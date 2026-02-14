@@ -1,0 +1,73 @@
+name: Build Unsigned APK
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on version tags like v0.1.0, v1.0.0-beta, etc.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Add Android platform
+        run: npx cap add android || echo "Android platform already exists"
+      
+      - name: Sync Capacitor
+        run: npx cap sync android
+      
+      - name: Build unsigned APK
+        run: |
+          cd android
+          ./gradlew assembleRelease
+      
+      - name: Rename APK for clarity
+        run: |
+          mv android/app/build/outputs/apk/release/app-release-unsigned.apk \
+             android/app/build/outputs/apk/release/SciREPL-${{ github.ref_name }}-unsigned.apk || \
+          mv android/app/build/outputs/apk/release/app-release.apk \
+             android/app/build/outputs/apk/release/SciREPL-${{ github.ref_name }}-unsigned.apk
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: android/app/build/outputs/apk/release/SciREPL-${{ github.ref_name }}-unsigned.apk
+          body: |
+            ## ⚠️ Manual Signing Required
+            
+            This APK is **unsigned**. To install on your device:
+            
+            1. Download the unsigned APK
+            2. Sign it locally:
+               ```bash
+               jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+                 -keystore scirepl-release.keystore \
+                 SciREPL-${{ github.ref_name }}-unsigned.apk scirepl
+               ```
+            3. Zipalign:
+               ```bash
+               zipalign -v 4 SciREPL-${{ github.ref_name }}-unsigned.apk \
+                 SciREPL-${{ github.ref_name }}.apk
+               ```
+            4. Install the signed APK on your device
+            
+            **For maintainers:** After signing, upload the signed APK to this release.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
