@@ -1,0 +1,27 @@
+{
+    "name": "sci-repl",
+    "version": "0.1.0",
+    "description": "Mobile Scientific REPL — Python + Pyodide + Plotly.js",
+    "main": "index.js",
+    "scripts": {
+        "serve": "python3 -m http.server 8085 -d www",
+        "sync": "npx cap sync",
+        "build": "npx cap sync && cd android && ./gradlew assembleDebug"
+    },
+    "keywords": [
+        "python",
+        "pyodide",
+        "repl",
+        "science",
+        "capacitor",
+        "android"
+    ],
+    "license": "MIT",
+    "dependencies": {
+        "@capacitor/android": "^8.0.2",
+        "@capacitor/core": "^8.0.2"
+    },
+    "devDependencies": {
+        "@capacitor/cli": "^7.4.5"
+    }
+}

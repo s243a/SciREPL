@@ -1,0 +1,8 @@
+{
+    "appId": "com.unifyweaver.scirepl",
+    "appName": "Sci REPL",
+    "webDir": "www",
+    "server": {
+        "androidScheme": "https"
+    }
+}
