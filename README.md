@@ -6,6 +6,8 @@ A **free, open-source** mobile-first Python REPL powered by Pyodide + Capacitor.
 
 ![Status](https://img.shields.io/badge/status-prototype-orange) ![License](https://img.shields.io/badge/license-MIT-blue)
 
+**📱 [Download APK from Releases](https://github.com/s243a/SciREPL/releases)** | **📖 [Signing Guide](SIGNING.md)**
+
 ## What is SciREPL?
 
 A browser-based Python REPL designed for scientific computing on mobile devices:
