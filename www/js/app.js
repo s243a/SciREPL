@@ -1,6 +1,7 @@
 /**
  * app.js — Sci REPL main application.
  * Initializes Pyodide, manages the REPL loop, and handles card creation.
+ * Supports editable cells — click a past input card to edit and re-run.
  */
 
 (function () {
@@ -16,6 +17,10 @@
     let pyodide = null;
     // Load cell counter from session
     let cellCounter = window.sessionManager ? window.sessionManager.session.cellCounter : 0;
+
+    // Track all cells for export and re-evaluation
+    // Each entry: { id, code, inputCard, outputCard }
+    window._cells = [];
 
     // Initialize history navigation index
     if (window.sessionManager) {
@@ -54,26 +59,33 @@
 
     // ---- Card creation ----
 
-    function createInputCard(code) {
-        cellCounter++;
+    function createInputCard(code, cellId) {
         const card = document.createElement('div');
         card.className = 'card card-input';
+        card.dataset.cellId = cellId;
         card.innerHTML = `
             <div class="card-label">
-                <span class="prompt-icon">In [${cellCounter}]</span>
+                <span class="prompt-icon">In [${cellId}]</span>
+                <button class="cell-edit-btn" title="Edit & re-run">✎</button>
             </div>
             <pre>${escapeHtml(code)}</pre>
         `;
+        // Click the edit button to enter edit mode
+        card.querySelector('.cell-edit-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            enterEditMode(card, cellId);
+        });
         repl.appendChild(card);
         return card;
     }
 
-    function createOutputCard() {
+    function createOutputCard(cellId) {
         const card = document.createElement('div');
         card.className = 'card card-output';
+        card.dataset.cellId = cellId;
         card.innerHTML = `
             <div class="card-label">
-                <span>Out [${cellCounter}]</span>
+                <span>Out [${cellId}]</span>
             </div>
             <div class="card-body"></div>
         `;
@@ -87,7 +99,203 @@
         return div.innerHTML;
     }
 
-    // ---- Run code ----
+    // ---- Editable cells ----
+
+    function enterEditMode(inputCard, cellId) {
+        if (inputCard.classList.contains('editing')) return;
+        inputCard.classList.add('editing');
+
+        const pre = inputCard.querySelector('pre');
+        const currentCode = pre.textContent;
+
+        // Replace <pre> with a textarea
+        const textarea = document.createElement('textarea');
+        textarea.className = 'cell-editor';
+        textarea.value = currentCode;
+        textarea.spellcheck = false;
+        textarea.setAttribute('autocapitalize', 'off');
+        textarea.setAttribute('autocomplete', 'off');
+        pre.replaceWith(textarea);
+
+        // Auto-resize
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 300) + 'px';
+        textarea.addEventListener('input', () => {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 300) + 'px';
+        });
+
+        // Add run/cancel buttons
+        const actions = document.createElement('div');
+        actions.className = 'cell-edit-actions';
+        actions.innerHTML = `
+            <button class="cell-run-btn">▶ Run</button>
+            <button class="cell-cancel-btn">Cancel</button>
+        `;
+        inputCard.appendChild(actions);
+
+        actions.querySelector('.cell-run-btn').addEventListener('click', () => {
+            const newCode = textarea.value.trim();
+            exitEditMode(inputCard, cellId, newCode, true);
+        });
+
+        actions.querySelector('.cell-cancel-btn').addEventListener('click', () => {
+            exitEditMode(inputCard, cellId, currentCode, false);
+        });
+
+        // Shift+Enter or Ctrl+Enter to run from within editor
+        textarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && (e.shiftKey || e.ctrlKey)) {
+                e.preventDefault();
+                const newCode = textarea.value.trim();
+                exitEditMode(inputCard, cellId, newCode, true);
+            }
+            if (e.key === 'Escape') {
+                exitEditMode(inputCard, cellId, currentCode, false);
+            }
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                textarea.value = textarea.value.substring(0, start) + '    ' + textarea.value.substring(end);
+                textarea.selectionStart = textarea.selectionEnd = start + 4;
+            }
+        });
+
+        textarea.focus();
+    }
+
+    function exitEditMode(inputCard, cellId, code, shouldRun) {
+        inputCard.classList.remove('editing');
+
+        // Remove action buttons
+        const actions = inputCard.querySelector('.cell-edit-actions');
+        if (actions) actions.remove();
+
+        // Replace textarea with pre
+        const textarea = inputCard.querySelector('.cell-editor');
+        const pre = document.createElement('pre');
+        pre.textContent = code;
+        if (textarea) textarea.replaceWith(pre);
+
+        if (shouldRun && code) {
+            reRunCell(cellId, code);
+        }
+    }
+
+    async function reRunCell(cellId, code) {
+        if (!pyodide) return;
+
+        // Find the cell record
+        const cell = window._cells.find(c => c.id === cellId);
+        if (!cell) return;
+
+        // Update stored code
+        cell.code = code;
+
+        // Update input card display
+        const pre = cell.inputCard.querySelector('pre');
+        if (pre) pre.textContent = code;
+
+        // Clear and reuse the output card
+        let outputCard = cell.outputCard;
+        if (outputCard) {
+            outputCard.classList.remove('card-error');
+            const body = outputCard.querySelector('.card-body');
+            if (body) body.innerHTML = '';
+        } else {
+            // Create a new output card after the input card
+            outputCard = createOutputCard(cellId);
+            cell.inputCard.after(outputCard);
+            cell.outputCard = outputCard;
+        }
+
+        runBtn.disabled = true;
+        badge.textContent = 'running…';
+        badge.className = 'running';
+        window._currentOutputCard = outputCard;
+
+        try {
+            await executeCode(code);
+
+            // Clean up empty output cards
+            const body = outputCard.querySelector('.card-body');
+            if (body && body.children.length === 0) {
+                outputCard.remove();
+                cell.outputCard = null;
+            }
+        } catch (err) {
+            try { pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`); } catch (_) { }
+            window.renderText(err.message, true);
+        }
+
+        window._currentOutputCard = null;
+        badge.textContent = 'ready';
+        badge.className = 'ready';
+        runBtn.disabled = false;
+    }
+
+    // ---- Execute code (shared between new cells and re-runs) ----
+
+    async function executeCode(code) {
+        // Capture stdout
+        pyodide.runPython(`
+import io, sys
+_sci_repl_stdout = io.StringIO()
+_sci_repl_old_stdout = sys.stdout
+sys.stdout = _sci_repl_stdout
+`);
+
+        // Run the user's code
+        let result = await pyodide.runPythonAsync(code);
+
+        // Capture printed output
+        pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`);
+        const printed = pyodide.runPython(`_sci_repl_stdout.getvalue()`);
+
+        // Show printed output
+        if (printed && printed.length > 0) {
+            window.renderText(printed, false);
+        }
+
+        // Check if code ends with semicolon (MATLAB/IPython-style suppression)
+        const suppressOutput = code.trimEnd().endsWith(';');
+
+        // Show return value (if not None, not already printed, and not suppressed)
+        if (result !== undefined && result !== null && !suppressOutput) {
+            // Check if it's a list of SymPy expressions
+            const isSympyList = pyodide.runPython(`_is_sympy_list(${getResultVarRef(result)})`);
+
+            if (isSympyList) {
+                const tex = pyodide.runPython(`_sympy_list_to_latex(${getResultVarRef(result)})`);
+                window.renderLatex(tex);
+            } else {
+                // Check if it's a single SymPy expression
+                const isSympy = pyodide.runPython(`_is_sympy(${getResultVarRef(result)})`);
+
+                if (isSympy) {
+                    const tex = pyodide.runPython(`_sympy_to_latex(${getResultVarRef(result)})`);
+                    window.renderLatex(tex);
+                } else {
+                    // Stringify the result
+                    let resultStr = result.toString();
+
+                    // Truncate if too long
+                    const MAX_OUTPUT = 10000;
+                    if (resultStr.length > MAX_OUTPUT) {
+                        resultStr = resultStr.substring(0, MAX_OUTPUT) +
+                            '\n... (output truncated, ' + resultStr.length + ' chars total)';
+                    }
+
+                    if (resultStr !== 'None' && resultStr !== '') {
+                        window.renderText(resultStr, false);
+                    }
+                }
+            }
+        }
+    }
+
+    // ---- Run code (new cell from input bar) ----
 
     async function runCode() {
         const code = input.value.trim();
@@ -98,80 +306,34 @@
         badge.textContent = 'running…';
         badge.className = 'running';
 
+        cellCounter++;
+        const cellId = cellCounter;
+
         // Create cards
-        createInputCard(code);
-        const outputCard = createOutputCard();
+        const inputCard = createInputCard(code, cellId);
+        const outputCard = createOutputCard(cellId);
         window._currentOutputCard = outputCard;
 
-        try {
-            // Capture stdout
-            pyodide.runPython(`
-import io, sys
-_sci_repl_stdout = io.StringIO()
-_sci_repl_old_stdout = sys.stdout
-sys.stdout = _sci_repl_stdout
-`);
+        // Track this cell
+        const cell = { id: cellId, code: code, inputCard: inputCard, outputCard: outputCard };
+        window._cells.push(cell);
 
-            // Run the user's code
-            let result = await pyodide.runPythonAsync(code);
+        try {
+            await executeCode(code);
 
             // Save to history
             if (window.sessionManager) {
                 window.sessionManager.addToHistory(code);
-                window.sessionManager.session.historyIndex = -1; // Reset nav
+                window.sessionManager.session.historyIndex = -1;
                 window.sessionManager.session.cellCounter = cellCounter;
                 window.sessionManager.save();
-            }
-
-            // Capture printed output
-            pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`);
-            const printed = pyodide.runPython(`_sci_repl_stdout.getvalue()`);
-
-            // Show printed output
-            if (printed && printed.length > 0) {
-                window.renderText(printed, false);
-            }
-
-            // Check if code ends with semicolon (MATLAB/IPython-style suppression)
-            const suppressOutput = code.trimEnd().endsWith(';');
-
-            // Show return value (if not None, not already printed, and not suppressed)
-            if (result !== undefined && result !== null && !suppressOutput) {
-                // Check if it's a list of SymPy expressions
-                const isSympyList = pyodide.runPython(`_is_sympy_list(${getResultVarRef(result)})`);
-
-                if (isSympyList) {
-                    const tex = pyodide.runPython(`_sympy_list_to_latex(${getResultVarRef(result)})`);
-                    window.renderLatex(tex);
-                } else {
-                    // Check if it's a single SymPy expression
-                    const isSympy = pyodide.runPython(`_is_sympy(${getResultVarRef(result)})`);
-
-                    if (isSympy) {
-                        const tex = pyodide.runPython(`_sympy_to_latex(${getResultVarRef(result)})`);
-                        window.renderLatex(tex);
-                    } else {
-                        // Stringify the result
-                        let resultStr = result.toString();
-
-                        // Truncate if too long
-                        const MAX_OUTPUT = 10000;
-                        if (resultStr.length > MAX_OUTPUT) {
-                            resultStr = resultStr.substring(0, MAX_OUTPUT) +
-                                '\n... (output truncated, ' + resultStr.length + ' chars total)';
-                        }
-
-                        if (resultStr !== 'None' && resultStr !== '') {
-                            window.renderText(resultStr, false);
-                        }
-                    }
-                }
             }
 
             // Clean up empty output cards
             const body = outputCard.querySelector('.card-body');
             if (body && body.children.length === 0) {
                 outputCard.remove();
+                cell.outputCard = null;
             }
 
         } catch (err) {

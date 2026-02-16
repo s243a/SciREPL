@@ -518,6 +518,77 @@ html, body {
 }
 
 
+/* ===== Editable Cells ===== */
+
+.cell-edit-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.card-input:hover .cell-edit-btn {
+    opacity: 1;
+}
+
+.card-input.editing {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+.cell-editor {
+    width: 100%;
+    border: none;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 10px 12px;
+    resize: none;
+    outline: none;
+    min-height: 44px;
+    max-height: 300px;
+}
+
+.cell-edit-actions {
+    display: flex;
+    gap: 8px;
+    padding: 6px 12px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-card);
+}
+
+.cell-run-btn {
+    padding: 4px 14px;
+    border: none;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--accent), #a371f7);
+    color: #fff;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.cell-cancel-btn {
+    padding: 4px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.cell-cancel-btn:hover {
+    background: var(--bg-secondary);
+}
+
 /* ===== Math Palette ===== */
 
 .math-palette {

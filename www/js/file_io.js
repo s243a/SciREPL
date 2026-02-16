@@ -1,5 +1,6 @@
 /**
  * file_io.js — Handles File Import/Export and Menu interactions.
+ * Export format is Jupyter Notebook (.ipynb).
  */
 
 class FileIO {
@@ -41,14 +42,14 @@ class FileIO {
             }
         });
 
-        // Export .py
-        document.getElementById('btn-export-py').addEventListener('click', () => {
-            this.exportPython();
+        // Export .ipynb
+        document.getElementById('btn-export-ipynb').addEventListener('click', () => {
+            this.exportNotebook();
             this.menuModal.classList.add('hidden');
         });
 
         // Import
-        document.getElementById('btn-import-ipynb').addEventListener('click', () => {
+        document.getElementById('btn-import-file').addEventListener('click', () => {
             this.fileInput.click();
         });
 
@@ -59,21 +60,57 @@ class FileIO {
         });
     }
 
-    exportPython() {
-        if (!window.sessionManager) return;
-        const history = window.sessionManager.session.history || [];
-        if (history.length === 0) {
-            alert('No history to export.');
+    /**
+     * Export current cells as a Jupyter Notebook (.ipynb).
+     */
+    exportNotebook() {
+        const cells = window._cells || [];
+        if (cells.length === 0) {
+            alert('No cells to export.');
             return;
         }
 
-        const content = "# Exported from SciREPL\n\n" + history.join('\n\n');
-        this.downloadFile('scirepl_export.py', content);
+        const nbCells = cells.map((cell, i) => ({
+            cell_type: 'code',
+            execution_count: cell.id,
+            metadata: {},
+            outputs: [],
+            source: cell.code.split('\n').map((line, j, arr) =>
+                j < arr.length - 1 ? line + '\n' : line
+            )
+        }));
+
+        const notebook = {
+            nbformat: 4,
+            nbformat_minor: 5,
+            metadata: {
+                kernelspec: {
+                    display_name: 'Python 3 (Pyodide)',
+                    language: 'python',
+                    name: 'python3'
+                },
+                language_info: {
+                    name: 'python',
+                    version: '3.12',
+                    mimetype: 'text/x-python',
+                    file_extension: '.py'
+                },
+                scirepl: {
+                    version: 'pro',
+                    exported_at: new Date().toISOString()
+                }
+            },
+            cells: nbCells
+        };
+
+        const json = JSON.stringify(notebook, null, 1);
+        this.downloadFile('scirepl_export.ipynb', json, 'application/json');
     }
 
-    downloadFile(filename, content) {
+    downloadFile(filename, content, mimeType) {
+        mimeType = mimeType || 'text/plain';
         const element = document.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+        element.setAttribute('href', 'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(content));
         element.setAttribute('download', filename);
         element.style.display = 'none';
         document.body.appendChild(element);
@@ -97,25 +134,19 @@ class FileIO {
         reader.readAsText(file);
     }
 
+    /**
+     * Import a .py file — put content into the input bar for the user to run.
+     */
     importPython(content) {
-        if (window.sessionManager) {
-            // Split by newlines, filter empty
-            const lines = content.split('\n').filter(line => line.trim() !== '');
-            // This is naive; it breaks multiline blocks.
-            // Better: Just import as one big block? Or try to "execute" it?
-            // For now, let's just append the whole thing to history so user can run it?
-            // Actually, "loading" a script usually means running it.
-            // But we can't easily run it safely without user intent.
-            // Let's put it into the code input so user can run it.
-
-            const input = document.getElementById('code-input');
-            input.value = content;
-            // autoResize() if available globally? 
-            // It's inside a closure in app.js. We need to trigger input event.
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-        }
+        const input = document.getElementById('code-input');
+        input.value = content;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
+    /**
+     * Import a .ipynb file — extract code cells and put them into the input
+     * bar, separated by cell markers.
+     */
     importIpynb(jsonContent) {
         try {
             const nb = JSON.parse(jsonContent);
@@ -124,8 +155,7 @@ class FileIO {
             if (nb.cells) {
                 nb.cells.forEach(cell => {
                     if (cell.cell_type === 'code') {
-                        // Source is usually array of strings
-                        let source = "";
+                        let source = '';
                         if (Array.isArray(cell.source)) {
                             source = cell.source.join('');
                         } else {
@@ -137,7 +167,7 @@ class FileIO {
             }
 
             if (extractedCode.length > 0) {
-                const combined = "# Imported Notebook\n\n" + extractedCode.join('\n\n# -- Cell --\n\n');
+                const combined = extractedCode.join('\n\n# -- Cell --\n\n');
                 this.importPython(combined);
             } else {
                 alert('No code cells found in notebook.');
