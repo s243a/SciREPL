@@ -589,6 +589,21 @@ html, body {
     background: var(--bg-secondary);
 }
 
+.cell-run-below-btn {
+    padding: 4px 14px;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    background: rgba(88, 166, 255, 0.1);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cell-run-below-btn:hover {
+    background: rgba(88, 166, 255, 0.2);
+}
+
 /* ===== Math Palette ===== */
 
 .math-palette {

@@ -42,6 +42,12 @@ class FileIO {
             }
         });
 
+        // Run All Cells
+        document.getElementById('btn-run-all').addEventListener('click', () => {
+            this.menuModal.classList.add('hidden');
+            if (window.runAllCells) window.runAllCells();
+        });
+
         // Export .ipynb
         document.getElementById('btn-export-ipynb').addEventListener('click', () => {
             this.exportNotebook();

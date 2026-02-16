@@ -130,6 +130,7 @@
         actions.className = 'cell-edit-actions';
         actions.innerHTML = `
             <button class="cell-run-btn">▶ Run</button>
+            <button class="cell-run-below-btn">▶▶ Run All Below</button>
             <button class="cell-cancel-btn">Cancel</button>
         `;
         inputCard.appendChild(actions);
@@ -137,6 +138,12 @@
         actions.querySelector('.cell-run-btn').addEventListener('click', () => {
             const newCode = textarea.value.trim();
             exitEditMode(inputCard, cellId, newCode, true);
+        });
+
+        actions.querySelector('.cell-run-below-btn').addEventListener('click', () => {
+            const newCode = textarea.value.trim();
+            exitEditMode(inputCard, cellId, newCode, false);
+            if (newCode) runCellAndBelow(cellId, newCode);
         });
 
         actions.querySelector('.cell-cancel-btn').addEventListener('click', () => {
@@ -234,6 +241,30 @@
         badge.className = 'ready';
         runBtn.disabled = false;
     }
+
+    // ---- Run cell and all below ----
+
+    async function runCellAndBelow(cellId, code) {
+        const idx = window._cells.findIndex(c => c.id === cellId);
+        if (idx === -1) return;
+
+        // Update the target cell's code
+        window._cells[idx].code = code;
+        const pre = window._cells[idx].inputCard.querySelector('pre');
+        if (pre) pre.textContent = code;
+
+        // Run this cell and every cell after it, sequentially
+        for (let i = idx; i < window._cells.length; i++) {
+            await reRunCell(window._cells[i].id, window._cells[i].code);
+        }
+    }
+
+    // Exposed for menu "Run All" button
+    window.runAllCells = async function () {
+        for (let i = 0; i < window._cells.length; i++) {
+            await reRunCell(window._cells[i].id, window._cells[i].code);
+        }
+    };
 
     // ---- Execute code (shared between new cells and re-runs) ----
 
