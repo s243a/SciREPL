@@ -1,6 +1,6 @@
 {
     "name": "sci-repl",
-    "version": "0.1.2",
+    "version": "0.2.0",
     "description": "Mobile Scientific REPL — Python + Pyodide + Plotly.js",
     "main": "index.js",
     "scripts": {
