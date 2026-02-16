@@ -85,7 +85,7 @@ big_array = np.arange(1000);</code></pre>
             <p>Includes: Editable cells, markdown cells, session persistence, Math Mode palette, .ipynb import/export</p>
 
             <h3>Privacy</h3>
-            <p><a href="privacy.html" target="_blank">Privacy Policy</a></p>
+            <p><a href="#" id="help-privacy-link">Privacy Policy</a></p>
 
             <div style="margin-top: 15px;">
                 <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
@@ -128,6 +128,67 @@ big_array = np.arange(1000);</code></pre>
         </div>
     </div>
 
+    <!-- Privacy Policy Modal -->
+    <div id="privacy-modal" class="modal hidden">
+        <div class="modal-content modal-content-scroll">
+            <button class="modal-close">&times;</button>
+            <h2>Privacy Policy</h2>
+            <p style="color: #888; font-size: 0.9em;">Last updated: February 16, 2026</p>
+
+            <h3>Summary</h3>
+            <p>SciREPL is designed to be a privacy-respecting application. All code execution happens locally on your device. We do not collect, store, or transmit any personal data to our servers.</p>
+
+            <h3>Local Data Storage</h3>
+            <p>SciREPL stores the following data locally on your device using localStorage:</p>
+            <ul>
+                <li>Your session history (code cells and their types)</li>
+                <li>Command history for input recall</li>
+                <li>Preferences (e.g. cell counter state)</li>
+            </ul>
+            <p>This data never leaves your device. You can clear it at any time via Menu &gt; Clear History.</p>
+
+            <h3>Network Requests &amp; Third-Party CDNs</h3>
+            <p>SciREPL bundles most of its rendering libraries (Plotly.js, KaTeX, marked.js) directly in the app to minimize network requests. However, the following resources are loaded from third-party CDNs:</p>
+            <ul>
+                <li><strong>Pyodide</strong> (Python runtime, ~25MB) — from <code>cdn.jsdelivr.net</code>. Loaded on first launch and cached locally for subsequent use.</li>
+                <li><strong>Ko-fi widget</strong> (support button in Help screen) — from <code>storage.ko-fi.com</code></li>
+            </ul>
+            <p>When these resources are fetched, the CDN providers may receive:</p>
+            <ul>
+                <li>Your IP address</li>
+                <li>Your device's user agent string (browser/OS information)</li>
+                <li>Timestamps of requests</li>
+                <li>URLs of requested resources</li>
+            </ul>
+            <p>Caching is used to minimize connections to CDN networks — after the initial download, Pyodide and its packages are served from the local cache.</p>
+            <p>jsDelivr's privacy policy: <a href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net" target="_blank">jsdelivr.com/terms/privacy-policy-jsdelivr-net</a></p>
+            <p>Your Python code, session data, and exported files are never transmitted to any server.</p>
+
+            <h3>Code Execution</h3>
+            <p>All Python code you enter is executed locally on your device using Pyodide (Python compiled to WebAssembly). No code is sent to any remote server for execution.</p>
+
+            <h3>File Export</h3>
+            <p>When you export a notebook (.ipynb), the file is created locally on your device. If you choose to share it (via the system share sheet), the destination is determined by your choice. SciREPL does not control or monitor where you share exported files.</p>
+
+            <h3>Analytics &amp; Tracking</h3>
+            <p>SciREPL does not include any analytics, crash reporting, advertising SDKs, or tracking mechanisms.</p>
+
+            <h3>Children's Privacy</h3>
+            <p>SciREPL does not knowingly collect any information from children. The app does not require account creation or collect personal information of any kind.</p>
+
+            <h3>Future Changes</h3>
+            <p>If additional language runtimes are added (e.g. Prolog, R), they may also be loaded from CDNs and cached locally, subject to the same metadata exposure described above. This policy will be updated to reflect any changes.</p>
+
+            <h3>Disclaimer</h3>
+            <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR PERFORMANCE THEREOF.</p>
+            <p>You use SciREPL entirely at your own risk. Code execution occurs locally on your device and the developers are not responsible for any consequences of code you choose to run.</p>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <button id="privacy-accept-btn" style="padding: 10px 30px; background: #72a4f2; color: #fff; border: none; border-radius: 6px; font-size: 1em; cursor: pointer;">I Understand</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Hidden file input for imports -->
     <input type="file" id="file-input" accept=".py,.ipynb" style="display:none">
 
@@ -151,6 +212,40 @@ big_array = np.arange(1000);</code></pre>
     <script src="js/math_mode.js"></script>
     <script src="js/bridge.js"></script>
     <script src="js/app.js"></script>
+
+    <!-- Privacy modal logic -->
+    <script>
+    (function() {
+        var modal = document.getElementById('privacy-modal');
+        var acceptBtn = document.getElementById('privacy-accept-btn');
+        var helpLink = document.getElementById('help-privacy-link');
+
+        // Show on first launch
+        if (!localStorage.getItem('scirepl_privacy_accepted')) {
+            modal.classList.remove('hidden');
+        }
+
+        // Accept button
+        acceptBtn.addEventListener('click', function() {
+            localStorage.setItem('scirepl_privacy_accepted', '1');
+            modal.classList.add('hidden');
+        });
+
+        // Close via backdrop or X button
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal || e.target.classList.contains('modal-close')) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        // Help page link opens the modal
+        helpLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('help-modal').classList.add('hidden');
+            modal.classList.remove('hidden');
+        });
+    })();
+    </script>
 </body>
 
 </html>
