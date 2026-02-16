@@ -517,3 +517,108 @@ html, body {
     text-decoration: underline;
 }
 
+
+/* ===== Math Palette ===== */
+
+.math-palette {
+    position: fixed;
+    bottom: 65px; /* Above input bar */
+    left: 0;
+    right: 0;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 8px;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
+}
+
+.math-palette.hidden {
+    transform: translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.math-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.math-palette button {
+    flex: 1;
+    max-width: 60px;
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-card);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.math-palette button:active {
+    background: var(--accent);
+    color: #fff;
+    transform: scale(0.95);
+}
+
+/* Toggle button active state */
+#math-mode-btn.active {
+    color: var(--accent);
+    background: rgba(88, 166, 255, 0.1);
+    border-color: var(--accent);
+}
+
+/* ===== Header Updates ===== */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ===== Menu Modal ===== */
+.menu-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.menu-grid button {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.menu-grid button:hover {
+    background: var(--bg-secondary);
+    border-color: var(--accent);
+}
+
+.menu-grid button.danger {
+    color: var(--red);
+    border-color: rgba(248, 81, 73, 0.3);
+}
+
+.menu-grid button.danger:hover {
+    background: rgba(248, 81, 73, 0.1);
+    border-color: var(--red);
+}

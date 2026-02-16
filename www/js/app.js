@@ -14,7 +14,13 @@
     const runBtn = document.getElementById('run-btn');
 
     let pyodide = null;
-    let cellCounter = 0;
+    // Load cell counter from session
+    let cellCounter = window.sessionManager ? window.sessionManager.session.cellCounter : 0;
+
+    // Initialize history navigation index
+    if (window.sessionManager) {
+        window.sessionManager.session.historyIndex = -1;
+    }
 
     // ---- Initialize Pyodide ----
 
@@ -109,6 +115,14 @@ sys.stdout = _sci_repl_stdout
             // Run the user's code
             let result = await pyodide.runPythonAsync(code);
 
+            // Save to history
+            if (window.sessionManager) {
+                window.sessionManager.addToHistory(code);
+                window.sessionManager.session.historyIndex = -1; // Reset nav
+                window.sessionManager.session.cellCounter = cellCounter;
+                window.sessionManager.save();
+            }
+
             // Capture printed output
             pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`);
             const printed = pyodide.runPython(`_sci_repl_stdout.getvalue()`);
@@ -177,6 +191,9 @@ sys.stdout = _sci_repl_stdout
 
         // Clear input and scroll to bottom
         input.value = '';
+        if (window.sessionManager) {
+            window.sessionManager.session.historyIndex = -1;
+        }
         input.style.height = 'auto';
         repl.scrollTop = repl.scrollHeight;
         input.focus();
@@ -208,6 +225,38 @@ sys.stdout = _sci_repl_stdout
         if (e.key === 'Enter' && (e.shiftKey || e.ctrlKey)) {
             e.preventDefault();
             runCode();
+        }
+        // Up arrow: History back
+        if (e.key === 'ArrowUp') {
+            if (window.sessionManager) {
+                const session = window.sessionManager.session;
+                if (session.historyIndex < session.history.length - 1) {
+                    e.preventDefault();
+                    session.historyIndex++;
+                    const idx = session.history.length - 1 - session.historyIndex;
+                    if (idx >= 0) {
+                        input.value = session.history[idx];
+                        autoResize();
+                    }
+                }
+            }
+        }
+        // Down arrow: History forward
+        if (e.key === 'ArrowDown') {
+            if (window.sessionManager) {
+                const session = window.sessionManager.session;
+                if (session.historyIndex > -1) {
+                    e.preventDefault();
+                    session.historyIndex--;
+                    if (session.historyIndex === -1) {
+                        input.value = ''; // Clear if back to "now"
+                    } else {
+                        const idx = session.history.length - 1 - session.historyIndex;
+                        input.value = session.history[idx];
+                    }
+                    autoResize();
+                }
+            }
         }
         // Tab inserts spaces
         if (e.key === 'Tab') {
