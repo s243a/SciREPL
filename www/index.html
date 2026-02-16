@@ -29,7 +29,9 @@
     <!-- App header -->
     <header id="app-header">
         <h1>Sci REPL</h1>
-        <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="header-right">
+            <button id="math-mode-btn" class="icon-btn" title="Math Mode">∑</button>
+            <button id="menu-btn" class="icon-btn" title="Menu">☰</button>
             <button id="help-btn" class="icon-btn" title="Help">?</button>
             <span id="status-badge">loading…</span>
         </div>
@@ -76,9 +78,8 @@ big_array = np.arange(1000);</code></pre>
             </p>
 
             <h3>Version</h3>
-            <p><strong>This is the free open-source version.</strong></p>
-            <p>Premium features (coming soon): Edit past cells, import <code>.ipynb</code> files, save/load sessions,
-                Math Mode</p>
+            <p><strong>SciREPL Pro</strong></p>
+            <p>Includes: Session persistence, Math Mode palette, file import/export (.py, .ipynb)</p>
 
             <div style="margin-top: 15px;">
                 <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
@@ -87,6 +88,41 @@ big_array = np.arange(1000);</code></pre>
             </div>
         </div>
     </div>
+
+    <!-- Math Palette -->
+    <div id="math-palette" class="math-palette hidden">
+        <div class="math-row">
+            <button data-insert="diff(, x)" title="Differentiate">d/dx</button>
+            <button data-insert="integrate(, x)" title="Integrate">∫</button>
+            <button data-insert="solve(, x)" title="Solve">solve</button>
+            <button data-insert="simplify()" title="Simplify">simp</button>
+            <button data-insert="expand()" title="Expand">exp</button>
+        </div>
+        <div class="math-row">
+            <button data-insert="Matrix([[]])" title="Matrix">Mat</button>
+            <button data-insert="symbols('')" title="Symbols">sym</button>
+            <button data-insert="limit(, x, oo)" title="Limit">lim</button>
+            <button data-insert="series(, x, 0, 6)" title="Series">ser</button>
+            <button data-insert="factor()" title="Factor">fac</button>
+        </div>
+    </div>
+
+    <!-- Menu Modal -->
+    <div id="menu-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2>Menu</h2>
+            <div class="menu-grid">
+                <button id="btn-save-session">💾 Save Session</button>
+                <button id="btn-export-py">📄 Export as .py</button>
+                <button id="btn-import-ipynb">📂 Import File (.py / .ipynb)</button>
+                <button id="btn-clear-session" class="danger">🗑 Clear History</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for imports -->
+    <input type="file" id="file-input" accept=".py,.ipynb" style="display:none">
 
     <!-- Sticky input bar -->
     <footer id="input-bar">
@@ -99,7 +135,7 @@ big_array = np.arange(1000);</code></pre>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.js"></script>
 
     <!-- App scripts -->
-    <script src="js/prelude.js"></script> <!-- Optional future separation -->
+    <!-- prelude.py is loaded by app.js via fetch, not as a script tag -->
     <script src="js/persistence.js"></script>
     <script src="js/file_io.js"></script>
     <script src="js/math_mode.js"></script>

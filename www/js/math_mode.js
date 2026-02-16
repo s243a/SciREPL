@@ -43,15 +43,17 @@ class MathMode {
         // Move cursor inside parentheses if they exist, or to end
         let newCursorPos = start + text.length;
 
-        // If text looks like "func()", put cursor inside parens
+        // Place cursor at the first comma or inside empty parens/quotes
+        const firstComma = text.indexOf(',');
         if (text.endsWith('()')) {
             newCursorPos -= 1;
-        } else if (text.endsWith('(, x)')) {
-            // For diff/integrate helpers, move before comma
-            newCursorPos -= 4;
+        } else if (text === "symbols('')") {
+            newCursorPos -= 2; // Inside quotes
         } else if (text === 'Matrix([[]])') {
-            // Inside inner brackets
-            newCursorPos -= 3;
+            newCursorPos -= 3; // Inside inner brackets
+        } else if (firstComma !== -1) {
+            // For patterns like "diff(, x)" or "limit(, x, oo)" — cursor before first comma
+            newCursorPos = start + firstComma;
         }
 
         this.input.selectionStart = this.input.selectionEnd = newCursorPos;
