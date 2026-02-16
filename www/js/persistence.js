@@ -27,6 +27,7 @@ class SessionManager {
             history: [],       // Command history
             historyIndex: -1,  // For up/down arrow navigation (runtime only)
             cellCounter: 0,    // Last cell index
+            cells: [],         // Saved cells: [{code, type}]
             darkMode: true     // Theme preference (future)
         };
     }
@@ -40,6 +41,7 @@ class SessionManager {
             const toSave = {
                 history: this.session.history.slice(-100), // Keep last 100 commands
                 cellCounter: this.session.cellCounter,
+                cells: this.session.cells || [],
                 darkMode: this.session.darkMode
             };
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(toSave));
@@ -60,6 +62,21 @@ class SessionManager {
         }
         this.session.history.push(code);
         this.save();
+    }
+
+    /**
+     * Save the current cells list (code + type only, no DOM refs).
+     */
+    saveCells(cells) {
+        this.session.cells = cells.map(c => ({ code: c.code, type: c.type }));
+        this.save();
+    }
+
+    /**
+     * Get saved cells for restoration.
+     */
+    getSavedCells() {
+        return this.session.cells || [];
     }
 
     /**

@@ -60,6 +60,10 @@
             badge.textContent = 'ready';
             badge.className = 'ready';
             runBtn.disabled = false;
+
+            // Restore saved cells
+            await restoreSession();
+
             input.focus();
 
         } catch (err) {
@@ -292,6 +296,7 @@
 
         if (cell.type === 'markdown') {
             reRenderMarkdownCell(cell);
+            saveCellsToSession();
             return;
         }
 
@@ -334,6 +339,7 @@
         badge.textContent = 'ready';
         badge.className = 'ready';
         runBtn.disabled = false;
+        saveCellsToSession();
     }
 
     function reRenderMarkdownCell(cell) {
@@ -429,6 +435,129 @@ sys.stdout = _sci_repl_stdout
         }
     }
 
+    // ---- Restore session ----
+
+    async function restoreSession() {
+        if (!window.sessionManager) return;
+        const savedCells = window.sessionManager.getSavedCells();
+        if (savedCells.length === 0) return;
+
+        badge.textContent = 'restoring…';
+        badge.className = 'running';
+
+        for (const saved of savedCells) {
+            cellCounter++;
+            const cellId = cellCounter;
+
+            const inputCard = createInputCard(saved.code, cellId, saved.type);
+            const outputCard = createOutputCard(cellId, saved.type);
+
+            const cell = {
+                id: cellId,
+                code: saved.code,
+                type: saved.type,
+                inputCard: inputCard,
+                outputCard: outputCard
+            };
+            window._cells.push(cell);
+
+            if (saved.type === 'markdown') {
+                const body = outputCard.querySelector('.card-body');
+                body.innerHTML = renderMarkdown(saved.code);
+                const pre = inputCard.querySelector('pre');
+                if (pre) pre.style.display = 'none';
+            } else {
+                window._currentOutputCard = outputCard;
+                try {
+                    await executeCode(saved.code);
+                    const body = outputCard.querySelector('.card-body');
+                    if (body && body.children.length === 0) {
+                        outputCard.remove();
+                        cell.outputCard = null;
+                    }
+                } catch (err) {
+                    try { pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`); } catch (_) { }
+                    window.renderText(err.message, true);
+                }
+                window._currentOutputCard = null;
+            }
+        }
+
+        // Update session manager cell counter
+        window.sessionManager.session.cellCounter = cellCounter;
+        window.sessionManager.save();
+
+        badge.textContent = 'ready';
+        badge.className = 'ready';
+        repl.scrollTop = repl.scrollHeight;
+    }
+
+    // ---- Save cells to session ----
+
+    function saveCellsToSession() {
+        if (window.sessionManager) {
+            window.sessionManager.session.cellCounter = cellCounter;
+            window.sessionManager.saveCells(window._cells);
+        }
+    }
+
+    // ---- Import cells from .ipynb ----
+
+    window.importCells = async function (cellDefs) {
+        if (!pyodide && cellDefs.some(c => c.type === 'code')) {
+            alert('Python is still loading. Please wait for "ready" status.');
+            return;
+        }
+
+        badge.textContent = 'importing…';
+        badge.className = 'running';
+        runBtn.disabled = true;
+
+        for (const def of cellDefs) {
+            cellCounter++;
+            const cellId = cellCounter;
+
+            const inputCard = createInputCard(def.code, cellId, def.type);
+            const outputCard = createOutputCard(cellId, def.type);
+
+            const cell = {
+                id: cellId,
+                code: def.code,
+                type: def.type,
+                inputCard: inputCard,
+                outputCard: outputCard
+            };
+            window._cells.push(cell);
+
+            if (def.type === 'markdown') {
+                const body = outputCard.querySelector('.card-body');
+                body.innerHTML = renderMarkdown(def.code);
+                const pre = inputCard.querySelector('pre');
+                if (pre) pre.style.display = 'none';
+            } else {
+                window._currentOutputCard = outputCard;
+                try {
+                    await executeCode(def.code);
+                    const body = outputCard.querySelector('.card-body');
+                    if (body && body.children.length === 0) {
+                        outputCard.remove();
+                        cell.outputCard = null;
+                    }
+                } catch (err) {
+                    try { pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`); } catch (_) { }
+                    window.renderText(err.message, true);
+                }
+                window._currentOutputCard = null;
+            }
+        }
+
+        saveCellsToSession();
+        badge.textContent = 'ready';
+        badge.className = 'ready';
+        runBtn.disabled = false;
+        repl.scrollTop = repl.scrollHeight;
+    };
+
     // ---- Run from input bar (new cell) ----
 
     async function runCode() {
@@ -462,6 +591,8 @@ sys.stdout = _sci_repl_stdout
             // Hide source pre
             const pre = inputCard.querySelector('pre');
             if (pre) pre.style.display = 'none';
+
+            saveCellsToSession();
         } else {
             badge.textContent = 'running…';
             badge.className = 'running';
@@ -473,9 +604,8 @@ sys.stdout = _sci_repl_stdout
                 if (window.sessionManager) {
                     window.sessionManager.addToHistory(code);
                     window.sessionManager.session.historyIndex = -1;
-                    window.sessionManager.session.cellCounter = cellCounter;
-                    window.sessionManager.save();
                 }
+                saveCellsToSession();
 
                 const body = outputCard.querySelector('.card-body');
                 if (body && body.children.length === 0) {

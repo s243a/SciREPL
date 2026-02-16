@@ -28,7 +28,7 @@ class FileIO {
         // Save Session (Local)
         document.getElementById('btn-save-session').addEventListener('click', () => {
             if (window.sessionManager) {
-                window.sessionManager.save();
+                window.sessionManager.saveCells(window._cells || []);
                 alert('Session saved to local storage.');
                 this.menuModal.classList.add('hidden');
             }
@@ -49,9 +49,9 @@ class FileIO {
         });
 
         // Export .ipynb
-        document.getElementById('btn-export-ipynb').addEventListener('click', () => {
-            this.exportNotebook();
+        document.getElementById('btn-export-ipynb').addEventListener('click', async () => {
             this.menuModal.classList.add('hidden');
+            await this.exportNotebook();
         });
 
         // Import
@@ -69,7 +69,7 @@ class FileIO {
     /**
      * Export current cells as a Jupyter Notebook (.ipynb).
      */
-    exportNotebook() {
+    async exportNotebook() {
         const cells = window._cells || [];
         if (cells.length === 0) {
             alert('No cells to export.');
@@ -120,18 +120,52 @@ class FileIO {
         };
 
         const json = JSON.stringify(notebook, null, 1);
-        this.downloadFile('scirepl_export.ipynb', json, 'application/json');
+        await this.downloadFile('scirepl_export.ipynb', json, 'application/json');
     }
 
-    downloadFile(filename, content, mimeType) {
+    async downloadFile(filename, content, mimeType) {
         mimeType = mimeType || 'text/plain';
+
+        // Try Capacitor native plugins (Android/iOS)
+        if (window.Capacitor && Capacitor.Plugins) {
+            try {
+                const { Filesystem } = Capacitor.Plugins;
+                const { Share } = Capacitor.Plugins;
+
+                if (Filesystem && Share) {
+                    // Write file to cache directory as UTF-8 text
+                    const writeResult = await Filesystem.writeFile({
+                        path: filename,
+                        data: content,
+                        directory: 'CACHE',
+                        encoding: 'utf8'
+                    });
+
+                    // Share the file
+                    await Share.share({
+                        title: filename,
+                        url: writeResult.uri,
+                        dialogTitle: 'Export ' + filename
+                    });
+                    return;
+                }
+            } catch (e) {
+                console.warn('Capacitor share failed:', e);
+                // Fall through to web fallback
+            }
+        }
+
+        // Fallback: blob URL download (desktop browsers)
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
         const element = document.createElement('a');
-        element.setAttribute('href', 'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(content));
-        element.setAttribute('download', filename);
+        element.href = url;
+        element.download = filename;
         element.style.display = 'none';
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
     handleFileUpload(file) {
@@ -160,33 +194,46 @@ class FileIO {
     }
 
     /**
-     * Import a .ipynb file — extract code cells and put them into the input
-     * bar, separated by cell markers.
+     * Import a .ipynb file — create cells and execute them.
+     * If window.importCells is available (set by app.js), uses it to
+     * create proper cells. Otherwise falls back to textarea.
      */
     importIpynb(jsonContent) {
         try {
             const nb = JSON.parse(jsonContent);
-            let extractedCode = [];
+            const extractedCells = [];
 
             if (nb.cells) {
                 nb.cells.forEach(cell => {
-                    if (cell.cell_type === 'code') {
-                        let source = '';
-                        if (Array.isArray(cell.source)) {
-                            source = cell.source.join('');
-                        } else {
-                            source = cell.source;
-                        }
-                        if (source.trim()) extractedCode.push(source);
+                    let source = '';
+                    if (Array.isArray(cell.source)) {
+                        source = cell.source.join('');
+                    } else {
+                        source = cell.source || '';
+                    }
+                    if (source.trim()) {
+                        extractedCells.push({
+                            code: source,
+                            type: cell.cell_type === 'markdown' ? 'markdown' : 'code'
+                        });
                     }
                 });
             }
 
-            if (extractedCode.length > 0) {
-                const combined = extractedCode.join('\n\n# -- Cell --\n\n');
-                this.importPython(combined);
+            if (extractedCells.length === 0) {
+                alert('No cells found in notebook.');
+                return;
+            }
+
+            // Use the cell import API if available
+            if (window.importCells) {
+                window.importCells(extractedCells);
             } else {
-                alert('No code cells found in notebook.');
+                // Fallback: dump code cells into textarea
+                const codeOnly = extractedCells
+                    .filter(c => c.type === 'code')
+                    .map(c => c.code);
+                this.importPython(codeOnly.join('\n\n# -- Cell --\n\n'));
             }
         } catch (e) {
             console.error(e);
