@@ -9,7 +9,10 @@
 
     <!-- KaTeX for LaTeX rendering -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
 
     <!-- Plotly.js for interactive plotting -->
     <script src="https://cdn.jsdelivr.net/npm/plotly.js-basic-dist-min@2.35.2/plotly-basic.min.js"></script>
@@ -127,6 +130,9 @@ big_array = np.arange(1000);</code></pre>
 
     <!-- Sticky input bar -->
     <footer id="input-bar">
+        <div id="input-controls">
+            <button id="cell-type-toggle" class="cell-type-btn" title="Toggle cell type">Code</button>
+        </div>
         <textarea id="code-input" rows="3" placeholder="Type Python here…" spellcheck="false" autocapitalize="off"
             autocomplete="off"></textarea>
         <button id="run-btn" disabled>▶ Run</button>

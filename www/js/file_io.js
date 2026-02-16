@@ -76,15 +76,25 @@ class FileIO {
             return;
         }
 
-        const nbCells = cells.map((cell, i) => ({
-            cell_type: 'code',
-            execution_count: cell.id,
-            metadata: {},
-            outputs: [],
-            source: cell.code.split('\n').map((line, j, arr) =>
+        const nbCells = cells.map((cell, i) => {
+            const source = cell.code.split('\n').map((line, j, arr) =>
                 j < arr.length - 1 ? line + '\n' : line
-            )
-        }));
+            );
+            if (cell.type === 'markdown') {
+                return {
+                    cell_type: 'markdown',
+                    metadata: {},
+                    source: source
+                };
+            }
+            return {
+                cell_type: 'code',
+                execution_count: cell.id,
+                metadata: {},
+                outputs: [],
+                source: source
+            };
+        });
 
         const notebook = {
             nbformat: 4,
