@@ -41,6 +41,7 @@
     <p>SciREPL bundles most of its rendering libraries (Plotly.js, KaTeX, marked.js) directly in the app to minimize network requests. However, the following resources are loaded from third-party CDNs:</p>
     <ul>
         <li><strong>Pyodide</strong> (Python runtime, ~25MB) — from <code>cdn.jsdelivr.net</code>. Loaded on first launch and cached locally by the app for subsequent use.</li>
+        <li><strong>SWI-Prolog WASM</strong> (Prolog runtime, ~10MB) — from <code>SWI-Prolog.github.io</code>. Loaded only when Prolog is first used, and cached locally.</li>
         <li><strong>Ko-fi widget</strong> (support button in Help screen) — from <code>storage.ko-fi.com</code></li>
     </ul>
     <p>When these resources are fetched, the CDN providers may receive:</p>

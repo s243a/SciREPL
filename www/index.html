@@ -49,7 +49,7 @@
             <button class="modal-close">&times;</button>
             <h2>SciREPL Help</h2>
 
-            <h3>Quick Start</h3>
+            <h3>Quick Start — Python</h3>
             <pre><code># Basic math
 2 + 2
 
@@ -69,6 +69,20 @@ solve(a*x**2 + b*x + c, x)
 # Suppress output with ;
 big_array = np.arange(1000);</code></pre>
 
+            <h3>Quick Start — Prolog</h3>
+            <p>Switch to Prolog using the language selector (Py → PL).</p>
+            <pre><code>% Assert facts
+assert(parent(tom, bob)).
+assert(parent(bob, ann)).
+
+% Query
+parent(tom, X).
+
+% Rules
+assert((grandparent(X,Z) :-
+    parent(X,Y), parent(Y,Z))).
+grandparent(tom, Z).</code></pre>
+
             <h3>Keyboard Shortcuts</h3>
             <ul>
                 <li><kbd>Shift+Enter</kbd> or <kbd>Ctrl+Enter</kbd> — Run code</li>
@@ -81,8 +95,8 @@ big_array = np.arange(1000);</code></pre>
             </p>
 
             <h3>Version</h3>
-            <p><strong>SciREPL Pro v0.2.0</strong></p>
-            <p>Includes: Editable cells, markdown cells, session persistence, Math Mode palette, .ipynb import/export</p>
+            <p><strong>SciREPL Pro v0.3.0</strong></p>
+            <p>Includes: Multi-language (Python + Prolog), editable cells, markdown cells, session persistence, Math Mode palette, .ipynb import/export</p>
 
             <h3>Privacy</h3>
             <p><a href="#" id="help-privacy-link">Privacy Policy</a></p>
@@ -122,7 +136,7 @@ big_array = np.arange(1000);</code></pre>
                 <button id="btn-run-all">▶ Run All Cells</button>
                 <button id="btn-save-session">💾 Save Session</button>
                 <button id="btn-export-ipynb">📓 Export as .ipynb</button>
-                <button id="btn-import-file">📂 Import File (.py / .ipynb)</button>
+                <button id="btn-import-file">📂 Import File (.py / .pl / .ipynb)</button>
                 <button id="btn-clear-session" class="danger">🗑 Clear History</button>
             </div>
         </div>
@@ -151,6 +165,7 @@ big_array = np.arange(1000);</code></pre>
             <p>SciREPL bundles most of its rendering libraries (Plotly.js, KaTeX, marked.js) directly in the app to minimize network requests. However, the following resources are loaded from third-party CDNs:</p>
             <ul>
                 <li><strong>Pyodide</strong> (Python runtime, ~25MB) — from <code>cdn.jsdelivr.net</code>. Loaded on first launch and cached locally for subsequent use.</li>
+                <li><strong>SWI-Prolog WASM</strong> (Prolog runtime, ~10MB) — from <code>SWI-Prolog.github.io</code>. Loaded only when Prolog is first used, and cached locally.</li>
                 <li><strong>Ko-fi widget</strong> (support button in Help screen) — from <code>storage.ko-fi.com</code></li>
             </ul>
             <p>When these resources are fetched, the CDN providers may receive:</p>
@@ -190,11 +205,15 @@ big_array = np.arange(1000);</code></pre>
     </div>
 
     <!-- Hidden file input for imports -->
-    <input type="file" id="file-input" accept=".py,.ipynb" style="display:none">
+    <input type="file" id="file-input" accept=".py,.pl,.ipynb" style="display:none">
 
     <!-- Sticky input bar -->
     <footer id="input-bar">
         <div id="input-controls">
+            <select id="lang-selector" title="Language">
+                <option value="python" selected>Py</option>
+                <option value="prolog">PL</option>
+            </select>
             <button id="cell-type-toggle" class="cell-type-btn" title="Toggle cell type">Code</button>
         </div>
         <textarea id="code-input" rows="3" placeholder="Type Python here…" spellcheck="false" autocapitalize="off"
@@ -210,6 +229,9 @@ big_array = np.arange(1000);</code></pre>
     <script src="js/file_io.js"></script>
     <script src="js/math_mode.js"></script>
     <script src="js/bridge.js"></script>
+    <script src="js/kernel_manager.js"></script>
+    <script src="js/kernels/python.js"></script>
+    <script src="js/kernels/prolog.js"></script>
     <script src="js/app.js"></script>
 
     <!-- Privacy modal + deferred Pyodide loading -->

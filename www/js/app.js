@@ -1,7 +1,8 @@
 /**
  * app.js — Sci REPL main application.
- * Initializes Pyodide, manages the REPL loop, and handles card creation.
- * Supports editable cells and markdown/code cell types.
+ * Initializes language kernels via KernelManager, manages the REPL loop,
+ * and handles card creation. Supports editable cells, markdown/code cell
+ * types, and multiple languages (Python, Prolog).
  */
 
 (function () {
@@ -14,19 +15,44 @@
     const input = document.getElementById('code-input');
     const runBtn = document.getElementById('run-btn');
     const cellTypeToggle = document.getElementById('cell-type-toggle');
+    const langSelector = document.getElementById('lang-selector');
 
-    let pyodide = null;
     let cellCounter = window.sessionManager ? window.sessionManager.session.cellCounter : 0;
 
     // Current input bar cell type: 'code' or 'markdown'
     let currentCellType = 'code';
 
     // Track all cells for export and re-evaluation
-    // Each entry: { id, code, type: 'code'|'markdown', inputCard, outputCard }
+    // Each entry: { id, code, type: 'code'|'markdown', language: 'python'|'prolog', inputCard, outputCard }
     window._cells = [];
 
     if (window.sessionManager) {
         window.sessionManager.session.historyIndex = -1;
+    }
+
+    // ---- Language selector ----
+
+    function getCurrentLanguage() {
+        return langSelector ? langSelector.value : 'python';
+    }
+
+    if (langSelector) {
+        langSelector.addEventListener('change', () => {
+            const lang = langSelector.value;
+            if (window.kernelManager) {
+                window.kernelManager.setLanguage(lang);
+            }
+            // Update visual styling
+            langSelector.className = lang === 'prolog' ? 'prolog-active' : '';
+            // Update placeholder
+            if (currentCellType === 'code') {
+                if (lang === 'prolog') {
+                    input.placeholder = 'Type Prolog here…';
+                } else {
+                    input.placeholder = 'Type Python here…';
+                }
+            }
+        });
     }
 
     // ---- Cell type toggle ----
@@ -41,20 +67,20 @@
             currentCellType = 'code';
             cellTypeToggle.textContent = 'Code';
             cellTypeToggle.classList.remove('markdown-active');
-            input.placeholder = 'Type Python here…';
+            const lang = getCurrentLanguage();
+            input.placeholder = lang === 'prolog' ? 'Type Prolog here…' : 'Type Python here…';
         }
     });
 
-    // ---- Initialize Pyodide ----
+    // ---- Initialize default kernel (Python) ----
 
-    async function initPyodide() {
+    async function initDefaultKernel() {
         try {
-            pyodide = await loadPyodide();
-            await pyodide.loadPackage(['numpy', 'sympy']);
+            const km = window.kernelManager;
+            if (!km) throw new Error('KernelManager not loaded');
 
-            const preludeResp = await fetch('js/prelude.py');
-            const preludeCode = await preludeResp.text();
-            await pyodide.runPythonAsync(preludeCode);
+            // Python is the default — init it now
+            await km.ensureReady('python');
 
             overlay.classList.add('hidden');
             badge.textContent = 'ready';
@@ -71,7 +97,7 @@
             badge.className = 'error';
             overlay.querySelector('p').textContent = 'Failed to load Python';
             overlay.querySelector('.loading-sub').textContent = err.message;
-            console.error('Pyodide init failed:', err);
+            console.error('Kernel init failed:', err);
         }
     }
 
@@ -82,7 +108,6 @@
      * Supports $inline$ and $$display$$ math blocks.
      */
     function renderMarkdown(text) {
-        // Protect math blocks from marked's HTML escaping
         const mathBlocks = [];
 
         // Replace $$...$$ display math
@@ -99,10 +124,8 @@
             return id;
         });
 
-        // Render markdown
         let html = marked.parse(processed);
 
-        // Restore math blocks with KaTeX rendering
         mathBlocks.forEach((block, i) => {
             const placeholder = `%%MATH_BLOCK_${i}%%`;
             let rendered;
@@ -122,17 +145,21 @@
 
     // ---- Card creation ----
 
-    function createInputCard(code, cellId, cellType) {
+    function createInputCard(code, cellId, cellType, language) {
         const card = document.createElement('div');
         const isMarkdown = cellType === 'markdown';
         card.className = 'card card-input' + (isMarkdown ? ' card-markdown' : '');
         card.dataset.cellId = cellId;
         card.dataset.cellType = cellType;
+        card.dataset.language = language || 'python';
 
         const typeLabel = isMarkdown ? 'Md' : 'In';
+        const langBadge = (!isMarkdown && language && language !== 'python')
+            ? ` <span class="lang-badge lang-${language}">${language}</span>`
+            : '';
         card.innerHTML = `
             <div class="card-label">
-                <span class="prompt-icon">${typeLabel} [${cellId}]</span>
+                <span class="prompt-icon">${typeLabel} [${cellId}]</span>${langBadge}
                 <button class="cell-edit-btn" title="Edit & re-run">✎</button>
             </div>
             <pre${isMarkdown ? ' class="md-source"' : ''}>${escapeHtml(code)}</pre>
@@ -152,7 +179,6 @@
         card.dataset.cellId = cellId;
 
         if (isMarkdown) {
-            // Markdown output has no label, just rendered content
             card.innerHTML = `<div class="card-body markdown-body"></div>`;
         } else {
             card.innerHTML = `
@@ -265,7 +291,6 @@
         const cell = window._cells.find(c => c.id === cellId);
         const cellType = cell ? cell.type : 'code';
 
-        // Update card classes to reflect current type
         inputCard.classList.toggle('card-markdown', cellType === 'markdown');
 
         const textarea = inputCard.querySelector('.cell-editor');
@@ -280,6 +305,104 @@
 
         if (shouldRun && code) {
             reRunCell(cellId, code);
+        }
+    }
+
+    // ---- Execute code via kernel manager ----
+
+    /**
+     * Execute code using the appropriate kernel.
+     * Renders output (stdout, result, errors) to the current output card.
+     */
+    async function executeCode(code, language) {
+        language = language || 'python';
+        const km = window.kernelManager;
+
+        if (!km) throw new Error('KernelManager not available');
+
+        // For Python, use the legacy bridge approach for plot/table/latex rendering
+        if (language === 'python') {
+            return executePythonLegacy(code);
+        }
+
+        // For other languages, use the kernel manager's standard execute
+        const result = await km.execute(code, language);
+
+        // Render stdout
+        if (result.stdout && result.stdout.length > 0) {
+            window.renderText(result.stdout, false);
+        }
+
+        // Render error
+        if (result.error) {
+            window.renderText(result.error, true);
+        }
+
+        // Render formatted result
+        if (result.result) {
+            if (result.result.type === 'latex') {
+                window.renderLatex(result.result.content);
+            } else if (result.result.type === 'text') {
+                window.renderText(result.result.content, false);
+            }
+        }
+    }
+
+    /**
+     * Execute Python code using the legacy Pyodide approach.
+     * This preserves the existing bridge functions (renderPlot, etc.)
+     * that Python calls directly via the js module.
+     */
+    async function executePythonLegacy(code) {
+        const km = window.kernelManager;
+        const kernel = km.getKernel('python');
+        const pyodide = kernel.getPyodide();
+
+        if (!pyodide) throw new Error('Python kernel not ready');
+
+        // Redirect stdout
+        pyodide.runPython(`
+import io, sys
+_sci_repl_stdout = io.StringIO()
+_sci_repl_old_stdout = sys.stdout
+sys.stdout = _sci_repl_stdout
+`);
+
+        let result = await pyodide.runPythonAsync(code);
+
+        pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`);
+        const printed = pyodide.runPython(`_sci_repl_stdout.getvalue()`);
+
+        if (printed && printed.length > 0) {
+            window.renderText(printed, false);
+        }
+
+        const suppressOutput = code.trimEnd().endsWith(';');
+
+        if (result !== undefined && result !== null && !suppressOutput) {
+            pyodide.globals.set('_last_result', result);
+
+            const isSympyList = pyodide.runPython(`_is_sympy_list(_last_result)`);
+            if (isSympyList) {
+                const tex = pyodide.runPython(`_sympy_list_to_latex(_last_result)`);
+                window.renderLatex(tex);
+            } else {
+                const isSympy = pyodide.runPython(`_is_sympy(_last_result)`);
+                if (isSympy) {
+                    const tex = pyodide.runPython(`_sympy_to_latex(_last_result)`);
+                    window.renderLatex(tex);
+                } else {
+                    let resultStr = result.toString();
+                    const MAX_OUTPUT = 10000;
+                    if (resultStr.length > MAX_OUTPUT) {
+                        resultStr = resultStr.substring(0, MAX_OUTPUT) +
+                            '\n... (output truncated, ' + resultStr.length + ' chars total)';
+                    }
+                    if (resultStr !== 'None' && resultStr !== '') {
+                        window.renderText(resultStr, false);
+                    }
+                }
+            }
         }
     }
 
@@ -300,8 +423,23 @@
             return;
         }
 
-        // Code cell — needs Pyodide
-        if (!pyodide) return;
+        // Code cell — needs a kernel
+        const language = cell.language || 'python';
+        const km = window.kernelManager;
+
+        if (!km || !km.isReady(language)) {
+            // Try to init the kernel on demand
+            try {
+                badge.textContent = 'loading ' + language + '…';
+                badge.className = 'running';
+                await km.ensureReady(language);
+            } catch (err) {
+                window.renderText('Failed to load ' + language + ': ' + err.message, true);
+                badge.textContent = 'ready';
+                badge.className = 'ready';
+                return;
+            }
+        }
 
         let outputCard = cell.outputCard;
         if (outputCard) {
@@ -323,7 +461,7 @@
         window._currentOutputCard = outputCard;
 
         try {
-            await executeCode(code);
+            await executeCode(code, language);
 
             const body = outputCard.querySelector('.card-body');
             if (body && body.children.length === 0) {
@@ -331,7 +469,13 @@
                 cell.outputCard = null;
             }
         } catch (err) {
-            try { pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`); } catch (_) { }
+            if (language === 'python') {
+                const kernel = km.getKernel('python');
+                const pyodide = kernel.getPyodide();
+                if (pyodide) {
+                    try { pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`); } catch (_) { }
+                }
+            }
             window.renderText(err.message, true);
         }
 
@@ -359,7 +503,6 @@
         body.className = 'card-body markdown-body';
         body.innerHTML = renderMarkdown(cell.code);
 
-        // Hide the source <pre> since the rendered output replaces it visually
         const pre = cell.inputCard.querySelector('pre');
         if (pre) pre.style.display = 'none';
     }
@@ -385,56 +528,6 @@
         }
     };
 
-    // ---- Execute code (shared between new cells and re-runs) ----
-
-    async function executeCode(code) {
-        pyodide.runPython(`
-import io, sys
-_sci_repl_stdout = io.StringIO()
-_sci_repl_old_stdout = sys.stdout
-sys.stdout = _sci_repl_stdout
-`);
-
-        let result = await pyodide.runPythonAsync(code);
-
-        pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`);
-        const printed = pyodide.runPython(`_sci_repl_stdout.getvalue()`);
-
-        if (printed && printed.length > 0) {
-            window.renderText(printed, false);
-        }
-
-        const suppressOutput = code.trimEnd().endsWith(';');
-
-        if (result !== undefined && result !== null && !suppressOutput) {
-            const isSympyList = pyodide.runPython(`_is_sympy_list(${getResultVarRef(result)})`);
-
-            if (isSympyList) {
-                const tex = pyodide.runPython(`_sympy_list_to_latex(${getResultVarRef(result)})`);
-                window.renderLatex(tex);
-            } else {
-                const isSympy = pyodide.runPython(`_is_sympy(${getResultVarRef(result)})`);
-
-                if (isSympy) {
-                    const tex = pyodide.runPython(`_sympy_to_latex(${getResultVarRef(result)})`);
-                    window.renderLatex(tex);
-                } else {
-                    let resultStr = result.toString();
-
-                    const MAX_OUTPUT = 10000;
-                    if (resultStr.length > MAX_OUTPUT) {
-                        resultStr = resultStr.substring(0, MAX_OUTPUT) +
-                            '\n... (output truncated, ' + resultStr.length + ' chars total)';
-                    }
-
-                    if (resultStr !== 'None' && resultStr !== '') {
-                        window.renderText(resultStr, false);
-                    }
-                }
-            }
-        }
-    }
-
     // ---- Restore session ----
 
     async function restoreSession() {
@@ -448,14 +541,16 @@ sys.stdout = _sci_repl_stdout
         for (const saved of savedCells) {
             cellCounter++;
             const cellId = cellCounter;
+            const language = saved.language || 'python';
 
-            const inputCard = createInputCard(saved.code, cellId, saved.type);
+            const inputCard = createInputCard(saved.code, cellId, saved.type, language);
             const outputCard = createOutputCard(cellId, saved.type);
 
             const cell = {
                 id: cellId,
                 code: saved.code,
                 type: saved.type,
+                language: language,
                 inputCard: inputCard,
                 outputCard: outputCard
             };
@@ -467,16 +562,35 @@ sys.stdout = _sci_repl_stdout
                 const pre = inputCard.querySelector('pre');
                 if (pre) pre.style.display = 'none';
             } else {
+                // Ensure the kernel for this language is ready
+                const km = window.kernelManager;
+                if (km) {
+                    try {
+                        await km.ensureReady(language);
+                    } catch (err) {
+                        window._currentOutputCard = outputCard;
+                        window.renderText('Failed to load ' + language + ': ' + err.message, true);
+                        window._currentOutputCard = null;
+                        continue;
+                    }
+                }
+
                 window._currentOutputCard = outputCard;
                 try {
-                    await executeCode(saved.code);
+                    await executeCode(saved.code, language);
                     const body = outputCard.querySelector('.card-body');
                     if (body && body.children.length === 0) {
                         outputCard.remove();
                         cell.outputCard = null;
                     }
                 } catch (err) {
-                    try { pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`); } catch (_) { }
+                    if (language === 'python') {
+                        const kernel = km.getKernel('python');
+                        const pyodide = kernel.getPyodide();
+                        if (pyodide) {
+                            try { pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`); } catch (_) { }
+                        }
+                    }
                     window.renderText(err.message, true);
                 }
                 window._currentOutputCard = null;
@@ -504,10 +618,8 @@ sys.stdout = _sci_repl_stdout
     // ---- Import cells from .ipynb ----
 
     window.importCells = async function (cellDefs) {
-        if (!pyodide && cellDefs.some(c => c.type === 'code')) {
-            alert('Python is still loading. Please wait for "ready" status.');
-            return;
-        }
+        const km = window.kernelManager;
+        if (!km) return;
 
         badge.textContent = 'importing…';
         badge.className = 'running';
@@ -516,14 +628,16 @@ sys.stdout = _sci_repl_stdout
         for (const def of cellDefs) {
             cellCounter++;
             const cellId = cellCounter;
+            const language = def.language || 'python';
 
-            const inputCard = createInputCard(def.code, cellId, def.type);
+            const inputCard = createInputCard(def.code, cellId, def.type, language);
             const outputCard = createOutputCard(cellId, def.type);
 
             const cell = {
                 id: cellId,
                 code: def.code,
                 type: def.type,
+                language: language,
                 inputCard: inputCard,
                 outputCard: outputCard
             };
@@ -535,16 +649,32 @@ sys.stdout = _sci_repl_stdout
                 const pre = inputCard.querySelector('pre');
                 if (pre) pre.style.display = 'none';
             } else {
+                // Ensure kernel is ready for this language
+                try {
+                    await km.ensureReady(language);
+                } catch (err) {
+                    window._currentOutputCard = outputCard;
+                    window.renderText('Failed to load ' + language + ': ' + err.message, true);
+                    window._currentOutputCard = null;
+                    continue;
+                }
+
                 window._currentOutputCard = outputCard;
                 try {
-                    await executeCode(def.code);
+                    await executeCode(def.code, language);
                     const body = outputCard.querySelector('.card-body');
                     if (body && body.children.length === 0) {
                         outputCard.remove();
                         cell.outputCard = null;
                     }
                 } catch (err) {
-                    try { pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`); } catch (_) { }
+                    if (language === 'python') {
+                        const kernel = km.getKernel('python');
+                        const pyodide = kernel.getPyodide();
+                        if (pyodide) {
+                            try { pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`); } catch (_) { }
+                        }
+                    }
                     window.renderText(err.message, true);
                 }
                 window._currentOutputCard = null;
@@ -564,31 +694,51 @@ sys.stdout = _sci_repl_stdout
         const code = input.value.trim();
         if (!code) return;
 
-        // Markdown cells don't need Pyodide
-        if (currentCellType === 'code' && !pyodide) return;
+        const language = getCurrentLanguage();
+        const km = window.kernelManager;
+
+        // Markdown cells don't need a kernel
+        if (currentCellType === 'code') {
+            if (!km || !km.isReady(language)) {
+                // Try to init on demand
+                try {
+                    runBtn.disabled = true;
+                    badge.textContent = 'loading ' + language + '…';
+                    badge.className = 'running';
+                    await km.ensureReady(language);
+                } catch (err) {
+                    badge.textContent = 'error';
+                    badge.className = 'error';
+                    alert('Failed to load ' + language + ': ' + err.message);
+                    runBtn.disabled = false;
+                    badge.textContent = 'ready';
+                    badge.className = 'ready';
+                    return;
+                }
+            }
+        }
 
         runBtn.disabled = true;
         cellCounter++;
         const cellId = cellCounter;
 
-        const inputCard = createInputCard(code, cellId, currentCellType);
+        const inputCard = createInputCard(code, cellId, currentCellType, language);
         const outputCard = createOutputCard(cellId, currentCellType);
 
         const cell = {
             id: cellId,
             code: code,
             type: currentCellType,
+            language: language,
             inputCard: inputCard,
             outputCard: outputCard
         };
         window._cells.push(cell);
 
         if (currentCellType === 'markdown') {
-            // Render markdown immediately
             const body = outputCard.querySelector('.card-body');
             body.innerHTML = renderMarkdown(code);
 
-            // Hide source pre
             const pre = inputCard.querySelector('pre');
             if (pre) pre.style.display = 'none';
 
@@ -599,7 +749,7 @@ sys.stdout = _sci_repl_stdout
             window._currentOutputCard = outputCard;
 
             try {
-                await executeCode(code);
+                await executeCode(code, language);
 
                 if (window.sessionManager) {
                     window.sessionManager.addToHistory(code);
@@ -613,7 +763,13 @@ sys.stdout = _sci_repl_stdout
                     cell.outputCard = null;
                 }
             } catch (err) {
-                try { pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`); } catch (_) { }
+                if (language === 'python') {
+                    const kernel = km.getKernel('python');
+                    const pyodide = kernel.getPyodide();
+                    if (pyodide) {
+                        try { pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`); } catch (_) { }
+                    }
+                }
                 window.renderText(err.message, true);
             }
 
@@ -630,11 +786,6 @@ sys.stdout = _sci_repl_stdout
         input.style.height = 'auto';
         repl.scrollTop = repl.scrollHeight;
         input.focus();
-    }
-
-    function getResultVarRef(result) {
-        pyodide.globals.set('_last_result', result);
-        return '_last_result';
     }
 
     // ---- Auto-resize textarea ----
@@ -711,13 +862,13 @@ sys.stdout = _sci_repl_stdout
     // window._startApp is called by the privacy script in index.html
     // once the Pyodide <script> has loaded.
     window._startApp = function () {
-        initPyodide();
+        initDefaultKernel();
     };
 
     // If Pyodide was already loaded (returning user, script loaded before app.js),
     // start immediately.
     if (typeof loadPyodide !== 'undefined') {
-        initPyodide();
+        initDefaultKernel();
     }
 
 })();

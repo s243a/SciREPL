@@ -1,8 +1,8 @@
-# SciREPL Pro — Mobile Scientific Python REPL
+# SciREPL Pro — Mobile Multi-Language Scientific REPL
 
 > **Note:** This is the **premium/Pro** version of SciREPL. The free open-source version is at [s243a/SciREPL](https://github.com/s243a/SciREPL).
 
-A **mobile-first** Python REPL powered by Pyodide + Capacitor, with Jupyter-style notebook features.
+A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, with Jupyter-style notebook features. Supports **Python** (Pyodide) and **Prolog** (swipl-wasm), with more languages planned.
 
 ![Status](https://img.shields.io/badge/status-beta-green) ![License](https://img.shields.io/badge/license-MIT-blue)
 
@@ -18,16 +18,19 @@ A **mobile-first** Python REPL powered by Pyodide + Capacitor, with Jupyter-styl
 - **Mobile-first UI**: Dark theme, touch-friendly
 
 ### Pro Features
+- **Multi-language support** — Python and Prolog in the same notebook, with per-cell language tracking
+- **SWI-Prolog kernel** — Full SWI-Prolog via swipl-wasm, loaded on demand from CDN
+- **Kernel abstraction layer** — Pluggable architecture for adding new language runtimes
 - **Editable cells** — Click the pencil icon to edit and re-run any cell
 - **Markdown cells** — Toggle Code/Md, supports `$LaTeX$` and `$$display math$$`
 - **Run All Below** — Re-execute from a cell downward
 - **Run All Cells** — Re-run the entire notebook
-- **Session persistence** — Cells auto-save and restore on app restart
-- **Export as .ipynb** — Native share sheet (save to Files, Drive, email, etc.)
-- **Import .ipynb** — Creates and executes cells (code + markdown)
-- **Import .py** — Load Python scripts into the input bar
+- **Session persistence** — Cells auto-save (with language) and restore on app restart
+- **Export as .ipynb** — Language-aware metadata, native share sheet
+- **Import .ipynb / .py / .pl** — Creates and executes cells with correct language
 - **Math Mode palette** — Quick-insert SymPy functions (diff, integrate, solve, etc.)
 - **Command history** — Arrow keys to recall previous inputs
+- **Privacy-first** — Bundled rendering libraries, deferred CDN loading until consent
 
 ## Quick Start
 
@@ -57,6 +60,8 @@ adb install android/app/build/outputs/apk/debug/app-debug.apk
 
 ## Try It
 
+### Python
+
 ```python
 # Basic math
 2 + 2
@@ -78,38 +83,93 @@ diff(sin(x), x)  # Shows cos(x) as rendered LaTeX
 a = np.arange(1000);
 ```
 
+### Prolog
+
+Switch to Prolog using the language selector (Py → PL):
+
+```prolog
+% Assert facts
+assert(parent(tom, bob)).
+assert(parent(bob, ann)).
+
+% Query
+parent(tom, X).
+% → X = bob
+
+% Rules
+assert((grandparent(X,Z) :- parent(X,Y), parent(Y,Z))).
+grandparent(tom, Z).
+% → Z = ann
+
+% Built-in predicates
+member(X, [a, b, c]).
+% → X = a, X = b, X = c
+
+append([1,2], [3,4], X).
+% → X = [1, 2, 3, 4]
+```
+
 ## Architecture
 
 ```mermaid
 graph LR
     A[Input Bar] -->|Code/Markdown| B{Cell Type?}
-    B -->|Code| C[Pyodide WASM]
+    B -->|Code| C{Language?}
     B -->|Markdown| D[marked.js + KaTeX]
-    C -->|text/value| E[Text Output]
-    C -->|SymPy object| F[LaTeX via KaTeX]
-    C -->|plot call| G[JS Bridge]
-    G -->|JSON data| H[Plotly.js Chart]
+    C -->|Python| E[Pyodide WASM]
+    C -->|Prolog| F[swipl-wasm]
+    E -->|text/value| G[Text Output]
+    E -->|SymPy object| H[LaTeX via KaTeX]
+    E -->|plot call| I[JS Bridge → Plotly.js]
+    F -->|solutions| G
 ```
+
+### Kernel Architecture
+
+```
+KernelManager (kernel_manager.js)
+├── PythonKernel (kernels/python.js)  — Pyodide + prelude.py
+└── PrologKernel (kernels/prolog.js)  — swipl-wasm via dynamic import
+```
+
+Each kernel implements: `init()`, `execute(code)`, `isReady()`, `getName()`, `getLanguage()`, `destroy()`
+
+Kernels are **lazy-loaded** — only downloaded when first used. Python loads at startup; Prolog loads when the user first switches to PL.
 
 ### File Structure
 
-- **[www/index.html](www/index.html)** — App shell, CDN loads, modals
-- **[www/css/style.css](www/css/style.css)** — Dark theme, mobile-first layout
-- **[www/js/app.js](www/js/app.js)** — REPL loop, cell management, session restore, import
+- **[www/index.html](www/index.html)** — App shell, language selector, modals, deferred CDN loading
+- **[www/css/style.css](www/css/style.css)** — Dark theme, mobile-first layout, language badges
+- **[www/js/app.js](www/js/app.js)** — REPL loop, cell management, multi-language execution
+- **[www/js/kernel_manager.js](www/js/kernel_manager.js)** — Kernel registry, lazy loading, language switching
+- **[www/js/kernels/python.js](www/js/kernels/python.js)** — Python kernel (Pyodide wrapper)
+- **[www/js/kernels/prolog.js](www/js/kernels/prolog.js)** — Prolog kernel (swipl-wasm wrapper)
 - **[www/js/bridge.js](www/js/bridge.js)** — JS rendering: `renderPlot()`, `renderLatex()`, `renderTable()`
 - **[www/js/prelude.py](www/js/prelude.py)** — Python bridge: `plot()`, `mplot()`, `table()`, pre-imports
-- **[www/js/persistence.js](www/js/persistence.js)** — Session save/restore via localStorage
-- **[www/js/file_io.js](www/js/file_io.js)** — Import/export (.ipynb, .py) via Capacitor plugins
+- **[www/js/persistence.js](www/js/persistence.js)** — Session save/restore via localStorage (with language per cell)
+- **[www/js/file_io.js](www/js/file_io.js)** — Import/export (.ipynb, .py, .pl) via Capacitor plugins
 - **[www/js/math_mode.js](www/js/math_mode.js)** — Math palette UI
+- **[www/vendor/](www/vendor/)** — Bundled KaTeX, Plotly.js, marked.js (~2.6MB)
 
 ### Capacitor Plugins
 
 - `@capacitor/filesystem` — Write export files to device storage
 - `@capacitor/share` — Native share sheet for file export
 
+### CDN Dependencies (loaded at runtime)
+
+| Runtime | CDN | Size | When loaded |
+|---------|-----|------|-------------|
+| Pyodide | cdn.jsdelivr.net | ~25MB | App startup (after privacy consent) |
+| swipl-wasm | SWI-Prolog.github.io | ~10MB | First Prolog cell execution |
+
 ## Roadmap
 
-- [ ] Multi-language support (Prolog via swipl-wasm, R via webR)
+- [x] Multi-language support (Python + Prolog)
+- [x] Kernel abstraction layer
+- [x] Privacy-first CDN loading (consent before download)
+- [x] Bundled rendering libraries
+- [ ] Additional languages (R via webR, Lua)
 - [ ] Cache management for WASM runtimes
 - [ ] PWA manifest (install without app stores)
 - [ ] Matplotlib backend fallback
@@ -124,6 +184,7 @@ MIT License — see [LICENSE](LICENSE)
 
 Built with:
 - [Pyodide](https://pyodide.org/) — Python in the browser
+- [swipl-wasm](https://github.com/SWI-Prolog/npm-swipl-wasm) — SWI-Prolog in the browser
 - [Plotly.js](https://plotly.com/javascript/) — Interactive charts
 - [KaTeX](https://katex.org/) — LaTeX rendering
 - [marked.js](https://marked.js.org/) — Markdown parsing

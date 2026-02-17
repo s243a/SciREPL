@@ -76,10 +76,21 @@ class FileIO {
             return;
         }
 
+        // Detect primary language from cells
+        const langCounts = {};
+        cells.forEach(c => {
+            if (c.type === 'code') {
+                const lang = c.language || 'python';
+                langCounts[lang] = (langCounts[lang] || 0) + 1;
+            }
+        });
+        const primaryLang = Object.keys(langCounts).sort((a, b) => langCounts[b] - langCounts[a])[0] || 'python';
+
         const nbCells = cells.map((cell, i) => {
             const source = cell.code.split('\n').map((line, j, arr) =>
                 j < arr.length - 1 ? line + '\n' : line
             );
+            const cellLang = cell.language || 'python';
             if (cell.type === 'markdown') {
                 return {
                     cell_type: 'markdown',
@@ -87,33 +98,40 @@ class FileIO {
                     source: source
                 };
             }
+            const meta = {};
+            // Tag cells with non-primary language
+            if (cellLang !== primaryLang) {
+                meta.scirepl_language = cellLang;
+            }
             return {
                 cell_type: 'code',
                 execution_count: cell.id,
-                metadata: {},
+                metadata: meta,
                 outputs: [],
                 source: source
             };
         });
 
+        const kernelMap = {
+            python: { display_name: 'Python 3 (Pyodide)', language: 'python', name: 'python3' },
+            prolog: { display_name: 'SWI-Prolog (WASM)', language: 'prolog', name: 'swipl' }
+        };
+
+        const langInfoMap = {
+            python: { name: 'python', version: '3.12', mimetype: 'text/x-python', file_extension: '.py' },
+            prolog: { name: 'prolog', version: '9.x', mimetype: 'text/x-prolog', file_extension: '.pl' }
+        };
+
         const notebook = {
             nbformat: 4,
             nbformat_minor: 5,
             metadata: {
-                kernelspec: {
-                    display_name: 'Python 3 (Pyodide)',
-                    language: 'python',
-                    name: 'python3'
-                },
-                language_info: {
-                    name: 'python',
-                    version: '3.12',
-                    mimetype: 'text/x-python',
-                    file_extension: '.py'
-                },
+                kernelspec: kernelMap[primaryLang] || kernelMap.python,
+                language_info: langInfoMap[primaryLang] || langInfoMap.python,
                 scirepl: {
                     version: 'pro',
-                    exported_at: new Date().toISOString()
+                    exported_at: new Date().toISOString(),
+                    languages: Object.keys(langCounts)
                 }
             },
             cells: nbCells
@@ -176,6 +194,8 @@ class FileIO {
             const content = e.target.result;
             if (file.name.endsWith('.ipynb')) {
                 this.importIpynb(content);
+            } else if (file.name.endsWith('.pl')) {
+                this.importProlog(content);
             } else {
                 // Assume .py or text
                 this.importPython(content);
@@ -194,6 +214,19 @@ class FileIO {
     }
 
     /**
+     * Import a .pl file — create a single Prolog cell with the content.
+     */
+    importProlog(content) {
+        if (window.importCells) {
+            window.importCells([{ code: content, type: 'code', language: 'prolog' }]);
+        } else {
+            const input = document.getElementById('code-input');
+            input.value = content;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    }
+
+    /**
      * Import a .ipynb file — create cells and execute them.
      * If window.importCells is available (set by app.js), uses it to
      * create proper cells. Otherwise falls back to textarea.
@@ -202,6 +235,21 @@ class FileIO {
         try {
             const nb = JSON.parse(jsonContent);
             const extractedCells = [];
+
+            // Detect notebook-level language from kernelspec
+            let notebookLang = 'python';
+            if (nb.metadata && nb.metadata.kernelspec) {
+                const ks = nb.metadata.kernelspec;
+                if (ks.language === 'prolog' || ks.name === 'swipl') {
+                    notebookLang = 'prolog';
+                }
+            }
+            if (nb.metadata && nb.metadata.language_info) {
+                const li = nb.metadata.language_info;
+                if (li.name === 'prolog') {
+                    notebookLang = 'prolog';
+                }
+            }
 
             if (nb.cells) {
                 nb.cells.forEach(cell => {
@@ -212,9 +260,15 @@ class FileIO {
                         source = cell.source || '';
                     }
                     if (source.trim()) {
+                        // Per-cell language override via scirepl metadata
+                        let cellLang = notebookLang;
+                        if (cell.metadata && cell.metadata.scirepl_language) {
+                            cellLang = cell.metadata.scirepl_language;
+                        }
                         extractedCells.push({
                             code: source,
-                            type: cell.cell_type === 'markdown' ? 'markdown' : 'code'
+                            type: cell.cell_type === 'markdown' ? 'markdown' : 'code',
+                            language: cellLang
                         });
                     }
                 });
