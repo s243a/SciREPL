@@ -202,8 +202,7 @@ big_array = np.arange(1000);</code></pre>
         <button id="run-btn" disabled>▶ Run</button>
     </footer>
 
-    <!-- Pyodide -->
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.js"></script>
+    <!-- Pyodide loaded dynamically after privacy acceptance — see below -->
 
     <!-- App scripts -->
     <!-- prelude.py is loaded by app.js via fetch, not as a script tag -->
@@ -213,15 +212,38 @@ big_array = np.arange(1000);</code></pre>
     <script src="js/bridge.js"></script>
     <script src="js/app.js"></script>
 
-    <!-- Privacy modal logic -->
+    <!-- Privacy modal + deferred Pyodide loading -->
     <script>
     (function() {
         var modal = document.getElementById('privacy-modal');
         var acceptBtn = document.getElementById('privacy-accept-btn');
         var helpLink = document.getElementById('help-privacy-link');
+        var pyodideUrl = 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.js';
 
-        // Show on first launch
-        if (!localStorage.getItem('scirepl_privacy_accepted')) {
+        function loadPyodideScript() {
+            // Only load if not already loaded
+            if (window.loadPyodide) {
+                if (window._startApp) window._startApp();
+                return;
+            }
+            // Update loading overlay
+            var loadingSub = document.querySelector('.loading-sub');
+            if (loadingSub) loadingSub.textContent = 'Downloading Python runtime…';
+
+            var script = document.createElement('script');
+            script.src = pyodideUrl;
+            script.onload = function() {
+                if (loadingSub) loadingSub.textContent = 'Initializing Pyodide + NumPy + SymPy';
+                if (window._startApp) window._startApp();
+            };
+            document.body.appendChild(script);
+        }
+
+        if (localStorage.getItem('scirepl_privacy_accepted')) {
+            // Already accepted — load Pyodide immediately
+            loadPyodideScript();
+        } else {
+            // First launch — show privacy modal, defer Pyodide
             modal.classList.remove('hidden');
         }
 
@@ -229,6 +251,7 @@ big_array = np.arange(1000);</code></pre>
         acceptBtn.addEventListener('click', function() {
             localStorage.setItem('scirepl_privacy_accepted', '1');
             modal.classList.add('hidden');
+            loadPyodideScript();
         });
 
         // Close via backdrop or X button

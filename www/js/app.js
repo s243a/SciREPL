@@ -707,6 +707,17 @@ sys.stdout = _sci_repl_stdout
     });
 
     // ---- Start ----
-    initPyodide();
+    // Pyodide is loaded dynamically after privacy acceptance.
+    // window._startApp is called by the privacy script in index.html
+    // once the Pyodide <script> has loaded.
+    window._startApp = function () {
+        initPyodide();
+    };
+
+    // If Pyodide was already loaded (returning user, script loaded before app.js),
+    // start immediately.
+    if (typeof loadPyodide !== 'undefined') {
+        initPyodide();
+    }
 
 })();
