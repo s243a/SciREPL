@@ -137,13 +137,29 @@ html, body {
     50% { opacity: 0.6; }
 }
 
+/* ===== App Body Layout ===== */
+
+#app-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 52px - 100px);
+}
+
+#repl-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+}
+
 /* ===== REPL Output Stream ===== */
 
-#repl {
+#repl, .repl-container {
     flex: 1;
     overflow-y: auto;
     padding: 12px 12px 12px;
-    height: calc(100vh - 52px - 100px);
     scroll-behavior: smooth;
 }
 
@@ -350,7 +366,7 @@ html, body {
 /* ===== Responsive ===== */
 
 @media (min-width: 768px) {
-    #repl {
+    #repl, .repl-container {
         max-width: 720px;
         margin: 0 auto;
         padding: 20px;
@@ -581,6 +597,15 @@ html, body {
     background-position: right 6px center;
 }
 
+#lang-selector.bash-active {
+    color: #4ec9b0;
+    border-color: #4ec9b0;
+    background-color: rgba(78, 201, 176, 0.1);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234ec9b0'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+}
+
 /* Language badge in cell labels */
 .lang-badge {
     font-size: 9px;
@@ -601,6 +626,12 @@ html, body {
     color: #f0883e;
     background: rgba(240, 136, 62, 0.1);
     border: 1px solid rgba(240, 136, 62, 0.3);
+}
+
+.lang-badge.lang-bash {
+    color: #4ec9b0;
+    background: rgba(78, 201, 176, 0.1);
+    border: 1px solid rgba(78, 201, 176, 0.3);
 }
 
 .cell-type-switch-btn {
@@ -946,4 +977,320 @@ html, body {
 .modal-content-scroll {
     max-height: 85vh;
     overflow-y: auto;
+}
+
+/* ===== Prolog Settings ===== */
+
+.vfs-actions {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.vfs-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-card);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.vfs-btn:hover {
+    background: rgba(88, 166, 255, 0.1);
+    border-color: var(--accent);
+}
+
+.vfs-file-list {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    margin: 8px 0;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.vfs-entry {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    color: var(--text-primary);
+    border-radius: 4px;
+}
+
+.vfs-entry:hover {
+    background: var(--bg-card);
+}
+
+.vfs-dir {
+    color: var(--accent);
+}
+
+.vfs-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.vfs-size {
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.vfs-empty {
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 8px;
+    text-align: center;
+}
+
+.vfs-delete-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0 4px;
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.vfs-entry:hover .vfs-delete-btn,
+tr:hover .vfs-delete-btn {
+    opacity: 1;
+}
+
+.vfs-delete-btn:hover {
+    color: var(--red);
+}
+
+/* Search path table */
+.search-path-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    margin: 8px 0;
+}
+
+.search-path-table th,
+.search-path-table td {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    text-align: left;
+    color: var(--text-primary);
+}
+
+.search-path-table th {
+    background: var(--bg-secondary);
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 11px;
+}
+
+.search-path-table td:last-child {
+    width: 30px;
+    text-align: center;
+}
+
+.path-add-form {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0;
+    align-items: center;
+}
+
+.path-input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    outline: none;
+}
+
+.path-input:focus {
+    border-color: var(--accent);
+}
+
+/* Fetch from URL */
+.fetch-form {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.fetch-input {
+    flex: 1;
+    min-width: 150px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    outline: none;
+}
+
+.fetch-input:focus {
+    border-color: var(--accent);
+}
+
+.fetch-input-short {
+    max-width: 180px;
+}
+
+.fetch-status {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    padding: 4px 0;
+    min-height: 18px;
+}
+
+/* File preview pane */
+.vfs-file-preview {
+    background: var(--bg-input);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    margin: 8px 0;
+    overflow: hidden;
+}
+
+.vfs-file-preview.hidden {
+    display: none;
+}
+
+.vfs-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+
+.vfs-preview-path {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.vfs-preview-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.vfs-preview-edit,
+.vfs-preview-save {
+    padding: 2px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.vfs-preview-edit:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.vfs-preview-save {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(63, 185, 80, 0.1);
+}
+
+.vfs-preview-save:hover {
+    background: rgba(63, 185, 80, 0.2);
+}
+
+.vfs-preview-save.hidden,
+.vfs-preview-edit.hidden {
+    display: none;
+}
+
+.vfs-preview-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.vfs-preview-close:hover {
+    color: var(--text-primary);
+}
+
+.vfs-preview-code {
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 250px;
+    overflow-y: auto;
+    margin: 0;
+}
+
+.vfs-preview-code.hidden {
+    display: none;
+}
+
+.vfs-preview-editor {
+    width: 100%;
+    min-height: 100px;
+    max-height: 300px;
+    padding: 10px 12px;
+    border: none;
+    border-top: 1px solid var(--accent);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+}
+
+.vfs-preview-editor.hidden {
+    display: none;
+}
+
+/* Active file in list */
+.vfs-entry-active {
+    background: var(--accent-glow);
+    border-left: 2px solid var(--accent);
+}
+
+.vfs-entry .vfs-name {
+    flex: 1;
+}
+
+.prolog-settings-help {
+    margin-top: 16px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
 }

@@ -55,6 +55,9 @@
     <p>jsDelivr's privacy policy is available at <a href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net" target="_blank">jsdelivr.com/terms/privacy-policy-jsdelivr-net</a>.</p>
     <p>Your Python code, session data, and exported files are never transmitted to any server.</p>
 
+    <h2>User-Initiated Network Requests</h2>
+    <p>SciREPL provides a file-fetching feature that allows notebook code to download files from URLs you specify. When you use this feature (e.g., <code>fetch_file</code> in Prolog, or via the Prolog Settings panel), the request is made directly from your device to the specified URL. The remote server will receive your IP address and standard HTTP headers. SciREPL does not proxy, log, or monitor these requests.</p>
+
     <h2>Code Execution</h2>
     <p>All Python code you enter is executed locally on your device using Pyodide (Python compiled to WebAssembly). No code is sent to any remote server for execution.</p>
 

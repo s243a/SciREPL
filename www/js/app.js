@@ -11,20 +11,35 @@
     // ---- DOM refs ----
     const overlay = document.getElementById('loading-overlay');
     const badge = document.getElementById('status-badge');
-    const repl = document.getElementById('repl');
     const input = document.getElementById('code-input');
     const runBtn = document.getElementById('run-btn');
     const cellTypeToggle = document.getElementById('cell-type-toggle');
     const langSelector = document.getElementById('lang-selector');
 
-    let cellCounter = window.sessionManager ? window.sessionManager.session.cellCounter : 0;
+    // Cell counter on window for notebook switching
+    if (window._cellCounter === undefined) {
+        window._cellCounter = window.sessionManager ? window.sessionManager.session.cellCounter : 0;
+    }
+
+    /**
+     * Get the active REPL container element.
+     * Uses NotebookManager's active notebook container if available,
+     * otherwise falls back to the default #repl element.
+     */
+    function getRepl() {
+        if (window.notebookManager) {
+            const nb = window.notebookManager.getActiveNotebook();
+            if (nb && nb.replContainer) return nb.replContainer;
+        }
+        return document.getElementById('repl');
+    }
 
     // Current input bar cell type: 'code' or 'markdown'
     let currentCellType = 'code';
 
     // Track all cells for export and re-evaluation
     // Each entry: { id, code, type: 'code'|'markdown', language: 'python'|'prolog', inputCard, outputCard }
-    window._cells = [];
+    if (!window._cells) window._cells = [];
 
     if (window.sessionManager) {
         window.sessionManager.session.historyIndex = -1;
@@ -43,11 +58,13 @@
                 window.kernelManager.setLanguage(lang);
             }
             // Update visual styling
-            langSelector.className = lang === 'prolog' ? 'prolog-active' : '';
+            langSelector.className = lang === 'prolog' ? 'prolog-active' : lang === 'bash' ? 'bash-active' : '';
             // Update placeholder
             if (currentCellType === 'code') {
                 if (lang === 'prolog') {
                     input.placeholder = 'Type Prolog here…';
+                } else if (lang === 'bash') {
+                    input.placeholder = 'Type Bash here…';
                 } else {
                     input.placeholder = 'Type Python here…';
                 }
@@ -68,7 +85,7 @@
             cellTypeToggle.textContent = 'Code';
             cellTypeToggle.classList.remove('markdown-active');
             const lang = getCurrentLanguage();
-            input.placeholder = lang === 'prolog' ? 'Type Prolog here…' : 'Type Python here…';
+            input.placeholder = lang === 'prolog' ? 'Type Prolog here…' : lang === 'bash' ? 'Type Bash here…' : 'Type Python here…';
         }
     });
 
@@ -168,7 +185,7 @@
             e.stopPropagation();
             enterEditMode(card, cellId);
         });
-        repl.appendChild(card);
+        getRepl().appendChild(card);
         return card;
     }
 
@@ -188,7 +205,7 @@
                 <div class="card-body"></div>
             `;
         }
-        repl.appendChild(card);
+        getRepl().appendChild(card);
         return card;
     }
 
@@ -319,6 +336,17 @@
         const km = window.kernelManager;
 
         if (!km) throw new Error('KernelManager not available');
+
+        // Handle %%language magic commands (e.g., %%bash, %%python, %%prolog)
+        // Strips the magic line and routes to the specified kernel.
+        const magicMatch = code.match(/^%%(\w+)\s*\n([\s\S]*)$/);
+        if (magicMatch) {
+            const magicLang = magicMatch[1].toLowerCase();
+            let magicCode = magicMatch[2];
+            if (km._registry && km._registry[magicLang]) {
+                return executeCode(magicCode, magicLang);
+            }
+        }
 
         // For Python, use the legacy bridge approach for plot/table/latex rendering
         if (language === 'python') {
@@ -532,15 +560,96 @@ sys.stdout = _sci_repl_stdout
 
     async function restoreSession() {
         if (!window.sessionManager) return;
+
+        // Restore SharedVFS before any cells execute (so bash/prolog can access shared files)
+        window.sessionManager.restoreSharedState();
+
+        // Restore multi-notebook state (tabs) if available
+        if (window.notebookManager && window.notebookManager.hasStoredState()) {
+            const activeCells = window.notebookManager.restoreState();
+            if (activeCells && activeCells.length > 0) {
+                // restoreState populates window._cells and renders the tab bar.
+                // Now re-render the active notebook's cells as cards.
+                badge.textContent = 'restoring…';
+                badge.className = 'running';
+                let prologStateRestored = false;
+
+                // Clear any DOM cells from the default init, then populate from restored state
+                const repl = getRepl();
+                const existingCards = repl.querySelectorAll('.cell-card');
+                existingCards.forEach(c => c.remove());
+
+                const cellDefs = activeCells.map(c => ({
+                    code: c.code, type: c.type, language: c.language || 'python'
+                }));
+                window._cells.length = 0;
+                window._cellCounter = 0;
+
+                for (const saved of cellDefs) {
+                    window._cellCounter++;
+                    const cellId = window._cellCounter;
+                    const language = saved.language || 'python';
+
+                    const inputCard = createInputCard(saved.code, cellId, saved.type, language);
+                    const outputCard = createOutputCard(cellId, saved.type);
+
+                    const cell = {
+                        id: cellId,
+                        code: saved.code,
+                        type: saved.type,
+                        language: language,
+                        inputCard: inputCard,
+                        outputCard: outputCard
+                    };
+                    window._cells.push(cell);
+
+                    if (saved.type === 'markdown') {
+                        const body = outputCard.querySelector('.card-body');
+                        body.innerHTML = renderMarkdown(saved.code);
+                        const pre = inputCard.querySelector('pre');
+                        if (pre) pre.style.display = 'none';
+                    }
+                }
+
+                // Update the active notebook's state
+                const active = window.notebookManager.getActiveNotebook();
+                if (active) {
+                    active.cells = window._cells;
+                    active.cellCounter = window._cellCounter;
+                }
+
+                // Restore Prolog VFS files from IndexedDB so modules are available
+                // when the user runs cells (without needing to re-import the package)
+                const hasPrologCells = cellDefs.some(c => c.language === 'prolog');
+                if (hasPrologCells) {
+                    const km = window.kernelManager;
+                    if (km) {
+                        try {
+                            await km.ensureReady('prolog');
+                            await window.sessionManager.restorePrologState();
+                        } catch (e) {
+                            console.warn('Failed to restore Prolog VFS on notebook restore:', e);
+                        }
+                    }
+                }
+
+                badge.textContent = 'ready';
+                badge.className = 'ready';
+                getRepl().scrollTop = getRepl().scrollHeight;
+                return;
+            }
+        }
+
         const savedCells = window.sessionManager.getSavedCells();
         if (savedCells.length === 0) return;
 
         badge.textContent = 'restoring…';
         badge.className = 'running';
+        let prologStateRestored = false;
 
         for (const saved of savedCells) {
-            cellCounter++;
-            const cellId = cellCounter;
+            window._cellCounter++;
+            const cellId = window._cellCounter;
             const language = saved.language || 'python';
 
             const inputCard = createInputCard(saved.code, cellId, saved.type, language);
@@ -567,6 +676,11 @@ sys.stdout = _sci_repl_stdout
                 if (km) {
                     try {
                         await km.ensureReady(language);
+                        // Restore Prolog VFS state on first Prolog cell
+                        if (language === 'prolog' && !prologStateRestored) {
+                            prologStateRestored = true;
+                            await window.sessionManager.restorePrologState();
+                        }
                     } catch (err) {
                         window._currentOutputCard = outputCard;
                         window.renderText('Failed to load ' + language + ': ' + err.message, true);
@@ -603,15 +717,23 @@ sys.stdout = _sci_repl_stdout
 
         badge.textContent = 'ready';
         badge.className = 'ready';
-        repl.scrollTop = repl.scrollHeight;
+        getRepl().scrollTop = getRepl().scrollHeight;
     }
 
     // ---- Save cells to session ----
 
     function saveCellsToSession() {
         if (window.sessionManager) {
-            window.sessionManager.session.cellCounter = cellCounter;
+            window.sessionManager.session.cellCounter = window._cellCounter;
             window.sessionManager.saveCells(window._cells);
+            // Also save Prolog VFS state if kernel is active
+            window.sessionManager.savePrologState();
+            // Save SharedVFS state for cross-kernel file persistence
+            window.sessionManager.saveSharedState();
+        }
+        // Also save multi-notebook state if applicable
+        if (window.notebookManager && window.notebookManager.hasMultipleNotebooks()) {
+            window.notebookManager.saveState();
         }
     }
 
@@ -626,8 +748,8 @@ sys.stdout = _sci_repl_stdout
         runBtn.disabled = true;
 
         for (const def of cellDefs) {
-            cellCounter++;
-            const cellId = cellCounter;
+            window._cellCounter++;
+            const cellId = window._cellCounter;
             const language = def.language || 'python';
 
             const inputCard = createInputCard(def.code, cellId, def.type, language);
@@ -685,7 +807,7 @@ sys.stdout = _sci_repl_stdout
         badge.textContent = 'ready';
         badge.className = 'ready';
         runBtn.disabled = false;
-        repl.scrollTop = repl.scrollHeight;
+        getRepl().scrollTop = getRepl().scrollHeight;
     };
 
     // ---- Run from input bar (new cell) ----
@@ -719,8 +841,8 @@ sys.stdout = _sci_repl_stdout
         }
 
         runBtn.disabled = true;
-        cellCounter++;
-        const cellId = cellCounter;
+        window._cellCounter++;
+        const cellId = window._cellCounter;
 
         const inputCard = createInputCard(code, cellId, currentCellType, language);
         const outputCard = createOutputCard(cellId, currentCellType);
@@ -784,7 +906,7 @@ sys.stdout = _sci_repl_stdout
             window.sessionManager.session.historyIndex = -1;
         }
         input.style.height = 'auto';
-        repl.scrollTop = repl.scrollHeight;
+        getRepl().scrollTop = getRepl().scrollHeight;
         input.focus();
     }
 
@@ -857,17 +979,36 @@ sys.stdout = _sci_repl_stdout
         if (e.target === helpModal) helpModal.classList.add('hidden');
     });
 
+    // ---- Expose internal functions for NotebookManager / PackageLoader ----
+    window._appInternals = {
+        createInputCard: createInputCard,
+        createOutputCard: createOutputCard,
+        executeCode: executeCode,
+        renderMarkdown: renderMarkdown,
+        saveCellsToSession: saveCellsToSession,
+        getRepl: getRepl,
+        getCurrentLanguage: getCurrentLanguage,
+        escapeHtml: escapeHtml
+    };
+
     // ---- Start ----
     // Pyodide is loaded dynamically after privacy acceptance.
     // window._startApp is called by the privacy script in index.html
     // once the Pyodide <script> has loaded.
     window._startApp = function () {
+        // Initialize notebook manager
+        if (window.notebookManager) {
+            window.notebookManager.init();
+        }
         initDefaultKernel();
     };
 
     // If Pyodide was already loaded (returning user, script loaded before app.js),
     // start immediately.
     if (typeof loadPyodide !== 'undefined') {
+        if (window.notebookManager) {
+            window.notebookManager.init();
+        }
         initDefaultKernel();
     }
 
