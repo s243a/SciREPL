@@ -35,7 +35,7 @@ export class BrushShell {
      * @returns {Promise<any>}
      */
     execute(script) {
-        const ptr0 = passStringToWasm0(script, wasm.__wbindgen_export3, wasm.__wbindgen_export4);
+        const ptr0 = passStringToWasm0(script, wasm.__wbindgen_export, wasm.__wbindgen_export2);
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.brushshell_execute(this.__wbg_ptr, ptr0, len0);
         return takeObject(ret);
@@ -61,6 +61,14 @@ function __wbg_get_imports() {
         __wbg___wbindgen_is_undefined_9e4d92534c42d778: function(arg0) {
             const ret = getObject(arg0) === undefined;
             return ret;
+        },
+        __wbg___wbindgen_string_get_72fb696202c56729: function(arg0, arg1) {
+            const obj = getObject(arg1);
+            const ret = typeof(obj) === 'string' ? obj : undefined;
+            var ptr1 = isLikeNone(ret) ? 0 : passStringToWasm0(ret, wasm.__wbindgen_export, wasm.__wbindgen_export2);
+            var len1 = WASM_VECTOR_LEN;
+            getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
+            getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
         },
         __wbg___wbindgen_throw_be289d5034ed271b: function(arg0, arg1) {
             throw new Error(getStringFromWasm0(arg0, arg1));
@@ -88,7 +96,7 @@ function __wbg_get_imports() {
                 deferred0_1 = arg1;
                 console.error(getStringFromWasm0(arg0, arg1));
             } finally {
-                wasm.__wbindgen_export2(deferred0_0, deferred0_1, 1);
+                wasm.__wbindgen_export4(deferred0_0, deferred0_1, 1);
             }
         },
         __wbg_getRandomValues_1c61fac11405ffdc: function() { return handleError(function (arg0, arg1) {
@@ -135,7 +143,7 @@ function __wbg_get_imports() {
                     const a = state0.a;
                     state0.a = 0;
                     try {
-                        return __wasm_bindgen_func_elem_3717(a, state0.b, arg0, arg1);
+                        return __wasm_bindgen_func_elem_3883(a, state0.b, arg0, arg1);
                     } finally {
                         state0.a = a;
                     }
@@ -177,7 +185,7 @@ function __wbg_get_imports() {
         },
         __wbg_stack_0ed75d68575b0f3c: function(arg0, arg1) {
             const ret = getObject(arg1).stack;
-            const ptr1 = passStringToWasm0(ret, wasm.__wbindgen_export3, wasm.__wbindgen_export4);
+            const ptr1 = passStringToWasm0(ret, wasm.__wbindgen_export, wasm.__wbindgen_export2);
             const len1 = WASM_VECTOR_LEN;
             getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
             getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
@@ -209,6 +217,10 @@ function __wbg_get_imports() {
             const ret = window.sharedVFS.vfs_exists(getStringFromWasm0(arg0, arg1));
             return ret;
         },
+        __wbg_vfs_list_dir_0903ad6e5bcfe450: function(arg0, arg1) {
+            const ret = window.sharedVFS.vfs_list_dir(getStringFromWasm0(arg0, arg1));
+            return addHeapObject(ret);
+        },
         __wbg_vfs_mkdir_db38d2e260150bc0: function(arg0, arg1) {
             window.sharedVFS.vfs_mkdir(getStringFromWasm0(arg0, arg1));
         },
@@ -220,12 +232,16 @@ function __wbg_get_imports() {
             const ret = window.sharedVFS.vfs_read_file(getStringFromWasm0(arg0, arg1));
             return addHeapObject(ret);
         },
+        __wbg_vfs_remove_c00274b1574a02c3: function(arg0, arg1) {
+            const ret = window.sharedVFS.vfs_remove(getStringFromWasm0(arg0, arg1));
+            return ret;
+        },
         __wbg_vfs_write_file_5a33cb5dca56c723: function(arg0, arg1, arg2, arg3) {
             window.sharedVFS.vfs_write_file(getStringFromWasm0(arg0, arg1), getArrayU8FromWasm0(arg2, arg3));
         },
         __wbindgen_cast_0000000000000001: function(arg0, arg1) {
-            // Cast intrinsic for `Closure(Closure { dtor_idx: 748, function: Function { arguments: [Externref], shim_idx: 749, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
-            const ret = makeMutClosure(arg0, arg1, wasm.__wasm_bindgen_func_elem_5611, __wasm_bindgen_func_elem_5612);
+            // Cast intrinsic for `Closure(Closure { dtor_idx: 769, function: Function { arguments: [Externref], shim_idx: 770, ret: Unit, inner_ret: Some(Unit) }, mutable: true }) -> Externref`.
+            const ret = makeMutClosure(arg0, arg1, wasm.__wasm_bindgen_func_elem_5799, __wasm_bindgen_func_elem_5800);
             return addHeapObject(ret);
         },
         __wbindgen_cast_0000000000000002: function(arg0) {
@@ -252,12 +268,12 @@ function __wbg_get_imports() {
     };
 }
 
-function __wasm_bindgen_func_elem_5612(arg0, arg1, arg2) {
-    wasm.__wasm_bindgen_func_elem_5612(arg0, arg1, addHeapObject(arg2));
+function __wasm_bindgen_func_elem_5800(arg0, arg1, arg2) {
+    wasm.__wasm_bindgen_func_elem_5800(arg0, arg1, addHeapObject(arg2));
 }
 
-function __wasm_bindgen_func_elem_3717(arg0, arg1, arg2, arg3) {
-    wasm.__wasm_bindgen_func_elem_3717(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
+function __wasm_bindgen_func_elem_3883(arg0, arg1, arg2, arg3) {
+    wasm.__wasm_bindgen_func_elem_3883(arg0, arg1, addHeapObject(arg2), addHeapObject(arg3));
 }
 
 const BrushShellFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -315,7 +331,7 @@ function handleError(f, args) {
     try {
         return f.apply(this, args);
     } catch (e) {
-        wasm.__wbindgen_export(addHeapObject(e));
+        wasm.__wbindgen_export3(addHeapObject(e));
     }
 }
 

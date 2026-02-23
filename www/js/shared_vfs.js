@@ -314,6 +314,88 @@ class SharedVFS {
         entry.modified = Date.now();
     }
 
+    /**
+     * List directory contents for Rust (returns JSON string).
+     * Format: [{"name":"foo","size":0,"is_dir":true,"modified":0}, ...]
+     */
+    vfs_list_dir(path) {
+        path = this._normalize(path);
+        // Check if path is a known directory
+        if (!path.endsWith('/')) path += '/';
+        const isDir = this._dirs.has(path.slice(0, -1)) || path === '/';
+        if (!isDir) return null;
+
+        const entries = new Map();
+
+        for (const [filePath, entry] of this._files) {
+            if (filePath.startsWith(path)) {
+                const rest = filePath.substring(path.length);
+                const name = rest.split('/')[0];
+                if (name && !entries.has(name)) {
+                    // Check if this name is itself a directory
+                    const childFull = path + name;
+                    const childIsDir = this._dirs.has(childFull);
+                    entries.set(name, {
+                        name,
+                        size: childIsDir ? 0 : (entry.size || 0),
+                        is_dir: childIsDir,
+                        modified: childIsDir ? 0 : (entry.modified || 0)
+                    });
+                }
+            }
+        }
+        for (const dirPath of this._dirs) {
+            if (dirPath.startsWith(path) && dirPath !== path.slice(0, -1)) {
+                const rest = dirPath.substring(path.length);
+                const name = rest.split('/')[0];
+                if (name && !entries.has(name)) {
+                    entries.set(name, { name, size: 0, is_dir: true, modified: 0 });
+                }
+            }
+        }
+
+        return JSON.stringify(Array.from(entries.values()));
+    }
+
+    /**
+     * Remove a file or empty directory for Rust.
+     */
+    vfs_remove(path) {
+        path = this._normalize(path);
+        // Try to delete as file first
+        if (this._files.has(path)) {
+            return this.unlink(path);
+        }
+        // Try to delete as empty directory
+        if (this._dirs.has(path)) {
+            // Check if empty
+            const prefix = path + '/';
+            for (const f of this._files.keys()) {
+                if (f.startsWith(prefix)) return false;
+            }
+            for (const d of this._dirs) {
+                if (d.startsWith(prefix)) return false;
+            }
+            this._dirs.delete(path);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get stat for Rust (returns JSON string).
+     * Format: {"size":0,"is_dir":true,"modified":0}
+     */
+    vfs_stat(path) {
+        const info = this.stat(path);
+        if (!info) return null;
+        return JSON.stringify({
+            size: info.size || 0,
+            is_dir: info.isDir || false,
+            modified: info.modified || 0
+        });
+    }
+
     // ── Events ──────────────────────────────────────────────────
 
     /**
