@@ -1030,7 +1030,8 @@ html, body {
 
 .pkg-install-btn.pkg-installed {
     border-color: var(--green);
-    color: var(--green);
+    background: var(--green);
+    color: #fff;
 }
 
 /* ===== Scrollable modal variant ===== */

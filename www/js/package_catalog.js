@@ -86,13 +86,9 @@ class PackageCatalog {
         btn.textContent = 'Downloading...';
 
         try {
-            const response = await fetch(pkg.url);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
+            const blob = await this._fetchPackage(pkg.url);
 
             btn.textContent = 'Importing...';
-            const blob = await response.blob();
 
             // Derive filename from URL
             const urlParts = pkg.url.split('/');
@@ -113,6 +109,52 @@ class PackageCatalog {
             setTimeout(() => { btn.textContent = 'Install'; }, 3000);
             alert('Package install failed: ' + err.message);
         }
+    }
+
+    /**
+     * Fetch a package URL as a Blob.
+     *
+     * On Capacitor (Android/iOS), uses the native Filesystem.downloadFile()
+     * API to bypass WebView CORS restrictions.  On web, uses plain fetch().
+     */
+    async _fetchPackage(url) {
+        // Capacitor native path — download via native HTTP
+        if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+            const { Filesystem } = window.Capacitor.Plugins;
+            if (Filesystem && Filesystem.downloadFile) {
+                const filename = '_pkg_download_' + Date.now() + '.zip';
+                const result = await Filesystem.downloadFile({
+                    url,
+                    path: filename,
+                    directory: 'CACHE',
+                    recursive: false,
+                });
+
+                // Read the downloaded file back as base64
+                const fileData = await Filesystem.readFile({
+                    path: filename,
+                    directory: 'CACHE',
+                });
+
+                // Clean up temp file
+                Filesystem.deleteFile({ path: filename, directory: 'CACHE' }).catch(() => {});
+
+                // Convert base64 to Blob
+                const binary = atob(fileData.data);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                return new Blob([bytes], { type: 'application/zip' });
+            }
+        }
+
+        // Web fallback
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return await response.blob();
     }
 
     _esc(str) {
