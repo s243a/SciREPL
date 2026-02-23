@@ -155,10 +155,21 @@ grandparent(tom, Z).</code></pre>
                 <button id="btn-export-ipynb">📓 Export as .ipynb</button>
                 <button id="btn-import-file">📂 Import File (.py / .pl / .ipynb / .zip)</button>
                 <button id="btn-import-package">📦 Import Package (.zip / .tar.gz)</button>
+                <button id="btn-browse-packages">📦 Browse Packages</button>
                 <button id="btn-export-package">📦 Export Package (.zip)</button>
                 <button id="btn-prolog-settings">⚙ Prolog Settings (VFS / Paths)</button>
                 <button id="btn-clear-session" class="danger">🗑 Clear History</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Package Catalog Modal -->
+    <div id="package-catalog-modal" class="modal hidden">
+        <div class="modal-content modal-content-scroll">
+            <button class="modal-close">&times;</button>
+            <h2>Browse Packages</h2>
+            <p>One-click install community packages into SciREPL.</p>
+            <div id="package-catalog-list"></div>
         </div>
     </div>
 
@@ -324,6 +335,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <script src="js/kernels/bash.js"></script>
     <script src="js/archive_extractors.js"></script>
     <script src="js/package_loader.js"></script>
+    <script src="js/package_catalog.js"></script>
     <script src="js/prolog_settings.js"></script>
     <script src="js/notebook_manager.js"></script>
     <script src="js/app.js"></script>

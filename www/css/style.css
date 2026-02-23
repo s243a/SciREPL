@@ -972,6 +972,67 @@ html, body {
     border-color: var(--red);
 }
 
+/* ===== Package Catalog ===== */
+
+.pkg-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-primary);
+}
+
+.pkg-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.pkg-info strong {
+    font-size: 1rem;
+}
+
+.pkg-version, .pkg-size {
+    font-size: 0.8rem;
+    color: var(--fg-secondary);
+    margin-left: 8px;
+}
+
+.pkg-info p {
+    margin: 4px 0 0;
+    font-size: 0.85rem;
+    color: var(--fg-secondary);
+}
+
+.pkg-install-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    margin-left: 12px;
+}
+
+.pkg-install-btn:hover {
+    background: var(--accent);
+    color: var(--bg-primary);
+}
+
+.pkg-install-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.pkg-install-btn.pkg-installed {
+    border-color: var(--green);
+    color: var(--green);
+}
+
 /* ===== Scrollable modal variant ===== */
 
 .modal-content-scroll {
