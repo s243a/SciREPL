@@ -1,6 +1,4 @@
-# SciREPL Pro — Mobile Multi-Language Scientific REPL
-
-> **Note:** This is the **premium/Pro** version of SciREPL. The free open-source version is at [s243a/SciREPL](https://github.com/s243a/SciREPL).
+# SciREPL — Mobile Multi-Language Scientific REPL
 
 A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, with Jupyter-style notebook features. Supports **Python** (Pyodide), **Prolog** (swipl-wasm), **Bash** (brush-wasm), and **JavaScript** (native).
 
@@ -8,34 +6,33 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 
 ## Features
 
-### Core (shared with free version)
-- **Offline Python** via Pyodide (WASM)
-- **Rich output**: LaTeX math rendering, interactive Plotly charts, tables
-- **NumPy + SymPy** preloaded
-- **Hybrid plotting**: Python `plot()` → Plotly.js (pinch-zoom, pan, hover)
-- **Variable persistence** across cells (like Jupyter)
-- **Semicolon suppression** (MATLAB/IPython-style)
-- **Mobile-first UI**: Dark theme, touch-friendly
-
-### Pro Features
-- **Multi-language support** — Python and Prolog in the same notebook, with per-cell language tracking
+- **Multi-language notebooks** — Python, Prolog, Bash, and JavaScript in the same notebook, with per-cell language tracking
+- **Offline Python** via Pyodide (WASM) — NumPy + SymPy preloaded
 - **SWI-Prolog kernel** — Full SWI-Prolog via swipl-wasm, loaded on demand from CDN
 - **Bash kernel** — Unix shell via brush-wasm with coreutils, findutils, grep (all Rust reimplementations)
+- **JavaScript kernel** — Native browser JS execution with zero download. Direct access to WASM modules, SharedVFS, and browser APIs
 - **Kernel abstraction layer** — Pluggable architecture for adding new language runtimes
 - **Package system v2** — Install packages with notebooks, data files, Python modules, Prolog knowledge bases, and WASM libraries. See [docs/packages.md](docs/packages.md).
-- **SharedVFS** — In-memory filesystem shared across all kernels. Python, Bash, and Prolog can read/write the same files.
-- **JavaScript kernel** — Native browser JS execution with zero download. Direct access to WASM modules, SharedVFS, and browser APIs. Use `%%javascript` magic or select JS from the language dropdown.
+- **SharedVFS** — In-memory filesystem shared across all kernels. Python, Bash, Prolog, and JavaScript can read/write the same files.
 - **Cross-kernel WASM FFI** — Package and distribute pre-compiled Rust WASM libraries callable from JavaScript, Python, and Prolog
+- **Rich output** — LaTeX math rendering, interactive Plotly charts, tables
+- **Hybrid plotting** — Python `plot()` → Plotly.js (pinch-zoom, pan, hover)
 - **Editable cells** — Click the pencil icon to edit and re-run any cell
 - **Markdown cells** — Toggle Code/Md, supports `$LaTeX$` and `$$display math$$`
-- **Run All Below** — Re-execute from a cell downward
-- **Run All Cells** — Re-run the entire notebook
+- **Run All Below / Run All Cells** — Re-execute from a cell downward or the entire notebook
 - **Session persistence** — Cells auto-save (with language) and restore on app restart
-- **Export as .ipynb** — Language-aware metadata, native share sheet
-- **Import .ipynb / .py / .pl** — Creates and executes cells with correct language
+- **Import/Export** — `.ipynb`, `.py`, `.pl` with language-aware metadata; native share sheet
+- **Package catalog** — Browse and one-click install curated packages
 - **Math Mode palette** — Quick-insert SymPy functions (diff, integrate, solve, etc.)
+- **Variable persistence** across cells (like Jupyter)
+- **Semicolon suppression** (MATLAB/IPython-style)
 - **Command history** — Arrow keys to recall previous inputs
+- **Mobile-first UI** — Dark theme, touch-friendly
 - **Privacy-first** — Bundled rendering libraries, deferred CDN loading until consent
+
+### Future Features
+
+*Some of these may be offered as part of a Pro version.*
 
 ## Quick Start
 
