@@ -255,12 +255,12 @@ class FileIO {
 
         const zip = new JSZip();
 
-        // Build manifest
+        // Build manifest (v2.0)
         const manifest = {
-            format_version: '1.0',
+            format_version: '2.0',
             name: 'SciREPL Package',
             version: '1.0.0',
-            description: 'Exported from SciREPL Pro v0.5.0',
+            description: 'Exported from SciREPL v0.5.0',
             notebooks: [],
             files: [],
             search_paths: []
@@ -282,7 +282,7 @@ class FileIO {
             });
         }
 
-        // Export VFS files
+        // Export Prolog VFS files (target: "prolog")
         const km = window.kernelManager;
         if (km) {
             const kernel = km.getKernel('prolog');
@@ -294,11 +294,12 @@ class FileIO {
                         if (f.path === '/user/prelude.pl') continue;
                         try {
                             const content = vfs.readFile(f.path);
-                            const archivePath = 'data' + f.path; // e.g. data/user/kb.pl
+                            const archivePath = 'prolog' + f.path; // e.g. prolog/user/kb.pl
                             zip.file(archivePath, content);
                             manifest.files.push({
                                 src: archivePath,
-                                dest: f.path
+                                dest: f.path,
+                                target: 'prolog'
                             });
                         } catch (e) {
                             // Skip unreadable files
@@ -313,6 +314,15 @@ class FileIO {
                     }
                 }
             }
+        }
+
+        // Export SharedVFS files (target: "shared")
+        const sharedVFS = window.sharedVFS;
+        if (sharedVFS) {
+            this._exportSharedDir(sharedVFS, '/shared/data', zip, manifest);
+            this._exportSharedDir(sharedVFS, '/shared/lib', zip, manifest);
+            this._exportSharedDir(sharedVFS, '/shared/config', zip, manifest);
+            this._exportSharedDir(sharedVFS, '/shared/bin', zip, manifest);
         }
 
         // Add manifest
@@ -420,6 +430,37 @@ class FileIO {
         element.click();
         document.body.removeChild(element);
         setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    /**
+     * Recursively export files from a SharedVFS directory into the zip.
+     */
+    _exportSharedDir(vfs, dirPath, zip, manifest) {
+        const entries = vfs.listDir(dirPath);
+        if (!entries) return;
+
+        for (const name of entries) {
+            const fullPath = dirPath + '/' + name;
+            const stat = vfs.stat(fullPath);
+            if (!stat) continue;
+
+            if (stat.isDir) {
+                this._exportSharedDir(vfs, fullPath, zip, manifest);
+            } else {
+                const content = vfs.readFile(fullPath);
+                if (content == null) continue;
+                // Archive path mirrors the SharedVFS path (e.g. shared/data/file.csv)
+                const archivePath = fullPath.substring(1); // strip leading /
+                const isBinary = content instanceof Uint8Array;
+                zip.file(archivePath, isBinary ? content : content, { binary: isBinary });
+                manifest.files.push({
+                    src: archivePath,
+                    dest: fullPath,
+                    target: 'shared',
+                    ...(isBinary ? { binary: true } : {})
+                });
+            }
+        }
     }
 
     /**

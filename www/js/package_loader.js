@@ -109,6 +109,9 @@ class PackageLoader {
             await this._mountFiles(manifest.files, fileMap, baseDir);
         }
 
+        // 1b. Sync Python modules if the Python kernel is already initialized
+        this._syncPythonModules();
+
         // 2. Add search paths
         if (manifest.search_paths && manifest.search_paths.length > 0) {
             this._addSearchPaths(manifest.search_paths);
@@ -529,6 +532,20 @@ class PackageLoader {
         const t0 = performance.now();
         vfs.bulkWrite(batch);
         console.log(`[PackageLoader] VFS mount done in ${(performance.now() - t0).toFixed(0)}ms`);
+    }
+
+    /**
+     * If the Python kernel is already initialized, sync .py files from
+     * SharedVFS /shared/lib/python/ into Pyodide's FS.
+     */
+    _syncPythonModules() {
+        const km = window.kernelManager;
+        if (!km) return;
+        const pyKernel = km.getKernel('python');
+        if (!pyKernel || !pyKernel.isReady || !pyKernel.isReady()) return;
+        if (pyKernel._syncSharedPythonModules) {
+            pyKernel._syncSharedPythonModules();
+        }
     }
 }
 

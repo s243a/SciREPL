@@ -25,6 +25,7 @@ class PackageCatalog {
                 version: 'v0.3.0',
                 url: 'https://github.com/s243a/SciREPL/releases/download/v0.3.0/unifyweaver_scirepl.zip',
                 size: '~2 MB',
+                kernels: ['prolog', 'python'],
             },
         ];
     }
@@ -65,6 +66,7 @@ class PackageCatalog {
                     <strong>${this._esc(pkg.name)}</strong>
                     ${pkg.version ? `<span class="pkg-version">${this._esc(pkg.version)}</span>` : ''}
                     ${pkg.size ? `<span class="pkg-size">${this._esc(pkg.size)}</span>` : ''}
+                    ${pkg.kernels ? `<span class="pkg-kernels">${pkg.kernels.map(k => this._esc(k)).join(', ')}</span>` : ''}
                     <p>${this._esc(pkg.description)}</p>
                 </div>
                 <button class="pkg-install-btn" data-idx="${i}">Install</button>
