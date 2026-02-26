@@ -171,9 +171,90 @@ print(f"mean={result['mean']}, count={result['count']}")
       (pyStats.stdout || '').includes('mean=20') && (pyStats.stdout || '').includes('count=3'),
       (pyStats.stdout || '').trim() || pyStats.error);
 
+    // --- Test: Prolog calls WASM ---
+
+    console.log('5. Testing Prolog → WASM calls...');
+
+    const plAdd = await page.evaluate(async () => {
+      const km = window.kernelManager;
+      await km.ensureReady('prolog');
+      return await km.execute(
+        'wasm_call(sci_math, add, \'{"a": 50, "b": 7}\').',
+        'prolog'
+      );
+    });
+    testLog('Prolog: wasm_call add(50, 7) = 57',
+      (plAdd.stdout || '').includes('"result":57') || (plAdd.stdout || '').includes('"result": 57'),
+      (plAdd.stdout || '').trim() || plAdd.error);
+
+    const plMultiply = await page.evaluate(async () => {
+      const km = window.kernelManager;
+      return await km.execute(
+        'wasm_call(sci_math, multiply, \'{"a": 8, "b": 9}\').',
+        'prolog'
+      );
+    });
+    testLog('Prolog: wasm_call multiply(8, 9) = 72',
+      (plMultiply.stdout || '').includes('"result":72') || (plMultiply.stdout || '').includes('"result": 72'),
+      (plMultiply.stdout || '').trim() || plMultiply.error);
+
+    const plFib = await page.evaluate(async () => {
+      const km = window.kernelManager;
+      return await km.execute(
+        'wasm_call(sci_math, fibonacci, \'{"n": 8}\').',
+        'prolog'
+      );
+    });
+    testLog('Prolog: wasm_call fibonacci(8) = 21',
+      (plFib.stdout || '').includes('"result":21') || (plFib.stdout || '').includes('"result": 21'),
+      (plFib.stdout || '').trim() || plFib.error);
+
+    const plStats = await page.evaluate(async () => {
+      const km = window.kernelManager;
+      return await km.execute(
+        'wasm_call(sci_math, stats, \'{"data": [2, 4, 6, 8, 10]}\').',
+        'prolog'
+      );
+    });
+    testLog('Prolog: wasm_call stats([2,4,6,8,10]) mean=6',
+      (plStats.stdout || '').includes('"mean":6') || (plStats.stdout || '').includes('"mean": 6'),
+      (plStats.stdout || '').trim() || plStats.error);
+
+    const plListFuncs = await page.evaluate(async () => {
+      const km = window.kernelManager;
+      return await km.execute(
+        'wasm_call(sci_math, list_functions, \'{}\').',
+        'prolog'
+      );
+    });
+    testLog('Prolog: wasm_call list_functions returns add',
+      (plListFuncs.stdout || '').includes('add'),
+      (plListFuncs.stdout || '').trim() || plListFuncs.error);
+
+    // --- Test: Cross-kernel WASM result sharing ---
+
+    console.log('6. Testing cross-kernel WASM result sharing...');
+
+    // JS calls WASM, writes result to SharedVFS, Bash reads it
+    const crossKernel = await page.evaluate(async () => {
+      const km = window.kernelManager;
+      // JS writes WASM result to SharedVFS
+      await km.execute(`
+        const result = window.wasmModules.sci_math.call('factorial', {n: 7});
+        window.sharedVFS.writeFile('/shared/data/wasm_result.txt', String(result.result), 'javascript');
+      `, 'javascript');
+
+      // Bash reads it
+      await km.ensureReady('bash');
+      return await km.execute('cat /shared/data/wasm_result.txt', 'bash');
+    });
+    testLog('Cross-kernel: JS WASM result → SharedVFS → Bash reads "5040"',
+      (crossKernel.stdout || '').trim() === '5040',
+      (crossKernel.stdout || '').trim() || crossKernel.error);
+
     // --- Test: Error handling ---
 
-    console.log('5. Testing error handling...');
+    console.log('7. Testing error handling...');
 
     const jsUnknown = await page.evaluate(async () => {
       const km = window.kernelManager;
@@ -186,6 +267,17 @@ print(f"mean={result['mean']}, count={result['count']}")
     testLog('JS: unknown function returns error',
       jsUnknownResult && jsUnknownResult.error && jsUnknownResult.error.includes('unknown function'),
       jsUnknown.result ? jsUnknown.result.content : (jsUnknown.error || 'no result'));
+
+    const plUnknownMod = await page.evaluate(async () => {
+      const km = window.kernelManager;
+      return await km.execute(
+        'wasm_call(nonexistent_module, add, \'{}\').',
+        'prolog'
+      );
+    });
+    testLog('Prolog: unknown module returns error',
+      (plUnknownMod.error || '').includes('not loaded'),
+      plUnknownMod.error || (plUnknownMod.stdout || '').trim());
 
     // --- Summary ---
     console.log('\n' + '='.repeat(50));
