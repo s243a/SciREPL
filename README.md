@@ -20,7 +20,11 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 ### Pro Features
 - **Multi-language support** — Python and Prolog in the same notebook, with per-cell language tracking
 - **SWI-Prolog kernel** — Full SWI-Prolog via swipl-wasm, loaded on demand from CDN
+- **Bash kernel** — Unix shell via brush-wasm with coreutils, findutils, grep (all Rust reimplementations)
 - **Kernel abstraction layer** — Pluggable architecture for adding new language runtimes
+- **Package system v2** — Install packages with notebooks, data files, Python modules, Prolog knowledge bases, and WASM libraries. See [docs/packages.md](docs/packages.md).
+- **SharedVFS** — In-memory filesystem shared across all kernels. Python, Bash, and Prolog can read/write the same files.
+- **Cross-kernel WASM FFI** — Package and distribute pre-compiled Rust WASM libraries callable from Python and Prolog
 - **Editable cells** — Click the pencil icon to edit and re-run any cell
 - **Markdown cells** — Toggle Code/Md, supports `$LaTeX$` and `$$display math$$`
 - **Run All Below** — Re-execute from a cell downward
@@ -128,13 +132,34 @@ graph LR
 
 ```
 KernelManager (kernel_manager.js)
-├── PythonKernel (kernels/python.js)  — Pyodide + prelude.py
-└── PrologKernel (kernels/prolog.js)  — swipl-wasm via dynamic import
+├── PythonKernel (kernels/python.js)  — Pyodide + prelude.py + sharedfs bridge
+├── PrologKernel (kernels/prolog.js)  — swipl-wasm + wasm_call/3
+└── BashKernel   (kernels/bash.js)    — brush-wasm (coreutils + findutils + grep)
 ```
 
 Each kernel implements: `init()`, `execute(code)`, `isReady()`, `getName()`, `getLanguage()`, `destroy()`
 
-Kernels are **lazy-loaded** — only downloaded when first used. Python loads at startup; Prolog loads when the user first switches to PL.
+Kernels are **lazy-loaded** — only downloaded when first used. Python loads at startup; Prolog and Bash load when first used.
+
+### SharedVFS + Package System
+
+```
+Package (.zip)  →  PackageLoader  →  target routing
+                                      ├── "shared"  →  SharedVFS (/shared/*)
+                                      ├── "prolog"  →  Prolog VFS (/user/*)
+                                      └── "all"     →  both
+
+SharedVFS (/shared/, /tmp/):
+  Bash:    direct access (wasm-bindgen)
+  Python:  via sharedfs module (import sharedfs)
+  Prolog:  mirrored on read/write
+
+WASM modules → window.wasmModules[name]
+  Python:  wasm_call('name', 'func', args)
+  Prolog:  wasm_call(name, func, '{"key": "val"}').
+```
+
+See [docs/packages.md](docs/packages.md) for full documentation.
 
 ### File Structure
 
@@ -142,14 +167,20 @@ Kernels are **lazy-loaded** — only downloaded when first used. Python loads at
 - **[www/css/style.css](www/css/style.css)** — Dark theme, mobile-first layout, language badges
 - **[www/js/app.js](www/js/app.js)** — REPL loop, cell management, multi-language execution
 - **[www/js/kernel_manager.js](www/js/kernel_manager.js)** — Kernel registry, lazy loading, language switching
-- **[www/js/kernels/python.js](www/js/kernels/python.js)** — Python kernel (Pyodide wrapper)
-- **[www/js/kernels/prolog.js](www/js/kernels/prolog.js)** — Prolog kernel (swipl-wasm wrapper)
+- **[www/js/kernels/python.js](www/js/kernels/python.js)** — Python kernel (Pyodide + sharedfs bridge)
+- **[www/js/kernels/prolog.js](www/js/kernels/prolog.js)** — Prolog kernel (swipl-wasm + wasm_call/3)
+- **[www/js/kernels/bash.js](www/js/kernels/bash.js)** — Bash kernel (brush-wasm)
 - **[www/js/bridge.js](www/js/bridge.js)** — JS rendering: `renderPlot()`, `renderLatex()`, `renderTable()`
-- **[www/js/prelude.py](www/js/prelude.py)** — Python bridge: `plot()`, `mplot()`, `table()`, pre-imports
+- **[www/js/prelude.py](www/js/prelude.py)** — Python bridge: `plot()`, `mplot()`, `table()`, `wasm_call()`
+- **[www/js/sharedfs.py](www/js/sharedfs.py)** — Python SharedVFS bridge (`import sharedfs`)
+- **[www/js/shared_vfs.js](www/js/shared_vfs.js)** — SharedVFS — in-memory filesystem shared across kernels
+- **[www/js/package_loader.js](www/js/package_loader.js)** — Package loading, target routing, WASM module loading
+- **[www/js/package_catalog.js](www/js/package_catalog.js)** — Browse Packages UI and one-click install
 - **[www/js/persistence.js](www/js/persistence.js)** — Session save/restore via localStorage (with language per cell)
-- **[www/js/file_io.js](www/js/file_io.js)** — Import/export (.ipynb, .py, .pl) via Capacitor plugins
+- **[www/js/file_io.js](www/js/file_io.js)** — Import/export (.ipynb, .py, .pl, packages) via Capacitor plugins
 - **[www/js/math_mode.js](www/js/math_mode.js)** — Math palette UI
 - **[www/vendor/](www/vendor/)** — Bundled KaTeX, Plotly.js, marked.js (~2.6MB)
+- **[docs/packages.md](docs/packages.md)** — Package system v2 documentation
 
 ### Capacitor Plugins
 
@@ -165,11 +196,15 @@ Kernels are **lazy-loaded** — only downloaded when first used. Python loads at
 
 ## Roadmap
 
-- [x] Multi-language support (Python + Prolog)
+- [x] Multi-language support (Python + Prolog + Bash)
 - [x] Kernel abstraction layer
 - [x] Privacy-first CDN loading (consent before download)
 - [x] Bundled rendering libraries
-- [ ] Additional languages (R via webR, Lua)
+- [x] Package system v2 — target routing, binary support, SharedVFS
+- [x] Python SharedVFS bridge (`import sharedfs`)
+- [x] Cross-kernel WASM FFI (Python + Prolog can call WASM modules)
+- [x] Package catalog with one-click install
+- [ ] Additional languages (R via webR, Lua, JavaScript)
 - [ ] Cache management for WASM runtimes
 - [ ] PWA manifest (install without app stores)
 - [ ] Matplotlib backend fallback
