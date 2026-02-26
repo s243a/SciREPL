@@ -208,12 +208,14 @@ class FileIO {
 
         const kernelMap = {
             python: { display_name: 'Python 3 (Pyodide)', language: 'python', name: 'python3' },
-            prolog: { display_name: 'SWI-Prolog (WASM)', language: 'prolog', name: 'swipl' }
+            prolog: { display_name: 'SWI-Prolog (WASM)', language: 'prolog', name: 'swipl' },
+            javascript: { display_name: 'JavaScript (Browser)', language: 'javascript', name: 'javascript' }
         };
 
         const langInfoMap = {
             python: { name: 'python', version: '3.12', mimetype: 'text/x-python', file_extension: '.py' },
-            prolog: { name: 'prolog', version: '9.x', mimetype: 'text/x-prolog', file_extension: '.pl' }
+            prolog: { name: 'prolog', version: '9.x', mimetype: 'text/x-prolog', file_extension: '.pl' },
+            javascript: { name: 'javascript', version: 'ES2022', mimetype: 'text/javascript', file_extension: '.js' }
         };
 
         const notebook = {
@@ -357,11 +359,13 @@ class FileIO {
 
         const kernelMap = {
             python: { display_name: 'Python 3 (Pyodide)', language: 'python', name: 'python3' },
-            prolog: { display_name: 'SWI-Prolog (WASM)', language: 'prolog', name: 'swipl' }
+            prolog: { display_name: 'SWI-Prolog (WASM)', language: 'prolog', name: 'swipl' },
+            javascript: { display_name: 'JavaScript (Browser)', language: 'javascript', name: 'javascript' }
         };
         const langInfoMap = {
             python: { name: 'python', version: '3.12', mimetype: 'text/x-python', file_extension: '.py' },
-            prolog: { name: 'prolog', version: '9.x', mimetype: 'text/x-prolog', file_extension: '.pl' }
+            prolog: { name: 'prolog', version: '9.x', mimetype: 'text/x-prolog', file_extension: '.pl' },
+            javascript: { name: 'javascript', version: 'ES2022', mimetype: 'text/javascript', file_extension: '.js' }
         };
 
         return {

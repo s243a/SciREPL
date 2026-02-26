@@ -58,16 +58,12 @@
                 window.kernelManager.setLanguage(lang);
             }
             // Update visual styling
-            langSelector.className = lang === 'prolog' ? 'prolog-active' : lang === 'bash' ? 'bash-active' : '';
+            const activeClasses = { prolog: 'prolog-active', bash: 'bash-active', javascript: 'javascript-active' };
+            langSelector.className = activeClasses[lang] || '';
             // Update placeholder
             if (currentCellType === 'code') {
-                if (lang === 'prolog') {
-                    input.placeholder = 'Type Prolog here…';
-                } else if (lang === 'bash') {
-                    input.placeholder = 'Type Bash here…';
-                } else {
-                    input.placeholder = 'Type Python here…';
-                }
+                const placeholders = { prolog: 'Type Prolog here…', bash: 'Type Bash here…', javascript: 'Type JavaScript here…' };
+                input.placeholder = placeholders[lang] || 'Type Python here…';
             }
         });
     }
@@ -85,7 +81,8 @@
             cellTypeToggle.textContent = 'Code';
             cellTypeToggle.classList.remove('markdown-active');
             const lang = getCurrentLanguage();
-            input.placeholder = lang === 'prolog' ? 'Type Prolog here…' : lang === 'bash' ? 'Type Bash here…' : 'Type Python here…';
+            const ph = { prolog: 'Type Prolog here…', bash: 'Type Bash here…', javascript: 'Type JavaScript here…' };
+            input.placeholder = ph[lang] || 'Type Python here…';
         }
     });
 
