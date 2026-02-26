@@ -151,6 +151,7 @@ The SharedVFS is an in-memory filesystem accessible to all kernels (Python, Bash
 | Kernel | Access Method |
 |--------|---------------|
 | **Bash** | Direct filesystem access. `cat /shared/data/file.csv` just works. |
+| **JavaScript** | Direct API. `window.sharedVFS.readFile('/shared/data/file.csv', 'utf8')` |
 | **Python** | Via the `sharedfs` module (see below). |
 | **Prolog** | Files with `target: "prolog"` are mounted in Prolog's VFS. Shared paths are synced after execution. |
 
@@ -243,9 +244,64 @@ mymodule.my_function()
 
 ---
 
+## JavaScript Kernel
+
+The JavaScript kernel runs code natively in the browser — no download, no WASM runtime. It's the most natural way to interact with WASM modules since `window.wasmModules` is a plain JS object.
+
+### Usage
+
+Select **JS** from the language dropdown, or use the `%%javascript` cell magic in any notebook:
+
+```javascript
+%%javascript
+// Runs in the browser's JS engine
+console.log("Hello from JavaScript");
+const result = await fetch('https://api.example.com/data');
+2 + 2  // Last expression is displayed as the cell result
+```
+
+### Features
+
+- `console.log/warn/error` output appears as cell stdout
+- Last expression value auto-displayed (like browser devtools)
+- End with `;` to suppress output (consistent with Python)
+- Full `async`/`await` support
+- Direct access to `window.sharedVFS`, `window.wasmModules`, DOM, etc.
+
+### Calling WASM Modules from JavaScript
+
+```javascript
+// JSON FFI (most common)
+const result = window.wasmModules.sci_math.call('add', {a: 40, b: 2});
+console.log(result);  // {result: 42}
+
+// List available functions
+const info = window.wasmModules.sci_math.call('list_functions', {});
+console.log(info.functions);
+
+// Raw exports (for non-JSON-FFI modules)
+const exports = window.wasmModules.my_module.exports;
+exports.my_function(42);
+```
+
+### Cross-Kernel with JavaScript
+
+```javascript
+// JS writes to SharedVFS
+window.sharedVFS.writeFile('/shared/data/from_js.txt', 'written by JS', 'javascript');
+```
+
+```bash
+# Bash reads it
+cat /shared/data/from_js.txt
+# Output: written by JS
+```
+
+---
+
 ## Packaging Rust Libraries as WASM
 
-You can compile Rust libraries to WASM and distribute them as SciREPL packages, making them callable from Python and Prolog.
+You can compile Rust libraries to WASM and distribute them as SciREPL packages, making them callable from JavaScript, Python, and Prolog.
 
 ### Step 1: Create a Rust Library
 
@@ -368,7 +424,13 @@ my-package/
 }
 ```
 
-### Step 5: Call from Python or Prolog
+### Step 5: Call from JavaScript, Python, or Prolog
+
+**JavaScript** (direct access, no bridge needed):
+```javascript
+const result = window.wasmModules.my_lib.call('add', {a: 40, b: 2});
+console.log(result);  // {result: 42}
+```
 
 **Python:**
 ```python
@@ -450,6 +512,10 @@ To add packages to the catalog, edit `www/js/package_catalog.js`:
 | `www/js/sharedfs.py` | Python bridge to SharedVFS (`import sharedfs`) |
 | `www/js/kernels/python.js` | Python kernel — loads sharedfs, syncs `/shared/lib/python/` |
 | `www/js/kernels/prolog.js` | Prolog kernel — SharedVFS sync, `wasm_call/3` |
+| `www/js/kernels/javascript.js` | JavaScript kernel — native browser execution, direct WASM access |
+| `www/js/kernels/bash.js` | Bash kernel — brush-wasm (coreutils, findutils, grep) |
 | `www/js/prelude.py` | Python prelude — `wasm_call()` helper |
 | `www/js/file_io.js` | Import/export UI, v2.0 package export |
-| `test_pkg_v2.mjs` | Playwright test suite (15 tests) |
+| `test_pkg_v2.mjs` | Playwright test suite — package system v2 (15 tests) |
+| `test_js_kernel.mjs` | Playwright test suite — JavaScript kernel (13 tests) |
+| `test_wasm_ffi.mjs` | Playwright test suite — WASM JSON FFI from JS + Python (11 tests) |
