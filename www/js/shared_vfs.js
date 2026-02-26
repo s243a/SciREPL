@@ -15,7 +15,11 @@ class SharedVFS {
         this._files = new Map();
 
         /** @type {Set<string>} */
-        this._dirs = new Set(['/', '/tmp', '/shared', '/education', '/user', '/user/education']);
+        this._dirs = new Set([
+            '/', '/tmp', '/shared', '/education', '/user', '/user/education',
+            '/shared/lib', '/shared/lib/python', '/shared/lib/prolog', '/shared/lib/wasm',
+            '/shared/bin', '/shared/data', '/shared/config',
+        ]);
 
         /** @type {Map<string, Set<Function>>} */
         this._listeners = new Map();

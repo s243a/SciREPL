@@ -250,6 +250,19 @@ class PrologKernel {
             const trimmed = stmt.trim();
             if (!trimmed) continue;
 
+            // Intercept wasm_call/3 calls: wasm_call(Module, Function, ArgsJson).
+            const wasmMatch = this._matchWasmCall(trimmed);
+            if (wasmMatch) {
+                try {
+                    const result = this._handleWasmCall(wasmMatch.module, wasmMatch.func, wasmMatch.args);
+                    output.push(JSON.stringify(result));
+                } catch (err) {
+                    errorMsg = 'wasm_call error: ' + (err.message || String(err));
+                    break;
+                }
+                continue;
+            }
+
             // Intercept fetch_file/2 calls
             const fetchMatch = this._matchFetchFile(trimmed);
             if (fetchMatch) {
@@ -585,6 +598,40 @@ class PrologKernel {
         } finally {
             try { FS.unlink(tmpPath); } catch (e) { /* ignore */ }
         }
+    }
+
+    // ---- wasm_call interception ----
+
+    /**
+     * Match wasm_call(Module, Function, ArgsJson) pattern.
+     * Returns {module, func, args} or null.
+     */
+    _matchWasmCall(stmt) {
+        // wasm_call(module_name, func_name, '{"key": "value"}').
+        const re = /^wasm_call\s*\(\s*(\w+)\s*,\s*(\w+)\s*,\s*(['"])(.+?)\3\s*\)\s*\.?$/;
+        const m = stmt.match(re);
+        if (m) {
+            try {
+                return { module: m[1], func: m[2], args: JSON.parse(m[4]) };
+            } catch (e) {
+                return { module: m[1], func: m[2], args: m[4] };
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Execute a WASM module function via JSON FFI.
+     */
+    _handleWasmCall(moduleName, funcName, args) {
+        if (!window.wasmModules || !window.wasmModules[moduleName]) {
+            throw new Error(`WASM module '${moduleName}' not loaded`);
+        }
+        const mod = window.wasmModules[moduleName];
+        if (!mod.call) {
+            throw new Error(`WASM module '${moduleName}' does not support JSON FFI`);
+        }
+        return mod.call(funcName, args);
     }
 
     // ---- fetch_file / load_url interception ----
