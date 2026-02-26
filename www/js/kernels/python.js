@@ -26,6 +26,18 @@ class PythonKernel {
         const preludeCode = await preludeResp.text();
         await this._pyodide.runPythonAsync(preludeCode);
 
+        // Load SharedVFS bridge (enables cross-kernel file access)
+        const bridgeResp = await fetch('js/sharedfs.py');
+        const bridgeCode = await bridgeResp.text();
+        await this._pyodide.runPythonAsync(bridgeCode);
+
+        // Add /shared/lib/python to sys.path for package-provided modules
+        await this._pyodide.runPythonAsync(`
+import sys
+if '/shared/lib/python' not in sys.path:
+    sys.path.insert(0, '/shared/lib/python')
+`);
+
         this._ready = true;
     }
 

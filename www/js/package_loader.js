@@ -11,9 +11,21 @@
 class PackageLoader {
     constructor() {
         this._manifestSchema = {
-            required: ['format_version', 'notebooks'],
-            format_versions: ['1.0']
+            required: ['format_version'],
+            format_versions: ['1.0', '2.0']
         };
+        this._binaryExts = new Set([
+            'wasm', 'bin', 'dat', 'png', 'jpg', 'jpeg', 'gif', 'webp',
+            'woff', 'woff2', 'ttf', 'otf', 'ico', 'bmp', 'tiff',
+        ]);
+    }
+
+    /**
+     * Check if a file path has a binary extension.
+     */
+    _isBinaryExt(path) {
+        const ext = (path.split('.').pop() || '').toLowerCase();
+        return this._binaryExts.has(ext);
     }
 
     /**
@@ -67,8 +79,8 @@ class PackageLoader {
             const data = typeof content === 'string' ? JSON.parse(content) : JSON.parse(new TextDecoder().decode(content));
 
             // Validate required fields
-            if (!data.format_version || !data.notebooks) {
-                console.warn('Invalid scirepl.json: missing required fields');
+            if (!data.format_version) {
+                console.warn('Invalid scirepl.json: missing format_version');
                 return null;
             }
 
@@ -102,26 +114,27 @@ class PackageLoader {
             this._addSearchPaths(manifest.search_paths);
         }
 
-        // 3. Create notebooks
-        const resolvedFileMap = new Map();
-        for (const [path, content] of fileMap) {
-            // Resolve relative to base dir
-            const resolvedPath = path.startsWith(baseDir) ? path.substring(baseDir.length) : path;
-            resolvedFileMap.set(resolvedPath, content);
-        }
-
-        const notebooks = await nm.loadFromManifest(manifest, resolvedFileMap);
-
-        // 4. Populate notebook cells (render cards but don't execute)
-        if (notebooks && notebooks.length > 0) {
-            for (const nb of notebooks) {
-                if (nb.cells && nb.cells.length > 0) {
-                    nm.switchTo(nb.id);
-                    this._populateCells(nb);
-                }
+        // 3. Create notebooks (if manifest has any)
+        let notebooks = null;
+        if (manifest.notebooks && manifest.notebooks.length > 0) {
+            const resolvedFileMap = new Map();
+            for (const [path, content] of fileMap) {
+                const resolvedPath = path.startsWith(baseDir) ? path.substring(baseDir.length) : path;
+                resolvedFileMap.set(resolvedPath, content);
             }
-            // Switch to first notebook
-            nm.switchTo(notebooks[0].id);
+
+            notebooks = await nm.loadFromManifest(manifest, resolvedFileMap);
+
+            // 4. Populate notebook cells (render cards but don't execute)
+            if (notebooks && notebooks.length > 0) {
+                for (const nb of notebooks) {
+                    if (nb.cells && nb.cells.length > 0) {
+                        nm.switchTo(nb.id);
+                        this._populateCells(nb);
+                    }
+                }
+                nm.switchTo(notebooks[0].id);
+            }
         }
 
         return {
@@ -254,58 +267,92 @@ class PackageLoader {
     }
 
     /**
-     * Mount manifest-specified files to VFS (bulk for performance).
+     * Resolve content for a file spec, preserving binary data when appropriate.
+     */
+    _resolveContent(content, destPath, spec) {
+        const isBinary = spec.binary || this._isBinaryExt(destPath);
+        if (isBinary) {
+            return (content instanceof Uint8Array) ? content : new TextEncoder().encode(content);
+        }
+        return (typeof content === 'string') ? content : new TextDecoder().decode(content);
+    }
+
+    /**
+     * Mount manifest-specified files to VFS with target routing.
+     * Supports targets: "shared", "prolog", "all" (default: "prolog").
      */
     async _mountFiles(fileSpecs, fileMap, baseDir) {
         const km = window.kernelManager;
         if (!km) return;
 
-        // Ensure Prolog kernel is ready for VFS
-        try {
-            await km.ensureReady('prolog');
-        } catch (e) {
-            console.warn('Could not init Prolog for VFS:', e);
-            return;
-        }
-
-        const vfs = km.getKernel('prolog').getVFS();
-        if (!vfs) return;
-
-        // Collect all files into a batch
-        const batch = [];
+        const sharedBatch = [];
+        const prologBatch = [];
 
         for (const spec of fileSpecs) {
             const srcPath = baseDir + spec.src;
             const destPath = spec.dest;
+            const target = spec.target || 'prolog';
+
+            const addFile = (dest, content) => {
+                const resolved = this._resolveContent(content, dest, spec);
+                if (target === 'shared' || target === 'all') {
+                    sharedBatch.push({ path: dest, content: resolved, origin: 'package' });
+                }
+                if (target === 'prolog' || target === 'all') {
+                    // Prolog VFS needs text content
+                    const textContent = (typeof resolved === 'string')
+                        ? resolved
+                        : new TextDecoder().decode(resolved);
+                    prologBatch.push({ path: dest, content: textContent });
+                }
+            };
 
             if (spec.src.endsWith('/')) {
-                // Directory — collect all files under that prefix
                 for (const [path, content] of fileMap) {
                     if (path.startsWith(srcPath)) {
                         const relPath = path.substring(srcPath.length);
-                        const dest = destPath + relPath;
-                        const textContent = typeof content === 'string'
-                            ? content
-                            : new TextDecoder().decode(content);
-                        batch.push({ path: dest, content: textContent });
+                        addFile(destPath + relPath, content);
                     }
                 }
             } else {
-                // Single file
                 const content = fileMap.get(srcPath);
                 if (content) {
-                    const textContent = typeof content === 'string'
-                        ? content
-                        : new TextDecoder().decode(content);
-                    batch.push({ path: destPath, content: textContent });
+                    addFile(destPath, content);
                 }
             }
         }
 
-        console.log(`[PackageLoader] Mounting ${batch.length} files to VFS...`);
-        const t0 = performance.now();
-        vfs.bulkWrite(batch);
-        console.log(`[PackageLoader] VFS mount done in ${(performance.now() - t0).toFixed(0)}ms`);
+        // Write to SharedVFS
+        if (sharedBatch.length > 0 && window.sharedVFS) {
+            console.log(`[PackageLoader] Mounting ${sharedBatch.length} files to SharedVFS...`);
+            const t0 = performance.now();
+            for (const entry of sharedBatch) {
+                // Ensure parent directories exist
+                const parts = entry.path.split('/');
+                for (let i = 2; i < parts.length; i++) {
+                    const dir = parts.slice(0, i).join('/');
+                    if (dir) window.sharedVFS.mkdir(dir);
+                }
+                window.sharedVFS.writeFile(entry.path, entry.content, entry.origin);
+            }
+            console.log(`[PackageLoader] SharedVFS mount done in ${(performance.now() - t0).toFixed(0)}ms`);
+        }
+
+        // Write to Prolog VFS
+        if (prologBatch.length > 0) {
+            try {
+                await km.ensureReady('prolog');
+                const vfs = km.getKernel('prolog').getVFS();
+                if (vfs) {
+                    console.log(`[PackageLoader] Mounting ${prologBatch.length} files to Prolog VFS...`);
+                    const t0 = performance.now();
+                    vfs.bulkWrite(prologBatch);
+                    console.log(`[PackageLoader] Prolog VFS mount done in ${(performance.now() - t0).toFixed(0)}ms`);
+                }
+            } catch (e) {
+                console.warn('Could not mount to Prolog VFS:', e);
+            }
+        }
     }
 
     /**
