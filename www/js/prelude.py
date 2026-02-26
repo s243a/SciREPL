@@ -139,7 +139,12 @@ def wasm_call(module_name, func_name, args=None):
         raise RuntimeError(f"WASM module '{module_name}' does not support JSON FFI")
     from pyodide.ffi import to_js
     result = mod.call(func_name, to_js(args or {}))
-    return json.loads(str(result)) if result is not None else None
+    if result is None:
+        return None
+    # mod.call() returns a parsed JS object (JsProxy); convert to Python dict
+    if hasattr(result, 'to_py'):
+        return result.to_py()
+    return json.loads(json.dumps(result))
 
 
 print("✓ Sci REPL ready" + (" (with SymPy)" if _SYMPY_AVAILABLE else " (NumPy only)"))

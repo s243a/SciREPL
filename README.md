@@ -2,7 +2,7 @@
 
 > **Note:** This is the **premium/Pro** version of SciREPL. The free open-source version is at [s243a/SciREPL](https://github.com/s243a/SciREPL).
 
-A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, with Jupyter-style notebook features. Supports **Python** (Pyodide) and **Prolog** (swipl-wasm), with more languages planned.
+A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, with Jupyter-style notebook features. Supports **Python** (Pyodide), **Prolog** (swipl-wasm), **Bash** (brush-wasm), and **JavaScript** (native).
 
 ![Status](https://img.shields.io/badge/status-beta-green) ![License](https://img.shields.io/badge/license-MIT-blue)
 
@@ -24,7 +24,8 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **Kernel abstraction layer** — Pluggable architecture for adding new language runtimes
 - **Package system v2** — Install packages with notebooks, data files, Python modules, Prolog knowledge bases, and WASM libraries. See [docs/packages.md](docs/packages.md).
 - **SharedVFS** — In-memory filesystem shared across all kernels. Python, Bash, and Prolog can read/write the same files.
-- **Cross-kernel WASM FFI** — Package and distribute pre-compiled Rust WASM libraries callable from Python and Prolog
+- **JavaScript kernel** — Native browser JS execution with zero download. Direct access to WASM modules, SharedVFS, and browser APIs. Use `%%javascript` magic or select JS from the language dropdown.
+- **Cross-kernel WASM FFI** — Package and distribute pre-compiled Rust WASM libraries callable from JavaScript, Python, and Prolog
 - **Editable cells** — Click the pencil icon to edit and re-run any cell
 - **Markdown cells** — Toggle Code/Md, supports `$LaTeX$` and `$$display math$$`
 - **Run All Below** — Re-execute from a cell downward
@@ -132,14 +133,15 @@ graph LR
 
 ```
 KernelManager (kernel_manager.js)
-├── PythonKernel (kernels/python.js)  — Pyodide + prelude.py + sharedfs bridge
-├── PrologKernel (kernels/prolog.js)  — swipl-wasm + wasm_call/3
-└── BashKernel   (kernels/bash.js)    — brush-wasm (coreutils + findutils + grep)
+├── PythonKernel     (kernels/python.js)      — Pyodide + prelude.py + sharedfs bridge
+├── PrologKernel     (kernels/prolog.js)       — swipl-wasm + wasm_call/3
+├── BashKernel       (kernels/bash.js)         — brush-wasm (coreutils + findutils + grep)
+└── JavaScriptKernel (kernels/javascript.js)   — native browser JS (zero download)
 ```
 
 Each kernel implements: `init()`, `execute(code)`, `isReady()`, `getName()`, `getLanguage()`, `destroy()`
 
-Kernels are **lazy-loaded** — only downloaded when first used. Python loads at startup; Prolog and Bash load when first used.
+Kernels are **lazy-loaded** — only downloaded when first used. Python loads at startup; Prolog and Bash load when first used. JavaScript is instant (native browser execution).
 
 ### SharedVFS + Package System
 
@@ -155,6 +157,7 @@ SharedVFS (/shared/, /tmp/):
   Prolog:  mirrored on read/write
 
 WASM modules → window.wasmModules[name]
+  JS:      window.wasmModules.name.call('func', {args})
   Python:  wasm_call('name', 'func', args)
   Prolog:  wasm_call(name, func, '{"key": "val"}').
 ```
@@ -170,6 +173,7 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - **[www/js/kernels/python.js](www/js/kernels/python.js)** — Python kernel (Pyodide + sharedfs bridge)
 - **[www/js/kernels/prolog.js](www/js/kernels/prolog.js)** — Prolog kernel (swipl-wasm + wasm_call/3)
 - **[www/js/kernels/bash.js](www/js/kernels/bash.js)** — Bash kernel (brush-wasm)
+- **[www/js/kernels/javascript.js](www/js/kernels/javascript.js)** — JavaScript kernel (native browser)
 - **[www/js/bridge.js](www/js/bridge.js)** — JS rendering: `renderPlot()`, `renderLatex()`, `renderTable()`
 - **[www/js/prelude.py](www/js/prelude.py)** — Python bridge: `plot()`, `mplot()`, `table()`, `wasm_call()`
 - **[www/js/sharedfs.py](www/js/sharedfs.py)** — Python SharedVFS bridge (`import sharedfs`)
@@ -204,7 +208,8 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - [x] Python SharedVFS bridge (`import sharedfs`)
 - [x] Cross-kernel WASM FFI (Python + Prolog can call WASM modules)
 - [x] Package catalog with one-click install
-- [ ] Additional languages (R via webR, Lua, JavaScript)
+- [x] JavaScript kernel (native browser, zero download)
+- [ ] Additional languages (R via webR, Lua)
 - [ ] Cache management for WASM runtimes
 - [ ] PWA manifest (install without app stores)
 - [ ] Matplotlib backend fallback
