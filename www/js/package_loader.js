@@ -114,6 +114,11 @@ class PackageLoader {
             this._addSearchPaths(manifest.search_paths);
         }
 
+        // 2b. Load WASM modules
+        if (manifest.wasm_modules && manifest.wasm_modules.length > 0) {
+            await this._loadWasmModules(manifest.wasm_modules, fileMap, baseDir);
+        }
+
         // 3. Create notebooks (if manifest has any)
         let notebooks = null;
         if (manifest.notebooks && manifest.notebooks.length > 0) {
@@ -140,7 +145,8 @@ class PackageLoader {
         return {
             name: manifest.name || 'Package',
             notebooks: notebooks ? notebooks.length : 0,
-            files: manifest.files ? manifest.files.length : 0
+            files: manifest.files ? manifest.files.length : 0,
+            wasm_modules: manifest.wasm_modules ? manifest.wasm_modules.length : 0
         };
     }
 
@@ -353,6 +359,124 @@ class PackageLoader {
                 console.warn('Could not mount to Prolog VFS:', e);
             }
         }
+    }
+
+    /**
+     * Load WASM modules declared in the manifest.
+     * Compiles, instantiates, and registers them at window.wasmModules[name].
+     */
+    async _loadWasmModules(modules, fileMap, baseDir) {
+        if (!window.wasmModules) window.wasmModules = {};
+
+        for (const mod of modules) {
+            const wasmPath = baseDir + mod.file;
+            const wasmBytes = fileMap.get(wasmPath);
+            if (!wasmBytes) {
+                console.warn('[PackageLoader] WASM module not found in archive:', wasmPath);
+                continue;
+            }
+
+            // Ensure Uint8Array
+            const bytes = (wasmBytes instanceof Uint8Array)
+                ? wasmBytes
+                : new TextEncoder().encode(wasmBytes);
+
+            // Load optional JS wrapper for imports
+            let imports = {};
+            if (mod.js_wrapper) {
+                const wrapperPath = baseDir + mod.js_wrapper;
+                const wrapperCode = fileMap.get(wrapperPath);
+                if (wrapperCode) {
+                    const wrapperStr = (typeof wrapperCode === 'string')
+                        ? wrapperCode
+                        : new TextDecoder().decode(wrapperCode);
+                    try {
+                        const wrapperFn = new Function('return ' + wrapperStr);
+                        imports = wrapperFn();
+                    } catch (e) {
+                        console.warn(`[PackageLoader] Failed to load JS wrapper for ${mod.name}:`, e);
+                    }
+                }
+            }
+
+            try {
+                const compiled = await WebAssembly.compile(bytes);
+                const instance = await WebAssembly.instantiate(compiled, imports);
+
+                const entry = {
+                    instance,
+                    module: compiled,
+                    exports: instance.exports,
+                    name: mod.name,
+                };
+
+                // Add JSON FFI call helper
+                if (mod.ffi === 'json') {
+                    entry.call = this._makeJsonCaller(instance);
+                }
+
+                window.wasmModules[mod.name] = entry;
+
+                // Also store bytes in SharedVFS for other kernels
+                if (window.sharedVFS) {
+                    window.sharedVFS.mkdir('/shared/lib/wasm');
+                    window.sharedVFS.writeFile(
+                        `/shared/lib/wasm/${mod.name}.wasm`, bytes, 'package'
+                    );
+                }
+
+                console.log(`[PackageLoader] Loaded WASM module: ${mod.name}`,
+                    `(${mod.exports ? mod.exports.length : '?'} declared exports)`);
+            } catch (e) {
+                console.error(`[PackageLoader] Failed to load WASM module ${mod.name}:`, e);
+            }
+        }
+    }
+
+    /**
+     * Build a JSON FFI caller for a WASM module.
+     * The module must export: alloc(len) -> ptr, dealloc(ptr, len), call(func_ptr, args_ptr) -> result_ptr
+     * plus a `memory` export.
+     */
+    _makeJsonCaller(instance) {
+        const { memory, alloc, dealloc, call } = instance.exports;
+
+        if (!memory || !alloc || !dealloc || !call) {
+            console.warn('[PackageLoader] WASM module missing required JSON FFI exports (memory, alloc, dealloc, call)');
+            return null;
+        }
+
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
+
+        return function jsonCall(funcName, args) {
+            // Encode function name as null-terminated string
+            const funcBytes = encoder.encode(funcName + '\0');
+            const funcPtr = alloc(funcBytes.length);
+            new Uint8Array(memory.buffer, funcPtr, funcBytes.length).set(funcBytes);
+
+            // Encode args as JSON null-terminated string
+            const argsJson = JSON.stringify(args);
+            const argsBytes = encoder.encode(argsJson + '\0');
+            const argsPtr = alloc(argsBytes.length);
+            new Uint8Array(memory.buffer, argsPtr, argsBytes.length).set(argsBytes);
+
+            // Call the WASM function
+            const resultPtr = call(funcPtr, argsPtr);
+
+            // Read null-terminated result string
+            const resultView = new Uint8Array(memory.buffer, resultPtr);
+            let end = 0;
+            while (resultView[end] !== 0 && end < 1024 * 1024) end++;
+            const resultJson = decoder.decode(resultView.slice(0, end));
+
+            // Cleanup
+            dealloc(funcPtr, funcBytes.length);
+            dealloc(argsPtr, argsBytes.length);
+            dealloc(resultPtr, end + 1);
+
+            return JSON.parse(resultJson);
+        };
     }
 
     /**

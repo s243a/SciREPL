@@ -123,4 +123,23 @@ def latex(expr):
     """Render a LaTeX string in the output."""
     js.renderLatex(str(expr))
 
+# ---- WASM FFI bridge ----
+
+def wasm_call(module_name, func_name, args=None):
+    """Call a function in a loaded WASM module via JSON FFI.
+
+    Usage:
+        result = wasm_call('linalg', 'matrix_multiply', {'a': [[1,2],[3,4]], 'b': [[5,6],[7,8]]})
+    """
+    mods = js.window.wasmModules
+    if not mods or not hasattr(mods, module_name):
+        raise RuntimeError(f"WASM module '{module_name}' not loaded")
+    mod = getattr(mods, module_name)
+    if not mod.call:
+        raise RuntimeError(f"WASM module '{module_name}' does not support JSON FFI")
+    from pyodide.ffi import to_js
+    result = mod.call(func_name, to_js(args or {}))
+    return json.loads(str(result)) if result is not None else None
+
+
 print("✓ Sci REPL ready" + (" (with SymPy)" if _SYMPY_AVAILABLE else " (NumPy only)"))
