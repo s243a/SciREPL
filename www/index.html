@@ -5,7 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Sci REPL</title>
-    <meta name="description" content="Mobile scientific Python REPL with interactive plotting">
+    <meta name="description" content="Multi-language scientific REPL — Python, Prolog, Bash, JavaScript">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d1117">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SciREPL">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 
     <!-- KaTeX for LaTeX rendering (bundled) -->
     <link rel="stylesheet" href="vendor/katex/katex.min.css">
@@ -398,6 +407,13 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
             modal.classList.remove('hidden');
         });
     })();
+    </script>
+
+    <!-- PWA Service Worker -->
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
     </script>
 </body>
 
