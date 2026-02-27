@@ -18,6 +18,8 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **Rich output** — LaTeX math rendering, interactive Plotly charts, tables
 - **Hybrid plotting** — Python `plot()` → Plotly.js (pinch-zoom, pan, hover)
 - **Editable cells** — Click the pencil icon to edit and re-run any cell
+- **Delete cells** — Remove individual cells with one click
+- **Cell reordering** — Drag-and-drop (desktop) or move up/down arrows (mobile)
 - **Markdown cells** — Toggle Code/Md, supports `$LaTeX$` and `$$display math$$`
 - **Run All Below / Run All Cells** — Re-execute from a cell downward or the entire notebook
 - **Session persistence** — Cells auto-save (with language) and restore on app restart
@@ -210,8 +212,8 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - [ ] Cache management for WASM runtimes
 - [ ] PWA manifest (install without app stores)
 - [ ] Matplotlib backend fallback
-- [ ] Cell reordering (drag and drop)
-- [ ] Delete individual cells
+- [x] Cell reordering (drag-and-drop + move arrows)
+- [x] Delete individual cells
 
 ## License
 

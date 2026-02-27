@@ -171,10 +171,15 @@
         const langBadge = (!isMarkdown && language && language !== 'python')
             ? ` <span class="lang-badge lang-${language}">${language}</span>`
             : '';
+        card.draggable = true;
         card.innerHTML = `
             <div class="card-label">
+                <span class="cell-drag-handle" title="Drag to reorder">⠿</span>
                 <span class="prompt-icon">${typeLabel} [${cellId}]</span>${langBadge}
+                <button class="cell-move-btn cell-move-up" title="Move up">▲</button>
+                <button class="cell-move-btn cell-move-down" title="Move down">▼</button>
                 <button class="cell-edit-btn" title="Edit & re-run">✎</button>
+                <button class="cell-delete-btn" title="Delete cell">✕</button>
             </div>
             <pre${isMarkdown ? ' class="md-source"' : ''}>${escapeHtml(code)}</pre>
         `;
@@ -182,6 +187,34 @@
             e.stopPropagation();
             enterEditMode(card, cellId);
         });
+        card.querySelector('.cell-delete-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteCell(cellId);
+        });
+        card.querySelector('.cell-move-up').addEventListener('click', (e) => {
+            e.stopPropagation();
+            moveCellUp(cellId);
+        });
+        card.querySelector('.cell-move-down').addEventListener('click', (e) => {
+            e.stopPropagation();
+            moveCellDown(cellId);
+        });
+
+        // Drag-and-drop: only allow drag from the handle
+        card.addEventListener('dragstart', (e) => {
+            if (!e.target.closest('.cell-drag-handle')) {
+                e.preventDefault();
+                return;
+            }
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', String(cellId));
+            card.classList.add('dragging');
+        });
+        card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+            _clearDragIndicators();
+        });
+
         getRepl().appendChild(card);
         return card;
     }
@@ -321,6 +354,128 @@
             reRunCell(cellId, code);
         }
     }
+
+    // ---- Delete cell ----
+
+    function deleteCell(cellId) {
+        const idx = window._cells.findIndex(c => c.id === cellId);
+        if (idx === -1) return;
+        const cell = window._cells[idx];
+        if (cell.inputCard) cell.inputCard.remove();
+        if (cell.outputCard) cell.outputCard.remove();
+        window._cells.splice(idx, 1);
+        saveCellsToSession();
+    }
+
+    // ---- Move cell up/down ----
+
+    function moveCellUp(cellId) {
+        const idx = window._cells.findIndex(c => c.id === cellId);
+        if (idx <= 0) return;
+        const prevCell = window._cells[idx - 1];
+        _moveCellDOM(cellId, prevCell.id, true);
+    }
+
+    function moveCellDown(cellId) {
+        const idx = window._cells.findIndex(c => c.id === cellId);
+        if (idx === -1 || idx >= window._cells.length - 1) return;
+        const nextCell = window._cells[idx + 1];
+        _moveCellDOM(cellId, nextCell.id, false);
+    }
+
+    // ---- Drag-and-drop cell reordering ----
+
+    let _dragCellId = null;
+
+    function _clearDragIndicators() {
+        document.querySelectorAll('.drag-over-top, .drag-over-bottom').forEach(el => {
+            el.classList.remove('drag-over-top', 'drag-over-bottom');
+        });
+    }
+
+    function _getDropTarget(e) {
+        // Find the closest .card-input that is not the one being dragged
+        const target = e.target.closest('.card-input');
+        if (!target || target.classList.contains('dragging')) return null;
+        return target;
+    }
+
+    // Attach drag events to the REPL container via delegation
+    function _initDragDrop(container) {
+        container.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            _clearDragIndicators();
+            const target = _getDropTarget(e);
+            if (!target) return;
+            const rect = target.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+            if (e.clientY < midY) {
+                target.classList.add('drag-over-top');
+            } else {
+                target.classList.add('drag-over-bottom');
+            }
+        });
+
+        container.addEventListener('dragleave', (e) => {
+            const target = e.target.closest('.card-input');
+            if (target) {
+                target.classList.remove('drag-over-top', 'drag-over-bottom');
+            }
+        });
+
+        container.addEventListener('drop', (e) => {
+            e.preventDefault();
+            _clearDragIndicators();
+            const draggedId = parseInt(e.dataTransfer.getData('text/plain'), 10);
+            const target = _getDropTarget(e);
+            if (!target || isNaN(draggedId)) return;
+
+            const targetId = parseInt(target.dataset.cellId, 10);
+            if (draggedId === targetId) return;
+
+            const rect = target.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+            const insertBefore = e.clientY < midY;
+
+            _moveCellDOM(draggedId, targetId, insertBefore);
+        });
+    }
+
+    function _moveCellDOM(draggedId, targetId, insertBefore) {
+        const cells = window._cells;
+        const fromIdx = cells.findIndex(c => c.id === draggedId);
+        const toIdx = cells.findIndex(c => c.id === targetId);
+        if (fromIdx === -1 || toIdx === -1) return;
+
+        // Remove from array
+        const [cell] = cells.splice(fromIdx, 1);
+
+        // Calculate new index (adjusted after removal)
+        let newIdx = cells.findIndex(c => c.id === targetId);
+        if (!insertBefore) newIdx++;
+        cells.splice(newIdx, 0, cell);
+
+        // Reorder DOM elements
+        const repl = getRepl();
+        const targetCell = cells.find(c => c.id === targetId);
+        if (insertBefore) {
+            repl.insertBefore(cell.inputCard, targetCell.inputCard);
+        } else {
+            // Insert after target's output card (or input card if no output)
+            const afterEl = targetCell.outputCard || targetCell.inputCard;
+            repl.insertBefore(cell.inputCard, afterEl.nextSibling);
+        }
+        // Move output card right after its input card
+        if (cell.outputCard) {
+            repl.insertBefore(cell.outputCard, cell.inputCard.nextSibling);
+        }
+
+        saveCellsToSession();
+    }
+
+    // Initialize drag-drop on the REPL wrapper (catches all notebook containers)
+    _initDragDrop(document.getElementById('repl-wrapper') || document.getElementById('repl'));
 
     // ---- Execute code via kernel manager ----
 
@@ -552,6 +707,11 @@ sys.stdout = _sci_repl_stdout
             await reRunCell(window._cells[i].id, window._cells[i].code);
         }
     };
+
+    // Expose cell operations for testing and external use
+    window.deleteCell = deleteCell;
+    window.moveCellUp = moveCellUp;
+    window.moveCellDown = moveCellDown;
 
     // ---- Restore session ----
 
