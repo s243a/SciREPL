@@ -810,8 +810,73 @@ html, body {
     transition: opacity 0.2s;
 }
 
-.card-input:hover .cell-edit-btn {
+.card-input:hover .cell-edit-btn,
+.card-input:hover .cell-delete-btn,
+.card-input:hover .cell-drag-handle,
+.card-input:hover .cell-move-btn {
     opacity: 1;
+}
+
+/* Delete button */
+.cell-delete-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.cell-delete-btn:hover {
+    color: #f85149;
+}
+
+/* Drag handle */
+.cell-drag-handle {
+    cursor: grab;
+    color: var(--text-muted);
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-size: 14px;
+    user-select: none;
+}
+
+.cell-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Move up/down arrows */
+.cell-move-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0 2px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    line-height: 1;
+}
+
+.cell-move-btn:hover {
+    color: var(--accent);
+}
+
+/* Drag feedback */
+.card-input.dragging {
+    opacity: 0.4;
+}
+
+.card-input.drag-over-top {
+    border-top: 2px solid var(--accent);
+    margin-top: -1px;
+}
+
+.card-input.drag-over-bottom {
+    border-bottom: 2px solid var(--accent);
+    margin-bottom: -1px;
 }
 
 .card-input.editing {
