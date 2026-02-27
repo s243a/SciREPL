@@ -30,6 +30,7 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **Semicolon suppression** (MATLAB/IPython-style)
 - **Command history** — Arrow keys to recall previous inputs
 - **Mobile-first UI** — Dark theme, touch-friendly
+- **Installable PWA** — Install from browser as a desktop or mobile app, works offline after first load
 - **Privacy-first** — Bundled rendering libraries, deferred CDN loading until consent
 
 ### Future Features
@@ -208,9 +209,8 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - [x] Cross-kernel WASM FFI (Python + Prolog can call WASM modules)
 - [x] Package catalog with one-click install
 - [x] JavaScript kernel (native browser, zero download)
+- [x] PWA — installable as desktop/mobile app, offline support, WASM runtime caching
 - [ ] Additional languages (R via webR, Lua)
-- [ ] Cache management for WASM runtimes
-- [ ] PWA manifest (install without app stores)
 - [ ] Matplotlib backend fallback
 - [x] Cell reordering (drag-and-drop + move arrows)
 - [x] Delete individual cells
