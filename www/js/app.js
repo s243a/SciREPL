@@ -201,16 +201,23 @@
         });
 
         // Drag-and-drop: only allow drag from the handle
+        // Track whether mousedown/touchstart originated on the handle
+        let _dragFromHandle = false;
+        card.querySelector('.cell-drag-handle').addEventListener('mousedown', () => {
+            _dragFromHandle = true;
+        });
         card.addEventListener('dragstart', (e) => {
-            if (!e.target.closest('.cell-drag-handle')) {
+            if (!_dragFromHandle) {
                 e.preventDefault();
                 return;
             }
+            _dragFromHandle = false;
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', String(cellId));
             card.classList.add('dragging');
         });
         card.addEventListener('dragend', () => {
+            _dragFromHandle = false;
             card.classList.remove('dragging');
             _clearDragIndicators();
         });

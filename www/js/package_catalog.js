@@ -117,7 +117,8 @@ class PackageCatalog {
      * Fetch a package URL as a Blob.
      *
      * On Capacitor (Android/iOS), uses the native Filesystem.downloadFile()
-     * API to bypass WebView CORS restrictions.  On web, uses plain fetch().
+     * API to bypass WebView CORS restrictions.  On web, uses the GitHub API
+     * for release assets (CORS-friendly) or plain fetch() for other URLs.
      */
     async _fetchPackage(url) {
         // Capacitor native path — download via native HTTP
@@ -151,7 +152,32 @@ class PackageCatalog {
             }
         }
 
-        // Web fallback
+        // For GitHub release URLs, use the API (which supports CORS)
+        const ghMatch = url.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/releases\/download\/([^/]+)\/(.+)$/);
+        if (ghMatch) {
+            const [, owner, repo, tag, filename] = ghMatch;
+            // Look up the release asset ID via the API
+            const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`;
+            const releaseResp = await fetch(apiUrl);
+            if (!releaseResp.ok) {
+                throw new Error(`GitHub API error: ${releaseResp.status}`);
+            }
+            const release = await releaseResp.json();
+            const asset = release.assets && release.assets.find(a => a.name === filename);
+            if (!asset) {
+                throw new Error(`Asset "${filename}" not found in release ${tag}`);
+            }
+            // Download the asset via the API with octet-stream accept header
+            const assetResp = await fetch(asset.url, {
+                headers: { 'Accept': 'application/octet-stream' },
+            });
+            if (!assetResp.ok) {
+                throw new Error(`Asset download failed: ${assetResp.status}`);
+            }
+            return await assetResp.blob();
+        }
+
+        // Web fallback for non-GitHub URLs
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
