@@ -163,6 +163,22 @@ html, body {
     scroll-behavior: smooth;
 }
 
+/* Desktop: constrain cell width for readability, allow resize */
+@media (min-width: 900px) {
+    #repl, .repl-container {
+        --cell-max-width: 100%;
+        padding: 12px 24px;
+    }
+
+    .card {
+        max-width: var(--cell-max-width);
+        margin-left: auto;
+        margin-right: auto;
+        resize: horizontal;
+        overflow: auto;
+    }
+}
+
 /* ===== Cards ===== */
 
 .card {

@@ -24,6 +24,8 @@ class PackageCatalog {
                 description: 'Physics knowledge-base notebooks with Prolog inference, embedding search, and mindmap tools.',
                 version: 'v0.3.0',
                 url: 'https://github.com/s243a/SciREPL/releases/download/v0.3.0/unifyweaver_scirepl.zip',
+                // Same-origin URL used when served from GitHub Pages (avoids CORS)
+                pages_url: 'packages/unifyweaver_scirepl.zip',
                 size: '~2 MB',
                 kernels: ['prolog', 'python'],
             },
@@ -88,7 +90,7 @@ class PackageCatalog {
         btn.textContent = 'Downloading...';
 
         try {
-            const blob = await this._fetchPackage(pkg.url);
+            const blob = await this._fetchPackage(pkg.pages_url || pkg.url);
 
             btn.textContent = 'Importing...';
 
@@ -152,37 +154,26 @@ class PackageCatalog {
             }
         }
 
-        // For GitHub release URLs, use the API (which supports CORS)
-        const ghMatch = url.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/releases\/download\/([^/]+)\/(.+)$/);
-        if (ghMatch) {
-            const [, owner, repo, tag, filename] = ghMatch;
-            // Look up the release asset ID via the API
-            const apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`;
-            const releaseResp = await fetch(apiUrl);
-            if (!releaseResp.ok) {
-                throw new Error(`GitHub API error: ${releaseResp.status}`);
+        // Try fetching directly (works for same-origin, pages_url, and CORS-enabled URLs)
+        try {
+            const response = await fetch(url);
+            if (response.ok) {
+                return await response.blob();
             }
-            const release = await releaseResp.json();
-            const asset = release.assets && release.assets.find(a => a.name === filename);
-            if (!asset) {
-                throw new Error(`Asset "${filename}" not found in release ${tag}`);
-            }
-            // Download the asset via the API with octet-stream accept header
-            const assetResp = await fetch(asset.url, {
-                headers: { 'Accept': 'application/octet-stream' },
-            });
-            if (!assetResp.ok) {
-                throw new Error(`Asset download failed: ${assetResp.status}`);
-            }
-            return await assetResp.blob();
+        } catch (e) {
+            // CORS or network error — fall through to alternatives
         }
 
-        // Web fallback for non-GitHub URLs
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // For GitHub release URLs, prompt user to download manually and import
+        const ghMatch = url.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/releases\/download\/([^/]+)\/(.+)$/);
+        if (ghMatch) {
+            throw new Error(
+                'Cannot download from GitHub releases due to browser CORS restrictions. ' +
+                'Please download the package manually from the release page and use Menu > Import Package to install it.'
+            );
         }
-        return await response.blob();
+
+        throw new Error(`Download failed. Please download the file manually and use Menu > Import Package.`);
     }
 
     _esc(str) {
