@@ -876,7 +876,7 @@ sys.stdout = _sci_repl_stdout
         }
 
         // Update session manager cell counter
-        window.sessionManager.session.cellCounter = cellCounter;
+        window.sessionManager.session.cellCounter = window._cellCounter;
         window.sessionManager.save();
 
         badge.textContent = 'ready';
