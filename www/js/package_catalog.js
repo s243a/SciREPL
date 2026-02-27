@@ -90,7 +90,19 @@ class PackageCatalog {
         btn.textContent = 'Downloading...';
 
         try {
-            const blob = await this._fetchPackage(pkg.pages_url || pkg.url);
+            let blob;
+            // Try same-origin pages_url first (GitHub Pages deployment)
+            if (pkg.pages_url) {
+                try {
+                    blob = await this._fetchPackage(pkg.pages_url);
+                } catch (e) {
+                    // pages_url not available — fall through to main URL
+                }
+            }
+            // Fall back to main URL (direct fetch → CORS proxy)
+            if (!blob) {
+                blob = await this._fetchPackage(pkg.url);
+            }
 
             btn.textContent = 'Importing...';
 
@@ -118,9 +130,11 @@ class PackageCatalog {
     /**
      * Fetch a package URL as a Blob.
      *
-     * On Capacitor (Android/iOS), uses the native Filesystem.downloadFile()
-     * API to bypass WebView CORS restrictions.  On web, uses the GitHub API
-     * for release assets (CORS-friendly) or plain fetch() for other URLs.
+     * Tries in order:
+     * 1. Capacitor native download (Android/iOS)
+     * 2. Direct fetch (same-origin, pages_url, CORS-enabled URLs)
+     * 3. Local CORS proxy at /proxy?url=... (dev server)
+     * 4. Error with manual download instructions
      */
     async _fetchPackage(url) {
         // Capacitor native path — download via native HTTP
@@ -161,19 +175,24 @@ class PackageCatalog {
                 return await response.blob();
             }
         } catch (e) {
-            // CORS or network error — fall through to alternatives
+            // CORS or network error — fall through to proxy
         }
 
-        // For GitHub release URLs, prompt user to download manually and import
-        const ghMatch = url.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/releases\/download\/([^/]+)\/(.+)$/);
-        if (ghMatch) {
-            throw new Error(
-                'Cannot download from GitHub releases due to browser CORS restrictions. ' +
-                'Please download the package manually from the release page and use Menu > Import Package to install it.'
-            );
+        // Try local CORS proxy (available when running via `npm run serve`)
+        try {
+            const proxyUrl = '/proxy?url=' + encodeURIComponent(url);
+            const response = await fetch(proxyUrl);
+            if (response.ok) {
+                return await response.blob();
+            }
+        } catch (e) {
+            // Proxy not available — fall through to error
         }
 
-        throw new Error(`Download failed. Please download the file manually and use Menu > Import Package.`);
+        throw new Error(
+            'Download failed. If running locally, use `npm run serve` for proxy support. ' +
+            'Otherwise, download the package manually and use Menu > Import Package.'
+        );
     }
 
     _esc(str) {

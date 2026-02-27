@@ -4,7 +4,7 @@
     "description": "Mobile Scientific REPL — Python + Pyodide + Plotly.js",
     "main": "index.js",
     "scripts": {
-        "serve": "python3 -m http.server 8085 -d www",
+        "serve": "node server.js",
         "sync": "npx cap sync",
         "build": "npx cap sync && cd android && ./gradlew assembleDebug"
     },
