@@ -20,6 +20,10 @@ signing/
 .capacitor/
 android/capacitor-cordova-android-plugins/
 
+# Rust build artifacts
+tests/*/target/
+tests/*/Cargo.lock
+
 # Logs
 *.log
 npm-debug.log*
