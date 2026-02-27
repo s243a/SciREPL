@@ -1,3 +1,7 @@
+---
+render_with_liquid: false
+---
+
 # SciREPL Package System v2
 
 The package system lets you bundle notebooks, data files, Python modules, Prolog knowledge bases, and pre-compiled WASM libraries into a single `.zip` archive that any SciREPL user can install with one click.
