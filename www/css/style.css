@@ -554,7 +554,10 @@ html, body {
 
 #input-controls {
     display: flex;
-    align-items: flex-end;
+    flex-direction: column;
+    align-items: stretch;
+    align-self: flex-start;
+    gap: 4px;
 }
 
 .cell-type-btn {
