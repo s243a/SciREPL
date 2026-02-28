@@ -27,6 +27,7 @@ const APP_SHELL = [
   './js/shared_vfs.js',
   './js/package_loader.js',
   './js/package_catalog.js',
+  './js/export.js',
   './js/file_io.js',
   './js/prelude.py',
   './js/sharedfs.py',
