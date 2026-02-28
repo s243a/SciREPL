@@ -945,6 +945,61 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         }
     }
 
+    // ---- Render Jupyter outputs from .ipynb import ----
+
+    /**
+     * Render pre-existing Jupyter outputs into an output card using bridge.js
+     * rendering functions. This allows imported .ipynb notebooks to display
+     * their outputs without re-executing the code.
+     */
+    window.renderJupyterOutputs = function (outputs, outputCard) {
+        window._currentOutputCard = outputCard;
+        try {
+            for (const out of outputs) {
+                const otype = out.output_type;
+                if (otype === 'stream') {
+                    const text = Array.isArray(out.text) ? out.text.join('') : (out.text || '');
+                    window.renderText(text, out.name === 'stderr');
+                } else if (otype === 'error') {
+                    const tb = Array.isArray(out.traceback) ? out.traceback.join('\n') : (out.evalue || 'Error');
+                    window.renderText(tb, true);
+                } else if (otype === 'execute_result' || otype === 'display_data') {
+                    const data = out.data || {};
+                    if (data['text/latex']) {
+                        // Extract TeX — may be wrapped in $\displaystyle ...$
+                        let tex = Array.isArray(data['text/latex']) ? data['text/latex'].join('') : data['text/latex'];
+                        tex = tex.replace(/^\$\\displaystyle\s*/, '').replace(/\$$/, '');
+                        window.renderLatex(tex);
+                    } else if (data['image/png']) {
+                        const base64 = Array.isArray(data['image/png']) ? data['image/png'].join('') : data['image/png'];
+                        window.renderImage('data:image/png;base64,' + base64);
+                    } else if (data['image/svg+xml']) {
+                        const svg = Array.isArray(data['image/svg+xml']) ? data['image/svg+xml'].join('') : data['image/svg+xml'];
+                        const body = outputCard.querySelector('.card-body');
+                        if (body) {
+                            const div = document.createElement('div');
+                            div.innerHTML = svg;
+                            body.appendChild(div);
+                        }
+                    } else if (data['text/html']) {
+                        const html = Array.isArray(data['text/html']) ? data['text/html'].join('') : data['text/html'];
+                        const body = outputCard.querySelector('.card-body');
+                        if (body) {
+                            const div = document.createElement('div');
+                            div.innerHTML = html;
+                            body.appendChild(div);
+                        }
+                    } else if (data['text/plain']) {
+                        const text = Array.isArray(data['text/plain']) ? data['text/plain'].join('') : data['text/plain'];
+                        window.renderText(text, false);
+                    }
+                }
+            }
+        } finally {
+            window._currentOutputCard = null;
+        }
+    };
+
     // ---- Import cells from .ipynb ----
 
     window.importCells = async function (cellDefs) {
@@ -978,8 +1033,11 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 body.innerHTML = renderMarkdown(def.code);
                 const pre = inputCard.querySelector('pre');
                 if (pre) pre.style.display = 'none';
+            } else if (def.outputs && def.outputs.length > 0) {
+                // Render pre-existing Jupyter outputs without re-executing
+                window.renderJupyterOutputs(def.outputs, outputCard);
             } else {
-                // Ensure kernel is ready for this language
+                // No cached outputs — execute as before
                 try {
                     await km.ensureReady(language);
                 } catch (err) {
