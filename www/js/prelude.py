@@ -147,4 +147,24 @@ def wasm_call(module_name, func_name, args=None):
     return json.loads(json.dumps(result))
 
 
+# ---- Package installation via micropip ----
+
+import micropip as _micropip
+
+async def pip_install(*packages):
+    """Install packages from PyPI using micropip.
+
+    Usage:
+        await pip_install('requests')
+        await pip_install('requests', 'beautifulsoup4')
+    """
+    for pkg in packages:
+        print(f"Installing {pkg}...")
+        try:
+            await _micropip.install(pkg)
+            print(f"  Installed {pkg}")
+        except Exception as e:
+            print(f"  Failed to install {pkg}: {e}")
+
+
 print("✓ Sci REPL ready" + (" (with SymPy)" if _SYMPY_AVAILABLE else " (NumPy only)"))

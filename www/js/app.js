@@ -496,6 +496,14 @@
 
         if (!km) throw new Error('KernelManager not available');
 
+        // Handle %pip install magic (Jupyter-compatible)
+        const pipMatch = code.match(/^%pip\s+install\s+(.+)$/m);
+        if (pipMatch && language === 'python') {
+            const packages = pipMatch[1].trim().split(/\s+/);
+            const pkgList = packages.map(p => `'${p.replace(/'/g, "\\'")}'`).join(', ');
+            return executePythonLegacy(`await pip_install(${pkgList})`);
+        }
+
         // Handle %%language magic commands (e.g., %%bash, %%python, %%prolog)
         // Strips the magic line and routes to the specified kernel.
         const magicMatch = code.match(/^%%(\w+)\s*\n([\s\S]*)$/);

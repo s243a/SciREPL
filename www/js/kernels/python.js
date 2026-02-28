@@ -20,6 +20,7 @@ class PythonKernel {
 
         this._pyodide = await loadPyodide();
         await this._pyodide.loadPackage(['numpy', 'sympy']);
+        await this._pyodide.loadPackage('micropip');
 
         // Load the prelude
         const preludeResp = await fetch('js/prelude.py');
