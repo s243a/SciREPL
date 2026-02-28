@@ -164,6 +164,15 @@ class FileIO {
             });
         }
 
+        // Export LaTeX
+        const exportLatexBtn = document.getElementById('btn-export-latex');
+        if (exportLatexBtn) {
+            exportLatexBtn.addEventListener('click', async () => {
+                this.menuModal.classList.add('hidden');
+                if (window.exportManager) await window.exportManager.exportLatex();
+            });
+        }
+
         // Import Package
         this.packageInput = document.getElementById('package-input');
         const importPackageBtn = document.getElementById('btn-import-package');
@@ -216,31 +225,52 @@ class FileIO {
         });
         const primaryLang = Object.keys(langCounts).sort((a, b) => langCounts[b] - langCounts[a])[0] || 'python';
 
-        const nbCells = cells.map((cell, i) => {
+        // Scrape live DOM outputs if export manager is available
+        const scrapedCells = window.exportManager ? window.exportManager._scrapeCells() : [];
+        const scrapedMap = {};
+        for (const sc of scrapedCells) {
+            scrapedMap[sc.id] = sc;
+        }
+
+        const nbCells = [];
+        for (const cell of cells) {
             const source = cell.code.split('\n').map((line, j, arr) =>
                 j < arr.length - 1 ? line + '\n' : line
             );
             const cellLang = cell.language || 'python';
             if (cell.type === 'markdown') {
-                return {
+                nbCells.push({
                     cell_type: 'markdown',
                     metadata: {},
                     source: source
-                };
+                });
+                continue;
             }
             const meta = {};
             // Tag cells with non-primary language
             if (cellLang !== primaryLang) {
                 meta.scirepl_language = cellLang;
             }
-            return {
+
+            // Convert scraped DOM outputs to Jupyter format
+            let outputs = [];
+            const scraped = scrapedMap[cell.id];
+            if (scraped && scraped.outputs.length > 0 && window.exportManager) {
+                try {
+                    outputs = await window.exportManager.scrapedOutputsToJupyter(scraped);
+                } catch (e) {
+                    console.warn('[FileIO] Failed to scrape outputs for cell', cell.id, e);
+                }
+            }
+
+            nbCells.push({
                 cell_type: 'code',
                 execution_count: cell.id,
                 metadata: meta,
-                outputs: [],
+                outputs: outputs,
                 source: source
-            };
-        });
+            });
+        }
 
         const kernelMap = {
             python: { display_name: 'Python 3 (Pyodide)', language: 'python', name: 'python3' },

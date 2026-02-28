@@ -169,6 +169,8 @@ grandparent(tom, Z).</code></pre>
                 <li><strong>Markdown</strong> — Fenced code blocks, LaTeX math, and markdown tables. Good for version control.</li>
                 <li><strong>PDF</strong> — Opens the browser print dialog. Choose "Save as PDF" for a light-themed document.</li>
                 <li><strong>DOCX</strong> — Word document with code blocks, tables, and images. Requires internet (library loaded on demand from CDN).</li>
+                <li><strong>LaTeX</strong> — <code>.tex</code> file for academic papers. Uses <code>listings</code>, <code>amsmath</code>, <code>booktabs</code>, <code>graphicx</code>. Exports as <code>.tex.zip</code> if images are present.</li>
+                <li><strong>.ipynb</strong> — Now includes cell outputs (text, LaTeX, images, tables). Viewable in Jupyter and GitHub without re-execution.</li>
             </ul>
 
             <h3>Keyboard Shortcuts</h3>
@@ -184,7 +186,7 @@ grandparent(tom, Z).</code></pre>
 
             <h3>Version</h3>
             <p><strong>SciREPL Pro v0.5.0</strong></p>
-            <p>Includes: Multi-language (Python + Prolog), editable cells, markdown cells, session persistence, Math Mode palette, .ipynb import/export, rich export (HTML, Markdown, PDF, DOCX), virtual filesystem, search paths, URL file fetching, multi-notebook support, package format (.zip/.tar.gz)</p>
+            <p>Includes: Multi-language (Python + Prolog), editable cells, markdown cells, session persistence, Math Mode palette, .ipynb import/export, rich export (HTML, Markdown, PDF, DOCX, LaTeX), .ipynb with outputs, virtual filesystem, search paths, URL file fetching, multi-notebook support, package format (.zip/.tar.gz)</p>
 
             <h3>Privacy</h3>
             <p><a href="#" id="help-privacy-link">Privacy Policy</a></p>
@@ -230,6 +232,7 @@ grandparent(tom, Z).</code></pre>
                 <button id="btn-export-md">📝 Export Markdown</button>
                 <button id="btn-export-pdf">🖨 Export PDF (Print)</button>
                 <button id="btn-export-docx">📄 Export DOCX</button>
+                <button id="btn-export-latex">📐 Export LaTeX</button>
                 <button id="btn-import-file">📂 Import File (.py / .pl / .ipynb / .zip)</button>
                 <button id="btn-import-package">📦 Import Package (.zip / .tar.gz)</button>
                 <button id="btn-browse-packages">📦 Browse Packages</button>
