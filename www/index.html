@@ -34,10 +34,28 @@
 
     <!-- App styles -->
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="vendor/hljs/atom-one-dark.min.css">
     <link rel="stylesheet" href="css/notebooks.css">
 </head>
 
 <body>
+    <!-- Search bar (Ctrl+F) -->
+    <div id="search-bar" class="search-bar hidden">
+        <div class="search-row">
+            <input type="text" id="search-input" placeholder="Find in notebook…" autocomplete="off">
+            <span id="search-count"></span>
+            <button id="search-prev-btn" title="Previous match (Shift+Enter)">▲</button>
+            <button id="search-next-btn" title="Next match (Enter)">▼</button>
+            <button id="search-replace-toggle" title="Toggle replace">⇄</button>
+            <button id="search-close-btn" title="Close (Escape)">&times;</button>
+        </div>
+        <div id="search-replace-row" class="search-row hidden">
+            <input type="text" id="replace-input" placeholder="Replace with…" autocomplete="off">
+            <button id="replace-one-btn">Replace</button>
+            <button id="replace-all-btn">All</button>
+        </div>
+    </div>
+
     <!-- Loading overlay -->
     <div id="loading-overlay">
         <div class="spinner"></div>
@@ -172,12 +190,13 @@ grandparent(tom, Z).</code></pre>
                 <li><strong>LaTeX</strong> — <code>.tex</code> file for academic papers. Uses <code>listings</code>, <code>amsmath</code>, <code>booktabs</code>, <code>graphicx</code>. Exports as <code>.tex.zip</code> if images are present.</li>
                 <li><strong>.ipynb</strong> — Now includes cell outputs (text, LaTeX, images, tables). Viewable in Jupyter and GitHub without re-execution.</li>
             </ul>
-            <p><strong>Syntax highlighting:</strong> HTML and DOCX exports include syntax-highlighted code blocks for Python, JavaScript, R, Bash, and Prolog.</p>
+            <p><strong>Syntax highlighting:</strong> Code cells display with syntax highlighting for Python, JavaScript, R, Bash, and Prolog. Exports (HTML, DOCX) also include highlighted code.</p>
             <p><strong>.ipynb import with outputs:</strong> When importing a <code>.ipynb</code> file that already contains outputs, they are displayed directly without re-executing the code. This allows fast viewing of notebooks from Jupyter, Colab, or previous SciREPL exports.</p>
 
             <h3>Keyboard Shortcuts</h3>
             <ul>
                 <li><kbd>Shift+Enter</kbd> or <kbd>Ctrl+Enter</kbd> — Run code</li>
+                <li><kbd>Ctrl+F</kbd> / <kbd>Cmd+F</kbd> — Find in notebook (with replace)</li>
                 <li><kbd>Tab</kbd> — Insert 4 spaces</li>
                 <li><kbd>;</kbd> at end of line — Suppress output</li>
             </ul>

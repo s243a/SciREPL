@@ -19,6 +19,8 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **Rich output** — LaTeX math rendering, interactive Plotly charts, tables
 - **Hybrid plotting** — Python `plot()` → Plotly.js (pinch-zoom, pan, hover), R `plotly()` → interactive Plotly charts
 - **Matplotlib support** — `import matplotlib.pyplot as plt; plt.show()` renders inline PNG images (dark theme)
+- **Syntax highlighting** — Code cells display with keyword coloring via highlight.js (Python, JavaScript, R, Bash, Prolog)
+- **Find & Replace** — `Ctrl+F` / `Cmd+F` to search across all cells with match navigation and replace
 - **Editable cells** — Click the pencil icon to edit and re-run any cell
 - **Delete cells** — Remove individual cells with one click
 - **Cell reordering** — Drag-and-drop (desktop) or move up/down arrows (mobile)
@@ -259,6 +261,8 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - [x] .ipynb export with outputs (text, images, LaTeX, tables)
 - [x] .ipynb import with output preservation (no re-execution needed)
 - [x] Syntax highlighting in exports (HTML, DOCX) via highlight.js
+- [x] In-app syntax highlighting for code cells
+- [x] Find & Replace across notebook cells (Ctrl+F)
 - [ ] Additional languages (Lua)
 - [x] Cell reordering (drag-and-drop + move arrows)
 - [x] Delete individual cells

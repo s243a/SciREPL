@@ -28,6 +28,7 @@ const APP_SHELL = [
   './js/package_loader.js',
   './js/package_catalog.js',
   './vendor/hljs/highlight.min.js',
+  './vendor/hljs/atom-one-dark.min.css',
   './js/export.js',
   './js/file_io.js',
   './js/prelude.py',

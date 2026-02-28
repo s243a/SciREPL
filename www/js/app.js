@@ -181,7 +181,7 @@
                 <button class="cell-edit-btn" title="Edit & re-run">✎</button>
                 <button class="cell-delete-btn" title="Delete cell">✕</button>
             </div>
-            <pre${isMarkdown ? ' class="md-source"' : ''}>${escapeHtml(code)}</pre>
+            <pre${isMarkdown ? ' class="md-source"' : ''}>${isMarkdown ? escapeHtml(code) : '<code>' + highlightCode(code, language) + '</code>'}</pre>
         `;
         card.querySelector('.cell-edit-btn').addEventListener('click', (e) => {
             e.stopPropagation();
@@ -250,6 +250,27 @@
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
+    }
+
+    /** Syntax-highlight code using highlight.js if available. Falls back to escapeHtml. */
+    function highlightCode(code, language) {
+        if (typeof window.hljs !== 'undefined') {
+            const langMap = { python: 'python', javascript: 'javascript', r: 'r', bash: 'bash', prolog: 'prolog' };
+            const hljsLang = langMap[language];
+            if (hljsLang && window.hljs.getLanguage(hljsLang)) {
+                try { return window.hljs.highlight(code, { language: hljsLang }).value; } catch (e) { /* fall through */ }
+            }
+        }
+        return escapeHtml(code);
+    }
+
+    /** Set the code content of an input card's <pre>, applying syntax highlighting. */
+    function setPreHighlighted(pre, code, language, isMarkdown) {
+        if (isMarkdown) {
+            pre.textContent = code;
+        } else {
+            pre.innerHTML = '<code>' + highlightCode(code, language) + '</code>';
+        }
     }
 
     // ---- Editable cells ----
@@ -350,7 +371,8 @@
         const textarea = inputCard.querySelector('.cell-editor');
         const pre = document.createElement('pre');
         if (cellType === 'markdown') pre.className = 'md-source';
-        pre.textContent = code;
+        const language = cell ? cell.language : (inputCard.dataset.language || 'python');
+        setPreHighlighted(pre, code, language, cellType === 'markdown');
         if (textarea) textarea.replaceWith(pre);
 
         // Update label
@@ -646,7 +668,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         cell.code = code;
 
         const pre = cell.inputCard.querySelector('pre');
-        if (pre) pre.textContent = code;
+        if (pre) setPreHighlighted(pre, code, cell.language || 'python', cell.type === 'markdown');
 
         if (cell.type === 'markdown') {
             reRenderMarkdownCell(cell);
@@ -746,7 +768,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
         window._cells[idx].code = code;
         const pre = window._cells[idx].inputCard.querySelector('pre');
-        if (pre) pre.textContent = code;
+        if (pre) setPreHighlighted(pre, code, window._cells[idx].language || 'python', window._cells[idx].type === 'markdown');
 
         for (let i = idx; i < window._cells.length; i++) {
             await reRunCell(window._cells[i].id, window._cells[i].code);
@@ -1245,6 +1267,266 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         if (e.target === helpModal) helpModal.classList.add('hidden');
     });
 
+    // ---- Search within notebook (Ctrl+F) ----
+
+    const searchBar = document.getElementById('search-bar');
+    const searchInput = document.getElementById('search-input');
+    const searchCount = document.getElementById('search-count');
+    const searchPrevBtn = document.getElementById('search-prev-btn');
+    const searchNextBtn = document.getElementById('search-next-btn');
+    const searchCloseBtn = document.getElementById('search-close-btn');
+    const searchReplaceToggle = document.getElementById('search-replace-toggle');
+    const searchReplaceRow = document.getElementById('search-replace-row');
+    const replaceInput = document.getElementById('replace-input');
+    const replaceOneBtn = document.getElementById('replace-one-btn');
+    const replaceAllBtn = document.getElementById('replace-all-btn');
+
+    let _searchMatches = [];  // [{ cellIndex, cell, positions: [startIdx, ...] }, ...]
+    let _searchFlatMatches = [];  // [{ cellIndex, cell, posIndex }, ...]
+    let _searchCurrentIdx = -1;
+
+    function openSearch() {
+        searchBar.classList.remove('hidden');
+        searchInput.focus();
+        searchInput.select();
+        runSearch();
+    }
+
+    function closeSearch() {
+        searchBar.classList.add('hidden');
+        searchReplaceRow.classList.add('hidden');
+        clearSearchHighlights();
+        _searchMatches = [];
+        _searchFlatMatches = [];
+        _searchCurrentIdx = -1;
+        searchCount.textContent = '';
+    }
+
+    function runSearch() {
+        clearSearchHighlights();
+        const query = searchInput.value;
+        _searchMatches = [];
+        _searchFlatMatches = [];
+        _searchCurrentIdx = -1;
+
+        if (!query) {
+            searchCount.textContent = '';
+            return;
+        }
+
+        const queryLower = query.toLowerCase();
+        const cells = window._cells || [];
+
+        for (let i = 0; i < cells.length; i++) {
+            const cell = cells[i];
+            const codeLower = cell.code.toLowerCase();
+            const positions = [];
+            let idx = 0;
+            while ((idx = codeLower.indexOf(queryLower, idx)) !== -1) {
+                positions.push(idx);
+                idx += queryLower.length;
+            }
+            if (positions.length > 0) {
+                _searchMatches.push({ cellIndex: i, cell, positions });
+                cell.inputCard.classList.add('search-match');
+                for (let p = 0; p < positions.length; p++) {
+                    _searchFlatMatches.push({ cellIndex: i, cell, posIndex: p, startIdx: positions[p] });
+                }
+            }
+        }
+
+        if (_searchFlatMatches.length > 0) {
+            _searchCurrentIdx = 0;
+            goToCurrentMatch();
+        }
+        updateSearchCount();
+    }
+
+    function updateSearchCount() {
+        if (_searchFlatMatches.length === 0) {
+            searchCount.textContent = searchInput.value ? '0 results' : '';
+        } else {
+            searchCount.textContent = `${_searchCurrentIdx + 1}/${_searchFlatMatches.length}`;
+        }
+    }
+
+    function goToCurrentMatch() {
+        // Remove previous current highlight
+        document.querySelectorAll('.search-current').forEach(el => el.classList.remove('search-current'));
+        removeTextHighlights();
+
+        if (_searchCurrentIdx < 0 || _searchCurrentIdx >= _searchFlatMatches.length) return;
+
+        const match = _searchFlatMatches[_searchCurrentIdx];
+        match.cell.inputCard.classList.add('search-current');
+        match.cell.inputCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Apply text-level highlights in the current cell's <pre><code> or <pre>
+        applyTextHighlights(match.cell, searchInput.value, match.startIdx);
+        updateSearchCount();
+    }
+
+    function applyTextHighlights(cell, query, currentStartIdx) {
+        const pre = cell.inputCard.querySelector('pre');
+        if (!pre) return;
+
+        const codeEl = pre.querySelector('code') || pre;
+        const walker = document.createTreeWalker(codeEl, NodeFilter.SHOW_TEXT, null, false);
+        const textNodes = [];
+        let node;
+        while ((node = walker.nextNode())) textNodes.push(node);
+
+        const queryLower = query.toLowerCase();
+        let globalOffset = 0;
+
+        for (const textNode of textNodes) {
+            const text = textNode.textContent;
+            const textLower = text.toLowerCase();
+            const parts = [];
+            let lastIdx = 0;
+            let searchIdx = 0;
+
+            while ((searchIdx = textLower.indexOf(queryLower, searchIdx)) !== -1) {
+                if (searchIdx > lastIdx) {
+                    parts.push({ text: text.slice(lastIdx, searchIdx), highlight: false });
+                }
+                const isCurrent = (globalOffset + searchIdx) === currentStartIdx;
+                parts.push({
+                    text: text.slice(searchIdx, searchIdx + query.length),
+                    highlight: true,
+                    isCurrent
+                });
+                lastIdx = searchIdx + query.length;
+                searchIdx = lastIdx;
+            }
+
+            if (parts.length > 0) {
+                if (lastIdx < text.length) {
+                    parts.push({ text: text.slice(lastIdx), highlight: false });
+                }
+                const frag = document.createDocumentFragment();
+                for (const part of parts) {
+                    if (part.highlight) {
+                        const mark = document.createElement('mark');
+                        mark.className = part.isCurrent ? 'search-hl search-hl-current' : 'search-hl';
+                        mark.textContent = part.text;
+                        frag.appendChild(mark);
+                    } else {
+                        frag.appendChild(document.createTextNode(part.text));
+                    }
+                }
+                textNode.replaceWith(frag);
+            }
+
+            globalOffset += text.length;
+        }
+    }
+
+    function removeTextHighlights() {
+        document.querySelectorAll('.card-input mark.search-hl').forEach(mark => {
+            const parent = mark.parentNode;
+            mark.replaceWith(document.createTextNode(mark.textContent));
+            if (parent) parent.normalize();
+        });
+    }
+
+    function clearSearchHighlights() {
+        removeTextHighlights();
+        document.querySelectorAll('.search-match').forEach(el => el.classList.remove('search-match'));
+        document.querySelectorAll('.search-current').forEach(el => el.classList.remove('search-current'));
+    }
+
+    function searchNext() {
+        if (_searchFlatMatches.length === 0) return;
+        _searchCurrentIdx = (_searchCurrentIdx + 1) % _searchFlatMatches.length;
+        goToCurrentMatch();
+    }
+
+    function searchPrev() {
+        if (_searchFlatMatches.length === 0) return;
+        _searchCurrentIdx = (_searchCurrentIdx - 1 + _searchFlatMatches.length) % _searchFlatMatches.length;
+        goToCurrentMatch();
+    }
+
+    function replaceCurrentMatch() {
+        if (_searchCurrentIdx < 0 || _searchCurrentIdx >= _searchFlatMatches.length) return;
+
+        const match = _searchFlatMatches[_searchCurrentIdx];
+        const query = searchInput.value;
+        const replacement = replaceInput.value;
+        if (!query) return;
+
+        // Replace in cell.code (case-preserving position)
+        const cell = match.cell;
+        cell.code = cell.code.slice(0, match.startIdx) + replacement + cell.code.slice(match.startIdx + query.length);
+
+        // Re-render the card's code
+        const pre = cell.inputCard.querySelector('pre');
+        if (pre) setPreHighlighted(pre, cell.code, cell.language || 'python', cell.type === 'markdown');
+
+        saveCellsToSession();
+        runSearch();
+    }
+
+    function replaceAllMatches() {
+        const query = searchInput.value;
+        const replacement = replaceInput.value;
+        if (!query) return;
+
+        const affectedCells = new Set();
+        // Replace from end to start to preserve indices
+        for (let i = _searchFlatMatches.length - 1; i >= 0; i--) {
+            const match = _searchFlatMatches[i];
+            match.cell.code = match.cell.code.slice(0, match.startIdx) + replacement + match.cell.code.slice(match.startIdx + query.length);
+            affectedCells.add(match.cell);
+        }
+
+        for (const cell of affectedCells) {
+            const pre = cell.inputCard.querySelector('pre');
+            if (pre) setPreHighlighted(pre, cell.code, cell.language || 'python', cell.type === 'markdown');
+        }
+
+        saveCellsToSession();
+        runSearch();
+    }
+
+    // Wire search bar events
+    if (searchInput) {
+        searchInput.addEventListener('input', () => runSearch());
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.shiftKey) { e.preventDefault(); searchPrev(); }
+            else if (e.key === 'Enter') { e.preventDefault(); searchNext(); }
+            else if (e.key === 'Escape') { e.preventDefault(); closeSearch(); }
+        });
+    }
+    if (replaceInput) {
+        replaceInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { e.preventDefault(); closeSearch(); }
+        });
+    }
+    if (searchNextBtn) searchNextBtn.addEventListener('click', searchNext);
+    if (searchPrevBtn) searchPrevBtn.addEventListener('click', searchPrev);
+    if (searchCloseBtn) searchCloseBtn.addEventListener('click', closeSearch);
+    if (searchReplaceToggle) {
+        searchReplaceToggle.addEventListener('click', () => {
+            searchReplaceRow.classList.toggle('hidden');
+            if (!searchReplaceRow.classList.contains('hidden')) replaceInput.focus();
+        });
+    }
+    if (replaceOneBtn) replaceOneBtn.addEventListener('click', replaceCurrentMatch);
+    if (replaceAllBtn) replaceAllBtn.addEventListener('click', replaceAllMatches);
+
+    // Global keyboard handler: Ctrl+F to open search, Escape to close
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            openSearch();
+        } else if (e.key === 'Escape' && !searchBar.classList.contains('hidden')) {
+            e.preventDefault();
+            closeSearch();
+        }
+    });
+
     // ---- Expose internal functions for NotebookManager / PackageLoader ----
     window._appInternals = {
         createInputCard: createInputCard,
@@ -1254,7 +1536,9 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         saveCellsToSession: saveCellsToSession,
         getRepl: getRepl,
         getCurrentLanguage: getCurrentLanguage,
-        escapeHtml: escapeHtml
+        escapeHtml: escapeHtml,
+        highlightCode: highlightCode,
+        setPreHighlighted: setPreHighlighted
     };
 
     // ---- Start ----

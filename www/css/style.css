@@ -225,6 +225,19 @@ html, body {
     word-break: break-word;
 }
 
+/* highlight.js in-app overrides — keep card background, reset hljs defaults */
+.card-input pre code.hljs,
+.card-input pre code {
+    background: transparent;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    white-space: pre-wrap;
+    word-break: break-word;
+    display: block;
+}
+
 /* Output card */
 .card-output {
     background: var(--bg-card);
@@ -1487,4 +1500,113 @@ tr:hover .vfs-delete-btn {
     accent-color: var(--accent);
     width: 16px;
     height: 16px;
+}
+
+/* ===== Search Bar (Ctrl+F) ===== */
+
+.search-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 3000;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.search-bar.hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.search-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.search-row + .search-row {
+    margin-top: 6px;
+}
+
+.search-bar input[type="text"] {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    outline: none;
+    min-width: 0;
+}
+
+.search-bar input[type="text"]:focus {
+    border-color: var(--accent);
+}
+
+#search-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    min-width: 40px;
+    text-align: center;
+}
+
+.search-bar button {
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.search-bar button:hover {
+    background: var(--border);
+    color: var(--text-primary);
+}
+
+#search-close-btn {
+    font-size: 16px;
+    padding: 2px 6px;
+}
+
+#replace-one-btn, #replace-all-btn {
+    font-size: 12px;
+    padding: 5px 10px;
+}
+
+/* Search match highlighting on cards */
+.card-input.search-match {
+    border: 1px solid var(--orange, #d29922) !important;
+    box-shadow: 0 0 0 1px rgba(210, 153, 34, 0.2);
+}
+
+.card-input.search-current {
+    border: 1px solid var(--accent) !important;
+    box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+/* Text-level match highlight inside code */
+.card-input mark.search-hl {
+    background: rgba(210, 153, 34, 0.35);
+    color: inherit;
+    border-radius: 2px;
+    padding: 0 1px;
+}
+
+.card-input mark.search-hl-current {
+    background: rgba(88, 166, 255, 0.4);
+    color: inherit;
+    border-radius: 2px;
+    padding: 0 1px;
 }
