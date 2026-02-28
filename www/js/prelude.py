@@ -167,4 +167,28 @@ async def pip_install(*packages):
             print(f"  Failed to install {pkg}: {e}")
 
 
+# ---- Matplotlib inline backend ----
+
+def _setup_matplotlib_hook():
+    """Monkey-patch plt.show() to render figures as inline PNG images."""
+    import matplotlib
+    matplotlib.use('agg')
+    import matplotlib.pyplot as plt
+
+    def _inline_show(*args, **kwargs):
+        import io, base64
+        figs = [plt.figure(i) for i in plt.get_fignums()]
+        for fig in figs:
+            buf = io.BytesIO()
+            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight',
+                        facecolor='#0d1117', edgecolor='none')
+            buf.seek(0)
+            data_url = 'data:image/png;base64,' + base64.b64encode(buf.read()).decode()
+            js.renderImage(data_url)
+            buf.close()
+        plt.close('all')
+
+    plt.show = _inline_show
+
+
 print("✓ Sci REPL ready" + (" (with SymPy)" if _SYMPY_AVAILABLE else " (NumPy only)"))

@@ -17,7 +17,8 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **SharedVFS** — In-memory filesystem shared across all kernels. Python, Bash, Prolog, R, and JavaScript can read/write the same files.
 - **Cross-kernel WASM FFI** — Package and distribute pre-compiled Rust WASM libraries callable from JavaScript, Python, and Prolog
 - **Rich output** — LaTeX math rendering, interactive Plotly charts, tables
-- **Hybrid plotting** — Python `plot()` → Plotly.js (pinch-zoom, pan, hover)
+- **Hybrid plotting** — Python `plot()` → Plotly.js (pinch-zoom, pan, hover), R `plotly()` → interactive Plotly charts
+- **Matplotlib support** — `import matplotlib.pyplot as plt; plt.show()` renders inline PNG images (dark theme)
 - **Editable cells** — Click the pencil icon to edit and re-run any cell
 - **Delete cells** — Remove individual cells with one click
 - **Cell reordering** — Drag-and-drop (desktop) or move up/down arrows (mobile)
@@ -212,7 +213,7 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - **[www/js/bridge.js](www/js/bridge.js)** — JS rendering: `renderPlot()`, `renderLatex()`, `renderTable()`
 - **[www/js/prelude.py](www/js/prelude.py)** — Python bridge: `plot()`, `mplot()`, `table()`, `wasm_call()`
 - **[www/js/sharedfs.py](www/js/sharedfs.py)** — Python SharedVFS bridge (`import sharedfs`)
-- **[www/js/r_sharedfs.R](www/js/r_sharedfs.R)** — R SharedVFS bridge (`sharedfs_read`, `sharedfs_write`, etc.)
+- **[www/js/r_prelude.R](www/js/r_prelude.R)** — R prelude: SharedVFS bridge + interactive `plotly()` / `mplotly()`
 - **[www/js/shared_vfs.js](www/js/shared_vfs.js)** — SharedVFS — in-memory filesystem shared across kernels
 - **[www/js/package_loader.js](www/js/package_loader.js)** — Package loading, target routing, WASM module loading
 - **[www/js/package_catalog.js](www/js/package_catalog.js)** — Browse Packages UI and one-click install
@@ -249,8 +250,9 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - [x] JavaScript kernel (native browser, zero download)
 - [x] PWA — installable as desktop/mobile app, offline support, WASM runtime caching
 - [x] R kernel via webR (lazy-loaded, plotting, SharedVFS, package install)
+- [x] Matplotlib inline backend (`plt.show()` renders PNG images)
+- [x] Interactive R plots via `plotly()` / `mplotly()` helpers
 - [ ] Additional languages (Lua)
-- [ ] Matplotlib backend fallback
 - [x] Cell reordering (drag-and-drop + move arrows)
 - [x] Delete individual cells
 

@@ -30,7 +30,7 @@ const APP_SHELL = [
   './js/file_io.js',
   './js/prelude.py',
   './js/sharedfs.py',
-  './js/r_sharedfs.R',
+  './js/r_prelude.R',
   './js/prolog_prelude.pl',
   './js/kernels/python.js',
   './js/kernels/prolog.js',

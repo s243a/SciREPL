@@ -592,6 +592,15 @@ sys.stdout = _sci_repl_stdout
 
         let result = await pyodide.runPythonAsync(code);
 
+        // Auto-setup matplotlib hook if matplotlib was imported
+        try {
+            pyodide.runPython(`
+if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_scirepl_hooked', False):
+    _setup_matplotlib_hook()
+    sys.modules['matplotlib']._scirepl_hooked = True
+`);
+        } catch(e) { /* matplotlib not imported or hook failed, ignore */ }
+
         pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`);
         const printed = pyodide.runPython(`_sci_repl_stdout.getvalue()`);
 
