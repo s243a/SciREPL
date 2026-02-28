@@ -52,24 +52,27 @@ jobs:
         with:
           files: android/app/build/outputs/apk/release/SciREPL-${{ github.ref_name }}-unsigned.apk
           body: |
-            ## ⚠️ Manual Signing Required
-            
-            This APK is **unsigned**. To install on your device:
-            
-            1. Download the unsigned APK
-            2. Sign it locally:
-               ```bash
-               jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-                 -keystore scirepl-release.keystore \
-                 SciREPL-${{ github.ref_name }}-unsigned.apk scirepl
-               ```
-            3. Zipalign:
+            ## Downloads
+
+            - **Android APK (unsigned):** Requires signing before install (see below)
+            - **PWA (Web App):** [https://s243a.github.io/SciREPL/](https://s243a.github.io/SciREPL/) — install from browser, no app store needed
+
+            ## Signing the Unsigned APK
+
+            1. Zipalign:
                ```bash
                zipalign -v 4 SciREPL-${{ github.ref_name }}-unsigned.apk \
-                 SciREPL-${{ github.ref_name }}.apk
+                 SciREPL-${{ github.ref_name }}-aligned.apk
                ```
-            4. Install the signed APK on your device
-            
+            2. Sign with apksigner (v2):
+               ```bash
+               apksigner sign --ks your-keystore.keystore \
+                 --ks-key-alias your-alias \
+                 --out SciREPL-${{ github.ref_name }}.apk \
+                 SciREPL-${{ github.ref_name }}-aligned.apk
+               ```
+            3. Install: `adb install SciREPL-${{ github.ref_name }}.apk`
+
             **For maintainers:** After signing, upload the signed APK to this release.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
