@@ -973,6 +973,314 @@ ${cellsHtml}
         });
     }
 
+    // ── LaTeX Export ──
+
+    _escapeLatex(str) {
+        return str
+            .replace(/\\/g, '\\textbackslash{}')
+            .replace(/([#$%&_{}])/g, '\\$1')
+            .replace(/~/g, '\\textasciitilde{}')
+            .replace(/\^/g, '\\textasciicircum{}');
+    }
+
+    /** Map SciREPL language names to lstlisting language names */
+    _latexLanguageName(lang) {
+        const map = {
+            'python': 'Python',
+            'javascript': 'JavaScript',
+            'r': 'R',
+            'prolog': 'Prolog',
+            'bash': 'bash'
+        };
+        return map[lang] || lang;
+    }
+
+    _htmlTableToLatex(tableEl) {
+        const headers = [];
+        const rows = [];
+
+        const thEls = tableEl.querySelectorAll('thead th');
+        thEls.forEach(th => headers.push(th.textContent.trim()));
+
+        const trEls = tableEl.querySelectorAll('tbody tr');
+        trEls.forEach(tr => {
+            const cells = [];
+            tr.querySelectorAll('td').forEach(td => cells.push(td.textContent.trim()));
+            rows.push(cells);
+        });
+
+        const colCount = Math.max(headers.length, rows.length > 0 ? rows[0].length : 0);
+        if (colCount === 0) return '';
+
+        let tex = '\\begin{table}[h]\n\\centering\n';
+        tex += '\\begin{tabular}{' + 'l'.repeat(colCount) + '}\n';
+        tex += '\\toprule\n';
+
+        if (headers.length > 0) {
+            tex += headers.map(h => this._escapeLatex(h)).join(' & ') + ' \\\\\n';
+            tex += '\\midrule\n';
+        }
+
+        rows.forEach(row => {
+            tex += row.map(c => this._escapeLatex(c)).join(' & ') + ' \\\\\n';
+        });
+
+        tex += '\\bottomrule\n';
+        tex += '\\end{tabular}\n\\end{table}\n';
+        return tex;
+    }
+
+    _markdownToLatex(text) {
+        const lines = text.split('\n');
+        let tex = '';
+
+        for (const line of lines) {
+            if (line.startsWith('# ')) {
+                tex += '\\section{' + this._escapeLatex(line.slice(2)) + '}\n';
+            } else if (line.startsWith('## ')) {
+                tex += '\\subsection{' + this._escapeLatex(line.slice(3)) + '}\n';
+            } else if (line.startsWith('### ')) {
+                tex += '\\subsubsection{' + this._escapeLatex(line.slice(4)) + '}\n';
+            } else if (line.trim() === '') {
+                tex += '\n';
+            } else if (line.startsWith('- ') || line.startsWith('* ')) {
+                tex += '\\item ' + this._escapeLatex(line.slice(2)) + '\n';
+            } else {
+                // Inline formatting: **bold**, *italic*, `code`
+                let processed = line;
+                processed = processed.replace(/\*\*(.+?)\*\*/g, (_, t) => '\\textbf{' + this._escapeLatex(t) + '}');
+                processed = processed.replace(/\*(.+?)\*/g, (_, t) => '\\textit{' + this._escapeLatex(t) + '}');
+                processed = processed.replace(/`(.+?)`/g, (_, t) => '\\texttt{' + this._escapeLatex(t) + '}');
+                // For lines without inline formatting, escape the whole thing
+                if (processed === line) {
+                    processed = this._escapeLatex(line);
+                }
+                tex += processed + '\n';
+            }
+        }
+
+        return tex;
+    }
+
+    async _buildLatexString() {
+        const cells = this._scrapeCells();
+        const name = this._getNotebookName();
+        const images = []; // { name, data }
+        let imageCounter = 0;
+
+        let body = '';
+
+        for (const cell of cells) {
+            if (cell.type === 'markdown') {
+                body += this._markdownToLatex(cell.code) + '\n';
+                continue;
+            }
+
+            // Code cell
+            const langName = this._latexLanguageName(cell.language);
+            body += `\\noindent\\textbf{In [${cell.id}]} \\textit{(${langName})}\n\n`;
+            body += `\\begin{lstlisting}[language=${langName}]\n${cell.code}\n\\end{lstlisting}\n\n`;
+
+            for (const out of cell.outputs) {
+                switch (out.kind) {
+                    case 'text':
+                        body += '\\begin{verbatim}\n' + out.content + '\n\\end{verbatim}\n\n';
+                        break;
+                    case 'error':
+                        body += '{\\color{red}\n\\begin{verbatim}\n' + out.content + '\n\\end{verbatim}\n}\n\n';
+                        break;
+                    case 'latex': {
+                        const tex = this._extractTexFromKaTeX(out.element || this._parseHtmlFragment(out.html));
+                        body += '\\[\n' + tex + '\n\\]\n\n';
+                        break;
+                    }
+                    case 'table': {
+                        const tableEl = out.element || this._parseHtmlFragment(out.html);
+                        body += this._htmlTableToLatex(tableEl) + '\n';
+                        break;
+                    }
+                    case 'image': {
+                        imageCounter++;
+                        const imgName = `image_${imageCounter}.png`;
+                        body += `\\begin{figure}[h]\n\\centering\n\\includegraphics[width=0.8\\textwidth]{images/${imgName}}\n\\end{figure}\n\n`;
+                        const base64 = out.src.split(',')[1];
+                        const binary = atob(base64);
+                        const bytes = new Uint8Array(binary.length);
+                        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                        images.push({ name: imgName, data: bytes });
+                        break;
+                    }
+                    case 'plot': {
+                        const dataUrl = await this._plotToImage(out.element);
+                        if (dataUrl) {
+                            imageCounter++;
+                            const imgName = `plot_${imageCounter}.png`;
+                            body += `\\begin{figure}[h]\n\\centering\n\\includegraphics[width=0.8\\textwidth]{images/${imgName}}\n\\end{figure}\n\n`;
+                            const base64 = dataUrl.split(',')[1];
+                            const binary = atob(base64);
+                            const bytes = new Uint8Array(binary.length);
+                            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                            images.push({ name: imgName, data: bytes });
+                        } else {
+                            body += '\\textit{[Plotly chart --- screenshot unavailable]}\n\n';
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        const tex = `\\documentclass[11pt]{article}
+
+\\usepackage[utf8]{inputenc}
+\\usepackage[T1]{fontenc}
+\\usepackage{amsmath,amssymb}
+\\usepackage{listings}
+\\usepackage{xcolor}
+\\usepackage{graphicx}
+\\usepackage{booktabs}
+\\usepackage[margin=1in]{geometry}
+\\usepackage{hyperref}
+
+\\lstset{
+  basicstyle=\\ttfamily\\small,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\\color{gray!10},
+  numbers=none,
+  tabsize=4,
+  showstringspaces=false,
+  keywordstyle=\\color{blue!70},
+  commentstyle=\\color{green!50!black},
+  stringstyle=\\color{red!60}
+}
+
+\\title{${this._escapeLatex(name)}}
+\\author{SciREPL}
+\\date{${this._escapeLatex(this._getTimestamp())}}
+
+\\begin{document}
+
+\\maketitle
+
+${body}
+\\end{document}
+`;
+
+        return { tex, images };
+    }
+
+    async exportLatex() {
+        const cells = this._scrapeCells();
+        if (cells.length === 0) {
+            alert('No cells to export.');
+            return;
+        }
+
+        const baseName = this._getNotebookName().replace(/[^a-zA-Z0-9_-]/g, '_');
+        const { tex, images } = await this._buildLatexString();
+
+        if (images.length === 0) {
+            // No images — export as standalone .tex
+            await this._downloadFile(baseName + '.tex', tex, 'application/x-latex');
+        } else {
+            // Has images — export as .tex.zip
+            if (typeof JSZip === 'undefined') {
+                alert('JSZip not loaded. Cannot create zip archive.');
+                return;
+            }
+
+            const zip = new JSZip();
+            zip.file('main.tex', tex);
+
+            const imgFolder = zip.folder('images');
+            for (const img of images) {
+                imgFolder.file(img.name, img.data);
+            }
+
+            const blob = await zip.generateAsync({ type: 'blob' });
+            this._downloadBlob(baseName + '.tex.zip', blob);
+        }
+    }
+
+    // ── .ipynb Output Helper ──
+
+    /**
+     * Convert scraped cell outputs to Jupyter notebook output format.
+     * Used by file_io.js exportNotebook().
+     * @param {Object} scrapedCell — from _scrapeCells()
+     * @returns {Array} Jupyter-format outputs
+     */
+    async scrapedOutputsToJupyter(scrapedCell) {
+        const outputs = [];
+
+        for (const out of scrapedCell.outputs) {
+            switch (out.kind) {
+                case 'text':
+                    outputs.push({
+                        output_type: 'stream',
+                        name: 'stdout',
+                        text: out.content.split('\n').map((line, i, arr) => i < arr.length - 1 ? line + '\n' : line)
+                    });
+                    break;
+                case 'error':
+                    outputs.push({
+                        output_type: 'error',
+                        ename: 'Error',
+                        evalue: out.content.split('\n')[0] || '',
+                        traceback: out.content.split('\n').map(line => line + '\n')
+                    });
+                    break;
+                case 'latex': {
+                    const tex = this._extractTexFromKaTeX(out.element || this._parseHtmlFragment(out.html));
+                    outputs.push({
+                        output_type: 'execute_result',
+                        data: {
+                            'text/plain': [tex],
+                            'text/latex': ['$\\displaystyle ' + tex + '$']
+                        },
+                        metadata: {},
+                        execution_count: scrapedCell.id
+                    });
+                    break;
+                }
+                case 'table':
+                    outputs.push({
+                        output_type: 'display_data',
+                        data: { 'text/html': [out.html] },
+                        metadata: {}
+                    });
+                    break;
+                case 'image': {
+                    const base64 = out.src.includes(',') ? out.src.split(',')[1] : out.src;
+                    outputs.push({
+                        output_type: 'display_data',
+                        data: { 'image/png': base64 },
+                        metadata: {}
+                    });
+                    break;
+                }
+                case 'plot': {
+                    const dataUrl = await this._plotToImage(out.element);
+                    if (dataUrl) {
+                        const base64 = dataUrl.split(',')[1];
+                        outputs.push({
+                            output_type: 'display_data',
+                            data: { 'image/png': base64 },
+                            metadata: {}
+                        });
+                    }
+                    break;
+                }
+                case 'markdown':
+                    // Markdown cell output is the rendered HTML — not a code output
+                    break;
+            }
+        }
+
+        return outputs;
+    }
+
     // ── File Download Helpers ──
 
     async _downloadFile(filename, content, mimeType) {
