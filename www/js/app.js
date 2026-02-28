@@ -58,11 +58,11 @@
                 window.kernelManager.setLanguage(lang);
             }
             // Update visual styling
-            const activeClasses = { prolog: 'prolog-active', bash: 'bash-active', javascript: 'javascript-active' };
+            const activeClasses = { prolog: 'prolog-active', bash: 'bash-active', javascript: 'javascript-active', r: 'r-active' };
             langSelector.className = activeClasses[lang] || '';
             // Update placeholder
             if (currentCellType === 'code') {
-                const placeholders = { prolog: 'Type Prolog here…', bash: 'Type Bash here…', javascript: 'Type JavaScript here…' };
+                const placeholders = { prolog: 'Type Prolog here…', bash: 'Type Bash here…', javascript: 'Type JavaScript here…', r: 'Type R here…' };
                 input.placeholder = placeholders[lang] || 'Type Python here…';
             }
         });
@@ -81,7 +81,7 @@
             cellTypeToggle.textContent = 'Code';
             cellTypeToggle.classList.remove('markdown-active');
             const lang = getCurrentLanguage();
-            const ph = { prolog: 'Type Prolog here…', bash: 'Type Bash here…', javascript: 'Type JavaScript here…' };
+            const ph = { prolog: 'Type Prolog here…', bash: 'Type Bash here…', javascript: 'Type JavaScript here…', r: 'Type R here…' };
             input.placeholder = ph[lang] || 'Type Python here…';
         }
     });
@@ -531,6 +531,22 @@
         // Render error
         if (result.error) {
             window.renderText(result.error, true);
+        }
+
+        // Render plot images (e.g. from R kernel)
+        if (result.images && result.images.length > 0) {
+            const container = window._currentOutputCard;
+            if (container) {
+                const body = container.querySelector('.card-body');
+                for (const imgUrl of result.images) {
+                    const img = document.createElement('img');
+                    img.src = imgUrl;
+                    img.style.maxWidth = '100%';
+                    img.style.borderRadius = '6px';
+                    img.style.marginTop = '8px';
+                    body.appendChild(img);
+                }
+            }
         }
 
         // Render formatted result
