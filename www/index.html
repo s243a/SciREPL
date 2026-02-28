@@ -94,6 +94,16 @@ solve(a*x**2 + b*x + c, x)
 # Suppress output with ;
 big_array = np.arange(1000);</code></pre>
 
+            <h3>Installing Packages</h3>
+            <p>Install pure-Python packages from PyPI with <code>%pip install</code>:</p>
+            <pre><code>%pip install requests
+
+# Then use it
+import requests
+r = requests.get('https://api.github.com')
+print(r.status_code)</code></pre>
+            <p><em>Note: Only pure-Python packages are supported. Packages with C extensions (e.g. psutil) require pre-compiled WASM wheels.</em></p>
+
             <h3>Quick Start — Prolog</h3>
             <p>Switch to Prolog using the language selector (Py → PL).</p>
             <pre><code>% Assert facts
