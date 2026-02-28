@@ -82,9 +82,16 @@
 import numpy as np
 np.linspace(0, 10, 5)
 
-# Plotting
+# Plotly chart (interactive)
 x = np.linspace(0, 2*np.pi, 50)
 plot(x, np.sin(x))
+
+# Matplotlib (install once, then use)
+%pip install matplotlib
+import matplotlib.pyplot as plt
+plt.plot([1, 4, 2, 3])
+plt.title("Matplotlib")
+plt.show()
 
 # SymPy (LaTeX rendering)
 from sympy import symbols, sqrt, solve
@@ -112,6 +119,34 @@ library(jsonlite)
 # Or use the %install shortcut
 %install dplyr</code></pre>
             <p><em>Note: Only R packages compiled to WebAssembly are available. See <a href="https://repo.r-wasm.org/" target="_blank" rel="noopener">repo.r-wasm.org</a> for the package list.</em></p>
+
+            <h3>Quick Start — R</h3>
+            <p>Switch to R using the language selector. The webR runtime (~50 MB) downloads on first use and is cached.</p>
+            <pre><code># Basic math
+mean(c(10, 20, 30))
+
+# Vectors and stats
+x <- rnorm(100)
+summary(x)
+
+# Static plot (PNG)
+plot(1:10, (1:10)^2, main = "Quadratic")
+
+# Interactive Plotly chart
+plotly(1:50, sin(1:50 / 5), title = "Sine Wave")
+
+# Multi-trace interactive chart
+mplotly(
+  traces = list(
+    list(x = 1:10, y = (1:10)^2, name = "x²"),
+    list(x = 1:10, y = (1:10)^3, name = "x³")
+  ),
+  title = "Power Functions"
+)
+
+# Cross-kernel file sharing
+sharedfs_write("/shared/data/from_r.txt", "Hello from R!")
+sharedfs_list("/shared/data")</code></pre>
 
             <h3>Quick Start — Prolog</h3>
             <p>Switch to Prolog using the language selector (Py → PL).</p>
