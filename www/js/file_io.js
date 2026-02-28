@@ -724,11 +724,16 @@ class FileIO {
                         if (cell.metadata && cell.metadata.scirepl_language) {
                             cellLang = cell.metadata.scirepl_language;
                         }
-                        extractedCells.push({
+                        const cellDef = {
                             code: source,
                             type: cell.cell_type === 'markdown' ? 'markdown' : 'code',
                             language: cellLang
-                        });
+                        };
+                        // Preserve outputs from .ipynb for display without re-execution
+                        if (cell.cell_type === 'code' && Array.isArray(cell.outputs) && cell.outputs.length > 0) {
+                            cellDef.outputs = cell.outputs;
+                        }
+                        extractedCells.push(cellDef);
                     }
                 });
             }

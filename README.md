@@ -26,8 +26,8 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **Run All Below / Run All Cells** — Re-execute from a cell downward or the entire notebook
 - **Session persistence** — Cells auto-save (with language) and restore on app restart
 - **Import/Export** — `.ipynb`, `.py`, `.pl` with language-aware metadata; native share sheet
-- **Rich export** — HTML, Markdown, PDF, DOCX, and LaTeX. Exports include code, output, plots, LaTeX math, and tables.
-- **Import/Export with outputs** — `.ipynb` export now includes cell outputs (text, images, LaTeX, tables), viewable in Jupyter and GitHub without re-execution
+- **Rich export** — HTML, Markdown, PDF, DOCX, and LaTeX. Exports include code, output, plots, LaTeX math, and tables. HTML and DOCX exports include syntax-highlighted code blocks.
+- **Import/Export with outputs** — `.ipynb` export includes cell outputs (text, images, LaTeX, tables), viewable in Jupyter and GitHub without re-execution. Import preserves outputs — no re-execution needed.
 - **Package catalog** — Browse and one-click install curated packages
 - **Math Mode palette** — Quick-insert SymPy functions (diff, integrate, solve, etc.)
 - **Variable persistence** across cells (like Jupyter)
@@ -220,10 +220,10 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - **[www/js/package_loader.js](www/js/package_loader.js)** — Package loading, target routing, WASM module loading
 - **[www/js/package_catalog.js](www/js/package_catalog.js)** — Browse Packages UI and one-click install
 - **[www/js/persistence.js](www/js/persistence.js)** — Session save/restore via localStorage (with language per cell)
-- **[www/js/export.js](www/js/export.js)** — HTML, Markdown, PDF, DOCX, and LaTeX export with DOM scraping
-- **[www/js/file_io.js](www/js/file_io.js)** — Import/export (.ipynb, .py, .pl, packages) via Capacitor plugins
+- **[www/js/export.js](www/js/export.js)** — HTML, Markdown, PDF, DOCX, and LaTeX export with DOM scraping and syntax highlighting
+- **[www/js/file_io.js](www/js/file_io.js)** — Import/export (.ipynb with output preservation, .py, .pl, packages) via Capacitor plugins
 - **[www/js/math_mode.js](www/js/math_mode.js)** — Math palette UI
-- **[www/vendor/](www/vendor/)** — Bundled KaTeX, Plotly.js, marked.js (~2.6MB)
+- **[www/vendor/](www/vendor/)** — Bundled KaTeX, Plotly.js, marked.js, highlight.js (~2.7MB)
 - **[docs/packages.md](docs/packages.md)** — Package system v2 documentation
 
 ### Capacitor Plugins
@@ -257,6 +257,8 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - [x] Interactive R plots via `plotly()` / `mplotly()` helpers
 - [x] Rich export — HTML, Markdown, PDF, DOCX, LaTeX
 - [x] .ipynb export with outputs (text, images, LaTeX, tables)
+- [x] .ipynb import with output preservation (no re-execution needed)
+- [x] Syntax highlighting in exports (HTML, DOCX) via highlight.js
 - [ ] Additional languages (Lua)
 - [x] Cell reordering (drag-and-drop + move arrows)
 - [x] Delete individual cells

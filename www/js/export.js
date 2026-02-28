@@ -8,6 +8,87 @@ class ExportManager {
         this._docxLoaded = false;
     }
 
+    /**
+     * Syntax-highlight code using highlight.js if available.
+     * Returns highlighted HTML string, or falls back to escaped HTML.
+     */
+    _highlightCode(code, language) {
+        if (typeof window.hljs !== 'undefined') {
+            // Map SciREPL language names to hljs names
+            const langMap = { python: 'python', javascript: 'javascript', r: 'r', bash: 'bash', prolog: 'prolog' };
+            const hljsLang = langMap[language];
+            if (hljsLang && window.hljs.getLanguage(hljsLang)) {
+                try {
+                    return window.hljs.highlight(code, { language: hljsLang }).value;
+                } catch (e) { /* fall through */ }
+            }
+        }
+        return this._escapeHtml(code);
+    }
+
+    /**
+     * Parse hljs-highlighted HTML into an array of { text, color } segments.
+     * Used by DOCX export to create colored TextRuns.
+     */
+    _parseHljsTokens(highlightedHtml) {
+        // Token class → color mapping (atom-one-dark inspired, but for light DOCX)
+        const colorMap = {
+            'hljs-keyword': '8B008B',      // dark magenta
+            'hljs-built_in': 'B8860B',     // dark goldenrod
+            'hljs-type': 'B8860B',
+            'hljs-literal': '0000FF',      // blue
+            'hljs-number': '098658',       // teal
+            'hljs-string': 'A31515',       // dark red
+            'hljs-regexp': 'A31515',
+            'hljs-addition': 'A31515',
+            'hljs-attribute': 'A31515',
+            'hljs-comment': '008000',      // green
+            'hljs-quote': '008000',
+            'hljs-doctag': '8B008B',
+            'hljs-formula': '8B008B',
+            'hljs-section': '0000FF',
+            'hljs-name': 'E06C75',
+            'hljs-selector-tag': 'E06C75',
+            'hljs-deletion': 'E06C75',
+            'hljs-subst': 'E06C75',
+            'hljs-meta': '4078F2',
+            'hljs-title': '4078F2',
+            'hljs-link': '4078F2',
+            'hljs-symbol': '4078F2',
+            'hljs-bullet': '4078F2',
+            'hljs-variable': 'D19A66',
+            'hljs-template-variable': 'D19A66',
+            'hljs-selector-class': 'D19A66',
+            'hljs-selector-attr': 'D19A66',
+            'hljs-selector-pseudo': 'D19A66',
+            'hljs-class': 'E6C07B',
+            'hljs-title.class_': 'E6C07B'
+        };
+
+        const segments = [];
+        // Use a regex to split on hljs spans
+        // Handles: <span class="hljs-keyword">text</span> and plain text
+        const spanRegex = /<span class="([^"]+)">([^<]*)<\/span>|([^<]+)/g;
+        let match;
+        while ((match = spanRegex.exec(highlightedHtml)) !== null) {
+            if (match[1]) {
+                // Span with class — find the first matching color
+                const classes = match[1].split(' ');
+                let color = null;
+                for (const cls of classes) {
+                    if (colorMap[cls]) { color = colorMap[cls]; break; }
+                }
+                // Unescape HTML entities in the text
+                const text = match[2].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#x27;/g, "'");
+                segments.push({ text, color: color || '000000' });
+            } else if (match[3]) {
+                const text = match[3].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#x27;/g, "'");
+                segments.push({ text, color: '000000' });
+            }
+        }
+        return segments;
+    }
+
     // ── Helpers ──
 
     _escapeHtml(str) {
@@ -387,6 +468,18 @@ body {
 }
 .markdown-body table th { background: var(--bg-secondary); font-weight: 600; }
 
+/* Syntax highlighting (highlight.js atom-one-dark) */
+.hljs-comment,.hljs-quote{color:#5c6370;font-style:italic}
+.hljs-doctag,.hljs-formula,.hljs-keyword{color:#c678dd}
+.hljs-deletion,.hljs-name,.hljs-section,.hljs-selector-tag,.hljs-subst{color:#e06c75}
+.hljs-literal{color:#56b6c2}
+.hljs-addition,.hljs-attribute,.hljs-meta .hljs-string,.hljs-regexp,.hljs-string{color:#98c379}
+.hljs-attr,.hljs-number,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-pseudo,.hljs-template-variable,.hljs-type,.hljs-variable{color:#d19a66}
+.hljs-bullet,.hljs-link,.hljs-meta,.hljs-selector-id,.hljs-symbol,.hljs-title{color:#61aeee}
+.hljs-built_in,.hljs-class .hljs-title,.hljs-title.class_{color:#e6c07b}
+.hljs-emphasis{font-style:italic}
+.hljs-strong{font-weight:700}
+
 /* Print / PDF overrides */
 @media print {
     :root {
@@ -443,7 +536,7 @@ body {
                 const langBadge = `<span class="lang-badge lang-${cell.language}">${cell.language}</span>`;
                 cellsHtml += `<div class="cell-input">
   <div class="cell-label"><span class="prompt-icon">In [${cell.id}]</span> ${langBadge}</div>
-  <pre class="cell-code"><code>${this._escapeHtml(cell.code)}</code></pre>
+  <pre class="cell-code"><code>${this._highlightCode(cell.code, cell.language)}</code></pre>
 </div>\n`;
 
                 if (cell.outputs.length > 0) {
@@ -785,14 +878,33 @@ ${cellsHtml}
                 spacing: { before: 300, after: 100 }
             }));
 
-            // Code block
+            // Code block (with syntax highlighting if hljs available)
+            const highlightedHtml = this._highlightCode(cell.code, cell.language);
+            const hasHljs = highlightedHtml !== this._escapeHtml(cell.code);
             const codeLines = cell.code.split('\n');
-            for (const line of codeLines) {
-                children.push(new Paragraph({
-                    children: [new TextRun({ text: line || ' ', font: 'Courier New', size: 20 })],
-                    shading: { type: ShadingType.SOLID, color: 'F6F8FA' },
-                    spacing: { after: 0 }
-                }));
+
+            if (hasHljs) {
+                // Parse highlighted HTML for colored TextRuns per line
+                const highlightedLines = highlightedHtml.split('\n');
+                for (const hLine of highlightedLines) {
+                    const segments = this._parseHljsTokens(hLine);
+                    const runs = segments.length > 0
+                        ? segments.map(s => new TextRun({ text: s.text || ' ', font: 'Courier New', size: 20, color: s.color }))
+                        : [new TextRun({ text: ' ', font: 'Courier New', size: 20 })];
+                    children.push(new Paragraph({
+                        children: runs,
+                        shading: { type: ShadingType.SOLID, color: 'F6F8FA' },
+                        spacing: { after: 0 }
+                    }));
+                }
+            } else {
+                for (const line of codeLines) {
+                    children.push(new Paragraph({
+                        children: [new TextRun({ text: line || ' ', font: 'Courier New', size: 20 })],
+                        shading: { type: ShadingType.SOLID, color: 'F6F8FA' },
+                        spacing: { after: 0 }
+                    }));
+                }
             }
 
             // Outputs
