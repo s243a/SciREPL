@@ -7,7 +7,7 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 ## Features
 
 - **Multi-language notebooks** — Python, Prolog, Bash, and JavaScript in the same notebook, with per-cell language tracking
-- **Offline Python** via Pyodide (WASM) — NumPy + SymPy preloaded
+- **Offline Python** via Pyodide (WASM) — NumPy + SymPy preloaded, `%pip install` for PyPI packages
 - **SWI-Prolog kernel** — Full SWI-Prolog via swipl-wasm, loaded on demand from CDN
 - **Bash kernel** — Unix shell via brush-wasm with coreutils, findutils, grep (all Rust reimplementations)
 - **JavaScript kernel** — Native browser JS execution with zero download. Direct access to WASM modules, SharedVFS, and browser APIs
@@ -134,7 +134,7 @@ append([1,2], [3,4], X).
 | **Runs offline** | Yes (PWA + WASM) | Needs local server | No |
 | **Privacy** | All execution local | Local | Google servers |
 | **Mobile support** | Mobile-first + Android app | Not optimized | Usable but not native |
-| **Package ecosystem** | Pyodide-compatible packages | Full pip | Full pip |
+| **Package ecosystem** | `%pip install` (pure-Python PyPI) | Full pip | Full pip |
 | **Performance** | WASM (slower for heavy compute) | Native Python | Native + free GPU/TPU |
 | **Collaboration** | Single user | JupyterHub | Real-time multi-user |
 | **Code completion** | Not yet | Extensions available | Built-in |
@@ -143,7 +143,7 @@ append([1,2], [3,4], X).
 
 **Why SciREPL?** It's **250x smaller** than a typical Jupyter install (~2MB vs ~500MB), the **only notebook with multi-language cells** (Python, Prolog, Bash, JS in one notebook), and **built for mobile** — not just adapted for it. All with zero setup: visit a URL and go.
 
-**Trade-offs:** WASM Python is slower than native for heavy compute, and the package ecosystem is limited to Pyodide-compatible libraries. Not ideal for GPU-accelerated ML training or large datasets.
+**Trade-offs:** WASM Python is slower than native for heavy compute. `%pip install` works for pure-Python packages; C-extension packages need pre-compiled WASM wheels. Not ideal for GPU-accelerated ML training or large datasets.
 
 ## Architecture
 
