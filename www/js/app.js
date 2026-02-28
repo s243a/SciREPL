@@ -504,6 +504,17 @@
             return executePythonLegacy(`await pip_install(${pkgList})`);
         }
 
+        // Handle %install magic for R packages (webR WASM repo)
+        const rInstallMatch = code.match(/^%install\s+(.+)$/m);
+        if (rInstallMatch && language === 'r') {
+            const packages = rInstallMatch[1].trim().split(/\s+/);
+            const kernel = km._instances && km._instances['r'];
+            if (kernel && kernel.installPackages) {
+                const msg = await kernel.installPackages(packages);
+                return { stdout: msg, result: null, error: null };
+            }
+        }
+
         // Handle %%language magic commands (e.g., %%bash, %%python, %%prolog)
         // Strips the magic line and routes to the specified kernel.
         const magicMatch = code.match(/^%%(\w+)\s*\n([\s\S]*)$/);

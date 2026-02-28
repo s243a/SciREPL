@@ -1,6 +1,7 @@
 /**
  * kernels/r.js — R kernel using webR (WebAssembly).
- * Provides a full R environment with plotting support.
+ * Provides a full R environment with plotting support,
+ * SharedVFS integration, and package installation.
  *
  * Lazy-loaded from CDN (~50+ MB) on first use.
  * User is prompted before download.
@@ -11,6 +12,8 @@ class RKernel {
         this._webr = null;
         this._ready = false;
         this._loading = false;
+        /** Track files synced to webR so we can detect changes */
+        this._syncedToWebR = new Map(); // path → modified timestamp
     }
 
     static displayName = 'R';
@@ -35,6 +38,20 @@ class RKernel {
             const { WebR } = await import('https://webr.r-wasm.org/latest/webr.mjs');
             this._webr = new WebR();
             await this._webr.init();
+
+            // Create shared directories in webR's filesystem
+            await this._mkdirSafe('/shared');
+            await this._mkdirSafe('/shared/data');
+            await this._mkdirSafe('/shared/lib');
+            await this._mkdirSafe('/tmp');
+
+            // Enable install.packages() to work with webR's WASM repo
+            await this._webr.evalRVoid('webr::shim_install()');
+            console.log('[RKernel] install.packages() shimmed');
+
+            // Load SharedVFS helper functions
+            await this._loadSharedFSHelpers();
+
             this._ready = true;
             console.log('[RKernel] Ready (webR)');
         } catch (err) {
@@ -42,6 +59,20 @@ class RKernel {
             throw err;
         } finally {
             this._loading = false;
+        }
+    }
+
+    /**
+     * Load the R SharedVFS convenience functions into the R session.
+     */
+    async _loadSharedFSHelpers() {
+        try {
+            const resp = await fetch('js/r_sharedfs.R');
+            const code = await resp.text();
+            await this._webr.evalRVoid(code);
+            console.log('[RKernel] SharedVFS helpers loaded');
+        } catch (e) {
+            console.warn('[RKernel] Failed to load r_sharedfs.R:', e);
         }
     }
 
@@ -72,6 +103,154 @@ class RKernel {
         return 'r';
     }
 
+    // ── SharedVFS Sync ──────────────────────────────────────────
+
+    /**
+     * Create a directory in webR's FS, ignoring "already exists" errors.
+     */
+    async _mkdirSafe(path) {
+        try {
+            await this._webr.FS.mkdir(path);
+        } catch (e) {
+            // Ignore EEXIST
+        }
+    }
+
+    /**
+     * Recursively collect all file paths from SharedVFS under a prefix.
+     */
+    _collectSharedFiles(prefix) {
+        const vfs = window.sharedVFS;
+        if (!vfs) return [];
+        const files = [];
+        // Walk the SharedVFS internal file map
+        for (const [path, entry] of vfs._files) {
+            if (path.startsWith(prefix + '/')) {
+                files.push({ path, content: entry.content, modified: entry.modified });
+            }
+        }
+        return files;
+    }
+
+    /**
+     * Sync files from SharedVFS → webR's Emscripten FS (before execution).
+     * Only syncs files that are new or changed since last sync.
+     */
+    async _syncToWebR() {
+        const vfs = window.sharedVFS;
+        if (!vfs) return;
+
+        for (const prefix of ['/shared', '/tmp']) {
+            const files = this._collectSharedFiles(prefix);
+            for (const { path, content, modified } of files) {
+                const lastSynced = this._syncedToWebR.get(path);
+                if (lastSynced && lastSynced >= modified) continue;
+
+                // Ensure parent dirs exist in webR FS
+                const parts = path.split('/');
+                for (let i = 2; i < parts.length; i++) {
+                    await this._mkdirSafe(parts.slice(0, i).join('/'));
+                }
+
+                // Write file into webR FS
+                let data;
+                if (content instanceof Uint8Array) {
+                    data = content;
+                } else {
+                    data = new TextEncoder().encode(String(content));
+                }
+                await this._webr.FS.writeFile(path, data);
+                this._syncedToWebR.set(path, modified);
+            }
+        }
+    }
+
+    /**
+     * Sync files from webR's Emscripten FS → SharedVFS (after execution).
+     * Walks /shared and /tmp in webR, writes any new/changed files back.
+     */
+    async _syncFromWebR() {
+        const vfs = window.sharedVFS;
+        if (!vfs) return;
+
+        for (const prefix of ['/shared', '/tmp']) {
+            await this._syncDirFromWebR(prefix, vfs);
+        }
+    }
+
+    /**
+     * Recursively sync a directory from webR FS back to SharedVFS.
+     */
+    async _syncDirFromWebR(dirPath, vfs) {
+        let entries;
+        try {
+            entries = await this._webr.evalRString(
+                `paste(list.files("${dirPath}", full.names = TRUE, recursive = TRUE), collapse = "\\n")`
+            );
+        } catch (e) {
+            return; // Directory might not exist
+        }
+
+        if (!entries || entries.trim() === '') return;
+
+        for (const filePath of entries.split('\n')) {
+            if (!filePath) continue;
+            try {
+                const data = await this._webr.FS.readFile(filePath);
+                // Check if this file differs from what's in SharedVFS
+                const existing = vfs.readFile(filePath);
+                if (existing instanceof Uint8Array) {
+                    if (existing.length === data.length) {
+                        let same = true;
+                        for (let i = 0; i < data.length; i++) {
+                            if (existing[i] !== data[i]) { same = false; break; }
+                        }
+                        if (same) continue;
+                    }
+                } else if (existing !== null) {
+                    const existingBytes = new TextEncoder().encode(String(existing));
+                    if (existingBytes.length === data.length) {
+                        let same = true;
+                        for (let i = 0; i < data.length; i++) {
+                            if (existingBytes[i] !== data[i]) { same = false; break; }
+                        }
+                        if (same) continue;
+                    }
+                }
+                // File is new or changed — write to SharedVFS
+                vfs.writeFile(filePath, new Uint8Array(data), 'r');
+                this._syncedToWebR.set(filePath, Date.now());
+            } catch (e) {
+                // Skip files that can't be read (directories, special files)
+            }
+        }
+    }
+
+    // ── Package Installation ────────────────────────────────────
+
+    /**
+     * Install R packages from the webR WASM repository.
+     * @param {string[]} packageNames
+     * @returns {string} Status messages
+     */
+    async installPackages(packageNames) {
+        if (!this._ready) await this.init();
+
+        const messages = [];
+        for (const pkg of packageNames) {
+            try {
+                messages.push(`Installing ${pkg}...`);
+                await this._webr.installPackages([pkg]);
+                messages.push(`  Installed ${pkg}`);
+            } catch (e) {
+                messages.push(`  Failed to install ${pkg}: ${e.message || e}`);
+            }
+        }
+        return messages.join('\n');
+    }
+
+    // ── Execute ─────────────────────────────────────────────────
+
     /**
      * Execute R code. Returns { stdout, result, error, images }.
      */
@@ -84,6 +263,9 @@ class RKernel {
         }
 
         try {
+            // Sync SharedVFS → webR before execution
+            await this._syncToWebR();
+
             const shelter = await new this._webr.Shelter();
             const capture = await shelter.captureR(trimmed, {
                 withAutoprint: true,
@@ -140,6 +322,9 @@ class RKernel {
 
             shelter.purge();
 
+            // Sync webR → SharedVFS after execution
+            await this._syncFromWebR();
+
             return {
                 stdout: stdout.trimEnd(),
                 result,
@@ -160,6 +345,7 @@ class RKernel {
             this._webr = null;
         }
         this._ready = false;
+        this._syncedToWebR.clear();
     }
 }
 

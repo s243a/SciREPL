@@ -1,19 +1,20 @@
 # SciREPL — Mobile Multi-Language Scientific REPL
 
-A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, with Jupyter-style notebook features. Supports **Python** (Pyodide), **Prolog** (swipl-wasm), **Bash** (brush-wasm), and **JavaScript** (native).
+A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, with Jupyter-style notebook features. Supports **Python** (Pyodide), **R** (webR), **Prolog** (swipl-wasm), **Bash** (brush-wasm), and **JavaScript** (native).
 
 ![Status](https://img.shields.io/badge/status-beta-green) ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ## Features
 
-- **Multi-language notebooks** — Python, Prolog, Bash, and JavaScript in the same notebook, with per-cell language tracking
+- **Multi-language notebooks** — Python, R, Prolog, Bash, and JavaScript in the same notebook, with per-cell language tracking
 - **Offline Python** via Pyodide (WASM) — NumPy + SymPy preloaded, `%pip install` for PyPI packages
 - **SWI-Prolog kernel** — Full SWI-Prolog via swipl-wasm, loaded on demand from CDN
 - **Bash kernel** — Unix shell via brush-wasm with coreutils, findutils, grep (all Rust reimplementations)
 - **JavaScript kernel** — Native browser JS execution with zero download. Direct access to WASM modules, SharedVFS, and browser APIs
+- **R kernel** — Full R via webR (WASM), loaded on demand (~50 MB, cached after first use). Supports plotting, `install.packages()`, and SharedVFS file sharing.
 - **Kernel abstraction layer** — Pluggable architecture for adding new language runtimes
 - **Package system v2** — Install packages with notebooks, data files, Python modules, Prolog knowledge bases, and WASM libraries. See [docs/packages.md](docs/packages.md).
-- **SharedVFS** — In-memory filesystem shared across all kernels. Python, Bash, Prolog, and JavaScript can read/write the same files.
+- **SharedVFS** — In-memory filesystem shared across all kernels. Python, Bash, Prolog, R, and JavaScript can read/write the same files.
 - **Cross-kernel WASM FFI** — Package and distribute pre-compiled Rust WASM libraries callable from JavaScript, Python, and Prolog
 - **Rich output** — LaTeX math rendering, interactive Plotly charts, tables
 - **Hybrid plotting** — Python `plot()` → Plotly.js (pinch-zoom, pan, hover)
@@ -130,7 +131,7 @@ append([1,2], [3,4], X).
 | | SciREPL | Jupyter Notebook | Google Colab |
 |---|---|---|---|
 | **Setup** | Zero — visit a URL or install APK | Install Python + pip | Google account |
-| **Languages per notebook** | Python, Prolog, Bash, JS (per cell) | One kernel per notebook | Python only |
+| **Languages per notebook** | Python, R, Prolog, Bash, JS (per cell) | One kernel per notebook | Python only |
 | **Runs offline** | Yes (PWA + WASM) | Needs local server | No |
 | **Privacy** | All execution local | Local | Google servers |
 | **Mobile support** | Mobile-first + Android app | Not optimized | Usable but not native |
@@ -167,7 +168,8 @@ KernelManager (kernel_manager.js)
 ├── PythonKernel     (kernels/python.js)      — Pyodide + prelude.py + sharedfs bridge
 ├── PrologKernel     (kernels/prolog.js)       — swipl-wasm + wasm_call/3
 ├── BashKernel       (kernels/bash.js)         — brush-wasm (coreutils + findutils + grep)
-└── JavaScriptKernel (kernels/javascript.js)   — native browser JS (zero download)
+├── JavaScriptKernel (kernels/javascript.js)   — native browser JS (zero download)
+└── RKernel          (kernels/r.js)            — webR (lazy-loaded ~50MB, plotting, SharedVFS, install.packages)
 ```
 
 Each kernel implements: `init()`, `execute(code)`, `isReady()`, `getName()`, `getLanguage()`, `destroy()`
@@ -186,6 +188,8 @@ SharedVFS (/shared/, /tmp/):
   Bash:    direct access (wasm-bindgen)
   Python:  via sharedfs module (import sharedfs)
   Prolog:  mirrored on read/write
+  R:       synced before/after execution (sharedfs_read/write helpers)
+  JS:      window.sharedVFS direct access
 
 WASM modules → window.wasmModules[name]
   JS:      window.wasmModules.name.call('func', {args})
@@ -208,6 +212,7 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - **[www/js/bridge.js](www/js/bridge.js)** — JS rendering: `renderPlot()`, `renderLatex()`, `renderTable()`
 - **[www/js/prelude.py](www/js/prelude.py)** — Python bridge: `plot()`, `mplot()`, `table()`, `wasm_call()`
 - **[www/js/sharedfs.py](www/js/sharedfs.py)** — Python SharedVFS bridge (`import sharedfs`)
+- **[www/js/r_sharedfs.R](www/js/r_sharedfs.R)** — R SharedVFS bridge (`sharedfs_read`, `sharedfs_write`, etc.)
 - **[www/js/shared_vfs.js](www/js/shared_vfs.js)** — SharedVFS — in-memory filesystem shared across kernels
 - **[www/js/package_loader.js](www/js/package_loader.js)** — Package loading, target routing, WASM module loading
 - **[www/js/package_catalog.js](www/js/package_catalog.js)** — Browse Packages UI and one-click install
@@ -228,6 +233,7 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 |---------|-----|------|-------------|
 | Pyodide | cdn.jsdelivr.net | ~25MB | App startup (after privacy consent) |
 | swipl-wasm | SWI-Prolog.github.io | ~10MB | First Prolog cell execution |
+| webR | webr.r-wasm.org | ~50MB | First R cell execution |
 
 ## Roadmap
 
@@ -237,11 +243,13 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - [x] Bundled rendering libraries
 - [x] Package system v2 — target routing, binary support, SharedVFS
 - [x] Python SharedVFS bridge (`import sharedfs`)
+- [x] R SharedVFS bridge (`sharedfs_read`, `sharedfs_write`) + `install.packages()` support
 - [x] Cross-kernel WASM FFI (Python + Prolog can call WASM modules)
 - [x] Package catalog with one-click install
 - [x] JavaScript kernel (native browser, zero download)
 - [x] PWA — installable as desktop/mobile app, offline support, WASM runtime caching
-- [ ] Additional languages (R via webR, Lua)
+- [x] R kernel via webR (lazy-loaded, plotting, SharedVFS, package install)
+- [ ] Additional languages (Lua)
 - [ ] Matplotlib backend fallback
 - [x] Cell reordering (drag-and-drop + move arrows)
 - [x] Delete individual cells
