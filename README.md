@@ -125,6 +125,26 @@ append([1,2], [3,4], X).
 % → X = [1, 2, 3, 4]
 ```
 
+## How Does SciREPL Compare to Jupyter / Colab?
+
+| | SciREPL | Jupyter Notebook | Google Colab |
+|---|---|---|---|
+| **Setup** | Zero — visit a URL or install APK | Install Python + pip | Google account |
+| **Languages per notebook** | Python, Prolog, Bash, JS (per cell) | One kernel per notebook | Python only |
+| **Runs offline** | Yes (PWA + WASM) | Needs local server | No |
+| **Privacy** | All execution local | Local | Google servers |
+| **Mobile support** | Mobile-first + Android app | Not optimized | Usable but not native |
+| **Package ecosystem** | Pyodide-compatible packages | Full pip | Full pip |
+| **Performance** | WASM (slower for heavy compute) | Native Python | Native + free GPU/TPU |
+| **Collaboration** | Single user | JupyterHub | Real-time multi-user |
+| **Code completion** | Not yet | Extensions available | Built-in |
+| **WASM FFI** | Call Rust WASM from any kernel | No | No |
+| **Size** | ~2MB app + CDN runtimes | ~500MB with Anaconda | Cloud-based |
+
+**Best for:** Portable, private, multi-language notebooks with zero setup — quick scientific computing on the go, education, and offline use.
+
+**Not ideal for:** Heavy ML training, large datasets, or workflows requiring extensive C-extension packages.
+
 ## Architecture
 
 ```mermaid
