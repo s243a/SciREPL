@@ -63,6 +63,17 @@ APK output: `android/app/build/outputs/apk/debug/app-debug.apk`
 adb install android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
+### Install as PWA
+
+Visit [https://s243a.github.io/SciREPL/](https://s243a.github.io/SciREPL/) in your browser, then:
+
+- **Chrome (desktop):** Click the install icon in the address bar, or Menu > "Install SciREPL"
+- **Chrome (Android):** Menu > "Add to Home screen" or "Install app"
+- **Edge:** Click the install icon in the address bar, or Menu > Apps > "Install this site as an app"
+- **Safari (iOS):** Share button > "Add to Home Screen"
+
+Once installed, it runs in its own window and works offline.
+
 ## Try It
 
 ### Python
