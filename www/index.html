@@ -104,6 +104,15 @@ r = requests.get('https://api.github.com')
 print(r.status_code)</code></pre>
             <p><em>Note: Only pure-Python packages are supported. Packages with C extensions (e.g. psutil) require pre-compiled WASM wheels.</em></p>
 
+            <p>Install R packages with <code>install.packages()</code> or <code>%install</code>:</p>
+            <pre><code># Standard R syntax (works out of the box)
+install.packages("jsonlite")
+library(jsonlite)
+
+# Or use the %install shortcut
+%install dplyr</code></pre>
+            <p><em>Note: Only R packages compiled to WebAssembly are available. See <a href="https://repo.r-wasm.org/" target="_blank" rel="noopener">repo.r-wasm.org</a> for the package list.</em></p>
+
             <h3>Quick Start — Prolog</h3>
             <p>Switch to Prolog using the language selector (Py → PL).</p>
             <pre><code>% Assert facts
