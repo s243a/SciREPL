@@ -114,6 +114,20 @@ window.renderTable = function (jsonStr) {
     body.appendChild(table);
 };
 
+/* ---- Inline image rendering (matplotlib, R plots) ---- */
+
+window.renderImage = function (dataUrl) {
+    const container = window._currentOutputCard;
+    if (!container) return;
+
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    img.style.maxWidth = '100%';
+    img.style.borderRadius = '6px';
+    img.style.marginTop = '8px';
+    container.querySelector('.card-body').appendChild(img);
+};
+
 /* ---- Text output ---- */
 
 window.renderText = function (text, isError) {

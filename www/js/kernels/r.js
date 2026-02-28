@@ -67,12 +67,12 @@ class RKernel {
      */
     async _loadSharedFSHelpers() {
         try {
-            const resp = await fetch('js/r_sharedfs.R');
+            const resp = await fetch('js/r_prelude.R');
             const code = await resp.text();
             await this._webr.evalRVoid(code);
-            console.log('[RKernel] SharedVFS helpers loaded');
+            console.log('[RKernel] R prelude loaded (SharedVFS + plotly)');
         } catch (e) {
-            console.warn('[RKernel] Failed to load r_sharedfs.R:', e);
+            console.warn('[RKernel] Failed to load r_prelude.R:', e);
         }
     }
 
@@ -321,6 +321,19 @@ class RKernel {
             }
 
             shelter.purge();
+
+            // Extract and render Plotly directives from stdout
+            const plotlyRegex = /__SCIREPL_PLOTLY__ (.*?) __END_PLOTLY__/g;
+            let plotlyMatch;
+            while ((plotlyMatch = plotlyRegex.exec(stdout)) !== null) {
+                try {
+                    window.renderPlot(plotlyMatch[1]);
+                } catch (e) {
+                    console.warn('[RKernel] Plotly render failed:', e);
+                }
+            }
+            // Remove plotly markers from displayed stdout
+            stdout = stdout.replace(/__SCIREPL_PLOTLY__ .*? __END_PLOTLY__\n?/g, '');
 
             // Sync webR → SharedVFS after execution
             await this._syncFromWebR();
