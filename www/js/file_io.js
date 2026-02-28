@@ -128,6 +128,42 @@ class FileIO {
             });
         }
 
+        // Export HTML
+        const exportHtmlBtn = document.getElementById('btn-export-html');
+        if (exportHtmlBtn) {
+            exportHtmlBtn.addEventListener('click', async () => {
+                this.menuModal.classList.add('hidden');
+                if (window.exportManager) await window.exportManager.exportHTML();
+            });
+        }
+
+        // Export Markdown
+        const exportMdBtn = document.getElementById('btn-export-md');
+        if (exportMdBtn) {
+            exportMdBtn.addEventListener('click', async () => {
+                this.menuModal.classList.add('hidden');
+                if (window.exportManager) await window.exportManager.exportMarkdown();
+            });
+        }
+
+        // Export PDF
+        const exportPdfBtn = document.getElementById('btn-export-pdf');
+        if (exportPdfBtn) {
+            exportPdfBtn.addEventListener('click', async () => {
+                this.menuModal.classList.add('hidden');
+                if (window.exportManager) await window.exportManager.exportPDF();
+            });
+        }
+
+        // Export DOCX
+        const exportDocxBtn = document.getElementById('btn-export-docx');
+        if (exportDocxBtn) {
+            exportDocxBtn.addEventListener('click', async () => {
+                this.menuModal.classList.add('hidden');
+                if (window.exportManager) await window.exportManager.exportDOCX();
+            });
+        }
+
         // Import Package
         this.packageInput = document.getElementById('package-input');
         const importPackageBtn = document.getElementById('btn-import-package');

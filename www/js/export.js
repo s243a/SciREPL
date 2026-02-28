@@ -1,0 +1,1031 @@
+/**
+ * export.js — HTML, Markdown, PDF, and DOCX export for SciREPL notebooks.
+ * Scrapes cell content and output from the DOM since outputs are not persisted.
+ */
+
+class ExportManager {
+    constructor() {
+        this._docxLoaded = false;
+    }
+
+    // ── Helpers ──
+
+    _escapeHtml(str) {
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    _getNotebookName() {
+        if (window.notebookManager) {
+            try {
+                const nb = window.notebookManager.getActiveNotebook();
+                if (nb && nb.name) return nb.name;
+            } catch (e) { /* ignore */ }
+        }
+        return 'SciREPL Notebook';
+    }
+
+    _getTimestamp() {
+        return new Date().toLocaleString();
+    }
+
+    // ── DOM Scraping ──
+
+    /**
+     * Walk window._cells and extract structured data from the live DOM.
+     * Returns array of { id, type, language, code, outputs[] }.
+     */
+    _scrapeCells() {
+        const cells = window._cells || [];
+        if (cells.length === 0) return [];
+
+        const results = [];
+
+        for (const cell of cells) {
+            const scraped = {
+                id: cell.id,
+                type: cell.type || 'code',
+                language: cell.language || 'python',
+                code: cell.code || '',
+                outputs: []
+            };
+
+            const outputCard = cell.outputCard;
+            if (!outputCard) {
+                results.push(scraped);
+                continue;
+            }
+
+            const body = outputCard.querySelector('.card-body');
+            if (!body) {
+                results.push(scraped);
+                continue;
+            }
+
+            // Markdown cell — the body itself has class markdown-body
+            if (body.classList.contains('markdown-body')) {
+                scraped.outputs.push({ kind: 'markdown', html: body.innerHTML });
+                results.push(scraped);
+                continue;
+            }
+
+            // Walk children of .card-body
+            for (const child of body.children) {
+                if (child.matches('pre.text-result')) {
+                    scraped.outputs.push({ kind: 'text', content: child.textContent });
+                } else if (child.matches('pre.error-result')) {
+                    scraped.outputs.push({ kind: 'error', content: child.textContent });
+                } else if (child.classList.contains('latex-result')) {
+                    scraped.outputs.push({ kind: 'latex', html: child.innerHTML, element: child });
+                } else if (child.tagName === 'TABLE') {
+                    scraped.outputs.push({ kind: 'table', html: child.outerHTML, element: child });
+                } else if (child.tagName === 'IMG') {
+                    scraped.outputs.push({ kind: 'image', src: child.src });
+                } else if (child.classList.contains('plot-container')) {
+                    scraped.outputs.push({ kind: 'plot', element: child });
+                }
+            }
+
+            results.push(scraped);
+        }
+
+        return results;
+    }
+
+    // ── Plotly Screenshot ──
+
+    /**
+     * Convert a Plotly plot container to a PNG data URL.
+     * Tries canvas first (WebGL), then SVG serialization.
+     */
+    async _plotToImage(plotContainer) {
+        // Try canvas (WebGL mode)
+        const canvas = plotContainer.querySelector('canvas');
+        if (canvas) {
+            try {
+                return canvas.toDataURL('image/png');
+            } catch (e) { /* tainted canvas, fall through */ }
+        }
+
+        // SVG serialization
+        const svg = plotContainer.querySelector('.main-svg');
+        if (!svg) return null;
+
+        const svgClone = svg.cloneNode(true);
+        // Ensure SVG has width/height attributes
+        const rect = svg.getBoundingClientRect();
+        svgClone.setAttribute('width', rect.width);
+        svgClone.setAttribute('height', rect.height);
+
+        const svgData = new XMLSerializer().serializeToString(svgClone);
+        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                const c = document.createElement('canvas');
+                c.width = img.naturalWidth || rect.width;
+                c.height = img.naturalHeight || rect.height;
+                const ctx = c.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                URL.revokeObjectURL(url);
+                resolve(c.toDataURL('image/png'));
+            };
+            img.onerror = () => {
+                URL.revokeObjectURL(url);
+                resolve(null);
+            };
+            img.src = url;
+        });
+    }
+
+    // ── Extract TeX from KaTeX ──
+
+    _extractTexFromKaTeX(latexEl) {
+        const annotation = latexEl.querySelector('annotation[encoding="application/x-tex"]');
+        if (annotation) return annotation.textContent;
+        return latexEl.textContent.trim();
+    }
+
+    // ── HTML Table → Markdown Table ──
+
+    _htmlTableToMarkdown(tableEl) {
+        const headers = [];
+        const rows = [];
+
+        const thEls = tableEl.querySelectorAll('thead th');
+        thEls.forEach(th => headers.push(th.textContent.trim()));
+
+        const trEls = tableEl.querySelectorAll('tbody tr');
+        trEls.forEach(tr => {
+            const cells = [];
+            tr.querySelectorAll('td').forEach(td => cells.push(td.textContent.trim()));
+            rows.push(cells);
+        });
+
+        if (headers.length === 0 && rows.length === 0) return '';
+
+        let md = '';
+        if (headers.length > 0) {
+            md += '| ' + headers.join(' | ') + ' |\n';
+            md += '| ' + headers.map(() => '---').join(' | ') + ' |\n';
+        }
+        rows.forEach(row => {
+            md += '| ' + row.join(' | ') + ' |\n';
+        });
+        return md;
+    }
+
+    // ── CSS for HTML Export ──
+
+    _getExportCSS() {
+        return `
+:root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-card: #1c2128;
+    --bg-input: #0d1117;
+    --border: #30363d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #484f58;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --font-mono: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+    --radius: 10px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.export-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.export-header h1 {
+    font-size: 22px;
+    background: linear-gradient(135deg, var(--accent), #a371f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.export-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.cell-group {
+    margin-bottom: 16px;
+}
+
+.cell-input {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.cell-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    border-bottom: 1px solid var(--border);
+}
+
+.cell-label .prompt-icon {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.cell-code {
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+}
+
+.cell-output {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    padding: 10px 12px;
+}
+
+.cell-output .text-result {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--green);
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+}
+
+.cell-output .error-result {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--red);
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+}
+
+.cell-output .latex-result {
+    padding: 8px 0;
+    overflow-x: auto;
+    font-size: 18px;
+    text-align: center;
+}
+
+.cell-output table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.cell-output table th,
+.cell-output table td {
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    text-align: right;
+}
+
+.cell-output table th {
+    background: var(--bg-secondary);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.cell-output img {
+    max-width: 100%;
+    border-radius: 6px;
+    margin: 4px 0;
+}
+
+.lang-badge {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.lang-badge.lang-python  { color: #3fb950; background: rgba(63,185,80,0.1);  border: 1px solid rgba(63,185,80,0.3); }
+.lang-badge.lang-prolog  { color: #f0883e; background: rgba(240,136,62,0.1); border: 1px solid rgba(240,136,62,0.3); }
+.lang-badge.lang-bash    { color: #4ec9b0; background: rgba(78,201,176,0.1); border: 1px solid rgba(78,201,176,0.3); }
+.lang-badge.lang-javascript { color: #f0d050; background: rgba(240,208,80,0.1); border: 1px solid rgba(240,208,80,0.3); }
+.lang-badge.lang-r       { color: #4E7FB4; background: rgba(78,127,180,0.1); border: 1px solid rgba(78,127,180,0.3); }
+
+/* Markdown rendered output */
+.markdown-body {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-primary);
+}
+.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 {
+    margin: 16px 0 8px; color: var(--text-primary); font-weight: 600;
+}
+.markdown-body h1 { font-size: 22px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+.markdown-body h2 { font-size: 18px; }
+.markdown-body h3 { font-size: 16px; }
+.markdown-body p { margin: 8px 0; }
+.markdown-body strong { color: var(--text-primary); font-weight: 600; }
+.markdown-body em { color: var(--text-secondary); }
+.markdown-body code {
+    font-family: var(--font-mono); font-size: 13px;
+    background: var(--bg-secondary); padding: 2px 6px; border-radius: 4px; color: var(--accent);
+}
+.markdown-body pre {
+    background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px; overflow-x: auto; font-family: var(--font-mono); font-size: 12px;
+    line-height: 1.5; margin: 8px 0;
+}
+.markdown-body pre code { background: none; padding: 0; color: var(--text-primary); }
+.markdown-body ul, .markdown-body ol { padding-left: 24px; margin: 8px 0; }
+.markdown-body li { margin: 4px 0; }
+.markdown-body blockquote {
+    border-left: 3px solid var(--accent); margin: 8px 0; padding: 4px 16px;
+    color: var(--text-secondary); background: rgba(88,166,255,0.05); border-radius: 0 6px 6px 0;
+}
+.markdown-body a { color: var(--accent); text-decoration: none; }
+.markdown-body table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 13px; }
+.markdown-body table th, .markdown-body table td {
+    padding: 6px 10px; border: 1px solid var(--border); text-align: left;
+}
+.markdown-body table th { background: var(--bg-secondary); font-weight: 600; }
+
+/* Print / PDF overrides */
+@media print {
+    :root {
+        --bg-primary: #fff;
+        --bg-secondary: #f6f8fa;
+        --bg-card: #f6f8fa;
+        --bg-input: #f6f8fa;
+        --border: #d0d7de;
+        --text-primary: #1f2328;
+        --text-secondary: #656d76;
+        --text-muted: #656d76;
+        --accent: #0969da;
+        --green: #1a7f37;
+        --red: #cf222e;
+    }
+    body { padding: 0; }
+    .cell-group { break-inside: avoid; }
+    .export-header h1 {
+        background: none;
+        -webkit-text-fill-color: var(--accent);
+        color: var(--accent);
+    }
+}
+`;
+    }
+
+    // ── Build HTML String ──
+
+    /**
+     * Build the complete HTML document.
+     * @param {Object} opts
+     * @param {boolean} opts.embedImages - true = inline base64, false = image refs
+     * @returns {{ html: string, images: Array<{name: string, data: Uint8Array}> }}
+     */
+    async _buildHTMLString(opts = {}) {
+        const embedImages = opts.embedImages !== false;
+        const cells = this._scrapeCells();
+        const name = this._getNotebookName();
+        const images = []; // for zip mode
+        let imageCounter = 0;
+
+        let cellsHtml = '';
+
+        for (const cell of cells) {
+            cellsHtml += '<div class="cell-group">\n';
+
+            if (cell.type === 'markdown') {
+                // Markdown cell — show rendered output only
+                const mdHtml = cell.outputs.length > 0 && cell.outputs[0].kind === 'markdown'
+                    ? cell.outputs[0].html : '';
+                cellsHtml += `<div class="cell-output"><div class="markdown-body">${mdHtml}</div></div>\n`;
+            } else {
+                // Code cell — input + output
+                const langBadge = `<span class="lang-badge lang-${cell.language}">${cell.language}</span>`;
+                cellsHtml += `<div class="cell-input">
+  <div class="cell-label"><span class="prompt-icon">In [${cell.id}]</span> ${langBadge}</div>
+  <pre class="cell-code"><code>${this._escapeHtml(cell.code)}</code></pre>
+</div>\n`;
+
+                if (cell.outputs.length > 0) {
+                    cellsHtml += '<div class="cell-output">\n';
+
+                    for (const out of cell.outputs) {
+                        switch (out.kind) {
+                            case 'text':
+                                cellsHtml += `<pre class="text-result">${this._escapeHtml(out.content)}</pre>\n`;
+                                break;
+                            case 'error':
+                                cellsHtml += `<pre class="error-result">${this._escapeHtml(out.content)}</pre>\n`;
+                                break;
+                            case 'latex':
+                                cellsHtml += `<div class="latex-result">${out.html}</div>\n`;
+                                break;
+                            case 'table':
+                                cellsHtml += out.html + '\n';
+                                break;
+                            case 'image': {
+                                if (embedImages) {
+                                    cellsHtml += `<img src="${out.src}" alt="Output image">\n`;
+                                } else {
+                                    imageCounter++;
+                                    const imgName = `image_${imageCounter}.png`;
+                                    cellsHtml += `<img src="images/${imgName}" alt="Output image">\n`;
+                                    // Convert data URL to binary
+                                    const base64 = out.src.split(',')[1];
+                                    const binary = atob(base64);
+                                    const bytes = new Uint8Array(binary.length);
+                                    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                                    images.push({ name: imgName, data: bytes });
+                                }
+                                break;
+                            }
+                            case 'plot': {
+                                const dataUrl = await this._plotToImage(out.element);
+                                if (dataUrl) {
+                                    if (embedImages) {
+                                        cellsHtml += `<img src="${dataUrl}" alt="Plot">\n`;
+                                    } else {
+                                        imageCounter++;
+                                        const imgName = `plot_${imageCounter}.png`;
+                                        cellsHtml += `<img src="images/${imgName}" alt="Plot">\n`;
+                                        const base64 = dataUrl.split(',')[1];
+                                        const binary = atob(base64);
+                                        const bytes = new Uint8Array(binary.length);
+                                        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                                        images.push({ name: imgName, data: bytes });
+                                    }
+                                } else {
+                                    cellsHtml += '<p style="color:var(--text-muted);font-style:italic;">[Plotly chart — screenshot unavailable]</p>\n';
+                                }
+                                break;
+                            }
+                            case 'markdown':
+                                cellsHtml += `<div class="markdown-body">${out.html}</div>\n`;
+                                break;
+                        }
+                    }
+                    cellsHtml += '</div>\n';
+                }
+            }
+
+            cellsHtml += '</div>\n';
+        }
+
+        // Build KaTeX CSS (stripped of @font-face)
+        let katexCSS = '';
+        try {
+            for (const sheet of document.styleSheets) {
+                if (sheet.href && sheet.href.includes('katex')) {
+                    const rules = [];
+                    for (const rule of sheet.cssRules) {
+                        if (rule.type !== CSSRule.FONT_FACE_RULE) {
+                            rules.push(rule.cssText);
+                        }
+                    }
+                    katexCSS = rules.join('\n');
+                    break;
+                }
+            }
+        } catch (e) {
+            // CORS or other issue reading stylesheets
+        }
+
+        const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${this._escapeHtml(name)}</title>
+<style>${this._getExportCSS()}</style>
+${katexCSS ? '<style>' + katexCSS + '</style>' : ''}
+</head>
+<body>
+<header class="export-header">
+<h1>${this._escapeHtml(name)}</h1>
+<p class="export-meta">Exported from SciREPL on ${this._getTimestamp()}</p>
+</header>
+<main class="export-cells">
+${cellsHtml}
+</main>
+</body>
+</html>`;
+
+        return { html, images };
+    }
+
+    // ── HTML Export ──
+
+    async exportHTML() {
+        const cells = this._scrapeCells();
+        if (cells.length === 0) {
+            alert('No cells to export.');
+            return;
+        }
+
+        const embedCheckbox = document.getElementById('chk-embed-images');
+        const embedImages = embedCheckbox ? embedCheckbox.checked : true;
+        const baseName = this._getNotebookName().replace(/[^a-zA-Z0-9_-]/g, '_');
+
+        if (embedImages) {
+            const { html } = await this._buildHTMLString({ embedImages: true });
+            await this._downloadFile(baseName + '.html', html, 'text/html');
+        } else {
+            // Zip mode
+            const { html, images } = await this._buildHTMLString({ embedImages: false });
+
+            if (typeof JSZip === 'undefined') {
+                alert('JSZip not loaded. Cannot create zip archive.');
+                return;
+            }
+
+            const zip = new JSZip();
+            zip.file('index.html', html);
+
+            if (images.length > 0) {
+                const imgFolder = zip.folder('images');
+                for (const img of images) {
+                    imgFolder.file(img.name, img.data);
+                }
+            }
+
+            const blob = await zip.generateAsync({ type: 'blob' });
+            this._downloadBlob(baseName + '.html.zip', blob);
+        }
+    }
+
+    // ── Markdown Export ──
+
+    async exportMarkdown() {
+        const cells = this._scrapeCells();
+        if (cells.length === 0) {
+            alert('No cells to export.');
+            return;
+        }
+
+        const name = this._getNotebookName();
+        let md = `# ${name}\n\n`;
+        md += `*Exported from SciREPL on ${this._getTimestamp()}*\n\n---\n\n`;
+
+        for (const cell of cells) {
+            if (cell.type === 'markdown') {
+                // Raw markdown source
+                md += cell.code + '\n\n';
+                continue;
+            }
+
+            // Code cell
+            md += `**In [${cell.id}]** *(${cell.language})*\n\n`;
+            md += '```' + cell.language + '\n' + cell.code + '\n```\n\n';
+
+            for (const out of cell.outputs) {
+                switch (out.kind) {
+                    case 'text':
+                        md += '**Output:**\n\n```\n' + out.content + '\n```\n\n';
+                        break;
+                    case 'error':
+                        md += '**Error:**\n\n```\n' + out.content + '\n```\n\n';
+                        break;
+                    case 'latex': {
+                        const tex = this._extractTexFromKaTeX(out.element || this._parseHtmlFragment(out.html));
+                        md += '$$\n' + tex + '\n$$\n\n';
+                        break;
+                    }
+                    case 'table': {
+                        const tableEl = out.element || this._parseHtmlFragment(out.html);
+                        const tableMd = this._htmlTableToMarkdown(tableEl);
+                        if (tableMd) {
+                            md += tableMd + '\n';
+                        }
+                        break;
+                    }
+                    case 'image':
+                        md += `![Output image](${out.src})\n\n`;
+                        break;
+                    case 'plot':
+                        md += '*[Interactive Plotly chart]*\n\n';
+                        break;
+                    case 'markdown':
+                        // Already handled above for markdown cells
+                        break;
+                }
+            }
+
+            md += '---\n\n';
+        }
+
+        const baseName = name.replace(/[^a-zA-Z0-9_-]/g, '_');
+        await this._downloadFile(baseName + '.md', md, 'text/markdown');
+    }
+
+    /** Parse an HTML string into a detached element for querying. */
+    _parseHtmlFragment(html) {
+        const tpl = document.createElement('template');
+        tpl.innerHTML = html;
+        return tpl.content.firstElementChild || tpl.content;
+    }
+
+    // ── PDF Export ──
+
+    async exportPDF() {
+        const cells = this._scrapeCells();
+        if (cells.length === 0) {
+            alert('No cells to export.');
+            return;
+        }
+
+        const { html } = await this._buildHTMLString({ embedImages: true });
+
+        const iframe = document.createElement('iframe');
+        iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:800px;height:600px;';
+        document.body.appendChild(iframe);
+
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open();
+        doc.write(html);
+        doc.close();
+
+        // Wait for content to render
+        await new Promise(resolve => {
+            iframe.onload = resolve;
+            setTimeout(resolve, 2000);
+        });
+
+        iframe.contentWindow.print();
+
+        setTimeout(() => {
+            document.body.removeChild(iframe);
+        }, 1000);
+    }
+
+    // ── DOCX Export ──
+
+    async _loadDocxLibrary() {
+        if (this._docxLoaded && window.docx) return;
+
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/docx@9.6.0/dist/index.iife.js';
+            script.onload = () => {
+                this._docxLoaded = true;
+                resolve();
+            };
+            script.onerror = () => reject(new Error('Failed to load docx library from CDN'));
+            document.head.appendChild(script);
+        });
+    }
+
+    async exportDOCX() {
+        const cells = this._scrapeCells();
+        if (cells.length === 0) {
+            alert('No cells to export.');
+            return;
+        }
+
+        // Load library
+        try {
+            await this._loadDocxLibrary();
+        } catch (e) {
+            alert('Could not load DOCX library. Check your internet connection.');
+            return;
+        }
+
+        const { Document, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell,
+                Packer, HeadingLevel, BorderStyle, WidthType, AlignmentType, ShadingType } = window.docx;
+
+        const name = this._getNotebookName();
+        const children = [];
+
+        // Title
+        children.push(new Paragraph({
+            children: [new TextRun({ text: name, bold: true, size: 36, color: '0969DA' })],
+            heading: HeadingLevel.HEADING_1,
+            spacing: { after: 200 }
+        }));
+
+        // Timestamp
+        children.push(new Paragraph({
+            children: [new TextRun({ text: 'Exported from SciREPL on ' + this._getTimestamp(), italics: true, size: 20, color: '656D76' })],
+            spacing: { after: 400 }
+        }));
+
+        for (const cell of cells) {
+            if (cell.type === 'markdown') {
+                // Simple markdown → paragraphs
+                const lines = cell.code.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('# ')) {
+                        children.push(new Paragraph({
+                            children: [new TextRun({ text: line.slice(2), bold: true, size: 32 })],
+                            heading: HeadingLevel.HEADING_1, spacing: { before: 200, after: 100 }
+                        }));
+                    } else if (line.startsWith('## ')) {
+                        children.push(new Paragraph({
+                            children: [new TextRun({ text: line.slice(3), bold: true, size: 28 })],
+                            heading: HeadingLevel.HEADING_2, spacing: { before: 200, after: 100 }
+                        }));
+                    } else if (line.startsWith('### ')) {
+                        children.push(new Paragraph({
+                            children: [new TextRun({ text: line.slice(4), bold: true, size: 24 })],
+                            heading: HeadingLevel.HEADING_3, spacing: { before: 200, after: 100 }
+                        }));
+                    } else if (line.trim() === '') {
+                        children.push(new Paragraph({ spacing: { after: 100 } }));
+                    } else {
+                        // Parse inline bold/italic
+                        const runs = this._parseInlineMarkdown(line, TextRun);
+                        children.push(new Paragraph({ children: runs, spacing: { after: 60 } }));
+                    }
+                }
+                continue;
+            }
+
+            // Code cell header
+            children.push(new Paragraph({
+                children: [new TextRun({ text: `In [${cell.id}] (${cell.language})`, bold: true, size: 18, color: '0969DA', font: 'Courier New' })],
+                spacing: { before: 300, after: 100 }
+            }));
+
+            // Code block
+            const codeLines = cell.code.split('\n');
+            for (const line of codeLines) {
+                children.push(new Paragraph({
+                    children: [new TextRun({ text: line || ' ', font: 'Courier New', size: 20 })],
+                    shading: { type: ShadingType.SOLID, color: 'F6F8FA' },
+                    spacing: { after: 0 }
+                }));
+            }
+
+            // Outputs
+            for (const out of cell.outputs) {
+                switch (out.kind) {
+                    case 'text':
+                        children.push(new Paragraph({
+                            children: [new TextRun({ text: out.content, font: 'Courier New', size: 20, color: '1A7F37' })],
+                            spacing: { before: 100, after: 100 }
+                        }));
+                        break;
+
+                    case 'error':
+                        children.push(new Paragraph({
+                            children: [new TextRun({ text: out.content, font: 'Courier New', size: 20, color: 'CF222E' })],
+                            spacing: { before: 100, after: 100 }
+                        }));
+                        break;
+
+                    case 'latex': {
+                        const tex = this._extractTexFromKaTeX(out.element || this._parseHtmlFragment(out.html));
+                        children.push(new Paragraph({
+                            children: [new TextRun({ text: tex, italics: true, font: 'Cambria Math', size: 24 })],
+                            alignment: AlignmentType.CENTER,
+                            spacing: { before: 100, after: 100 }
+                        }));
+                        break;
+                    }
+
+                    case 'table': {
+                        const tableEl = out.element || this._parseHtmlFragment(out.html);
+                        const docxTable = this._htmlTableToDocx(tableEl, { Table, TableRow, TableCell, Paragraph, TextRun, BorderStyle, WidthType });
+                        if (docxTable) {
+                            children.push(docxTable);
+                            children.push(new Paragraph({ spacing: { after: 100 } }));
+                        }
+                        break;
+                    }
+
+                    case 'image': {
+                        const imgData = this._dataUrlToBuffer(out.src);
+                        if (imgData) {
+                            children.push(new Paragraph({
+                                children: [new ImageRun({ data: imgData, transformation: { width: 500, height: 300 }, type: 'png' })],
+                                spacing: { before: 100, after: 100 }
+                            }));
+                        }
+                        break;
+                    }
+
+                    case 'plot': {
+                        const dataUrl = await this._plotToImage(out.element);
+                        if (dataUrl) {
+                            const plotData = this._dataUrlToBuffer(dataUrl);
+                            if (plotData) {
+                                children.push(new Paragraph({
+                                    children: [new ImageRun({ data: plotData, transformation: { width: 500, height: 300 }, type: 'png' })],
+                                    spacing: { before: 100, after: 100 }
+                                }));
+                            }
+                        } else {
+                            children.push(new Paragraph({
+                                children: [new TextRun({ text: '[Plotly chart — screenshot unavailable]', italics: true, color: '656D76' })],
+                                spacing: { before: 100, after: 100 }
+                            }));
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        const doc = new Document({
+            sections: [{ children }]
+        });
+
+        const blob = await Packer.toBlob(doc);
+        const baseName = name.replace(/[^a-zA-Z0-9_-]/g, '_');
+        this._downloadBlob(baseName + '.docx', blob);
+    }
+
+    /** Convert a base64 data URL to ArrayBuffer */
+    _dataUrlToBuffer(dataUrl) {
+        try {
+            const base64 = dataUrl.split(',')[1];
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return bytes.buffer;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /** Parse inline markdown (bold, italic, code) into TextRun array */
+    _parseInlineMarkdown(text, TextRun) {
+        const runs = [];
+        // Simple regex: **bold**, *italic*, `code`
+        const regex = /(\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)/g;
+        let lastIndex = 0;
+        let match;
+
+        while ((match = regex.exec(text)) !== null) {
+            if (match.index > lastIndex) {
+                runs.push(new TextRun({ text: text.slice(lastIndex, match.index), size: 22 }));
+            }
+            if (match[2]) {
+                runs.push(new TextRun({ text: match[2], bold: true, size: 22 }));
+            } else if (match[3]) {
+                runs.push(new TextRun({ text: match[3], italics: true, size: 22 }));
+            } else if (match[4]) {
+                runs.push(new TextRun({ text: match[4], font: 'Courier New', size: 20 }));
+            }
+            lastIndex = match.index + match[0].length;
+        }
+
+        if (lastIndex < text.length) {
+            runs.push(new TextRun({ text: text.slice(lastIndex), size: 22 }));
+        }
+
+        if (runs.length === 0) {
+            runs.push(new TextRun({ text: text, size: 22 }));
+        }
+
+        return runs;
+    }
+
+    /** Convert HTML <table> to docx Table */
+    _htmlTableToDocx(tableEl, docxTypes) {
+        const { Table, TableRow, TableCell, Paragraph, TextRun, BorderStyle, WidthType } = docxTypes;
+
+        const rows = [];
+        const borderStyle = {
+            top: { style: BorderStyle.SINGLE, size: 1, color: 'D0D7DE' },
+            bottom: { style: BorderStyle.SINGLE, size: 1, color: 'D0D7DE' },
+            left: { style: BorderStyle.SINGLE, size: 1, color: 'D0D7DE' },
+            right: { style: BorderStyle.SINGLE, size: 1, color: 'D0D7DE' }
+        };
+
+        // Header
+        const thEls = tableEl.querySelectorAll('thead th');
+        if (thEls.length > 0) {
+            const headerCells = [];
+            thEls.forEach(th => {
+                headerCells.push(new TableCell({
+                    children: [new Paragraph({
+                        children: [new TextRun({ text: th.textContent.trim(), bold: true, font: 'Courier New', size: 18, color: '0969DA' })]
+                    })],
+                    borders: borderStyle,
+                    shading: { type: 'solid', color: 'F6F8FA' }
+                }));
+            });
+            rows.push(new TableRow({ children: headerCells, tableHeader: true }));
+        }
+
+        // Body rows
+        const trEls = tableEl.querySelectorAll('tbody tr');
+        trEls.forEach(tr => {
+            const cellArray = [];
+            tr.querySelectorAll('td').forEach(td => {
+                cellArray.push(new TableCell({
+                    children: [new Paragraph({
+                        children: [new TextRun({ text: td.textContent.trim(), font: 'Courier New', size: 18 })]
+                    })],
+                    borders: borderStyle
+                }));
+            });
+            if (cellArray.length > 0) {
+                rows.push(new TableRow({ children: cellArray }));
+            }
+        });
+
+        if (rows.length === 0) return null;
+
+        return new Table({
+            rows,
+            width: { size: 100, type: WidthType.PERCENTAGE }
+        });
+    }
+
+    // ── File Download Helpers ──
+
+    async _downloadFile(filename, content, mimeType) {
+        // Delegate to FileIO if available
+        if (window.fileIO && window.fileIO.downloadFile) {
+            await window.fileIO.downloadFile(filename, content, mimeType);
+            return;
+        }
+
+        // Fallback
+        const blob = new Blob([content], { type: mimeType || 'text/plain' });
+        this._downloadBlob(filename, blob);
+    }
+
+    _downloadBlob(filename, blob) {
+        // Try Capacitor
+        if (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.Filesystem && Capacitor.Plugins.Share) {
+            const reader = new FileReader();
+            reader.onload = async () => {
+                try {
+                    const { Filesystem } = Capacitor.Plugins;
+                    const { Share } = Capacitor.Plugins;
+                    const base64 = reader.result.split(',')[1];
+                    const writeResult = await Filesystem.writeFile({
+                        path: filename,
+                        data: base64,
+                        directory: 'CACHE'
+                    });
+                    await Share.share({ title: filename, url: writeResult.uri, dialogTitle: 'Export ' + filename });
+                } catch (e) {
+                    console.warn('Capacitor share failed:', e);
+                    this._webDownloadBlob(filename, blob);
+                }
+            };
+            reader.readAsDataURL(blob);
+            return;
+        }
+
+        this._webDownloadBlob(filename, blob);
+    }
+
+    _webDownloadBlob(filename, blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+}
+
+// Singleton
+window.exportManager = new ExportManager();

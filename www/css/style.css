@@ -1470,3 +1470,21 @@ tr:hover .vfs-delete-btn {
     border-top: 1px solid var(--border);
     padding-top: 12px;
 }
+
+/* ===== Export Options ===== */
+
+.export-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.export-option input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+}
