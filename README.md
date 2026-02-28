@@ -141,9 +141,9 @@ append([1,2], [3,4], X).
 | **WASM FFI** | Call Rust WASM from any kernel | No | No |
 | **Size** | ~2MB app + CDN runtimes | ~500MB with Anaconda | Cloud-based |
 
-**Best for:** Portable, private, multi-language notebooks with zero setup — quick scientific computing on the go, education, and offline use.
+**Why SciREPL?** It's **250x smaller** than a typical Jupyter install (~2MB vs ~500MB), the **only notebook with multi-language cells** (Python, Prolog, Bash, JS in one notebook), and **built for mobile** — not just adapted for it. All with zero setup: visit a URL and go.
 
-**Not ideal for:** Heavy ML training, large datasets, or workflows requiring extensive C-extension packages.
+**Trade-offs:** WASM Python is slower than native for heavy compute, and the package ecosystem is limited to Pyodide-compatible libraries. Not ideal for GPU-accelerated ML training or large datasets.
 
 ## Architecture
 
