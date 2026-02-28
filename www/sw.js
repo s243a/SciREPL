@@ -47,10 +47,11 @@ const APP_SHELL = [
   './icons/icon-512.png',
 ];
 
-// CDN domains to cache (Pyodide ~25MB, swipl-wasm ~10MB)
+// CDN domains to cache (Pyodide ~25MB, swipl-wasm ~10MB, webR ~50MB)
 const CDN_DOMAINS = [
   'cdn.jsdelivr.net',
   'swi-prolog.github.io',
+  'webr.r-wasm.org',
 ];
 
 function isCDNRequest(url) {
