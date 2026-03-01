@@ -366,6 +366,7 @@ html, body {
 
 #run-btn {
     flex-shrink: 0;
+    align-self: flex-start;
     padding: 10px 20px;
     border: none;
     border-radius: 8px;
@@ -713,6 +714,35 @@ html, body {
     color: #d2a8ff;
     border-color: #d2a8ff;
     background: rgba(210, 168, 255, 0.1);
+}
+
+.cell-lang-switch {
+    padding: 4px 6px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cell-lang-apply-all {
+    padding: 4px 6px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cell-lang-apply-all:hover {
+    background: var(--accent);
+    color: #fff;
 }
 
 /* ===== Markdown Cells ===== */

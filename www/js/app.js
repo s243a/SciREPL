@@ -168,8 +168,8 @@
         card.dataset.language = language || 'python';
 
         const typeLabel = isMarkdown ? 'Md' : 'In';
-        const langBadge = (!isMarkdown && language && language !== 'python')
-            ? ` <span class="lang-badge lang-${language}">${language}</span>`
+        const langBadge = !isMarkdown
+            ? ` <span class="lang-badge lang-${language || 'python'}">${language || 'python'}</span>`
             : '';
         card.draggable = true;
         card.innerHTML = `
@@ -302,13 +302,55 @@
 
         const actions = document.createElement('div');
         actions.className = 'cell-edit-actions';
+        const cellLang = cell ? (cell.language || 'python') : 'python';
         actions.innerHTML = `
             <button class="cell-type-switch-btn">${cellType === 'markdown' ? 'Md' : 'Code'}</button>
+            <select class="cell-lang-switch" title="Cell language">
+                <option value="python"${cellLang === 'python' ? ' selected' : ''}>Py</option>
+                <option value="r"${cellLang === 'r' ? ' selected' : ''}>R</option>
+                <option value="prolog"${cellLang === 'prolog' ? ' selected' : ''}>PL</option>
+                <option value="bash"${cellLang === 'bash' ? ' selected' : ''}>Sh</option>
+                <option value="javascript"${cellLang === 'javascript' ? ' selected' : ''}>JS</option>
+            </select>
+            <button class="cell-lang-apply-all" title="Apply language to all code cells">All→</button>
             <button class="cell-run-btn">▶ Run</button>
             <button class="cell-run-below-btn">▶▶ Run All Below</button>
             <button class="cell-cancel-btn">Cancel</button>
         `;
         inputCard.appendChild(actions);
+
+        // Cell language switch
+        const langSwitch = actions.querySelector('.cell-lang-switch');
+        function updateCellLangBadge(targetCell, newLang) {
+            targetCell.language = newLang;
+            targetCell.inputCard.dataset.language = newLang;
+            const existingBadge = targetCell.inputCard.querySelector('.lang-badge');
+            if (existingBadge) existingBadge.remove();
+            const labelSpan = targetCell.inputCard.querySelector('.prompt-icon');
+            if (labelSpan) {
+                const badge = document.createElement('span');
+                badge.className = 'lang-badge lang-' + newLang;
+                badge.textContent = newLang;
+                labelSpan.insertAdjacentElement('afterend', badge);
+            }
+        }
+        langSwitch.addEventListener('change', () => {
+            if (cell) updateCellLangBadge(cell, langSwitch.value);
+        });
+
+        // Apply language to all code cells (skip cells with %% magic)
+        actions.querySelector('.cell-lang-apply-all').addEventListener('click', () => {
+            const newLang = langSwitch.value;
+            for (const c of window._cells) {
+                if (c.type === 'markdown') continue;
+                if (c.code && c.code.match(/^%%\w+/)) continue;
+                updateCellLangBadge(c, newLang);
+            }
+            // Also update the main language selector
+            if (langSelector) langSelector.value = newLang;
+            if (window.kernelManager) window.kernelManager.setLanguage(newLang);
+            saveCellsToSession();
+        });
 
         // Type switch button
         const typeSwitch = actions.querySelector('.cell-type-switch-btn');

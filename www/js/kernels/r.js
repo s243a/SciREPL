@@ -267,7 +267,9 @@ class RKernel {
             await this._syncToWebR();
 
             const shelter = await new this._webr.Shelter();
-            const capture = await shelter.captureR(trimmed, {
+            // Prepend dark-theme par() so base R plots are legible on dark UI
+            const darkPar = `par(bg="#0d1117", fg="#c9d1d9", col="#58a6ff", col.axis="#8b949e", col.lab="#c9d1d9", col.main="#e6edf3", col.sub="#8b949e")\n`;
+            const capture = await shelter.captureR(darkPar + trimmed, {
                 withAutoprint: true,
                 captureStreams: true,
                 captureConditions: false,
