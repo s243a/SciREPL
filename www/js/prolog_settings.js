@@ -24,6 +24,17 @@ class PrologSettings {
             }
         });
 
+        // Upload to SharedVFS
+        const uploadSharedBtn = document.getElementById('vfs-upload-shared');
+        const uploadSharedInput = document.getElementById('vfs-shared-input');
+        if (uploadSharedBtn && uploadSharedInput) {
+            uploadSharedBtn.addEventListener('click', () => uploadSharedInput.click());
+            uploadSharedInput.addEventListener('change', (e) => {
+                this._handleSharedUpload(e.target.files[0]);
+                uploadSharedInput.value = '';
+            });
+        }
+
         // Upload .pl file
         const uploadPlBtn = document.getElementById('vfs-upload-pl');
         const uploadPlInput = document.getElementById('vfs-file-input');
@@ -52,6 +63,14 @@ class PrologSettings {
             addPathBtn.addEventListener('click', () => this._addSearchPath());
         }
 
+        // Kernel selector for VFS uploads
+        this.kernelSelect = document.getElementById('vfs-kernel-select');
+        if (this.kernelSelect) {
+            this.kernelSelect.addEventListener('change', () => {
+                this._onKernelSelectChange();
+            });
+        }
+
         // Fetch from URL
         const fetchBtn = document.getElementById('fetch-url-btn');
         if (fetchBtn) {
@@ -64,28 +83,113 @@ class PrologSettings {
      */
     open() {
         this.modal.classList.remove('hidden');
+        this._refreshKernelSelect();
         this._refreshFileList();
         this._refreshPathTable();
         if (this.fetchStatus) this.fetchStatus.textContent = '';
     }
 
     /**
-     * Get the Prolog kernel's VFS instance.
+     * Update kernel selector: grey out unloaded kernels.
+     */
+    _refreshKernelSelect() {
+        if (!this.kernelSelect) return;
+        const km = window.kernelManager;
+        if (!km) return;
+
+        for (const option of this.kernelSelect.options) {
+            const lang = option.value;
+            const ready = km.isReady(lang);
+            option.classList.toggle('kernel-not-loaded', !ready);
+            option.textContent = option.value.charAt(0).toUpperCase() + option.value.slice(1) + (ready ? '' : ' (not loaded)');
+        }
+    }
+
+    /**
+     * Handle kernel selector change — prompt to load if not ready.
+     */
+    async _onKernelSelectChange() {
+        const lang = this.kernelSelect.value;
+        const km = window.kernelManager;
+        if (!km) return;
+
+        // Only prompt to load kernels that have a VFS
+        const kernelsWithVFS = ['prolog'];
+        if (!km.isReady(lang) && kernelsWithVFS.includes(lang)) {
+            const load = confirm(
+                lang.charAt(0).toUpperCase() + lang.slice(1) +
+                ' kernel is not loaded. Download and initialize it now?'
+            );
+            if (load) {
+                try {
+                    this.kernelSelect.disabled = true;
+                    await km.ensureReady(lang);
+                    this._refreshKernelSelect();
+                } catch (err) {
+                    alert('Failed to load ' + lang + ': ' + err.message);
+                } finally {
+                    this.kernelSelect.disabled = false;
+                }
+            }
+        }
+        this._refreshFileList();
+    }
+
+    /**
+     * Get the selected kernel's VFS instance.
      */
     _getVFS() {
         const km = window.kernelManager;
         if (!km) return null;
-        const kernel = km.getKernel('prolog');
+        const lang = this.kernelSelect ? this.kernelSelect.value : 'prolog';
+        const kernel = km._instances[lang];
         if (!kernel || !kernel.getVFS) return null;
         return kernel.getVFS();
     }
 
-    // ---- Virtual Files section ----
+    // ---- SharedVFS upload ----
+
+    _handleSharedUpload(file) {
+        if (!file) return;
+        if (!window.sharedVFS) {
+            alert('SharedVFS not available.');
+            return;
+        }
+
+        const destInput = document.getElementById('shared-upload-path');
+        let destDir = destInput ? destInput.value.trim() : '/shared/data/';
+        if (!destDir.endsWith('/')) destDir += '/';
+        const destPath = destDir + file.name;
+
+        const isText = /\.(csv|tsv|txt|json|jsonl|xml|html|md|r|R|js|yaml|yml|toml|ini|cfg|conf|log|sql|sh|bash|py|pl|pro)$/i.test(file.name);
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                if (isText) {
+                    window.sharedVFS.writeFile(destPath, e.target.result, 'user');
+                } else {
+                    window.sharedVFS.writeFile(destPath, new Uint8Array(e.target.result), 'user');
+                }
+                alert('Uploaded to ' + destPath);
+            } catch (err) {
+                alert('Upload failed: ' + err.message);
+            }
+        };
+        if (isText) {
+            reader.readAsText(file);
+        } else {
+            reader.readAsArrayBuffer(file);
+        }
+    }
+
+    // ---- Kernel Virtual Files section ----
 
     async _handleFileUpload(files) {
+        const lang = this.kernelSelect ? this.kernelSelect.value : 'prolog';
         const vfs = this._getVFS();
         if (!vfs) {
-            alert('Prolog kernel not loaded. Switch to Prolog first.');
+            alert('For ' + lang + ' use SharedVFS instead (see above).');
             return;
         }
 
@@ -102,9 +206,10 @@ class PrologSettings {
 
     async _handleZipUpload(file) {
         if (!file) return;
+        const lang = this.kernelSelect ? this.kernelSelect.value : 'prolog';
         const vfs = this._getVFS();
         if (!vfs) {
-            alert('Prolog kernel not loaded. Switch to Prolog first.');
+            alert('For ' + lang + ' use SharedVFS instead (see above).');
             return;
         }
 
@@ -120,10 +225,18 @@ class PrologSettings {
 
     _refreshFileList() {
         if (!this.fileList) return;
+        const lang = this.kernelSelect ? this.kernelSelect.value : 'prolog';
+        const km = window.kernelManager;
+        const isLoaded = km && km.isReady(lang);
         const vfs = this._getVFS();
 
+        if (!isLoaded) {
+            this.fileList.innerHTML = '<div class="vfs-empty">' + lang + ' kernel is not loaded.</div>';
+            return;
+        }
+
         if (!vfs) {
-            this.fileList.innerHTML = '<div class="vfs-empty">Prolog kernel not loaded.</div>';
+            this.fileList.innerHTML = '<div class="vfs-empty">For ' + lang + ' use SharedVFS instead (see above).</div>';
             return;
         }
 
@@ -319,7 +432,7 @@ class PrologSettings {
         const vfs = this._getVFS();
 
         if (!vfs) {
-            this.pathTable.innerHTML = '<tr><td colspan="3" class="vfs-empty">Prolog kernel not loaded.</td></tr>';
+            this.pathTable.innerHTML = '<tr><td colspan="3" class="vfs-empty">Kernel not loaded or has no VFS.</td></tr>';
             return;
         }
 
@@ -367,7 +480,7 @@ class PrologSettings {
 
         const vfs = this._getVFS();
         if (!vfs) {
-            alert('Prolog kernel not loaded.');
+            alert('Kernel not loaded or has no VFS.');
             return;
         }
 
@@ -394,7 +507,7 @@ class PrologSettings {
 
         const vfs = this._getVFS();
         if (!vfs) {
-            alert('Prolog kernel not loaded.');
+            alert('Kernel not loaded or has no VFS.');
             return;
         }
 

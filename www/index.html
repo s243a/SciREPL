@@ -258,11 +258,11 @@ grandparent(tom, Z).</code></pre>
                 <button id="btn-export-pdf">🖨 Export PDF (Print)</button>
                 <button id="btn-export-docx">📄 Export DOCX</button>
                 <button id="btn-export-latex">📐 Export LaTeX</button>
-                <button id="btn-import-file">📂 Import File (.py / .pl / .ipynb / .zip)</button>
+                <button id="btn-import-file">📂 Import File (e.g. .csv, .py, .ipynb, .zip)</button>
                 <button id="btn-import-package">📦 Import Package (.zip / .tar.gz)</button>
                 <button id="btn-browse-packages">📦 Browse Packages</button>
                 <button id="btn-export-package">📦 Export Package (.zip)</button>
-                <button id="btn-prolog-settings">⚙ Prolog Settings (VFS / Paths)</button>
+                <button id="btn-prolog-settings">⚙ Files &amp; Storage (VFS / Paths)</button>
                 <button id="btn-clear-session" class="danger">🗑 Clear History</button>
             </div>
         </div>
@@ -282,15 +282,31 @@ grandparent(tom, Z).</code></pre>
     <div id="prolog-settings-modal" class="modal hidden">
         <div class="modal-content modal-content-scroll">
             <button class="modal-close">&times;</button>
-            <h2>Prolog Settings</h2>
+            <h2>Files &amp; Storage</h2>
 
-            <h3>Virtual Files</h3>
-            <p>Upload Prolog files (.pl) or .zip archives into the virtual filesystem.</p>
+            <h3>Upload to SharedVFS</h3>
+            <p>Upload any file to the shared filesystem, accessible from all kernels.</p>
             <div class="vfs-actions">
-                <button id="vfs-upload-pl" class="vfs-btn">Upload .pl File</button>
+                <button id="vfs-upload-shared" class="vfs-btn">Upload File</button>
+            </div>
+            <div class="shared-upload-dest">
+                <label>Destination:</label>
+                <input type="text" id="shared-upload-path" placeholder="/shared/data/" class="path-input" value="/shared/data/">
+            </div>
+            <input type="file" id="vfs-shared-input" style="display:none">
+
+            <h3>Kernel Specific Files</h3>
+            <p>Upload files into a kernel's virtual filesystem.</p>
+            <div class="vfs-actions">
+                <select id="vfs-kernel-select" class="vfs-kernel-select" title="Target kernel">
+                    <option value="prolog">Prolog</option>
+                    <option value="python">Python</option>
+                    <option value="r">R</option>
+                </select>
+                <button id="vfs-upload-pl" class="vfs-btn">Upload File</button>
                 <button id="vfs-upload-zip" class="vfs-btn">Upload .zip Archive</button>
             </div>
-            <input type="file" id="vfs-file-input" accept=".pl,.pro,.P,.txt" multiple style="display:none">
+            <input type="file" id="vfs-file-input" style="display:none">
             <input type="file" id="vfs-zip-input" accept=".zip" style="display:none">
             <div id="vfs-file-list" class="vfs-file-list">
                 <div class="vfs-empty">No files mounted.</div>
@@ -405,7 +421,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     </div>
 
     <!-- Hidden file input for imports -->
-    <input type="file" id="file-input" accept=".py,.pl,.ipynb,.zip,.tar.gz,.tgz,.rar" style="display:none">
+    <input type="file" id="file-input" style="display:none">
     <input type="file" id="package-input" accept=".zip,.tar.gz,.tgz,.rar" style="display:none">
 
     <!-- Sticky input bar -->

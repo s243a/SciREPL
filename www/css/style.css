@@ -1198,7 +1198,39 @@ html, body {
     overflow-y: auto;
 }
 
-/* ===== Prolog Settings ===== */
+/* ===== Files & Storage ===== */
+
+.shared-upload-dest {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.vfs-kernel-select {
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.vfs-kernel-select option.kernel-not-loaded {
+    color: var(--text-muted);
+}
+
+.shared-upload-dest label {
+    color: var(--text-secondary);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.shared-upload-dest .path-input {
+    flex: 1;
+}
 
 .vfs-actions {
     display: flex;
