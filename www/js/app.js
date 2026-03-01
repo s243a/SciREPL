@@ -1558,6 +1558,10 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
     if (replaceOneBtn) replaceOneBtn.addEventListener('click', replaceCurrentMatch);
     if (replaceAllBtn) replaceAllBtn.addEventListener('click', replaceAllMatches);
 
+    // Mobile search button in header
+    const searchHeaderBtn = document.getElementById('search-btn');
+    if (searchHeaderBtn) searchHeaderBtn.addEventListener('click', openSearch);
+
     // Global keyboard handler: Ctrl+F to open search, Escape to close
     document.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'f') {

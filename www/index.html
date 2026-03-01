@@ -68,6 +68,7 @@
         <h1>Sci REPL</h1>
         <div id="notebook-selector-container" class="notebook-selector-container"></div>
         <div class="header-right">
+            <button id="search-btn" class="icon-btn" title="Find in notebook">🔍</button>
             <button id="math-mode-btn" class="icon-btn" title="Math Mode">∑</button>
             <button id="menu-btn" class="icon-btn" title="Menu">☰</button>
             <button id="help-btn" class="icon-btn" title="Help">?</button>
@@ -193,10 +194,13 @@ grandparent(tom, Z).</code></pre>
             <p><strong>Syntax highlighting:</strong> Code cells display with syntax highlighting for Python, JavaScript, R, Bash, and Prolog. Exports (HTML, DOCX) also include highlighted code.</p>
             <p><strong>.ipynb import with outputs:</strong> When importing a <code>.ipynb</code> file that already contains outputs, they are displayed directly without re-executing the code. This allows fast viewing of notebooks from Jupyter, Colab, or previous SciREPL exports.</p>
 
+            <h3>Cell Language</h3>
+            <p>Each cell remembers its language. To change a cell's language, click ✎ to edit, then use the language dropdown. Click <strong>All→</strong> to apply the language to all code cells in the notebook.</p>
+
             <h3>Keyboard Shortcuts</h3>
             <ul>
                 <li><kbd>Shift+Enter</kbd> or <kbd>Ctrl+Enter</kbd> — Run code</li>
-                <li><kbd>Ctrl+F</kbd> / <kbd>Cmd+F</kbd> — Find in notebook (with replace)</li>
+                <li><kbd>Ctrl+F</kbd> / <kbd>Cmd+F</kbd> or 🔍 button — Find in notebook (with replace)</li>
                 <li><kbd>Tab</kbd> — Insert 4 spaces</li>
                 <li><kbd>;</kbd> at end of line — Suppress output</li>
             </ul>
