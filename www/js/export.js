@@ -232,6 +232,265 @@ class ExportManager {
         return latexEl.textContent.trim();
     }
 
+    // ── TeX → OMML (Office Math Markup Language) ──
+
+    /**
+     * Convert a TeX string to an OMML object for docx export.
+     * Pipeline: TeX → KaTeX MathML → DOMParser → walk MathML → OMML objects.
+     * Returns a prepForXml-compatible object or null on failure.
+     */
+    _texToOmml(texStr) {
+        try {
+            if (typeof katex === 'undefined') return null;
+            const html = katex.renderToString(texStr, { output: 'mathml', throwOnError: false });
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const mathEl = doc.querySelector('math');
+            if (!mathEl) return null;
+            const children = this._walkMathML(mathEl);
+            if (!children || children.length === 0) return null;
+            return {
+                'm:oMathPara': [
+                    { _attr: { 'xmlns:m': 'http://schemas.openxmlformats.org/officeDocument/2006/math' } },
+                    { 'm:oMath': children }
+                ]
+            };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /**
+     * Recursively walk a MathML DOM subtree and return an array of
+     * OMML-compatible objects (prepForXml format used by docx.js).
+     */
+    _walkMathML(node) {
+        const results = [];
+        for (const child of node.childNodes) {
+            if (child.nodeType === 3) { // text node
+                const text = child.textContent.trim();
+                if (text) results.push({ 'm:r': [{ 'm:t': [text] }] });
+                continue;
+            }
+            if (child.nodeType !== 1) continue;
+            const tag = (child.localName || child.tagName || '').toLowerCase();
+
+            switch (tag) {
+                case 'math':
+                case 'mrow':
+                case 'mstyle':
+                case 'mpadded':
+                    results.push(...this._walkMathML(child));
+                    break;
+
+                case 'semantics':
+                    for (const sc of child.children) {
+                        const st = (sc.localName || sc.tagName || '').toLowerCase();
+                        if (st !== 'annotation') results.push(...this._walkMathML(sc));
+                    }
+                    break;
+
+                case 'mi': case 'mn': case 'mo':
+                    if (child.textContent) {
+                        results.push({ 'm:r': [{ 'm:t': [child.textContent] }] });
+                    }
+                    break;
+
+                case 'mtext':
+                    if (child.textContent) {
+                        results.push({
+                            'm:r': [
+                                { 'm:rPr': [{ 'm:nor': [] }] },
+                                { 'm:t': [child.textContent] }
+                            ]
+                        });
+                    }
+                    break;
+
+                case 'mfrac': {
+                    const kids = [...child.children];
+                    results.push({
+                        'm:f': [
+                            { 'm:num': kids[0] ? this._walkMathML(kids[0]) : [] },
+                            { 'm:den': kids[1] ? this._walkMathML(kids[1]) : [] }
+                        ]
+                    });
+                    break;
+                }
+
+                case 'msup': {
+                    const kids = [...child.children];
+                    results.push({
+                        'm:sSup': [
+                            { 'm:sSupPr': [] },
+                            { 'm:e': kids[0] ? this._walkMathML(kids[0]) : [] },
+                            { 'm:sup': kids[1] ? this._walkMathML(kids[1]) : [] }
+                        ]
+                    });
+                    break;
+                }
+
+                case 'msub': {
+                    const kids = [...child.children];
+                    results.push({
+                        'm:sSub': [
+                            { 'm:sSubPr': [] },
+                            { 'm:e': kids[0] ? this._walkMathML(kids[0]) : [] },
+                            { 'm:sub': kids[1] ? this._walkMathML(kids[1]) : [] }
+                        ]
+                    });
+                    break;
+                }
+
+                case 'msubsup': {
+                    const kids = [...child.children];
+                    const baseTag0 = kids[0] ? (kids[0].localName || kids[0].tagName || '').toLowerCase() : '';
+                    const baseText0 = kids[0] ? kids[0].textContent.trim() : '';
+                    const naryChars = '\u2211\u222B\u220F\u2210\u22C3\u22C2\u22C1\u22C0\u222E\u222F\u2230\u222C\u222D';
+                    if (baseTag0 === 'mo' && naryChars.includes(baseText0)) {
+                        results.push({
+                            'm:nary': [
+                                { 'm:naryPr': [
+                                    { 'm:chr': [{ _attr: { 'm:val': baseText0 } }] },
+                                    { 'm:limLoc': [{ _attr: { 'm:val': 'subSup' } }] }
+                                ]},
+                                { 'm:sub': kids[1] ? this._walkMathML(kids[1]) : [] },
+                                { 'm:sup': kids[2] ? this._walkMathML(kids[2]) : [] },
+                                { 'm:e': [] }
+                            ]
+                        });
+                    } else {
+                        results.push({
+                            'm:sSubSup': [
+                                { 'm:sSubSupPr': [] },
+                                { 'm:e': kids[0] ? this._walkMathML(kids[0]) : [] },
+                                { 'm:sub': kids[1] ? this._walkMathML(kids[1]) : [] },
+                                { 'm:sup': kids[2] ? this._walkMathML(kids[2]) : [] }
+                            ]
+                        });
+                    }
+                    break;
+                }
+
+                case 'msqrt':
+                    results.push({
+                        'm:rad': [
+                            { 'm:radPr': [{ 'm:degHide': [{ _attr: { 'm:val': '1' } }] }] },
+                            { 'm:deg': [] },
+                            { 'm:e': this._walkMathML(child) }
+                        ]
+                    });
+                    break;
+
+                case 'mroot': {
+                    const kids = [...child.children];
+                    results.push({
+                        'm:rad': [
+                            { 'm:radPr': [] },
+                            { 'm:deg': kids[1] ? this._walkMathML(kids[1]) : [] },
+                            { 'm:e': kids[0] ? this._walkMathML(kids[0]) : [] }
+                        ]
+                    });
+                    break;
+                }
+
+                case 'mover': case 'munder': case 'munderover': {
+                    const kids = [...child.children];
+                    const baseTag = kids[0] ? (kids[0].localName || kids[0].tagName || '').toLowerCase() : '';
+                    const baseText = kids[0] ? kids[0].textContent.trim() : '';
+                    const naryOps = '\u2211\u222B\u220F\u2210\u22C3\u22C2\u22C1\u22C0\u222E\u222F\u2230\u222C\u222D';
+                    if (baseTag === 'mo' && naryOps.includes(baseText)) {
+                        // Nary operator (sum, integral, product, etc.)
+                        const nary = [
+                            { 'm:naryPr': [
+                                { 'm:chr': [{ _attr: { 'm:val': baseText } }] },
+                                { 'm:limLoc': [{ _attr: { 'm:val': 'undOvr' } }] }
+                            ]}
+                        ];
+                        if (tag === 'munder') {
+                            nary.push({ 'm:sub': kids[1] ? this._walkMathML(kids[1]) : [] });
+                            nary.push({ 'm:sup': [] });
+                        } else if (tag === 'mover') {
+                            nary.push({ 'm:sub': [] });
+                            nary.push({ 'm:sup': kids[1] ? this._walkMathML(kids[1]) : [] });
+                        } else {
+                            nary.push({ 'm:sub': kids[1] ? this._walkMathML(kids[1]) : [] });
+                            nary.push({ 'm:sup': kids[2] ? this._walkMathML(kids[2]) : [] });
+                        }
+                        nary.push({ 'm:e': [] });
+                        results.push({ 'm:nary': nary });
+                    } else if (tag === 'mover') {
+                        // Accent (hat, tilde, bar, etc.)
+                        const accChar = kids[1] ? kids[1].textContent.trim() : '';
+                        results.push({
+                            'm:acc': [
+                                { 'm:accPr': [{ 'm:chr': [{ _attr: { 'm:val': accChar } }] }] },
+                                { 'm:e': kids[0] ? this._walkMathML(kids[0]) : [] }
+                            ]
+                        });
+                    } else if (tag === 'munder') {
+                        results.push({
+                            'm:limLow': [
+                                { 'm:e': kids[0] ? this._walkMathML(kids[0]) : [] },
+                                { 'm:lim': kids[1] ? this._walkMathML(kids[1]) : [] }
+                            ]
+                        });
+                    } else {
+                        // munderover without nary — render children inline
+                        results.push(...this._walkMathML(child));
+                    }
+                    break;
+                }
+
+                case 'mfenced': {
+                    const open = child.getAttribute('open') || '(';
+                    const close = child.getAttribute('close') || ')';
+                    results.push({ 'm:r': [{ 'm:t': [open] }] });
+                    results.push(...this._walkMathML(child));
+                    results.push({ 'm:r': [{ 'm:t': [close] }] });
+                    break;
+                }
+
+                case 'mtable': {
+                    const rows = [];
+                    for (const tr of child.children) {
+                        const trTag = (tr.localName || tr.tagName || '').toLowerCase();
+                        if (trTag === 'mtr' || trTag === 'mlabeledtr') {
+                            const cells = [];
+                            for (const td of tr.children) {
+                                const tdTag = (td.localName || td.tagName || '').toLowerCase();
+                                if (tdTag === 'mtd') cells.push({ 'm:e': this._walkMathML(td) });
+                            }
+                            rows.push({ 'm:mr': cells });
+                        }
+                    }
+                    if (rows.length > 0) {
+                        results.push({ 'm:m': [{ 'm:mPr': [] }, ...rows] });
+                    }
+                    break;
+                }
+
+                case 'merror':
+                    if (child.textContent.trim()) {
+                        results.push({ 'm:r': [{ 'm:t': [child.textContent.trim()] }] });
+                    }
+                    break;
+
+                case 'mspace': case 'mphantom': case 'annotation':
+                case 'none':
+                    break;
+
+                default:
+                    if (child.children && child.children.length > 0) {
+                        results.push(...this._walkMathML(child));
+                    } else if (child.textContent && child.textContent.trim()) {
+                        results.push({ 'm:r': [{ 'm:t': [child.textContent.trim()] }] });
+                    }
+                    break;
+            }
+        }
+        return results;
+    }
+
     // ── HTML Table → Markdown Table ──
 
     _htmlTableToMarkdown(tableEl) {
@@ -823,7 +1082,15 @@ ${cellsHtml}
         }
 
         const { Document, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell,
-                Packer, HeadingLevel, BorderStyle, WidthType, AlignmentType, ShadingType } = window.docx;
+                Packer, HeadingLevel, BorderStyle, WidthType, AlignmentType, ShadingType,
+                XmlComponent } = window.docx;
+
+        // Helper class: wraps a raw prepForXml-compatible object as an XmlComponent
+        // so it can be embedded inside Paragraph children for OOXML Math output.
+        class OmmlComponent extends XmlComponent {
+            constructor(obj) { super('m:oMathPara'); this._obj = obj; }
+            prepForXml() { return this._obj; }
+        }
 
         const name = this._getNotebookName();
         const children = [];
@@ -926,11 +1193,19 @@ ${cellsHtml}
 
                     case 'latex': {
                         const tex = this._extractTexFromKaTeX(out.element || this._parseHtmlFragment(out.html));
-                        children.push(new Paragraph({
-                            children: [new TextRun({ text: tex, italics: true, font: 'Cambria Math', size: 24 })],
-                            alignment: AlignmentType.CENTER,
-                            spacing: { before: 100, after: 100 }
-                        }));
+                        const ommlObj = this._texToOmml(tex);
+                        if (ommlObj) {
+                            const para = new Paragraph({ spacing: { before: 100, after: 100 } });
+                            para.addChildElement(new OmmlComponent(ommlObj));
+                            children.push(para);
+                        } else {
+                            // Fallback: plain italic text in Cambria Math
+                            children.push(new Paragraph({
+                                children: [new TextRun({ text: tex, italics: true, font: 'Cambria Math', size: 24 })],
+                                alignment: AlignmentType.CENTER,
+                                spacing: { before: 100, after: 100 }
+                            }));
+                        }
                         break;
                     }
 
