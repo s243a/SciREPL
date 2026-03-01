@@ -131,6 +131,60 @@ append([1,2], [3,4], X).
 % → X = [1, 2, 3, 4]
 ```
 
+### R
+
+Switch to R using the language selector (Py → R). First use downloads webR (~50 MB, cached after):
+
+```r
+# Basic math
+x <- seq(0, 2*pi, length.out=50)
+sin(x)
+
+# Data frames
+df <- data.frame(name=c("Alice","Bob"), score=c(95, 87))
+df
+
+# Interactive plotting
+plotly(x, sin(x), title="Sine Wave")
+
+# Install packages
+install.packages("jsonlite")
+library(jsonlite)
+```
+
+### Bash
+
+Switch to Bash using the language selector (Py → Bash):
+
+```bash
+# Unix commands via brush-wasm
+echo "Hello from Bash!"
+seq 1 10 | head -5
+
+# File operations (SharedVFS)
+echo "data" > /shared/test.txt
+cat /shared/test.txt
+
+# Pipes and filters
+echo -e "banana\napple\ncherry" | sort
+```
+
+### JavaScript
+
+Switch to JavaScript using the language selector (Py → JS):
+
+```javascript
+// Native browser JS — zero download
+const x = Array.from({length: 50}, (_, i) => i * 0.1);
+const y = x.map(v => Math.sin(v));
+
+// Access SharedVFS
+window.sharedVFS.write('/shared/hello.txt', 'from JS');
+
+// Use any browser API
+JSON.stringify({pi: Math.PI, e: Math.E}, null, 2)
+```
+
 ## How Does SciREPL Compare to Jupyter / Colab?
 
 | | SciREPL | Jupyter Notebook | Google Colab |
