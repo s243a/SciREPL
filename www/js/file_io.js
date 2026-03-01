@@ -328,7 +328,7 @@ class FileIO {
             format_version: '2.0',
             name: 'SciREPL Package',
             version: '1.0.0',
-            description: 'Exported from SciREPL v0.5.0',
+            description: 'Exported from SciREPL v0.6.0',
             notebooks: [],
             files: [],
             search_paths: []
