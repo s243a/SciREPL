@@ -91,7 +91,7 @@ class FileIO {
             this.menuModal.classList.add('hidden');
         });
 
-        // Prolog Settings
+        // Files & Storage
         const prologSettingsBtn = document.getElementById('btn-prolog-settings');
         if (prologSettingsBtn) {
             prologSettingsBtn.addEventListener('click', () => {
@@ -99,7 +99,7 @@ class FileIO {
                 if (window.prologSettings) {
                     window.prologSettings.open();
                 } else {
-                    alert('Prolog settings not available. Load the Prolog kernel first.');
+                    alert('Files & Storage panel not available.');
                 }
             });
         }
@@ -580,19 +580,28 @@ class FileIO {
             return;
         }
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const content = e.target.result;
-            if (file.name.endsWith('.ipynb')) {
-                this.importIpynb(content);
-            } else if (file.name.endsWith('.pl') || file.name.endsWith('.pro')) {
-                this.importProlog(content);
-            } else {
-                // Assume .py or text
-                this.importPython(content);
-            }
-        };
-        reader.readAsText(file);
+        // Notebook/code files: import as cells
+        if (file.name.endsWith('.ipynb')) {
+            const reader = new FileReader();
+            reader.onload = (e) => this.importIpynb(e.target.result);
+            reader.readAsText(file);
+            return;
+        }
+        if (file.name.endsWith('.pl') || file.name.endsWith('.pro')) {
+            const reader = new FileReader();
+            reader.onload = (e) => this.importProlog(e.target.result);
+            reader.readAsText(file);
+            return;
+        }
+        if (file.name.endsWith('.py')) {
+            const reader = new FileReader();
+            reader.onload = (e) => this.importPython(e.target.result);
+            reader.readAsText(file);
+            return;
+        }
+
+        // All other files: save to SharedVFS
+        this._importToSharedVFS(file);
     }
 
     /**
@@ -623,6 +632,38 @@ class FileIO {
         } catch (err) {
             // Fallback to VFS mount
             await this._handleZipForVFS(file);
+        }
+    }
+
+    /**
+     * Import any file into SharedVFS at /shared/data/<filename>.
+     * Binary files are written as Uint8Array, text files as strings.
+     */
+    _importToSharedVFS(file) {
+        const destPath = '/shared/data/' + file.name;
+        const isText = /\.(csv|tsv|txt|json|jsonl|xml|html|md|r|R|js|yaml|yml|toml|ini|cfg|conf|log|sql|sh|bash)$/i.test(file.name);
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                if (window.sharedVFS) {
+                    if (isText) {
+                        window.sharedVFS.writeFile(destPath, e.target.result, 'user');
+                    } else {
+                        window.sharedVFS.writeFile(destPath, new Uint8Array(e.target.result), 'user');
+                    }
+                    alert('Uploaded to ' + destPath);
+                } else {
+                    alert('SharedVFS not available.');
+                }
+            } catch (err) {
+                alert('Upload failed: ' + err.message);
+            }
+        };
+        if (isText) {
+            reader.readAsText(file);
+        } else {
+            reader.readAsArrayBuffer(file);
         }
     }
 
