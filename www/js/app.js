@@ -21,6 +21,15 @@
         window._cellCounter = window.sessionManager ? window.sessionManager.session.cellCounter : 0;
     }
 
+    // Restore draft input immediately (before Pyodide loads)
+    try {
+        const draftInput = sessionStorage.getItem('scirepl_draft_input');
+        if (draftInput && input) {
+            input.value = draftInput;
+            sessionStorage.removeItem('scirepl_draft_input');
+        }
+    } catch (e) { /* sessionStorage unavailable */ }
+
     /**
      * Get the active REPL container element.
      * Uses NotebookManager's active notebook container if available,
@@ -991,6 +1000,44 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         badge.className = 'ready';
         getRepl().scrollTop = getRepl().scrollHeight;
     }
+
+    // ---- Auto-save: beforeunload + periodic timer ----
+
+    window.addEventListener('beforeunload', () => {
+        // Save main input draft
+        try {
+            if (input && input.value.trim()) {
+                sessionStorage.setItem('scirepl_draft_input', input.value);
+            } else {
+                sessionStorage.removeItem('scirepl_draft_input');
+            }
+        } catch (e) { /* sessionStorage unavailable */ }
+
+        // Commit any in-progress cell edit
+        const editor = document.querySelector('.cell-editor');
+        if (editor) {
+            const card = editor.closest('.card-input');
+            const cellId = card ? parseInt(card.dataset.cellId) : -1;
+            const cell = (window._cells || []).find(c => c.id === cellId);
+            if (cell) cell.code = editor.value.trim();
+        }
+
+        saveCellsToSession();
+    });
+
+    // Periodic auto-save every 30 seconds (commits in-progress cell edits)
+    setInterval(() => {
+        const editor = document.querySelector('.cell-editor');
+        if (editor) {
+            const card = editor.closest('.card-input');
+            const cellId = card ? parseInt(card.dataset.cellId) : -1;
+            const cell = (window._cells || []).find(c => c.id === cellId);
+            if (cell && editor.value.trim() !== cell.code) {
+                cell.code = editor.value.trim();
+                saveCellsToSession();
+            }
+        }
+    }, 30000);
 
     // ---- Save cells to session ----
 
