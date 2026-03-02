@@ -54,6 +54,7 @@ class FileIO {
             // Second click: actually clear
             clearTimeout(clearTimer);
             clearBtn.textContent = 'Clearing...';
+            window._clearingSession = true; // Prevent beforeunload from re-saving
             localStorage.removeItem('scirepl_session_v2');
             localStorage.removeItem('scirepl_session_v1');
             // Also clear IndexedDB (VFS files and search paths)

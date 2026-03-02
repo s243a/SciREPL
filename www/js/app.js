@@ -1004,6 +1004,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
     // ---- Auto-save: beforeunload + periodic timer ----
 
     window.addEventListener('beforeunload', () => {
+        if (window._clearingSession) return; // Skip save during Clear History
         // Save main input draft
         try {
             if (input && input.value.trim()) {
