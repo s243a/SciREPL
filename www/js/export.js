@@ -1110,9 +1110,35 @@ ${cellsHtml}
 
         for (const cell of cells) {
             if (cell.type === 'markdown') {
-                // Simple markdown → paragraphs
-                const lines = cell.code.split('\n');
+                // Extract $$...$$ display math blocks, replace with placeholders
+                const displayMath = [];
+                let mdText = cell.code.replace(/\$\$([\s\S]*?)\$\$/g, (match, tex) => {
+                    const id = `%%DISPLAY_MATH_${displayMath.length}%%`;
+                    displayMath.push(tex.trim());
+                    return id;
+                });
+
+                const lines = mdText.split('\n');
                 for (const line of lines) {
+                    // Check for display math placeholder
+                    const dmMatch = line.trim().match(/^%%DISPLAY_MATH_(\d+)%%$/);
+                    if (dmMatch) {
+                        const tex = displayMath[parseInt(dmMatch[1])];
+                        const ommlObj = this._texToOmml(tex);
+                        if (ommlObj) {
+                            const para = new Paragraph({ spacing: { before: 100, after: 100 } });
+                            para.addChildElement(new OmmlComponent(ommlObj));
+                            children.push(para);
+                        } else {
+                            children.push(new Paragraph({
+                                children: [new TextRun({ text: tex, italics: true, font: 'Cambria Math', size: 24 })],
+                                alignment: AlignmentType.CENTER,
+                                spacing: { before: 100, after: 100 }
+                            }));
+                        }
+                        continue;
+                    }
+
                     if (line.startsWith('# ')) {
                         children.push(new Paragraph({
                             children: [new TextRun({ text: line.slice(2), bold: true, size: 32 })],
@@ -1130,6 +1156,10 @@ ${cellsHtml}
                         }));
                     } else if (line.trim() === '') {
                         children.push(new Paragraph({ spacing: { after: 100 } }));
+                    } else if (line.includes('$')) {
+                        // Line may contain inline math $...$  — split into text + math runs
+                        const parts = this._splitInlineMath(line, TextRun, OmmlComponent);
+                        children.push(new Paragraph({ children: parts, spacing: { after: 60 } }));
                     } else {
                         // Parse inline bold/italic
                         const runs = this._parseInlineMarkdown(line, TextRun);
@@ -1272,6 +1302,59 @@ ${cellsHtml}
         } catch (e) {
             return null;
         }
+    }
+
+    /**
+     * Split a line containing $...$ inline math into an array of TextRun and
+     * OmmlComponent children suitable for a Paragraph.
+     */
+    _splitInlineMath(line, TextRun, OmmlComponent) {
+        const parts = [];
+        const regex = /\$([^\$\n]+?)\$/g;
+        let lastIndex = 0;
+        let match;
+
+        while ((match = regex.exec(line)) !== null) {
+            // Text before the math
+            if (match.index > lastIndex) {
+                const textBefore = line.slice(lastIndex, match.index);
+                parts.push(...this._parseInlineMarkdown(textBefore, TextRun));
+            }
+            // Inline math
+            const tex = match[1].trim();
+            const ommlObj = this._texToOmml(tex);
+            if (ommlObj) {
+                // For inline math, use m:oMath directly (not m:oMathPara)
+                const inlineOmml = ommlObj['m:oMathPara'];
+                // Extract the m:oMath from inside m:oMathPara
+                const oMathArr = inlineOmml ? inlineOmml.filter(c => c['m:oMath']) : null;
+                if (oMathArr && oMathArr.length > 0) {
+                    const inlineObj = {
+                        'm:oMath': [
+                            { _attr: { 'xmlns:m': 'http://schemas.openxmlformats.org/officeDocument/2006/math' } },
+                            ...oMathArr[0]['m:oMath']
+                        ]
+                    };
+                    parts.push(new OmmlComponent(inlineObj));
+                } else {
+                    parts.push(new TextRun({ text: tex, italics: true, font: 'Cambria Math', size: 22 }));
+                }
+            } else {
+                parts.push(new TextRun({ text: tex, italics: true, font: 'Cambria Math', size: 22 }));
+            }
+            lastIndex = match.index + match[0].length;
+        }
+
+        // Remaining text after last math
+        if (lastIndex < line.length) {
+            parts.push(...this._parseInlineMarkdown(line.slice(lastIndex), TextRun));
+        }
+
+        if (parts.length === 0) {
+            parts.push(new TextRun({ text: line, size: 22 }));
+        }
+
+        return parts;
     }
 
     /** Parse inline markdown (bold, italic, code) into TextRun array */
