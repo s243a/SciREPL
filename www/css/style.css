@@ -1191,6 +1191,14 @@ html, body {
     color: #fff;
 }
 
+.catalog-section-header {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin: 12px 0 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+}
+
 /* ===== Scrollable modal variant ===== */
 
 .modal-content-scroll {
