@@ -111,8 +111,12 @@ del _pkg_dir
         if (!vfs) return;
         const FS = this._pyodide.FS;
 
+        let synced = 0;
         for (const prefix of ['/shared', '/tmp']) {
-            this._syncDirFromPyodide(prefix, FS, vfs);
+            synced += this._syncDirFromPyodide(prefix, FS, vfs);
+        }
+        if (synced > 0) {
+            console.log('[PythonKernel] _syncFromPyodide:', synced, 'file(s) synced to SharedVFS');
         }
     }
 
@@ -120,16 +124,18 @@ del _pkg_dir
         let entries;
         try {
             entries = FS.readdir(dirPath).filter(n => n !== '.' && n !== '..');
-        } catch (_) {
-            return;
+        } catch (e) {
+            console.log('[PythonKernel] _syncDir: cannot readdir', dirPath, e.message || e);
+            return 0;
         }
 
+        let count = 0;
         for (const name of entries) {
             const fullPath = dirPath + '/' + name;
             try {
                 const stat = FS.stat(fullPath);
                 if (FS.isDir(stat.mode)) {
-                    this._syncDirFromPyodide(fullPath, FS, vfs);
+                    count += this._syncDirFromPyodide(fullPath, FS, vfs);
                 } else {
                     const data = FS.readFile(fullPath);
                     // Check if file differs from SharedVFS
@@ -148,11 +154,13 @@ del _pkg_dir
                     }
                     vfs.writeFile(fullPath, new Uint8Array(data), 'python');
                     this._syncedToPyodide.set(fullPath, Date.now());
+                    count++;
                 }
-            } catch (_) {
-                // Skip inaccessible entries
+            } catch (e) {
+                console.warn('[PythonKernel] _syncDir error on', fullPath, ':', e.message || e);
             }
         }
+        return count;
     }
 
     /**

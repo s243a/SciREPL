@@ -74,7 +74,10 @@ http.createServer((req, res) => {
 
     const ext = path.extname(filePath).toLowerCase();
     const mime = MIME[ext] || 'application/octet-stream';
-    res.writeHead(200, { 'Content-Type': mime });
+    res.writeHead(200, {
+      'Content-Type': mime,
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+    });
     fs.createReadStream(filePath).pipe(res);
   });
 }).listen(PORT, () => {

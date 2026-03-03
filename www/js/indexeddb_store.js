@@ -1,15 +1,19 @@
 /**
  * indexeddb_store.js — IndexedDB-backed storage for VFS files and search paths.
  *
- * Replaces localStorage for large data (Prolog VFS files from imported packages).
- * localStorage has a 5-10MB limit; IndexedDB supports 50MB+ per origin.
+ * Primary persistent store for all user-generated files:
+ * - Prolog VFS files and search paths (vfs_files, search_paths)
+ * - SharedVFS files and directories (shared_files, shared_dirs)
+ *
+ * IndexedDB supports 50MB+ per origin and stores Uint8Array natively
+ * via structured clone (no base64 encoding needed).
  */
 
 class VFSStore {
     constructor() {
         this._db = null;
         this._dbName = 'scirepl_vfs';
-        this._dbVersion = 1;
+        this._dbVersion = 2;
     }
 
     /**
@@ -25,14 +29,20 @@ class VFSStore {
             request.onupgradeneeded = (event) => {
                 const db = event.target.result;
 
-                // Store VFS files: keyed by path
+                // v1 stores: Prolog VFS files and search paths
                 if (!db.objectStoreNames.contains('vfs_files')) {
                     db.createObjectStore('vfs_files', { keyPath: 'path' });
                 }
-
-                // Store search paths: keyed by alias
                 if (!db.objectStoreNames.contains('search_paths')) {
                     db.createObjectStore('search_paths', { keyPath: 'alias' });
+                }
+
+                // v2 stores: SharedVFS files and directories
+                if (!db.objectStoreNames.contains('shared_files')) {
+                    db.createObjectStore('shared_files', { keyPath: 'path' });
+                }
+                if (!db.objectStoreNames.contains('shared_dirs')) {
+                    db.createObjectStore('shared_dirs', { keyPath: 'path' });
                 }
             };
 
@@ -54,6 +64,8 @@ class VFSStore {
     isReady() {
         return this._db !== null;
     }
+
+    // ── Prolog VFS (vfs_files, search_paths) ──────────────────
 
     /**
      * Save an array of files to IndexedDB.
@@ -170,6 +182,137 @@ class VFSStore {
             };
         });
     }
+
+    // ── SharedVFS (shared_files, shared_dirs) ─────────────────
+
+    /**
+     * Bulk save all SharedVFS files and directories.
+     * Replaces all existing data (clear + put).
+     * Used at beforeunload for full flush.
+     */
+    async saveAllSharedFiles(files, dirs) {
+        if (!this._db) return;
+
+        return new Promise((resolve, reject) => {
+            const tx = this._db.transaction(['shared_files', 'shared_dirs'], 'readwrite');
+            const fileStore = tx.objectStore('shared_files');
+            const dirStore = tx.objectStore('shared_dirs');
+
+            fileStore.clear();
+            dirStore.clear();
+
+            for (const f of files) {
+                fileStore.put({
+                    path: f.path,
+                    content: f.content,
+                    origin: f.origin || 'unknown',
+                    size: f.size || 0,
+                    created: f.created || 0,
+                    modified: f.modified || 0
+                });
+            }
+
+            for (const d of dirs) {
+                dirStore.put({ path: d });
+            }
+
+            tx.oncomplete = () => resolve();
+            tx.onerror = (event) => {
+                console.warn('[VFSStore] saveAllSharedFiles failed:', event.target.error);
+                reject(event.target.error);
+            };
+        });
+    }
+
+    /**
+     * Load all SharedVFS files from IndexedDB.
+     * Returns: [{ path, content, origin, size, created, modified }, ...]
+     */
+    async loadSharedFiles() {
+        if (!this._db) return [];
+
+        return new Promise((resolve, reject) => {
+            const tx = this._db.transaction('shared_files', 'readonly');
+            const request = tx.objectStore('shared_files').getAll();
+
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = (event) => {
+                console.warn('[VFSStore] loadSharedFiles failed:', event.target.error);
+                reject(event.target.error);
+            };
+        });
+    }
+
+    /**
+     * Load all SharedVFS directories from IndexedDB.
+     * Returns: string[]
+     */
+    async loadSharedDirs() {
+        if (!this._db) return [];
+
+        return new Promise((resolve, reject) => {
+            const tx = this._db.transaction('shared_dirs', 'readonly');
+            const request = tx.objectStore('shared_dirs').getAll();
+
+            request.onsuccess = () => resolve((request.result || []).map(r => r.path));
+            request.onerror = (event) => {
+                console.warn('[VFSStore] loadSharedDirs failed:', event.target.error);
+                reject(event.target.error);
+            };
+        });
+    }
+
+    /**
+     * Write a single SharedVFS file (incremental update).
+     */
+    async putSharedFile(path, entry) {
+        if (!this._db) return;
+
+        return new Promise((resolve, reject) => {
+            const tx = this._db.transaction('shared_files', 'readwrite');
+            tx.objectStore('shared_files').put({
+                path,
+                content: entry.content,
+                origin: entry.origin || 'unknown',
+                size: entry.size || 0,
+                created: entry.created || Date.now(),
+                modified: entry.modified || Date.now()
+            });
+            tx.oncomplete = () => resolve();
+            tx.onerror = (event) => reject(event.target.error);
+        });
+    }
+
+    /**
+     * Delete a single SharedVFS file (incremental update).
+     */
+    async deleteSharedFile(path) {
+        if (!this._db) return;
+
+        return new Promise((resolve, reject) => {
+            const tx = this._db.transaction('shared_files', 'readwrite');
+            tx.objectStore('shared_files').delete(path);
+            tx.oncomplete = () => resolve();
+            tx.onerror = (event) => reject(event.target.error);
+        });
+    }
+
+    /**
+     * Clear all SharedVFS data (files + dirs). Used by Clear History.
+     */
+    async clearSharedFiles() {
+        if (!this._db) return;
+
+        return new Promise((resolve, reject) => {
+            const tx = this._db.transaction(['shared_files', 'shared_dirs'], 'readwrite');
+            tx.objectStore('shared_files').clear();
+            tx.objectStore('shared_dirs').clear();
+            tx.oncomplete = () => resolve();
+            tx.onerror = (event) => reject(event.target.error);
+        });
+    }
+
+    // ── Utilities ─────────────────────────────────────────────
 
     /**
      * Get storage usage estimate (if available).
