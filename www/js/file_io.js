@@ -57,17 +57,39 @@ class FileIO {
             window._clearingSession = true; // Prevent beforeunload from re-saving
             localStorage.removeItem('scirepl_session_v2');
             localStorage.removeItem('scirepl_session_v1');
-            // Also clear IndexedDB (VFS files and search paths)
+            // Also clear IndexedDB (VFS files, search paths, and SharedVFS)
             if (window.vfsStore && window.vfsStore.isReady()) {
                 try {
                     await window.vfsStore.clearFiles();
                     await window.vfsStore.saveSearchPaths([]);
+                    await window.vfsStore.clearSharedFiles();
                 } catch (e) {
                     console.warn('Failed to clear IndexedDB:', e);
                 }
             }
             location.reload();
         });
+
+        // Reload App — unregister service worker and hard-reload
+        const reloadBtn = document.getElementById('btn-reload-app');
+        if (reloadBtn) {
+            reloadBtn.addEventListener('click', async () => {
+                reloadBtn.textContent = 'Reloading...';
+                reloadBtn.disabled = true;
+                try {
+                    // Unregister service workers
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(regs.map(r => r.unregister()));
+                } catch (_) { }
+                try {
+                    // Clear all SW caches
+                    const names = await caches.keys();
+                    await Promise.all(names.map(n => caches.delete(n)));
+                } catch (_) { }
+                // Reload (browser will fetch fresh from server)
+                location.reload();
+            });
+        }
 
         // Run All Cells
         document.getElementById('btn-run-all').addEventListener('click', () => {
@@ -788,6 +810,20 @@ class FileIO {
             // Apply Prolog search paths from notebook metadata
             if (nb.metadata && nb.metadata.scirepl && nb.metadata.scirepl.prolog_paths) {
                 this._applyPrologPaths(nb.metadata.scirepl.prolog_paths);
+            }
+
+            // Create a new notebook tab for the imported workbook
+            const nm = window.notebookManager;
+            if (nm && nm.createNotebook) {
+                // Extract name from first markdown heading, or fall back
+                let wbName = 'Imported Workbook';
+                const firstMd = extractedCells.find(c => c.type === 'markdown');
+                if (firstMd) {
+                    const headingMatch = firstMd.code.match(/^#\s+(.+)/m);
+                    if (headingMatch) wbName = headingMatch[1].trim();
+                }
+                const newNb = nm.createNotebook({ name: wbName });
+                nm.switchTo(newNb.id);
             }
 
             // Use the cell import API if available

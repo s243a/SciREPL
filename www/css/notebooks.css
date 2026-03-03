@@ -228,6 +228,21 @@
     color: var(--accent);
 }
 
+/* ===== Inline rename input ===== */
+
+.nb-rename-input {
+    flex: 1;
+    min-width: 0;
+    padding: 2px 6px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    font-size: inherit;
+    font-family: var(--font-sans);
+    outline: none;
+}
+
 /* ===== Language badge in notebook selectors ===== */
 
 .sidebar-notebook-item .lang-badge,

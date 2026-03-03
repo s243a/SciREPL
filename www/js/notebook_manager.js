@@ -150,6 +150,14 @@ class NotebookManager {
         this.saveState();
     }
 
+    renameNotebook(id, newName) {
+        const nb = this._notebooks.find(n => n.id === id);
+        if (!nb || !newName || !newName.trim()) return;
+        nb.name = newName.trim();
+        this.renderSelector();
+        this.saveState();
+    }
+
     getNotebook(id) {
         return this._notebooks.find(n => n.id === id) || null;
     }
@@ -474,6 +482,17 @@ class NotebookManager {
             this.switchTo(select.value);
         });
 
+        const renameBtn = document.createElement('button');
+        renameBtn.className = 'notebook-add-btn';
+        renameBtn.textContent = '\u270E';
+        renameBtn.title = 'Rename Notebook';
+        renameBtn.addEventListener('click', () => {
+            const active = this.getActiveNotebook();
+            if (!active) return;
+            const newName = prompt('Rename notebook:', active.name);
+            if (newName) this.renameNotebook(active.id, newName);
+        });
+
         const addBtn = document.createElement('button');
         addBtn.className = 'notebook-add-btn';
         addBtn.textContent = '+';
@@ -486,7 +505,35 @@ class NotebookManager {
         });
 
         container.appendChild(select);
+        container.appendChild(renameBtn);
         container.appendChild(addBtn);
+    }
+
+    /**
+     * Replace a name element with an inline input for renaming.
+     */
+    _startInlineRename(nameEl, nbId) {
+        const nb = this.getNotebook(nbId);
+        if (!nb) return;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'nb-rename-input';
+        input.value = nb.name;
+        input.addEventListener('click', e => e.stopPropagation());
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.renameNotebook(nbId, input.value);
+            } else if (e.key === 'Escape') {
+                this.renderSelector();
+            }
+        });
+        input.addEventListener('blur', () => {
+            this.renameNotebook(nbId, input.value);
+        });
+        nameEl.replaceWith(input);
+        input.focus();
+        input.select();
     }
 
     _renderSidebar(sidebar) {
@@ -508,6 +555,15 @@ class NotebookManager {
                 <span class="sidebar-nb-name">${nb.name}</span>
                 ${langBadge}
             `;
+
+            // Double-click to rename
+            const nameSpan = item.querySelector('.sidebar-nb-name');
+            if (nameSpan) {
+                nameSpan.addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    this._startInlineRename(nameSpan, nb.id);
+                });
+            }
 
             item.addEventListener('click', () => this.switchTo(nb.id));
 
@@ -555,6 +611,16 @@ class NotebookManager {
                 : '';
 
             tab.innerHTML = `<span class="tab-name">${nb.name}</span> ${langBadge}`;
+
+            // Double-click to rename
+            const tabName = tab.querySelector('.tab-name');
+            if (tabName) {
+                tabName.addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    this._startInlineRename(tabName, nb.id);
+                });
+            }
+
             tab.addEventListener('click', () => this.switchTo(nb.id));
 
             // Close button
