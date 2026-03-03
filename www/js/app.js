@@ -655,6 +655,9 @@
 
         if (!pyodide) throw new Error('Python kernel not ready');
 
+        // Sync SharedVFS → Pyodide before execution
+        if (kernel._syncToPyodide) kernel._syncToPyodide();
+
         // Redirect stdout
         pyodide.runPython(`
 import io, sys
@@ -676,6 +679,9 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
         pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`);
         const printed = pyodide.runPython(`_sci_repl_stdout.getvalue()`);
+
+        // Sync Pyodide → SharedVFS after execution
+        if (kernel._syncFromPyodide) kernel._syncFromPyodide();
 
         if (printed && printed.length > 0) {
             window.renderText(printed, false);
@@ -843,7 +849,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         if (!window.sessionManager) return;
 
         // Restore SharedVFS before any cells execute (so bash/prolog can access shared files)
-        window.sessionManager.restoreSharedState();
+        await window.sessionManager.restoreSharedState();
 
         // Restore multi-notebook state (tabs) if available
         if (window.notebookManager && window.notebookManager.hasStoredState()) {

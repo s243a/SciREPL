@@ -1191,6 +1191,14 @@ html, body {
     color: #fff;
 }
 
+.catalog-section-header {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin: 12px 0 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+}
+
 /* ===== Scrollable modal variant ===== */
 
 .modal-content-scroll {
@@ -1255,6 +1263,20 @@ html, body {
     border-color: var(--accent);
 }
 
+.vfs-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin: 4px 0;
+}
+
+.vfs-option input[type="checkbox"] {
+    accent-color: var(--accent);
+}
+
 .vfs-file-list {
     background: var(--bg-input);
     border: 1px solid var(--border);
@@ -1294,6 +1316,30 @@ html, body {
     font-size: 10px;
 }
 
+.vfs-mount {
+    font-weight: 600;
+    color: var(--orange);
+    border-bottom: 1px solid var(--border);
+    margin-top: 4px;
+    padding-bottom: 4px;
+}
+
+.vfs-mount .vfs-icon {
+    font-size: 15px;
+}
+
+.vfs-not-loaded {
+    opacity: 0.4;
+    font-style: italic;
+}
+
+.vfs-not-loaded .vfs-name::after {
+    content: ' (not loaded)';
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 400;
+}
+
 .vfs-empty {
     color: var(--text-muted);
     font-style: italic;
@@ -1302,7 +1348,6 @@ html, body {
 }
 
 .vfs-delete-btn {
-    margin-left: auto;
     background: none;
     border: none;
     color: var(--text-muted);
@@ -1534,6 +1579,41 @@ tr:hover .vfs-delete-btn {
 .vfs-entry-active {
     background: var(--accent-glow);
     border-left: 2px solid var(--accent);
+}
+
+/* Selected folder */
+.vfs-dir-selected {
+    background: rgba(88, 166, 255, 0.12);
+    border-left: 2px solid var(--accent);
+    cursor: pointer;
+}
+
+/* Action button group (download + delete) */
+.vfs-entry-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.vfs-download-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 4px;
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.vfs-entry:hover .vfs-download-btn {
+    opacity: 1;
+}
+
+.vfs-download-btn:hover {
+    color: var(--accent);
 }
 
 .vfs-entry .vfs-name {

@@ -14,7 +14,7 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **R kernel** — Full R via webR (WASM), loaded on demand (~50 MB, cached after first use). Supports plotting, `install.packages()`, and SharedVFS file sharing.
 - **Kernel abstraction layer** — Pluggable architecture for adding new language runtimes
 - **Package system v2** — Install packages with notebooks, data files, Python modules, Prolog knowledge bases, and WASM libraries. See [docs/packages.md](docs/packages.md).
-- **SharedVFS** — In-memory filesystem shared across all kernels. Python, Bash, Prolog, R, and JavaScript can read/write the same files.
+- **SharedVFS** — In-memory filesystem shared across all kernels. Python, Bash, Prolog, R, and JavaScript can read/write the same files. Persisted to IndexedDB — files survive page reloads.
 - **Cross-kernel WASM FFI** — Package and distribute pre-compiled Rust WASM libraries callable from JavaScript, Python, and Prolog
 - **Rich output** — LaTeX math rendering, interactive Plotly charts, tables
 - **Hybrid plotting** — Python `plot()` → Plotly.js (pinch-zoom, pan, hover), R `plotly()` → interactive Plotly charts
@@ -26,7 +26,9 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **Cell reordering** — Drag-and-drop (desktop) or move up/down arrows (mobile)
 - **Markdown cells** — Toggle Code/Md, supports `$LaTeX$` and `$$display math$$`
 - **Run All Below / Run All Cells** — Re-execute from a cell downward or the entire notebook
-- **Session persistence** — Cells auto-save (with language) and restore on app restart
+- **File browser** — Browse, download, create folders, and manage files across all filesystems. Upload files to any folder, extract zip archives, or upload them as whole files.
+- **Multi-notebook tabs** — Multiple notebooks in tabs/sidebar/dropdown. Import a workbook to create a new tab. Double-click tab names to rename.
+- **Session persistence** — Cells auto-save (with language) and restore on app restart. SharedVFS files persist to IndexedDB.
 - **Import/Export** — `.ipynb`, `.py`, `.pl` with language-aware metadata; native share sheet
 - **Rich export** — HTML, Markdown, PDF, DOCX, and LaTeX. Exports include code, output, plots, LaTeX math, and tables. HTML and DOCX exports include syntax-highlighted code blocks.
 - **Import/Export with outputs** — `.ipynb` export includes cell outputs (text, images, LaTeX, tables), viewable in Jupyter and GitHub without re-execution. Import preserves outputs — no re-execution needed.
@@ -275,7 +277,9 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - **[www/js/shared_vfs.js](www/js/shared_vfs.js)** — SharedVFS — in-memory filesystem shared across kernels
 - **[www/js/package_loader.js](www/js/package_loader.js)** — Package loading, target routing, WASM module loading
 - **[www/js/package_catalog.js](www/js/package_catalog.js)** — Browse Packages UI and one-click install
-- **[www/js/persistence.js](www/js/persistence.js)** — Session save/restore via localStorage (with language per cell)
+- **[www/js/persistence.js](www/js/persistence.js)** — Session save/restore via localStorage + IndexedDB (with language per cell)
+- **[www/js/indexeddb_store.js](www/js/indexeddb_store.js)** — IndexedDB storage for Prolog VFS and SharedVFS files
+- **[www/js/notebook_manager.js](www/js/notebook_manager.js)** — Multi-notebook management (tabs/sidebar/dropdown, rename, persistence)
 - **[www/js/export.js](www/js/export.js)** — HTML, Markdown, PDF, DOCX, and LaTeX export with DOM scraping and syntax highlighting
 - **[www/js/file_io.js](www/js/file_io.js)** — Import/export (.ipynb with output preservation, .py, .pl, packages) via Capacitor plugins
 - **[www/js/math_mode.js](www/js/math_mode.js)** — Math palette UI
@@ -317,6 +321,11 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - [x] Syntax highlighting in exports (HTML, DOCX) via highlight.js
 - [x] In-app syntax highlighting for code cells
 - [x] Find & Replace across notebook cells (Ctrl+F)
+- [x] IndexedDB persistence for SharedVFS (files survive page reloads)
+- [x] Unified file browser with mount-point view (/shared + /mnt/pyodide + /mnt/prolog)
+- [x] File browser: folder selection, download files/folders, create folders, zip extraction
+- [x] Multi-notebook tabs with rename support
+- [x] Workbook import creates new tab (auto-named from heading)
 - [ ] Additional languages (Lua)
 - [x] Cell reordering (drag-and-drop + move arrows)
 - [x] Delete individual cells

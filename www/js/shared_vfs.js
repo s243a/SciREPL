@@ -477,6 +477,74 @@ class SharedVFS {
         }
     }
 
+    // ── IndexedDB persistence ────────────────────────────────
+
+    /**
+     * Save all SharedVFS data to IndexedDB.
+     * Called at beforeunload (fire-and-forget) and periodically.
+     */
+    async saveToIndexedDB() {
+        const store = window.vfsStore;
+        if (!store || !store.isReady()) return false;
+
+        const files = [];
+        for (const [path, entry] of this._files) {
+            files.push({
+                path,
+                content: entry.content,
+                origin: entry.origin,
+                size: entry.size,
+                created: entry.created,
+                modified: entry.modified
+            });
+        }
+        const dirs = Array.from(this._dirs);
+
+        await store.saveAllSharedFiles(files, dirs);
+        if (files.length > 0) {
+            console.log(`[SharedVFS] Saved ${files.length} files to IndexedDB`);
+        }
+        return true;
+    }
+
+    /**
+     * Restore SharedVFS data from IndexedDB.
+     * Called early during startup, before kernels initialize.
+     */
+    async restoreFromIndexedDB() {
+        const store = window.vfsStore;
+        if (!store || !store.isReady()) return false;
+
+        const [files, dirs] = await Promise.all([
+            store.loadSharedFiles(),
+            store.loadSharedDirs()
+        ]);
+
+        // Always restore dirs (merge with defaults)
+        for (const d of dirs) this._dirs.add(d);
+        for (const f of files) {
+            this._files.set(f.path, {
+                content: f.content,
+                origin: f.origin || 'restored',
+                created: f.created || Date.now(),
+                modified: f.modified || Date.now(),
+                size: f.size || 0
+            });
+        }
+        console.log(`[SharedVFS] Restored ${files.length} files, ${dirs.length} dirs from IndexedDB`);
+        // Only count as successful if actual files were restored;
+        // dirs alone are just defaults and shouldn't block localStorage migration
+        return files.length > 0;
+    }
+
+    /**
+     * Alias for unlink() — matches the interface expected by the
+     * Files & Storage panel's delete button.
+     */
+    removeFile(path) {
+        return this.unlink(path);
+    }
+
     /**
      * Get a tree listing for debugging/display.
      */

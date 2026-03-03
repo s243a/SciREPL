@@ -181,6 +181,43 @@ assert((grandparent(X,Z) :-
     parent(X,Y), parent(Y,Z))).
 grandparent(tom, Z).</code></pre>
 
+            <h3>Shared Filesystem</h3>
+            <p>SciREPL has a <strong>SharedVFS</strong> (shared virtual filesystem) that lets all kernels read and write to the same files. Files under <code>/shared/</code> and <code>/tmp/</code> are accessible from every language.</p>
+
+            <p><strong>Directory layout:</strong></p>
+            <ul>
+                <li><code>/shared/data/</code> — Datasets (CSV, JSON, etc.)</li>
+                <li><code>/shared/lib/python/</code> — Python modules (auto-added to <code>sys.path</code>)</li>
+                <li><code>/shared/lib/prolog/</code> — Prolog modules</li>
+                <li><code>/shared/lib/wasm/</code> — WebAssembly modules</li>
+                <li><code>/shared/bin/</code>, <code>/shared/config/</code> — Utilities and config files</li>
+                <li><code>/tmp/</code> — Temporary files (shared, not persisted)</li>
+            </ul>
+
+            <p><strong>Per-kernel behavior:</strong></p>
+            <ul>
+                <li><strong>Python</strong> — Use standard <code>open()</code> with <code>/shared/</code> paths. Files are synced to SharedVFS automatically after each cell execution.</li>
+                <li><strong>R</strong> — Use <code>sharedfs_write()</code> and <code>sharedfs_read()</code> helpers to access shared files.</li>
+                <li><strong>Prolog</strong> — Consult files from <code>/shared/</code> paths directly.</li>
+                <li><strong>Bash</strong> — The brush-wasm shell has a built-in bridge to SharedVFS.</li>
+            </ul>
+
+            <pre><code># Python — write a CSV to the shared folder
+with open("/shared/data/results.csv", "w") as f:
+    f.write("x,y\n1,2\n3,4\n")
+
+# R — read it back
+sharedfs_read("/shared/data/results.csv")
+
+% Prolog — consult a shared knowledge base
+:- consult('/shared/lib/prolog/kb.pl').</code></pre>
+
+            <p><strong>Packages &amp; workbooks:</strong> When you install a package or workbook from Browse Packages &amp; Workbooks, files with <code>/shared/</code> destination paths are written to SharedVFS automatically. Package files targeting a specific kernel (e.g., Prolog modules at <code>/user/</code>) go to that kernel's own filesystem.</p>
+
+            <p><strong>Browsing files:</strong> Open <strong>Menu → Files &amp; Storage</strong> to browse. Select <strong>SharedVFS</strong> from the dropdown to see shared files, or select a kernel (Python, Prolog) to see its internal filesystem. Use the <em>Show empty folders</em> checkbox to toggle visibility of empty directories.</p>
+
+            <p><strong>Uploading:</strong> Use the "Upload File" button at the top of Files &amp; Storage to upload files directly into SharedVFS. Set the destination path (default: <code>/shared/data/</code>) before uploading.</p>
+
             <h3>Export Formats</h3>
             <p>Use the Menu to export your notebook:</p>
             <ul>
@@ -260,10 +297,11 @@ grandparent(tom, Z).</code></pre>
                 <button id="btn-export-latex">📐 Export LaTeX</button>
                 <button id="btn-import-file">📂 Import File (e.g. .csv, .py, .ipynb, .zip)</button>
                 <button id="btn-import-package">📦 Import Package (.zip / .tar.gz)</button>
-                <button id="btn-browse-packages">📦 Browse Packages</button>
+                <button id="btn-browse-packages">📦 Browse Packages &amp; Workbooks</button>
                 <button id="btn-export-package">📦 Export Package (.zip)</button>
                 <button id="btn-prolog-settings">⚙ Files &amp; Storage (VFS / Paths)</button>
                 <button id="btn-clear-session" class="danger">🗑 Clear History</button>
+                <button id="btn-reload-app">🔄 Reload App</button>
             </div>
         </div>
     </div>
@@ -272,8 +310,8 @@ grandparent(tom, Z).</code></pre>
     <div id="package-catalog-modal" class="modal hidden">
         <div class="modal-content modal-content-scroll">
             <button class="modal-close">&times;</button>
-            <h2>Browse Packages</h2>
-            <p>One-click install community packages into SciREPL.</p>
+            <h2>Browse Packages &amp; Workbooks</h2>
+            <p>One-click install packages and workbook templates into SciREPL.</p>
             <div id="package-catalog-list"></div>
         </div>
     </div>
@@ -295,19 +333,23 @@ grandparent(tom, Z).</code></pre>
             </div>
             <input type="file" id="vfs-shared-input" style="display:none">
 
-            <h3>Kernel Specific Files</h3>
-            <p>Upload files into a kernel's virtual filesystem.</p>
+            <h3>File Browser</h3>
+            <p>Browse persistent storage and kernel-specific filesystems.</p>
             <div class="vfs-actions">
-                <select id="vfs-kernel-select" class="vfs-kernel-select" title="Target kernel">
-                    <option value="prolog">Prolog</option>
-                    <option value="python">Python</option>
-                    <option value="r">R</option>
+                <select id="vfs-kernel-select" class="vfs-kernel-select" title="Filesystem view">
+                    <option value="unified">All Filesystems</option>
+                    <option value="shared">/ (Persistent Storage)</option>
+                    <option value="prolog">/mnt/prolog</option>
+                    <option value="python">/mnt/pyodide</option>
+                    <option value="r">/mnt/r</option>
                 </select>
                 <button id="vfs-upload-pl" class="vfs-btn">Upload File</button>
                 <button id="vfs-upload-zip" class="vfs-btn">Upload .zip Archive</button>
+                <button id="vfs-new-folder-btn" class="vfs-btn">New Folder</button>
             </div>
             <input type="file" id="vfs-file-input" style="display:none">
             <input type="file" id="vfs-zip-input" accept=".zip" style="display:none">
+            <label class="vfs-option" id="vfs-show-empty-label"><input type="checkbox" id="vfs-show-empty-dirs"> Show empty folders</label>
             <div id="vfs-file-list" class="vfs-file-list">
                 <div class="vfs-empty">No files mounted.</div>
             </div>

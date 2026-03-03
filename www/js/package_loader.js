@@ -304,7 +304,9 @@ class PackageLoader {
 
             const addFile = (dest, content) => {
                 const resolved = this._resolveContent(content, dest, spec);
-                if (target === 'shared' || target === 'all') {
+                // Auto-route: paths under /shared/ or /tmp/ always go to SharedVFS
+                const isSharedPath = dest.startsWith('/shared/') || dest.startsWith('/tmp/');
+                if (target === 'shared' || target === 'all' || isSharedPath) {
                     sharedBatch.push({ path: dest, content: resolved, origin: 'package' });
                 }
                 if (target === 'prolog' || target === 'all') {

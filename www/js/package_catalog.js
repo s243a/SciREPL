@@ -1,9 +1,8 @@
 /**
- * package_catalog.js — Browse and install packages from predefined URLs.
+ * package_catalog.js — Browse and install packages/workbooks from predefined URLs.
  *
- * A lightweight alternative to a full package manager: a curated list of
- * package URLs (typically GitHub release assets) that users can install
- * with one click.
+ * A lightweight catalog of curated packages (.zip) and workbook templates
+ * (.ipynb) that users can install with one click.
  */
 
 class PackageCatalog {
@@ -14,20 +13,30 @@ class PackageCatalog {
     }
 
     /**
-     * The package catalog.  Add entries here to make them available to users.
-     * Each entry needs: name, description, url, and optionally version/size.
+     * The catalog.  Add entries here to make them available to users.
+     * Each entry needs: name, description, url, and optionally version/size/type.
+     * type: 'package' (default, .zip) or 'workbook' (.ipynb)
      */
     get packages() {
         return [
             {
                 name: 'UnifyWeaver SciREPL',
                 description: 'Physics knowledge-base notebooks with Prolog inference, embedding search, and mindmap tools.',
+                type: 'package',
                 version: 'v0.3.0',
                 url: 'https://github.com/s243a/SciREPL/releases/download/v0.3.0/unifyweaver_scirepl.zip',
-                // Same-origin URL used when served from GitHub Pages (avoids CORS)
                 pages_url: 'packages/unifyweaver_scirepl.zip',
                 size: '~2 MB',
                 kernels: ['prolog', 'python'],
+            },
+            {
+                name: 'Life Expectancy Analysis',
+                description: 'Mixed Python/R workbook: Gapminder & WHO datasets with pandas, plotly, and R base graphics.',
+                type: 'workbook',
+                url: 'https://github.com/s243a/SciREPL/releases/download/v0.5.0/life_expectancy_csv_demo.ipynb',
+                pages_url: 'workbooks/life_expectancy_csv_demo.ipynb',
+                size: '~8 KB',
+                kernels: ['python', 'r'],
             },
         ];
     }
@@ -55,14 +64,36 @@ class PackageCatalog {
 
     _render() {
         if (!this.listEl) return;
-        const pkgs = this.packages;
+        const all = this.packages;
 
-        if (pkgs.length === 0) {
-            this.listEl.innerHTML = '<p>No packages available.</p>';
+        if (all.length === 0) {
+            this.listEl.innerHTML = '<p>No items available.</p>';
             return;
         }
 
-        this.listEl.innerHTML = pkgs.map((pkg, i) => `
+        const packages = all.filter(p => (p.type || 'package') === 'package');
+        const workbooks = all.filter(p => p.type === 'workbook');
+
+        let html = '';
+        if (packages.length > 0) {
+            html += '<h3 class="catalog-section-header">Packages</h3>';
+            html += packages.map((pkg) => this._renderCard(pkg, all.indexOf(pkg))).join('');
+        }
+        if (workbooks.length > 0) {
+            html += '<h3 class="catalog-section-header">Workbooks</h3>';
+            html += workbooks.map((pkg) => this._renderCard(pkg, all.indexOf(pkg))).join('');
+        }
+
+        this.listEl.innerHTML = html;
+
+        // Attach install handlers
+        this.listEl.querySelectorAll('.pkg-install-btn').forEach(btn => {
+            btn.addEventListener('click', () => this._install(btn));
+        });
+    }
+
+    _renderCard(pkg, idx) {
+        return `
             <div class="pkg-card">
                 <div class="pkg-info">
                     <strong>${this._esc(pkg.name)}</strong>
@@ -71,14 +102,9 @@ class PackageCatalog {
                     ${pkg.kernels ? `<span class="pkg-kernels">${pkg.kernels.map(k => this._esc(k)).join(', ')}</span>` : ''}
                     <p>${this._esc(pkg.description)}</p>
                 </div>
-                <button class="pkg-install-btn" data-idx="${i}">Install</button>
+                <button class="pkg-install-btn" data-idx="${idx}">Install</button>
             </div>
-        `).join('');
-
-        // Attach install handlers
-        this.listEl.querySelectorAll('.pkg-install-btn').forEach(btn => {
-            btn.addEventListener('click', () => this._install(btn));
-        });
+        `;
     }
 
     async _install(btn) {
@@ -106,17 +132,33 @@ class PackageCatalog {
 
             btn.textContent = 'Importing...';
 
-            // Derive filename from URL
-            const urlParts = pkg.url.split('/');
-            const filename = urlParts[urlParts.length - 1] || 'package.zip';
-            const file = new File([blob], filename, { type: blob.type });
-
-            if (window.packageLoader) {
-                await window.packageLoader.loadFromFile(file);
-                btn.textContent = 'Installed';
-                btn.classList.add('pkg-installed');
+            if (pkg.type === 'workbook') {
+                // Workbook: read as text and import via FileIO
+                const text = await blob.text();
+                if (window.fileIO) {
+                    window.fileIO.importIpynb(text);
+                } else {
+                    throw new Error('File IO not available');
+                }
             } else {
-                throw new Error('Package loader not available');
+                // Package: extract archive via PackageLoader
+                const urlParts = pkg.url.split('/');
+                const filename = urlParts[urlParts.length - 1] || 'package.zip';
+                const file = new File([blob], filename, { type: blob.type });
+
+                if (window.packageLoader) {
+                    await window.packageLoader.loadFromFile(file);
+                } else {
+                    throw new Error('Package loader not available');
+                }
+            }
+
+            btn.textContent = 'Installed';
+            btn.classList.add('pkg-installed');
+
+            // Close modal after workbook import so user sees their cells
+            if (pkg.type === 'workbook' && this.modal) {
+                setTimeout(() => this.modal.classList.add('hidden'), 500);
             }
         } catch (err) {
             console.error('[PackageCatalog] Install failed:', err);

@@ -202,30 +202,83 @@ class SessionManager {
 
     /**
      * Save SharedVFS state for cross-kernel file persistence.
-     * Stores files from /tmp/ and /shared/ up to a size limit.
+     * Uses IndexedDB as primary (no size limit), localStorage snapshot as fallback.
      */
     saveSharedState() {
         if (!window.sharedVFS) return;
         try {
-            const snap = window.sharedVFS.snapshot();
-            this.session.sharedVFS = snap;
-            this.save();
+            // Fire-and-forget: IndexedDB transaction commits even on page unload
+            window.sharedVFS.saveToIndexedDB().then(() => {
+                // Clear localStorage copy if migration complete
+                if (this.session.sharedVFS) {
+                    this.session.sharedVFS = null;
+                    this.save();
+                }
+            }).catch(e => {
+                console.warn('[SessionManager] IndexedDB SharedVFS save failed, using localStorage:', e);
+                // Fallback: localStorage snapshot
+                try {
+                    this.session.sharedVFS = window.sharedVFS.snapshot();
+                    this.save();
+                } catch (e2) {
+                    console.warn('Failed to save SharedVFS state:', e2);
+                }
+            });
         } catch (e) {
             console.warn('Failed to save SharedVFS state:', e);
         }
     }
 
     /**
-     * Restore SharedVFS state from saved session.
+     * Restore SharedVFS state from IndexedDB (primary) or localStorage (fallback).
      * Called early during startup, before kernels initialize.
      */
-    restoreSharedState() {
+    async restoreSharedState() {
         if (!window.sharedVFS) return;
+
+        // Ensure vfsStore is ready
+        const store = window.vfsStore;
+        if (store && !store.isReady()) {
+            try { await store.init(); } catch (e) {
+                console.warn('[SessionManager] VFSStore init failed:', e);
+            }
+        }
+
+        // Try IndexedDB first
+        if (store && store.isReady()) {
+            try {
+                const restored = await window.sharedVFS.restoreFromIndexedDB();
+                if (restored) {
+                    // Migrate any leftover localStorage data
+                    if (this.session.sharedVFS) {
+                        console.log('[SessionManager] Migrating localStorage SharedVFS → IndexedDB');
+                        window.sharedVFS.restore(this.session.sharedVFS);
+                        window.sharedVFS.saveToIndexedDB().catch(() => {});
+                        this.session.sharedVFS = null;
+                        this.save();
+                    }
+                    return;
+                }
+            } catch (e) {
+                console.warn('[SessionManager] IndexedDB SharedVFS restore failed:', e);
+            }
+        }
+
+        // Fallback: localStorage snapshot
         const snap = this.session.sharedVFS;
         if (!snap) return;
         try {
             window.sharedVFS.restore(snap);
-            console.log('[SessionManager] Restored SharedVFS state');
+            console.log('[SessionManager] Restored SharedVFS from localStorage');
+
+            // Migrate to IndexedDB for next time
+            if (store && store.isReady()) {
+                window.sharedVFS.saveToIndexedDB().then(() => {
+                    this.session.sharedVFS = null;
+                    this.save();
+                    console.log('[SessionManager] Migrated SharedVFS to IndexedDB');
+                }).catch(() => {});
+            }
         } catch (e) {
             console.warn('Failed to restore SharedVFS state:', e);
         }

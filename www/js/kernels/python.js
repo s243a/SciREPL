@@ -8,6 +8,7 @@ class PythonKernel {
     constructor() {
         this._pyodide = null;
         this._ready = false;
+        this._syncedToPyodide = new Map(); // path → modified timestamp
     }
 
     async init() {
@@ -32,6 +33,11 @@ class PythonKernel {
         const bridgeCode = await bridgeResp.text();
         // Write sharedfs.py into Pyodide's filesystem so `import sharedfs` works
         this._pyodide.FS.writeFile('/home/pyodide/sharedfs.py', bridgeCode);
+
+        // Create shared directories in Pyodide's filesystem
+        try { this._pyodide.FS.mkdirTree('/shared/data'); } catch (_) { }
+        try { this._pyodide.FS.mkdirTree('/shared/lib'); } catch (_) { }
+        try { this._pyodide.FS.mkdirTree('/tmp'); } catch (_) { }
 
         // Sync Python modules from SharedVFS /shared/lib/python/ into Pyodide FS
         // so `import <module>` works natively
@@ -61,6 +67,102 @@ del _pkg_dir
         return 'python';
     }
 
+    // ── SharedVFS Sync ──────────────────────────────────────────
+
+    /**
+     * Sync files from SharedVFS → Pyodide FS (before execution).
+     * Only syncs files that are new or changed since last sync.
+     */
+    _syncToPyodide() {
+        const vfs = window.sharedVFS;
+        if (!vfs) return;
+        const FS = this._pyodide.FS;
+
+        for (const prefix of ['/shared', '/tmp']) {
+            for (const [path, entry] of vfs._files) {
+                if (!path.startsWith(prefix + '/')) continue;
+                const lastSynced = this._syncedToPyodide.get(path);
+                if (lastSynced && lastSynced >= entry.modified) continue;
+
+                // Ensure parent directory exists
+                const dir = path.substring(0, path.lastIndexOf('/'));
+                try { FS.mkdirTree(dir); } catch (_) { /* exists */ }
+
+                try {
+                    if (entry.content instanceof Uint8Array) {
+                        FS.writeFile(path, entry.content);
+                    } else {
+                        FS.writeFile(path, String(entry.content));
+                    }
+                    this._syncedToPyodide.set(path, entry.modified);
+                } catch (e) {
+                    console.warn('[PythonKernel] sync to Pyodide failed:', path, e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Sync files from Pyodide FS → SharedVFS (after execution).
+     * Walks /shared and /tmp, writes any new/changed files back.
+     */
+    _syncFromPyodide() {
+        const vfs = window.sharedVFS;
+        if (!vfs) return;
+        const FS = this._pyodide.FS;
+
+        let synced = 0;
+        for (const prefix of ['/shared', '/tmp']) {
+            synced += this._syncDirFromPyodide(prefix, FS, vfs);
+        }
+        if (synced > 0) {
+            console.log('[PythonKernel] _syncFromPyodide:', synced, 'file(s) synced to SharedVFS');
+        }
+    }
+
+    _syncDirFromPyodide(dirPath, FS, vfs) {
+        let entries;
+        try {
+            entries = FS.readdir(dirPath).filter(n => n !== '.' && n !== '..');
+        } catch (e) {
+            console.log('[PythonKernel] _syncDir: cannot readdir', dirPath, e.message || e);
+            return 0;
+        }
+
+        let count = 0;
+        for (const name of entries) {
+            const fullPath = dirPath + '/' + name;
+            try {
+                const stat = FS.stat(fullPath);
+                if (FS.isDir(stat.mode)) {
+                    count += this._syncDirFromPyodide(fullPath, FS, vfs);
+                } else {
+                    const data = FS.readFile(fullPath);
+                    // Check if file differs from SharedVFS
+                    const existing = vfs._files.get(fullPath);
+                    if (existing) {
+                        const existingBytes = existing.content instanceof Uint8Array
+                            ? existing.content
+                            : new TextEncoder().encode(String(existing.content));
+                        if (existingBytes.length === data.length) {
+                            let same = true;
+                            for (let i = 0; i < data.length; i++) {
+                                if (existingBytes[i] !== data[i]) { same = false; break; }
+                            }
+                            if (same) continue;
+                        }
+                    }
+                    vfs.writeFile(fullPath, new Uint8Array(data), 'python');
+                    this._syncedToPyodide.set(fullPath, Date.now());
+                    count++;
+                }
+            } catch (e) {
+                console.warn('[PythonKernel] _syncDir error on', fullPath, ':', e.message || e);
+            }
+        }
+        return count;
+    }
+
     /**
      * Execute Python code. Returns { stdout, result, error }.
      *
@@ -73,6 +175,9 @@ del _pkg_dir
         }
 
         const pyodide = this._pyodide;
+
+        // Sync SharedVFS → Pyodide before execution
+        this._syncToPyodide();
 
         // Redirect stdout
         pyodide.runPython(`
@@ -98,6 +203,9 @@ sys.stdout = _sci_repl_stdout
         try {
             stdout = pyodide.runPython(`_sci_repl_stdout.getvalue()`);
         } catch (_) { }
+
+        // Sync Pyodide → SharedVFS after execution
+        this._syncFromPyodide();
 
         if (error) {
             return { stdout, result: null, error };
@@ -189,6 +297,70 @@ sys.stdout = _sci_repl_stdout
      */
     getPyodide() {
         return this._pyodide;
+    }
+
+    /**
+     * VFS adapter — exposes Pyodide's Emscripten FS with the same interface
+     * as PrologVFS so the Files & Storage panel can browse it.
+     */
+    getVFS() {
+        if (!this._pyodide) return null;
+        if (this._vfs) return this._vfs;
+
+        const FS = this._pyodide.FS;
+        this._vfs = {
+            getTree(basePath, depth) {
+                basePath = basePath || '/shared';
+                depth = depth || 0;
+                const MAX_DEPTH = 5;
+                const entries = [];
+                if (depth > MAX_DEPTH) return entries;
+
+                let items;
+                try {
+                    items = FS.readdir(basePath).filter(n => n !== '.' && n !== '..');
+                } catch (_) {
+                    return entries;
+                }
+
+                for (const name of items) {
+                    const fullPath = basePath + '/' + name;
+                    try {
+                        const stat = FS.stat(fullPath);
+                        const isDir = FS.isDir(stat.mode);
+                        entries.push({
+                            path: fullPath,
+                            name,
+                            type: isDir ? 'dir' : 'file',
+                            size: isDir ? 0 : stat.size,
+                            depth
+                        });
+                        if (isDir) {
+                            entries.push(...this.getTree(fullPath, depth + 1));
+                        }
+                    } catch (_) { }
+                }
+                return entries;
+            },
+
+            readFile(path, encoding) {
+                return FS.readFile(path, { encoding: encoding || 'utf8' });
+            },
+
+            writeFile(path, content) {
+                // Ensure parent dir exists
+                const dir = path.substring(0, path.lastIndexOf('/'));
+                if (dir) try { FS.mkdirTree(dir); } catch (_) { }
+                FS.writeFile(path, content);
+            },
+
+            removeFile(path) {
+                try { FS.unlink(path); } catch (e) {
+                    console.warn('PythonVFS removeFile:', e.message);
+                }
+            }
+        };
+        return this._vfs;
     }
 
     async destroy() {
