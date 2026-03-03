@@ -291,6 +291,70 @@ sys.stdout = _sci_repl_stdout
         return this._pyodide;
     }
 
+    /**
+     * VFS adapter — exposes Pyodide's Emscripten FS with the same interface
+     * as PrologVFS so the Files & Storage panel can browse it.
+     */
+    getVFS() {
+        if (!this._pyodide) return null;
+        if (this._vfs) return this._vfs;
+
+        const FS = this._pyodide.FS;
+        this._vfs = {
+            getTree(basePath, depth) {
+                basePath = basePath || '/shared';
+                depth = depth || 0;
+                const MAX_DEPTH = 5;
+                const entries = [];
+                if (depth > MAX_DEPTH) return entries;
+
+                let items;
+                try {
+                    items = FS.readdir(basePath).filter(n => n !== '.' && n !== '..');
+                } catch (_) {
+                    return entries;
+                }
+
+                for (const name of items) {
+                    const fullPath = basePath + '/' + name;
+                    try {
+                        const stat = FS.stat(fullPath);
+                        const isDir = FS.isDir(stat.mode);
+                        entries.push({
+                            path: fullPath,
+                            name,
+                            type: isDir ? 'dir' : 'file',
+                            size: isDir ? 0 : stat.size,
+                            depth
+                        });
+                        if (isDir) {
+                            entries.push(...this.getTree(fullPath, depth + 1));
+                        }
+                    } catch (_) { }
+                }
+                return entries;
+            },
+
+            readFile(path, encoding) {
+                return FS.readFile(path, { encoding: encoding || 'utf8' });
+            },
+
+            writeFile(path, content) {
+                // Ensure parent dir exists
+                const dir = path.substring(0, path.lastIndexOf('/'));
+                if (dir) try { FS.mkdirTree(dir); } catch (_) { }
+                FS.writeFile(path, content);
+            },
+
+            removeFile(path) {
+                try { FS.unlink(path); } catch (e) {
+                    console.warn('PythonVFS removeFile:', e.message);
+                }
+            }
+        };
+        return this._vfs;
+    }
+
     async destroy() {
         this._pyodide = null;
         this._ready = false;

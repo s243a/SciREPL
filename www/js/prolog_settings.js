@@ -99,6 +99,11 @@ class PrologSettings {
 
         for (const option of this.kernelSelect.options) {
             const lang = option.value;
+            if (lang === 'shared') {
+                option.classList.remove('kernel-not-loaded');
+                option.textContent = 'SharedVFS';
+                continue;
+            }
             const ready = km.isReady(lang);
             option.classList.toggle('kernel-not-loaded', !ready);
             option.textContent = option.value.charAt(0).toUpperCase() + option.value.slice(1) + (ready ? '' : ' (not loaded)');
@@ -114,8 +119,10 @@ class PrologSettings {
         if (!km) return;
 
         // Only prompt to load kernels that have a VFS
-        const kernelsWithVFS = ['prolog'];
-        if (!km.isReady(lang) && kernelsWithVFS.includes(lang)) {
+        // Prompt to load kernels that have a browsable VFS
+        // R is excluded because its webR FS is async (worker-based)
+        const kernelsWithVFS = ['prolog', 'python'];
+        if (lang !== 'shared' && !km.isReady(lang) && kernelsWithVFS.includes(lang)) {
             const load = confirm(
                 lang.charAt(0).toUpperCase() + lang.slice(1) +
                 ' kernel is not loaded. Download and initialize it now?'
@@ -136,12 +143,14 @@ class PrologSettings {
     }
 
     /**
-     * Get the selected kernel's VFS instance.
+     * Get the selected kernel's VFS instance (or SharedVFS).
      */
     _getVFS() {
+        const lang = this.kernelSelect ? this.kernelSelect.value : 'prolog';
+        if (lang === 'shared') return window.sharedVFS || null;
+
         const km = window.kernelManager;
         if (!km) return null;
-        const lang = this.kernelSelect ? this.kernelSelect.value : 'prolog';
         const kernel = km._instances[lang];
         if (!kernel || !kernel.getVFS) return null;
         return kernel.getVFS();
@@ -227,7 +236,8 @@ class PrologSettings {
         if (!this.fileList) return;
         const lang = this.kernelSelect ? this.kernelSelect.value : 'prolog';
         const km = window.kernelManager;
-        const isLoaded = km && km.isReady(lang);
+        const isShared = lang === 'shared';
+        const isLoaded = isShared || (km && km.isReady(lang));
         const vfs = this._getVFS();
 
         if (!isLoaded) {
@@ -236,11 +246,28 @@ class PrologSettings {
         }
 
         if (!vfs) {
-            this.fileList.innerHTML = '<div class="vfs-empty">For ' + lang + ' use SharedVFS instead (see above).</div>';
+            this.fileList.innerHTML = '<div class="vfs-empty">No VFS available for ' + lang + '.</div>';
             return;
         }
 
-        const tree = vfs.getTree('/user');
+        const basePath = isShared ? '/shared' : (lang === 'prolog' ? '/user' : '/shared');
+        let tree = vfs.getTree(basePath);
+
+        // Normalize SharedVFS tree format to match PrologVFS format
+        if (isShared && tree.length > 0 && tree[0].isDir !== undefined) {
+            const baseDepth = basePath.split('/').filter(Boolean).length;
+            tree = tree
+                .filter(e => e.path !== basePath) // exclude the base dir itself
+                .map(e => ({
+                    path: e.path,
+                    name: e.path.split('/').pop(),
+                    type: e.isDir ? 'dir' : 'file',
+                    size: e.size || 0,
+                    depth: e.path.split('/').filter(Boolean).length - baseDepth,
+                    origin: e.origin
+                }));
+        }
+
         if (tree.length === 0) {
             this.fileList.innerHTML = '<div class="vfs-empty">No files mounted.</div>';
             return;
