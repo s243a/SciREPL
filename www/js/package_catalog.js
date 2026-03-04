@@ -33,7 +33,7 @@ class PackageCatalog {
                 name: 'Life Expectancy Analysis',
                 description: 'Mixed Python/R workbook: Gapminder & WHO datasets with pandas, plotly, and R base graphics.',
                 type: 'workbook',
-                url: 'https://github.com/s243a/SciREPL/releases/download/v0.5.0/life_expectancy_csv_demo.ipynb',
+                url: 'https://github.com/s243a/SciREPL/releases/download/v0.7.0/life_expectancy_csv_demo.ipynb',
                 pages_url: 'workbooks/life_expectancy_csv_demo.ipynb',
                 size: '~8 KB',
                 kernels: ['python', 'r'],
