@@ -35,7 +35,10 @@ class RKernel {
 
         this._loading = true;
         try {
+            this._updateProgress('Downloading R runtime...');
             const { WebR } = await import('https://webr.r-wasm.org/latest/webr.mjs');
+
+            this._updateProgress('Initializing R environment...');
             this._webr = new WebR();
             await this._webr.init();
 
@@ -45,16 +48,23 @@ class RKernel {
             await this._mkdirSafe('/shared/lib');
             await this._mkdirSafe('/tmp');
 
+            this._updateProgress('Configuring packages...');
             // Enable install.packages() to work with webR's WASM repo
             await this._webr.evalRVoid('webr::shim_install()');
             console.log('[RKernel] install.packages() shimmed');
 
+            this._updateProgress('Loading helpers...');
             // Load SharedVFS helper functions
             await this._loadSharedFSHelpers();
 
             this._ready = true;
+            this._hideModal();
             console.log('[RKernel] Ready (webR)');
+
+            // Offer to pre-install popular packages (non-blocking)
+            this._offerPrewarm();
         } catch (err) {
+            this._hideModal();
             console.error('[RKernel] Init failed:', err);
             throw err;
         } finally {
@@ -78,17 +88,65 @@ class RKernel {
 
     /**
      * Prompt the user before downloading the ~50 MB webR runtime.
+     * Uses a styled modal instead of native confirm().
      * Returns true if user confirms, false if cancelled.
      */
     async _confirmDownload() {
+        const modal = document.getElementById('webr-download-modal');
+        // Fall back to native confirm if modal HTML not present
+        if (!modal) {
+            return confirm('The R runtime (webR) requires a ~50 MB download.\n\nDownload now?');
+        }
+
         return new Promise(resolve => {
-            const confirmed = confirm(
-                'The R runtime (webR) requires a ~50 MB download.\n\n' +
-                'It will be cached by the browser for future use.\n\n' +
-                'Download now?'
-            );
-            resolve(confirmed);
+            const dlBtn = document.getElementById('webr-download-btn');
+            const cancelBtn = document.getElementById('webr-cancel-btn');
+            const progressWrap = document.getElementById('webr-progress-wrap');
+            const actions = document.getElementById('webr-download-actions');
+
+            // Reset state
+            progressWrap.classList.add('hidden');
+            actions.classList.remove('hidden');
+            modal.classList.remove('hidden');
+
+            const cleanup = () => {
+                dlBtn.removeEventListener('click', onDownload);
+                cancelBtn.removeEventListener('click', onCancel);
+            };
+
+            const onDownload = () => {
+                cleanup();
+                // Switch to progress view
+                actions.classList.add('hidden');
+                progressWrap.classList.remove('hidden');
+                resolve(true);
+            };
+
+            const onCancel = () => {
+                cleanup();
+                modal.classList.add('hidden');
+                resolve(false);
+            };
+
+            dlBtn.addEventListener('click', onDownload);
+            cancelBtn.addEventListener('click', onCancel);
         });
+    }
+
+    /**
+     * Update the webR download modal progress text.
+     */
+    _updateProgress(text) {
+        const el = document.getElementById('webr-progress-text');
+        if (el) el.textContent = text;
+    }
+
+    /**
+     * Hide the webR download modal.
+     */
+    _hideModal() {
+        const modal = document.getElementById('webr-download-modal');
+        if (modal) modal.classList.add('hidden');
     }
 
     isReady() {
@@ -242,6 +300,14 @@ class RKernel {
                 messages.push(`Installing ${pkg}...`);
                 await this._webr.installPackages([pkg]);
                 messages.push(`  Installed ${pkg}`);
+                // Auto-apply dark theme when ggplot2 is installed
+                if (pkg === 'ggplot2') {
+                    try {
+                        await this._webr.evalRVoid('.scirepl_setup_ggplot2()');
+                        await this._webr.evalRVoid('assign(".scirepl_ggplot2_themed", TRUE, envir=globalenv())');
+                        messages.push('  SciREPL dark theme applied');
+                    } catch (e) { /* theme setup is best-effort */ }
+                }
             } catch (e) {
                 messages.push(`  Failed to install ${pkg}: ${e.message || e}`);
             }
@@ -269,7 +335,9 @@ class RKernel {
             const shelter = await new this._webr.Shelter();
             // Prepend dark-theme par() so base R plots are legible on dark UI
             const darkPar = `par(bg="#0d1117", fg="#c9d1d9", col="#58a6ff", col.axis="#8b949e", col.lab="#c9d1d9", col.main="#e6edf3", col.sub="#8b949e")\n`;
-            const capture = await shelter.captureR(darkPar + trimmed, {
+            // Auto-apply ggplot2 dark theme if ggplot2 is loaded
+            const ggTheme = `if (requireNamespace("ggplot2", quietly=TRUE) && !exists(".scirepl_ggplot2_themed", envir=globalenv())) { .scirepl_setup_ggplot2(); assign(".scirepl_ggplot2_themed", TRUE, envir=globalenv()) }\n`;
+            const capture = await shelter.captureR(darkPar + ggTheme + trimmed, {
                 withAutoprint: true,
                 captureStreams: true,
                 captureConditions: false,
@@ -352,6 +420,77 @@ class RKernel {
                 result: null,
                 error: e.message || String(e)
             };
+        }
+    }
+
+    /**
+     * Offer to pre-install popular R packages after init.
+     * Shows a non-blocking prompt in the REPL output area.
+     */
+    async _offerPrewarm() {
+        const pref = localStorage.getItem('scirepl_r_prewarm');
+        if (pref === 'no') return;       // user said "don't ask again"
+        if (pref === 'yes') {
+            // Auto-install without prompting
+            this._doPrewarm();
+            return;
+        }
+
+        // Show prompt card in output area
+        const repl = document.getElementById('repl');
+        if (!repl) return;
+
+        const card = document.createElement('div');
+        card.className = 'card card-output';
+        card.innerHTML = `
+            <div class="card-body" style="text-align:center; padding:12px;">
+                <p style="margin:0 0 10px; color:var(--text-secondary); font-size:13px;">
+                    Install recommended R packages? <strong>ggplot2</strong> and <strong>dplyr</strong>
+                    enable visualization and data wrangling.
+                </p>
+                <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                    <button class="vfs-btn" data-action="install" style="background:var(--accent);color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;">Install</button>
+                    <button class="vfs-btn" data-action="skip" style="padding:6px 16px;border-radius:6px;cursor:pointer;">Skip</button>
+                    <button class="vfs-btn" data-action="never" style="padding:6px 16px;border-radius:6px;cursor:pointer;font-size:11px;">Don't ask again</button>
+                </div>
+            </div>
+        `;
+
+        repl.appendChild(card);
+        card.scrollIntoView({ behavior: 'smooth' });
+
+        card.addEventListener('click', (e) => {
+            const action = e.target.dataset.action;
+            if (!action) return;
+            card.remove();
+            if (action === 'install') {
+                localStorage.setItem('scirepl_r_prewarm', 'yes');
+                this._doPrewarm();
+            } else if (action === 'never') {
+                localStorage.setItem('scirepl_r_prewarm', 'no');
+            }
+            // 'skip' just removes the card, doesn't persist preference
+        });
+    }
+
+    /**
+     * Install ggplot2 + dplyr in the background.
+     */
+    async _doPrewarm() {
+        const badge = document.getElementById('status-badge');
+        if (badge) {
+            badge.textContent = 'installing R packages...';
+            badge.className = 'running';
+        }
+        try {
+            await this.installPackages(['ggplot2', 'dplyr']);
+            console.log('[RKernel] Pre-warm complete (ggplot2, dplyr)');
+        } catch (e) {
+            console.warn('[RKernel] Pre-warm failed:', e);
+        }
+        if (badge) {
+            badge.textContent = 'ready';
+            badge.className = 'ready';
         }
     }
 

@@ -38,6 +38,33 @@ class PackageCatalog {
                 size: '~8 KB',
                 kernels: ['python', 'r'],
             },
+            {
+                name: 'ggplot2 Showcase',
+                description: 'Scatter, bar, density, box, and heatmap charts with ggplot2 dark theme. Uses built-in R datasets.',
+                type: 'workbook',
+                url: 'https://github.com/s243a/SciREPL/releases/download/v0.8.0/r_ggplot2_showcase.ipynb',
+                pages_url: 'workbooks/r_ggplot2_showcase.ipynb',
+                size: '~5 KB',
+                kernels: ['r'],
+            },
+            {
+                name: 'Tidyverse Data Wrangling',
+                description: 'dplyr/tidyr pipelines with cross-language CSV sharing: Python downloads, R processes, Python visualizes.',
+                type: 'workbook',
+                url: 'https://github.com/s243a/SciREPL/releases/download/v0.8.0/r_tidyverse_wrangling.ipynb',
+                pages_url: 'workbooks/r_tidyverse_wrangling.ipynb',
+                size: '~6 KB',
+                kernels: ['python', 'r'],
+            },
+            {
+                name: 'Statistics with R',
+                description: 'Hypothesis testing (t-test, chi-squared, ANOVA), regression, confidence intervals, and diagnostic plots.',
+                type: 'workbook',
+                url: 'https://github.com/s243a/SciREPL/releases/download/v0.8.0/r_statistics.ipynb',
+                pages_url: 'workbooks/r_statistics.ipynb',
+                size: '~5 KB',
+                kernels: ['r'],
+            },
         ];
     }
 

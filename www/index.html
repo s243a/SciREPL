@@ -462,6 +462,22 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
         </div>
     </div>
 
+    <!-- webR download modal -->
+    <div id="webr-download-modal" class="modal hidden">
+        <div class="modal-content webr-download-content">
+            <h2>R Runtime Download</h2>
+            <p>The R runtime (webR) requires a <strong>~50 MB</strong> download. It will be cached by the browser for future use.</p>
+            <div id="webr-progress-wrap" class="hidden">
+                <div class="progress-bar"><div id="webr-progress-fill" class="progress-fill"></div></div>
+                <p id="webr-progress-text" class="loading-sub">Downloading R runtime...</p>
+            </div>
+            <div id="webr-download-actions">
+                <button id="webr-download-btn" class="vfs-btn">Download</button>
+                <button id="webr-cancel-btn" class="vfs-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Hidden file input for imports -->
     <input type="file" id="file-input" style="display:none">
     <input type="file" id="package-input" accept=".zip,.tar.gz,.tgz,.rar" style="display:none">
