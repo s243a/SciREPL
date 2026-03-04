@@ -271,8 +271,13 @@ class PackageLoader {
         // Update notebook state
         nb.cellCounter = window._cellCounter;
 
-        // Save
-        if (ai.saveCellsToSession) ai.saveCellsToSession();
+        // Save via NotebookManager to preserve ALL tabs (not just active)
+        const nm = window.notebookManager;
+        if (nm && nm.saveState) {
+            nm.saveState();
+        } else if (ai.saveCellsToSession) {
+            ai.saveCellsToSession();
+        }
     }
 
     /**
