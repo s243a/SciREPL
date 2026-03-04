@@ -330,6 +330,19 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - [x] Cell reordering (drag-and-drop + move arrows)
 - [x] Delete individual cells
 
+### Showcase Polish
+
+Near-term items to make R and cross-language features demo-ready:
+
+- [ ] **ggplot2 support** — Test and enable ggplot2 via webR's WASM package repo; apply dark theme defaults
+- [ ] **webR download progress** — Show a progress bar or percentage during the ~50MB first-use download
+- [ ] **R workbook: ggplot2 showcase** — Workbook demonstrating ggplot2 charts (scatter, bar, facets) with dark theme
+- [ ] **R workbook: tidyverse data wrangling** — dplyr/tidyr pipeline with SharedVFS CSV import from Python
+- [ ] **R workbook: statistics** — Hypothesis testing, regression, confidence intervals with base R + plots
+- [ ] **Mobile touch targets** — Larger tap areas for file browser action buttons (download, delete)
+- [ ] **Screenshots & GIF** — Visual assets showing R plots, cross-language data flow, mobile UI
+- [ ] **R package pre-warming** — Option to pre-install common R packages (ggplot2, dplyr) after webR loads
+
 ## License
 
 MIT License — see [LICENSE](LICENSE)
