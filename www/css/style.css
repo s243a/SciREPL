@@ -1819,16 +1819,20 @@ tr:hover .vfs-delete-btn {
 @media (hover: none) and (pointer: coarse) {
     .vfs-download-btn,
     .vfs-delete-btn {
-        opacity: 0.6;
+        opacity: 1;
         min-width: 44px;
         min-height: 44px;
-        font-size: 18px;
+        font-size: 20px;
         padding: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
+        color: var(--text-secondary);
+    }
+    .vfs-download-btn {
+        color: var(--accent);
     }
     .vfs-entry-actions {
-        gap: 4px;
+        gap: 12px;
     }
 }

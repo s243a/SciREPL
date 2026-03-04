@@ -585,6 +585,9 @@ class PrologSettings {
                     delBtn.title = 'Remove';
                     delBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
+                        const name = entry.path.split('/').pop();
+                        const what = entry.type === 'dir' ? `folder "${name}" and its contents` : `"${name}"`;
+                        if (!confirm(`Delete ${what}?`)) return;
                         const vfs = defaultVFS || this._resolveVFS(entry.source);
                         if (vfs) {
                             if (entry.type === 'file') {
