@@ -334,14 +334,20 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 
 Near-term items to make R and cross-language features demo-ready:
 
-- [ ] **ggplot2 support** — Test and enable ggplot2 via webR's WASM package repo; apply dark theme defaults
-- [ ] **webR download progress** — Show a progress bar or percentage during the ~50MB first-use download
-- [ ] **R workbook: ggplot2 showcase** — Workbook demonstrating ggplot2 charts (scatter, bar, facets) with dark theme
-- [ ] **R workbook: tidyverse data wrangling** — dplyr/tidyr pipeline with SharedVFS CSV import from Python
-- [ ] **R workbook: statistics** — Hypothesis testing, regression, confidence intervals with base R + plots
-- [ ] **Mobile touch targets** — Larger tap areas for file browser action buttons (download, delete)
+- [x] **ggplot2 support** — `theme_scirepl()` dark theme, auto-applied when ggplot2 loads
+- [x] **webR download modal** — Styled modal with progress phases replaces native confirm()
+- [x] **R workbook: ggplot2 showcase** — Scatter, bar, density, box, and heatmap charts
+- [x] **R workbook: tidyverse data wrangling** — dplyr/tidyr pipeline with Python↔R SharedVFS sharing
+- [x] **R workbook: statistics** — t-test, chi-squared, regression, ANOVA with base R
+- [x] **Mobile touch targets** — Larger tap areas, better contrast for file browser buttons
 - [ ] **Screenshots & GIF** — Visual assets showing R plots, cross-language data flow, mobile UI
-- [ ] **R package pre-warming** — Option to pre-install common R packages (ggplot2, dplyr) after webR loads
+- [x] **R package pre-warming** — Prompt to install ggplot2 + dplyr after R init, persists preference
+
+### Future Improvements
+
+- [ ] **Settings menu** — Centralized preferences (delete confirmation, mobile emulation, R package defaults, theme options)
+- [ ] **Capacitor WebView media query investigation** — `@media (hover: none) and (pointer: coarse)` may not trigger in Android WebView; determine cause and fix
+- [ ] **webR byte-level progress** — Track actual download progress via Service Worker interception or ReadableStream
 
 ## License
 

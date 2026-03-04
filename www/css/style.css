@@ -1411,11 +1411,11 @@ html, body {
 .vfs-delete-btn {
     background: none;
     border: none;
-    color: var(--text-muted);
-    font-size: 16px;
+    color: var(--text-secondary);
+    font-size: 18px;
     cursor: pointer;
-    padding: 0 4px;
-    opacity: 0;
+    padding: 4px 6px;
+    opacity: 0.8;
     transition: opacity 0.2s, color 0.2s;
 }
 
@@ -1654,18 +1654,18 @@ tr:hover .vfs-delete-btn {
     margin-left: auto;
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 12px;
     flex-shrink: 0;
 }
 
 .vfs-download-btn {
     background: none;
     border: none;
-    color: var(--text-muted);
-    font-size: 14px;
+    color: var(--accent);
+    font-size: 18px;
     cursor: pointer;
-    padding: 0 4px;
-    opacity: 0;
+    padding: 4px 6px;
+    opacity: 0.8;
     transition: opacity 0.2s, color 0.2s;
 }
 
@@ -1815,11 +1815,13 @@ tr:hover .vfs-delete-btn {
 }
 
 /* ===== Mobile Touch Targets ===== */
+/* TODO: Investigate why @media (hover: none) and (pointer: coarse)
+   doesn't trigger in Capacitor Android WebView. For now, improved
+   styles are applied universally (see .vfs-download-btn, .vfs-delete-btn above). */
 
 @media (hover: none) and (pointer: coarse) {
     .vfs-download-btn,
     .vfs-delete-btn {
-        opacity: 1;
         min-width: 44px;
         min-height: 44px;
         font-size: 20px;
@@ -1827,12 +1829,5 @@ tr:hover .vfs-delete-btn {
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--text-secondary);
-    }
-    .vfs-download-btn {
-        color: var(--accent);
-    }
-    .vfs-entry-actions {
-        gap: 12px;
     }
 }
