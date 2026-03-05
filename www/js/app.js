@@ -95,33 +95,18 @@
         }
     });
 
-    // ---- Initialize default kernel (Python) ----
+    // ---- App startup (no kernel init — kernels load lazily) ----
 
-    async function initDefaultKernel() {
-        try {
-            const km = window.kernelManager;
-            if (!km) throw new Error('KernelManager not loaded');
+    async function startApp() {
+        overlay.classList.add('hidden');
+        badge.textContent = 'ready';
+        badge.className = 'ready';
+        runBtn.disabled = false;
 
-            // Python is the default — init it now
-            await km.ensureReady('python');
+        // Restore saved cells
+        await restoreSession();
 
-            overlay.classList.add('hidden');
-            badge.textContent = 'ready';
-            badge.className = 'ready';
-            runBtn.disabled = false;
-
-            // Restore saved cells
-            await restoreSession();
-
-            input.focus();
-
-        } catch (err) {
-            badge.textContent = 'error';
-            badge.className = 'error';
-            overlay.querySelector('p').textContent = 'Failed to load Python';
-            overlay.querySelector('.loading-sub').textContent = err.message;
-            console.error('Kernel init failed:', err);
-        }
+        input.focus();
     }
 
     // ---- Markdown rendering ----
@@ -1669,24 +1654,13 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
     };
 
     // ---- Start ----
-    // Pyodide is loaded dynamically after privacy acceptance.
-    // window._startApp is called by the privacy script in index.html
-    // once the Pyodide <script> has loaded.
+    // App starts immediately — kernels load lazily on first use.
+    // window._startApp is called by the inline script in index.html.
     window._startApp = function () {
-        // Initialize notebook manager
         if (window.notebookManager) {
             window.notebookManager.init();
         }
-        initDefaultKernel();
+        startApp();
     };
-
-    // If Pyodide was already loaded (returning user, script loaded before app.js),
-    // start immediately.
-    if (typeof loadPyodide !== 'undefined') {
-        if (window.notebookManager) {
-            window.notebookManager.init();
-        }
-        initDefaultKernel();
-    }
 
 })();

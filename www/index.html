@@ -479,18 +479,18 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
         </div>
     </div>
 
-    <!-- webR download modal -->
-    <div id="webr-download-modal" class="modal hidden">
+    <!-- Runtime download modal (shared by Python, R, Prolog) -->
+    <div id="runtime-download-modal" class="modal hidden">
         <div class="modal-content webr-download-content">
-            <h2>R Runtime Download</h2>
-            <p>The R runtime (webR) requires a <strong>~50 MB</strong> download. It will be cached by the browser for future use.</p>
-            <div id="webr-progress-wrap" class="hidden">
-                <div class="progress-bar"><div id="webr-progress-fill" class="progress-fill"></div></div>
-                <p id="webr-progress-text" class="loading-sub">Downloading R runtime...</p>
+            <h2 id="runtime-download-title">Runtime Download</h2>
+            <p id="runtime-download-desc">This runtime requires a download. It will be cached by the browser for future use.</p>
+            <div id="runtime-progress-wrap" class="hidden">
+                <div class="progress-bar"><div id="runtime-progress-fill" class="progress-fill"></div></div>
+                <p id="runtime-progress-text" class="loading-sub">Downloading...</p>
             </div>
-            <div id="webr-download-actions">
-                <button id="webr-download-btn" class="vfs-btn">Download</button>
-                <button id="webr-cancel-btn" class="vfs-btn">Cancel</button>
+            <div id="runtime-download-actions">
+                <button id="runtime-download-btn" class="vfs-btn">Download</button>
+                <button id="runtime-cancel-btn" class="vfs-btn">Cancel</button>
             </div>
         </div>
     </div>
@@ -542,61 +542,28 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <script src="js/export.js"></script>
     <script src="js/app.js"></script>
 
-    <!-- Privacy modal + deferred Pyodide loading -->
+    <!-- Privacy modal (shown on-demand by kernel_manager) + app start -->
     <script>
     (function() {
         var modal = document.getElementById('privacy-modal');
-        var acceptBtn = document.getElementById('privacy-accept-btn');
         var helpLink = document.getElementById('help-privacy-link');
-        var pyodideUrl = 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.js';
 
-        function loadPyodideScript() {
-            // Only load if not already loaded
-            if (window.loadPyodide) {
-                if (window._startApp) window._startApp();
-                return;
-            }
-            // Update loading overlay
-            var loadingSub = document.querySelector('.loading-sub');
-            if (loadingSub) loadingSub.textContent = 'Downloading Python runtime…';
-
-            var script = document.createElement('script');
-            script.src = pyodideUrl;
-            script.onload = function() {
-                if (loadingSub) loadingSub.textContent = 'Initializing Pyodide + NumPy + SymPy';
-                if (window._startApp) window._startApp();
-            };
-            document.body.appendChild(script);
-        }
-
-        if (localStorage.getItem('scirepl_privacy_accepted')) {
-            // Already accepted — load Pyodide immediately
-            loadPyodideScript();
-        } else {
-            // First launch — show privacy modal, defer Pyodide
+        // Help page link opens the privacy modal
+        helpLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('help-modal').classList.add('hidden');
             modal.classList.remove('hidden');
-        }
-
-        // Accept button
-        acceptBtn.addEventListener('click', function() {
-            localStorage.setItem('scirepl_privacy_accepted', '1');
-            modal.classList.add('hidden');
-            loadPyodideScript();
         });
 
-        // Close via backdrop or X button
+        // Close privacy modal via backdrop or X (without accepting)
         modal.addEventListener('click', function(e) {
             if (e.target === modal || e.target.classList.contains('modal-close')) {
                 modal.classList.add('hidden');
             }
         });
 
-        // Help page link opens the modal
-        helpLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('help-modal').classList.add('hidden');
-            modal.classList.remove('hidden');
-        });
+        // Start app immediately — kernels load lazily on first use
+        if (window._startApp) window._startApp();
     })();
     </script>
 

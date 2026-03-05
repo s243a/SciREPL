@@ -14,14 +14,26 @@ class PythonKernel {
     async init() {
         if (this._ready) return;
 
-        // loadPyodide must be available globally (loaded by index.html)
+        const km = window.kernelManager;
+
+        // Dynamically load Pyodide script if not already available
         if (typeof loadPyodide === 'undefined') {
-            throw new Error('Pyodide script not loaded. Accept privacy policy first.');
+            if (km) km.updateProgress('Downloading Python runtime…');
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.js';
+                script.onload = resolve;
+                script.onerror = () => reject(new Error('Failed to load Pyodide from CDN'));
+                document.body.appendChild(script);
+            });
         }
 
+        if (km) km.updateProgress('Initializing Pyodide + NumPy + SymPy…');
         this._pyodide = await loadPyodide();
         await this._pyodide.loadPackage(['numpy', 'sympy']);
         await this._pyodide.loadPackage('micropip');
+
+        if (km) km.updateProgress('Loading helpers…');
 
         // Load the prelude
         const preludeResp = await fetch('js/prelude.py');
@@ -53,6 +65,7 @@ del _pkg_dir
 `);
 
         this._ready = true;
+        if (km) km.hideDownloadModal();
     }
 
     isReady() {

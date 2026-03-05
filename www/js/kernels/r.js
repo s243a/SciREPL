@@ -27,18 +27,13 @@ class RKernel {
             return;
         }
 
-        // Prompt user before downloading the large runtime
-        const proceed = await this._confirmDownload();
-        if (!proceed) {
-            throw new Error('R runtime download cancelled by user');
-        }
-
+        const km = window.kernelManager;
         this._loading = true;
         try {
-            this._updateProgress('Downloading R runtime...');
+            if (km) km.updateProgress('Downloading R runtime...');
             const { WebR } = await import('https://webr.r-wasm.org/latest/webr.mjs');
 
-            this._updateProgress('Initializing R environment...');
+            if (km) km.updateProgress('Initializing R environment...');
             this._webr = new WebR();
             await this._webr.init();
 
@@ -48,23 +43,23 @@ class RKernel {
             await this._mkdirSafe('/shared/lib');
             await this._mkdirSafe('/tmp');
 
-            this._updateProgress('Configuring packages...');
+            if (km) km.updateProgress('Configuring packages...');
             // Enable install.packages() to work with webR's WASM repo
             await this._webr.evalRVoid('webr::shim_install()');
             console.log('[RKernel] install.packages() shimmed');
 
-            this._updateProgress('Loading helpers...');
+            if (km) km.updateProgress('Loading helpers...');
             // Load SharedVFS helper functions
             await this._loadSharedFSHelpers();
 
             this._ready = true;
-            this._hideModal();
+            if (km) km.hideDownloadModal();
             console.log('[RKernel] Ready (webR)');
 
             // Offer to pre-install popular packages (non-blocking)
             this._offerPrewarm();
         } catch (err) {
-            this._hideModal();
+            if (km) km.hideDownloadModal();
             console.error('[RKernel] Init failed:', err);
             throw err;
         } finally {
@@ -84,69 +79,6 @@ class RKernel {
         } catch (e) {
             console.warn('[RKernel] Failed to load r_prelude.R:', e);
         }
-    }
-
-    /**
-     * Prompt the user before downloading the ~50 MB webR runtime.
-     * Uses a styled modal instead of native confirm().
-     * Returns true if user confirms, false if cancelled.
-     */
-    async _confirmDownload() {
-        const modal = document.getElementById('webr-download-modal');
-        // Fall back to native confirm if modal HTML not present
-        if (!modal) {
-            return confirm('The R runtime (webR) requires a ~50 MB download.\n\nDownload now?');
-        }
-
-        return new Promise(resolve => {
-            const dlBtn = document.getElementById('webr-download-btn');
-            const cancelBtn = document.getElementById('webr-cancel-btn');
-            const progressWrap = document.getElementById('webr-progress-wrap');
-            const actions = document.getElementById('webr-download-actions');
-
-            // Reset state
-            progressWrap.classList.add('hidden');
-            actions.classList.remove('hidden');
-            modal.classList.remove('hidden');
-
-            const cleanup = () => {
-                dlBtn.removeEventListener('click', onDownload);
-                cancelBtn.removeEventListener('click', onCancel);
-            };
-
-            const onDownload = () => {
-                cleanup();
-                // Switch to progress view
-                actions.classList.add('hidden');
-                progressWrap.classList.remove('hidden');
-                resolve(true);
-            };
-
-            const onCancel = () => {
-                cleanup();
-                modal.classList.add('hidden');
-                resolve(false);
-            };
-
-            dlBtn.addEventListener('click', onDownload);
-            cancelBtn.addEventListener('click', onCancel);
-        });
-    }
-
-    /**
-     * Update the webR download modal progress text.
-     */
-    _updateProgress(text) {
-        const el = document.getElementById('webr-progress-text');
-        if (el) el.textContent = text;
-    }
-
-    /**
-     * Hide the webR download modal.
-     */
-    _hideModal() {
-        const modal = document.getElementById('webr-download-modal');
-        if (modal) modal.classList.add('hidden');
     }
 
     isReady() {
