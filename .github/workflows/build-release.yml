@@ -51,13 +51,26 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: android/app/build/outputs/apk/release/SciREPL-${{ github.ref_name }}-unsigned.apk
+          prerelease: true
           body: |
+            > **Pre-release** — unsigned APK for testing. After signing, upload `SciREPL-${{ github.ref_name }}.apk` and mark as latest release.
+
             ## Downloads
 
-            - **Android APK (unsigned):** Requires signing before install (see below)
+            - **Android APK (signed):** Upload pending — download `SciREPL-${{ github.ref_name }}.apk` once available
+            - **Android APK (unsigned):** `SciREPL-${{ github.ref_name }}-unsigned.apk` — requires signing before install (see below)
             - **PWA (Web App):** [https://s243a.github.io/SciREPL/](https://s243a.github.io/SciREPL/) — install from browser, no app store needed
 
+            ## Updating the PWA
+
+            If you already have the PWA installed, make sure you're running the latest version:
+
+            - **Desktop:** Press `Ctrl+Shift+R` to force-reload and clear the service worker cache
+            - **Mobile / newer versions:** Open the **Menu** and tap **Reload App**
+
             ## Signing the Unsigned APK
+
+            If you prefer to sign the APK yourself:
 
             1. Zipalign:
                ```bash
@@ -73,6 +86,6 @@ jobs:
                ```
             3. Install: `adb install SciREPL-${{ github.ref_name }}.apk`
 
-            **For maintainers:** After signing, upload the signed APK to this release.
+            **For maintainers:** After signing, upload the signed APK and edit this release to add a changelog and mark as latest.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
