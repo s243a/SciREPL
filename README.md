@@ -351,6 +351,14 @@ Near-term items to make R and cross-language features demo-ready:
 - [x] **Lazy kernel loading** — App starts instantly; privacy consent + download confirmation on first CDN kernel use
 - [x] **tar/tar.gz export** — Export packages as .tar or .tar.gz (selectable in Settings), using browser-native CompressionStream
 - [x] **Memory & Storage panel** — Per-kernel WASM heap usage, storage quota breakdown, kernel unload, clear VFS/cache
+- [ ] **Cell output collapse/expand** — Toggle long outputs with a click, especially useful on mobile
+- [ ] **Execution counter** — `In [N]` / `Out [N]` numbering like Jupyter to track execution order
+- [ ] **Basic tab-completion** — Keyword/variable completion in the input textarea
+- [ ] **Variable inspector** — Panel showing current variables and types across kernels
+- [ ] **Undo delete cell** — Undo stack to recover accidentally deleted cells
+- [ ] **Dark/light theme toggle** — Light theme option for classrooms/sunlight
+- [ ] **Notebook sharing via URL** — Encode small notebooks as base64 URL fragments or gist links
+- [ ] **Lua kernel** — Fengari (Lua in WASM, ~500KB)
 - [ ] **Capacitor WebView media query investigation** — `@media (hover: none) and (pointer: coarse)` may not trigger in Android WebView; determine cause and fix
 - [ ] **Byte-level download progress** — Track actual download progress via Service Worker interception or ReadableStream
 
