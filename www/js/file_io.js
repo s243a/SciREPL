@@ -805,7 +805,8 @@ class FileIO {
             card.className = 'memory-kernel-card';
 
             const dot = document.createElement('span');
-            dot.className = 'memory-dot' + (k.loaded && k.ready ? ' loaded' : '');
+            const isCDN = KernelManager.CDN_KERNELS.has(k.language);
+            dot.className = 'memory-dot' + (!isCDN || (k.loaded && k.ready) ? ' loaded' : '');
             card.appendChild(dot);
 
             const info = document.createElement('div');
@@ -816,8 +817,9 @@ class FileIO {
             info.appendChild(nameEl);
             const statusEl = document.createElement('div');
             statusEl.className = 'memory-kernel-status';
-            if (k.language === 'javascript') {
-                statusEl.textContent = 'Always ready';
+            const isBundled = !KernelManager.CDN_KERNELS.has(k.language);
+            if (isBundled) {
+                statusEl.textContent = 'Bundled';
             } else if (k.ready) {
                 statusEl.textContent = 'Ready';
             } else {
