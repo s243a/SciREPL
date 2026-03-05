@@ -831,26 +831,42 @@ class FileIO {
             sizeEl.textContent = k.memory != null ? this._formatBytes(k.memory) : '—';
             card.appendChild(sizeEl);
 
-            // Unload button for loaded CDN kernels (not JavaScript)
-            if (k.loaded && k.ready && KernelManager.CDN_KERNELS.has(k.language)) {
-                const btn = document.createElement('button');
-                btn.className = 'memory-unload-btn';
-                btn.textContent = 'Unload';
-                btn.addEventListener('click', async () => {
-                    btn.textContent = 'Unloading...';
-                    btn.disabled = true;
-                    await km.destroyKernel(k.language);
-                    // Update status badge if this was current language
-                    if (km.currentLanguage === k.language) {
-                        const badge = document.getElementById('status-badge');
-                        if (badge) {
-                            badge.textContent = 'ready';
-                            badge.className = 'ready';
+            // Load/Unload buttons for CDN kernels (not JavaScript/Bash)
+            if (KernelManager.CDN_KERNELS.has(k.language)) {
+                if (k.loaded && k.ready) {
+                    const btn = document.createElement('button');
+                    btn.className = 'memory-unload-btn';
+                    btn.textContent = 'Unload';
+                    btn.addEventListener('click', async () => {
+                        btn.textContent = 'Unloading...';
+                        btn.disabled = true;
+                        await km.destroyKernel(k.language);
+                        if (km.currentLanguage === k.language) {
+                            const badge = document.getElementById('status-badge');
+                            if (badge) {
+                                badge.textContent = 'ready';
+                                badge.className = 'ready';
+                            }
                         }
-                    }
-                    this._refreshMemoryModal();
-                });
-                card.appendChild(btn);
+                        this._refreshMemoryModal();
+                    });
+                    card.appendChild(btn);
+                } else {
+                    const btn = document.createElement('button');
+                    btn.className = 'memory-load-btn';
+                    btn.textContent = 'Load';
+                    btn.addEventListener('click', async () => {
+                        btn.textContent = 'Loading...';
+                        btn.disabled = true;
+                        try {
+                            await km.ensureReady(k.language);
+                        } catch (err) {
+                            console.warn('Failed to load ' + k.language + ':', err);
+                        }
+                        this._refreshMemoryModal();
+                    });
+                    card.appendChild(btn);
+                }
             }
 
             list.appendChild(card);

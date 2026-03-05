@@ -903,20 +903,8 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                     active.cellCounter = window._cellCounter;
                 }
 
-                // Restore Prolog VFS files from IndexedDB so modules are available
-                // when the user runs cells (without needing to re-import the package)
-                const hasPrologCells = cellDefs.some(c => c.language === 'prolog');
-                if (hasPrologCells) {
-                    const km = window.kernelManager;
-                    if (km) {
-                        try {
-                            await km.ensureReady('prolog');
-                            await window.sessionManager.restorePrologState();
-                        } catch (e) {
-                            console.warn('Failed to restore Prolog VFS on notebook restore:', e);
-                        }
-                    }
-                }
+                // Prolog VFS restore is deferred to first Prolog cell execution
+                // (ensureReady triggers a download prompt — don't do that on reload)
 
                 badge.textContent = 'ready';
                 badge.className = 'ready';
@@ -930,7 +918,6 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
         badge.textContent = 'restoring…';
         badge.className = 'running';
-        let prologStateRestored = false;
 
         for (const saved of savedCells) {
             window._cellCounter++;
@@ -956,43 +943,10 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 const pre = inputCard.querySelector('pre');
                 if (pre) pre.style.display = 'none';
             } else {
-                // Ensure the kernel for this language is ready
-                const km = window.kernelManager;
-                if (km) {
-                    try {
-                        await km.ensureReady(language);
-                        // Restore Prolog VFS state on first Prolog cell
-                        if (language === 'prolog' && !prologStateRestored) {
-                            prologStateRestored = true;
-                            await window.sessionManager.restorePrologState();
-                        }
-                    } catch (err) {
-                        window._currentOutputCard = outputCard;
-                        window.renderText('Failed to load ' + language + ': ' + err.message, true);
-                        window._currentOutputCard = null;
-                        continue;
-                    }
-                }
-
-                window._currentOutputCard = outputCard;
-                try {
-                    await executeCode(saved.code, language);
-                    const body = outputCard.querySelector('.card-body');
-                    if (body && body.children.length === 0) {
-                        outputCard.remove();
-                        cell.outputCard = null;
-                    }
-                } catch (err) {
-                    if (language === 'python') {
-                        const kernel = km.getKernel('python');
-                        const pyodide = kernel.getPyodide();
-                        if (pyodide) {
-                            try { pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`); } catch (_) { }
-                        }
-                    }
-                    window.renderText(err.message, true);
-                }
-                window._currentOutputCard = null;
+                // Code cells: just render the input card, don't re-execute.
+                // Kernels load lazily on first user-initiated execution.
+                outputCard.remove();
+                cell.outputCard = null;
             }
         }
 
