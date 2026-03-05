@@ -347,8 +347,9 @@ Near-term items to make R and cross-language features demo-ready:
 
 ### Future Improvements
 
-- [x] **Settings menu** — Auto-execute on import toggle, confirm-before-delete toggle
+- [x] **Settings menu** — Auto-execute, confirm-delete, auto-download, R pre-warm, large touch targets, default language
 - [x] **Lazy kernel loading** — App starts instantly; privacy consent + download confirmation on first CDN kernel use
+- [ ] **tar.gz export** — Add tar.gz as alternative package export format (needs tar creation + pako deflate libraries)
 - [ ] **Capacitor WebView media query investigation** — `@media (hover: none) and (pointer: coarse)` may not trigger in Android WebView; determine cause and fix
 - [ ] **Byte-level download progress** — Track actual download progress via Service Worker interception or ReadableStream
 
