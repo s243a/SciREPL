@@ -132,6 +132,10 @@ class JavaScriptKernel {
         return lines.join('\n');
     }
 
+    getMemoryUsage() {
+        return 0; // Native browser JS, no WASM allocation
+    }
+
     destroy() {
         this._ready = false;
     }

@@ -85,6 +85,12 @@ class RKernel {
         return this._ready;
     }
 
+    getMemoryUsage() {
+        // webR runs in a web worker — direct heap access is limited
+        if (!this._webr) return null;
+        return null;
+    }
+
     getName() {
         return 'R (webR)';
     }
