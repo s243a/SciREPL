@@ -30,11 +30,15 @@ class PrologKernel {
             return;
         }
 
+        const km = window.kernelManager;
         this._loading = true;
         try {
+            if (km) km.updateProgress('Downloading Prolog runtime...');
             const module = await import(PrologKernel.CDN_URL);
             const SWIPL = module.SWIPL || module.default;
             const self = this;
+
+            if (km) km.updateProgress('Initializing Prolog...');
             this._swipl = await SWIPL({
                 arguments: ['-q'],
                 print: (text) => { self._stdoutBuffer.push(text); },
@@ -52,6 +56,10 @@ class PrologKernel {
             await this._loadPrelude();
 
             this._ready = true;
+            if (km) km.hideDownloadModal();
+        } catch (err) {
+            if (km) km.hideDownloadModal();
+            throw err;
         } finally {
             this._loading = false;
         }

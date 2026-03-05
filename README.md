@@ -39,7 +39,9 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **Command history** — Arrow keys to recall previous inputs
 - **Mobile-first UI** — Dark theme, touch-friendly
 - **Installable PWA** — Install from browser as a desktop or mobile app, works offline after first load
-- **Privacy-first** — Bundled rendering libraries, deferred CDN loading until consent
+- **Privacy-first** — Bundled rendering libraries, lazy CDN loading with consent prompt on first use
+- **Lazy kernel loading** — App starts instantly; Python, R, and Prolog runtimes download only when first used
+- **Settings menu** — Configure auto-execute on import, delete confirmation
 
 ### Future Features
 
@@ -53,7 +55,7 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 npm run serve
 ```
 
-Open http://localhost:8085. Wait for Pyodide to load (~30s first time).
+Open http://localhost:8085. The app loads instantly — runtimes download on first use.
 
 ### Build for Android
 
@@ -235,7 +237,7 @@ KernelManager (kernel_manager.js)
 
 Each kernel implements: `init()`, `execute(code)`, `isReady()`, `getName()`, `getLanguage()`, `destroy()`
 
-Kernels are **lazy-loaded** — only downloaded when first used. Python loads at startup; Prolog and Bash load when first used. JavaScript is instant (native browser execution).
+Kernels are **lazy-loaded** — only downloaded when first used. Privacy consent and download confirmation are shown before any CDN download. JavaScript and Bash are instant (no CDN required).
 
 ### SharedVFS + Package System
 
@@ -295,7 +297,7 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 
 | Runtime | CDN | Size | When loaded |
 |---------|-----|------|-------------|
-| Pyodide | cdn.jsdelivr.net | ~25MB | App startup (after privacy consent) |
+| Pyodide | cdn.jsdelivr.net | ~25MB | First Python cell execution |
 | swipl-wasm | SWI-Prolog.github.io | ~10MB | First Prolog cell execution |
 | webR | webr.r-wasm.org | ~50MB | First R cell execution |
 
@@ -345,9 +347,10 @@ Near-term items to make R and cross-language features demo-ready:
 
 ### Future Improvements
 
-- [ ] **Settings menu** — Centralized preferences (delete confirmation, mobile emulation, R package defaults, theme options)
+- [x] **Settings menu** — Auto-execute on import toggle, confirm-before-delete toggle
+- [x] **Lazy kernel loading** — App starts instantly; privacy consent + download confirmation on first CDN kernel use
 - [ ] **Capacitor WebView media query investigation** — `@media (hover: none) and (pointer: coarse)` may not trigger in Android WebView; determine cause and fix
-- [ ] **webR byte-level progress** — Track actual download progress via Service Worker interception or ReadableStream
+- [ ] **Byte-level download progress** — Track actual download progress via Service Worker interception or ReadableStream
 
 ## License
 
