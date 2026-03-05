@@ -298,7 +298,7 @@ sharedfs_read("/shared/data/results.csv")
                 <button id="btn-import-file">📂 Import File (e.g. .csv, .py, .ipynb, .zip)</button>
                 <button id="btn-import-package">📦 Import Package (.zip / .tar.gz)</button>
                 <button id="btn-browse-packages">📦 Browse Packages &amp; Workbooks</button>
-                <button id="btn-export-package">📦 Export Package (.zip)</button>
+                <button id="btn-export-package">📦 Export Package</button>
                 <button id="btn-prolog-settings">⚙ Files &amp; Storage (VFS / Paths)</button>
                 <button id="btn-memory">📊 Memory &amp; Storage</button>
                 <button id="btn-settings">⚙ Settings</button>
@@ -320,6 +320,14 @@ sharedfs_read("/shared/data/results.csv")
                 </label>
                 <label class="settings-item">
                     <input type="checkbox" id="setting-confirm-delete" checked> Confirm before deleting files
+                </label>
+                <label class="settings-item">
+                    Export format:
+                    <select id="setting-export-format" class="settings-select">
+                        <option value="zip">.zip (default)</option>
+                        <option value="tar">.tar</option>
+                        <option value="tar.gz">.tar.gz</option>
+                    </select>
                 </label>
 
                 <div class="settings-section">Runtime Downloads</div>

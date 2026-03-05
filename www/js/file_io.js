@@ -104,6 +104,7 @@ class FileIO {
                 const rPrewarm = document.getElementById('setting-r-prewarm');
                 const largeTouch = document.getElementById('setting-large-touch');
                 const defaultLang = document.getElementById('setting-default-language');
+                const exportFmt = document.getElementById('setting-export-format');
 
                 if (autoExec) autoExec.checked = localStorage.getItem('scirepl_auto_execute') === '1';
                 if (confirmDel) confirmDel.checked = localStorage.getItem('scirepl_confirm_delete') !== '0';
@@ -111,6 +112,7 @@ class FileIO {
                 if (rPrewarm) rPrewarm.checked = localStorage.getItem('scirepl_r_prewarm') === 'yes';
                 if (largeTouch) largeTouch.checked = localStorage.getItem('scirepl_mobile_emulation') === '1';
                 if (defaultLang) defaultLang.value = localStorage.getItem('scirepl_default_language') || 'python';
+                if (exportFmt) exportFmt.value = localStorage.getItem('scirepl_export_format') || 'zip';
 
                 settingsModal.classList.remove('hidden');
             });
@@ -131,6 +133,8 @@ class FileIO {
                     document.body.classList.toggle('force-mobile', e.target.checked);
                 } else if (id === 'setting-default-language') {
                     localStorage.setItem('scirepl_default_language', e.target.value);
+                } else if (id === 'setting-export-format') {
+                    localStorage.setItem('scirepl_export_format', e.target.value);
                 }
             });
             // Reset privacy consent button
@@ -439,43 +443,36 @@ class FileIO {
     }
 
     /**
-     * Export all notebooks and VFS files as a .zip package with scirepl.json manifest.
+     * Collect all package files (notebooks, VFS, manifest) into a flat array.
+     * Returns { manifest, files: [{path, content}] } or null.
      */
-    async exportPackage() {
-        if (typeof JSZip === 'undefined') {
-            alert('JSZip not loaded.');
-            return;
-        }
-
+    _collectPackageFiles() {
         const nm = window.notebookManager;
         const notebooks = nm ? nm.getNotebooks() : [];
 
         if (notebooks.length === 0) {
             alert('No notebooks to export.');
-            return;
+            return null;
         }
 
-        const zip = new JSZip();
-
-        // Build manifest (v2.0)
         const manifest = {
             format_version: '2.0',
             name: 'SciREPL Package',
             version: '1.0.0',
-            description: 'Exported from SciREPL v0.6.0',
+            description: 'Exported from SciREPL',
             notebooks: [],
             files: [],
             search_paths: []
         };
 
+        const files = [];
+
         // Export each notebook as .ipynb
         for (const nb of notebooks) {
             const cells = nb.isActive ? (window._cells || []) : nb.cells;
             const filename = (nb.name.replace(/[^a-zA-Z0-9_-]/g, '_') || 'notebook') + '.ipynb';
-
             const ipynb = this._buildIpynb(cells, nb.kernelLanguage);
-            zip.file(filename, JSON.stringify(ipynb, null, 1));
-
+            files.push({ path: filename, content: JSON.stringify(ipynb, null, 1) });
             manifest.notebooks.push({
                 file: filename,
                 name: nb.name,
@@ -484,7 +481,7 @@ class FileIO {
             });
         }
 
-        // Export Prolog VFS files (target: "prolog")
+        // Export Prolog VFS files
         const km = window.kernelManager;
         if (km) {
             const kernel = km.getKernel('prolog');
@@ -496,19 +493,11 @@ class FileIO {
                         if (f.path === '/user/prelude.pl') continue;
                         try {
                             const content = vfs.readFile(f.path);
-                            const archivePath = 'prolog' + f.path; // e.g. prolog/user/kb.pl
-                            zip.file(archivePath, content);
-                            manifest.files.push({
-                                src: archivePath,
-                                dest: f.path,
-                                target: 'prolog'
-                            });
-                        } catch (e) {
-                            // Skip unreadable files
-                        }
+                            const archivePath = 'prolog' + f.path;
+                            files.push({ path: archivePath, content });
+                            manifest.files.push({ src: archivePath, dest: f.path, target: 'prolog' });
+                        } catch (e) { /* skip */ }
                     }
-
-                    // Export search paths
                     const paths = vfs.getSearchPaths();
                     for (const p of paths) {
                         if (p.alias === 'user' && p.dir === '/user') continue;
@@ -518,24 +507,139 @@ class FileIO {
             }
         }
 
-        // Export SharedVFS files (target: "shared")
+        // Export SharedVFS files
         const sharedVFS = window.sharedVFS;
         if (sharedVFS) {
-            this._exportSharedDir(sharedVFS, '/shared/data', zip, manifest);
-            this._exportSharedDir(sharedVFS, '/shared/lib', zip, manifest);
-            this._exportSharedDir(sharedVFS, '/shared/config', zip, manifest);
-            this._exportSharedDir(sharedVFS, '/shared/bin', zip, manifest);
+            for (const dir of ['/shared/data', '/shared/lib', '/shared/config', '/shared/bin']) {
+                this._collectSharedDir(sharedVFS, dir, files, manifest);
+            }
         }
 
-        // Add manifest
-        zip.file('scirepl.json', JSON.stringify(manifest, null, 2));
+        return { manifest, files };
+    }
 
-        // Generate and download
+    /**
+     * Recursively collect files from a SharedVFS directory.
+     */
+    _collectSharedDir(vfs, dirPath, files, manifest) {
+        const entries = vfs.listDir(dirPath);
+        if (!entries) return;
+
+        for (const name of entries) {
+            const fullPath = dirPath + '/' + name;
+            const stat = vfs.stat(fullPath);
+            if (!stat) continue;
+
+            if (stat.isDir) {
+                this._collectSharedDir(vfs, fullPath, files, manifest);
+            } else {
+                const content = vfs.readFile(fullPath);
+                if (content == null) continue;
+                const archivePath = fullPath.substring(1); // strip leading /
+                const isBinary = content instanceof Uint8Array;
+                files.push({ path: archivePath, content });
+                manifest.files.push({
+                    src: archivePath,
+                    dest: fullPath,
+                    target: 'shared',
+                    ...(isBinary ? { binary: true } : {})
+                });
+            }
+        }
+    }
+
+    /**
+     * Export all notebooks and VFS files as a package.
+     * Format determined by the export format setting (zip, tar, tar.gz).
+     */
+    async exportPackage() {
+        const collected = this._collectPackageFiles();
+        if (!collected) return;
+
+        const format = localStorage.getItem('scirepl_export_format') || 'zip';
+
+        if (format === 'tar' || format === 'tar.gz') {
+            await this._exportAsTar(collected, format === 'tar.gz');
+        } else {
+            await this._exportAsZip(collected);
+        }
+    }
+
+    /**
+     * Serialize collected files as .zip and trigger download.
+     */
+    async _exportAsZip(collected) {
+        if (typeof JSZip === 'undefined') {
+            alert('JSZip not loaded.');
+            return;
+        }
+        const zip = new JSZip();
+        for (const { path, content } of collected.files) {
+            const isBinary = content instanceof Uint8Array;
+            zip.file(path, content, { binary: isBinary });
+        }
+        zip.file('scirepl.json', JSON.stringify(collected.manifest, null, 2));
+
         const blob = await zip.generateAsync({ type: 'blob' });
+        this._downloadBlob(blob, 'scirepl_package.zip');
+    }
+
+    /**
+     * Serialize collected files as .tar or .tar.gz and trigger download.
+     */
+    async _exportAsTar(collected, gzip) {
+        if (typeof TarWriter === 'undefined') {
+            alert('TarWriter not available.');
+            return;
+        }
+        const tar = new TarWriter();
+        for (const { path, content } of collected.files) {
+            tar.addFile(path, content);
+        }
+        tar.addFile('scirepl.json', JSON.stringify(collected.manifest, null, 2));
+
+        let data = tar.build();
+        let filename = 'scirepl_package.tar';
+
+        if (gzip) {
+            data = await this._gzipCompress(data);
+            filename = 'scirepl_package.tar.gz';
+        }
+
+        const blob = new Blob([data], { type: 'application/octet-stream' });
+        this._downloadBlob(blob, filename);
+    }
+
+    /**
+     * Compress a Uint8Array using the browser's CompressionStream API.
+     */
+    async _gzipCompress(data) {
+        const cs = new CompressionStream('gzip');
+        const writer = cs.writable.getWriter();
+        writer.write(data);
+        writer.close();
+        const reader = cs.readable.getReader();
+        const chunks = [];
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            chunks.push(value);
+        }
+        const total = chunks.reduce((s, c) => s + c.length, 0);
+        const result = new Uint8Array(total);
+        let offset = 0;
+        for (const c of chunks) { result.set(c, offset); offset += c.length; }
+        return result;
+    }
+
+    /**
+     * Download a Blob as a file.
+     */
+    _downloadBlob(blob, filename) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'scirepl_package.zip';
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -636,36 +740,6 @@ class FileIO {
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    /**
-     * Recursively export files from a SharedVFS directory into the zip.
-     */
-    _exportSharedDir(vfs, dirPath, zip, manifest) {
-        const entries = vfs.listDir(dirPath);
-        if (!entries) return;
-
-        for (const name of entries) {
-            const fullPath = dirPath + '/' + name;
-            const stat = vfs.stat(fullPath);
-            if (!stat) continue;
-
-            if (stat.isDir) {
-                this._exportSharedDir(vfs, fullPath, zip, manifest);
-            } else {
-                const content = vfs.readFile(fullPath);
-                if (content == null) continue;
-                // Archive path mirrors the SharedVFS path (e.g. shared/data/file.csv)
-                const archivePath = fullPath.substring(1); // strip leading /
-                const isBinary = content instanceof Uint8Array;
-                zip.file(archivePath, isBinary ? content : content, { binary: isBinary });
-                manifest.files.push({
-                    src: archivePath,
-                    dest: fullPath,
-                    target: 'shared',
-                    ...(isBinary ? { binary: true } : {})
-                });
-            }
-        }
-    }
 
     /**
      * Get current Prolog search paths for export.

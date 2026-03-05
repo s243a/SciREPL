@@ -65,6 +65,86 @@ class TarParser {
 }
 
 /**
+ * Tar archive writer. Creates standard POSIX (ustar) tar archives.
+ */
+class TarWriter {
+    constructor() {
+        this._files = [];
+    }
+
+    /**
+     * Add a file to the archive.
+     * @param {string} name — file path within the archive
+     * @param {string|Uint8Array} content — file content
+     */
+    addFile(name, content) {
+        const data = (content instanceof Uint8Array)
+            ? content
+            : new TextEncoder().encode(String(content));
+        this._files.push({ name, data });
+    }
+
+    /**
+     * Build the tar archive as a Uint8Array.
+     */
+    build() {
+        const blocks = [];
+        for (const { name, data } of this._files) {
+            blocks.push(this._makeHeader(name, data.length));
+            blocks.push(data);
+            // Pad to 512-byte boundary
+            const remainder = data.length % 512;
+            if (remainder > 0) {
+                blocks.push(new Uint8Array(512 - remainder));
+            }
+        }
+        // Two zero blocks = end of archive
+        blocks.push(new Uint8Array(1024));
+
+        // Concatenate all blocks
+        const total = blocks.reduce((s, b) => s + b.length, 0);
+        const result = new Uint8Array(total);
+        let offset = 0;
+        for (const b of blocks) {
+            result.set(b, offset);
+            offset += b.length;
+        }
+        return result;
+    }
+
+    _makeHeader(name, size) {
+        const header = new Uint8Array(512);
+        const enc = new TextEncoder();
+
+        // Name (0-99)
+        header.set(enc.encode(name).slice(0, 100), 0);
+        // Mode (100-107): 0644
+        header.set(enc.encode('0000644\0'), 100);
+        // UID (108-115), GID (116-123): 0
+        header.set(enc.encode('0000000\0'), 108);
+        header.set(enc.encode('0000000\0'), 116);
+        // Size (124-135): octal
+        header.set(enc.encode(size.toString(8).padStart(11, '0') + '\0'), 124);
+        // Mtime (136-147)
+        const mtime = Math.floor(Date.now() / 1000);
+        header.set(enc.encode(mtime.toString(8).padStart(11, '0') + '\0'), 136);
+        // Type flag (156): '0' = regular file
+        header[156] = 48;
+        // USTAR magic (257-262) + version (263-264)
+        header.set(enc.encode('ustar\0'), 257);
+        header.set(enc.encode('00'), 263);
+
+        // Checksum (148-155): fill with spaces, then compute
+        header.set(enc.encode('        '), 148);
+        let checksum = 0;
+        for (let i = 0; i < 512; i++) checksum += header[i];
+        header.set(enc.encode(checksum.toString(8).padStart(6, '0') + '\0 '), 148);
+
+        return header;
+    }
+}
+
+/**
  * Unified archive extraction interface.
  */
 class ArchiveExtractors {
@@ -165,4 +245,5 @@ class ArchiveExtractors {
 
 // Export to window
 window.TarParser = TarParser;
+window.TarWriter = TarWriter;
 window.ArchiveExtractors = ArchiveExtractors;
