@@ -80,6 +80,13 @@ del _pkg_dir
         return 'python';
     }
 
+    getMemoryUsage() {
+        if (!this._pyodide) return null;
+        try {
+            return this._pyodide._module.HEAPU8.buffer.byteLength;
+        } catch (_) { return null; }
+    }
+
     // ── SharedVFS Sync ──────────────────────────────────────────
 
     /**

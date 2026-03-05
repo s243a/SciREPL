@@ -150,6 +150,58 @@ class FileIO {
             });
         }
 
+        // Memory & Storage
+        const memoryBtn = document.getElementById('btn-memory');
+        const memoryModal = document.getElementById('memory-modal');
+        if (memoryBtn && memoryModal) {
+            memoryBtn.addEventListener('click', () => {
+                this.menuModal.classList.add('hidden');
+                this._refreshMemoryModal();
+                memoryModal.classList.remove('hidden');
+            });
+            memoryModal.addEventListener('click', (e) => {
+                if (e.target === memoryModal || e.target.classList.contains('modal-close')) {
+                    memoryModal.classList.add('hidden');
+                }
+            });
+            // Refresh button
+            const refreshBtn = document.getElementById('memory-refresh');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => this._refreshMemoryModal());
+            }
+            // Clear VFS button
+            const clearVfsBtn = document.getElementById('memory-clear-vfs');
+            if (clearVfsBtn) {
+                clearVfsBtn.addEventListener('click', async () => {
+                    clearVfsBtn.textContent = 'Clearing...';
+                    try {
+                        if (window.vfsStore && window.vfsStore.isReady()) {
+                            await window.vfsStore.clearSharedFiles();
+                        }
+                    } catch (e) {
+                        console.warn('Failed to clear VFS:', e);
+                    }
+                    clearVfsBtn.textContent = 'Clear VFS';
+                    this._refreshMemoryModal();
+                });
+            }
+            // Clear Cache button
+            const clearCacheBtn = document.getElementById('memory-clear-cache');
+            if (clearCacheBtn) {
+                clearCacheBtn.addEventListener('click', async () => {
+                    clearCacheBtn.textContent = 'Clearing...';
+                    try {
+                        const names = await caches.keys();
+                        await Promise.all(names.map(n => caches.delete(n)));
+                    } catch (e) {
+                        console.warn('Failed to clear caches:', e);
+                    }
+                    clearCacheBtn.textContent = 'Clear Cache';
+                    this._refreshMemoryModal();
+                });
+            }
+        }
+
         // Run All Cells
         document.getElementById('btn-run-all').addEventListener('click', () => {
             this.menuModal.classList.add('hidden');
@@ -644,6 +696,159 @@ class FileIO {
             if (p.alias && p.dir) {
                 vfs.addSearchPath(p.alias, p.dir);
             }
+        }
+    }
+
+    /**
+     * Format bytes as a human-readable string (e.g. "25.4 MB").
+     */
+    _formatBytes(bytes) {
+        if (bytes == null || bytes < 0) return '—';
+        if (bytes === 0) return '0 B';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let i = 0;
+        let val = bytes;
+        while (val >= 1024 && i < units.length - 1) { val /= 1024; i++; }
+        return val.toFixed(i === 0 ? 0 : 1) + ' ' + units[i];
+    }
+
+    /**
+     * Populate the Memory & Storage modal with current data.
+     */
+    async _refreshMemoryModal() {
+        const km = window.kernelManager;
+        if (!km) return;
+
+        // -- Kernel Memory --
+        const list = document.getElementById('memory-kernel-list');
+        if (!list) return;
+
+        const memInfo = km.getMemoryInfo();
+        list.innerHTML = '';
+
+        for (const k of memInfo.kernels) {
+            const card = document.createElement('div');
+            card.className = 'memory-kernel-card';
+
+            const dot = document.createElement('span');
+            dot.className = 'memory-dot' + (k.loaded && k.ready ? ' loaded' : '');
+            card.appendChild(dot);
+
+            const info = document.createElement('div');
+            info.className = 'memory-kernel-info';
+            const nameEl = document.createElement('div');
+            nameEl.className = 'memory-kernel-name';
+            nameEl.textContent = k.name;
+            info.appendChild(nameEl);
+            const statusEl = document.createElement('div');
+            statusEl.className = 'memory-kernel-status';
+            if (k.language === 'javascript') {
+                statusEl.textContent = 'Always ready';
+            } else if (k.ready) {
+                statusEl.textContent = 'Ready';
+            } else {
+                statusEl.textContent = 'Not loaded';
+            }
+            info.appendChild(statusEl);
+            card.appendChild(info);
+
+            const sizeEl = document.createElement('span');
+            sizeEl.className = 'memory-kernel-size';
+            sizeEl.textContent = k.memory != null ? this._formatBytes(k.memory) : '—';
+            card.appendChild(sizeEl);
+
+            // Unload button for loaded CDN kernels (not JavaScript)
+            if (k.loaded && k.ready && KernelManager.CDN_KERNELS.has(k.language)) {
+                const btn = document.createElement('button');
+                btn.className = 'memory-unload-btn';
+                btn.textContent = 'Unload';
+                btn.addEventListener('click', async () => {
+                    btn.textContent = 'Unloading...';
+                    btn.disabled = true;
+                    await km.destroyKernel(k.language);
+                    // Update status badge if this was current language
+                    if (km.currentLanguage === k.language) {
+                        const badge = document.getElementById('status-badge');
+                        if (badge) {
+                            badge.textContent = 'ready';
+                            badge.className = 'ready';
+                        }
+                    }
+                    this._refreshMemoryModal();
+                });
+                card.appendChild(btn);
+            }
+
+            list.appendChild(card);
+        }
+
+        // -- Storage --
+        try {
+            const estimate = await navigator.storage.estimate();
+            const usage = estimate.usage || 0;
+            const quota = estimate.quota || 0;
+            document.getElementById('memory-storage-used').textContent = this._formatBytes(usage);
+            document.getElementById('memory-storage-quota').textContent = this._formatBytes(quota);
+
+            const pct = quota > 0 ? (usage / quota * 100) : 0;
+            const fill = document.getElementById('memory-bar-fill');
+            fill.style.width = Math.min(pct, 100).toFixed(1) + '%';
+            fill.className = 'memory-bar-fill' + (pct > 80 ? ' critical' : pct > 50 ? ' warn' : '');
+        } catch (_) { }
+
+        // SW cache size
+        try {
+            let cacheSize = 0;
+            const cacheNames = await caches.keys();
+            for (const name of cacheNames) {
+                const cache = await caches.open(name);
+                const keys = await cache.keys();
+                for (const req of keys) {
+                    const resp = await cache.match(req);
+                    if (resp) {
+                        const blob = await resp.clone().blob();
+                        cacheSize += blob.size;
+                    }
+                }
+            }
+            document.getElementById('memory-sw-size').textContent = this._formatBytes(cacheSize);
+        } catch (_) {
+            document.getElementById('memory-sw-size').textContent = '—';
+        }
+
+        // localStorage size
+        try {
+            let lsSize = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                lsSize += (key.length + localStorage.getItem(key).length) * 2; // UTF-16
+            }
+            document.getElementById('memory-ls-size').textContent = this._formatBytes(lsSize);
+        } catch (_) {
+            document.getElementById('memory-ls-size').textContent = '—';
+        }
+
+        // IndexedDB size (estimate from overall storage minus caches/localStorage)
+        try {
+            const estimate = await navigator.storage.estimate();
+            const swEl = document.getElementById('memory-sw-size');
+            const lsEl = document.getElementById('memory-ls-size');
+            // Parse sizes back (rough estimate)
+            const swText = swEl.textContent;
+            const lsText = lsEl.textContent;
+            const parseSize = (t) => {
+                const m = t.match(/([\d.]+)\s*(B|KB|MB|GB)/);
+                if (!m) return 0;
+                const v = parseFloat(m[1]);
+                const u = m[2];
+                return v * (u === 'GB' ? 1073741824 : u === 'MB' ? 1048576 : u === 'KB' ? 1024 : 1);
+            };
+            const swSize = parseSize(swText);
+            const lsSize = parseSize(lsText);
+            const idbSize = Math.max(0, (estimate.usage || 0) - swSize - lsSize);
+            document.getElementById('memory-idb-size').textContent = this._formatBytes(idbSize);
+        } catch (_) {
+            document.getElementById('memory-idb-size').textContent = '—';
         }
     }
 

@@ -248,6 +248,25 @@ class KernelManager {
         }
         delete this._instances[language];
     }
+
+    /**
+     * Get memory info for all registered kernels.
+     * Returns { kernels: [{language, name, ready, loaded, memory}] }
+     */
+    getMemoryInfo() {
+        const kernels = [];
+        for (const lang of this.getLanguages()) {
+            const instance = this._instances[lang];
+            const ready = instance ? instance.isReady() : false;
+            const name = instance ? instance.getName() : (this._registry[lang].displayName || lang);
+            let memory = null;
+            if (instance && typeof instance.getMemoryUsage === 'function') {
+                memory = instance.getMemoryUsage();
+            }
+            kernels.push({ language: lang, name, ready, loaded: !!instance, memory });
+        }
+        return { kernels };
+    }
 }
 
 // Kernels that require CDN downloads

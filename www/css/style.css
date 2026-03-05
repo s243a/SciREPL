@@ -1870,6 +1870,147 @@ tr:hover .vfs-delete-btn {
     border-color: var(--text-secondary);
 }
 
+/* ===== Memory & Storage Panel ===== */
+
+.memory-kernel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 8px 0;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.memory-kernel-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.memory-kernel-card:last-child {
+    border-bottom: none;
+}
+
+.memory-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.memory-dot.loaded {
+    background: var(--green);
+}
+
+.memory-kernel-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.memory-kernel-name {
+    font-size: 13px;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.memory-kernel-status {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.memory-kernel-size {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    margin-right: 8px;
+}
+
+.memory-unload-btn {
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: none;
+    color: var(--red);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.memory-unload-btn:hover {
+    background: rgba(248, 81, 73, 0.1);
+    border-color: var(--red);
+}
+
+.memory-storage-section {
+    margin: 8px 0;
+}
+
+.memory-storage-bar-wrap {
+    margin-bottom: 12px;
+}
+
+.memory-storage-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.memory-bar-track {
+    height: 8px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.memory-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.memory-bar-fill.warn {
+    background: var(--orange);
+}
+
+.memory-bar-fill.critical {
+    background: var(--red);
+}
+
+.memory-storage-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.memory-storage-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 2px 0;
+}
+
+.memory-storage-row span:last-child {
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+}
+
+.memory-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 /* ===== Mobile Touch Targets ===== */
 /* Applied via media query for real touch devices and via body.force-mobile for the setting */
 

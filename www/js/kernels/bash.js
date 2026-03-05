@@ -51,6 +51,11 @@ class BashKernel {
         return this._ready;
     }
 
+    getMemoryUsage() {
+        if (!this._shell) return null;
+        return null;
+    }
+
     getName() {
         return 'Bash (WASM)';
     }

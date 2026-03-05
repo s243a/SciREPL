@@ -91,6 +91,13 @@ class PrologKernel {
         return this._ready;
     }
 
+    getMemoryUsage() {
+        if (!this._swipl) return null;
+        try {
+            return this._swipl.HEAPU8?.buffer?.byteLength ?? null;
+        } catch (_) { return null; }
+    }
+
     getName() {
         return 'SWI-Prolog (WASM)';
     }

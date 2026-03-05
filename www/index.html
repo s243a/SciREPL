@@ -300,6 +300,7 @@ sharedfs_read("/shared/data/results.csv")
                 <button id="btn-browse-packages">📦 Browse Packages &amp; Workbooks</button>
                 <button id="btn-export-package">📦 Export Package (.zip)</button>
                 <button id="btn-prolog-settings">⚙ Files &amp; Storage (VFS / Paths)</button>
+                <button id="btn-memory">📊 Memory &amp; Storage</button>
                 <button id="btn-settings">⚙ Settings</button>
                 <button id="btn-clear-session" class="danger">🗑 Clear History</button>
                 <button id="btn-reload-app">🔄 Reload App</button>
@@ -344,6 +345,39 @@ sharedfs_read("/shared/data/results.csv")
                         <option value="javascript">JavaScript</option>
                     </select>
                 </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Memory & Storage Modal -->
+    <div id="memory-modal" class="modal hidden">
+        <div class="modal-content modal-content-scroll">
+            <button class="modal-close">&times;</button>
+            <h2>Memory &amp; Storage</h2>
+
+            <div class="settings-section">Kernel Memory</div>
+            <div id="memory-kernel-list" class="memory-kernel-list"></div>
+
+            <div class="settings-section">Storage</div>
+            <div id="memory-storage-section" class="memory-storage-section">
+                <div class="memory-storage-bar-wrap">
+                    <div class="memory-storage-label">
+                        <span id="memory-storage-used">—</span> / <span id="memory-storage-quota">—</span>
+                    </div>
+                    <div class="memory-bar-track">
+                        <div id="memory-bar-fill" class="memory-bar-fill" style="width:0%"></div>
+                    </div>
+                </div>
+                <div class="memory-storage-rows">
+                    <div class="memory-storage-row"><span>IndexedDB (VFS files)</span><span id="memory-idb-size">—</span></div>
+                    <div class="memory-storage-row"><span>Service Worker cache</span><span id="memory-sw-size">—</span></div>
+                    <div class="memory-storage-row"><span>localStorage</span><span id="memory-ls-size">—</span></div>
+                </div>
+                <div class="memory-actions">
+                    <button id="memory-clear-vfs" class="vfs-btn">Clear VFS</button>
+                    <button id="memory-clear-cache" class="vfs-btn">Clear Cache</button>
+                    <button id="memory-refresh" class="vfs-btn">Refresh</button>
+                </div>
             </div>
         </div>
     </div>
