@@ -493,6 +493,23 @@ class NotebookManager {
             if (newName) this.renameNotebook(active.id, newName);
         });
 
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'notebook-add-btn';
+        deleteBtn.textContent = '\u00D7';
+        deleteBtn.title = 'Delete Notebook';
+        deleteBtn.style.color = 'var(--red, #f85149)';
+        deleteBtn.addEventListener('click', () => {
+            const active = this.getActiveNotebook();
+            if (!active) return;
+            if (this._notebooks.length <= 1) {
+                alert('Cannot delete the last notebook.');
+                return;
+            }
+            if (confirm('Delete "' + active.name + '"?')) {
+                this.removeNotebook(active.id);
+            }
+        });
+
         const addBtn = document.createElement('button');
         addBtn.className = 'notebook-add-btn';
         addBtn.textContent = '+';
@@ -506,6 +523,7 @@ class NotebookManager {
 
         container.appendChild(select);
         container.appendChild(renameBtn);
+        container.appendChild(deleteBtn);
         container.appendChild(addBtn);
     }
 

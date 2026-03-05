@@ -91,6 +91,35 @@ class FileIO {
             });
         }
 
+        // Settings
+        const settingsBtn = document.getElementById('btn-settings');
+        const settingsModal = document.getElementById('settings-modal');
+        if (settingsBtn && settingsModal) {
+            settingsBtn.addEventListener('click', () => {
+                this.menuModal.classList.add('hidden');
+                // Load saved settings
+                const autoExec = document.getElementById('setting-auto-execute');
+                const confirmDel = document.getElementById('setting-confirm-delete');
+                if (autoExec) autoExec.checked = localStorage.getItem('scirepl_auto_execute') === '1';
+                if (confirmDel) confirmDel.checked = localStorage.getItem('scirepl_confirm_delete') !== '0';
+                settingsModal.classList.remove('hidden');
+            });
+            // Save on change
+            settingsModal.addEventListener('change', (e) => {
+                if (e.target.id === 'setting-auto-execute') {
+                    localStorage.setItem('scirepl_auto_execute', e.target.checked ? '1' : '0');
+                } else if (e.target.id === 'setting-confirm-delete') {
+                    localStorage.setItem('scirepl_confirm_delete', e.target.checked ? '1' : '0');
+                }
+            });
+            // Close modal
+            settingsModal.addEventListener('click', (e) => {
+                if (e.target === settingsModal || e.target.classList.contains('modal-close')) {
+                    settingsModal.classList.add('hidden');
+                }
+            });
+        }
+
         // Run All Cells
         document.getElementById('btn-run-all').addEventListener('click', () => {
             this.menuModal.classList.add('hidden');
@@ -741,7 +770,8 @@ class FileIO {
      */
     importProlog(content) {
         if (window.importCells) {
-            window.importCells([{ code: content, type: 'code', language: 'prolog' }]);
+            const autoExec = localStorage.getItem('scirepl_auto_execute') === '1';
+            window.importCells([{ code: content, type: 'code', language: 'prolog' }], { autoExecute: autoExec });
         } else {
             const input = document.getElementById('code-input');
             input.value = content;
@@ -828,7 +858,8 @@ class FileIO {
 
             // Use the cell import API if available
             if (window.importCells) {
-                window.importCells(extractedCells);
+                const autoExec = localStorage.getItem('scirepl_auto_execute') === '1';
+                window.importCells(extractedCells, { autoExecute: autoExec });
             } else {
                 // Fallback: dump code cells into textarea
                 const codeOnly = extractedCells

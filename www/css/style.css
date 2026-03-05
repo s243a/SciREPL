@@ -1814,6 +1814,27 @@ tr:hover .vfs-delete-btn {
     padding: 0 1px;
 }
 
+/* ===== Settings ===== */
+
+.settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.settings-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+.settings-item input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 18px;
+    height: 18px;
+}
+
 /* ===== Mobile Touch Targets ===== */
 /* TODO: Investigate why @media (hover: none) and (pointer: coarse)
    doesn't trigger in Capacitor Android WebView. For now, improved

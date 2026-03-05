@@ -300,8 +300,25 @@ sharedfs_read("/shared/data/results.csv")
                 <button id="btn-browse-packages">📦 Browse Packages &amp; Workbooks</button>
                 <button id="btn-export-package">📦 Export Package (.zip)</button>
                 <button id="btn-prolog-settings">⚙ Files &amp; Storage (VFS / Paths)</button>
+                <button id="btn-settings">⚙ Settings</button>
                 <button id="btn-clear-session" class="danger">🗑 Clear History</button>
                 <button id="btn-reload-app">🔄 Reload App</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2>Settings</h2>
+            <div class="settings-list">
+                <label class="settings-item">
+                    <input type="checkbox" id="setting-auto-execute"> Auto-execute cells on workbook import
+                </label>
+                <label class="settings-item">
+                    <input type="checkbox" id="setting-confirm-delete" checked> Confirm before deleting files
+                </label>
             </div>
         </div>
     </div>

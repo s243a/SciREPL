@@ -1120,18 +1120,31 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
     // ---- Import cells from .ipynb ----
 
+    // ---- Import queue ----
+    window._importQueue = [];
     window._importingCells = false;
 
-    window.importCells = async function (cellDefs) {
+    /**
+     * Import cells from .ipynb — renders cells without executing by default.
+     * If autoExecute is true, code cells are executed sequentially.
+     * Multiple imports are queued and processed in order.
+     */
+    window.importCells = async function (cellDefs, { autoExecute = false } = {}) {
+        window._importQueue.push({ cellDefs, autoExecute });
+        if (window._importingCells) return; // queue will be drained
+        window._importingCells = true;
+
+        while (window._importQueue.length > 0) {
+            const { cellDefs: defs, autoExecute: exec } = window._importQueue.shift();
+            await window._processImport(defs, exec);
+        }
+
+        window._importingCells = false;
+    };
+
+    window._processImport = async function (cellDefs, autoExecute) {
         const km = window.kernelManager;
         if (!km) return;
-
-        // Prevent concurrent imports — queue would be complex, just block
-        if (window._importingCells) {
-            alert('A workbook is still importing. Please wait for it to finish.');
-            return;
-        }
-        window._importingCells = true;
 
         badge.textContent = 'importing…';
         badge.className = 'running';
@@ -1163,8 +1176,8 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
             } else if (def.outputs && def.outputs.length > 0) {
                 // Render pre-existing Jupyter outputs without re-executing
                 window.renderJupyterOutputs(def.outputs, outputCard);
-            } else {
-                // No cached outputs — execute as before
+            } else if (autoExecute) {
+                // Execute code cells only when autoExecute is on
                 try {
                     await km.ensureReady(language);
                 } catch (err) {
@@ -1193,6 +1206,10 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                     window.renderText(err.message, true);
                 }
                 window._currentOutputCard = null;
+            } else {
+                // No auto-execute: remove empty output card
+                outputCard.remove();
+                cell.outputCard = null;
             }
         }
 
@@ -1201,7 +1218,6 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         badge.textContent = 'ready';
         badge.className = 'ready';
         runBtn.disabled = false;
-        window._importingCells = false;
         getRepl().scrollTop = getRepl().scrollHeight;
     };
 
