@@ -1821,6 +1821,18 @@ tr:hover .vfs-delete-btn {
     flex-direction: column;
     gap: 12px;
 }
+.settings-section {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    margin-top: 16px;
+    margin-bottom: -4px;
+    opacity: 0.7;
+}
+.settings-section:first-child {
+    margin-top: 0;
+}
 .settings-item {
     display: flex;
     align-items: center;
@@ -1834,11 +1846,32 @@ tr:hover .vfs-delete-btn {
     width: 18px;
     height: 18px;
 }
+.settings-select {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 13px;
+    margin-left: auto;
+}
+.settings-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    align-self: flex-start;
+}
+.settings-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+}
 
 /* ===== Mobile Touch Targets ===== */
-/* TODO: Investigate why @media (hover: none) and (pointer: coarse)
-   doesn't trigger in Capacitor Android WebView. For now, improved
-   styles are applied universally (see .vfs-download-btn, .vfs-delete-btn above). */
+/* Applied via media query for real touch devices and via body.force-mobile for the setting */
 
 @media (hover: none) and (pointer: coarse) {
     .vfs-download-btn,
@@ -1851,4 +1884,15 @@ tr:hover .vfs-delete-btn {
         align-items: center;
         justify-content: center;
     }
+}
+
+body.force-mobile .vfs-download-btn,
+body.force-mobile .vfs-delete-btn {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 20px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

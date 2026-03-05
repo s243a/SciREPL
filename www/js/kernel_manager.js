@@ -136,8 +136,6 @@ class KernelManager {
 
         const title = document.getElementById('runtime-download-title');
         const desc = document.getElementById('runtime-download-desc');
-        const downloadBtn = document.getElementById('runtime-download-btn');
-        const cancelBtn = document.getElementById('runtime-cancel-btn');
         const actions = document.getElementById('runtime-download-actions');
         const progressWrap = document.getElementById('runtime-progress-wrap');
         const progressText = document.getElementById('runtime-progress-text');
@@ -145,9 +143,21 @@ class KernelManager {
         if (title) title.textContent = info.name + ' Download';
         if (desc) desc.innerHTML = 'The <strong>' + info.name + '</strong> runtime requires a <strong>' + info.size + '</strong> download. It will be cached by the browser for future use.';
 
+        // Auto-download: skip confirmation, just show progress
+        if (localStorage.getItem('scirepl_auto_download') === '1') {
+            if (actions) actions.classList.add('hidden');
+            if (progressWrap) progressWrap.classList.remove('hidden');
+            if (progressText) progressText.textContent = 'Downloading ' + info.name + '...';
+            modal.classList.remove('hidden');
+            return;
+        }
+
         // Reset state
         if (actions) actions.classList.remove('hidden');
         if (progressWrap) progressWrap.classList.add('hidden');
+
+        const downloadBtn = document.getElementById('runtime-download-btn');
+        const cancelBtn = document.getElementById('runtime-cancel-btn');
 
         return new Promise((resolve, reject) => {
             modal.classList.remove('hidden');

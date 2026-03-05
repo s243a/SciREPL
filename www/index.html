@@ -313,11 +313,36 @@ sharedfs_read("/shared/data/results.csv")
             <button class="modal-close">&times;</button>
             <h2>Settings</h2>
             <div class="settings-list">
+                <div class="settings-section">Import &amp; Editing</div>
                 <label class="settings-item">
                     <input type="checkbox" id="setting-auto-execute"> Auto-execute cells on workbook import
                 </label>
                 <label class="settings-item">
                     <input type="checkbox" id="setting-confirm-delete" checked> Confirm before deleting files
+                </label>
+
+                <div class="settings-section">Runtime Downloads</div>
+                <label class="settings-item">
+                    <input type="checkbox" id="setting-auto-download"> Auto-download runtimes (skip confirmation)
+                </label>
+                <label class="settings-item">
+                    <input type="checkbox" id="setting-r-prewarm"> Pre-install R packages (ggplot2, dplyr)
+                </label>
+                <button id="btn-reset-privacy" class="settings-btn">Reset Privacy Consent</button>
+
+                <div class="settings-section">Display</div>
+                <label class="settings-item">
+                    <input type="checkbox" id="setting-large-touch"> Large touch targets (mobile-style buttons)
+                </label>
+                <label class="settings-item">
+                    Default language:
+                    <select id="setting-default-language" class="settings-select">
+                        <option value="python">Python</option>
+                        <option value="r">R</option>
+                        <option value="prolog">Prolog</option>
+                        <option value="bash">Bash</option>
+                        <option value="javascript">JavaScript</option>
+                    </select>
                 </label>
             </div>
         </div>

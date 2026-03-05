@@ -100,18 +100,48 @@ class FileIO {
                 // Load saved settings
                 const autoExec = document.getElementById('setting-auto-execute');
                 const confirmDel = document.getElementById('setting-confirm-delete');
+                const autoDl = document.getElementById('setting-auto-download');
+                const rPrewarm = document.getElementById('setting-r-prewarm');
+                const largeTouch = document.getElementById('setting-large-touch');
+                const defaultLang = document.getElementById('setting-default-language');
+
                 if (autoExec) autoExec.checked = localStorage.getItem('scirepl_auto_execute') === '1';
                 if (confirmDel) confirmDel.checked = localStorage.getItem('scirepl_confirm_delete') !== '0';
+                if (autoDl) autoDl.checked = localStorage.getItem('scirepl_auto_download') === '1';
+                if (rPrewarm) rPrewarm.checked = localStorage.getItem('scirepl_r_prewarm') === 'yes';
+                if (largeTouch) largeTouch.checked = localStorage.getItem('scirepl_mobile_emulation') === '1';
+                if (defaultLang) defaultLang.value = localStorage.getItem('scirepl_default_language') || 'python';
+
                 settingsModal.classList.remove('hidden');
             });
             // Save on change
             settingsModal.addEventListener('change', (e) => {
-                if (e.target.id === 'setting-auto-execute') {
+                const id = e.target.id;
+                if (id === 'setting-auto-execute') {
                     localStorage.setItem('scirepl_auto_execute', e.target.checked ? '1' : '0');
-                } else if (e.target.id === 'setting-confirm-delete') {
+                } else if (id === 'setting-confirm-delete') {
                     localStorage.setItem('scirepl_confirm_delete', e.target.checked ? '1' : '0');
+                } else if (id === 'setting-auto-download') {
+                    localStorage.setItem('scirepl_auto_download', e.target.checked ? '1' : '0');
+                } else if (id === 'setting-r-prewarm') {
+                    localStorage.setItem('scirepl_r_prewarm', e.target.checked ? 'yes' : '');
+                    if (!e.target.checked) localStorage.removeItem('scirepl_r_prewarm');
+                } else if (id === 'setting-large-touch') {
+                    localStorage.setItem('scirepl_mobile_emulation', e.target.checked ? '1' : '0');
+                    document.body.classList.toggle('force-mobile', e.target.checked);
+                } else if (id === 'setting-default-language') {
+                    localStorage.setItem('scirepl_default_language', e.target.value);
                 }
             });
+            // Reset privacy consent button
+            const resetPrivacy = document.getElementById('btn-reset-privacy');
+            if (resetPrivacy) {
+                resetPrivacy.addEventListener('click', () => {
+                    localStorage.removeItem('scirepl_privacy_accepted');
+                    resetPrivacy.textContent = 'Privacy consent reset';
+                    setTimeout(() => { resetPrivacy.textContent = 'Reset Privacy Consent'; }, 2000);
+                });
+            }
             // Close modal
             settingsModal.addEventListener('click', (e) => {
                 if (e.target === settingsModal || e.target.classList.contains('modal-close')) {

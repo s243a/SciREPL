@@ -98,6 +98,19 @@
     // ---- App startup (no kernel init — kernels load lazily) ----
 
     async function startApp() {
+        // Apply saved preferences
+        if (localStorage.getItem('scirepl_mobile_emulation') === '1') {
+            document.body.classList.add('force-mobile');
+        }
+        const defaultLang = localStorage.getItem('scirepl_default_language');
+        if (defaultLang && window.kernelManager) {
+            try {
+                window.kernelManager.setLanguage(defaultLang);
+                const sel = document.getElementById('lang-selector');
+                if (sel) sel.value = defaultLang;
+            } catch (_) { /* ignore if kernel not registered */ }
+        }
+
         overlay.classList.add('hidden');
         badge.textContent = 'ready';
         badge.className = 'ready';
