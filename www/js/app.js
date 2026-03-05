@@ -1120,9 +1120,18 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
     // ---- Import cells from .ipynb ----
 
+    window._importingCells = false;
+
     window.importCells = async function (cellDefs) {
         const km = window.kernelManager;
         if (!km) return;
+
+        // Prevent concurrent imports — queue would be complex, just block
+        if (window._importingCells) {
+            alert('A workbook is still importing. Please wait for it to finish.');
+            return;
+        }
+        window._importingCells = true;
 
         badge.textContent = 'importing…';
         badge.className = 'running';
@@ -1188,9 +1197,11 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         }
 
         saveCellsToSession();
+        if (window.notebookManager) window.notebookManager.saveState();
         badge.textContent = 'ready';
         badge.className = 'ready';
         runBtn.disabled = false;
+        window._importingCells = false;
         getRepl().scrollTop = getRepl().scrollHeight;
     };
 
