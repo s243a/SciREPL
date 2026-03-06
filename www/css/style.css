@@ -1856,6 +1856,10 @@ tr:hover .vfs-delete-btn {
     margin-left: auto;
     color-scheme: dark;
 }
+.settings-select option {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
 .settings-btn {
     background: none;
     border: 1px solid var(--border);
