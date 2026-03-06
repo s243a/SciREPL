@@ -361,6 +361,7 @@ Near-term items to make R and cross-language features demo-ready:
 - [ ] **Lua kernel** — Fengari (Lua in WASM, ~500KB)
 - [ ] **Capacitor WebView media query investigation** — `@media (hover: none) and (pointer: coarse)` may not trigger in Android WebView; determine cause and fix
 - [ ] **Byte-level download progress** — Track actual download progress via Service Worker interception or ReadableStream
+- [ ] **Background package installs** — Install packages/workbooks without switching to the target notebook tab; requires notebook-aware card creation
 
 ## License
 
