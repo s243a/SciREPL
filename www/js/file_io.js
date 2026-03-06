@@ -1175,6 +1175,8 @@ class FileIO {
 
             // Create a new notebook tab for the imported workbook
             const nm = window.notebookManager;
+            const autoSwitch = localStorage.getItem('scirepl_auto_switch_workbook') !== '0';
+            let prevNbId = null;
             if (nm && nm.createNotebook) {
                 // Extract name from first markdown heading, or fall back
                 let wbName = 'Imported Workbook';
@@ -1183,28 +1185,32 @@ class FileIO {
                     const headingMatch = firstMd.code.match(/^#\s+(.+)/m);
                     if (headingMatch) wbName = headingMatch[1].trim();
                 }
-                const newNb = nm.createNotebook({ name: wbName });
-                // Always switch during creation so importCells targets the right notebook;
-                // if auto-switch is off, we switch back to the previous tab afterward
-                const autoSwitch = localStorage.getItem('scirepl_auto_switch_workbook') !== '0';
-                const prevNb = !autoSwitch && nm.getActiveNotebook ? nm.getActiveNotebook() : null;
-                nm.switchTo(newNb.id);
-                if (prevNb) {
-                    // Defer switching back so importCells sees the new notebook first
-                    setTimeout(() => nm.switchTo(prevNb.id), 0);
+                if (!autoSwitch) {
+                    const prev = nm.getActiveNotebook && nm.getActiveNotebook();
+                    if (prev) prevNbId = prev.id;
                 }
+                const newNb = nm.createNotebook({ name: wbName });
+                // Must switch so importCells targets the right notebook
+                nm.switchTo(newNb.id);
             }
 
-            // Use the cell import API if available
+            // Use the cell import API if available; return the promise
+            // so callers (e.g. package catalog) can await completion.
             if (window.importCells) {
                 const autoExec = localStorage.getItem('scirepl_auto_execute') === '1';
-                window.importCells(extractedCells, { autoExecute: autoExec });
+                const p = window.importCells(extractedCells, { autoExecute: autoExec });
+                // Switch back to previous notebook after import completes
+                if (prevNbId && nm) {
+                    return p.then(() => nm.switchTo(prevNbId));
+                }
+                return p;
             } else {
                 // Fallback: dump code cells into textarea
                 const codeOnly = extractedCells
                     .filter(c => c.type === 'code')
                     .map(c => c.code);
                 this.importPython(codeOnly.join('\n\n# -- Cell --\n\n'));
+                if (prevNbId && nm) nm.switchTo(prevNbId);
             }
         } catch (e) {
             console.error(e);
