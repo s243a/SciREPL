@@ -1854,6 +1854,7 @@ tr:hover .vfs-delete-btn {
     padding: 4px 8px;
     font-size: 13px;
     margin-left: auto;
+    color-scheme: dark;
 }
 .settings-btn {
     background: none;
