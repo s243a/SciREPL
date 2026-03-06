@@ -270,49 +270,46 @@ class FileIO {
             });
         }
 
-        // Export HTML
-        const exportHtmlBtn = document.getElementById('btn-export-html');
-        if (exportHtmlBtn) {
-            exportHtmlBtn.addEventListener('click', async () => {
-                this.menuModal.classList.add('hidden');
-                if (window.exportManager) await window.exportManager.exportHTML();
-            });
-        }
+        // Export Modal
+        const exportBtn = document.getElementById('btn-export');
+        const exportModal = document.getElementById('export-modal');
+        const exportImageSection = document.getElementById('export-image-section');
+        const doExportBtn = document.getElementById('btn-do-export');
 
-        // Export Markdown
-        const exportMdBtn = document.getElementById('btn-export-md');
-        if (exportMdBtn) {
-            exportMdBtn.addEventListener('click', async () => {
+        if (exportBtn && exportModal) {
+            exportBtn.addEventListener('click', () => {
                 this.menuModal.classList.add('hidden');
-                if (window.exportManager) await window.exportManager.exportMarkdown();
+                const htmlRadio = exportModal.querySelector('input[name="export-format"][value="html"]');
+                if (htmlRadio) htmlRadio.checked = true;
+                const embedRadio = exportModal.querySelector('input[name="export-images"][value="embed"]');
+                if (embedRadio) embedRadio.checked = true;
+                this._updateExportImageVisibility(exportModal, exportImageSection);
+                exportModal.classList.remove('hidden');
             });
-        }
 
-        // Export PDF
-        const exportPdfBtn = document.getElementById('btn-export-pdf');
-        if (exportPdfBtn) {
-            exportPdfBtn.addEventListener('click', async () => {
-                this.menuModal.classList.add('hidden');
-                if (window.exportManager) await window.exportManager.exportPDF();
+            exportModal.addEventListener('click', (e) => {
+                if (e.target === exportModal || e.target.classList.contains('modal-close')) {
+                    exportModal.classList.add('hidden');
+                }
             });
-        }
 
-        // Export DOCX
-        const exportDocxBtn = document.getElementById('btn-export-docx');
-        if (exportDocxBtn) {
-            exportDocxBtn.addEventListener('click', async () => {
-                this.menuModal.classList.add('hidden');
-                if (window.exportManager) await window.exportManager.exportDOCX();
+            exportModal.addEventListener('change', (e) => {
+                if (e.target.name === 'export-format') {
+                    this._updateExportImageVisibility(exportModal, exportImageSection);
+                }
             });
-        }
 
-        // Export LaTeX
-        const exportLatexBtn = document.getElementById('btn-export-latex');
-        if (exportLatexBtn) {
-            exportLatexBtn.addEventListener('click', async () => {
-                this.menuModal.classList.add('hidden');
-                if (window.exportManager) await window.exportManager.exportLatex();
-            });
+            if (doExportBtn) {
+                doExportBtn.addEventListener('click', async () => {
+                    const format = exportModal.querySelector('input[name="export-format"]:checked');
+                    const imageMode = exportModal.querySelector('input[name="export-images"]:checked');
+                    exportModal.classList.add('hidden');
+                    await this._dispatchExport(
+                        format ? format.value : 'html',
+                        imageMode ? imageMode.value : 'embed'
+                    );
+                });
+            }
         }
 
         // Import Package
@@ -677,6 +674,51 @@ class FileIO {
         a.click();
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    /**
+     * Show/hide image handling section based on selected export format.
+     */
+    _updateExportImageVisibility(modal, imageSection) {
+        if (!imageSection) return;
+        const format = modal.querySelector('input[name="export-format"]:checked');
+        const fmt = format ? format.value : 'html';
+        const showImages = (fmt === 'html' || fmt === 'markdown');
+        if (showImages) {
+            imageSection.classList.remove('hidden');
+            // Default: embed for HTML, separate for Markdown
+            const defaultVal = fmt === 'markdown' ? 'separate' : 'embed';
+            const radio = modal.querySelector(`input[name="export-images"][value="${defaultVal}"]`);
+            if (radio) radio.checked = true;
+        } else {
+            imageSection.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Dispatch export based on format and image mode selections.
+     */
+    async _dispatchExport(format, imageMode) {
+        const em = window.exportManager;
+        switch (format) {
+            case 'html':
+                if (em) await em.exportHTML({ embedImages: imageMode === 'embed' });
+                break;
+            case 'markdown':
+                if (em) await em.exportMarkdown({ embedImages: imageMode === 'embed' });
+                break;
+            case 'pdf':
+                if (em) await em.exportPDF();
+                break;
+            case 'docx':
+                if (em) await em.exportDOCX();
+                break;
+            case 'latex':
+                if (em) await em.exportLatex();
+                break;
+            default:
+                alert('Unknown export format: ' + format);
+        }
     }
 
     /**

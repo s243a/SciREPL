@@ -219,14 +219,14 @@ sharedfs_read("/shared/data/results.csv")
             <p><strong>Uploading:</strong> Use the "Upload File" button at the top of Files &amp; Storage to upload files directly into SharedVFS. Set the destination path (default: <code>/shared/data/</code>) before uploading.</p>
 
             <h3>Export Formats</h3>
-            <p>Use the Menu to export your notebook:</p>
+            <p>Use <strong>Export</strong> in the Menu to choose a format and image handling:</p>
             <ul>
-                <li><strong>HTML</strong> — Self-contained file with dark theme, code, and output. Uncheck "Embed images" for a <code>.html.zip</code> with separate image files.</li>
-                <li><strong>Markdown</strong> — Fenced code blocks, LaTeX math, and markdown tables. Good for version control.</li>
+                <li><strong>HTML</strong> — Self-contained file with dark theme, code, and output. Choose "Separate files" for a <code>.html.zip</code> with an images/ folder.</li>
+                <li><strong>Markdown</strong> — Fenced code blocks, LaTeX math, and markdown tables. "Separate files" uses GitHub-compatible <code>![alt](images/X.png)</code> references in a <code>.md.zip</code>.</li>
                 <li><strong>PDF</strong> — Opens the browser print dialog. Choose "Save as PDF" for a light-themed document.</li>
                 <li><strong>DOCX</strong> — Word document with code blocks, tables, images, and native Word equations (LaTeX math converted to editable OOXML formulas). Requires internet (library loaded on demand from CDN).</li>
                 <li><strong>LaTeX</strong> — <code>.tex</code> file for academic papers. Uses <code>listings</code>, <code>amsmath</code>, <code>booktabs</code>, <code>graphicx</code>. Exports as <code>.tex.zip</code> if images are present.</li>
-                <li><strong>.ipynb</strong> — Now includes cell outputs (text, LaTeX, images, tables). Viewable in Jupyter and GitHub without re-execution.</li>
+                <li><strong>.ipynb</strong> — Includes cell outputs (text, LaTeX, images, tables). Viewable in Jupyter and GitHub without re-execution.</li>
             </ul>
             <p><strong>Syntax highlighting:</strong> Code cells display with syntax highlighting for Python, JavaScript, R, Bash, and Prolog. Exports (HTML, DOCX) also include highlighted code.</p>
             <p><strong>.ipynb import with outputs:</strong> When importing a <code>.ipynb</code> file that already contains outputs, they are displayed directly without re-executing the code. This allows fast viewing of notebooks from Jupyter, Colab, or previous SciREPL exports.</p>
@@ -288,13 +288,8 @@ sharedfs_read("/shared/data/results.csv")
                 <button id="btn-run-all">▶ Run All Cells</button>
                 <button id="btn-new-notebook">+ New Notebook</button>
                 <button id="btn-save-session">💾 Save Session</button>
+                <button id="btn-export">📤 Export</button>
                 <button id="btn-export-ipynb">📓 Export as .ipynb</button>
-                <button id="btn-export-html">🌐 Export HTML</button>
-                <label class="export-option"><input type="checkbox" id="chk-embed-images" checked> Embed images in HTML</label>
-                <button id="btn-export-md">📝 Export Markdown</button>
-                <button id="btn-export-pdf">🖨 Export PDF (Print)</button>
-                <button id="btn-export-docx">📄 Export DOCX</button>
-                <button id="btn-export-latex">📐 Export LaTeX</button>
                 <button id="btn-import-file">📂 Import File (e.g. .csv, .py, .ipynb, .zip)</button>
                 <button id="btn-import-package">📦 Import Package (.zip / .tar.gz)</button>
                 <button id="btn-browse-packages">📦 Browse Packages &amp; Workbooks</button>
@@ -304,6 +299,52 @@ sharedfs_read("/shared/data/results.csv")
                 <button id="btn-settings">⚙ Settings</button>
                 <button id="btn-clear-session" class="danger">🗑 Clear History</button>
                 <button id="btn-reload-app">🔄 Reload App</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="export-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2>Export Notebook</h2>
+            <div class="settings-list">
+                <div class="settings-section">Format</div>
+                <label class="settings-item">
+                    <input type="radio" name="export-format" value="html" checked> HTML
+                    <span class="export-format-desc">Self-contained web page</span>
+                </label>
+                <label class="settings-item">
+                    <input type="radio" name="export-format" value="markdown"> Markdown
+                    <span class="export-format-desc">GitHub-compatible .md</span>
+                </label>
+                <label class="settings-item">
+                    <input type="radio" name="export-format" value="pdf"> PDF (Print)
+                    <span class="export-format-desc">Opens browser print dialog</span>
+                </label>
+                <label class="settings-item">
+                    <input type="radio" name="export-format" value="docx"> DOCX
+                    <span class="export-format-desc">Word document with equations</span>
+                </label>
+                <label class="settings-item">
+                    <input type="radio" name="export-format" value="latex"> LaTeX
+                    <span class="export-format-desc">.tex with listings and amsmath</span>
+                </label>
+
+                <div id="export-image-section">
+                    <div class="settings-section">Images</div>
+                    <label class="settings-item">
+                        <input type="radio" name="export-images" value="embed" checked> Embed in file
+                        <span class="export-format-desc">Base64 inline</span>
+                    </label>
+                    <label class="settings-item">
+                        <input type="radio" name="export-images" value="separate"> Separate files in archive
+                        <span class="export-format-desc">images/ folder in .zip</span>
+                    </label>
+                </div>
+            </div>
+            <div class="export-modal-actions">
+                <button id="btn-do-export" class="export-action-btn">Export</button>
             </div>
         </div>
     </div>

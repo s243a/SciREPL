@@ -907,15 +907,14 @@ ${cellsHtml}
 
     // ── HTML Export ──
 
-    async exportHTML() {
+    async exportHTML(opts = {}) {
         const cells = this._scrapeCells();
         if (cells.length === 0) {
             alert('No cells to export.');
             return;
         }
 
-        const embedCheckbox = document.getElementById('chk-embed-images');
-        const embedImages = embedCheckbox ? embedCheckbox.checked : true;
+        const embedImages = opts.embedImages !== undefined ? opts.embedImages : true;
         const baseName = this._getNotebookName().replace(/[^a-zA-Z0-9_-]/g, '_');
 
         if (embedImages) {
@@ -947,12 +946,16 @@ ${cellsHtml}
 
     // ── Markdown Export ──
 
-    async exportMarkdown() {
+    async exportMarkdown(opts = {}) {
         const cells = this._scrapeCells();
         if (cells.length === 0) {
             alert('No cells to export.');
             return;
         }
+
+        const embedImages = opts.embedImages !== undefined ? opts.embedImages : false;
+        const images = [];
+        let imageCounter = 0;
 
         const name = this._getNotebookName();
         let md = `# ${name}\n\n`;
@@ -991,10 +994,39 @@ ${cellsHtml}
                         break;
                     }
                     case 'image':
-                        md += `![Output image](${out.src})\n\n`;
+                        if (embedImages) {
+                            md += `![Output image](${out.src})\n\n`;
+                        } else {
+                            imageCounter++;
+                            const imgName = `image_${imageCounter}.png`;
+                            md += `![Output image](images/${imgName})\n\n`;
+                            const base64 = out.src.split(',')[1];
+                            if (base64) {
+                                const binary = atob(base64);
+                                const bytes = new Uint8Array(binary.length);
+                                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                                images.push({ name: imgName, data: bytes });
+                            }
+                        }
                         break;
                     case 'plot':
-                        md += '*[Interactive Plotly chart]*\n\n';
+                        if (!embedImages && out.element && typeof Plotly !== 'undefined') {
+                            try {
+                                const dataUrl = await Plotly.toImage(out.element, { format: 'png', width: 800, height: 500 });
+                                imageCounter++;
+                                const imgName = `plot_${imageCounter}.png`;
+                                md += `![Plot](images/${imgName})\n\n`;
+                                const base64 = dataUrl.split(',')[1];
+                                const binary = atob(base64);
+                                const bytes = new Uint8Array(binary.length);
+                                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                                images.push({ name: imgName, data: bytes });
+                            } catch (_) {
+                                md += '*[Interactive Plotly chart]*\n\n';
+                            }
+                        } else {
+                            md += '*[Interactive Plotly chart]*\n\n';
+                        }
                         break;
                     case 'markdown':
                         // Already handled above for markdown cells
@@ -1006,7 +1038,24 @@ ${cellsHtml}
         }
 
         const baseName = name.replace(/[^a-zA-Z0-9_-]/g, '_');
-        await this._downloadFile(baseName + '.md', md, 'text/markdown');
+
+        if (!embedImages && images.length > 0) {
+            // Zip with GitHub-compatible image references
+            if (typeof JSZip === 'undefined') {
+                alert('JSZip not loaded. Cannot create zip archive.');
+                return;
+            }
+            const zip = new JSZip();
+            zip.file(baseName + '.md', md);
+            const imgFolder = zip.folder('images');
+            for (const img of images) {
+                imgFolder.file(img.name, img.data);
+            }
+            const blob = await zip.generateAsync({ type: 'blob' });
+            this._downloadBlob(baseName + '.md.zip', blob);
+        } else {
+            await this._downloadFile(baseName + '.md', md, 'text/markdown');
+        }
     }
 
     /** Parse an HTML string into a detached element for querying. */

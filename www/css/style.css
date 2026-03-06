@@ -1689,20 +1689,40 @@ tr:hover .vfs-delete-btn {
 
 /* ===== Export Options ===== */
 
-.export-option {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    font-size: 13px;
-    color: var(--text-secondary);
-    cursor: pointer;
+/* ===== Export Modal ===== */
+
+.settings-item input[type="radio"] {
+    accent-color: var(--accent);
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
 }
 
-.export-option input[type="checkbox"] {
-    accent-color: var(--accent);
-    width: 16px;
-    height: 16px;
+.export-format-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: auto;
+}
+
+#export-image-section.hidden {
+    display: none;
+}
+
+.export-modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.export-action-btn {
+    padding: 10px 28px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 /* ===== Search Bar (Ctrl+F) ===== */
