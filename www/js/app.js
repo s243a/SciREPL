@@ -1122,11 +1122,25 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         const km = window.kernelManager;
         if (!km) return;
 
+        // Lock to the target notebook — if the user switches tabs during an
+        // await (e.g. kernel download), switch back before creating each cell
+        const nm = window.notebookManager;
+        const targetNb = nm && nm.getActiveNotebook();
+        const targetId = targetNb ? targetNb.id : null;
+
         badge.textContent = 'importing…';
         badge.className = 'running';
         runBtn.disabled = true;
 
         for (const def of cellDefs) {
+            // Ensure we're still on the target notebook
+            if (targetId && nm) {
+                const cur = nm.getActiveNotebook();
+                if (!cur || cur.id !== targetId) {
+                    nm.switchTo(targetId);
+                }
+            }
+
             window._cellCounter++;
             const cellId = window._cellCounter;
             const language = def.language || 'python';
@@ -1186,6 +1200,14 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 // No auto-execute: remove empty output card
                 outputCard.remove();
                 cell.outputCard = null;
+            }
+        }
+
+        // Ensure we're on the target notebook before saving
+        if (targetId && nm) {
+            const cur = nm.getActiveNotebook();
+            if (!cur || cur.id !== targetId) {
+                nm.switchTo(targetId);
             }
         }
 
