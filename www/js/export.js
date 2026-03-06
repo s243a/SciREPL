@@ -113,6 +113,39 @@ class ExportManager {
         return new Date().toLocaleString();
     }
 
+    // ── Image Helpers ──
+
+    /**
+     * Convert any image src (blob: or data: URL) to a Uint8Array.
+     */
+    async _srcToBytes(src) {
+        if (src.startsWith('blob:')) {
+            const resp = await fetch(src);
+            const buf = await resp.arrayBuffer();
+            return new Uint8Array(buf);
+        }
+        const base64 = src.split(',')[1];
+        if (!base64) return null;
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return bytes;
+    }
+
+    /**
+     * Convert any image src (blob: or data: URL) to a data URL.
+     */
+    async _srcToDataURL(src) {
+        if (!src.startsWith('blob:')) return src;
+        const resp = await fetch(src);
+        const blob = await resp.blob();
+        return new Promise(r => {
+            const fr = new FileReader();
+            fr.onload = () => r(fr.result);
+            fr.readAsDataURL(blob);
+        });
+    }
+
     // ── DOM Scraping ──
 
     /**
@@ -817,17 +850,14 @@ body {
                                 break;
                             case 'image': {
                                 if (embedImages) {
-                                    cellsHtml += `<img src="${out.src}" alt="Output image">\n`;
+                                    const imgSrc = await this._srcToDataURL(out.src);
+                                    cellsHtml += `<img src="${imgSrc}" alt="Output image">\n`;
                                 } else {
                                     imageCounter++;
                                     const imgName = `image_${imageCounter}.png`;
                                     cellsHtml += `<img src="images/${imgName}" alt="Output image">\n`;
-                                    // Convert data URL to binary
-                                    const base64 = out.src.split(',')[1];
-                                    const binary = atob(base64);
-                                    const bytes = new Uint8Array(binary.length);
-                                    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-                                    images.push({ name: imgName, data: bytes });
+                                    const bytes = await this._srcToBytes(out.src);
+                                    if (bytes) images.push({ name: imgName, data: bytes });
                                 }
                                 break;
                             }
@@ -995,18 +1025,14 @@ ${cellsHtml}
                     }
                     case 'image':
                         if (embedImages) {
-                            md += `![Output image](${out.src})\n\n`;
+                            const imgSrc = await this._srcToDataURL(out.src);
+                            md += `![Output image](${imgSrc})\n\n`;
                         } else {
                             imageCounter++;
                             const imgName = `image_${imageCounter}.png`;
                             md += `![Output image](images/${imgName})\n\n`;
-                            const base64 = out.src.split(',')[1];
-                            if (base64) {
-                                const binary = atob(base64);
-                                const bytes = new Uint8Array(binary.length);
-                                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-                                images.push({ name: imgName, data: bytes });
-                            }
+                            const bytes = await this._srcToBytes(out.src);
+                            if (bytes) images.push({ name: imgName, data: bytes });
                         }
                         break;
                     case 'plot':
@@ -1301,7 +1327,7 @@ ${cellsHtml}
                     }
 
                     case 'image': {
-                        const imgData = this._dataUrlToBuffer(out.src);
+                        const imgData = await this._dataUrlToBuffer(out.src);
                         if (imgData) {
                             children.push(new Paragraph({
                                 children: [new ImageRun({ data: imgData, transformation: { width: 500, height: 300 }, type: 'png' })],
@@ -1314,7 +1340,7 @@ ${cellsHtml}
                     case 'plot': {
                         const dataUrl = await this._plotToImage(out.element);
                         if (dataUrl) {
-                            const plotData = this._dataUrlToBuffer(dataUrl);
+                            const plotData = await this._dataUrlToBuffer(dataUrl);
                             if (plotData) {
                                 children.push(new Paragraph({
                                     children: [new ImageRun({ data: plotData, transformation: { width: 500, height: 300 }, type: 'png' })],
@@ -1343,13 +1369,10 @@ ${cellsHtml}
     }
 
     /** Convert a base64 data URL to ArrayBuffer */
-    _dataUrlToBuffer(dataUrl) {
+    async _dataUrlToBuffer(src) {
         try {
-            const base64 = dataUrl.split(',')[1];
-            const binary = atob(base64);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-            return bytes.buffer;
+            const bytes = await this._srcToBytes(src);
+            return bytes ? bytes.buffer : null;
         } catch (e) {
             return null;
         }
@@ -1624,11 +1647,8 @@ ${cellsHtml}
                         imageCounter++;
                         const imgName = `image_${imageCounter}.png`;
                         body += `\\begin{figure}[h]\n\\centering\n\\includegraphics[width=0.8\\textwidth]{images/${imgName}}\n\\end{figure}\n\n`;
-                        const base64 = out.src.split(',')[1];
-                        const binary = atob(base64);
-                        const bytes = new Uint8Array(binary.length);
-                        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-                        images.push({ name: imgName, data: bytes });
+                        const imgBytes = await this._srcToBytes(out.src);
+                        if (imgBytes) images.push({ name: imgName, data: imgBytes });
                         break;
                     }
                     case 'plot': {
@@ -1637,11 +1657,8 @@ ${cellsHtml}
                             imageCounter++;
                             const imgName = `plot_${imageCounter}.png`;
                             body += `\\begin{figure}[h]\n\\centering\n\\includegraphics[width=0.8\\textwidth]{images/${imgName}}\n\\end{figure}\n\n`;
-                            const base64 = dataUrl.split(',')[1];
-                            const binary = atob(base64);
-                            const bytes = new Uint8Array(binary.length);
-                            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-                            images.push({ name: imgName, data: bytes });
+                            const plotBytes = await this._srcToBytes(dataUrl);
+                            if (plotBytes) images.push({ name: imgName, data: plotBytes });
                         } else {
                             body += '\\textit{[Plotly chart --- screenshot unavailable]}\n\n';
                         }
@@ -1773,10 +1790,11 @@ ${body}
                     });
                     break;
                 case 'image': {
-                    const base64 = out.src.includes(',') ? out.src.split(',')[1] : out.src;
+                    const imgDataUrl = await this._srcToDataURL(out.src);
+                    const b64 = imgDataUrl.includes(',') ? imgDataUrl.split(',')[1] : imgDataUrl;
                     outputs.push({
                         output_type: 'display_data',
-                        data: { 'image/png': base64 },
+                        data: { 'image/png': b64 },
                         metadata: {}
                     });
                     break;
@@ -1784,10 +1802,10 @@ ${body}
                 case 'plot': {
                     const dataUrl = await this._plotToImage(out.element);
                     if (dataUrl) {
-                        const base64 = dataUrl.split(',')[1];
+                        const b64 = dataUrl.split(',')[1];
                         outputs.push({
                             output_type: 'display_data',
-                            data: { 'image/png': base64 },
+                            data: { 'image/png': b64 },
                             metadata: {}
                         });
                     }
