@@ -851,56 +851,69 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
         // Restore multi-notebook state (tabs) if available
         if (window.notebookManager && window.notebookManager.hasStoredState()) {
-            const activeCells = window.notebookManager.restoreState();
+            const nm = window.notebookManager;
+            const activeCells = nm.restoreState();
             if (activeCells && activeCells.length > 0) {
-                // restoreState populates window._cells and renders the tab bar.
-                // Now re-render the active notebook's cells as cards.
                 badge.textContent = 'restoring…';
                 badge.className = 'running';
-                let prologStateRestored = false;
 
-                // Clear any DOM cells from the default init, then populate from restored state
-                const repl = getRepl();
-                const existingCards = repl.querySelectorAll('.cell-card');
-                existingCards.forEach(c => c.remove());
+                // Render cells for ALL notebooks (not just the active one)
+                const activeNb = nm.getActiveNotebook();
+                const allNotebooks = nm.getNotebooks();
 
-                const cellDefs = activeCells.map(c => ({
-                    code: c.code, type: c.type, language: c.language || 'python'
-                }));
-                window._cells.length = 0;
-                window._cellCounter = 0;
+                for (const nb of allNotebooks) {
+                    // Switch to this notebook so createInputCard/createOutputCard
+                    // append to the correct container
+                    nm.switchTo(nb.id);
 
-                for (const saved of cellDefs) {
-                    window._cellCounter++;
-                    const cellId = window._cellCounter;
-                    const language = saved.language || 'python';
+                    // Clear any existing DOM cards in this container
+                    const repl = getRepl();
+                    const existingCards = repl.querySelectorAll('.cell-card');
+                    existingCards.forEach(c => c.remove());
 
-                    const inputCard = createInputCard(saved.code, cellId, saved.type, language);
-                    const outputCard = createOutputCard(cellId, saved.type);
+                    const cellDefs = (nb.cells || []).map(c => ({
+                        code: c.code, type: c.type, language: c.language || 'python'
+                    }));
+                    window._cells.length = 0;
+                    window._cellCounter = 0;
 
-                    const cell = {
-                        id: cellId,
-                        code: saved.code,
-                        type: saved.type,
-                        language: language,
-                        inputCard: inputCard,
-                        outputCard: outputCard
-                    };
-                    window._cells.push(cell);
+                    for (const saved of cellDefs) {
+                        window._cellCounter++;
+                        const cellId = window._cellCounter;
+                        const language = saved.language || 'python';
 
-                    if (saved.type === 'markdown') {
-                        const body = outputCard.querySelector('.card-body');
-                        body.innerHTML = renderMarkdown(saved.code);
-                        const pre = inputCard.querySelector('pre');
-                        if (pre) pre.style.display = 'none';
+                        const inputCard = createInputCard(saved.code, cellId, saved.type, language);
+                        const outputCard = createOutputCard(cellId, saved.type);
+
+                        const cell = {
+                            id: cellId,
+                            code: saved.code,
+                            type: saved.type,
+                            language: language,
+                            inputCard: inputCard,
+                            outputCard: outputCard
+                        };
+                        window._cells.push(cell);
+
+                        if (saved.type === 'markdown') {
+                            const body = outputCard.querySelector('.card-body');
+                            body.innerHTML = renderMarkdown(saved.code);
+                            const pre = inputCard.querySelector('pre');
+                            if (pre) pre.style.display = 'none';
+                        } else {
+                            // Code cell without execution — remove empty output card
+                            outputCard.remove();
+                            cell.outputCard = null;
+                        }
                     }
+
+                    nb.cells = [...window._cells];
+                    nb.cellCounter = window._cellCounter;
                 }
 
-                // Update the active notebook's state
-                const active = window.notebookManager.getActiveNotebook();
-                if (active) {
-                    active.cells = window._cells;
-                    active.cellCounter = window._cellCounter;
+                // Switch back to the originally active notebook
+                if (activeNb) {
+                    nm.switchTo(activeNb.id);
                 }
 
                 // Prolog VFS restore is deferred to first Prolog cell execution
