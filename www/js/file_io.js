@@ -639,7 +639,36 @@ class FileIO {
     /**
      * Download a Blob as a file.
      */
-    _downloadBlob(blob, filename) {
+    async _downloadBlob(blob, filename) {
+        // Try Capacitor native plugins (Android/iOS)
+        if (window.Capacitor && Capacitor.Plugins) {
+            try {
+                const { Filesystem } = Capacitor.Plugins;
+                const { Share } = Capacitor.Plugins;
+                if (Filesystem && Share) {
+                    const buffer = await blob.arrayBuffer();
+                    const bytes = new Uint8Array(buffer);
+                    let binary = '';
+                    for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+                    const b64 = btoa(binary);
+                    const writeResult = await Filesystem.writeFile({
+                        path: filename,
+                        data: b64,
+                        directory: 'CACHE'
+                    });
+                    await Share.share({
+                        title: filename,
+                        url: writeResult.uri,
+                        dialogTitle: 'Download ' + filename
+                    });
+                    return;
+                }
+            } catch (e) {
+                console.warn('Capacitor blob download failed:', e);
+            }
+        }
+
+        // Fallback: blob URL download (desktop browsers)
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
