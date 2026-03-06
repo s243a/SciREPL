@@ -195,6 +195,15 @@ class PrologVFS {
         }
     }
 
+    stat(path) {
+        try {
+            const s = this._FS.stat(path);
+            return { isDir: this._FS.isDir(s.mode), size: s.size || 0 };
+        } catch (e) {
+            return null;
+        }
+    }
+
     /**
      * Remove a file from VFS.
      */
