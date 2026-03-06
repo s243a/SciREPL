@@ -29,6 +29,7 @@ const TIMEOUT = 120_000;
     const context = browser.contexts()[0];
     await context.addInitScript(() => {
       localStorage.setItem('scirepl_privacy_accepted', '1');
+      localStorage.setItem('scirepl_auto_download', '1');
     });
 
     await page.goto('http://localhost:8085/', { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
