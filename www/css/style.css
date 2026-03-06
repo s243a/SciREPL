@@ -1847,7 +1847,7 @@ tr:hover .vfs-delete-btn {
     height: 18px;
 }
 .settings-select {
-    background: var(--card-bg);
+    background: var(--bg-card);
     color: var(--text-primary);
     border: 1px solid var(--border);
     border-radius: 4px;
@@ -1857,8 +1857,8 @@ tr:hover .vfs-delete-btn {
     color-scheme: dark;
 }
 .settings-select option {
-    background: var(--card-bg);
-    color: var(--text-primary);
+    background: #1c2128;
+    color: #e6edf3;
 }
 .settings-btn {
     background: none;
