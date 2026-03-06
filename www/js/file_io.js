@@ -922,8 +922,8 @@ class FileIO {
         } catch (_) { }
 
         // SW cache size
+        let swCacheBytes = 0;
         try {
-            let cacheSize = 0;
             const cacheNames = await caches.keys();
             for (const name of cacheNames) {
                 const cache = await caches.open(name);
@@ -932,45 +932,31 @@ class FileIO {
                     const resp = await cache.match(req);
                     if (resp) {
                         const blob = await resp.clone().blob();
-                        cacheSize += blob.size;
+                        swCacheBytes += blob.size;
                     }
                 }
             }
-            document.getElementById('memory-sw-size').textContent = this._formatBytes(cacheSize);
+            document.getElementById('memory-sw-size').textContent = this._formatBytes(swCacheBytes);
         } catch (_) {
             document.getElementById('memory-sw-size').textContent = '—';
         }
 
         // localStorage size
+        let lsBytes = 0;
         try {
-            let lsSize = 0;
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                lsSize += (key.length + localStorage.getItem(key).length) * 2; // UTF-16
+                lsBytes += (key.length + localStorage.getItem(key).length) * 2; // UTF-16
             }
-            document.getElementById('memory-ls-size').textContent = this._formatBytes(lsSize);
+            document.getElementById('memory-ls-size').textContent = this._formatBytes(lsBytes);
         } catch (_) {
             document.getElementById('memory-ls-size').textContent = '—';
         }
 
-        // IndexedDB size (estimate from overall storage minus caches/localStorage)
+        // IndexedDB size (total storage minus SW cache and localStorage)
         try {
             const estimate = await navigator.storage.estimate();
-            const swEl = document.getElementById('memory-sw-size');
-            const lsEl = document.getElementById('memory-ls-size');
-            // Parse sizes back (rough estimate)
-            const swText = swEl.textContent;
-            const lsText = lsEl.textContent;
-            const parseSize = (t) => {
-                const m = t.match(/([\d.]+)\s*(B|KB|MB|GB)/);
-                if (!m) return 0;
-                const v = parseFloat(m[1]);
-                const u = m[2];
-                return v * (u === 'GB' ? 1073741824 : u === 'MB' ? 1048576 : u === 'KB' ? 1024 : 1);
-            };
-            const swSize = parseSize(swText);
-            const lsSize = parseSize(lsText);
-            const idbSize = Math.max(0, (estimate.usage || 0) - swSize - lsSize);
+            const idbSize = Math.max(0, (estimate.usage || 0) - swCacheBytes - lsBytes);
             document.getElementById('memory-idb-size').textContent = this._formatBytes(idbSize);
         } catch (_) {
             document.getElementById('memory-idb-size').textContent = '—';
