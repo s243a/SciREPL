@@ -1039,17 +1039,19 @@ ${cellsHtml}
 
         const baseName = name.replace(/[^a-zA-Z0-9_-]/g, '_');
 
-        if (!embedImages && images.length > 0) {
-            // Zip with GitHub-compatible image references
+        if (!embedImages) {
+            // Always zip when user chose "Separate files" mode
             if (typeof JSZip === 'undefined') {
                 alert('JSZip not loaded. Cannot create zip archive.');
                 return;
             }
             const zip = new JSZip();
             zip.file(baseName + '.md', md);
-            const imgFolder = zip.folder('images');
-            for (const img of images) {
-                imgFolder.file(img.name, img.data);
+            if (images.length > 0) {
+                const imgFolder = zip.folder('images');
+                for (const img of images) {
+                    imgFolder.file(img.name, img.data);
+                }
             }
             const blob = await zip.generateAsync({ type: 'blob' });
             this._downloadBlob(baseName + '.md.zip', blob);
