@@ -1184,7 +1184,15 @@ class FileIO {
                     if (headingMatch) wbName = headingMatch[1].trim();
                 }
                 const newNb = nm.createNotebook({ name: wbName });
+                // Always switch during creation so importCells targets the right notebook;
+                // if auto-switch is off, we switch back to the previous tab afterward
+                const autoSwitch = localStorage.getItem('scirepl_auto_switch_workbook') !== '0';
+                const prevNb = !autoSwitch && nm.getActiveNotebook ? nm.getActiveNotebook() : null;
                 nm.switchTo(newNb.id);
+                if (prevNb) {
+                    // Defer switching back so importCells sees the new notebook first
+                    setTimeout(() => nm.switchTo(prevNb.id), 0);
+                }
             }
 
             // Use the cell import API if available
