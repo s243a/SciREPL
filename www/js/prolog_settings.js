@@ -560,7 +560,7 @@ class PrologSettings {
                 dlBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (entry.type === 'dir') {
-                        this._downloadFolderAsZip(entry.path, entry.source, defaultVFS);
+                        this._downloadFolder(entry.path, entry.source, defaultVFS);
                     } else {
                         const vfs = defaultVFS || this._resolveVFS(entry.source);
                         if (!vfs) return;
@@ -792,35 +792,48 @@ class PrologSettings {
 
     // ---- Download ----
 
-    async _downloadFolderAsZip(folderPath, source, defaultVFS) {
-        if (typeof JSZip === 'undefined') {
-            alert('JSZip not loaded.');
-            return;
-        }
+    async _downloadFolder(folderPath, source, defaultVFS) {
         const vfs = defaultVFS || this._resolveVFS(source);
         if (!vfs) {
             alert('Cannot access filesystem.');
             return;
         }
-        const zip = new JSZip();
-        this._addFolderToZip(vfs, folderPath, folderPath, zip);
-        if (Object.keys(zip.files).length === 0) {
+
+        // Collect all files recursively
+        const files = [];
+        this._collectFolderFiles(vfs, folderPath, folderPath, files);
+        if (files.length === 0) {
             alert('Folder is empty.');
             return;
         }
-        const blob = await zip.generateAsync({ type: 'blob' });
+
         const folderName = folderPath.split('/').filter(Boolean).pop() || 'folder';
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = folderName + '.zip';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        const format = localStorage.getItem('scirepl_export_format') || 'zip';
+        const fio = window.fileIO;
+
+        if ((format === 'tar' || format === 'tar.gz') && typeof TarWriter !== 'undefined') {
+            const tw = new TarWriter();
+            for (const f of files) tw.addFile(f.path, f.content);
+            let data = tw.build();
+            let ext = '.tar';
+            if (format === 'tar.gz' && fio && fio._gzipCompress) {
+                data = await fio._gzipCompress(data);
+                ext = '.tar.gz';
+            }
+            const blob = new Blob([data], { type: 'application/octet-stream' });
+            if (fio) fio._downloadBlob(blob, folderName + ext);
+        } else {
+            if (typeof JSZip === 'undefined') { alert('JSZip not loaded.'); return; }
+            const zip = new JSZip();
+            for (const f of files) {
+                zip.file(f.path, f.content, { binary: f.content instanceof Uint8Array });
+            }
+            const blob = await zip.generateAsync({ type: 'blob' });
+            if (fio) fio._downloadBlob(blob, folderName + '.zip');
+        }
     }
 
-    _addFolderToZip(vfs, dirPath, basePath, zip) {
+    _collectFolderFiles(vfs, dirPath, basePath, out) {
         const entries = vfs.listDir ? vfs.listDir(dirPath) : null;
         if (!entries) return;
         for (const name of entries) {
@@ -829,12 +842,12 @@ class PrologSettings {
             if (!stat) continue;
             const relPath = fullPath.substring(basePath.length + 1);
             if (stat.isDir) {
-                this._addFolderToZip(vfs, fullPath, basePath, zip);
+                this._collectFolderFiles(vfs, fullPath, basePath, out);
             } else {
                 try {
                     const content = vfs.readFile(fullPath);
                     if (content == null) continue;
-                    zip.file(relPath, content, { binary: content instanceof Uint8Array });
+                    out.push({ path: relPath, content });
                 } catch (_) { /* skip unreadable files */ }
             }
         }

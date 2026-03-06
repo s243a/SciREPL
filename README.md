@@ -41,7 +41,7 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **Installable PWA** — Install from browser as a desktop or mobile app, works offline after first load
 - **Privacy-first** — Bundled rendering libraries, lazy CDN loading with consent prompt on first use
 - **Lazy kernel loading** — App starts instantly; Python, R, and Prolog runtimes download only when first used
-- **Settings menu** — Configure auto-execute on import, delete confirmation, export format (.zip/.tar/.tar.gz), auto-download runtimes, default language
+- **Settings menu** — Configure auto-execute on import, delete confirmation, export format (.zip/.tar/.tar.gz), auto-download runtimes, auto-switch workbook on install, large touch targets, default language
 
 ### Future Features
 
@@ -347,7 +347,7 @@ Near-term items to make R and cross-language features demo-ready:
 
 ### Future Improvements
 
-- [x] **Settings menu** — Auto-execute, confirm-delete, export format, auto-download, R pre-warm, large touch targets, default language
+- [x] **Settings menu** — Auto-execute, confirm-delete, export format, auto-download, auto-switch workbook, R pre-warm, large touch targets, default language
 - [x] **Lazy kernel loading** — App starts instantly; privacy consent + download confirmation on first CDN kernel use
 - [x] **tar/tar.gz export** — Export packages as .tar or .tar.gz (selectable in Settings), using browser-native CompressionStream
 - [x] **Memory & Storage panel** — Per-kernel WASM heap usage, storage quota breakdown, kernel unload, clear VFS/cache
@@ -361,6 +361,7 @@ Near-term items to make R and cross-language features demo-ready:
 - [ ] **Lua kernel** — Fengari (Lua in WASM, ~500KB)
 - [ ] **Capacitor WebView media query investigation** — `@media (hover: none) and (pointer: coarse)` may not trigger in Android WebView; determine cause and fix
 - [ ] **Byte-level download progress** — Track actual download progress via Service Worker interception or ReadableStream
+- [ ] **Background package installs** — Install packages/workbooks without switching to the target notebook tab; requires notebook-aware card creation
 
 ## License
 

@@ -143,12 +143,16 @@ class KernelManager {
         if (title) title.textContent = info.name + ' Download';
         if (desc) desc.innerHTML = 'The <strong>' + info.name + '</strong> runtime requires a <strong>' + info.size + '</strong> download. It will be cached by the browser for future use.';
 
-        // Auto-download: skip confirmation, just show progress
+        // Auto-download: skip confirmation, show progress after a delay
+        // so fast downloads don't flash the modal
         if (localStorage.getItem('scirepl_auto_download') === '1') {
             if (actions) actions.classList.add('hidden');
             if (progressWrap) progressWrap.classList.remove('hidden');
             if (progressText) progressText.textContent = 'Downloading ' + info.name + '...';
-            modal.classList.remove('hidden');
+            // Delay showing modal — hideDownloadModal() cancels if download finishes first
+            this._autoDownloadTimer = setTimeout(() => {
+                modal.classList.remove('hidden');
+            }, 2000);
             return;
         }
 
@@ -196,6 +200,11 @@ class KernelManager {
      * Hide the download modal. Called when kernel init completes.
      */
     hideDownloadModal() {
+        // Cancel pending auto-download timer so fast downloads never flash the modal
+        if (this._autoDownloadTimer) {
+            clearTimeout(this._autoDownloadTimer);
+            this._autoDownloadTimer = null;
+        }
         const modal = document.getElementById('runtime-download-modal');
         if (modal) modal.classList.add('hidden');
     }

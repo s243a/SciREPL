@@ -57,6 +57,15 @@ class PrologKernel {
 
             this._ready = true;
             if (km) km.hideDownloadModal();
+
+            // Restore Prolog VFS state from IndexedDB (deferred from session restore)
+            if (window.sessionManager && window.sessionManager.restorePrologState) {
+                try {
+                    await window.sessionManager.restorePrologState();
+                } catch (e) {
+                    console.warn('[PrologKernel] Failed to restore VFS state:', e);
+                }
+            }
         } catch (err) {
             if (km) km.hideDownloadModal();
             throw err;

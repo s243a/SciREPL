@@ -99,6 +99,7 @@ class FileIO {
                 this.menuModal.classList.add('hidden');
                 // Load saved settings
                 const autoExec = document.getElementById('setting-auto-execute');
+                const autoSwitch = document.getElementById('setting-auto-switch');
                 const confirmDel = document.getElementById('setting-confirm-delete');
                 const autoDl = document.getElementById('setting-auto-download');
                 const rPrewarm = document.getElementById('setting-r-prewarm');
@@ -107,6 +108,7 @@ class FileIO {
                 const exportFmt = document.getElementById('setting-export-format');
 
                 if (autoExec) autoExec.checked = localStorage.getItem('scirepl_auto_execute') === '1';
+                if (autoSwitch) autoSwitch.checked = localStorage.getItem('scirepl_auto_switch_workbook') !== '0';
                 if (confirmDel) confirmDel.checked = localStorage.getItem('scirepl_confirm_delete') !== '0';
                 if (autoDl) autoDl.checked = localStorage.getItem('scirepl_auto_download') === '1';
                 if (rPrewarm) rPrewarm.checked = localStorage.getItem('scirepl_r_prewarm') === 'yes';
@@ -135,6 +137,8 @@ class FileIO {
                     localStorage.setItem('scirepl_default_language', e.target.value);
                 } else if (id === 'setting-export-format') {
                     localStorage.setItem('scirepl_export_format', e.target.value);
+                } else if (id === 'setting-auto-switch') {
+                    localStorage.setItem('scirepl_auto_switch_workbook', e.target.checked ? '1' : '0');
                 }
             });
             // Reset privacy consent button
@@ -805,7 +809,8 @@ class FileIO {
             card.className = 'memory-kernel-card';
 
             const dot = document.createElement('span');
-            dot.className = 'memory-dot' + (k.loaded && k.ready ? ' loaded' : '');
+            const isCDN = KernelManager.CDN_KERNELS.has(k.language);
+            dot.className = 'memory-dot' + (!isCDN || (k.loaded && k.ready) ? ' loaded' : '');
             card.appendChild(dot);
 
             const info = document.createElement('div');
@@ -816,8 +821,9 @@ class FileIO {
             info.appendChild(nameEl);
             const statusEl = document.createElement('div');
             statusEl.className = 'memory-kernel-status';
-            if (k.language === 'javascript') {
-                statusEl.textContent = 'Always ready';
+            const isBundled = !KernelManager.CDN_KERNELS.has(k.language);
+            if (isBundled) {
+                statusEl.textContent = 'Bundled';
             } else if (k.ready) {
                 statusEl.textContent = 'Ready';
             } else {
@@ -831,26 +837,42 @@ class FileIO {
             sizeEl.textContent = k.memory != null ? this._formatBytes(k.memory) : '—';
             card.appendChild(sizeEl);
 
-            // Unload button for loaded CDN kernels (not JavaScript)
-            if (k.loaded && k.ready && KernelManager.CDN_KERNELS.has(k.language)) {
-                const btn = document.createElement('button');
-                btn.className = 'memory-unload-btn';
-                btn.textContent = 'Unload';
-                btn.addEventListener('click', async () => {
-                    btn.textContent = 'Unloading...';
-                    btn.disabled = true;
-                    await km.destroyKernel(k.language);
-                    // Update status badge if this was current language
-                    if (km.currentLanguage === k.language) {
-                        const badge = document.getElementById('status-badge');
-                        if (badge) {
-                            badge.textContent = 'ready';
-                            badge.className = 'ready';
+            // Load/Unload buttons for CDN kernels (not JavaScript/Bash)
+            if (KernelManager.CDN_KERNELS.has(k.language)) {
+                if (k.loaded && k.ready) {
+                    const btn = document.createElement('button');
+                    btn.className = 'memory-unload-btn';
+                    btn.textContent = 'Unload';
+                    btn.addEventListener('click', async () => {
+                        btn.textContent = 'Unloading...';
+                        btn.disabled = true;
+                        await km.destroyKernel(k.language);
+                        if (km.currentLanguage === k.language) {
+                            const badge = document.getElementById('status-badge');
+                            if (badge) {
+                                badge.textContent = 'ready';
+                                badge.className = 'ready';
+                            }
                         }
-                    }
-                    this._refreshMemoryModal();
-                });
-                card.appendChild(btn);
+                        this._refreshMemoryModal();
+                    });
+                    card.appendChild(btn);
+                } else {
+                    const btn = document.createElement('button');
+                    btn.className = 'memory-load-btn';
+                    btn.textContent = 'Load';
+                    btn.addEventListener('click', async () => {
+                        btn.textContent = 'Loading...';
+                        btn.disabled = true;
+                        try {
+                            await km.ensureReady(k.language);
+                        } catch (err) {
+                            console.warn('Failed to load ' + k.language + ':', err);
+                        }
+                        this._refreshMemoryModal();
+                    });
+                    card.appendChild(btn);
+                }
             }
 
             list.appendChild(card);
@@ -1153,6 +1175,8 @@ class FileIO {
 
             // Create a new notebook tab for the imported workbook
             const nm = window.notebookManager;
+            const autoSwitch = localStorage.getItem('scirepl_auto_switch_workbook') !== '0';
+            let prevNbId = null;
             if (nm && nm.createNotebook) {
                 // Extract name from first markdown heading, or fall back
                 let wbName = 'Imported Workbook';
@@ -1161,20 +1185,32 @@ class FileIO {
                     const headingMatch = firstMd.code.match(/^#\s+(.+)/m);
                     if (headingMatch) wbName = headingMatch[1].trim();
                 }
+                if (!autoSwitch) {
+                    const prev = nm.getActiveNotebook && nm.getActiveNotebook();
+                    if (prev) prevNbId = prev.id;
+                }
                 const newNb = nm.createNotebook({ name: wbName });
+                // Must switch so importCells targets the right notebook
                 nm.switchTo(newNb.id);
             }
 
-            // Use the cell import API if available
+            // Use the cell import API if available; return the promise
+            // so callers (e.g. package catalog) can await completion.
             if (window.importCells) {
                 const autoExec = localStorage.getItem('scirepl_auto_execute') === '1';
-                window.importCells(extractedCells, { autoExecute: autoExec });
+                const p = window.importCells(extractedCells, { autoExecute: autoExec });
+                // Switch back to previous notebook after import completes
+                if (prevNbId && nm) {
+                    return p.then(() => nm.switchTo(prevNbId));
+                }
+                return p;
             } else {
                 // Fallback: dump code cells into textarea
                 const codeOnly = extractedCells
                     .filter(c => c.type === 'code')
                     .map(c => c.code);
                 this.importPython(codeOnly.join('\n\n# -- Cell --\n\n'));
+                if (prevNbId && nm) nm.switchTo(prevNbId);
             }
         } catch (e) {
             console.error(e);

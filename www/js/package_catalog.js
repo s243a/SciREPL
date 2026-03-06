@@ -134,6 +134,10 @@ class PackageCatalog {
         `;
     }
 
+    /**
+     * Install a package/workbook.  Downloads start immediately (concurrent),
+     * but imports are queued so notebook state stays consistent.
+     */
     async _install(btn) {
         const idx = parseInt(btn.dataset.idx, 10);
         const pkg = this.packages[idx];
@@ -142,57 +146,71 @@ class PackageCatalog {
         btn.disabled = true;
         btn.textContent = 'Downloading...';
 
+        // 1. Download (concurrent — multiple downloads can run at once)
+        let blob;
         try {
-            let blob;
-            // Try same-origin pages_url first (GitHub Pages deployment)
             if (pkg.pages_url) {
-                try {
-                    blob = await this._fetchPackage(pkg.pages_url);
-                } catch (e) {
-                    // pages_url not available — fall through to main URL
-                }
+                try { blob = await this._fetchPackage(pkg.pages_url); } catch (e) {}
             }
-            // Fall back to main URL (direct fetch → CORS proxy)
             if (!blob) {
                 blob = await this._fetchPackage(pkg.url);
             }
-
-            btn.textContent = 'Importing...';
-
-            if (pkg.type === 'workbook') {
-                // Workbook: read as text and import via FileIO
-                const text = await blob.text();
-                if (window.fileIO) {
-                    window.fileIO.importIpynb(text);
-                } else {
-                    throw new Error('File IO not available');
-                }
-            } else {
-                // Package: extract archive via PackageLoader
-                const urlParts = pkg.url.split('/');
-                const filename = urlParts[urlParts.length - 1] || 'package.zip';
-                const file = new File([blob], filename, { type: blob.type });
-
-                if (window.packageLoader) {
-                    await window.packageLoader.loadFromFile(file);
-                } else {
-                    throw new Error('Package loader not available');
-                }
-            }
-
-            btn.textContent = 'Installed';
-            btn.classList.add('pkg-installed');
-
-            // Close modal after workbook import so user sees their cells
-            if (pkg.type === 'workbook' && this.modal) {
-                setTimeout(() => this.modal.classList.add('hidden'), 500);
-            }
         } catch (err) {
-            console.error('[PackageCatalog] Install failed:', err);
+            console.error('[PackageCatalog] Download failed:', err);
             btn.textContent = 'Failed';
             btn.disabled = false;
             setTimeout(() => { btn.textContent = 'Install'; }, 3000);
-            alert('Package install failed: ' + err.message);
+            return;
+        }
+
+        // 2. Queue the import (sequential — avoids notebook state races)
+        this._importQueue = this._importQueue || [];
+        btn.textContent = this._importRunning ? 'Queued...' : 'Importing...';
+        this._importQueue.push({ btn, pkg, blob });
+
+        if (this._importRunning) return; // will be processed in order
+        this._importRunning = true;
+
+        while (this._importQueue.length > 0) {
+            const job = this._importQueue.shift();
+            job.btn.textContent = 'Importing...';
+            try {
+                await this._doImport(job.pkg, job.blob);
+                job.btn.textContent = 'Installed';
+                job.btn.classList.add('pkg-installed');
+            } catch (err) {
+                console.error('[PackageCatalog] Import failed:', err);
+                job.btn.textContent = 'Failed';
+                job.btn.disabled = false;
+                setTimeout(() => { job.btn.textContent = 'Install'; }, 3000);
+            }
+        }
+
+        this._importRunning = false;
+
+        // Close modal after all installs finish (if auto-switch is on)
+        const autoSwitch = localStorage.getItem('scirepl_auto_switch_workbook') !== '0';
+        if (autoSwitch && this.modal) {
+            setTimeout(() => this.modal.classList.add('hidden'), 500);
+        }
+    }
+
+    /**
+     * Perform the actual import for a single package/workbook.
+     * Returns a promise that resolves when the import is fully complete.
+     */
+    async _doImport(pkg, blob) {
+        if (pkg.type === 'workbook') {
+            const text = await blob.text();
+            if (!window.fileIO) throw new Error('File IO not available');
+            // importIpynb now returns a promise (resolves when importCells finishes)
+            await window.fileIO.importIpynb(text);
+        } else {
+            const urlParts = pkg.url.split('/');
+            const filename = urlParts[urlParts.length - 1] || 'package.zip';
+            const file = new File([blob], filename, { type: blob.type });
+            if (!window.packageLoader) throw new Error('Package loader not available');
+            await window.packageLoader.loadFromFile(file);
         }
     }
 
