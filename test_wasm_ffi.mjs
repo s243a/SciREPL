@@ -28,14 +28,26 @@ const TIMEOUT = 120_000;
     const context = browser.contexts()[0];
     await context.addInitScript(() => {
       localStorage.setItem('scirepl_privacy_accepted', '1');
+      localStorage.setItem('scirepl_auto_download', '1');
     });
 
     await page.goto('http://localhost:8085/', { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
 
-    // Wait for Pyodide (needed for Python tests)
-    console.log('   Waiting for Pyodide...');
-    await page.waitForFunction(() => typeof window.loadPyodide !== 'undefined', { timeout: TIMEOUT });
-    await page.waitForTimeout(2000);
+    // Wait for app to be ready
+    console.log('   Waiting for app...');
+    await page.waitForFunction(() => {
+      return window.kernelManager && document.getElementById('run-btn');
+    }, { timeout: 30000 });
+
+    // Trigger Python kernel load (needed for Python FFI tests)
+    console.log('   Loading Python kernel...');
+    await page.evaluate(async () => {
+      await window.kernelManager.ensureReady('python');
+    });
+    await page.waitForFunction(() => {
+      const km = window.kernelManager;
+      return km._instances.python && km._instances.python.isReady();
+    }, { timeout: TIMEOUT });
 
     // --- Load the WASM package ---
 

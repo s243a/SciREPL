@@ -26,16 +26,16 @@ const TIMEOUT = 120_000;
     const context = browser.contexts()[0];
     await context.addInitScript(() => {
       localStorage.setItem('scirepl_privacy_accepted', '1');
+      localStorage.setItem('scirepl_auto_download', '1');
     });
 
     await page.goto('http://localhost:8085/', { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
 
-    // Wait for Pyodide to be fully ready
-    console.log('   Waiting for Pyodide...');
+    // Wait for app to be ready (kernels are lazy-loaded, no need to wait for Pyodide)
+    console.log('   Waiting for app...');
     await page.waitForFunction(() => {
-      const km = window.kernelManager;
-      return km && km._instances && km._instances.python && km._instances.python.isReady();
-    }, { timeout: TIMEOUT });
+      return window.kernelManager && window._cells !== undefined && document.getElementById('run-btn');
+    }, { timeout: 30000 });
 
     // Helper: execute code via kernel manager and wait for cells to render
     async function executeCell(code, lang = 'python') {
@@ -51,11 +51,11 @@ const TIMEOUT = 120_000;
       const prevCount = await page.evaluate(() => window._cells.length);
       await page.fill('#code-input', code);
       await page.click('#run-btn');
-      // Wait for cell count to increase
+      // Wait for cell count to increase (first call may trigger kernel download)
       await page.waitForFunction(
         (expected) => window._cells.length >= expected,
         prevCount + 1,
-        { timeout: 30000 }
+        { timeout: TIMEOUT }
       );
       await page.waitForTimeout(200);
     }
