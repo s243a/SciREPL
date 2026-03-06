@@ -135,13 +135,16 @@ class PackageLoader {
 
             // 4. Populate notebook cells (render cards but don't execute)
             if (notebooks && notebooks.length > 0) {
+                const autoSwitch = localStorage.getItem('scirepl_auto_switch_workbook') !== '0';
                 for (const nb of notebooks) {
                     if (nb.cells && nb.cells.length > 0) {
                         nm.switchTo(nb.id);
                         this._populateCells(nb);
                     }
                 }
-                nm.switchTo(notebooks[0].id);
+                if (autoSwitch) {
+                    nm.switchTo(notebooks[0].id);
+                }
             }
         }
 
@@ -210,13 +213,16 @@ class PackageLoader {
 
         // Switch to first and populate cells (render cards, don't execute)
         if (createdNotebooks.length > 0) {
+            const autoSwitch = localStorage.getItem('scirepl_auto_switch_workbook') !== '0';
             for (const nb of createdNotebooks) {
                 if (nb.cells && nb.cells.length > 0) {
                     nm.switchTo(nb.id);
                     this._populateCells(nb);
                 }
             }
-            nm.switchTo(createdNotebooks[0].id);
+            if (autoSwitch) {
+                nm.switchTo(createdNotebooks[0].id);
+            }
         }
 
         return {

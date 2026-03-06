@@ -99,6 +99,7 @@ class FileIO {
                 this.menuModal.classList.add('hidden');
                 // Load saved settings
                 const autoExec = document.getElementById('setting-auto-execute');
+                const autoSwitch = document.getElementById('setting-auto-switch');
                 const confirmDel = document.getElementById('setting-confirm-delete');
                 const autoDl = document.getElementById('setting-auto-download');
                 const rPrewarm = document.getElementById('setting-r-prewarm');
@@ -107,6 +108,7 @@ class FileIO {
                 const exportFmt = document.getElementById('setting-export-format');
 
                 if (autoExec) autoExec.checked = localStorage.getItem('scirepl_auto_execute') === '1';
+                if (autoSwitch) autoSwitch.checked = localStorage.getItem('scirepl_auto_switch_workbook') !== '0';
                 if (confirmDel) confirmDel.checked = localStorage.getItem('scirepl_confirm_delete') !== '0';
                 if (autoDl) autoDl.checked = localStorage.getItem('scirepl_auto_download') === '1';
                 if (rPrewarm) rPrewarm.checked = localStorage.getItem('scirepl_r_prewarm') === 'yes';
@@ -135,6 +137,8 @@ class FileIO {
                     localStorage.setItem('scirepl_default_language', e.target.value);
                 } else if (id === 'setting-export-format') {
                     localStorage.setItem('scirepl_export_format', e.target.value);
+                } else if (id === 'setting-auto-switch') {
+                    localStorage.setItem('scirepl_auto_switch_workbook', e.target.checked ? '1' : '0');
                 }
             });
             // Reset privacy consent button
