@@ -184,7 +184,9 @@ class PackageCatalog {
             btn.classList.add('pkg-installed');
 
             // Close modal after workbook import so user sees their cells
-            if (pkg.type === 'workbook' && this.modal) {
+            // (unless auto-switch is disabled — user wants to keep browsing)
+            const autoSwitch = localStorage.getItem('scirepl_auto_switch_workbook') !== '0';
+            if (autoSwitch && pkg.type === 'workbook' && this.modal) {
                 setTimeout(() => this.modal.classList.add('hidden'), 500);
             }
         } catch (err) {
