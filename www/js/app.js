@@ -1094,17 +1094,28 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
      * If autoExecute is true, code cells are executed sequentially.
      * Multiple imports are queued and processed in order.
      */
-    window.importCells = async function (cellDefs, { autoExecute = false } = {}) {
-        window._importQueue.push({ cellDefs, autoExecute });
-        if (window._importingCells) return; // queue will be drained
-        window._importingCells = true;
+    window.importCells = function (cellDefs, { autoExecute = false } = {}) {
+        // Each caller gets a promise that resolves when THEIR cells are done
+        let resolve;
+        const promise = new Promise(r => { resolve = r; });
+        window._importQueue.push({ cellDefs, autoExecute, resolve });
 
-        while (window._importQueue.length > 0) {
-            const { cellDefs: defs, autoExecute: exec } = window._importQueue.shift();
-            await window._processImport(defs, exec);
+        if (!window._importingCells) {
+            window._importingCells = true;
+            (async () => {
+                try {
+                    while (window._importQueue.length > 0) {
+                        const job = window._importQueue.shift();
+                        await window._processImport(job.cellDefs, job.autoExecute);
+                        job.resolve();
+                    }
+                } finally {
+                    window._importingCells = false;
+                }
+            })();
         }
 
-        window._importingCells = false;
+        return promise;
     };
 
     window._processImport = async function (cellDefs, autoExecute) {
