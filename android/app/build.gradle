@@ -26,6 +26,10 @@ android {
 
 configurations.all {
     exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+    // Force older androidx.browser to stay compatible with compileSdk 35 / AGP 8.7
+    resolutionStrategy {
+        force 'androidx.browser:browser:1.8.0'
+    }
 }
 
 repositories {

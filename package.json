@@ -19,9 +19,11 @@
     "license": "MIT",
     "dependencies": {
         "@capacitor/android": "^8.0.2",
+        "@capacitor/browser": "^8.0.1",
         "@capacitor/core": "^8.0.2",
         "@capacitor/filesystem": "^8.1.2",
         "@capacitor/share": "^8.0.1",
+        "@capgo/capacitor-pdf-generator": "^8.0.19",
         "playwright": "^1.58.2"
     },
     "devDependencies": {

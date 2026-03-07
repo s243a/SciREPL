@@ -1134,7 +1134,39 @@ ${cellsHtml}
         const theme = opts.theme || 'keep';
         const pageBg = opts.pageBg || 'white';
         const { html } = await this._buildHTMLString({ embedImages: true, theme, pageBg });
+        const name = this._getNotebookName();
 
+        // Capacitor/Android: use PDF generator plugin (avoids WebView print issues)
+        if (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.PdfGenerator) {
+            try {
+                const baseName = name.replace(/[^a-zA-Z0-9_-]/g, '_');
+                const result = await Capacitor.Plugins.PdfGenerator.fromData({
+                    data: html,
+                    fileName: baseName
+                });
+                // result contains base64 PDF data or triggers share
+                if (result && result.base64 && Capacitor.Plugins.Filesystem && Capacitor.Plugins.Share) {
+                    const { Filesystem } = Capacitor.Plugins;
+                    const { Share } = Capacitor.Plugins;
+                    const writeResult = await Filesystem.writeFile({
+                        path: baseName + '.pdf',
+                        data: result.base64,
+                        directory: 'CACHE'
+                    });
+                    await Share.share({
+                        title: baseName + '.pdf',
+                        url: writeResult.uri,
+                        dialogTitle: 'Save PDF'
+                    });
+                }
+                return;
+            } catch (e) {
+                console.warn('PDF generator failed:', e);
+                // Fall through to browser print
+            }
+        }
+
+        // Browser: use iframe + window.print()
         const iframe = document.createElement('iframe');
         iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:800px;height:600px;';
         document.body.appendChild(iframe);

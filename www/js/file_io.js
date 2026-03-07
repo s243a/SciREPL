@@ -70,6 +70,24 @@ class FileIO {
             location.reload();
         });
 
+        // Open in Browser — open app URL in system browser (useful on Android)
+        const openBrowserBtn = document.getElementById('btn-open-browser');
+        if (openBrowserBtn) {
+            if (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.Browser) {
+                openBrowserBtn.addEventListener('click', async () => {
+                    this.menuModal.classList.add('hidden');
+                    try {
+                        await Capacitor.Plugins.Browser.open({ url: window.location.href });
+                    } catch (e) {
+                        console.warn('Failed to open browser:', e);
+                    }
+                });
+            } else {
+                // Not on Capacitor — hide the button
+                openBrowserBtn.style.display = 'none';
+            }
+        }
+
         // Reload App — unregister service worker and hard-reload
         const reloadBtn = document.getElementById('btn-reload-app');
         if (reloadBtn) {
