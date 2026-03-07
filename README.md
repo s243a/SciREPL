@@ -30,7 +30,7 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **Multi-notebook tabs** — Multiple notebooks in tabs/sidebar/dropdown. Import a workbook to create a new tab. Double-click tab names to rename.
 - **Session persistence** — Cells auto-save (with language) and restore on app restart. SharedVFS files persist to IndexedDB.
 - **Import/Export** — `.ipynb`, `.py`, `.pl` with language-aware metadata; native share sheet
-- **Rich export** — HTML, Markdown, PDF, DOCX, and LaTeX. Exports include code, output, plots, LaTeX math, and tables. HTML and DOCX exports include syntax-highlighted code blocks.
+- **Rich export** — HTML, Markdown, PDF, DOCX, and LaTeX via Export modal with theme (dark/light/browser default), page background, and image handling options. Exports include code, output, plots, LaTeX math, and tables. HTML and DOCX exports include syntax-highlighted code blocks.
 - **Import/Export with outputs** — `.ipynb` export includes cell outputs (text, images, LaTeX, tables), viewable in Jupyter and GitHub without re-execution. Import preserves outputs — no re-execution needed.
 - **Package catalog** — Browse and one-click install curated packages
 - **Math Mode palette** — Quick-insert SymPy functions (diff, integrate, solve, etc.)
@@ -317,7 +317,7 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - [x] R kernel via webR (lazy-loaded, plotting, SharedVFS, package install)
 - [x] Matplotlib inline backend (`plt.show()` renders PNG images)
 - [x] Interactive R plots via `plotly()` / `mplotly()` helpers
-- [x] Rich export — HTML, Markdown, PDF, DOCX, LaTeX
+- [x] Rich export — HTML, Markdown, PDF, DOCX, LaTeX with Export modal (theme, page background, image handling)
 - [x] .ipynb export with outputs (text, images, LaTeX, tables)
 - [x] .ipynb import with output preservation (no re-execution needed)
 - [x] Syntax highlighting in exports (HTML, DOCX) via highlight.js

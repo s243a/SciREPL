@@ -555,9 +555,8 @@ class ExportManager {
 
     // ── CSS for HTML Export ──
 
-    _getExportCSS() {
-        return `
-:root {
+    _getExportCSS(theme, pageBg) {
+        const darkVars = `
     --bg-primary: #0d1117;
     --bg-secondary: #161b22;
     --bg-card: #1c2128;
@@ -568,7 +567,32 @@ class ExportManager {
     --text-muted: #484f58;
     --accent: #58a6ff;
     --green: #3fb950;
-    --red: #f85149;
+    --red: #f85149;`;
+
+        const lightVars = `
+    --bg-primary: #ffffff;
+    --bg-secondary: #f6f8fa;
+    --bg-card: #f0f2f5;
+    --bg-input: #ffffff;
+    --border: #d0d7de;
+    --text-primary: #1f2328;
+    --text-secondary: #656d76;
+    --text-muted: #8b949e;
+    --accent: #0969da;
+    --green: #1a7f37;
+    --red: #cf222e;`;
+
+        const vars = theme === 'light' ? lightVars : darkVars;
+        // "browser" theme = dark vars but let browser decide on print (no print-color-adjust)
+        const forceColors = theme !== 'browser';
+
+        // Page background: white, dark (#0d1117), or browser decides (no explicit bg)
+        const pageBgColor = pageBg === 'dark' ? '#0d1117'
+            : pageBg === 'browser' ? undefined
+            : '#ffffff';
+
+        return `
+:root {${vars}
     --font-mono: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'SF Mono', Consolas, monospace;
     --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
     --radius: 10px;
@@ -576,14 +600,16 @@ class ExportManager {
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-    background: var(--bg-primary);
+body {${pageBgColor ? `
+    background: ${pageBgColor};` : ''}
     color: var(--text-primary);
     font-family: var(--font-sans);
     font-size: 15px;
-    padding: 20px;
+    padding: ${pageBg === 'dark' ? '20px' : '0'};
     max-width: 900px;
-    margin: 0 auto;
+    margin: 0 auto;${forceColors ? `
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;` : ''}
 }
 
 .export-header {
@@ -760,7 +786,19 @@ body {
 }
 .markdown-body table th { background: var(--bg-secondary); font-weight: 600; }
 
-/* Syntax highlighting (highlight.js atom-one-dark) */
+/* Syntax highlighting (highlight.js) */
+${theme === 'light' ? `
+/* atom-one-light */
+.hljs-comment,.hljs-quote{color:#a0a1a7;font-style:italic}
+.hljs-doctag,.hljs-formula,.hljs-keyword{color:#a626a4}
+.hljs-deletion,.hljs-name,.hljs-section,.hljs-selector-tag,.hljs-subst{color:#e45649}
+.hljs-literal{color:#0184bb}
+.hljs-addition,.hljs-attribute,.hljs-meta .hljs-string,.hljs-regexp,.hljs-string{color:#50a14f}
+.hljs-attr,.hljs-number,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-pseudo,.hljs-template-variable,.hljs-type,.hljs-variable{color:#986801}
+.hljs-bullet,.hljs-link,.hljs-meta,.hljs-selector-id,.hljs-symbol,.hljs-title{color:#4078f2}
+.hljs-built_in,.hljs-class .hljs-title,.hljs-title.class_{color:#c18401}
+` : `
+/* atom-one-dark */
 .hljs-comment,.hljs-quote{color:#5c6370;font-style:italic}
 .hljs-doctag,.hljs-formula,.hljs-keyword{color:#c678dd}
 .hljs-deletion,.hljs-name,.hljs-section,.hljs-selector-tag,.hljs-subst{color:#e06c75}
@@ -769,25 +807,12 @@ body {
 .hljs-attr,.hljs-number,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-pseudo,.hljs-template-variable,.hljs-type,.hljs-variable{color:#d19a66}
 .hljs-bullet,.hljs-link,.hljs-meta,.hljs-selector-id,.hljs-symbol,.hljs-title{color:#61aeee}
 .hljs-built_in,.hljs-class .hljs-title,.hljs-title.class_{color:#e6c07b}
-.hljs-emphasis{font-style:italic}
+`}.hljs-emphasis{font-style:italic}
 .hljs-strong{font-weight:700}
 
-/* Print / PDF overrides */
-@media print {
-    :root {
-        --bg-primary: #fff;
-        --bg-secondary: #f6f8fa;
-        --bg-card: #f6f8fa;
-        --bg-input: #f6f8fa;
-        --border: #d0d7de;
-        --text-primary: #1f2328;
-        --text-secondary: #656d76;
-        --text-muted: #656d76;
-        --accent: #0969da;
-        --green: #1a7f37;
-        --red: #cf222e;
-    }
-    body { padding: 0; }
+/* Print overrides */
+@media print {${pageBg === 'dark' ? `
+    @page { margin: 0; }` : ''}
     .cell-group { break-inside: avoid; }
     .export-header h1 {
         background: none;
@@ -808,6 +833,7 @@ body {
      */
     async _buildHTMLString(opts = {}) {
         const embedImages = opts.embedImages !== false;
+        const options = { theme: opts.theme || 'keep', ...opts };
         const cells = this._scrapeCells();
         const name = this._getNotebookName();
         const images = []; // for zip mode
@@ -918,7 +944,7 @@ body {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${this._escapeHtml(name)}</title>
-<style>${this._getExportCSS()}</style>
+<style>${this._getExportCSS(options.theme, options.pageBg)}</style>
 ${katexCSS ? '<style>' + katexCSS + '</style>' : ''}
 </head>
 <body>
@@ -947,12 +973,15 @@ ${cellsHtml}
         const embedImages = opts.embedImages !== undefined ? opts.embedImages : true;
         const baseName = this._getNotebookName().replace(/[^a-zA-Z0-9_-]/g, '_');
 
+        const theme = opts.theme || 'keep';
+        const pageBg = opts.pageBg || 'white';
+
         if (embedImages) {
-            const { html } = await this._buildHTMLString({ embedImages: true });
+            const { html } = await this._buildHTMLString({ embedImages: true, theme, pageBg });
             await this._downloadFile(baseName + '.html', html, 'text/html');
         } else {
             // Zip mode
-            const { html, images } = await this._buildHTMLString({ embedImages: false });
+            const { html, images } = await this._buildHTMLString({ embedImages: false, theme, pageBg });
 
             if (typeof JSZip === 'undefined') {
                 alert('JSZip not loaded. Cannot create zip archive.');
@@ -1095,14 +1124,16 @@ ${cellsHtml}
 
     // ── PDF Export ──
 
-    async exportPDF() {
+    async exportPDF(opts = {}) {
         const cells = this._scrapeCells();
         if (cells.length === 0) {
             alert('No cells to export.');
             return;
         }
 
-        const { html } = await this._buildHTMLString({ embedImages: true });
+        const theme = opts.theme || 'keep';
+        const pageBg = opts.pageBg || 'white';
+        const { html } = await this._buildHTMLString({ embedImages: true, theme, pageBg });
 
         const iframe = document.createElement('iframe');
         iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:800px;height:600px;';

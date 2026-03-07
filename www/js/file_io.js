@@ -274,6 +274,8 @@ class FileIO {
         const exportBtn = document.getElementById('btn-export');
         const exportModal = document.getElementById('export-modal');
         const exportImageSection = document.getElementById('export-image-section');
+        const exportThemeSection = document.getElementById('export-theme-section');
+        const exportPageBgSection = document.getElementById('export-pagebg-section');
         const doExportBtn = document.getElementById('btn-do-export');
 
         if (exportBtn && exportModal) {
@@ -283,7 +285,11 @@ class FileIO {
                 if (htmlRadio) htmlRadio.checked = true;
                 const embedRadio = exportModal.querySelector('input[name="export-images"][value="embed"]');
                 if (embedRadio) embedRadio.checked = true;
-                this._updateExportImageVisibility(exportModal, exportImageSection);
+                const keepRadio = exportModal.querySelector('input[name="export-theme"][value="keep"]');
+                if (keepRadio) keepRadio.checked = true;
+                const whiteRadio = exportModal.querySelector('input[name="export-pagebg"][value="white"]');
+                if (whiteRadio) whiteRadio.checked = true;
+                this._updateExportSections(exportModal, exportImageSection, exportThemeSection, exportPageBgSection);
                 exportModal.classList.remove('hidden');
             });
 
@@ -295,7 +301,7 @@ class FileIO {
 
             exportModal.addEventListener('change', (e) => {
                 if (e.target.name === 'export-format') {
-                    this._updateExportImageVisibility(exportModal, exportImageSection);
+                    this._updateExportSections(exportModal, exportImageSection, exportThemeSection, exportPageBgSection);
                 }
             });
 
@@ -303,10 +309,14 @@ class FileIO {
                 doExportBtn.addEventListener('click', async () => {
                     const format = exportModal.querySelector('input[name="export-format"]:checked');
                     const imageMode = exportModal.querySelector('input[name="export-images"]:checked');
+                    const theme = exportModal.querySelector('input[name="export-theme"]:checked');
+                    const pageBg = exportModal.querySelector('input[name="export-pagebg"]:checked');
                     exportModal.classList.add('hidden');
                     await this._dispatchExport(
                         format ? format.value : 'html',
-                        imageMode ? imageMode.value : 'embed'
+                        imageMode ? imageMode.value : 'embed',
+                        theme ? theme.value : 'keep',
+                        pageBg ? pageBg.value : 'white'
                     );
                 });
             }
@@ -677,38 +687,61 @@ class FileIO {
     }
 
     /**
-     * Show/hide image handling section based on selected export format.
+     * Show/hide image and theme sections based on selected export format.
      */
-    _updateExportImageVisibility(modal, imageSection) {
-        if (!imageSection) return;
+    _updateExportSections(modal, imageSection, themeSection, pageBgSection) {
         const format = modal.querySelector('input[name="export-format"]:checked');
         const fmt = format ? format.value : 'html';
-        const showImages = (fmt === 'html' || fmt === 'markdown');
-        if (showImages) {
-            imageSection.classList.remove('hidden');
-            // Default: embed for HTML, separate for Markdown
-            const defaultVal = fmt === 'markdown' ? 'separate' : 'embed';
-            const radio = modal.querySelector(`input[name="export-images"][value="${defaultVal}"]`);
-            if (radio) radio.checked = true;
-        } else {
-            imageSection.classList.add('hidden');
+
+        // Images: show for HTML and Markdown
+        if (imageSection) {
+            const showImages = (fmt === 'html' || fmt === 'markdown');
+            if (showImages) {
+                imageSection.classList.remove('hidden');
+                const defaultVal = fmt === 'markdown' ? 'separate' : 'embed';
+                const radio = modal.querySelector(`input[name="export-images"][value="${defaultVal}"]`);
+                if (radio) radio.checked = true;
+            } else {
+                imageSection.classList.add('hidden');
+            }
+        }
+
+        const showStyled = (fmt === 'html' || fmt === 'pdf');
+
+        // Theme: show for HTML and PDF
+        if (themeSection) {
+            if (showStyled) {
+                themeSection.classList.remove('hidden');
+            } else {
+                themeSection.classList.add('hidden');
+            }
+        }
+
+        // Page Background: show for HTML and PDF
+        if (pageBgSection) {
+            if (showStyled) {
+                pageBgSection.classList.remove('hidden');
+            } else {
+                pageBgSection.classList.add('hidden');
+            }
         }
     }
 
     /**
-     * Dispatch export based on format and image mode selections.
+     * Dispatch export based on format, image mode, and theme selections.
      */
-    async _dispatchExport(format, imageMode) {
+    async _dispatchExport(format, imageMode, theme, pageBg) {
         const em = window.exportManager;
+        const opts = { embedImages: imageMode === 'embed', theme: theme || 'keep', pageBg: pageBg || 'white' };
         switch (format) {
             case 'html':
-                if (em) await em.exportHTML({ embedImages: imageMode === 'embed' });
+                if (em) await em.exportHTML(opts);
                 break;
             case 'markdown':
-                if (em) await em.exportMarkdown({ embedImages: imageMode === 'embed' });
+                if (em) await em.exportMarkdown({ embedImages: opts.embedImages });
                 break;
             case 'pdf':
-                if (em) await em.exportPDF();
+                if (em) await em.exportPDF(opts);
                 break;
             case 'docx':
                 if (em) await em.exportDOCX();

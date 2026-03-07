@@ -1704,7 +1704,9 @@ tr:hover .vfs-delete-btn {
     margin-left: auto;
 }
 
-#export-image-section.hidden {
+#export-image-section.hidden,
+#export-theme-section.hidden,
+#export-pagebg-section.hidden {
     display: none;
 }
 

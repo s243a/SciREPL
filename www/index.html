@@ -342,6 +342,38 @@ sharedfs_read("/shared/data/results.csv")
                         <span class="export-format-desc">images/ folder in .zip</span>
                     </label>
                 </div>
+
+                <div id="export-theme-section">
+                    <div class="settings-section">Theme</div>
+                    <label class="settings-item">
+                        <input type="radio" name="export-theme" value="keep" checked> Keep as is
+                        <span class="export-format-desc">Dark theme (matches app)</span>
+                    </label>
+                    <label class="settings-item">
+                        <input type="radio" name="export-theme" value="light"> Light
+                        <span class="export-format-desc">Light cells (print-friendly)</span>
+                    </label>
+                    <label class="settings-item">
+                        <input type="radio" name="export-theme" value="browser"> Browser default
+                        <span class="export-format-desc">Let browser decide (strips backgrounds on print)</span>
+                    </label>
+                </div>
+
+                <div id="export-pagebg-section">
+                    <div class="settings-section">Page Background</div>
+                    <label class="settings-item">
+                        <input type="radio" name="export-pagebg" value="white" checked> White
+                        <span class="export-format-desc">Clean contrast with cells</span>
+                    </label>
+                    <label class="settings-item">
+                        <input type="radio" name="export-pagebg" value="dark"> Dark
+                        <span class="export-format-desc">Matches app background</span>
+                    </label>
+                    <label class="settings-item">
+                        <input type="radio" name="export-pagebg" value="browser"> Browser decides
+                        <span class="export-format-desc">No forced background</span>
+                    </label>
+                </div>
             </div>
             <div class="export-modal-actions">
                 <button id="btn-do-export" class="export-action-btn">Export</button>
