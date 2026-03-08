@@ -260,6 +260,7 @@ class ExportManager {
     // ── Extract TeX from KaTeX ──
 
     _extractTexFromKaTeX(latexEl) {
+        if (latexEl.dataset && latexEl.dataset.tex) return latexEl.dataset.tex;
         const annotation = latexEl.querySelector('annotation[encoding="application/x-tex"]');
         if (annotation) return annotation.textContent;
         return latexEl.textContent.trim();

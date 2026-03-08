@@ -140,16 +140,27 @@ class KernelManager {
         const progressWrap = document.getElementById('runtime-progress-wrap');
         const progressText = document.getElementById('runtime-progress-text');
 
-        if (title) title.textContent = info.name + ' Download';
-        if (desc) desc.innerHTML = 'The <strong>' + info.name + '</strong> runtime requires a <strong>' + info.size + '</strong> download. It will be cached by the browser for future use.';
+        if (title) title.textContent = 'Download ' + info.name;
+        if (desc) desc.innerHTML = 'The <strong>' + info.name + '</strong> runtime requires a <strong>' + info.size + '</strong> download from CDN. It will be cached locally for future use.';
 
-        // Auto-download: skip confirmation, show progress after a delay
-        // so fast downloads don't flash the modal
-        if (localStorage.getItem('scirepl_auto_download') === '1') {
+        // Check if runtime is actually in the CDN cache
+        let cached = false;
+        if (info.cdnHost) {
+            try {
+                const cdnCache = await caches.open('scirepl-cdn-v1');
+                const keys = await cdnCache.keys();
+                cached = keys.some(r => new URL(r.url).hostname === info.cdnHost);
+            } catch (_) { }
+        }
+
+        // Auto-download or cached: skip confirmation, show progress after a delay
+        // so fast loads don't flash the modal
+        if (cached || localStorage.getItem('scirepl_auto_download') === '1') {
             if (actions) actions.classList.add('hidden');
             if (progressWrap) progressWrap.classList.remove('hidden');
-            if (progressText) progressText.textContent = 'Downloading ' + info.name + '...';
-            // Delay showing modal — hideDownloadModal() cancels if download finishes first
+            if (progressText) progressText.textContent = (cached ? 'Loading ' : 'Downloading ') + info.name + '…';
+            if (title) title.textContent = (cached ? 'Loading ' : 'Downloading ') + info.name;
+            // Delay showing modal — hideDownloadModal() cancels if load finishes first
             this._autoDownloadTimer = setTimeout(() => {
                 modal.classList.remove('hidden');
             }, 2000);
@@ -283,9 +294,9 @@ KernelManager.CDN_KERNELS = new Set(['python', 'prolog', 'r']);
 
 // Runtime display info for download confirmation modal
 KernelManager.RUNTIME_INFO = {
-    python: { name: 'Python (Pyodide)', size: '~25 MB' },
-    r:      { name: 'R (webR)',         size: '~50 MB' },
-    prolog: { name: 'Prolog (SWI)',     size: '~10 MB' },
+    python: { name: 'Python (Pyodide)', size: '~25 MB', cdnHost: 'cdn.jsdelivr.net' },
+    r:      { name: 'R (webR)',         size: '~50 MB', cdnHost: 'webr.r-wasm.org' },
+    prolog: { name: 'Prolog (SWI)',     size: '~10 MB', cdnHost: 'swi-prolog.github.io' },
 };
 
 // Export singleton

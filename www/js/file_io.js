@@ -88,23 +88,22 @@ class FileIO {
             }
         }
 
-        // Reload App — unregister service worker and hard-reload
+        // Reload App — clear app cache and reload (preserves CDN cache for Pyodide etc.)
         const reloadBtn = document.getElementById('btn-reload-app');
         if (reloadBtn) {
             reloadBtn.addEventListener('click', async () => {
                 reloadBtn.textContent = 'Reloading...';
                 reloadBtn.disabled = true;
                 try {
-                    // Unregister service workers
-                    const regs = await navigator.serviceWorker.getRegistrations();
-                    await Promise.all(regs.map(r => r.unregister()));
+                    // Clear app caches but preserve CDN cache (Pyodide, swipl-wasm, etc.)
+                    const names = await caches.keys();
+                    await Promise.all(names.filter(n => !n.includes('-cdn-')).map(n => caches.delete(n)));
                 } catch (_) { }
                 try {
-                    // Clear all SW caches
-                    const names = await caches.keys();
-                    await Promise.all(names.map(n => caches.delete(n)));
+                    // Tell SW to update so it picks up new app assets
+                    const reg = await navigator.serviceWorker.getRegistration();
+                    if (reg) await reg.update();
                 } catch (_) { }
-                // Reload (browser will fetch fresh from server)
                 location.reload();
             });
         }
@@ -961,6 +960,10 @@ class FileIO {
 
             // Load/Unload buttons for CDN kernels (not JavaScript/Bash)
             if (KernelManager.CDN_KERNELS.has(k.language)) {
+                const runtimeInfo = KernelManager.RUNTIME_INFO[k.language];
+                const btnWrap = document.createElement('div');
+                btnWrap.className = 'memory-btn-wrap';
+
                 if (k.loaded && k.ready) {
                     const btn = document.createElement('button');
                     btn.className = 'memory-unload-btn';
@@ -978,7 +981,7 @@ class FileIO {
                         }
                         this._refreshMemoryModal();
                     });
-                    card.appendChild(btn);
+                    btnWrap.appendChild(btn);
                 } else {
                     const btn = document.createElement('button');
                     btn.className = 'memory-load-btn';
@@ -993,8 +996,41 @@ class FileIO {
                         }
                         this._refreshMemoryModal();
                     });
-                    card.appendChild(btn);
+                    btnWrap.appendChild(btn);
+
+                    // Show "Clear Cache" if CDN cache has entries for this runtime
+                    if (runtimeInfo && runtimeInfo.cdnHost) {
+                        try {
+                            const cdnCache = await caches.open('scirepl-cdn-v1');
+                            const keys = await cdnCache.keys();
+                            const hasCached = keys.some(r => new URL(r.url).hostname === runtimeInfo.cdnHost);
+                            if (hasCached) {
+                                const clearBtn = document.createElement('button');
+                                clearBtn.className = 'memory-unload-btn';
+                                clearBtn.textContent = 'Clear Cache';
+                                clearBtn.addEventListener('click', async () => {
+                                    clearBtn.textContent = 'Clearing...';
+                                    clearBtn.disabled = true;
+                                    try {
+                                        const cache = await caches.open('scirepl-cdn-v1');
+                                        const allKeys = await cache.keys();
+                                        await Promise.all(
+                                            allKeys
+                                                .filter(r => new URL(r.url).hostname === runtimeInfo.cdnHost)
+                                                .map(r => cache.delete(r))
+                                        );
+                                    } catch (e) {
+                                        console.warn('Failed to clear cache for ' + k.language + ':', e);
+                                    }
+                                    this._refreshMemoryModal();
+                                });
+                                btnWrap.appendChild(clearBtn);
+                            }
+                        } catch (_) { }
+                    }
                 }
+
+                card.appendChild(btnWrap);
             }
 
             list.appendChild(card);

@@ -568,11 +568,54 @@
         if (!km) throw new Error('KernelManager not available');
 
         // Handle %pip install magic (Jupyter-compatible)
-        const pipMatch = code.match(/^%pip\s+install\s+(.+)$/m);
-        if (pipMatch && language === 'python') {
-            const packages = pipMatch[1].trim().split(/\s+/);
-            const pkgList = packages.map(p => `'${p.replace(/'/g, "\\'")}'`).join(', ');
-            return executePythonLegacy(`await pip_install(${pkgList})`);
+        // Run pip installs directly via pyodide first, then execute remaining code
+        // through executePythonLegacy so imports/plots/etc. work normally.
+        if (language === 'python' && /^%pip\s+install\s+/m.test(code)) {
+            const kernel = km.getKernel('python');
+            const pyodide = kernel && kernel.getPyodide();
+            if (pyodide) {
+                const lines = code.split('\n');
+                const remainingLines = [];
+                for (const line of lines) {
+                    const pm = line.match(/^%pip\s+install\s+(.+)$/);
+                    if (pm) {
+                        const packages = pm[1].trim().split(/\s+/);
+                        const pkgList = packages.map(p => `'${p.replace(/'/g, "\\'")}'`).join(', ');
+                        pyodide.runPython(`
+import io, sys
+_pip_stdout = io.StringIO()
+_pip_old_stdout = sys.stdout
+sys.stdout = _pip_stdout
+`);
+                        await pyodide.runPythonAsync(`await pip_install(${pkgList})`);
+                        pyodide.runPython(`sys.stdout = _pip_old_stdout`);
+                        const pipOut = pyodide.runPython(`_pip_stdout.getvalue()`);
+                        if (pipOut) window.renderText(pipOut, false);
+                    } else {
+                        remainingLines.push(line);
+                    }
+                }
+                pyodide.runPython(`import importlib; importlib.invalidate_caches()`);
+                // Eagerly set up matplotlib hook if it's now available,
+                // so plt.show() works on the first call in the remaining code
+                try {
+                    pyodide.runPython(`
+if 'matplotlib' in sys.modules or importlib.util.find_spec('matplotlib'):
+    try:
+        import matplotlib
+        if not getattr(matplotlib, '_scirepl_hooked', False):
+            _setup_matplotlib_hook()
+            matplotlib._scirepl_hooked = True
+    except Exception:
+        pass
+`);
+                } catch (_) { }
+                const remaining = remainingLines.join('\n').trim();
+                if (remaining) {
+                    return executePythonLegacy(remaining);
+                }
+                return { stdout: '', result: null, error: null };
+            }
         }
 
         // Handle %install magic for R packages (webR WASM repo)

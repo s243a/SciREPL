@@ -1992,6 +1992,13 @@ tr:hover .vfs-delete-btn {
     border-color: var(--accent);
 }
 
+.memory-btn-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+}
+
 .memory-storage-section {
     margin: 8px 0;
 }

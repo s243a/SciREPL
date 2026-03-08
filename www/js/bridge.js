@@ -65,11 +65,12 @@ window.renderLatex = function (texStr) {
     latexDiv.className = 'latex-result';
     container.querySelector('.card-body').appendChild(latexDiv);
 
+    latexDiv.dataset.tex = texStr;
     try {
         katex.render(texStr, latexDiv, {
             throwOnError: false,
             displayMode: true,
-            output: 'html'
+            output: 'htmlAndMathml'
         });
     } catch (e) {
         latexDiv.textContent = texStr;
