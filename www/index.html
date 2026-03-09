@@ -218,15 +218,20 @@ sharedfs_read("/shared/data/results.csv")
 
             <p><strong>Uploading:</strong> Use the "Upload File" button at the top of Files &amp; Storage to upload files directly into SharedVFS. Set the destination path (default: <code>/shared/data/</code>) before uploading.</p>
 
-            <h3>Export Formats</h3>
-            <p>Use <strong>Export</strong> in the Menu to choose a format and image handling:</p>
+            <h3>Export</h3>
+            <p><strong>Export Document</strong> — Choose a document format and image handling:</p>
             <ul>
                 <li><strong>HTML</strong> — Self-contained file with dark theme, code, and output. Choose "Separate files" for a <code>.html.zip</code> with an images/ folder.</li>
                 <li><strong>Markdown</strong> — Fenced code blocks, LaTeX math, and markdown tables. "Separate files" uses GitHub-compatible <code>![alt](images/X.png)</code> references in a <code>.md.zip</code>.</li>
                 <li><strong>PDF</strong> — Opens the browser print dialog. Choose "Save as PDF" for a light-themed document.</li>
                 <li><strong>DOCX</strong> — Word document with code blocks, tables, images, and native Word equations (LaTeX math converted to editable OOXML formulas). Requires internet (library loaded on demand from CDN).</li>
                 <li><strong>LaTeX</strong> — <code>.tex</code> file for academic papers. Uses <code>listings</code>, <code>amsmath</code>, <code>booktabs</code>, <code>graphicx</code>. Exports as <code>.tex.zip</code> if images are present.</li>
-                <li><strong>.ipynb</strong> — Includes cell outputs (text, LaTeX, images, tables). Viewable in Jupyter and GitHub without re-execution.</li>
+            </ul>
+            <p><strong>Export Workbooks &amp; Packages</strong> — Export notebooks and data:</p>
+            <ul>
+                <li><strong>.srwb</strong> — SciREPL native workbook (JSON). Export current tab or all tabs.</li>
+                <li><strong>.ipynb</strong> — Jupyter Notebook with <code>%%magic</code> commands for multi-language cells. Includes cell outputs. Viewable in Jupyter and GitHub.</li>
+                <li><strong>Package</strong> — Archive (.zip/.tar/.tar.gz) with notebooks and data files.</li>
             </ul>
             <p><strong>Syntax highlighting:</strong> Code cells display with syntax highlighting for Python, JavaScript, R, Bash, and Prolog. Exports (HTML, DOCX) also include highlighted code.</p>
             <p><strong>.ipynb import with outputs:</strong> When importing a <code>.ipynb</code> file that already contains outputs, they are displayed directly without re-executing the code. This allows fast viewing of notebooks from Jupyter, Colab, or previous SciREPL exports.</p>
