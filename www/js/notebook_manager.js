@@ -345,6 +345,53 @@ class NotebookManager {
         });
         const activeId = this.getActiveNotebook() ? this.getActiveNotebook().id : null;
         window.sessionManager.saveNotebooks(notebooks, activeId);
+        this._syncToSharedVFS(notebooks);
+    }
+
+    /**
+     * Sync notebooks to SharedVFS as .srwb files under /shared/notebooks/.
+     * Each notebook is written as a separate JSON file.
+     */
+    _syncToSharedVFS(notebooks) {
+        const vfs = window.sharedVFS;
+        if (!vfs) return;
+
+        const dir = '/shared/notebooks';
+        try { vfs.mkdirTree(dir); } catch (_) { }
+
+        // Track which filenames we write so we can clean up stale ones
+        const written = new Set();
+
+        for (const nb of notebooks) {
+            const safeName = (nb.name || 'notebook').replace(/[^a-zA-Z0-9_\- ]/g, '_').trim();
+            const shortId = (nb.id || '').replace(/^nb-/, '').substring(0, 8);
+            const filename = safeName + (shortId ? '_' + shortId : '') + '.srwb';
+            const filepath = dir + '/' + filename;
+            written.add(filename);
+
+            const srwb = {
+                format: 'srwb',
+                format_version: '1.0',
+                exported_at: new Date().toISOString(),
+                notebook: nb
+            };
+
+            try {
+                vfs.writeFile(filepath, JSON.stringify(srwb, null, 2), 'notebook-sync');
+            } catch (e) {
+                console.warn('[NotebookManager] Failed to sync', filepath, e);
+            }
+        }
+
+        // Remove .srwb files that no longer correspond to any notebook
+        try {
+            const existing = vfs.listDir(dir);
+            for (const name of existing) {
+                if (name.endsWith('.srwb') && !written.has(name)) {
+                    vfs.unlink(dir + '/' + name);
+                }
+            }
+        } catch (_) { }
     }
 
     /**
