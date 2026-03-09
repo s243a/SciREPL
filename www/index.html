@@ -289,11 +289,10 @@ sharedfs_read("/shared/data/results.csv")
                 <button id="btn-new-notebook">+ New Notebook</button>
                 <button id="btn-save-session">💾 Save Session</button>
                 <button id="btn-export">📤 Export Document</button>
-                <button id="btn-export-ipynb">📓 Export as .ipynb</button>
+                <button id="btn-export-workbook">📦 Export Workbooks &amp; Packages</button>
                 <button id="btn-import-file">📂 Import File (e.g. .csv, .py, .ipynb, .zip)</button>
                 <button id="btn-import-package">📦 Import Package (.zip / .tar.gz)</button>
                 <button id="btn-browse-packages">📦 Browse Packages &amp; Workbooks</button>
-                <button id="btn-export-package">📦 Export Package</button>
                 <button id="btn-prolog-settings">⚙ Files &amp; Storage (VFS / Paths)</button>
                 <button id="btn-memory">📊 Memory &amp; Storage</button>
                 <button id="btn-settings">⚙ Settings</button>
@@ -378,6 +377,65 @@ sharedfs_read("/shared/data/results.csv")
             </div>
             <div class="export-modal-actions">
                 <button id="btn-do-export" class="export-action-btn">Export</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Workbooks & Packages Modal -->
+    <div id="export-workbook-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2>Export Workbooks &amp; Packages</h2>
+            <div class="settings-list">
+                <div class="settings-section">Format</div>
+                <label class="settings-item">
+                    <input type="radio" name="wb-export-format" value="srwb" checked> Workbook (.srwb)
+                    <span class="export-format-desc">SciREPL native format (JSON)</span>
+                </label>
+                <label class="settings-item">
+                    <input type="radio" name="wb-export-format" value="ipynb"> Jupyter Notebook (.ipynb)
+                    <span class="export-format-desc">One file per tab, %%magic for multi-language</span>
+                </label>
+                <label class="settings-item">
+                    <input type="radio" name="wb-export-format" value="package"> Package (archive)
+                    <span class="export-format-desc">Notebooks + data files in archive</span>
+                </label>
+
+                <div id="wb-scope-section">
+                    <div class="settings-section">Scope</div>
+                    <label class="settings-item">
+                        <input type="radio" name="wb-export-scope" value="current" checked> Current tab only
+                        <span class="export-format-desc">Export the active notebook</span>
+                    </label>
+                    <label class="settings-item">
+                        <input type="radio" name="wb-export-scope" value="all"> All tabs
+                        <span class="export-format-desc">Export entire workbook</span>
+                    </label>
+                </div>
+
+                <div id="wb-kernel-section" class="hidden">
+                    <div class="settings-section">Default Kernel</div>
+                    <select id="wb-export-kernel" class="settings-select">
+                        <option value="auto">Auto-detect (first cell)</option>
+                        <option value="python">Python</option>
+                        <option value="r">R</option>
+                        <option value="prolog">Prolog</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="bash">Bash</option>
+                    </select>
+                </div>
+
+                <div id="wb-archive-section" class="hidden">
+                    <div class="settings-section">Archive Format</div>
+                    <select id="wb-export-archive" class="settings-select">
+                        <option value="zip">.zip</option>
+                        <option value="tar">.tar</option>
+                        <option value="tar.gz">.tar.gz</option>
+                    </select>
+                </div>
+            </div>
+            <div class="export-modal-actions">
+                <button id="btn-do-export-workbook" class="export-action-btn">Export</button>
             </div>
         </div>
     </div>

@@ -233,11 +233,14 @@ class FileIO {
             if (window.runAllCells) window.runAllCells();
         });
 
-        // Export .ipynb
-        document.getElementById('btn-export-ipynb').addEventListener('click', async () => {
-            this.menuModal.classList.add('hidden');
-            await this.exportNotebook();
-        });
+        // Export Workbooks & Packages modal
+        const exportWbBtn = document.getElementById('btn-export-workbook');
+        if (exportWbBtn) {
+            exportWbBtn.addEventListener('click', () => {
+                this.menuModal.classList.add('hidden');
+                this._openExportWorkbookModal();
+            });
+        }
 
         // Import
         document.getElementById('btn-import-file').addEventListener('click', () => {
@@ -278,14 +281,7 @@ class FileIO {
             });
         }
 
-        // Export Package
-        const exportPackageBtn = document.getElementById('btn-export-package');
-        if (exportPackageBtn) {
-            exportPackageBtn.addEventListener('click', async () => {
-                this.menuModal.classList.add('hidden');
-                await this.exportPackage();
-            });
-        }
+        // (Export Package removed — merged into Export Workbooks & Packages modal)
 
         // Export Modal
         const exportBtn = document.getElementById('btn-export');
@@ -768,6 +764,224 @@ class FileIO {
                 break;
             default:
                 alert('Unknown export format: ' + format);
+        }
+    }
+
+    /**
+     * Open the Export Workbooks & Packages modal.
+     */
+    _openExportWorkbookModal() {
+        const modal = document.getElementById('export-workbook-modal');
+        if (!modal) return;
+
+        // Reset to defaults
+        const srwbRadio = modal.querySelector('input[name="wb-export-format"][value="srwb"]');
+        if (srwbRadio) srwbRadio.checked = true;
+        const currentRadio = modal.querySelector('input[name="wb-export-scope"][value="current"]');
+        if (currentRadio) currentRadio.checked = true;
+
+        // Set archive format from settings
+        const archiveSelect = document.getElementById('wb-export-archive');
+        if (archiveSelect) archiveSelect.value = localStorage.getItem('scirepl_export_format') || 'zip';
+
+        this._updateWbExportSections();
+
+        // Wire up format change to show/hide sections
+        modal.addEventListener('change', (e) => {
+            if (e.target.name === 'wb-export-format') {
+                this._updateWbExportSections();
+            }
+        });
+
+        // Wire up export button
+        const doBtn = document.getElementById('btn-do-export-workbook');
+        if (doBtn) {
+            const handler = async () => {
+                doBtn.removeEventListener('click', handler);
+                modal.classList.add('hidden');
+                await this._doExportWorkbook();
+            };
+            doBtn.addEventListener('click', handler);
+        }
+
+        // Close on backdrop/X click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal || e.target.classList.contains('modal-close')) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        modal.classList.remove('hidden');
+    }
+
+    /**
+     * Show/hide sections in the workbook export modal based on format.
+     */
+    _updateWbExportSections() {
+        const modal = document.getElementById('export-workbook-modal');
+        if (!modal) return;
+        const format = modal.querySelector('input[name="wb-export-format"]:checked');
+        const fmt = format ? format.value : 'srwb';
+
+        const scopeSection = document.getElementById('wb-scope-section');
+        const kernelSection = document.getElementById('wb-kernel-section');
+        const archiveSection = document.getElementById('wb-archive-section');
+
+        // Scope: show for srwb and ipynb, hide for package (always exports all)
+        if (scopeSection) scopeSection.classList.toggle('hidden', fmt === 'package');
+        // Kernel: show for ipynb only
+        if (kernelSection) kernelSection.classList.toggle('hidden', fmt !== 'ipynb');
+        // Archive format: show for package only
+        if (archiveSection) archiveSection.classList.toggle('hidden', fmt !== 'package');
+    }
+
+    /**
+     * Dispatch the workbook export based on modal selections.
+     */
+    async _doExportWorkbook() {
+        const modal = document.getElementById('export-workbook-modal');
+        const format = modal.querySelector('input[name="wb-export-format"]:checked').value;
+        const scope = modal.querySelector('input[name="wb-export-scope"]:checked').value;
+
+        if (format === 'srwb') {
+            await this._exportSrwb(scope);
+        } else if (format === 'ipynb') {
+            const kernelSelect = document.getElementById('wb-export-kernel');
+            const kernel = kernelSelect ? kernelSelect.value : 'auto';
+            await this._exportIpynb(scope, kernel);
+        } else if (format === 'package') {
+            await this.exportPackage();
+        }
+    }
+
+    /**
+     * Export as .srwb (SciREPL Workbook).
+     */
+    async _exportSrwb(scope) {
+        const nm = window.notebookManager;
+        if (!nm) { alert('No notebooks available.'); return; }
+
+        if (scope === 'current') {
+            const active = nm.getActiveNotebook();
+            if (!active) { alert('No active notebook.'); return; }
+            // Grab live cells for the active notebook
+            active.cells = window._cells ? [...window._cells] : [];
+            active.cellCounter = window._cellCounter || 0;
+            const nb = active.toJSON();
+            const srwb = {
+                format: 'srwb',
+                format_version: '1.0',
+                exported_at: new Date().toISOString(),
+                notebook: nb
+            };
+            const safeName = (nb.name || 'notebook').replace(/[^a-zA-Z0-9_\- ]/g, '_');
+            await this.downloadFile(safeName + '.srwb', JSON.stringify(srwb, null, 2), 'application/json');
+        } else {
+            // All tabs
+            const notebooks = nm.getNotebooks().map(nb => {
+                if (nb.isActive) {
+                    nb.cells = window._cells ? [...window._cells] : [];
+                    nb.cellCounter = window._cellCounter || 0;
+                }
+                return nb.toJSON();
+            });
+            const srwb = {
+                format: 'srwb',
+                format_version: '1.0',
+                exported_at: new Date().toISOString(),
+                workbook: {
+                    activeNotebookId: nm.getActiveNotebook() ? nm.getActiveNotebook().id : null,
+                    notebooks: notebooks
+                }
+            };
+            await this.downloadFile('workbook.srwb', JSON.stringify(srwb, null, 2), 'application/json');
+        }
+    }
+
+    /**
+     * Export as .ipynb with %%magic commands for non-default kernel cells.
+     */
+    async _exportIpynb(scope, kernelOverride) {
+        const nm = window.notebookManager;
+        if (!nm) { alert('No notebooks available.'); return; }
+
+        const exportOne = async (nb) => {
+            const cells = nb.isActive ? (window._cells || []) : nb.cells;
+            if (cells.length === 0) return;
+
+            // Determine default kernel
+            let defaultKernel;
+            if (kernelOverride && kernelOverride !== 'auto') {
+                defaultKernel = kernelOverride;
+            } else {
+                // Use first code cell's language
+                const firstCode = cells.find(c => c.type === 'code');
+                defaultKernel = firstCode ? (firstCode.language || 'python') : 'python';
+            }
+
+            // Build cells with %%magic for non-default languages
+            const nbCells = [];
+            for (const cell of cells) {
+                const source = cell.code.split('\n').map((line, j, arr) =>
+                    j < arr.length - 1 ? line + '\n' : line
+                );
+                if (cell.type === 'markdown') {
+                    nbCells.push({ cell_type: 'markdown', metadata: {}, source });
+                    continue;
+                }
+                const cellLang = cell.language || 'python';
+                const meta = {};
+                let cellSource = source;
+                if (cellLang !== defaultKernel) {
+                    meta.scirepl_language = cellLang;
+                    // Prepend %%magic command for Jupyter compatibility
+                    cellSource = ['%%' + cellLang + '\n', ...source];
+                }
+                nbCells.push({
+                    cell_type: 'code',
+                    execution_count: null,
+                    metadata: meta,
+                    outputs: [],
+                    source: cellSource
+                });
+            }
+
+            const kernelMap = {
+                python: { display_name: 'Python 3 (Pyodide)', language: 'python', name: 'python3' },
+                r: { display_name: 'R (webR)', language: 'r', name: 'ir' },
+                prolog: { display_name: 'SWI-Prolog (WASM)', language: 'prolog', name: 'swipl' },
+                javascript: { display_name: 'JavaScript (Browser)', language: 'javascript', name: 'javascript' },
+                bash: { display_name: 'Bash', language: 'bash', name: 'bash' }
+            };
+            const langInfoMap = {
+                python: { name: 'python', version: '3.12', mimetype: 'text/x-python', file_extension: '.py' },
+                r: { name: 'R', version: '4.x', mimetype: 'text/x-r', file_extension: '.r' },
+                prolog: { name: 'prolog', version: '9.x', mimetype: 'text/x-prolog', file_extension: '.pl' },
+                javascript: { name: 'javascript', version: 'ES2022', mimetype: 'text/javascript', file_extension: '.js' },
+                bash: { name: 'bash', version: '5.x', mimetype: 'text/x-sh', file_extension: '.sh' }
+            };
+
+            const notebook = {
+                nbformat: 4, nbformat_minor: 5,
+                metadata: {
+                    kernelspec: kernelMap[defaultKernel] || kernelMap.python,
+                    language_info: langInfoMap[defaultKernel] || langInfoMap.python,
+                    scirepl: { version: 'pro', exported_at: new Date().toISOString() }
+                },
+                cells: nbCells
+            };
+
+            const safeName = (nb.name || 'notebook').replace(/[^a-zA-Z0-9_\- ]/g, '_');
+            await this.downloadFile(safeName + '.ipynb', JSON.stringify(notebook, null, 1), 'application/json');
+        };
+
+        if (scope === 'current') {
+            const active = nm.getActiveNotebook();
+            if (active) await exportOne(active);
+        } else {
+            for (const nb of nm.getNotebooks()) {
+                await exportOne(nb);
+            }
         }
     }
 
