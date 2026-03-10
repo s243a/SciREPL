@@ -229,9 +229,9 @@ sharedfs_read("/shared/data/results.csv")
             </ul>
             <p><strong>Export Workbooks &amp; Packages</strong> — Export notebooks and data:</p>
             <ul>
-                <li><strong>.srwb</strong> — SciREPL native workbook (JSON). Export current tab or all tabs.</li>
-                <li><strong>.ipynb</strong> — Jupyter Notebook with <code>%%magic</code> commands for multi-language cells. Includes cell outputs. Viewable in Jupyter and GitHub.</li>
-                <li><strong>Package</strong> — Archive (.zip/.tar/.tar.gz) with notebooks and data files.</li>
+                <li><strong>.srwb</strong> (SciREPL Workbook) — Native format for saving and restoring your workspace. Can hold multiple tabs in one file (like Excel sheets). Preserves per-cell language, cell IDs, and all SciREPL-specific state. Use this to back up your work or move it between devices. Not readable by Jupyter or other tools.</li>
+                <li><strong>.ipynb</strong> (Jupyter Notebook) — Universal notebook format. One file per tab. Multi-language cells use <code>%%magic</code> commands (e.g. <code>%%r</code>, <code>%%bash</code>). Viewable in Jupyter, Colab, VS Code, and GitHub. Use this to share notebooks with others.</li>
+                <li><strong>Package</strong> — Archive (.zip/.tar/.tar.gz) containing notebooks and data files from SharedVFS. Use this to share an entire project with its datasets.</li>
             </ul>
             <p><strong>Syntax highlighting:</strong> Code cells display with syntax highlighting for Python, JavaScript, R, Bash, and Prolog. Exports (HTML, DOCX) also include highlighted code.</p>
             <p><strong>.ipynb import with outputs:</strong> When importing a <code>.ipynb</code> file that already contains outputs, they are displayed directly without re-executing the code. This allows fast viewing of notebooks from Jupyter, Colab, or previous SciREPL exports.</p>
