@@ -786,9 +786,9 @@ class FileIO {
 
         this._updateWbExportSections();
 
-        // Wire up format change to show/hide sections
+        // Wire up format/scope change to show/hide sections
         modal.addEventListener('change', (e) => {
-            if (e.target.name === 'wb-export-format') {
+            if (e.target.name === 'wb-export-format' || e.target.name === 'wb-export-scope') {
                 this._updateWbExportSections();
             }
         });
@@ -827,12 +827,16 @@ class FileIO {
         const kernelSection = document.getElementById('wb-kernel-section');
         const archiveSection = document.getElementById('wb-archive-section');
 
+        const scope = modal.querySelector('input[name="wb-export-scope"]:checked');
+        const scp = scope ? scope.value : 'current';
+
         // Scope: show for srwb and ipynb, hide for package (always exports all)
         if (scopeSection) scopeSection.classList.toggle('hidden', fmt === 'package');
         // Kernel: show for ipynb only
         if (kernelSection) kernelSection.classList.toggle('hidden', fmt !== 'ipynb');
-        // Archive format: show for package only
-        if (archiveSection) archiveSection.classList.toggle('hidden', fmt !== 'package');
+        // Archive format: show for package, or ipynb with all tabs
+        const showArchive = fmt === 'package' || (fmt === 'ipynb' && scp === 'all');
+        if (archiveSection) archiveSection.classList.toggle('hidden', !showArchive);
     }
 
     /**
@@ -848,7 +852,9 @@ class FileIO {
         } else if (format === 'ipynb') {
             const kernelSelect = document.getElementById('wb-export-kernel');
             const kernel = kernelSelect ? kernelSelect.value : 'auto';
-            await this._exportIpynb(scope, kernel);
+            const archiveSelect = document.getElementById('wb-export-archive');
+            const archiveFmt = archiveSelect ? archiveSelect.value : 'zip';
+            await this._exportIpynb(scope, kernel, archiveFmt);
         } else if (format === 'package') {
             await this.exportPackage();
         }
@@ -901,7 +907,7 @@ class FileIO {
     /**
      * Export as .ipynb with %%magic commands for non-default kernel cells.
      */
-    async _exportIpynb(scope, kernelOverride) {
+    async _exportIpynb(scope, kernelOverride, archiveFormat) {
         const nm = window.notebookManager;
         if (!nm) { alert('No notebooks available.'); return; }
 
@@ -999,20 +1005,42 @@ class FileIO {
                 return;
             }
             if (files.length === 1) {
-                // Single tab — no need for zip
+                // Single tab — no need for archive
                 await this.downloadFile(files[0].name, files[0].content, 'application/json');
             } else {
-                if (typeof JSZip === 'undefined') {
-                    alert('JSZip not loaded. Cannot create archive.');
-                    return;
-                }
-                const zip = new JSZip();
-                for (const f of files) {
-                    zip.file(f.name, f.content);
-                }
-                const blob = await zip.generateAsync({ type: 'blob' });
+                const fmt = archiveFormat || 'zip';
                 const workbookName = (nm.getActiveNotebook()?.name || 'notebooks').replace(/[^a-zA-Z0-9_\- ]/g, '_');
-                await this.downloadFile(workbookName + '_notebooks.zip', blob, 'application/zip');
+
+                if (fmt === 'tar' || fmt === 'tar.gz') {
+                    if (typeof TarWriter === 'undefined') {
+                        alert('TarWriter not available. Cannot create tar archive.');
+                        return;
+                    }
+                    const tar = new TarWriter();
+                    for (const f of files) {
+                        tar.addFile(f.name, f.content);
+                    }
+                    let data = tar.build();
+                    let ext = '.tar';
+                    if (fmt === 'tar.gz') {
+                        data = await this._gzipCompress(data);
+                        ext = '.tar.gz';
+                    }
+                    const blob = new Blob([data], { type: 'application/octet-stream' });
+                    await this._downloadBlob(blob, workbookName + '_notebooks' + ext);
+                } else {
+                    // Default: zip
+                    if (typeof JSZip === 'undefined') {
+                        alert('JSZip not loaded. Cannot create archive.');
+                        return;
+                    }
+                    const zip = new JSZip();
+                    for (const f of files) {
+                        zip.file(f.name, f.content);
+                    }
+                    const blob = await zip.generateAsync({ type: 'blob' });
+                    await this._downloadBlob(blob, workbookName + '_notebooks.zip');
+                }
             }
         }
     }

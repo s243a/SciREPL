@@ -60,7 +60,19 @@ const BASE = 'http://localhost:8085';
     console.log(`   Scope hidden: ${ipynbState.scopeHidden}, Kernel hidden: ${ipynbState.kernelHidden}, Archive hidden: ${ipynbState.archiveHidden}`);
     if (ipynbState.scopeHidden) throw new Error('Scope should be visible for ipynb');
     if (ipynbState.kernelHidden) throw new Error('Kernel should be visible for ipynb');
-    if (!ipynbState.archiveHidden) throw new Error('Archive should be hidden for ipynb');
+    if (!ipynbState.archiveHidden) throw new Error('Archive should be hidden for ipynb + current tab');
+
+    // 4b. Switch scope to "all" — archive should now show for ipynb
+    console.log('4b. Switching ipynb scope to all tabs...');
+    await page.click('input[name="wb-export-scope"][value="all"]');
+    const ipynbAllState = await page.evaluate(() => {
+        return document.getElementById('wb-archive-section').classList.contains('hidden');
+    });
+    console.log(`   Archive hidden: ${ipynbAllState}`);
+    if (ipynbAllState) throw new Error('Archive should be visible for ipynb + all tabs');
+
+    // Reset scope back to current for next tests
+    await page.click('input[name="wb-export-scope"][value="current"]');
 
     // 5. Switch to package — scope should hide, archive should show, kernel should hide
     console.log('5. Switching to package format...');
