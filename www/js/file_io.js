@@ -534,8 +534,21 @@ class FileIO {
         // Export SharedVFS files
         const sharedVFS = window.sharedVFS;
         if (sharedVFS) {
-            for (const dir of ['/shared/data', '/shared/lib', '/shared/config', '/shared/bin']) {
-                this._collectSharedDir(sharedVFS, dir, files, manifest);
+            // Scan all subdirectories under /shared
+            try {
+                const topEntries = sharedVFS.listDir('/shared');
+                for (const name of topEntries) {
+                    const dirPath = '/shared/' + name;
+                    const stat = sharedVFS.stat(dirPath);
+                    if (stat && stat.isDir) {
+                        this._collectSharedDir(sharedVFS, dirPath, files, manifest);
+                    }
+                }
+            } catch (_) {
+                // Fallback to known directories
+                for (const dir of ['/shared/data', '/shared/lib', '/shared/config', '/shared/bin', '/shared/notebooks']) {
+                    this._collectSharedDir(sharedVFS, dir, files, manifest);
+                }
             }
         }
 
