@@ -905,9 +905,9 @@ class FileIO {
         const nm = window.notebookManager;
         if (!nm) { alert('No notebooks available.'); return; }
 
-        const exportOne = async (nb) => {
-            const cells = nb.isActive ? (window._cells || []) : nb.cells;
-            if (cells.length === 0) return;
+        const exportOne = (nb) => {
+            const cells = nb.isActive ? (window._cells || []) : (nb.cells || []);
+            if (cells.length === 0) return null;
 
             // Determine default kernel
             let defaultKernel;
@@ -971,16 +971,48 @@ class FileIO {
                 cells: nbCells
             };
 
-            const safeName = (nb.name || 'notebook').replace(/[^a-zA-Z0-9_\- ]/g, '_');
-            await this.downloadFile(safeName + '.ipynb', JSON.stringify(notebook, null, 1), 'application/json');
+            return notebook;
         };
 
         if (scope === 'current') {
             const active = nm.getActiveNotebook();
-            if (active) await exportOne(active);
+            if (active) {
+                const result = exportOne(active);
+                if (result) {
+                    const safeName = (active.name || 'notebook').replace(/[^a-zA-Z0-9_\- ]/g, '_');
+                    await this.downloadFile(safeName + '.ipynb', JSON.stringify(result, null, 1), 'application/json');
+                }
+            }
         } else {
-            for (const nb of nm.getNotebooks()) {
-                await exportOne(nb);
+            // All tabs — bundle into a zip archive
+            const notebooks = nm.getNotebooks();
+            const files = [];
+            for (const nb of notebooks) {
+                const result = exportOne(nb);
+                if (result) {
+                    const safeName = (nb.name || 'notebook').replace(/[^a-zA-Z0-9_\- ]/g, '_');
+                    files.push({ name: safeName + '.ipynb', content: JSON.stringify(result, null, 1) });
+                }
+            }
+            if (files.length === 0) {
+                alert('No notebooks with cells to export.');
+                return;
+            }
+            if (files.length === 1) {
+                // Single tab — no need for zip
+                await this.downloadFile(files[0].name, files[0].content, 'application/json');
+            } else {
+                if (typeof JSZip === 'undefined') {
+                    alert('JSZip not loaded. Cannot create archive.');
+                    return;
+                }
+                const zip = new JSZip();
+                for (const f of files) {
+                    zip.file(f.name, f.content);
+                }
+                const blob = await zip.generateAsync({ type: 'blob' });
+                const workbookName = (nm.getActiveNotebook()?.name || 'notebooks').replace(/[^a-zA-Z0-9_\- ]/g, '_');
+                await this.downloadFile(workbookName + '_notebooks.zip', blob, 'application/zip');
             }
         }
     }
@@ -1036,6 +1068,7 @@ class FileIO {
 
     async downloadFile(filename, content, mimeType) {
         mimeType = mimeType || 'text/plain';
+        const isBinary = content instanceof Blob || content instanceof ArrayBuffer || content instanceof Uint8Array;
 
         // Try Capacitor native plugins (Android/iOS)
         if (window.Capacitor && Capacitor.Plugins) {
@@ -1044,13 +1077,27 @@ class FileIO {
                 const { Share } = Capacitor.Plugins;
 
                 if (Filesystem && Share) {
-                    // Write file to cache directory as UTF-8 text
-                    const writeResult = await Filesystem.writeFile({
-                        path: filename,
-                        data: content,
-                        directory: 'CACHE',
-                        encoding: 'utf8'
-                    });
+                    let writeOpts;
+                    if (isBinary) {
+                        // Convert blob/arraybuffer to base64 for Capacitor
+                        let base64;
+                        if (content instanceof Blob) {
+                            const ab = await content.arrayBuffer();
+                            const bytes = new Uint8Array(ab);
+                            let binary = '';
+                            for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+                            base64 = btoa(binary);
+                        } else {
+                            const bytes = content instanceof Uint8Array ? content : new Uint8Array(content);
+                            let binary = '';
+                            for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+                            base64 = btoa(binary);
+                        }
+                        writeOpts = { path: filename, data: base64, directory: 'CACHE' };
+                    } else {
+                        writeOpts = { path: filename, data: content, directory: 'CACHE', encoding: 'utf8' };
+                    }
+                    const writeResult = await Filesystem.writeFile(writeOpts);
 
                     // Share the file
                     await Share.share({

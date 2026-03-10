@@ -189,8 +189,41 @@ const BASE = 'http://localhost:8085';
     if (ipynb.nbformat !== 4) throw new Error('Wrong nbformat');
     if (!ipynb.metadata?.kernelspec) throw new Error('Missing kernelspec');
 
-    // 12. Verify menu still has Export Document button
-    console.log('12. Verifying Export Document button still exists...');
+    // 12. Create a second notebook and test .ipynb all-tabs zip export
+    console.log('12. Creating second notebook for all-tabs .ipynb test...');
+    await page.evaluate(() => {
+        const nm = window.notebookManager;
+        const nb2 = nm.createNotebook({ name: 'Test Notebook 2' });
+        // Add a cell to the second notebook
+        nb2.cells = [{
+            id: 1, type: 'code', language: 'r',
+            code: 'print("hello from R")', outputs: []
+        }];
+        nb2.cellCounter = 1;
+        // Switch back to first notebook so nb2 is inactive
+        const first = nm.getNotebooks()[0];
+        nm.switchTo(first.id);
+    });
+
+    console.log('13. Testing .ipynb export (all tabs → zip)...');
+    await page.click('#menu-btn');
+    await page.waitForSelector('#menu-modal:not(.hidden)', { timeout: 5000 });
+    await page.click('#btn-export-workbook');
+    await page.waitForSelector('#export-workbook-modal:not(.hidden)', { timeout: 5000 });
+    await page.click('input[name="wb-export-format"][value="ipynb"]');
+    await page.click('input[name="wb-export-scope"][value="all"]');
+
+    const [download4] = await Promise.all([
+        page.waitForEvent('download', { timeout: 10000 }),
+        page.click('#btn-do-export-workbook')
+    ]);
+    const filename4 = download4.suggestedFilename();
+    console.log(`   Downloaded: ${filename4}`);
+    if (!filename4.endsWith('.zip')) throw new Error(`Expected .zip for multi-tab ipynb, got: ${filename4}`);
+    console.log('   Multi-tab .ipynb zip export works.');
+
+    // 14. Verify menu still has Export Document button
+    console.log('14. Verifying Export Document button still exists...');
     await page.click('#menu-btn');
     await page.waitForSelector('#menu-modal:not(.hidden)', { timeout: 5000 });
     const hasExportDoc = await page.evaluate(() => !!document.getElementById('btn-export'));
