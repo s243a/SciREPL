@@ -234,8 +234,77 @@ const BASE = 'http://localhost:8085';
     if (!filename4.endsWith('.zip')) throw new Error(`Expected .zip for multi-tab ipynb, got: ${filename4}`);
     console.log('   Multi-tab .ipynb zip export works.');
 
-    // 14. Verify menu still has Export Document button
-    console.log('14. Verifying Export Document button still exists...');
+    // 14. Test package format shows file tree
+    console.log('14. Testing package file tree...');
+    await page.click('#menu-btn');
+    await page.waitForSelector('#menu-modal:not(.hidden)', { timeout: 5000 });
+    await page.click('#btn-export-workbook');
+    await page.waitForSelector('#export-workbook-modal:not(.hidden)', { timeout: 5000 });
+    await page.click('input[name="wb-export-format"][value="package"]');
+
+    // Wait a tick for tree to populate
+    await page.waitForTimeout(200);
+
+    const treeState = await page.evaluate(() => {
+        const section = document.getElementById('wb-filetree-section');
+        const tree = document.getElementById('wb-filetree');
+        const hidden = section.classList.contains('hidden');
+        const checkboxes = tree.querySelectorAll('input[type="checkbox"][data-path]');
+        const folders = tree.querySelectorAll('input[type="checkbox"][data-dir]');
+        return {
+            hidden,
+            fileCount: checkboxes.length,
+            folderCount: folders.length,
+            allChecked: Array.from(checkboxes).every(cb => cb.checked)
+        };
+    });
+    console.log(`   Tree visible: ${!treeState.hidden}, Files: ${treeState.fileCount}, Folders: ${treeState.folderCount}, All checked: ${treeState.allChecked}`);
+    if (treeState.hidden) throw new Error('File tree should be visible for package format');
+    if (treeState.fileCount === 0) throw new Error('File tree should have at least one file');
+    if (!treeState.allChecked) throw new Error('All files should be checked by default');
+
+    // 15. Test folder checkbox toggles children
+    console.log('15. Testing folder checkbox toggle...');
+    const toggleResult = await page.evaluate(() => {
+        const tree = document.getElementById('wb-filetree');
+        const firstFolder = tree.querySelector('input[type="checkbox"][data-dir]');
+        if (!firstFolder) return { error: 'no folder found' };
+        const dir = firstFolder.dataset.dir;
+        // Uncheck folder
+        firstFolder.checked = false;
+        firstFolder.dispatchEvent(new Event('change', { bubbles: true }));
+        const children = tree.querySelectorAll(`input[type="checkbox"][data-path]`);
+        // Find children that belong to this folder
+        const dirChildren = Array.from(children).filter(cb => cb.dataset.path.startsWith(dir === '.' ? '' : dir + '/') || dir === '.');
+        const allUnchecked = dirChildren.every(cb => !cb.checked);
+        // Re-check folder
+        firstFolder.checked = true;
+        firstFolder.dispatchEvent(new Event('change', { bubbles: true }));
+        const allRechecked = dirChildren.every(cb => cb.checked);
+        return { allUnchecked, allRechecked };
+    });
+    if (toggleResult.error) {
+        console.log(`   Skipping toggle test: ${toggleResult.error}`);
+    } else {
+        console.log(`   Uncheck folder → children unchecked: ${toggleResult.allUnchecked}, Recheck → children checked: ${toggleResult.allRechecked}`);
+        if (!toggleResult.allUnchecked) throw new Error('Unchecking folder should uncheck all children');
+        if (!toggleResult.allRechecked) throw new Error('Checking folder should check all children');
+    }
+
+    // 16. Test file tree hidden when switching away from package
+    console.log('16. Testing file tree hides for non-package formats...');
+    await page.click('input[name="wb-export-format"][value="srwb"]');
+    const treeHidden = await page.evaluate(() =>
+        document.getElementById('wb-filetree-section').classList.contains('hidden')
+    );
+    if (!treeHidden) throw new Error('File tree should be hidden for srwb format');
+    console.log('   File tree hidden for srwb.');
+
+    // Close modal
+    await page.click('#export-workbook-modal .modal-close');
+
+    // 17. Verify menu still has Export Document button
+    console.log('17. Verifying Export Document button still exists...');
     await page.click('#menu-btn');
     await page.waitForSelector('#menu-modal:not(.hidden)', { timeout: 5000 });
     const hasExportDoc = await page.evaluate(() => !!document.getElementById('btn-export'));

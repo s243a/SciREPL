@@ -574,13 +574,28 @@ class FileIO {
 
     /**
      * Export all notebooks and VFS files as a package.
-     * Format determined by the export format setting (zip, tar, tar.gz).
+     * @param {Set|null} includedPaths - If provided, only include files with these paths.
+     * @param {string} archiveFormat - 'zip', 'tar', or 'tar.gz'. Falls back to settings.
      */
-    async exportPackage() {
+    async exportPackage(includedPaths, archiveFormat) {
         const collected = this._collectPackageFiles();
         if (!collected) return;
 
-        const format = localStorage.getItem('scirepl_export_format') || 'zip';
+        // Filter files if a selection was provided
+        if (includedPaths && includedPaths.size > 0) {
+            collected.files = collected.files.filter(f => includedPaths.has(f.path));
+            // Update manifest to match
+            const includedSet = new Set(collected.files.map(f => f.path));
+            collected.manifest.notebooks = collected.manifest.notebooks.filter(n => includedSet.has(n.file));
+            collected.manifest.files = collected.manifest.files.filter(n => includedSet.has(n.src));
+        }
+
+        if (collected.files.length === 0) {
+            alert('No files selected for export.');
+            return;
+        }
+
+        const format = archiveFormat || localStorage.getItem('scirepl_export_format') || 'zip';
 
         if (format === 'tar' || format === 'tar.gz') {
             await this._exportAsTar(collected, format === 'tar.gz');
@@ -784,6 +799,10 @@ class FileIO {
         const archiveSelect = document.getElementById('wb-export-archive');
         if (archiveSelect) archiveSelect.value = localStorage.getItem('scirepl_export_format') || 'zip';
 
+        // Clear file tree so it rebuilds with fresh data
+        const filetree = document.getElementById('wb-filetree');
+        if (filetree) filetree.innerHTML = '';
+
         this._updateWbExportSections();
 
         // Wire up format/scope change to show/hide sections
@@ -837,6 +856,109 @@ class FileIO {
         // Archive format: show for package, or ipynb with all tabs
         const showArchive = fmt === 'package' || (fmt === 'ipynb' && scp === 'all');
         if (archiveSection) archiveSection.classList.toggle('hidden', !showArchive);
+
+        // File tree: show for package only
+        const filetreeSection = document.getElementById('wb-filetree-section');
+        if (filetreeSection) {
+            const showTree = fmt === 'package';
+            filetreeSection.classList.toggle('hidden', !showTree);
+            if (showTree) {
+                this._populatePackageTree();
+            } else {
+                // Clear so it rebuilds fresh next time
+                const tree = document.getElementById('wb-filetree');
+                if (tree) tree.innerHTML = '';
+            }
+        }
+    }
+
+    /**
+     * Populate the package file tree with checkboxes.
+     */
+    _populatePackageTree() {
+        const container = document.getElementById('wb-filetree');
+        if (!container) return;
+
+        // Only rebuild if empty (avoid flicker on repeated calls)
+        if (container.children.length > 0) return;
+
+        const collected = this._collectPackageFiles();
+        if (!collected) {
+            container.innerHTML = '<div style="color:var(--text-muted);padding:8px">No files to export.</div>';
+            return;
+        }
+
+        // Group files by directory
+        const groups = new Map();
+        for (const f of collected.files) {
+            const parts = f.path.split('/');
+            const dir = parts.length > 1 ? parts.slice(0, -1).join('/') : '.';
+            const name = parts[parts.length - 1];
+            if (!groups.has(dir)) groups.set(dir, []);
+            groups.get(dir).push({ name, path: f.path, size: f.content ? f.content.length : 0 });
+        }
+
+        container.innerHTML = '';
+
+        for (const [dir, files] of groups) {
+            const group = document.createElement('div');
+            group.className = 'pkg-tree-group';
+
+            // Folder header with checkbox
+            const folderLabel = document.createElement('label');
+            folderLabel.className = 'pkg-tree-folder';
+            const folderCb = document.createElement('input');
+            folderCb.type = 'checkbox';
+            folderCb.checked = true;
+            folderCb.dataset.dir = dir;
+            folderLabel.appendChild(folderCb);
+            folderLabel.appendChild(document.createTextNode(dir === '.' ? 'notebooks/' : dir + '/'));
+            group.appendChild(folderLabel);
+
+            // File entries
+            const fileCbs = [];
+            for (const f of files) {
+                const fileLabel = document.createElement('label');
+                fileLabel.className = 'pkg-tree-file';
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = true;
+                cb.dataset.path = f.path;
+                fileLabel.appendChild(cb);
+                fileLabel.appendChild(document.createTextNode(f.name));
+                const sizeSpan = document.createElement('span');
+                sizeSpan.className = 'pkg-tree-size';
+                sizeSpan.textContent = this._formatSize(f.size);
+                fileLabel.appendChild(sizeSpan);
+                group.appendChild(fileLabel);
+                fileCbs.push(cb);
+            }
+
+            // Folder checkbox toggles all children
+            folderCb.addEventListener('change', () => {
+                for (const cb of fileCbs) cb.checked = folderCb.checked;
+            });
+            // Child unchecked → update folder state
+            for (const cb of fileCbs) {
+                cb.addEventListener('change', () => {
+                    const allChecked = fileCbs.every(c => c.checked);
+                    const someChecked = fileCbs.some(c => c.checked);
+                    folderCb.checked = allChecked;
+                    folderCb.indeterminate = !allChecked && someChecked;
+                });
+            }
+
+            container.appendChild(group);
+        }
+    }
+
+    /**
+     * Format byte size for display.
+     */
+    _formatSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     }
 
     /**
@@ -856,7 +978,16 @@ class FileIO {
             const archiveFmt = archiveSelect ? archiveSelect.value : 'zip';
             await this._exportIpynb(scope, kernel, archiveFmt);
         } else if (format === 'package') {
-            await this.exportPackage();
+            // Get checked files from the tree
+            const tree = document.getElementById('wb-filetree');
+            let includedPaths = null;
+            if (tree) {
+                const checked = tree.querySelectorAll('input[type="checkbox"][data-path]:checked');
+                includedPaths = new Set(Array.from(checked).map(cb => cb.dataset.path));
+            }
+            const archiveSelect = document.getElementById('wb-export-archive');
+            const archiveFmt = archiveSelect ? archiveSelect.value : 'zip';
+            await this.exportPackage(includedPaths, archiveFmt);
         }
     }
 

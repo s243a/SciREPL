@@ -1727,6 +1727,48 @@ tr:hover .vfs-delete-btn {
     cursor: pointer;
 }
 
+/* Package file tree */
+.pkg-filetree {
+    max-height: 240px;
+    overflow-y: auto;
+    font-size: 12px;
+    margin-top: 4px;
+}
+.pkg-tree-group {
+    margin-bottom: 2px;
+}
+.pkg-tree-folder {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+}
+.pkg-tree-folder input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+}
+.pkg-tree-file {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0 2px 22px;
+    color: var(--text-secondary);
+}
+.pkg-tree-file input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 14px;
+    height: 14px;
+}
+.pkg-tree-size {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-muted, #666);
+}
+
 /* ===== Search Bar (Ctrl+F) ===== */
 
 .search-bar {
