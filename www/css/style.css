@@ -1746,16 +1746,26 @@ tr:hover .vfs-delete-btn {
     font-weight: 600;
     cursor: pointer;
 }
+.pkg-tree-arrow {
+    font-size: 10px;
+    width: 14px;
+    text-align: center;
+    flex-shrink: 0;
+    user-select: none;
+}
 .pkg-tree-folder input[type="checkbox"] {
     accent-color: var(--accent);
     width: 16px;
     height: 16px;
 }
+.pkg-tree-files.collapsed {
+    display: none;
+}
 .pkg-tree-file {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 2px 0 2px 22px;
+    padding: 2px 0 2px 36px;
     color: var(--text-secondary);
 }
 .pkg-tree-file input[type="checkbox"] {

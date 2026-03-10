@@ -899,21 +899,59 @@ class FileIO {
         }
 
         container.innerHTML = '';
+        const AUTO_COLLAPSE_THRESHOLD = 5;
 
         for (const [dir, files] of groups) {
             const group = document.createElement('div');
             group.className = 'pkg-tree-group';
 
-            // Folder header with checkbox
-            const folderLabel = document.createElement('label');
-            folderLabel.className = 'pkg-tree-folder';
+            // Folder header row
+            const folderRow = document.createElement('div');
+            folderRow.className = 'pkg-tree-folder';
+
+            // Toggle arrow
+            const arrow = document.createElement('span');
+            arrow.className = 'pkg-tree-arrow';
+            arrow.textContent = '▼';
+            folderRow.appendChild(arrow);
+
+            // Checkbox
             const folderCb = document.createElement('input');
             folderCb.type = 'checkbox';
             folderCb.checked = true;
             folderCb.dataset.dir = dir;
-            folderLabel.appendChild(folderCb);
-            folderLabel.appendChild(document.createTextNode(dir === '.' ? 'notebooks/' : dir + '/'));
-            group.appendChild(folderLabel);
+            folderRow.appendChild(folderCb);
+
+            // Folder name + file count
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = (dir === '.' ? 'notebooks/' : dir + '/');
+            folderRow.appendChild(nameSpan);
+            const countSpan = document.createElement('span');
+            countSpan.className = 'pkg-tree-size';
+            countSpan.textContent = `(${files.length})`;
+            folderRow.appendChild(countSpan);
+
+            group.appendChild(folderRow);
+
+            // Collapsible file list container
+            const fileList = document.createElement('div');
+            fileList.className = 'pkg-tree-files';
+            const collapsed = files.length > AUTO_COLLAPSE_THRESHOLD;
+            if (collapsed) {
+                fileList.classList.add('collapsed');
+                arrow.textContent = '▶';
+            }
+
+            // Toggle collapse on arrow or folder name click
+            const toggleCollapse = (e) => {
+                // Don't toggle when clicking the checkbox
+                if (e.target === folderCb) return;
+                e.preventDefault();
+                const isCollapsed = fileList.classList.toggle('collapsed');
+                arrow.textContent = isCollapsed ? '▶' : '▼';
+            };
+            arrow.addEventListener('click', toggleCollapse);
+            nameSpan.addEventListener('click', toggleCollapse);
 
             // File entries
             const fileCbs = [];
@@ -930,9 +968,11 @@ class FileIO {
                 sizeSpan.className = 'pkg-tree-size';
                 sizeSpan.textContent = this._formatSize(f.size);
                 fileLabel.appendChild(sizeSpan);
-                group.appendChild(fileLabel);
+                fileList.appendChild(fileLabel);
                 fileCbs.push(cb);
             }
+
+            group.appendChild(fileList);
 
             // Folder checkbox toggles all children
             folderCb.addEventListener('change', () => {
