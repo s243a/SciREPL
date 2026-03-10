@@ -18,7 +18,7 @@ class SharedVFS {
         this._dirs = new Set([
             '/', '/tmp', '/shared', '/education', '/user', '/user/education',
             '/shared/lib', '/shared/lib/python', '/shared/lib/prolog', '/shared/lib/wasm',
-            '/shared/bin', '/shared/data', '/shared/config',
+            '/shared/bin', '/shared/data', '/shared/config', '/shared/notebooks',
         ]);
 
         /** @type {Map<string, Set<Function>>} */

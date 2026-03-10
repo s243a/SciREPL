@@ -218,15 +218,20 @@ sharedfs_read("/shared/data/results.csv")
 
             <p><strong>Uploading:</strong> Use the "Upload File" button at the top of Files &amp; Storage to upload files directly into SharedVFS. Set the destination path (default: <code>/shared/data/</code>) before uploading.</p>
 
-            <h3>Export Formats</h3>
-            <p>Use <strong>Export</strong> in the Menu to choose a format and image handling:</p>
+            <h3>Export</h3>
+            <p><strong>Export Document</strong> — Choose a document format and image handling:</p>
             <ul>
                 <li><strong>HTML</strong> — Self-contained file with dark theme, code, and output. Choose "Separate files" for a <code>.html.zip</code> with an images/ folder.</li>
                 <li><strong>Markdown</strong> — Fenced code blocks, LaTeX math, and markdown tables. "Separate files" uses GitHub-compatible <code>![alt](images/X.png)</code> references in a <code>.md.zip</code>.</li>
                 <li><strong>PDF</strong> — Opens the browser print dialog. Choose "Save as PDF" for a light-themed document.</li>
                 <li><strong>DOCX</strong> — Word document with code blocks, tables, images, and native Word equations (LaTeX math converted to editable OOXML formulas). Requires internet (library loaded on demand from CDN).</li>
                 <li><strong>LaTeX</strong> — <code>.tex</code> file for academic papers. Uses <code>listings</code>, <code>amsmath</code>, <code>booktabs</code>, <code>graphicx</code>. Exports as <code>.tex.zip</code> if images are present.</li>
-                <li><strong>.ipynb</strong> — Includes cell outputs (text, LaTeX, images, tables). Viewable in Jupyter and GitHub without re-execution.</li>
+            </ul>
+            <p><strong>Export Workbooks &amp; Packages</strong> — Export notebooks and data:</p>
+            <ul>
+                <li><strong>.srwb</strong> (SciREPL Workbook) — Native format for saving and restoring your workspace. Can hold multiple tabs in one file (like Excel sheets). Preserves per-cell language, cell IDs, and all SciREPL-specific state. Use this to back up your work or move it between devices. Not readable by Jupyter or other tools.</li>
+                <li><strong>.ipynb</strong> (Jupyter Notebook) — Universal notebook format. One file per tab. Multi-language cells use <code>%%magic</code> commands (e.g. <code>%%r</code>, <code>%%bash</code>). Viewable in Jupyter, Colab, VS Code, and GitHub. Use this to share notebooks with others.</li>
+                <li><strong>Package</strong> — Archive (.zip/.tar/.tar.gz) containing notebooks and data files from SharedVFS. Use this to share an entire project with its datasets.</li>
             </ul>
             <p><strong>Syntax highlighting:</strong> Code cells display with syntax highlighting for Python, JavaScript, R, Bash, and Prolog. Exports (HTML, DOCX) also include highlighted code.</p>
             <p><strong>.ipynb import with outputs:</strong> When importing a <code>.ipynb</code> file that already contains outputs, they are displayed directly without re-executing the code. This allows fast viewing of notebooks from Jupyter, Colab, or previous SciREPL exports.</p>
@@ -289,11 +294,10 @@ sharedfs_read("/shared/data/results.csv")
                 <button id="btn-new-notebook">+ New Notebook</button>
                 <button id="btn-save-session">💾 Save Session</button>
                 <button id="btn-export">📤 Export Document</button>
-                <button id="btn-export-ipynb">📓 Export as .ipynb</button>
+                <button id="btn-export-workbook">📦 Export Workbooks &amp; Packages</button>
                 <button id="btn-import-file">📂 Import File (e.g. .csv, .py, .ipynb, .zip)</button>
                 <button id="btn-import-package">📦 Import Package (.zip / .tar.gz)</button>
                 <button id="btn-browse-packages">📦 Browse Packages &amp; Workbooks</button>
-                <button id="btn-export-package">📦 Export Package</button>
                 <button id="btn-prolog-settings">⚙ Files &amp; Storage (VFS / Paths)</button>
                 <button id="btn-memory">📊 Memory &amp; Storage</button>
                 <button id="btn-settings">⚙ Settings</button>
@@ -378,6 +382,65 @@ sharedfs_read("/shared/data/results.csv")
             </div>
             <div class="export-modal-actions">
                 <button id="btn-do-export" class="export-action-btn">Export</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Workbooks & Packages Modal -->
+    <div id="export-workbook-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2>Export Workbooks &amp; Packages</h2>
+            <div class="settings-list">
+                <div class="settings-section">Format</div>
+                <label class="settings-item">
+                    <input type="radio" name="wb-export-format" value="srwb" checked> Workbook (.srwb)
+                    <span class="export-format-desc">SciREPL native format (JSON)</span>
+                </label>
+                <label class="settings-item">
+                    <input type="radio" name="wb-export-format" value="ipynb"> Jupyter Notebook (.ipynb)
+                    <span class="export-format-desc">One file per tab, %%magic for multi-language</span>
+                </label>
+                <label class="settings-item">
+                    <input type="radio" name="wb-export-format" value="package"> Package (archive)
+                    <span class="export-format-desc">Notebooks + data files in archive</span>
+                </label>
+
+                <div id="wb-scope-section">
+                    <div class="settings-section">Scope</div>
+                    <label class="settings-item">
+                        <input type="radio" name="wb-export-scope" value="current" checked> Current tab only
+                        <span class="export-format-desc">Export the active notebook</span>
+                    </label>
+                    <label class="settings-item">
+                        <input type="radio" name="wb-export-scope" value="all"> All tabs
+                        <span class="export-format-desc">Export entire workbook</span>
+                    </label>
+                </div>
+
+                <div id="wb-kernel-section" class="hidden">
+                    <div class="settings-section">Default Kernel</div>
+                    <select id="wb-export-kernel" class="settings-select">
+                        <option value="auto">Auto-detect (first cell)</option>
+                        <option value="python">Python</option>
+                        <option value="r">R</option>
+                        <option value="prolog">Prolog</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="bash">Bash</option>
+                    </select>
+                </div>
+
+                <div id="wb-archive-section" class="hidden">
+                    <div class="settings-section">Archive Format</div>
+                    <select id="wb-export-archive" class="settings-select">
+                        <option value="zip">.zip</option>
+                        <option value="tar">.tar</option>
+                        <option value="tar.gz">.tar.gz</option>
+                    </select>
+                </div>
+            </div>
+            <div class="export-modal-actions">
+                <button id="btn-do-export-workbook" class="export-action-btn">Export</button>
             </div>
         </div>
     </div>
