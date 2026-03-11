@@ -913,8 +913,11 @@ class FileIO {
 
         container.innerHTML = '';
         const AUTO_COLLAPSE_THRESHOLD = 5;
+        // Folders unchecked by default (redundant with notebooks/ .ipynb exports)
+        const UNCHECKED_DIRS = new Set(['shared/notebooks']);
 
         for (const [dir, files] of groups) {
+            const defaultChecked = !UNCHECKED_DIRS.has(dir);
             const group = document.createElement('div');
             group.className = 'pkg-tree-group';
 
@@ -931,7 +934,7 @@ class FileIO {
             // Checkbox
             const folderCb = document.createElement('input');
             folderCb.type = 'checkbox';
-            folderCb.checked = true;
+            folderCb.checked = defaultChecked;
             folderCb.dataset.dir = dir;
             folderRow.appendChild(folderCb);
 
@@ -949,7 +952,7 @@ class FileIO {
             // Collapsible file list container
             const fileList = document.createElement('div');
             fileList.className = 'pkg-tree-files';
-            const collapsed = files.length > AUTO_COLLAPSE_THRESHOLD;
+            const collapsed = !defaultChecked || files.length > AUTO_COLLAPSE_THRESHOLD;
             if (collapsed) {
                 fileList.classList.add('collapsed');
                 arrow.textContent = '▶';
@@ -973,7 +976,7 @@ class FileIO {
                 fileLabel.className = 'pkg-tree-file';
                 const cb = document.createElement('input');
                 cb.type = 'checkbox';
-                cb.checked = true;
+                cb.checked = defaultChecked;
                 cb.dataset.path = f.path;
                 fileLabel.appendChild(cb);
                 fileLabel.appendChild(document.createTextNode(f.name));
