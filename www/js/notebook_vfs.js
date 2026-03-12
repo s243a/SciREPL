@@ -257,6 +257,98 @@ class NotebookVFS {
         }
     }
 
+    // ── Cell creation / deletion ─────────────────────────────────
+
+    /**
+     * Create a new cell at the end of the notebook.
+     * Called via `mkdir /nb/cell_name`.
+     * @param {string} name — cell name (must not be In[N] pattern)
+     * @returns {boolean} success
+     */
+    createCell(name) {
+        const cells = this._getCells();
+
+        // Validate name
+        if (!name || name.includes('/') || name.startsWith('.')) {
+            console.warn('[NotebookVFS] Invalid cell name for creation:', name);
+            return false;
+        }
+        if (/^In\[\d+\]$/.test(name)) {
+            console.warn('[NotebookVFS] Cannot create cell with In[N] name');
+            return false;
+        }
+        // Check uniqueness
+        for (const c of cells) {
+            if (c.name === name) {
+                console.warn('[NotebookVFS] Cell name already exists:', name);
+                return false;
+            }
+        }
+
+        // Create minimal cell object
+        window._cellCounter = (window._cellCounter || cells.length) + 1;
+        const cellId = window._cellCounter;
+        const cell = {
+            id: cellId,
+            code: '',
+            type: 'code',
+            language: 'python',
+            name: name,
+            lastOutput: '',
+            inputCard: null,
+            outputCard: null
+        };
+        cells.push(cell);
+
+        // Create DOM cards if app.js helpers are available
+        if (window._appInternals && window._appInternals.createInputCard) {
+            cell.inputCard = window._appInternals.createInputCard('', cellId, 'code', 'python');
+            cell.outputCard = window._appInternals.createOutputCard(cellId, 'code');
+            // Show the cell name label
+            this._updateCellUI(cells.length - 1, 'name');
+        }
+
+        // Save session
+        if (window._appInternals && window._appInternals.saveCellsToSession) {
+            window._appInternals.saveCellsToSession();
+        }
+
+        console.log('[NotebookVFS] Created cell:', name, 'at position', cells.length);
+        return true;
+    }
+
+    /**
+     * Delete a cell from the notebook.
+     * Called via `rm -r /nb/In[N]` or `rm -r /nb/cell_name`.
+     * @param {string} ident — cell identifier
+     * @returns {boolean} success
+     */
+    deleteCell(ident) {
+        const index = this._resolveCell(ident);
+        if (index === null) {
+            console.warn('[NotebookVFS] Cell not found for deletion:', ident);
+            return false;
+        }
+
+        const cells = this._getCells();
+        const cell = cells[index];
+
+        // Remove DOM cards
+        if (cell.inputCard) cell.inputCard.remove();
+        if (cell.outputCard) cell.outputCard.remove();
+
+        // Remove from array
+        cells.splice(index, 1);
+
+        // Save session
+        if (window._appInternals && window._appInternals.saveCellsToSession) {
+            window._appInternals.saveCellsToSession();
+        }
+
+        console.log('[NotebookVFS] Deleted cell:', ident);
+        return true;
+    }
+
     // ── VFS path interface ──────────────────────────────────────
 
     /**

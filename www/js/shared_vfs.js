@@ -163,10 +163,17 @@ class SharedVFS {
     }
 
     /**
-     * Delete a file.
+     * Delete a file. For /nb/ paths, deletes a cell.
      */
     unlink(path) {
         path = this._normalize(path);
+        if (this._isNbPath(path) && window.notebookVFS) {
+            const parsed = window.notebookVFS._parsePath(path);
+            if (parsed.cellIdent && !parsed.property) {
+                return window.notebookVFS.deleteCell(parsed.cellIdent);
+            }
+            return false;
+        }
         const existed = this._files.delete(path);
         if (existed) {
             this._emit('delete', { path });
@@ -176,9 +183,18 @@ class SharedVFS {
 
     /**
      * Create a directory (no error if exists).
+     * For /nb/ paths, creates a new cell.
      */
     mkdir(path) {
         path = this._normalize(path);
+        if (this._isNbPath(path) && window.notebookVFS) {
+            // mkdir /nb/cell_name → create a new cell
+            const parsed = window.notebookVFS._parsePath(path);
+            if (parsed.cellIdent && !parsed.property) {
+                window.notebookVFS.createCell(parsed.cellIdent);
+            }
+            return;
+        }
         if (!this._dirs.has(path)) {
             this._dirs.add(path);
             this._emit('mkdir', { path });
@@ -332,9 +348,17 @@ class SharedVFS {
     }
 
     /**
-     * Create a directory.
+     * Create a directory. For /nb/ paths, creates a new cell.
      */
     vfs_mkdir(path) {
+        const normalized = this._normalize(path);
+        if (this._isNbPath(normalized) && window.notebookVFS) {
+            const parsed = window.notebookVFS._parsePath(normalized);
+            if (parsed.cellIdent && !parsed.property) {
+                window.notebookVFS.createCell(parsed.cellIdent);
+            }
+            return;
+        }
         this.mkdirTree(path);
     }
 
@@ -422,9 +446,17 @@ class SharedVFS {
 
     /**
      * Remove a file or empty directory for Rust.
+     * For /nb/ paths, deletes a cell.
      */
     vfs_remove(path) {
         path = this._normalize(path);
+        if (this._isNbPath(path) && window.notebookVFS) {
+            const parsed = window.notebookVFS._parsePath(path);
+            if (parsed.cellIdent && !parsed.property) {
+                return window.notebookVFS.deleteCell(parsed.cellIdent);
+            }
+            return false;
+        }
         // Try to delete as file first
         if (this._files.has(path)) {
             return this.unlink(path);

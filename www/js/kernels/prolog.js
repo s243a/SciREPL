@@ -155,6 +155,8 @@ class PrologKernel {
             const results = await this._executeBlock(trimmed);
             // Sync files written by Prolog's native I/O to SharedVFS
             this._syncSharedPaths();
+            // Sync NotebookVFS write-back
+            this._syncNbFromProlog();
             return results;
         } catch (err) {
             return { stdout: '', result: null, error: err.message || String(err) };
@@ -209,6 +211,37 @@ class PrologKernel {
                             FS.writeFile(namedDir + '/' + prop, value);
                         } catch (_) { /* skip */ }
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * Sync NotebookVFS properties from Emscripten FS back to NotebookVFS.
+     * Detects files modified by Prolog under /nb/In[N]/ and writes back.
+     */
+    _syncNbFromProlog() {
+        const nbvfs = window.notebookVFS;
+        if (!nbvfs || !this._swipl) return;
+        const FS = this._swipl.FS;
+        const cells = window._cells || [];
+        if (cells.length === 0) return;
+
+        const writableProps = ['.code', '.language', '.type', '.name'];
+
+        for (let i = 0; i < cells.length; i++) {
+            const label = 'In[' + (i + 1) + ']';
+            const cellDir = '/nb/' + label;
+
+            for (const prop of writableProps) {
+                try {
+                    const data = FS.readFile(cellDir + '/' + prop, { encoding: 'utf8' });
+                    const oldValue = nbvfs._getCellProperty(i, prop) || '';
+                    if (data !== oldValue) {
+                        nbvfs._setCellProperty(i, prop, data);
+                    }
+                } catch (e) {
+                    // File doesn't exist — skip
                 }
             }
         }

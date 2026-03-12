@@ -40,6 +40,15 @@ nb_output(Cell, Output) :- nb_read(Cell, '.output', Output).
 %% nb_language(+Cell, -Lang) — shorthand for reading .language
 nb_language(Cell, Lang) :- nb_read(Cell, '.language', Lang).
 
+%% nb_write(+Cell, +Prop, +Value)
+%% Write a cell property. Changes sync back to NotebookVFS after execution.
+%% Example: nb_write('In[2]', '.code', "print('hello')").
+nb_write(Cell, Prop, Value) :-
+    atomic_list_concat(['/nb/', Cell, '/', Prop], Path),
+    open(Path, write, Stream),
+    write(Stream, Value),
+    close(Stream).
+
 %% nb_list(-Cells) — list cell directories under /nb/
 nb_list(Cells) :-
     directory_files('/nb', AllFiles),

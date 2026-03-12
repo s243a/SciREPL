@@ -168,22 +168,21 @@ The key insight: **workbooks are JSON in localStorage**. The `/nb/` mount is a s
 ### Phase 3: Extended features — PLANNED
 Items grouped by complexity and dependency. Each can be implemented independently.
 
-#### 3a. R and Prolog write support
-- **R write-back** — after execution, scan `/nb/` in webR FS for modified properties and sync back to NotebookVFS. Add `nb_write()` R helper.
-- **Prolog write-back** — same pattern for Emscripten FS. Add `nb_write/3` predicate.
-- Complexity: low. Follows existing SharedVFS sync patterns.
+#### 3a. R and Prolog write support — DONE
+- **R write-back** — `_syncNbFromWebR()` scans `/nb/In[N]/` for writable properties after execution, diffs against NotebookVFS, writes back changes. `nb_write(cell, prop, value)` R helper added.
+- **Prolog write-back** — `_syncNbFromProlog()` same pattern for Emscripten FS. `nb_write/3` predicate added to prelude.
 
-#### 3b. Cell creation and deletion
-- `mkdir /nb/new_cell` creates a new cell at the end of the notebook
-- `rm -r /nb/In[5]` deletes a cell
-- Writing `.language` on a new cell sets its type before adding code
-- Need to decide: does creation add to DOM immediately, or require a refresh?
-- Complexity: medium. Touches cell creation/deletion code paths in app.js.
+#### 3b. Cell creation and deletion — DONE
+- `mkdir /nb/new_cell` creates a new cell at the end of the notebook (via `notebookVFS.createCell()`)
+- `rm -r /nb/In[5]` or `rm -r /nb/cell_name` deletes a cell (via `notebookVFS.deleteCell()`)
+- Delegated from SharedVFS `mkdir`, `unlink`, `vfs_mkdir`, `vfs_remove`
+- Creation adds to DOM immediately using `window._appInternals.createInputCard/createOutputCard`
+- Writing `.language` on a new cell sets its language before adding code
 
-#### 3c. Security settings UI
-- Add a settings section (Menu → Settings or dedicated panel) with toggles for: cross-notebook read/write, programmatic execution, same-notebook write, allow JavaScript
-- Enforce settings in NotebookVFS `_setCellProperty` and add checks to read paths for cross-notebook
-- Complexity: low-medium. Settings scaffold already exists in NotebookVFS.
+#### 3c. Security settings UI — DONE
+- Settings section in Menu → Settings with toggles for: same-notebook write, cross-notebook read/write, programmatic execution, allow JavaScript
+- Checkboxes read/write `notebookVFS._getSettings()` / `_saveSettings()` (persisted in localStorage)
+- Enforcement in `_setCellProperty` already checks `sameNotebookWrite` setting
 
 #### 3d. Typed output access
 - `.output` currently returns `textContent` of the output card DOM
@@ -215,6 +214,7 @@ Items grouped by complexity and dependency. Each can be implemented independentl
 - A kernel can subscribe to changes on a cell's `.output`
 - When that cell re-executes, subscribers are notified
 - Enables live dashboards: data cell updates → visualization cell auto-refreshes
+- **Max cycles setting** — limits how many times a change can propagate through a dependency chain (like Excel's iterative calculation limit). Default: **1** (a change propagates once; A→B but B doesn't re-trigger A). Users can raise it for convergence/fixed-point workflows.
 - Complexity: high. Needs event system, re-execution triggers, cycle detection.
 
 #### 3i. Sandboxed JavaScript kernel

@@ -515,6 +515,23 @@ print(s:match("(%a+)%s+(%a+)"))</code></pre>
                 </label>
                 <button id="btn-reset-privacy" class="settings-btn">Reset Privacy Consent</button>
 
+                <div class="settings-section">Notebook VFS</div>
+                <label class="settings-item">
+                    <input type="checkbox" id="setting-nbvfs-same-write" checked> Allow cells to modify other cells
+                </label>
+                <label class="settings-item">
+                    <input type="checkbox" id="setting-nbvfs-cross-read"> Allow cross-notebook reads
+                </label>
+                <label class="settings-item">
+                    <input type="checkbox" id="setting-nbvfs-cross-write"> Allow cross-notebook writes
+                </label>
+                <label class="settings-item">
+                    <input type="checkbox" id="setting-nbvfs-exec"> Allow programmatic execution
+                </label>
+                <label class="settings-item">
+                    <input type="checkbox" id="setting-nbvfs-allow-js" checked> Allow JavaScript kernel
+                </label>
+
                 <div class="settings-section">Display</div>
                 <label class="settings-item">
                     <input type="checkbox" id="setting-large-touch"> Large touch targets (mobile-style buttons)
