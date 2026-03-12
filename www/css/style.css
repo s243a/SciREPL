@@ -779,6 +779,19 @@ html, body {
     border: 1px solid rgba(123, 104, 238, 0.3);
 }
 
+/* Cell name label (NotebookVFS) */
+.cell-name-label {
+    color: #58a6ff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    background: rgba(88, 166, 255, 0.1);
+    border: 1px solid rgba(88, 166, 255, 0.25);
+    border-radius: 3px;
+    cursor: pointer;
+    margin-left: auto;
+}
+
 .cell-type-switch-btn {
     padding: 4px 10px;
     border: 1px solid var(--border);

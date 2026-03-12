@@ -19,6 +19,7 @@ class SharedVFS {
             '/', '/tmp', '/shared', '/education', '/user', '/user/education',
             '/shared/lib', '/shared/lib/python', '/shared/lib/prolog', '/shared/lib/wasm',
             '/shared/bin', '/shared/data', '/shared/config', '/shared/notebooks',
+            '/nb',
         ]);
 
         /** @type {Map<string, Set<Function>>} */
@@ -58,7 +59,15 @@ class SharedVFS {
         return n === '/tmp' || n.startsWith('/tmp/') ||
                n === '/shared' || n.startsWith('/shared/') ||
                n === '/education' || n.startsWith('/education/') ||
-               n.startsWith('/user/education/');
+               n.startsWith('/user/education/') ||
+               n === '/nb' || n.startsWith('/nb/');
+    }
+
+    /**
+     * Check if a path should be delegated to NotebookVFS.
+     */
+    _isNbPath(path) {
+        return path === '/nb' || path.startsWith('/nb/');
     }
 
     // ── Core file operations ────────────────────────────────────
@@ -71,6 +80,13 @@ class SharedVFS {
      */
     writeFile(path, content, origin = 'unknown') {
         path = this._normalize(path);
+
+        // Delegate /nb/ paths to NotebookVFS
+        if (this._isNbPath(path) && window.notebookVFS) {
+            window.notebookVFS.writeFile(path, content);
+            return;
+        }
+
         this.mkdirTree(this._parentDir(path));
 
         const now = Date.now();
@@ -96,6 +112,12 @@ class SharedVFS {
      */
     readFile(path, encoding) {
         path = this._normalize(path);
+
+        // Delegate /nb/ paths to NotebookVFS
+        if (this._isNbPath(path) && window.notebookVFS) {
+            return window.notebookVFS.readFile(path);
+        }
+
         const entry = this._files.get(path);
         if (!entry) return null;
 
@@ -110,6 +132,9 @@ class SharedVFS {
      */
     exists(path) {
         path = this._normalize(path);
+        if (this._isNbPath(path) && window.notebookVFS) {
+            return window.notebookVFS.exists(path);
+        }
         return this._files.has(path) || this._dirs.has(path);
     }
 
@@ -117,14 +142,24 @@ class SharedVFS {
      * Check if a path is a file.
      */
     isFile(path) {
-        return this._files.has(this._normalize(path));
+        path = this._normalize(path);
+        if (this._isNbPath(path) && window.notebookVFS) {
+            const s = window.notebookVFS.stat(path);
+            return s ? s.isFile : false;
+        }
+        return this._files.has(path);
     }
 
     /**
      * Check if a path is a directory.
      */
     isDir(path) {
-        return this._dirs.has(this._normalize(path));
+        path = this._normalize(path);
+        if (this._isNbPath(path) && window.notebookVFS) {
+            const s = window.notebookVFS.stat(path);
+            return s ? s.isDir : false;
+        }
+        return this._dirs.has(path);
     }
 
     /**
@@ -170,6 +205,9 @@ class SharedVFS {
      */
     listDir(path) {
         path = this._normalize(path);
+        if (this._isNbPath(path) && window.notebookVFS) {
+            return window.notebookVFS.listDir(path) || [];
+        }
         if (!path.endsWith('/')) path += '/';
         const entries = new Set();
 
@@ -196,6 +234,9 @@ class SharedVFS {
      */
     stat(path) {
         path = this._normalize(path);
+        if (this._isNbPath(path) && window.notebookVFS) {
+            return window.notebookVFS.stat(path);
+        }
         const entry = this._files.get(path);
         if (entry) {
             return {
@@ -246,6 +287,11 @@ class SharedVFS {
      */
     vfs_read_file(path) {
         path = this._normalize(path);
+        if (this._isNbPath(path) && window.notebookVFS) {
+            const content = window.notebookVFS.readFile(path);
+            if (content === null) return null;
+            return typeof content === 'string' ? new TextEncoder().encode(content) : content;
+        }
         const entry = this._files.get(path);
         if (!entry) return null;
 
@@ -262,6 +308,12 @@ class SharedVFS {
      * @param {Uint8Array} content
      */
     vfs_write_file(path, content) {
+        const normalized = this._normalize(path);
+        if (this._isNbPath(normalized) && window.notebookVFS) {
+            const copy = content instanceof Uint8Array ? new Uint8Array(content) : content;
+            window.notebookVFS.writeFile(normalized, copy);
+            return;
+        }
         // Copy the Uint8Array — wasm-bindgen passes a view into WASM linear
         // memory which becomes detached when the memory grows.
         const copy = content instanceof Uint8Array ? new Uint8Array(content) : content;
@@ -272,6 +324,10 @@ class SharedVFS {
      * Check if a path exists (file or directory).
      */
     vfs_exists(path) {
+        const normalized = this._normalize(path);
+        if (this._isNbPath(normalized) && window.notebookVFS) {
+            return window.notebookVFS.exists(normalized);
+        }
         return this.exists(path);
     }
 
@@ -324,6 +380,9 @@ class SharedVFS {
      */
     vfs_list_dir(path) {
         path = this._normalize(path);
+        if (this._isNbPath(path) && window.notebookVFS) {
+            return window.notebookVFS.vfs_list_dir(path);
+        }
         // Check if path is a known directory
         if (!path.endsWith('/')) path += '/';
         const isDir = this._dirs.has(path.slice(0, -1)) || path === '/';
@@ -391,6 +450,16 @@ class SharedVFS {
      * Format: {"size":0,"is_dir":true,"modified":0}
      */
     vfs_stat(path) {
+        const normalized = this._normalize(path);
+        if (this._isNbPath(normalized) && window.notebookVFS) {
+            const info = window.notebookVFS.stat(normalized);
+            if (!info) return null;
+            return JSON.stringify({
+                size: info.size || 0,
+                is_dir: info.isDir || false,
+                modified: info.modified || 0
+            });
+        }
         const info = this.stat(path);
         if (!info) return null;
         return JSON.stringify({
