@@ -47,6 +47,9 @@ class LuaKernel {
         // Override print() to capture output
         this._installPrint();
 
+        // Install nb table for NotebookVFS access
+        this._installNotebookVFS();
+
         this._ready = true;
 
         if (window.kernelManager) {
@@ -96,6 +99,70 @@ class LuaKernel {
         });
         lua.lua_setfield(L, -2, f.to_luastring('write'));
         lua.lua_pop(L, 1);
+    }
+
+    /**
+     * Install the nb table for NotebookVFS access.
+     * nb.read(cell, prop), nb.write(cell, prop, value), nb.list()
+     */
+    _installNotebookVFS() {
+        const L = this._L;
+        const lua = this._lua;
+        const f = this._fengari;
+
+        lua.lua_newtable(L);
+
+        // nb.read(cell, prop) → string
+        lua.lua_pushjsfunction(L, function(L) {
+            const nbvfs = window.notebookVFS;
+            if (!nbvfs) { lua.lua_pushnil(L); return 1; }
+            const cell = f.to_jsstring(lua.lua_tostring(L, 1));
+            const prop = lua.lua_gettop(L) >= 2 ? f.to_jsstring(lua.lua_tostring(L, 2)) : null;
+            const path = prop ? `/nb/${cell}/${prop}` : `/nb/${cell}`;
+            const result = nbvfs.readFile(path);
+            if (result === null) { lua.lua_pushnil(L); return 1; }
+            lua.lua_pushstring(L, f.to_luastring(String(result)));
+            return 1;
+        });
+        lua.lua_setfield(L, -2, f.to_luastring('read'));
+
+        // nb.write(cell, prop, value) → boolean
+        lua.lua_pushjsfunction(L, function(L) {
+            const nbvfs = window.notebookVFS;
+            if (!nbvfs) { lua.lua_pushboolean(L, false); return 1; }
+            const cell = f.to_jsstring(lua.lua_tostring(L, 1));
+            const prop = f.to_jsstring(lua.lua_tostring(L, 2));
+            const value = f.to_jsstring(lua.lua_tostring(L, 3));
+            const path = `/nb/${cell}/${prop}`;
+            const ok = nbvfs.writeFile(path, value);
+            lua.lua_pushboolean(L, !!ok);
+            return 1;
+        });
+        lua.lua_setfield(L, -2, f.to_luastring('write'));
+
+        // nb.list() → JSON string of cells
+        lua.lua_pushjsfunction(L, function(L) {
+            const nbvfs = window.notebookVFS;
+            if (!nbvfs) { lua.lua_pushnil(L); return 1; }
+            const result = nbvfs.readFile('/nb');
+            lua.lua_pushstring(L, f.to_luastring(String(result)));
+            return 1;
+        });
+        lua.lua_setfield(L, -2, f.to_luastring('list'));
+
+        // nb.name(cell, new_name) — set cell name (shorthand)
+        lua.lua_pushjsfunction(L, function(L) {
+            const nbvfs = window.notebookVFS;
+            if (!nbvfs) { lua.lua_pushboolean(L, false); return 1; }
+            const cell = f.to_jsstring(lua.lua_tostring(L, 1));
+            const name = f.to_jsstring(lua.lua_tostring(L, 2));
+            const ok = nbvfs.writeFile(`/nb/${cell}/.name`, name);
+            lua.lua_pushboolean(L, !!ok);
+            return 1;
+        });
+        lua.lua_setfield(L, -2, f.to_luastring('name'));
+
+        lua.lua_setglobal(L, f.to_luastring('nb'));
     }
 
     isReady() {

@@ -229,6 +229,27 @@
             _clearDragIndicators();
         });
 
+        // Double-click prompt icon to set/edit cell name
+        const promptIcon = card.querySelector('.prompt-icon');
+        if (promptIcon) {
+            promptIcon.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                const cell = window._cells.find(c => c.id === cellId);
+                if (!cell) return;
+                const currentName = cell.name || '';
+                const newName = prompt('Cell name (empty to clear):', currentName);
+                if (newName === null) return; // cancelled
+                if (window.notebookVFS) {
+                    const idx = window._cells.indexOf(cell);
+                    if (idx >= 0) {
+                        window.notebookVFS._setCellName(idx, newName.trim());
+                        saveCellsToSession();
+                    }
+                }
+            });
+            promptIcon.title = 'Double-click to name this cell';
+        }
+
         getRepl().appendChild(card);
         return card;
     }
@@ -815,10 +836,21 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         badge.className = 'running';
         window._currentOutputCard = outputCard;
 
+        // Set NotebookVFS context to this cell
+        if (window.notebookVFS) {
+            const cellIdx = window._cells.indexOf(cell);
+            if (cellIdx >= 0) window.notebookVFS.setContext(cellIdx);
+        }
+
         try {
             await executeCode(code, language);
 
+            // Capture output for NotebookVFS
             const body = outputCard.querySelector('.card-body');
+            if (body) {
+                cell.lastOutput = body.textContent || '';
+            }
+
             if (body && body.children.length === 0) {
                 outputCard.remove();
                 cell.outputCard = null;
@@ -992,10 +1024,17 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 code: saved.code,
                 type: saved.type,
                 language: language,
+                name: saved.name || '',
+                lastOutput: saved.lastOutput || '',
                 inputCard: inputCard,
                 outputCard: outputCard
             };
             window._cells.push(cell);
+
+            // Render cell name label if set
+            if (cell.name && window.notebookVFS) {
+                window.notebookVFS._updateCellUI(window._cells.length - 1, 'name');
+            }
 
             if (saved.type === 'markdown') {
                 const body = outputCard.querySelector('.card-body');
@@ -1308,10 +1347,17 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
             code: code,
             type: currentCellType,
             language: language,
+            name: '',
+            lastOutput: '',
             inputCard: inputCard,
             outputCard: outputCard
         };
         window._cells.push(cell);
+
+        // Set NotebookVFS context to this cell
+        if (window.notebookVFS) {
+            window.notebookVFS.setContext(window._cells.length - 1);
+        }
 
         if (currentCellType === 'markdown') {
             const body = outputCard.querySelector('.card-body');
@@ -1335,7 +1381,12 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 }
                 saveCellsToSession();
 
+                // Capture output for NotebookVFS
                 const body = outputCard.querySelector('.card-body');
+                if (body) {
+                    cell.lastOutput = body.textContent || '';
+                }
+
                 if (body && body.children.length === 0) {
                     outputCard.remove();
                     cell.outputCard = null;

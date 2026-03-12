@@ -45,6 +45,25 @@ sharedfs_size <- function(path) {
   file.info(path)$size
 }
 
+# ── Notebook VFS helpers (/nb/) ────────────────────────────────
+# Read cell properties synced from NotebookVFS before execution.
+# Paths: /nb/In[1]/.code, /nb/my_cell/.output, etc.
+
+#' Read a cell property from the notebook.
+#' @param cell Cell identifier: "In[1]", "In[2]", or a named cell
+#' @param prop Property: ".code", ".output", ".language", ".type", ".name"
+nb_read <- function(cell, prop = ".code") {
+  path <- paste0("/nb/", cell, "/", prop)
+  if (!file.exists(path)) stop(paste("Cell not found:", cell))
+  paste(readLines(path, warn = FALSE), collapse = "\n")
+}
+
+#' List cells in the notebook (reads synced /nb/ directory).
+nb_list <- function() {
+  if (!dir.exists("/nb")) return(character(0))
+  list.files("/nb", full.names = FALSE)
+}
+
 # ── Interactive Plotly plotting ────────────────────────────────
 # Emits Plotly JSON markers that the R kernel intercepts and
 # routes to Plotly.js for interactive charts.

@@ -123,6 +123,57 @@ def latex(expr):
     """Render a LaTeX string in the output."""
     js.renderLatex(str(expr))
 
+# ---- Notebook VFS (/nb/) bridge ----
+
+def nb_read(cell, prop=".code"):
+    """Read a cell property from the notebook.
+
+    Usage:
+        code = nb_read("In[1]", ".code")
+        output = nb_read("my_cell", ".output")
+        lang = nb_read("In[2]", ".language")
+        info = nb_read("In[1]")  # returns JSON object reference
+    """
+    nbvfs = js.window.notebookVFS
+    if not nbvfs:
+        raise RuntimeError("NotebookVFS not available")
+    if prop:
+        path = f"/nb/{cell}/{prop}"
+    else:
+        path = f"/nb/{cell}"
+    result = nbvfs.readFile(path)
+    if result is None:
+        raise FileNotFoundError(f"Cell not found: {cell}")
+    return str(result)
+
+def nb_write(cell, prop, value):
+    """Write to a cell property in the notebook.
+
+    Usage:
+        nb_write("my_cell", ".code", "print('hello')")
+        nb_write("In[3]", ".name", "results")
+        nb_write("In[1]", ".language", "lua")
+    """
+    nbvfs = js.window.notebookVFS
+    if not nbvfs:
+        raise RuntimeError("NotebookVFS not available")
+    path = f"/nb/{cell}/{prop}"
+    ok = nbvfs.writeFile(path, str(value))
+    if not ok:
+        raise RuntimeError(f"Failed to write to {path}")
+
+def nb_list():
+    """List all cells in the current notebook.
+
+    Returns a list of dicts with position, label, name, language, type.
+    """
+    nbvfs = js.window.notebookVFS
+    if not nbvfs:
+        raise RuntimeError("NotebookVFS not available")
+    result = nbvfs.readFile("/nb")
+    return json.loads(str(result))
+
+
 # ---- WASM FFI bridge ----
 
 def wasm_call(module_name, func_name, args=None):

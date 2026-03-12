@@ -42,7 +42,9 @@ class Notebook {
             cells: this.cells.map(c => ({
                 code: c.code,
                 type: c.type,
-                language: c.language || 'python'
+                language: c.language || 'python',
+                name: c.name || '',
+                lastOutput: c.lastOutput || ''
             }))
         };
     }
