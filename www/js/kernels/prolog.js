@@ -150,6 +150,8 @@ class PrologKernel {
         }
 
         try {
+            // Sync NotebookVFS cell properties into Emscripten FS
+            this._syncNbToProlog();
             const results = await this._executeBlock(trimmed);
             // Sync files written by Prolog's native I/O to SharedVFS
             this._syncSharedPaths();
@@ -165,6 +167,53 @@ class PrologKernel {
      * directly to Emscripten FS, bypassing PrologVFS.writeFile(),
      * so SharedVFS never sees those files without this sync.
      */
+    /**
+     * Sync NotebookVFS cell properties into Emscripten FS.
+     * Creates /nb/In[N]/.code, .output, .language, .type, .name.
+     * This allows Prolog to read cell content via read_file_to_string/3.
+     */
+    _syncNbToProlog() {
+        const nbvfs = window.notebookVFS;
+        if (!nbvfs || !this._swipl) return;
+        const FS = this._swipl.FS;
+        const cells = window._cells || [];
+        if (cells.length === 0) return;
+
+        // Ensure /nb exists
+        try { FS.mkdir('/nb'); } catch (_) { /* exists */ }
+
+        const props = ['.code', '.output', '.language', '.type', '.name'];
+
+        for (let i = 0; i < cells.length; i++) {
+            const label = 'In[' + (i + 1) + ']';
+            const cellDir = '/nb/' + label;
+            try { FS.mkdir(cellDir); } catch (_) { /* exists */ }
+
+            for (const prop of props) {
+                const value = nbvfs._getCellProperty(i, prop);
+                if (value !== null) {
+                    try {
+                        FS.writeFile(cellDir + '/' + prop, value);
+                    } catch (_) { /* skip */ }
+                }
+            }
+
+            // Named alias
+            if (cells[i].name) {
+                const namedDir = '/nb/' + cells[i].name;
+                try { FS.mkdir(namedDir); } catch (_) { /* exists */ }
+                for (const prop of props) {
+                    const value = nbvfs._getCellProperty(i, prop);
+                    if (value !== null) {
+                        try {
+                            FS.writeFile(namedDir + '/' + prop, value);
+                        } catch (_) { /* skip */ }
+                    }
+                }
+            }
+        }
+    }
+
     _syncSharedPaths() {
         if (!window.sharedVFS || !this._swipl) return;
         const FS = this._swipl.FS;

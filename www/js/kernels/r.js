@@ -162,6 +162,51 @@ class RKernel {
     }
 
     /**
+     * Sync NotebookVFS cell properties into webR's FS as files.
+     * Creates /nb/In[N]/.code, .output, .language, .type, .name for each cell.
+     * This allows R code to use readLines("/nb/In[1]/.code") etc.
+     */
+    async _syncNbToWebR() {
+        const nbvfs = window.notebookVFS;
+        if (!nbvfs) return;
+
+        const cells = window._cells || [];
+        if (cells.length === 0) return;
+
+        // Ensure /nb directory exists
+        await this._mkdirSafe('/nb');
+
+        const props = ['.code', '.output', '.language', '.type', '.name'];
+
+        for (let i = 0; i < cells.length; i++) {
+            const label = 'In[' + (i + 1) + ']';
+            const cellDir = '/nb/' + label;
+            await this._mkdirSafe(cellDir);
+
+            for (const prop of props) {
+                const value = nbvfs._getCellProperty(i, prop);
+                if (value !== null) {
+                    const data = new TextEncoder().encode(value);
+                    await this._webr.FS.writeFile(cellDir + '/' + prop, data);
+                }
+            }
+
+            // Also create named alias directory if cell has a name
+            if (cells[i].name) {
+                const namedDir = '/nb/' + cells[i].name;
+                await this._mkdirSafe(namedDir);
+                for (const prop of props) {
+                    const value = nbvfs._getCellProperty(i, prop);
+                    if (value !== null) {
+                        const data = new TextEncoder().encode(value);
+                        await this._webr.FS.writeFile(namedDir + '/' + prop, data);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Sync files from webR's Emscripten FS → SharedVFS (after execution).
      * Walks /shared and /tmp in webR, writes any new/changed files back.
      */
@@ -269,6 +314,8 @@ class RKernel {
         try {
             // Sync SharedVFS → webR before execution
             await this._syncToWebR();
+            // Sync NotebookVFS cell properties into webR FS
+            await this._syncNbToWebR();
 
             const shelter = await new this._webr.Shelter();
             // Prepend dark-theme par() so base R plots are legible on dark UI
