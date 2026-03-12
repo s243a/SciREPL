@@ -150,28 +150,79 @@ The key insight: **workbooks are JSON in localStorage**. The `/nb/` mount is a s
 
 ## Implementation plan
 
-### Phase 1: Core mount + Bash integration
-1. **NotebookVFS class** (`www/js/notebook_vfs.js`)
-   - Implements `readFile(path)`, `writeFile(path, content)`, `listDir(path)`, `stat(path)`
-   - Resolves addressing: `In[N]`, named cells, relative (`./+1`)
-   - Registered as a mount point in SharedVFS or as a parallel VFS
-2. **Cell name property** — add `name` field to cell objects, persist in session/notebook JSON
-3. **Cell name UI** — small editable label above each cell
-4. **Bash kernel bridge** — intercept `/nb/` paths in brush-wasm, delegate to NotebookVFS
+### Phase 1: Core mount + Bash integration — DONE
+1. **NotebookVFS class** (`www/js/notebook_vfs.js`) — full VFS interface with `readFile`, `writeFile`, `listDir`, `stat`, `exists`, plus Rust bridge methods (`vfs_list_dir`, `vfs_read_file`, etc.)
+2. **SharedVFS delegation** — all `/nb/` paths intercepted at SharedVFS level, giving Bash free access via brush-wasm's Rust VFS hooks
+3. **Cell addressing** — `In[N]` (positional), named cells, relative (`+N`/`-N`), self (`.`)
+4. **Cell name property** — `name` field on cell objects, persisted in session/notebook JSON
+5. **Cell name UI** — label in card header, double-click prompt icon to set/edit
+6. **Output capture** — `cell.lastOutput` populated after execution for `.output` reads
 
-### Phase 2: Cross-kernel support
-5. **Python bridge** — expose `/nb/` paths via `open()` override or helper functions
-6. **Lua bridge** — expose via `io.open()` or helper table
-7. **R bridge** — `nb_read()` / `nb_write()` helpers
-8. **Prolog bridge** — `nb_read/2`, `nb_write/2` predicates, or consult from `/nb/` paths
+### Phase 2: Cross-kernel support — DONE
+7. **Bash** — `cat /nb/In[1]/.code`, `ls /nb/`, `echo "x" > /nb/cell/.code`
+8. **Python** — `nb_read(cell, prop)`, `nb_write(cell, prop, value)`, `nb_list()` via `js.window.notebookVFS`
+9. **Lua** — `nb.read(cell, prop)`, `nb.write(cell, prop, value)`, `nb.list()`, `nb.name(cell, name)` via `lua_pushjsfunction`
+10. **R** — `nb_read(cell, prop)`, `nb_list()` via files synced to webR FS before execution (read-only)
+11. **Prolog** — `nb_read/3`, `nb_code/2`, `nb_output/2`, `nb_language/2`, `nb_list/1` via Emscripten FS sync (read-only)
 
-### Phase 3: Extended features
-9. **Cell object references** — bare path returns a handle usable in JS/Python
-10. **Typed output access** — `.output.json`, `.output.csv`, `.output.png`
-11. **`/workbook/` mount** — cross-notebook cell access
-12. **`/local/` mount** — raw localStorage/IndexedDB access
-13. **Cell creation/deletion** via `mkdir`/`rm`
-14. **Watch/subscribe** — notify when a cell's output changes (reactive pipelines)
+### Phase 3: Extended features — PLANNED
+Items grouped by complexity and dependency. Each can be implemented independently.
+
+#### 3a. R and Prolog write support
+- **R write-back** — after execution, scan `/nb/` in webR FS for modified properties and sync back to NotebookVFS. Add `nb_write()` R helper.
+- **Prolog write-back** — same pattern for Emscripten FS. Add `nb_write/3` predicate.
+- Complexity: low. Follows existing SharedVFS sync patterns.
+
+#### 3b. Cell creation and deletion
+- `mkdir /nb/new_cell` creates a new cell at the end of the notebook
+- `rm -r /nb/In[5]` deletes a cell
+- Writing `.language` on a new cell sets its type before adding code
+- Need to decide: does creation add to DOM immediately, or require a refresh?
+- Complexity: medium. Touches cell creation/deletion code paths in app.js.
+
+#### 3c. Security settings UI
+- Add a settings section (Menu → Settings or dedicated panel) with toggles for: cross-notebook read/write, programmatic execution, same-notebook write, allow JavaScript
+- Enforce settings in NotebookVFS `_setCellProperty` and add checks to read paths for cross-notebook
+- Complexity: low-medium. Settings scaffold already exists in NotebookVFS.
+
+#### 3d. Typed output access
+- `.output` currently returns `textContent` of the output card DOM
+- Add sub-properties: `.output.text` (plain text), `.output.html` (raw HTML), `.output.json` (if output is JSON-parseable), `.output.png` (if output contains an image, return data URL)
+- Requires richer output capture — store structured output, not just text
+- Complexity: medium. Needs changes to output capture in app.js and executeCode.
+
+#### 3e. `/workbook/` mount — cross-notebook access
+- `/workbook/Notebook Name/In[1]/.code` reads cells from inactive notebooks
+- NotebookManager already stores `nb.cells` for inactive notebooks, so reads are straightforward
+- Writes to inactive notebooks update the data model; UI refreshes on `switchTo()`
+- Gated by security settings (cross-notebook read/write)
+- Complexity: medium. Needs a new mount handler, path parsing for notebook names with spaces.
+
+#### 3f. `/local/` mount — localStorage/IndexedDB browser
+- Expose localStorage keys as files under `/local/`
+- Useful for debugging, backup, and cross-session data access
+- Read-only initially; writes could modify localStorage but risk breaking app state
+- Ties into the filesystem viewer (task #141)
+- Complexity: medium. Need to handle JSON values, binary IndexedDB entries.
+
+#### 3g. Programmatic cell execution
+- Writing to `/nb/In[3]/.run` (or a special `.execute` property) triggers execution
+- Security-gated (programmatic execution setting must be enabled)
+- Enables pipeline workflows: cell A generates code → writes to cell B → triggers B
+- Complexity: high. Needs async execution queue, re-entrance protection, UI feedback.
+
+#### 3h. Watch/subscribe — reactive pipelines
+- A kernel can subscribe to changes on a cell's `.output`
+- When that cell re-executes, subscribers are notified
+- Enables live dashboards: data cell updates → visualization cell auto-refreshes
+- Complexity: high. Needs event system, re-execution triggers, cycle detection.
+
+#### 3i. Sandboxed JavaScript kernel
+- Run JS in a Web Worker or sandboxed iframe
+- Communicate via message-passing bridge (like other kernels)
+- No `window`/`document` access; `/nb/` and `/shared/` via bridge only
+- Coexists as "JavaScript (sandboxed)" alongside full JS
+- Complexity: high. Needs new kernel architecture, message protocol.
 
 ## Relationship to existing systems
 
