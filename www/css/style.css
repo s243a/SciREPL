@@ -573,6 +573,12 @@ html, body {
     margin: 8px 0;
 }
 
+.modal-desc {
+    font-size: 12px;
+    color: var(--text-muted, #8b949e);
+    margin-bottom: 12px;
+}
+
 .modal-content pre {
     background: var(--bg-input);
     border: 1px solid var(--border);
@@ -718,6 +724,15 @@ html, body {
     background-position: right 6px center;
 }
 
+#lang-selector.lua-active {
+    color: #7b68ee;
+    border-color: #7b68ee;
+    background-color: rgba(123, 104, 238, 0.1);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237b68ee'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+}
+
 /* Language badge in cell labels */
 .lang-badge {
     font-size: 9px;
@@ -756,6 +771,12 @@ html, body {
     color: #4E7FB4;
     background: rgba(78, 127, 180, 0.1);
     border: 1px solid rgba(78, 127, 180, 0.3);
+}
+
+.lang-badge.lang-lua {
+    color: #7b68ee;
+    background: rgba(123, 104, 238, 0.1);
+    border: 1px solid rgba(123, 104, 238, 0.3);
 }
 
 .cell-type-switch-btn {

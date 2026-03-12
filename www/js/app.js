@@ -67,11 +67,11 @@
                 window.kernelManager.setLanguage(lang);
             }
             // Update visual styling
-            const activeClasses = { prolog: 'prolog-active', bash: 'bash-active', javascript: 'javascript-active', r: 'r-active' };
+            const activeClasses = { prolog: 'prolog-active', bash: 'bash-active', javascript: 'javascript-active', r: 'r-active', lua: 'lua-active' };
             langSelector.className = activeClasses[lang] || '';
             // Update placeholder
             if (currentCellType === 'code') {
-                const placeholders = { prolog: 'Type Prolog here…', bash: 'Type Bash here…', javascript: 'Type JavaScript here…', r: 'Type R here…' };
+                const placeholders = { prolog: 'Type Prolog here…', bash: 'Type Bash here…', javascript: 'Type JavaScript here…', r: 'Type R here…', lua: 'Type Lua here…' };
                 input.placeholder = placeholders[lang] || 'Type Python here…';
             }
         });
@@ -262,7 +262,7 @@
     /** Syntax-highlight code using highlight.js if available. Falls back to escapeHtml. */
     function highlightCode(code, language) {
         if (typeof window.hljs !== 'undefined') {
-            const langMap = { python: 'python', javascript: 'javascript', r: 'r', bash: 'bash', prolog: 'prolog' };
+            const langMap = { python: 'python', javascript: 'javascript', r: 'r', bash: 'bash', prolog: 'prolog', lua: 'lua' };
             const hljsLang = langMap[language];
             if (hljsLang && window.hljs.getLanguage(hljsLang)) {
                 try { return window.hljs.highlight(code, { language: hljsLang }).value; } catch (e) { /* fall through */ }
@@ -310,15 +310,19 @@
         const actions = document.createElement('div');
         actions.className = 'cell-edit-actions';
         const cellLang = cell ? (cell.language || 'python') : 'python';
+        // Build language options from enabled set
+        const _langMeta = (window.fileIO && window.fileIO.constructor.LANGUAGE_META) || [
+            {id:'python',abbrev:'Py'},{id:'r',abbrev:'R'},{id:'prolog',abbrev:'PL'},
+            {id:'bash',abbrev:'Sh'},{id:'javascript',abbrev:'JS'},{id:'lua',abbrev:'Lua'}
+        ];
+        const _enabled = window.fileIO ? window.fileIO._getEnabledLanguages() : new Set(_langMeta.map(l=>l.id));
+        const _langOpts = _langMeta
+            .filter(l => _enabled.has(l.id) || l.id === cellLang) // always include current cell's lang
+            .map(l => `<option value="${l.id}"${cellLang === l.id ? ' selected' : ''}>${l.abbrev}</option>`)
+            .join('');
         actions.innerHTML = `
             <button class="cell-type-switch-btn">${cellType === 'markdown' ? 'Md' : 'Code'}</button>
-            <select class="cell-lang-switch" title="Cell language">
-                <option value="python"${cellLang === 'python' ? ' selected' : ''}>Py</option>
-                <option value="r"${cellLang === 'r' ? ' selected' : ''}>R</option>
-                <option value="prolog"${cellLang === 'prolog' ? ' selected' : ''}>PL</option>
-                <option value="bash"${cellLang === 'bash' ? ' selected' : ''}>Sh</option>
-                <option value="javascript"${cellLang === 'javascript' ? ' selected' : ''}>JS</option>
-            </select>
+            <select class="cell-lang-switch" title="Cell language">${_langOpts}</select>
             <button class="cell-lang-apply-all" title="Apply language to all code cells">All→</button>
             <button class="cell-run-btn">▶ Run</button>
             <button class="cell-run-below-btn">▶▶ Run All Below</button>
