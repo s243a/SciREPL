@@ -267,6 +267,40 @@ class RKernel {
         }
     }
 
+    /**
+     * Sync NotebookVFS properties from webR's FS back to NotebookVFS.
+     * Detects files modified by R code under /nb/In[N]/ and writes
+     * changes back to the notebook via NotebookVFS.
+     */
+    async _syncNbFromWebR() {
+        const nbvfs = window.notebookVFS;
+        if (!nbvfs) return;
+
+        const cells = window._cells || [];
+        if (cells.length === 0) return;
+
+        const writableProps = ['.code', '.language', '.type', '.name'];
+
+        for (let i = 0; i < cells.length; i++) {
+            const label = 'In[' + (i + 1) + ']';
+            const cellDir = '/nb/' + label;
+
+            for (const prop of writableProps) {
+                const filePath = cellDir + '/' + prop;
+                try {
+                    const data = await this._webr.FS.readFile(filePath);
+                    const newValue = new TextDecoder().decode(data);
+                    const oldValue = nbvfs._getCellProperty(i, prop) || '';
+                    if (newValue !== oldValue) {
+                        nbvfs._setCellProperty(i, prop, newValue);
+                    }
+                } catch (e) {
+                    // File doesn't exist or can't be read — skip
+                }
+            }
+        }
+    }
+
     // ── Package Installation ────────────────────────────────────
 
     /**
@@ -392,6 +426,8 @@ class RKernel {
 
             // Sync webR → SharedVFS after execution
             await this._syncFromWebR();
+            // Sync webR → NotebookVFS (write-back)
+            await this._syncNbFromWebR();
 
             return {
                 stdout: stdout.trimEnd(),

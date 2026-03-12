@@ -58,6 +58,18 @@ nb_read <- function(cell, prop = ".code") {
   paste(readLines(path, warn = FALSE), collapse = "\n")
 }
 
+#' Write a cell property in the notebook.
+#' Changes are synced back to NotebookVFS after execution.
+#' @param cell Cell identifier: "In[1]", "In[2]", or a named cell
+#' @param prop Property: ".code", ".language", ".type", ".name"
+#' @param value New value (character string)
+nb_write <- function(cell, prop, value) {
+  path <- paste0("/nb/", cell, "/", prop)
+  dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
+  writeLines(as.character(value), path)
+  invisible(path)
+}
+
 #' List cells in the notebook (reads synced /nb/ directory).
 nb_list <- function() {
   if (!dir.exists("/nb")) return(character(0))

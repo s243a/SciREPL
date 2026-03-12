@@ -133,6 +133,19 @@ class FileIO {
                 if (defaultLang) defaultLang.value = localStorage.getItem('scirepl_default_language') || 'python';
                 if (exportFmt) exportFmt.value = localStorage.getItem('scirepl_export_format') || 'zip';
 
+                // Load Notebook VFS settings
+                const nbvfsSettings = window.notebookVFS ? window.notebookVFS._getSettings() : {};
+                const nbSameWrite = document.getElementById('setting-nbvfs-same-write');
+                const nbCrossRead = document.getElementById('setting-nbvfs-cross-read');
+                const nbCrossWrite = document.getElementById('setting-nbvfs-cross-write');
+                const nbExec = document.getElementById('setting-nbvfs-exec');
+                const nbAllowJs = document.getElementById('setting-nbvfs-allow-js');
+                if (nbSameWrite) nbSameWrite.checked = nbvfsSettings.sameNotebookWrite !== false;
+                if (nbCrossRead) nbCrossRead.checked = !!nbvfsSettings.crossNotebookRead;
+                if (nbCrossWrite) nbCrossWrite.checked = !!nbvfsSettings.crossNotebookWrite;
+                if (nbExec) nbExec.checked = !!nbvfsSettings.programmaticExecution;
+                if (nbAllowJs) nbAllowJs.checked = nbvfsSettings.allowJavaScript !== false;
+
                 settingsModal.classList.remove('hidden');
             });
             // Save on change
@@ -156,6 +169,14 @@ class FileIO {
                     localStorage.setItem('scirepl_export_format', e.target.value);
                 } else if (id === 'setting-auto-switch') {
                     localStorage.setItem('scirepl_auto_switch_workbook', e.target.checked ? '1' : '0');
+                } else if (id.startsWith('setting-nbvfs-') && window.notebookVFS) {
+                    const s = window.notebookVFS._getSettings();
+                    if (id === 'setting-nbvfs-same-write') s.sameNotebookWrite = e.target.checked;
+                    else if (id === 'setting-nbvfs-cross-read') s.crossNotebookRead = e.target.checked;
+                    else if (id === 'setting-nbvfs-cross-write') s.crossNotebookWrite = e.target.checked;
+                    else if (id === 'setting-nbvfs-exec') s.programmaticExecution = e.target.checked;
+                    else if (id === 'setting-nbvfs-allow-js') s.allowJavaScript = e.target.checked;
+                    window.notebookVFS._saveSettings(s);
                 }
             });
             // Reset privacy consent button
