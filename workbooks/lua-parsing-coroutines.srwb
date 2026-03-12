@@ -1,0 +1,149 @@
+{
+  "format": "srwb",
+  "format_version": "1.0",
+  "exported_at": "2026-03-10T00:00:00.000Z",
+  "notebook": {
+    "id": "nb-lua-parsing-001",
+    "name": "Lua: Parsing with Coroutines",
+    "description": "Building parsers in Lua using coroutines as lexers, closures as combinators, and tables as ASTs.",
+    "kernelLanguage": "lua",
+    "cellCounter": 30,
+    "cells": [
+      {
+        "code": "# Parsing with Coroutines in Lua\n\nLua's coroutines, closures, and pattern matching combine into a natural toolkit for building parsers — no external libraries needed.\n\nThis workbook builds up from patterns to a working expression evaluator:\n\n1. **Lua patterns** — the built-in pattern matching system\n2. **Coroutine lexer** — tokenize input lazily, yielding one token at a time\n3. **Recursive descent parser** — consume tokens to build an AST\n4. **Evaluator** — walk the tree to compute results\n5. **Combinator library** — composable parsers from closures",
+        "type": "markdown",
+        "language": "lua"
+      },
+      {
+        "code": "## 1. Lua Patterns\n\nLua doesn't have regex — it has *patterns*, a lighter system built into `string.find`, `string.match`, `string.gmatch`, and `string.gsub`.\n\nKey classes: `%a` (letter), `%d` (digit), `%w` (alphanumeric), `%s` (space), `%p` (punctuation). Uppercase is the complement (`%A` = non-letter). `.` matches anything.",
+        "type": "markdown",
+        "language": "lua"
+      },
+      {
+        "code": "-- string.match: extract captures\nlocal year, month, day = string.match(\"2026-03-10\", \"(%d+)-(%d+)-(%d+)\")\nprint(\"Year:\", year, \"Month:\", month, \"Day:\", day)\n\n-- string.gmatch: iterate over all matches\nprint(\"\\nWords in sentence:\")\nfor word in string.gmatch(\"the quick brown fox\", \"%a+\") do\n  print(\"  \" .. word)\nend",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "-- string.gsub: search and replace\nlocal result = string.gsub(\"Hello World\", \"%u\", function(c)\n  return \"[\" .. c .. \"]\"\nend)\nprint(result)  -- [H]ello [W]orld\n\n-- Swap key=value pairs\nlocal swapped = string.gsub(\"name=Alice age=30\", \"(%w+)=(%w+)\", \"%2=%1\")\nprint(swapped)  -- Alice=name 30=age",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "-- string.find: locate patterns with positions\nlocal s = \"function foo(x, y)\"\nlocal i, j, name = string.find(s, \"function%s+(%w+)\")\nprint(string.format(\"Found '%s' at positions %d-%d\", name, i, j))\n\n-- Frontier pattern %f[]: match at boundary transitions\nlocal text = \"camelCaseVariable\"\nlocal parts = {}\nfor word in string.gmatch(text, \"%u?%l+\") do\n  parts[#parts + 1] = word\nend\nprint(\"Split camelCase:\", table.concat(parts, \" | \"))",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "## 2. Coroutine Lexer\n\nA **lexer** (tokenizer) breaks input text into tokens. Using a coroutine, we can `yield` tokens one at a time — the parser pulls them on demand. No intermediate array needed.",
+        "type": "markdown",
+        "language": "lua"
+      },
+      {
+        "code": "-- Token types\nNUM = \"NUM\"\nOP  = \"OP\"\nID  = \"ID\"\nLPAREN = \"LPAREN\"\nRPAREN = \"RPAREN\"\nEOF = \"EOF\"\n\nfunction lexer(input)\n  return coroutine.wrap(function()\n    local pos = 1\n    while pos <= #input do\n      -- Skip whitespace\n      local ws = string.match(input, \"^%s+\", pos)\n      if ws then pos = pos + #ws end\n      if pos > #input then break end\n\n      -- Numbers (integers and decimals)\n      local num = string.match(input, \"^%d+%.?%d*\", pos)\n      if num then\n        coroutine.yield({ type = NUM, value = tonumber(num), pos = pos })\n        pos = pos + #num\n      -- Identifiers / keywords\n      elseif string.match(input, \"^%a\", pos) then\n        local id = string.match(input, \"^%a%w*\", pos)\n        coroutine.yield({ type = ID, value = id, pos = pos })\n        pos = pos + #id\n      -- Operators\n      elseif string.find(\"+-*/^%%\", string.sub(input, pos, pos), 1, true) then\n        coroutine.yield({ type = OP, value = string.sub(input, pos, pos), pos = pos })\n        pos = pos + 1\n      -- Parentheses\n      elseif string.sub(input, pos, pos) == \"(\" then\n        coroutine.yield({ type = LPAREN, pos = pos })\n        pos = pos + 1\n      elseif string.sub(input, pos, pos) == \")\" then\n        coroutine.yield({ type = RPAREN, pos = pos })\n        pos = pos + 1\n      else\n        error(\"Unexpected character at position \" .. pos .. \": '\" .. string.sub(input, pos, pos) .. \"'\")\n      end\n    end\n    coroutine.yield({ type = EOF })\n  end)\nend\n\n-- Test the lexer\nprint(\"Tokens for '3 + 42 * (x - 1)':\")\nfor tok in lexer(\"3 + 42 * (x - 1)\") do\n  if tok.value then\n    print(string.format(\"  %-7s %s\", tok.type, tostring(tok.value)))\n  else\n    print(string.format(\"  %s\", tok.type))\n  end\nend",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "## 3. Token Stream\n\nThe parser needs to peek ahead without consuming. We wrap the lexer coroutine in a stream that buffers one token.",
+        "type": "markdown",
+        "language": "lua"
+      },
+      {
+        "code": "function TokenStream(input)\n  local next_token = lexer(input)\n  local current = next_token()\n\n  local stream = {}\n\n  function stream.peek()\n    return current\n  end\n\n  function stream.consume()\n    local tok = current\n    current = next_token()\n    return tok\n  end\n\n  function stream.expect(typ)\n    local tok = current\n    if tok.type ~= typ then\n      error(\"Expected \" .. typ .. \" but got \" .. tok.type\n        .. (tok.pos and \" at position \" .. tok.pos or \"\"))\n    end\n    return stream.consume()\n  end\n\n  return stream\nend\n\n-- Test peek/consume\nlocal s = TokenStream(\"10 + 20\")\nprint(\"Peek:\", s.peek().type, s.peek().value)\nprint(\"Consume:\", s.consume().value)\nprint(\"Next:\", s.peek().type, s.peek().value)",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "## 4. Recursive Descent Parser\n\nWe parse arithmetic expressions respecting operator precedence:\n- `+`, `-` (lowest)\n- `*`, `/` (higher)\n- `^` (highest, right-associative)\n- Parentheses and unary minus\n\nThe parser builds an **AST** (abstract syntax tree) from tables.",
+        "type": "markdown",
+        "language": "lua"
+      },
+      {
+        "code": "-- AST node constructors\nfunction NumNode(value)\n  return { tag = \"num\", value = value }\nend\n\nfunction VarNode(name)\n  return { tag = \"var\", name = name }\nend\n\nfunction BinOp(op, left, right)\n  return { tag = \"binop\", op = op, left = left, right = right }\nend\n\nfunction UnaryOp(op, operand)\n  return { tag = \"unary\", op = op, operand = operand }\nend\n\nfunction CallNode(name, args)\n  return { tag = \"call\", name = name, args = args }\nend",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "-- Parser: recursive descent with precedence climbing\nfunction parse(input)\n  local tokens = TokenStream(input)\n\n  -- expr = term (('+' | '-') term)*\n  local function expr()\n    local node = term()\n    while tokens.peek().type == OP\n      and (tokens.peek().value == \"+\" or tokens.peek().value == \"-\") do\n      local op = tokens.consume().value\n      node = BinOp(op, node, term())\n    end\n    return node\n  end\n\n  -- term = power (('*' | '/' | '%') power)*\n  function term()\n    local node = power()\n    while tokens.peek().type == OP\n      and (tokens.peek().value == \"*\" or tokens.peek().value == \"/\"\n           or tokens.peek().value == \"%\") do\n      local op = tokens.consume().value\n      node = BinOp(op, node, power())\n    end\n    return node\n  end\n\n  -- power = unary ('^' power)?  (right-associative)\n  function power()\n    local node = unary()\n    if tokens.peek().type == OP and tokens.peek().value == \"^\" then\n      tokens.consume()\n      node = BinOp(\"^\", node, power())  -- right-recursive!\n    end\n    return node\n  end\n\n  -- unary = '-' unary | atom\n  function unary()\n    if tokens.peek().type == OP and tokens.peek().value == \"-\" then\n      tokens.consume()\n      return UnaryOp(\"-\", unary())\n    end\n    return atom()\n  end\n\n  -- atom = NUM | ID | ID '(' args ')' | '(' expr ')'\n  function atom()\n    local tok = tokens.peek()\n\n    if tok.type == NUM then\n      tokens.consume()\n      return NumNode(tok.value)\n    end\n\n    if tok.type == ID then\n      local name = tokens.consume().value\n      -- Function call?\n      if tokens.peek().type == LPAREN then\n        tokens.consume()  -- eat '('\n        local args = {}\n        if tokens.peek().type ~= RPAREN then\n          args[1] = expr()\n          while tokens.peek().type == OP and tokens.peek().value == \",\" do\n            tokens.consume()\n            args[#args + 1] = expr()\n          end\n        end\n        tokens.expect(RPAREN)\n        return CallNode(name, args)\n      end\n      return VarNode(name)\n    end\n\n    if tok.type == LPAREN then\n      tokens.consume()\n      local node = expr()\n      tokens.expect(RPAREN)\n      return node\n    end\n\n    error(\"Unexpected token: \" .. tok.type\n      .. (tok.pos and \" at position \" .. tok.pos or \"\"))\n  end\n\n  local ast = expr()\n  tokens.expect(EOF)\n  return ast\nend\n\nprint(\"Parser loaded.\")",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "## 5. AST Pretty-Printer\n\nBefore evaluating, let's visualize what the parser produces.",
+        "type": "markdown",
+        "language": "lua"
+      },
+      {
+        "code": "function pretty(node, indent)\n  indent = indent or 0\n  local pad = string.rep(\"  \", indent)\n\n  if node.tag == \"num\" then\n    return pad .. tostring(node.value)\n  elseif node.tag == \"var\" then\n    return pad .. node.name\n  elseif node.tag == \"unary\" then\n    return pad .. \"(\" .. node.op .. \"\\n\" .. pretty(node.operand, indent + 1) .. \")\"\n  elseif node.tag == \"binop\" then\n    return pad .. \"(\" .. node.op .. \"\\n\"\n      .. pretty(node.left, indent + 1) .. \"\\n\"\n      .. pretty(node.right, indent + 1) .. \")\"\n  elseif node.tag == \"call\" then\n    local argStrs = {}\n    for _, a in ipairs(node.args) do\n      argStrs[#argStrs + 1] = pretty(a, indent + 1)\n    end\n    return pad .. node.name .. \"(\\n\" .. table.concat(argStrs, \"\\n\") .. \")\"\n  end\n  return pad .. \"??\"\nend\n\n-- Parse and display\nlocal ast = parse(\"2 ^ 3 ^ 2 + 1\")\nprint(\"AST for '2 ^ 3 ^ 2 + 1':\")\nprint(pretty(ast))\n\nprint(\"\\nAST for '-(3 + 4) * 2':\")\nprint(pretty(parse(\"-(3 + 4) * 2\")))",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "## 6. Evaluator\n\nWalk the AST to compute a result. Variables and functions are looked up in an environment table.",
+        "type": "markdown",
+        "language": "lua"
+      },
+      {
+        "code": "function evaluate(node, env)\n  env = env or {}\n\n  if node.tag == \"num\" then\n    return node.value\n\n  elseif node.tag == \"var\" then\n    local val = env[node.name]\n    if val == nil then error(\"Undefined variable: \" .. node.name) end\n    return val\n\n  elseif node.tag == \"unary\" then\n    if node.op == \"-\" then\n      return -evaluate(node.operand, env)\n    end\n\n  elseif node.tag == \"binop\" then\n    local l = evaluate(node.left, env)\n    local r = evaluate(node.right, env)\n    if     node.op == \"+\" then return l + r\n    elseif node.op == \"-\" then return l - r\n    elseif node.op == \"*\" then return l * r\n    elseif node.op == \"/\" then return l / r\n    elseif node.op == \"%\" then return l % r\n    elseif node.op == \"^\" then return l ^ r\n    end\n\n  elseif node.tag == \"call\" then\n    local fn = env[node.name]\n    if type(fn) ~= \"function\" then\n      error(\"Not a function: \" .. node.name)\n    end\n    local args = {}\n    for _, a in ipairs(node.args) do\n      args[#args + 1] = evaluate(a, env)\n    end\n    return fn(table.unpack(args))\n  end\n\n  error(\"Unknown node tag: \" .. tostring(node.tag))\nend\n\n-- Convenience: parse + evaluate\nfunction calc(expr, env)\n  return evaluate(parse(expr), env)\nend\n\nprint(\"Calculator loaded.\")",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "-- Basic arithmetic\nprint(\"2 + 3 * 4      =\", calc(\"2 + 3 * 4\"))\nprint(\"(2 + 3) * 4    =\", calc(\"(2 + 3) * 4\"))\nprint(\"2 ^ 3 ^ 2      =\", calc(\"2 ^ 3 ^ 2\"))      -- right-assoc: 2^(3^2) = 512\nprint(\"-5 + 3         =\", calc(\"-5 + 3\"))\nprint(\"10 % 3         =\", calc(\"10 % 3\"))",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "-- With variables and functions\nlocal env = {\n  pi = math.pi,\n  e  = math.exp(1),\n  x  = 10,\n  sqrt = math.sqrt,\n  sin  = math.sin,\n  cos  = math.cos,\n  abs  = math.abs,\n}\n\nprint(\"pi * x ^ 2    =\", calc(\"pi * x ^ 2\", env))\nprint(\"sqrt(144)      =\", calc(\"sqrt(144)\", env))\nprint(\"sin(pi / 2)    =\", calc(\"sin(pi / 2)\", env))\nprint(\"abs(-42) + e   =\", calc(\"abs(-42) + e\", env))",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "## 7. Parser Combinators\n\nA different approach: build parsers from small composable pieces using closures. Each parser is a function that takes input (string + position) and returns a result + new position, or `nil` on failure.",
+        "type": "markdown",
+        "language": "lua"
+      },
+      {
+        "code": "-- A parser is: function(input, pos) -> result, newpos | nil\n\n-- Match a Lua pattern, return captured group\nfunction P(pattern)\n  return function(input, pos)\n    local s, e, cap = string.find(input, \"^(\" .. pattern .. \")\", pos)\n    if s then return cap, e + 1 end\n    return nil\n  end\nend\n\n-- Match literal string\nfunction L(str)\n  return function(input, pos)\n    if string.sub(input, pos, pos + #str - 1) == str then\n      return str, pos + #str\n    end\n    return nil\n  end\nend\n\n-- Skip whitespace, then apply parser\nfunction Token(parser)\n  return function(input, pos)\n    local _, p2 = string.find(input, \"^%s*\", pos)\n    return parser(input, (p2 or pos) + 1)\n  end\nend\n\nprint(\"Combinators loaded.\")",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "-- Sequence: all parsers must match in order\nfunction Seq(...)\n  local parsers = {...}\n  return function(input, pos)\n    local results = {}\n    local p = pos\n    for _, parser in ipairs(parsers) do\n      local r, np = parser(input, p)\n      if r == nil then return nil end\n      results[#results + 1] = r\n      p = np\n    end\n    return results, p\n  end\nend\n\n-- Choice: try each parser, return first match\nfunction Choice(...)\n  local parsers = {...}\n  return function(input, pos)\n    for _, parser in ipairs(parsers) do\n      local r, np = parser(input, pos)\n      if r ~= nil then return r, np end\n    end\n    return nil\n  end\nend\n\n-- Zero or more repetitions\nfunction Many(parser)\n  return function(input, pos)\n    local results = {}\n    local p = pos\n    while true do\n      local r, np = parser(input, p)\n      if r == nil then break end\n      results[#results + 1] = r\n      p = np\n    end\n    return results, p\n  end\nend\n\n-- Transform result\nfunction Map(parser, fn)\n  return function(input, pos)\n    local r, np = parser(input, pos)\n    if r ~= nil then return fn(r), np end\n    return nil\n  end\nend\n\nprint(\"Seq, Choice, Many, Map loaded.\")",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "-- Parse a simple key-value config format:\n--   host = localhost\n--   port = 8080\n--   debug = true\n\nlocal key   = Token(P(\"%a%w*\"))\nlocal eq    = Token(L(\"=\"))\nlocal value = Token(P(\"%S+\"))\n\nlocal pair  = Map(\n  Seq(key, eq, value),\n  function(r) return { key = r[1], value = r[3] } end\n)\n\nlocal config = Many(pair)\n\nlocal input = \"host = localhost  port = 8080  debug = true\"\nlocal result, pos = config(input, 1)\n\nprint(\"Parsed config:\")\nfor _, entry in ipairs(result) do\n  print(string.format(\"  %-8s = %s\", entry.key, entry.value))\nend",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "## 8. CSV Parser\n\nA more practical example: parse CSV with quoted fields, using the combinator approach.",
+        "type": "markdown",
+        "language": "lua"
+      },
+      {
+        "code": "function parseCSV(input)\n  local rows = {}\n\n  -- Use a coroutine to yield rows as they're parsed\n  local function parseField(line, pos)\n    if string.sub(line, pos, pos) == '\"' then\n      -- Quoted field: find closing quote (handles escaped \"\")\n      local field = {}\n      pos = pos + 1\n      while pos <= #line do\n        if string.sub(line, pos, pos + 1) == '\"\"' then\n          field[#field + 1] = '\"'\n          pos = pos + 2\n        elseif string.sub(line, pos, pos) == '\"' then\n          pos = pos + 1\n          break\n        else\n          field[#field + 1] = string.sub(line, pos, pos)\n          pos = pos + 1\n        end\n      end\n      return table.concat(field), pos\n    else\n      -- Unquoted field: read until comma or end\n      local s, e, val = string.find(line, \"^([^,]*)\", pos)\n      return val or \"\", (e or pos) + 1\n    end\n  end\n\n  for line in string.gmatch(input, \"([^\\n]+)\") do\n    local row = {}\n    local pos = 1\n    while pos <= #line do\n      local field\n      field, pos = parseField(line, pos)\n      row[#row + 1] = field\n      -- Skip comma separator\n      if string.sub(line, pos, pos) == \",\" then\n        pos = pos + 1\n      end\n    end\n    rows[#rows + 1] = row\n  end\n\n  return rows\nend\n\nlocal csv = [[name,age,city\nAlice,30,\"New York\"\nBob,25,\"San Francisco\"\n\"O'Brien, Charlie\",40,\"Boston\"]]\n\nlocal data = parseCSV(csv)\n\n-- Print as a formatted table\nlocal widths = {}\nfor _, row in ipairs(data) do\n  for i, field in ipairs(row) do\n    widths[i] = math.max(widths[i] or 0, #field)\n  end\nend\n\nfor r, row in ipairs(data) do\n  local parts = {}\n  for i, field in ipairs(row) do\n    parts[i] = field .. string.rep(\" \", widths[i] - #field)\n  end\n  print(table.concat(parts, \"  |  \"))\n  if r == 1 then\n    local sep = {}\n    for i = 1, #widths do sep[i] = string.rep(\"-\", widths[i]) end\n    print(table.concat(sep, \"--+--\"))\n  end\nend",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "## 9. Streaming Pipeline\n\nCombine everything: a coroutine-based pipeline that lexes, parses, and evaluates a sequence of expressions — one line at a time, fully lazy.",
+        "type": "markdown",
+        "language": "lua"
+      },
+      {
+        "code": "function repl_eval(lines, env)\n  return coroutine.wrap(function()\n    for line in string.gmatch(lines, \"([^\\n]+)\") do\n      -- Skip comments and blank lines\n      local trimmed = string.match(line, \"^%s*(.-)%s*$\")\n      if trimmed ~= \"\" and string.sub(trimmed, 1, 1) ~= \"#\" then\n        local ok, result = pcall(function()\n          return calc(trimmed, env)\n        end)\n        if ok then\n          coroutine.yield(trimmed, result, nil)\n        else\n          coroutine.yield(trimmed, nil, result)\n        end\n      end\n    end\n  end)\nend\n\nlocal program = [[\n# Physics calculations\n9.8 * 2\nsqrt(144) + 1\npi * r ^ 2\n2 ^ 10\nabs(-7) * 3\n5 / 0\n]]\n\nlocal env = {\n  pi = math.pi, r = 5,\n  sqrt = math.sqrt, abs = math.abs,\n}\n\nprint(\"Expression evaluator:\")\nprint(string.rep(\"-\", 40))\nfor expr, result, err in repl_eval(program, env) do\n  if err then\n    print(string.format(\"  %-20s  ERROR: %s\", expr, err))\n  else\n    print(string.format(\"  %-20s  = %g\", expr, result))\n  end\nend",
+        "type": "code",
+        "language": "lua"
+      },
+      {
+        "code": "## Summary\n\nWhat we built with just Lua's standard library:\n\n| Component | Technique |\n|---|---|\n| Lexer | Coroutine + `string.match` patterns |\n| Token stream | Closure (peek/consume over coroutine) |\n| Recursive descent parser | Mutual recursion + tables as AST |\n| Evaluator | Tree walk with environment table |\n| Combinators | Higher-order closures (Seq, Choice, Many, Map) |\n| CSV parser | Pattern matching + state machine |\n| Streaming pipeline | Coroutine chain with `pcall` error handling |\n\nNo external libraries, no regex engine, no parser generator — just patterns, coroutines, closures, and tables.",
+        "type": "markdown",
+        "language": "lua"
+      }
+    ]
+  }
+}

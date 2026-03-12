@@ -290,13 +290,14 @@ class KernelManager {
 }
 
 // Kernels that require CDN downloads
-KernelManager.CDN_KERNELS = new Set(['python', 'prolog', 'r']);
+KernelManager.CDN_KERNELS = new Set(['python', 'prolog', 'r', 'lua']);
 
 // Runtime display info for download confirmation modal
 KernelManager.RUNTIME_INFO = {
     python: { name: 'Python (Pyodide)', size: '~25 MB', cdnHost: 'cdn.jsdelivr.net' },
     r:      { name: 'R (webR)',         size: '~50 MB', cdnHost: 'webr.r-wasm.org' },
     prolog: { name: 'Prolog (SWI)',     size: '~10 MB', cdnHost: 'swi-prolog.github.io' },
+    lua:    { name: 'Lua (Fengari)',    size: '~200 KB', cdnHost: 'cdn.jsdelivr.net' },
 };
 
 // Export singleton

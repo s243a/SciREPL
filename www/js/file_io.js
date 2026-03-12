@@ -175,6 +175,27 @@ class FileIO {
             });
         }
 
+        // Languages
+        const langBtn = document.getElementById('btn-languages');
+        const langModal = document.getElementById('languages-modal');
+        if (langBtn && langModal) {
+            langBtn.addEventListener('click', () => {
+                this.menuModal.classList.add('hidden');
+                this._populateLanguagesModal();
+                langModal.classList.remove('hidden');
+            });
+            langModal.addEventListener('click', (e) => {
+                if (e.target === langModal || e.target.classList.contains('modal-close')) {
+                    langModal.classList.add('hidden');
+                }
+            });
+            langModal.addEventListener('change', (e) => {
+                if (e.target.matches('.lang-toggle')) {
+                    this._onLanguageToggle(e.target.dataset.lang, e.target.checked);
+                }
+            });
+        }
+
         // Memory & Storage
         const memoryBtn = document.getElementById('btn-memory');
         const memoryModal = document.getElementById('memory-modal');
@@ -356,6 +377,13 @@ class FileIO {
      */
     async _handlePackageImport(file) {
         if (!file) return;
+        // Redirect .srwb files to the workbook importer
+        if (file.name.endsWith('.srwb')) {
+            const reader = new FileReader();
+            reader.onload = (e) => this.importSrwb(e.target.result);
+            reader.readAsText(file);
+            return;
+        }
         if (window.packageLoader) {
             try {
                 await window.packageLoader.loadFromFile(file);
@@ -437,13 +465,15 @@ class FileIO {
         const kernelMap = {
             python: { display_name: 'Python 3 (Pyodide)', language: 'python', name: 'python3' },
             prolog: { display_name: 'SWI-Prolog (WASM)', language: 'prolog', name: 'swipl' },
-            javascript: { display_name: 'JavaScript (Browser)', language: 'javascript', name: 'javascript' }
+            javascript: { display_name: 'JavaScript (Browser)', language: 'javascript', name: 'javascript' },
+            lua: { display_name: 'Lua (Fengari)', language: 'lua', name: 'lua' }
         };
 
         const langInfoMap = {
             python: { name: 'python', version: '3.12', mimetype: 'text/x-python', file_extension: '.py' },
             prolog: { name: 'prolog', version: '9.x', mimetype: 'text/x-prolog', file_extension: '.pl' },
-            javascript: { name: 'javascript', version: 'ES2022', mimetype: 'text/javascript', file_extension: '.js' }
+            javascript: { name: 'javascript', version: 'ES2022', mimetype: 'text/javascript', file_extension: '.js' },
+            lua: { name: 'lua', version: '5.3', mimetype: 'text/x-lua', file_extension: '.lua' }
         };
 
         const notebook = {
@@ -1144,14 +1174,16 @@ class FileIO {
                 r: { display_name: 'R (webR)', language: 'r', name: 'ir' },
                 prolog: { display_name: 'SWI-Prolog (WASM)', language: 'prolog', name: 'swipl' },
                 javascript: { display_name: 'JavaScript (Browser)', language: 'javascript', name: 'javascript' },
-                bash: { display_name: 'Bash', language: 'bash', name: 'bash' }
+                bash: { display_name: 'Bash', language: 'bash', name: 'bash' },
+                lua: { display_name: 'Lua (Fengari)', language: 'lua', name: 'lua' }
             };
             const langInfoMap = {
                 python: { name: 'python', version: '3.12', mimetype: 'text/x-python', file_extension: '.py' },
                 r: { name: 'R', version: '4.x', mimetype: 'text/x-r', file_extension: '.r' },
                 prolog: { name: 'prolog', version: '9.x', mimetype: 'text/x-prolog', file_extension: '.pl' },
                 javascript: { name: 'javascript', version: 'ES2022', mimetype: 'text/javascript', file_extension: '.js' },
-                bash: { name: 'bash', version: '5.x', mimetype: 'text/x-sh', file_extension: '.sh' }
+                bash: { name: 'bash', version: '5.x', mimetype: 'text/x-sh', file_extension: '.sh' },
+                lua: { name: 'lua', version: '5.3', mimetype: 'text/x-lua', file_extension: '.lua' }
             };
 
             const notebook = {
@@ -1250,12 +1282,14 @@ class FileIO {
         const kernelMap = {
             python: { display_name: 'Python 3 (Pyodide)', language: 'python', name: 'python3' },
             prolog: { display_name: 'SWI-Prolog (WASM)', language: 'prolog', name: 'swipl' },
-            javascript: { display_name: 'JavaScript (Browser)', language: 'javascript', name: 'javascript' }
+            javascript: { display_name: 'JavaScript (Browser)', language: 'javascript', name: 'javascript' },
+            lua: { display_name: 'Lua (Fengari)', language: 'lua', name: 'lua' }
         };
         const langInfoMap = {
             python: { name: 'python', version: '3.12', mimetype: 'text/x-python', file_extension: '.py' },
             prolog: { name: 'prolog', version: '9.x', mimetype: 'text/x-prolog', file_extension: '.pl' },
-            javascript: { name: 'javascript', version: 'ES2022', mimetype: 'text/javascript', file_extension: '.js' }
+            javascript: { name: 'javascript', version: 'ES2022', mimetype: 'text/javascript', file_extension: '.js' },
+            lua: { name: 'lua', version: '5.3', mimetype: 'text/x-lua', file_extension: '.lua' }
         };
 
         return {
@@ -1583,6 +1617,14 @@ class FileIO {
             return;
         }
 
+        // SciREPL workbook files
+        if (file.name.endsWith('.srwb')) {
+            const reader = new FileReader();
+            reader.onload = (e) => this.importSrwb(e.target.result);
+            reader.readAsText(file);
+            return;
+        }
+
         // Notebook/code files: import as cells
         if (file.name.endsWith('.ipynb')) {
             const reader = new FileReader();
@@ -1735,6 +1777,110 @@ class FileIO {
      * If window.importCells is available (set by app.js), uses it to
      * create proper cells. Otherwise falls back to textarea.
      */
+    /**
+     * Import a .srwb file — create notebook tab(s) and load cells.
+     * Supports both single-notebook and multi-notebook (workbook) format.
+     */
+    importSrwb(jsonContent) {
+        try {
+            const srwb = JSON.parse(jsonContent);
+            if (srwb.format !== 'srwb') {
+                alert('Not a valid .srwb file.');
+                return;
+            }
+
+            const nm = window.notebookManager;
+            if (!nm) { alert('NotebookManager not available.'); return; }
+
+            const autoExec = localStorage.getItem('scirepl_auto_execute') === '1';
+            const autoSwitch = localStorage.getItem('scirepl_auto_switch_workbook') !== '0';
+
+            const app = window._appInternals;
+            if (!app || !app.createInputCard || !app.createOutputCard) {
+                console.error('[importSrwb] window._appInternals not available');
+                alert('App not fully initialized. Please try again.');
+                return;
+            }
+
+            // Render cells into a notebook using the same approach as restoreSession
+            const renderCells = (nb, cellDefs) => {
+                nm.switchTo(nb.id);
+
+                window._cells.length = 0;
+                window._cellCounter = 0;
+
+                for (const def of cellDefs) {
+                    window._cellCounter++;
+                    const cellId = window._cellCounter;
+                    const language = def.language || nb.kernelLanguage || 'python';
+
+                    const inputCard = app.createInputCard(def.code, cellId, def.type, language);
+                    const outputCard = app.createOutputCard(cellId, def.type);
+
+                    const cell = {
+                        id: cellId,
+                        code: def.code,
+                        type: def.type || 'code',
+                        language: language,
+                        inputCard: inputCard,
+                        outputCard: outputCard
+                    };
+                    window._cells.push(cell);
+
+                    if (def.type === 'markdown') {
+                        const body = outputCard.querySelector('.card-body');
+                        if (body) body.innerHTML = app.renderMarkdown(def.code);
+                        const pre = inputCard.querySelector('pre');
+                        if (pre) pre.style.display = 'none';
+                    } else {
+                        // Code cell — remove empty output card
+                        outputCard.remove();
+                        cell.outputCard = null;
+                    }
+                }
+
+                nb.cells = [...window._cells];
+                nb.cellCounter = window._cellCounter;
+            };
+
+            const loadNotebook = (nbData) => {
+                const nb = nm.createNotebook({
+                    name: nbData.name || 'Imported Notebook',
+                    description: nbData.description || '',
+                    kernelLanguage: nbData.kernelLanguage || null
+                });
+
+                const cellDefs = (nbData.cells || []).map(c => ({
+                    code: c.code,
+                    type: c.type || 'code',
+                    language: c.language || nbData.kernelLanguage || 'python'
+                }));
+
+                renderCells(nb, cellDefs);
+                return nb;
+            };
+
+            if (srwb.notebook) {
+                const nb = loadNotebook(srwb.notebook);
+                if (autoSwitch) nm.switchTo(nb.id);
+            } else if (srwb.workbook && srwb.workbook.notebooks) {
+                let targetNb = null;
+                for (const nbData of srwb.workbook.notebooks) {
+                    const nb = loadNotebook(nbData);
+                    // Switch to the originally active notebook, or first one
+                    if (nbData.id === srwb.workbook.activeNotebookId) targetNb = nb;
+                    if (!targetNb) targetNb = nb;
+                }
+                if (autoSwitch && targetNb) nm.switchTo(targetNb.id);
+            }
+
+            nm.saveState();
+        } catch (e) {
+            console.error('[importSrwb] Error:', e.message, e.stack);
+            alert('Failed to import .srwb file: ' + e.message);
+        }
+    }
+
     importIpynb(jsonContent) {
         try {
             const nb = JSON.parse(jsonContent);
@@ -1742,16 +1888,19 @@ class FileIO {
 
             // Detect notebook-level language from kernelspec
             let notebookLang = 'python';
+            const knownLangs = new Set(['python', 'prolog', 'javascript', 'bash', 'r', 'lua']);
             if (nb.metadata && nb.metadata.kernelspec) {
                 const ks = nb.metadata.kernelspec;
-                if (ks.language === 'prolog' || ks.name === 'swipl') {
+                if (ks.language && knownLangs.has(ks.language)) {
+                    notebookLang = ks.language;
+                } else if (ks.name === 'swipl') {
                     notebookLang = 'prolog';
                 }
             }
             if (nb.metadata && nb.metadata.language_info) {
                 const li = nb.metadata.language_info;
-                if (li.name === 'prolog') {
-                    notebookLang = 'prolog';
+                if (li.name && knownLangs.has(li.name)) {
+                    notebookLang = li.name;
                 }
             }
 
@@ -1836,6 +1985,135 @@ class FileIO {
             console.error(e);
             alert('Failed to parse .ipynb file.');
         }
+    }
+
+    // ---- Language Settings ----
+
+    /**
+     * Language metadata: id → {label, abbrev}.
+     * Order determines display order in dropdowns and the Languages modal.
+     */
+    static LANGUAGE_META = [
+        { id: 'python',     label: 'Python',     abbrev: 'Py' },
+        { id: 'r',          label: 'R',           abbrev: 'R' },
+        { id: 'prolog',     label: 'Prolog',      abbrev: 'PL' },
+        { id: 'bash',       label: 'Bash',        abbrev: 'Sh' },
+        { id: 'javascript', label: 'JavaScript',  abbrev: 'JS' },
+        { id: 'lua',        label: 'Lua',         abbrev: 'Lua' },
+    ];
+
+    /**
+     * Get the set of enabled language IDs from localStorage.
+     * Defaults to all languages enabled.
+     */
+    _getEnabledLanguages() {
+        const stored = localStorage.getItem('scirepl_enabled_languages');
+        if (stored) {
+            try { return new Set(JSON.parse(stored)); } catch (_) {}
+        }
+        return new Set(FileIO.LANGUAGE_META.map(l => l.id));
+    }
+
+    _saveEnabledLanguages(enabledSet) {
+        localStorage.setItem('scirepl_enabled_languages', JSON.stringify([...enabledSet]));
+    }
+
+    /**
+     * Populate the Languages modal with checkboxes for each registered language.
+     */
+    _populateLanguagesModal() {
+        const list = document.getElementById('languages-list');
+        if (!list) return;
+
+        const enabled = this._getEnabledLanguages();
+        list.innerHTML = '';
+
+        for (const lang of FileIO.LANGUAGE_META) {
+            const label = document.createElement('label');
+            label.className = 'settings-item';
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.className = 'lang-toggle';
+            cb.dataset.lang = lang.id;
+            cb.checked = enabled.has(lang.id);
+            label.appendChild(cb);
+            label.appendChild(document.createTextNode(' ' + lang.label));
+
+            // Show runtime size hint for CDN kernels
+            const info = KernelManager.RUNTIME_INFO[lang.id];
+            if (info) {
+                const hint = document.createElement('span');
+                hint.className = 'export-format-desc';
+                hint.textContent = info.size;
+                label.appendChild(hint);
+            }
+            list.appendChild(label);
+        }
+    }
+
+    /**
+     * Handle language enable/disable toggle.
+     */
+    _onLanguageToggle(langId, checked) {
+        const enabled = this._getEnabledLanguages();
+        if (checked) {
+            enabled.add(langId);
+        } else {
+            // Don't allow disabling all languages
+            if (enabled.size <= 1) {
+                const cb = document.querySelector(`.lang-toggle[data-lang="${langId}"]`);
+                if (cb) cb.checked = true;
+                return;
+            }
+            enabled.delete(langId);
+        }
+        this._saveEnabledLanguages(enabled);
+        this._rebuildLanguageDropdowns();
+    }
+
+    /**
+     * Rebuild all language selector dropdowns based on enabled set.
+     */
+    _rebuildLanguageDropdowns() {
+        const enabled = this._getEnabledLanguages();
+        const meta = FileIO.LANGUAGE_META.filter(l => enabled.has(l.id));
+
+        // Main footer selector
+        const mainSel = document.getElementById('lang-selector');
+        if (mainSel) {
+            const curVal = mainSel.value;
+            mainSel.innerHTML = '';
+            for (const l of meta) {
+                const opt = document.createElement('option');
+                opt.value = l.id;
+                opt.textContent = l.abbrev;
+                mainSel.appendChild(opt);
+            }
+            // Restore selection if still enabled, else pick first
+            if (enabled.has(curVal)) {
+                mainSel.value = curVal;
+            } else {
+                mainSel.value = meta[0].id;
+                if (window.kernelManager) window.kernelManager.setLanguage(meta[0].id);
+            }
+        }
+
+        // Cell-level dropdowns (existing cells in the DOM)
+        document.querySelectorAll('.cell-lang-switch').forEach(sel => {
+            const curVal = sel.value;
+            sel.innerHTML = '';
+            for (const l of meta) {
+                const opt = document.createElement('option');
+                opt.value = l.id;
+                opt.textContent = l.abbrev;
+                sel.appendChild(opt);
+            }
+            if (enabled.has(curVal)) {
+                sel.value = curVal;
+            } else {
+                sel.value = meta[0].id;
+            }
+        });
     }
 }
 

@@ -12,7 +12,7 @@ const MIME = {
   '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml',
   '.wasm': 'application/wasm', '.py': 'text/x-python', '.pl': 'text/plain',
   '.ttf': 'font/ttf', '.woff': 'font/woff', '.woff2': 'font/woff2',
-  '.zip': 'application/zip', '.map': 'application/json',
+  '.zip': 'application/zip', '.map': 'application/json', '.srwb': 'application/json',
 };
 
 function followRedirects(url, callback, maxRedirects = 5) {

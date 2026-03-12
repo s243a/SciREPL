@@ -65,6 +65,24 @@ class PackageCatalog {
                 size: '~5 KB',
                 kernels: ['r'],
             },
+            {
+                name: 'Lua: Tables, Coroutines & Closures',
+                description: 'Tour of Lua\'s core features — tables as universal data structure, coroutines for cooperative multitasking, closures, custom iterators, and a lazy Stream library.',
+                type: 'workbook',
+                format: 'srwb',
+                pages_url: 'workbooks/lua-tables-coroutines.srwb',
+                size: '~12 KB',
+                kernels: ['lua'],
+            },
+            {
+                name: 'Lua: Parsing with Coroutines',
+                description: 'Build a calculator from scratch — coroutine lexer, recursive descent parser, AST evaluator, parser combinators, and a CSV parser. No external libraries.',
+                type: 'workbook',
+                format: 'srwb',
+                pages_url: 'workbooks/lua-parsing-coroutines.srwb',
+                size: '~14 KB',
+                kernels: ['lua'],
+            },
         ];
     }
 
@@ -200,7 +218,11 @@ class PackageCatalog {
      * Returns a promise that resolves when the import is fully complete.
      */
     async _doImport(pkg, blob) {
-        if (pkg.type === 'workbook') {
+        if (pkg.type === 'workbook' && pkg.format === 'srwb') {
+            const text = await blob.text();
+            if (!window.fileIO) throw new Error('File IO not available');
+            window.fileIO.importSrwb(text);
+        } else if (pkg.type === 'workbook') {
             const text = await blob.text();
             if (!window.fileIO) throw new Error('File IO not available');
             // importIpynb now returns a promise (resolves when importCells finishes)
