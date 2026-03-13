@@ -44,7 +44,8 @@ class Notebook {
                 type: c.type,
                 language: c.language || 'python',
                 name: c.name || '',
-                lastOutput: c.lastOutput || ''
+                lastOutput: c.lastOutput || '',
+                lastOutputHtml: c.lastOutputHtml || ''
             }))
         };
     }

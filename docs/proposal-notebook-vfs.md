@@ -135,18 +135,18 @@ The Notebook VFS fits into the broader SciREPL filesystem:
 │   ├── In[1]/
 │   ├── In[2]/
 │   └── ...
-├── workbook/             # all notebooks (future)
+├── workbook/             # all notebooks (WorkbookVFS)
 │   ├── Notebook 1/
 │   │   ├── In[1]/
 │   │   └── ...
 │   └── Physics Notes/
 │       └── ...
-├── local/                # localStorage / IndexedDB (future)
+├── local/                # localStorage keys (LocalStorageVFS, read-only)
 │   └── ...
 └── tmp/                  # temporary files
 ```
 
-The key insight: **workbooks are JSON in localStorage**. The `/nb/` mount is a structured view over that JSON, and `/local/` would expose the raw storage. This is analogous to how Linux exposes kernel internals via `/proc/` and `/sys/`.
+The key insight: **workbooks are JSON in localStorage**. The `/nb/` mount is a structured view over that JSON, `/workbook/` exposes all notebooks, and `/local/` exposes the raw storage. This is analogous to how Linux exposes kernel internals via `/proc/` and `/sys/`.
 
 ## Implementation plan
 
@@ -162,10 +162,10 @@ The key insight: **workbooks are JSON in localStorage**. The `/nb/` mount is a s
 7. **Bash** — `cat /nb/In[1]/.code`, `ls /nb/`, `echo "x" > /nb/cell/.code`
 8. **Python** — `nb_read(cell, prop)`, `nb_write(cell, prop, value)`, `nb_list()` via `js.window.notebookVFS`
 9. **Lua** — `nb.read(cell, prop)`, `nb.write(cell, prop, value)`, `nb.list()`, `nb.name(cell, name)` via `lua_pushjsfunction`
-10. **R** — `nb_read(cell, prop)`, `nb_list()` via files synced to webR FS before execution (read-only)
-11. **Prolog** — `nb_read/3`, `nb_code/2`, `nb_output/2`, `nb_language/2`, `nb_list/1` via Emscripten FS sync (read-only)
+10. **R** — `nb_read(cell, prop)`, `nb_write(cell, prop, value)`, `nb_list()` via files synced to webR FS before/after execution
+11. **Prolog** — `nb_read/3`, `nb_write/3`, `nb_code/2`, `nb_output/2`, `nb_language/2`, `nb_list/1` via Emscripten FS sync
 
-### Phase 3: Extended features — PLANNED
+### Phase 3: Extended features — 3a–3f DONE, 3g–3i PLANNED
 Items grouped by complexity and dependency. Each can be implemented independently.
 
 #### 3a. R and Prolog write support — DONE
@@ -184,25 +184,28 @@ Items grouped by complexity and dependency. Each can be implemented independentl
 - Checkboxes read/write `notebookVFS._getSettings()` / `_saveSettings()` (persisted in localStorage)
 - Enforcement in `_setCellProperty` already checks `sameNotebookWrite` setting
 
-#### 3d. Typed output access
-- `.output` currently returns `textContent` of the output card DOM
-- Add sub-properties: `.output.text` (plain text), `.output.html` (raw HTML), `.output.json` (if output is JSON-parseable), `.output.png` (if output contains an image, return data URL)
-- Requires richer output capture — store structured output, not just text
-- Complexity: medium. Needs changes to output capture in app.js and executeCode.
+#### 3d. Typed output access — DONE
+- `.output` returns plain text (default). Sub-properties via `/nb/In[1]/.output/.text` etc.:
+  - `.output.text` — plain text (same as `.output`)
+  - `.output.html` — raw HTML of the output card
+  - `.output.json` — output text if it's valid JSON, null otherwise
+  - `.output.png` — first image data URL from HTML output, null if none
+- `cell.lastOutputHtml` captured alongside `cell.lastOutput` after execution
+- `.output` acts as both file (readable) and directory (has sub-properties) in stat/listDir
 
-#### 3e. `/workbook/` mount — cross-notebook access
-- `/workbook/Notebook Name/In[1]/.code` reads cells from inactive notebooks
-- NotebookManager already stores `nb.cells` for inactive notebooks, so reads are straightforward
-- Writes to inactive notebooks update the data model; UI refreshes on `switchTo()`
-- Gated by security settings (cross-notebook read/write)
-- Complexity: medium. Needs a new mount handler, path parsing for notebook names with spaces.
+#### 3e. `/workbook/` mount — cross-notebook access — DONE
+- `WorkbookVFS` class: `/workbook/Notebook Name/In[1]/.code` reads cells from any notebook
+- Resolves notebook names (including spaces) against NotebookManager's notebook list
+- Active notebook delegates to `window._cells`; inactive reads from `nb.cells` directly
+- Writes to inactive notebooks modify cell data; UI refreshes on `switchTo()`
+- Gated by `crossNotebookRead` / `crossNotebookWrite` security settings
+- SharedVFS delegates all `/workbook/` paths to WorkbookVFS
 
-#### 3f. `/local/` mount — localStorage/IndexedDB browser
-- Expose localStorage keys as files under `/local/`
-- Useful for debugging, backup, and cross-session data access
-- Read-only initially; writes could modify localStorage but risk breaking app state
-- Ties into the filesystem viewer (task #141)
-- Complexity: medium. Need to handle JSON values, binary IndexedDB entries.
+#### 3f. `/local/` mount — localStorage browser — DONE
+- `LocalStorageVFS` class: `/local/` lists all localStorage keys, `/local/key` reads value
+- JSON values are pretty-printed when read
+- Read-only for safety (writes could break app state)
+- SharedVFS delegates all `/local/` paths to LocalStorageVFS
 
 #### 3g. Programmatic cell execution
 - Writing to `/nb/In[3]/.run` (or a special `.execute` property) triggers execution
