@@ -229,11 +229,10 @@
             _clearDragIndicators();
         });
 
-        // Double-click prompt icon to set/edit cell name
+        // Double-click or long-press prompt icon to set/edit cell name
         const promptIcon = card.querySelector('.prompt-icon');
         if (promptIcon) {
-            promptIcon.addEventListener('dblclick', (e) => {
-                e.stopPropagation();
+            const renameCellPrompt = () => {
                 const cell = window._cells.find(c => c.id === cellId);
                 if (!cell) return;
                 const currentName = cell.name || '';
@@ -246,7 +245,20 @@
                         saveCellsToSession();
                     }
                 }
+            };
+
+            promptIcon.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                renameCellPrompt();
             });
+
+            // Long-press for mobile — contextmenu fires on Android long-press
+            promptIcon.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                renameCellPrompt();
+            });
+
             promptIcon.title = 'Double-click to name this cell';
         }
 

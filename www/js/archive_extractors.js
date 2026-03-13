@@ -193,7 +193,7 @@ class ArchiveExtractors {
 
             // Try text first for known text types
             const ext = path.split('.').pop().toLowerCase();
-            const textExts = ['json', 'ipynb', 'pl', 'pro', 'py', 'txt', 'md', 'csv', 'tsv', 'xml', 'html', 'css', 'js'];
+            const textExts = ['json', 'ipynb', 'srwb', 'pl', 'pro', 'py', 'txt', 'md', 'csv', 'tsv', 'xml', 'html', 'css', 'js'];
             if (textExts.includes(ext)) {
                 fileMap.set(path, await entry.async('string'));
             } else {
@@ -219,7 +219,7 @@ class ArchiveExtractors {
 
         for (const f of files) {
             const ext = f.name.split('.').pop().toLowerCase();
-            const textExts = ['json', 'ipynb', 'pl', 'pro', 'py', 'txt', 'md', 'csv', 'tsv', 'xml', 'html', 'css', 'js'];
+            const textExts = ['json', 'ipynb', 'srwb', 'pl', 'pro', 'py', 'txt', 'md', 'csv', 'tsv', 'xml', 'html', 'css', 'js'];
             if (textExts.includes(ext)) {
                 fileMap.set(f.name, new TextDecoder('utf-8').decode(f.content));
             } else {

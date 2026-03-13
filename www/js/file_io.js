@@ -1843,10 +1843,16 @@ class FileIO {
                         code: def.code,
                         type: def.type || 'code',
                         language: language,
+                        name: def.name || '',
                         inputCard: inputCard,
                         outputCard: outputCard
                     };
                     window._cells.push(cell);
+
+                    // Register cell name with NotebookVFS
+                    if (def.name && window.notebookVFS && window.notebookVFS._setCellName) {
+                        window.notebookVFS._setCellName(window._cells.length - 1, def.name);
+                    }
 
                     if (def.type === 'markdown') {
                         const body = outputCard.querySelector('.card-body');
@@ -1874,7 +1880,8 @@ class FileIO {
                 const cellDefs = (nbData.cells || []).map(c => ({
                     code: c.code,
                     type: c.type || 'code',
-                    language: c.language || nbData.kernelLanguage || 'python'
+                    language: c.language || nbData.kernelLanguage || 'python',
+                    name: c.name || ''
                 }));
 
                 renderCells(nb, cellDefs);

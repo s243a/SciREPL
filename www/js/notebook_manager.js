@@ -249,32 +249,45 @@ class NotebookManager {
         const createdNotebooks = [];
 
         for (const nbDef of manifest.notebooks) {
-            const ipynbContent = fileMap.get(nbDef.file);
-            if (!ipynbContent) {
+            const content = fileMap.get(nbDef.file);
+            if (!content) {
                 console.warn('Notebook file not found in package:', nbDef.file);
                 continue;
             }
 
-            const nb = this.createNotebook({
-                name: nbDef.name || nbDef.file.replace('.ipynb', ''),
-                description: nbDef.description || '',
-                kernelLanguage: nbDef.kernel || null
-            });
-
-            // Parse .ipynb and extract cells
             try {
-                const parsed = JSON.parse(ipynbContent);
+                const parsed = JSON.parse(content);
+
+                // Handle .srwb files — delegate to fileIO.importSrwb
+                // importSrwb fully renders the notebook (DOM cards, switching, saving),
+                // so we do NOT add it to createdNotebooks — that would cause
+                // _populateCells to re-process and destroy the already-rendered content.
+                if (nbDef.type === 'srwb' || parsed.format === 'srwb') {
+                    if (window.fileIO && window.fileIO.importSrwb) {
+                        window.fileIO.importSrwb(content);
+                    } else {
+                        console.warn('fileIO.importSrwb not available for:', nbDef.file);
+                    }
+                    continue;
+                }
+
+                // Handle .ipynb files
+                const nb = this.createNotebook({
+                    name: nbDef.name || nbDef.file.replace('.ipynb', ''),
+                    description: nbDef.description || '',
+                    kernelLanguage: nbDef.kernel || null
+                });
+
                 const cells = this._extractCellsFromIpynb(parsed, nbDef.kernel);
                 nb.cells = cells.map((c, i) => ({
                     ...c,
                     id: i + 1
                 }));
                 nb.cellCounter = cells.length;
+                createdNotebooks.push(nb);
             } catch (e) {
                 console.warn('Failed to parse notebook:', nbDef.file, e);
             }
-
-            createdNotebooks.push(nb);
         }
 
         // Switch to the first created notebook

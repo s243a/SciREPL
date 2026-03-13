@@ -230,18 +230,21 @@ class PrologKernel {
         const writableProps = ['.code', '.language', '.type', '.name'];
 
         for (let i = 0; i < cells.length; i++) {
-            const label = 'In[' + (i + 1) + ']';
-            const cellDir = '/nb/' + label;
+            // Check both In[N] and named cell directories
+            const dirs = ['/nb/In[' + (i + 1) + ']'];
+            if (cells[i].name) dirs.push('/nb/' + cells[i].name);
 
-            for (const prop of writableProps) {
-                try {
-                    const data = FS.readFile(cellDir + '/' + prop, { encoding: 'utf8' });
-                    const oldValue = nbvfs._getCellProperty(i, prop) || '';
-                    if (data !== oldValue) {
-                        nbvfs._setCellProperty(i, prop, data);
+            for (const cellDir of dirs) {
+                for (const prop of writableProps) {
+                    try {
+                        const data = FS.readFile(cellDir + '/' + prop, { encoding: 'utf8' });
+                        const oldValue = nbvfs._getCellProperty(i, prop) || '';
+                        if (data !== oldValue) {
+                            nbvfs._setCellProperty(i, prop, data);
+                        }
+                    } catch (e) {
+                        // File doesn't exist — skip
                     }
-                } catch (e) {
-                    // File doesn't exist — skip
                 }
             }
         }
