@@ -135,18 +135,18 @@ The Notebook VFS fits into the broader SciREPL filesystem:
 │   ├── In[1]/
 │   ├── In[2]/
 │   └── ...
-├── workbook/             # all notebooks (future)
+├── workbook/             # all notebooks (WorkbookVFS)
 │   ├── Notebook 1/
 │   │   ├── In[1]/
 │   │   └── ...
 │   └── Physics Notes/
 │       └── ...
-├── local/                # localStorage / IndexedDB (future)
+├── local/                # localStorage keys (LocalStorageVFS, read-only)
 │   └── ...
 └── tmp/                  # temporary files
 ```
 
-The key insight: **workbooks are JSON in localStorage**. The `/nb/` mount is a structured view over that JSON, and `/local/` would expose the raw storage. This is analogous to how Linux exposes kernel internals via `/proc/` and `/sys/`.
+The key insight: **workbooks are JSON in localStorage**. The `/nb/` mount is a structured view over that JSON, `/workbook/` exposes all notebooks, and `/local/` exposes the raw storage. This is analogous to how Linux exposes kernel internals via `/proc/` and `/sys/`.
 
 ## Implementation plan
 
@@ -162,10 +162,10 @@ The key insight: **workbooks are JSON in localStorage**. The `/nb/` mount is a s
 7. **Bash** — `cat /nb/In[1]/.code`, `ls /nb/`, `echo "x" > /nb/cell/.code`
 8. **Python** — `nb_read(cell, prop)`, `nb_write(cell, prop, value)`, `nb_list()` via `js.window.notebookVFS`
 9. **Lua** — `nb.read(cell, prop)`, `nb.write(cell, prop, value)`, `nb.list()`, `nb.name(cell, name)` via `lua_pushjsfunction`
-10. **R** — `nb_read(cell, prop)`, `nb_list()` via files synced to webR FS before execution (read-only)
-11. **Prolog** — `nb_read/3`, `nb_code/2`, `nb_output/2`, `nb_language/2`, `nb_list/1` via Emscripten FS sync (read-only)
+10. **R** — `nb_read(cell, prop)`, `nb_write(cell, prop, value)`, `nb_list()` via files synced to webR FS before/after execution
+11. **Prolog** — `nb_read/3`, `nb_write/3`, `nb_code/2`, `nb_output/2`, `nb_language/2`, `nb_list/1` via Emscripten FS sync
 
-### Phase 3: Extended features — PLANNED
+### Phase 3: Extended features — 3a–3f DONE, 3g–3i PLANNED
 Items grouped by complexity and dependency. Each can be implemented independently.
 
 #### 3a. R and Prolog write support — DONE
