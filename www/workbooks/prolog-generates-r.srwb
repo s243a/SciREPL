@@ -1,0 +1,86 @@
+{
+  "format": "srwb",
+  "format_version": "1.0",
+  "exported_at": "2026-03-12T00:00:00.000Z",
+  "notebook": {
+    "id": "nb-prolog-gen-r-001",
+    "name": "Prolog Generates R: Notebook VFS Demo",
+    "description": "Demonstrates cross-kernel code generation using the Notebook VFS. Prolog defines a factorial algorithm, generates equivalent R code, and writes it to another cell via /nb/.",
+    "kernelLanguage": null,
+    "cellCounter": 9,
+    "cells": [
+      {
+        "code": "# Prolog Generates R — Notebook VFS Demo\n\nThis workbook demonstrates SciREPL's **Notebook VFS** (`/nb/`), which lets any kernel read from or write to other cells.\n\nThe workflow:\n1. **Prolog** defines a recursive factorial and generates equivalent R code\n2. Prolog **writes the R code** to a named cell via `nb_write/3`\n3. **R** runs the generated code\n\nThis mirrors the UnifyWeaver pattern of compiling Prolog logic into target-language implementations — but live, inside a notebook.",
+        "type": "markdown",
+        "language": "python",
+        "name": "",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "## Step 1: Define Factorial in Prolog\n\nA simple recursive factorial. The base case returns 1 when N is 0. The recursive case computes `N * factorial(N-1)`. No memoization needed — factorial has no repeated subproblems.",
+        "type": "markdown",
+        "language": "prolog",
+        "name": "",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "factorial(0, 1).\nfactorial(N, F) :-\n    N > 0,\n    N1 is N - 1,\n    factorial(N1, F1),\n    F is N * F1.\n\n%% Test it\nfactorial(6, F), writeln(F).",
+        "type": "code",
+        "language": "prolog",
+        "name": "prolog_factorial",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "## Step 2: Generate R Code\n\nNow Prolog generates equivalent R code. We use a tail-recursive style that compiles to a simple `for` loop — no memoization needed.\n\nThe generated code is written to the **r_factorial** cell via `nb_write/3`.",
+        "type": "markdown",
+        "language": "prolog",
+        "name": "",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "generate_r_factorial(Code) :-\n    atomic_list_concat([\n        'factorial <- function(n) {\\n',\n        '    result <- 1\\n',\n        '    for (i in seq_len(n)) {\\n',\n        '        result <- result * i\\n',\n        '    }\\n',\n        '    return(result)\\n',\n        '}\\n',\n        '\\n',\n        '# Test: compute 6! and 20!\\n',\n        'cat(\"6! =\", factorial(6), \"\\\\n\")\\n',\n        'cat(\"20! =\", factorial(20), \"\\\\n\")\\n',\n        'cat(\"0! =\", factorial(0), \"\\\\n\")\\n'\n    ], Code).\n\n%% Generate and write to the r_factorial cell\ngenerate_r_factorial(Code),\nnb_write('r_factorial', '.code', Code),\nnb_write('r_factorial', '.language', 'r'),\nwriteln('R code written to cell: r_factorial').",
+        "type": "code",
+        "language": "prolog",
+        "name": "generate_r",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "## Step 3: Run the Generated R Code\n\nThe cell below is named **r_factorial**. After running Step 2, its code and language will be set by Prolog. Click the edit button (✎) on the cell and re-run it to execute the generated R code.",
+        "type": "markdown",
+        "language": "python",
+        "name": "",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "# This cell will be overwritten by Prolog.\n# Run the 'generate_r' cell above first.",
+        "type": "code",
+        "language": "r",
+        "name": "r_factorial",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "## Step 4: Inspect via Bash\n\nThe Notebook VFS lets any kernel inspect cells. Here Bash reads the generated code:",
+        "type": "markdown",
+        "language": "python",
+        "name": "",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "echo \"=== Cells ===\"\nls /nb/\necho \"\"\necho \"=== r_factorial code ===\"\ncat /nb/r_factorial/.code\necho \"\"\necho \"=== r_factorial language ===\"\ncat /nb/r_factorial/.language",
+        "type": "code",
+        "language": "bash",
+        "name": "inspect",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      }
+    ]
+  }
+}

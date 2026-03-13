@@ -1,7 +1,7 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v87';
+const CACHE_VERSION = 'v88';
 const APP_CACHE = 'scirepl-app-' + CACHE_VERSION;
 const CDN_CACHE = 'scirepl-cdn-v1';
 
@@ -54,6 +54,7 @@ const APP_SHELL = [
   './icons/icon-512.png',
   './workbooks/lua-tables-coroutines.srwb',
   './workbooks/lua-parsing-coroutines.srwb',
+  './workbooks/prolog-generates-r.srwb',
 ];
 
 // CDN domains to cache (Pyodide ~25MB, swipl-wasm ~10MB, webR ~50MB)
