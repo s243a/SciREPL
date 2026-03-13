@@ -30,13 +30,24 @@ class SharedVFS {
 
     /**
      * Normalize a path: resolve `.` and `..`, ensure leading `/`.
+     * For /nb/ paths, preserves `.` and `+N`/`-N` cell identifiers
+     * (these are NotebookVFS addressing, not filesystem navigation).
      */
     _normalize(path) {
         if (!path.startsWith('/')) path = '/' + path;
         const parts = path.split('/');
         const resolved = [];
-        for (const p of parts) {
-            if (p === '' || p === '.') continue;
+        // Detect /nb/ paths — cell ident is part index 2 (parts[0]='', parts[1]='nb', parts[2]=cellIdent)
+        const isNb = parts.length >= 2 && parts[1] === 'nb';
+        for (let i = 0; i < parts.length; i++) {
+            const p = parts[i];
+            if (p === '') continue;
+            // In /nb/ paths, preserve the cell identifier (index 2) even if it's '.' or '+N'/'-N'
+            if (isNb && i === 2) {
+                resolved.push(p);
+                continue;
+            }
+            if (p === '.') continue;
             if (p === '..') { resolved.pop(); continue; }
             resolved.push(p);
         }

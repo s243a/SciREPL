@@ -7,7 +7,7 @@
     "name": "Prolog Generates R: Compiler Demo",
     "description": "Demonstrates UnifyWeaver compiling a Prolog factorial predicate into R code, using the linear recursion compiler and Notebook VFS.",
     "kernelLanguage": null,
-    "cellCounter": 13,
+    "cellCounter": 14,
     "cells": [
       {
         "code": "# Prolog Generates R — UnifyWeaver Compiler Demo\n\nThis workbook demonstrates **UnifyWeaver** compiling Prolog logic into executable R code — live, inside a notebook.\n\nThe workflow:\n1. Load the UnifyWeaver compiler environment\n2. Define a recursive `factorial/2` in Prolog\n3. The compiler reads the Prolog source from the previous cell via `nb_read/3`, consults it, and generates an equivalent R `for` loop\n4. The generated R code is written to another cell via `nb_write/3`\n5. Run the R cell to verify correctness",
@@ -110,6 +110,14 @@
         "type": "code",
         "language": "bash",
         "name": "inspect",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "# Step 7: Relative addressing — /nb/-1/.output reads the previous cell's output.\n# /nb/./.code reads this cell's own code. Copy-paste to accumulate!\necho \"[accumulate] previous cell output via /nb/-1/.output:\"\necho \"---\"\ncat /nb/-1/.output\necho \"---\"\necho \"\"\necho \"[self] this cell's code via /nb/./.code:\"\ncat /nb/./.code",
+        "type": "code",
+        "language": "bash",
+        "name": "accumulate",
         "lastOutput": "",
         "lastOutputHtml": ""
       }

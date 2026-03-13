@@ -91,6 +91,22 @@ const R_TIMEOUT = 180_000;     // 3 min for webR init
 
     testLog('Package loads without error', loadResult.ok, loadResult.error || `notebooks=${loadResult.notebooks}`);
 
+    // ---- 2b. Re-import the local .srwb (may have newer cells than the package zip) ----
+    console.log('2b. Re-importing local prolog-generates-r.srwb...');
+
+    const srwbReload = await page.evaluate(async () => {
+      try {
+        const resp = await fetch('./workbooks/prolog-generates-r.srwb');
+        if (!resp.ok) return { ok: false, error: `fetch ${resp.status}` };
+        const text = await resp.text();
+        window.fileIO.importSrwb(text);
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, error: e.message };
+      }
+    });
+    testLog('Local .srwb re-imported', srwbReload.ok, srwbReload.error || '');
+
     // ---- 3. Find and switch to the Prolog Generates R workbook ----
     console.log('3. Switching to Prolog Generates R workbook...');
 
@@ -99,7 +115,9 @@ const R_TIMEOUT = 180_000;     // 3 min for webR init
       if (!nm) return { ok: false, error: 'No notebookManager' };
       const nbs = nm.getNotebooks();
       const names = nbs.map(n => n.name);
-      const target = nbs.find(n => n.name.toLowerCase().includes('prolog generates r'));
+      // Use the last matching notebook (most recently imported)
+      const matches = nbs.filter(n => n.name.toLowerCase().includes('prolog generates r'));
+      const target = matches.length > 0 ? matches[matches.length - 1] : null;
       if (!target) return { ok: false, error: 'Not found', names };
       nm.switchTo(target.id);
       return { ok: true, name: target.name, cellCount: target.cells ? target.cells.length : 0, names };
@@ -131,12 +149,16 @@ const R_TIMEOUT = 180_000;     // 3 min for webR init
     const compileCell = cellNames.find(c => c.name === 'compile_to_r');
     const rCell = cellNames.find(c => c.name === 'r_factorial');
     const testRCell = cellNames.find(c => c.name === 'test_r');
+    const inspectCell = cellNames.find(c => c.name === 'inspect');
+    const accumCell = cellNames.find(c => c.name === 'accumulate');
 
     testLog('load_uw cell found', !!initCell);
     testLog('prolog_factorial cell found', !!factCell);
     testLog('compile_to_r cell found', !!compileCell);
     testLog('r_factorial cell found', !!rCell);
     testLog('test_r cell found', !!testRCell);
+    testLog('inspect cell found', !!inspectCell);
+    testLog('accumulate cell found', !!accumCell);
 
     if (!initCell || !factCell || !compileCell || !rCell) {
       throw new Error('Missing required cells — aborting');
@@ -251,8 +273,76 @@ const R_TIMEOUT = 180_000;     // 3 min for webR init
       vfsCode.includes('factorial <- function'),
       vfsCode.substring(0, 100));
 
-    // ---- 10. Run the generated R code (if webR loads) ----
-    console.log('10. Attempting to run generated R code (webR download)...');
+    // ---- 10. Test relative addressing via bash cells ----
+    console.log('10. Testing relative addressing (bash inspect + accumulate)...');
+
+    if (inspectCell && accumCell) {
+      // Initialize bash kernel
+      let bashReady = false;
+      try {
+        await page.evaluate(async () => {
+          await window.kernelManager.ensureReady('bash');
+        });
+        bashReady = true;
+      } catch (e) {
+        console.log('   Bash kernel init failed:', e.message);
+      }
+      testLog('Bash kernel ready', bashReady);
+
+      if (bashReady) {
+        // Run the inspect cell first (so it has output for accumulate to read)
+        const inspectResult = await page.evaluate(async (cellId) => {
+          const cell = window._cells.find(c => c.id === cellId);
+          if (!cell) return { error: 'cell not found' };
+          // Set context to this cell's index for relative addressing
+          const idx = window._cells.indexOf(cell);
+          if (idx >= 0) window.notebookVFS.setContext(idx);
+          try {
+            const result = await window.kernelManager.execute(cell.code, 'bash');
+            // Store output on the cell so accumulate can read it via -1
+            cell.lastOutput = result.stdout || '';
+            return { stdout: result.stdout || '', error: result.error || null };
+          } catch (e) {
+            return { error: e.message };
+          }
+        }, inspectCell.id);
+
+        const inspectOutput = inspectResult.stdout || '';
+        testLog('Bash inspect cell runs', !inspectResult.error, inspectResult.error || '');
+        testLog('Inspect output lists cells', inspectOutput.includes('=== Cells ==='), '');
+        testLog('Inspect output shows r_factorial code',
+          inspectOutput.includes('factorial'),
+          inspectOutput.substring(0, 150));
+
+        // Now run accumulate — it uses /nb/-1/.output (relative to itself)
+        const accumResult = await page.evaluate(async (cellId) => {
+          const cell = window._cells.find(c => c.id === cellId);
+          if (!cell) return { error: 'cell not found' };
+          const idx = window._cells.indexOf(cell);
+          if (idx >= 0) window.notebookVFS.setContext(idx);
+          try {
+            const result = await window.kernelManager.execute(cell.code, 'bash');
+            return { stdout: result.stdout || '', error: result.error || null };
+          } catch (e) {
+            return { error: e.message };
+          }
+        }, accumCell.id);
+
+        const accumOutput = accumResult.stdout || '';
+        testLog('Accumulate cell runs', !accumResult.error, accumResult.error || '');
+        testLog('Accumulate reads inspect output via /nb/-1/.output',
+          accumOutput.includes('=== Cells ===') || accumOutput.includes('factorial'),
+          accumOutput.substring(0, 200));
+        testLog('Accumulate reads own code via /nb/./.code',
+          accumOutput.includes('cat /nb/-1/.output') && accumOutput.includes('cat /nb/./.code'),
+          '');
+      }
+    } else {
+      testLog('Relative addressing (skipped — cells not found)', false, 'inspect or accumulate cell missing');
+    }
+
+    // ---- 11. Run the generated R code (if webR loads) ----
+    console.log('11. Attempting to run generated R code (webR download)...');
 
     let rReady = false;
     try {
