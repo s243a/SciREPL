@@ -1,4 +1,4 @@
-name: Build Unsigned APK
+name: Build Release (APK + PWA)
 
 on:
   push:
@@ -46,11 +46,20 @@ jobs:
              android/app/build/outputs/apk/release/SciREPL-${{ github.ref_name }}-unsigned.apk || \
           mv android/app/build/outputs/apk/release/app-release.apk \
              android/app/build/outputs/apk/release/SciREPL-${{ github.ref_name }}-unsigned.apk
-      
+
+      - name: Package PWA as zip
+        run: |
+          cd www
+          zip -r ../SciREPL-${{ github.ref_name }}-pwa.zip . \
+            -x "*.DS_Store"
+          cd ..
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: android/app/build/outputs/apk/release/SciREPL-${{ github.ref_name }}-unsigned.apk
+          files: |
+            android/app/build/outputs/apk/release/SciREPL-${{ github.ref_name }}-unsigned.apk
+            SciREPL-${{ github.ref_name }}-pwa.zip
           prerelease: true
           body: |
             > **Pre-release** — unsigned APK for testing. After signing, upload `SciREPL-${{ github.ref_name }}.apk` and mark as latest release.
@@ -59,7 +68,8 @@ jobs:
 
             - **Android APK (signed):** Upload pending — download `SciREPL-${{ github.ref_name }}.apk` once available
             - **Android APK (unsigned):** `SciREPL-${{ github.ref_name }}-unsigned.apk` — requires signing before install (see below)
-            - **PWA (Web App):** [https://s243a.github.io/SciREPL/](https://s243a.github.io/SciREPL/) — install from browser, no app store needed
+            - **PWA (zip):** `SciREPL-${{ github.ref_name }}-pwa.zip` — unzip and serve locally, or open `index.html`
+            - **PWA (live):** [https://s243a.github.io/SciREPL/](https://s243a.github.io/SciREPL/) — install from browser, no app store needed
 
             ## Updating the PWA
 
