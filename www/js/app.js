@@ -845,10 +845,11 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         try {
             await executeCode(code, language);
 
-            // Capture output for NotebookVFS
+            // Capture output for NotebookVFS (text + HTML)
             const body = outputCard.querySelector('.card-body');
             if (body) {
                 cell.lastOutput = body.textContent || '';
+                cell.lastOutputHtml = body.innerHTML || '';
             }
 
             if (body && body.children.length === 0) {
@@ -1026,6 +1027,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 language: language,
                 name: saved.name || '',
                 lastOutput: saved.lastOutput || '',
+                lastOutputHtml: saved.lastOutputHtml || '',
                 inputCard: inputCard,
                 outputCard: outputCard
             };
@@ -1349,6 +1351,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
             language: language,
             name: '',
             lastOutput: '',
+            lastOutputHtml: '',
             inputCard: inputCard,
             outputCard: outputCard
         };
@@ -1381,10 +1384,11 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 }
                 saveCellsToSession();
 
-                // Capture output for NotebookVFS
+                // Capture output for NotebookVFS (text + HTML)
                 const body = outputCard.querySelector('.card-body');
                 if (body) {
                     cell.lastOutput = body.textContent || '';
+                    cell.lastOutputHtml = body.innerHTML || '';
                 }
 
                 if (body && body.children.length === 0) {

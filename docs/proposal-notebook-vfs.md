@@ -184,25 +184,28 @@ Items grouped by complexity and dependency. Each can be implemented independentl
 - Checkboxes read/write `notebookVFS._getSettings()` / `_saveSettings()` (persisted in localStorage)
 - Enforcement in `_setCellProperty` already checks `sameNotebookWrite` setting
 
-#### 3d. Typed output access
-- `.output` currently returns `textContent` of the output card DOM
-- Add sub-properties: `.output.text` (plain text), `.output.html` (raw HTML), `.output.json` (if output is JSON-parseable), `.output.png` (if output contains an image, return data URL)
-- Requires richer output capture — store structured output, not just text
-- Complexity: medium. Needs changes to output capture in app.js and executeCode.
+#### 3d. Typed output access — DONE
+- `.output` returns plain text (default). Sub-properties via `/nb/In[1]/.output/.text` etc.:
+  - `.output.text` — plain text (same as `.output`)
+  - `.output.html` — raw HTML of the output card
+  - `.output.json` — output text if it's valid JSON, null otherwise
+  - `.output.png` — first image data URL from HTML output, null if none
+- `cell.lastOutputHtml` captured alongside `cell.lastOutput` after execution
+- `.output` acts as both file (readable) and directory (has sub-properties) in stat/listDir
 
-#### 3e. `/workbook/` mount — cross-notebook access
-- `/workbook/Notebook Name/In[1]/.code` reads cells from inactive notebooks
-- NotebookManager already stores `nb.cells` for inactive notebooks, so reads are straightforward
-- Writes to inactive notebooks update the data model; UI refreshes on `switchTo()`
-- Gated by security settings (cross-notebook read/write)
-- Complexity: medium. Needs a new mount handler, path parsing for notebook names with spaces.
+#### 3e. `/workbook/` mount — cross-notebook access — DONE
+- `WorkbookVFS` class: `/workbook/Notebook Name/In[1]/.code` reads cells from any notebook
+- Resolves notebook names (including spaces) against NotebookManager's notebook list
+- Active notebook delegates to `window._cells`; inactive reads from `nb.cells` directly
+- Writes to inactive notebooks modify cell data; UI refreshes on `switchTo()`
+- Gated by `crossNotebookRead` / `crossNotebookWrite` security settings
+- SharedVFS delegates all `/workbook/` paths to WorkbookVFS
 
-#### 3f. `/local/` mount — localStorage/IndexedDB browser
-- Expose localStorage keys as files under `/local/`
-- Useful for debugging, backup, and cross-session data access
-- Read-only initially; writes could modify localStorage but risk breaking app state
-- Ties into the filesystem viewer (task #141)
-- Complexity: medium. Need to handle JSON values, binary IndexedDB entries.
+#### 3f. `/local/` mount — localStorage browser — DONE
+- `LocalStorageVFS` class: `/local/` lists all localStorage keys, `/local/key` reads value
+- JSON values are pretty-printed when read
+- Read-only for safety (writes could break app state)
+- SharedVFS delegates all `/local/` paths to LocalStorageVFS
 
 #### 3g. Programmatic cell execution
 - Writing to `/nb/In[3]/.run` (or a special `.execute` property) triggers execution

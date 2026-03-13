@@ -19,7 +19,7 @@ class SharedVFS {
             '/', '/tmp', '/shared', '/education', '/user', '/user/education',
             '/shared/lib', '/shared/lib/python', '/shared/lib/prolog', '/shared/lib/wasm',
             '/shared/bin', '/shared/data', '/shared/config', '/shared/notebooks',
-            '/nb',
+            '/nb', '/workbook', '/local',
         ]);
 
         /** @type {Map<string, Set<Function>>} */
@@ -60,7 +60,9 @@ class SharedVFS {
                n === '/shared' || n.startsWith('/shared/') ||
                n === '/education' || n.startsWith('/education/') ||
                n.startsWith('/user/education/') ||
-               n === '/nb' || n.startsWith('/nb/');
+               n === '/nb' || n.startsWith('/nb/') ||
+               n === '/workbook' || n.startsWith('/workbook/') ||
+               n === '/local' || n.startsWith('/local/');
     }
 
     /**
@@ -68,6 +70,20 @@ class SharedVFS {
      */
     _isNbPath(path) {
         return path === '/nb' || path.startsWith('/nb/');
+    }
+
+    /**
+     * Check if a path should be delegated to WorkbookVFS.
+     */
+    _isWorkbookPath(path) {
+        return path === '/workbook' || path.startsWith('/workbook/');
+    }
+
+    /**
+     * Check if a path should be delegated to LocalStorageVFS.
+     */
+    _isLocalPath(path) {
+        return path === '/local' || path.startsWith('/local/');
     }
 
     // ── Core file operations ────────────────────────────────────
@@ -84,6 +100,14 @@ class SharedVFS {
         // Delegate /nb/ paths to NotebookVFS
         if (this._isNbPath(path) && window.notebookVFS) {
             window.notebookVFS.writeFile(path, content);
+            return;
+        }
+        if (this._isWorkbookPath(path) && window.workbookVFS) {
+            window.workbookVFS.writeFile(path, content);
+            return;
+        }
+        if (this._isLocalPath(path) && window.localStorageVFS) {
+            window.localStorageVFS.writeFile(path, content);
             return;
         }
 
@@ -117,6 +141,12 @@ class SharedVFS {
         if (this._isNbPath(path) && window.notebookVFS) {
             return window.notebookVFS.readFile(path);
         }
+        if (this._isWorkbookPath(path) && window.workbookVFS) {
+            return window.workbookVFS.readFile(path);
+        }
+        if (this._isLocalPath(path) && window.localStorageVFS) {
+            return window.localStorageVFS.readFile(path);
+        }
 
         const entry = this._files.get(path);
         if (!entry) return null;
@@ -135,6 +165,12 @@ class SharedVFS {
         if (this._isNbPath(path) && window.notebookVFS) {
             return window.notebookVFS.exists(path);
         }
+        if (this._isWorkbookPath(path) && window.workbookVFS) {
+            return window.workbookVFS.exists(path);
+        }
+        if (this._isLocalPath(path) && window.localStorageVFS) {
+            return window.localStorageVFS.exists(path);
+        }
         return this._files.has(path) || this._dirs.has(path);
     }
 
@@ -147,6 +183,14 @@ class SharedVFS {
             const s = window.notebookVFS.stat(path);
             return s ? s.isFile : false;
         }
+        if (this._isWorkbookPath(path) && window.workbookVFS) {
+            const s = window.workbookVFS.stat(path);
+            return s ? s.isFile : false;
+        }
+        if (this._isLocalPath(path) && window.localStorageVFS) {
+            const s = window.localStorageVFS.stat(path);
+            return s ? s.isFile : false;
+        }
         return this._files.has(path);
     }
 
@@ -157,6 +201,14 @@ class SharedVFS {
         path = this._normalize(path);
         if (this._isNbPath(path) && window.notebookVFS) {
             const s = window.notebookVFS.stat(path);
+            return s ? s.isDir : false;
+        }
+        if (this._isWorkbookPath(path) && window.workbookVFS) {
+            const s = window.workbookVFS.stat(path);
+            return s ? s.isDir : false;
+        }
+        if (this._isLocalPath(path) && window.localStorageVFS) {
+            const s = window.localStorageVFS.stat(path);
             return s ? s.isDir : false;
         }
         return this._dirs.has(path);
@@ -224,6 +276,12 @@ class SharedVFS {
         if (this._isNbPath(path) && window.notebookVFS) {
             return window.notebookVFS.listDir(path) || [];
         }
+        if (this._isWorkbookPath(path) && window.workbookVFS) {
+            return window.workbookVFS.listDir(path) || [];
+        }
+        if (this._isLocalPath(path) && window.localStorageVFS) {
+            return window.localStorageVFS.listDir(path) || [];
+        }
         if (!path.endsWith('/')) path += '/';
         const entries = new Set();
 
@@ -252,6 +310,12 @@ class SharedVFS {
         path = this._normalize(path);
         if (this._isNbPath(path) && window.notebookVFS) {
             return window.notebookVFS.stat(path);
+        }
+        if (this._isWorkbookPath(path) && window.workbookVFS) {
+            return window.workbookVFS.stat(path);
+        }
+        if (this._isLocalPath(path) && window.localStorageVFS) {
+            return window.localStorageVFS.stat(path);
         }
         const entry = this._files.get(path);
         if (entry) {
@@ -293,6 +357,27 @@ class SharedVFS {
         return result;
     }
 
+    // ── Rust bridge helpers ─────────────────────────────────────
+
+    /**
+     * Delegate a vfs_read_file to virtual mounts (/nb/, /workbook/, /local/).
+     * Returns undefined if not a virtual path (caller should fall through).
+     */
+    _delegateVfsRead(path) {
+        for (const [check, vfs] of [
+            [this._isNbPath(path), window.notebookVFS],
+            [this._isWorkbookPath(path), window.workbookVFS],
+            [this._isLocalPath(path), window.localStorageVFS],
+        ]) {
+            if (check && vfs) {
+                const content = vfs.readFile(path);
+                if (content === null) return null;
+                return typeof content === 'string' ? new TextEncoder().encode(content) : content;
+            }
+        }
+        return undefined; // not a virtual path
+    }
+
     // ── Rust bridge methods (called from wasm-bindgen) ──────────
     // These use snake_case to match Rust naming conventions.
     // wasm-bindgen imports reference window.sharedVFS.vfs_*
@@ -303,11 +388,9 @@ class SharedVFS {
      */
     vfs_read_file(path) {
         path = this._normalize(path);
-        if (this._isNbPath(path) && window.notebookVFS) {
-            const content = window.notebookVFS.readFile(path);
-            if (content === null) return null;
-            return typeof content === 'string' ? new TextEncoder().encode(content) : content;
-        }
+        // Delegate to virtual mounts
+        const vfsDelegate = this._delegateVfsRead(path);
+        if (vfsDelegate !== undefined) return vfsDelegate;
         const entry = this._files.get(path);
         if (!entry) return null;
 
@@ -330,6 +413,15 @@ class SharedVFS {
             window.notebookVFS.writeFile(normalized, copy);
             return;
         }
+        if (this._isWorkbookPath(normalized) && window.workbookVFS) {
+            const copy = content instanceof Uint8Array ? new Uint8Array(content) : content;
+            window.workbookVFS.writeFile(normalized, copy);
+            return;
+        }
+        if (this._isLocalPath(normalized) && window.localStorageVFS) {
+            window.localStorageVFS.writeFile(normalized, content);
+            return;
+        }
         // Copy the Uint8Array — wasm-bindgen passes a view into WASM linear
         // memory which becomes detached when the memory grows.
         const copy = content instanceof Uint8Array ? new Uint8Array(content) : content;
@@ -343,6 +435,12 @@ class SharedVFS {
         const normalized = this._normalize(path);
         if (this._isNbPath(normalized) && window.notebookVFS) {
             return window.notebookVFS.exists(normalized);
+        }
+        if (this._isWorkbookPath(normalized) && window.workbookVFS) {
+            return window.workbookVFS.exists(normalized);
+        }
+        if (this._isLocalPath(normalized) && window.localStorageVFS) {
+            return window.localStorageVFS.exists(normalized);
         }
         return this.exists(path);
     }
@@ -406,6 +504,12 @@ class SharedVFS {
         path = this._normalize(path);
         if (this._isNbPath(path) && window.notebookVFS) {
             return window.notebookVFS.vfs_list_dir(path);
+        }
+        if (this._isWorkbookPath(path) && window.workbookVFS) {
+            return window.workbookVFS.vfs_list_dir(path);
+        }
+        if (this._isLocalPath(path) && window.localStorageVFS) {
+            return window.localStorageVFS.vfs_list_dir(path);
         }
         // Check if path is a known directory
         if (!path.endsWith('/')) path += '/';
@@ -483,14 +587,21 @@ class SharedVFS {
      */
     vfs_stat(path) {
         const normalized = this._normalize(path);
-        if (this._isNbPath(normalized) && window.notebookVFS) {
-            const info = window.notebookVFS.stat(normalized);
-            if (!info) return null;
-            return JSON.stringify({
-                size: info.size || 0,
-                is_dir: info.isDir || false,
-                modified: info.modified || 0
-            });
+        // Delegate to virtual mounts
+        for (const [check, vfs] of [
+            [this._isNbPath(normalized), window.notebookVFS],
+            [this._isWorkbookPath(normalized), window.workbookVFS],
+            [this._isLocalPath(normalized), window.localStorageVFS],
+        ]) {
+            if (check && vfs) {
+                const info = vfs.stat(normalized);
+                if (!info) return null;
+                return JSON.stringify({
+                    size: info.size || 0,
+                    is_dir: info.isDir || false,
+                    modified: info.modified || 0
+                });
+            }
         }
         const info = this.stat(path);
         if (!info) return null;
