@@ -165,7 +165,7 @@ class PackageCatalog {
         btn.textContent = 'Downloading...';
 
         // 1. Download (concurrent — multiple downloads can run at once)
-        //    Try release URL first (authoritative), fall back to pages_url (local/cached)
+        //    Try release asset URL first, fall back to pages_url
         let blob;
         try {
             if (pkg.url) {
