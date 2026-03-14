@@ -261,7 +261,109 @@ print(coroutine.resume(co))
 
 -- Pattern matching (built-in, no regex needed)
 s = "Hello World 123"
-print(s:match("(%a+)%s+(%a+)"))</code></pre>
+print(s:match("(%a+)%s+(%a+)"))
+
+-- Read another cell's output via Notebook VFS
+prev = nb.read("In[1]", ".output")
+print("Cell 1 said: " .. (prev or "(empty)"))
+
+-- Write to a named cell
+nb.write("results", ".code", "print('updated by Lua!')")</code></pre>
+
+            <h3>Cross-Cell Communication (Notebook VFS)</h3>
+            <p>Every cell is accessible as a virtual file at <code>/nb/</code>. You can read and write cell code, output, language, and name from any kernel. Cells can be addressed three ways:</p>
+            <ul>
+                <li><strong>By name</strong> — <code>/nb/my_cell/.code</code> (user-assigned cell name)</li>
+                <li><strong>By index</strong> — <code>/nb/In[1]/.code</code> (1-based position)</li>
+                <li><strong>Relative</strong> — <code>/nb/-1/.output</code> (previous cell), <code>/nb/+1/.code</code> (next cell), <code>/nb/./.code</code> (self)</li>
+            </ul>
+            <p><strong>Properties:</strong> <code>.code</code>, <code>.output</code>, <code>.language</code>, <code>.type</code>, <code>.name</code></p>
+
+            <p><strong>Bash</strong> — uses filesystem paths directly:</p>
+            <pre><code># By name
+cat /nb/my_cell/.code
+
+# By index
+cat /nb/In[1]/.output
+
+# Relative: previous cell's output
+cat /nb/-1/.output
+
+# Self-reference
+cat /nb/./.code
+
+# Write to a cell
+echo "print('hello')" > /nb/In[3]/.code
+
+# List all cells
+ls /nb/</code></pre>
+
+            <p><strong>Python</strong> — <code>nb_read()</code> / <code>nb_write()</code>:</p>
+            <pre><code># By name
+code = nb_read("my_cell", ".code")
+
+# By index
+output = nb_read("In[2]", ".output")
+
+# Relative (previous cell)
+prev = nb_read("-1", ".output")
+
+# Write generated code to a named cell
+nb_write("results", ".code", "print('generated!')")
+
+# List all cells
+cells = nb_list()</code></pre>
+
+            <p><strong>R</strong> — <code>nb_read()</code> / <code>nb_write()</code>:</p>
+            <pre><code># By name
+code <- nb_read("my_cell", ".code")
+
+# By index
+output <- nb_read("In[2]", ".output")
+
+# Write to a named cell
+nb_write("plot_cell", ".code", "plot(1:10)")
+
+# List cells
+cells <- nb_list()</code></pre>
+
+            <p><strong>Lua</strong> — <code>nb.read()</code> / <code>nb.write()</code>:</p>
+            <pre><code>-- By name
+code = nb.read("my_cell", ".code")
+
+-- By index
+output = nb.read("In[2]", ".output")
+
+-- Relative: previous cell
+prev = nb.read("-1", ".output")
+
+-- Write to a named cell
+nb.write("results", ".code", "print('from Lua')")
+
+-- List all cells (returns JSON)
+cells = nb.list()</code></pre>
+
+            <p><strong>Prolog</strong> — <code>nb_read/3</code> / <code>nb_write/3</code>:</p>
+            <pre><code>%% By name
+nb_read('my_cell', '.code', Code).
+
+%% By index
+nb_read('In[2]', '.output', Output).
+
+%% Write compiler output to another cell
+nb_write('r_factorial', '.code', GeneratedCode).</code></pre>
+
+            <p><strong>JavaScript</strong> — direct <code>window.notebookVFS</code> API:</p>
+            <pre><code>// By name
+const code = window.notebookVFS.readFile("/nb/my_cell/.code");
+
+// By index
+const out = window.notebookVFS.readFile("/nb/In[1]/.output");
+
+// Write
+window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pre>
+
+            <p><em>Tip: Give cells a name (click the cell label) so other cells can address them by name instead of fragile index numbers.</em></p>
 
             <h3>Cell Language</h3>
             <p>Each cell remembers its language. To change a cell's language, click ✎ to edit, then use the language dropdown. Click <strong>All→</strong> to apply the language to all code cells in the notebook.</p>
@@ -282,7 +384,7 @@ print(s:match("(%a+)%s+(%a+)"))</code></pre>
             </p>
 
             <h3>Version</h3>
-            <p><strong>SciREPL Pro v0.9.2-pre1</strong></p>
+            <p><strong>SciREPL Pro v0.10.0</strong></p>
             <p>Includes: Multi-language (Python, R, Prolog, Bash, JavaScript, Lua), editable cells, markdown cells, session persistence with auto-save and crash recovery, Math Mode palette, .ipynb import/export with output preservation, .srwb workbook format, rich export (HTML, Markdown, PDF, DOCX with native equations, LaTeX) with syntax highlighting, virtual filesystem, search paths, URL file fetching, multi-notebook support, package catalog with one-click install, language settings, package format (.zip/.tar.gz)</p>
 
             <h3>Privacy</h3>
