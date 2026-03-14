@@ -165,13 +165,14 @@ class PackageCatalog {
         btn.textContent = 'Downloading...';
 
         // 1. Download (concurrent — multiple downloads can run at once)
+        //    Try release URL first (authoritative), fall back to pages_url (local/cached)
         let blob;
         try {
-            if (pkg.pages_url) {
-                try { blob = await this._fetchPackage(pkg.pages_url); } catch (e) {}
+            if (pkg.url) {
+                try { blob = await this._fetchPackage(pkg.url); } catch (e) {}
             }
-            if (!blob) {
-                blob = await this._fetchPackage(pkg.url);
+            if (!blob && pkg.pages_url) {
+                blob = await this._fetchPackage(pkg.pages_url);
             }
         } catch (err) {
             console.error('[PackageCatalog] Download failed:', err);
