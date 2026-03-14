@@ -100,9 +100,9 @@ class FileIO {
                     await Promise.all(names.filter(n => !n.includes('-cdn-')).map(n => caches.delete(n)));
                 } catch (_) { }
                 try {
-                    // Tell SW to update so it picks up new app assets
+                    // Unregister the old SW so the reload gets fresh assets
                     const reg = await navigator.serviceWorker.getRegistration();
-                    if (reg) await reg.update();
+                    if (reg) await reg.unregister();
                 } catch (_) { }
                 location.reload();
             });
