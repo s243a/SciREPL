@@ -151,6 +151,12 @@ const R_TIMEOUT = 180_000;     // 3 min for webR init
     const testRCell = cellNames.find(c => c.name === 'test_r');
     const inspectCell = cellNames.find(c => c.name === 'inspect');
     const accumCell = cellNames.find(c => c.name === 'accumulate');
+    const ancestorCell = cellNames.find(c => c.name === 'prolog_ancestor');
+    const compileTcCell = cellNames.find(c => c.name === 'compile_ancestor_tc');
+    const compileSkipCell = cellNames.find(c => c.name === 'compile_ancestor_skip');
+    const rAncestorTcCell = cellNames.find(c => c.name === 'r_ancestor_tc');
+    const bashAncestorAltCell = cellNames.find(c => c.name === 'bash_ancestor_alt');
+    const compareCell = cellNames.find(c => c.name === 'compare_outputs');
 
     testLog('load_uw cell found', !!initCell);
     testLog('prolog_factorial cell found', !!factCell);
@@ -159,6 +165,12 @@ const R_TIMEOUT = 180_000;     // 3 min for webR init
     testLog('test_r cell found', !!testRCell);
     testLog('inspect cell found', !!inspectCell);
     testLog('accumulate cell found', !!accumCell);
+    testLog('prolog_ancestor cell found', !!ancestorCell);
+    testLog('compile_ancestor_tc cell found', !!compileTcCell);
+    testLog('compile_ancestor_skip cell found', !!compileSkipCell);
+    testLog('r_ancestor_tc cell found', !!rAncestorTcCell);
+    testLog('bash_ancestor_alt cell found', !!bashAncestorAltCell);
+    testLog('compare_outputs cell found', !!compareCell);
 
     if (!initCell || !factCell || !compileCell || !rCell) {
       throw new Error('Missing required cells — aborting');
@@ -341,8 +353,91 @@ const R_TIMEOUT = 180_000;     // 3 min for webR init
       testLog('Relative addressing (skipped — cells not found)', false, 'inspect or accumulate cell missing');
     }
 
-    // ---- 11. Run the generated R code (if webR loads) ----
-    console.log('11. Attempting to run generated R code (webR download)...');
+    // ---- 11. Test ancestor compilation (Part 2) ----
+    console.log('11. Testing ancestor compilation (transitive closure + skip)...');
+
+    if (ancestorCell && compileTcCell && compileSkipCell) {
+      // Run ancestor definition cell
+      const ancResult = await page.evaluate(async (cellId) => {
+        const cell = window._cells.find(c => c.id === cellId);
+        if (!cell) return { error: 'cell not found' };
+        try {
+          const result = await window.kernelManager.execute(cell.code, 'prolog');
+          return { stdout: result.stdout || '', error: result.error || null };
+        } catch (e) {
+          return { error: e.message };
+        }
+      }, ancestorCell.id);
+      testLog('Ancestor predicates defined', !ancResult.error, ancResult.error || '');
+
+      // Run compile_ancestor_tc (default → transitive closure)
+      const tcResult = await page.evaluate(async (cellId) => {
+        const cell = window._cells.find(c => c.id === cellId);
+        if (!cell) return { error: 'cell not found' };
+        try {
+          const result = await window.kernelManager.execute(cell.code, 'prolog');
+          return { stdout: result.stdout || '', error: result.error || null };
+        } catch (e) {
+          return { error: e.message };
+        }
+      }, compileTcCell.id);
+
+      const tcOutput = tcResult.stdout || '';
+      testLog('TC compiler cell executed', !tcResult.error, tcResult.error || '');
+      testLog('TC output mentions transitive_closure',
+        tcOutput.includes('transitive') || tcOutput.includes('Transitive') || tcOutput.includes('ancestor'),
+        tcOutput.substring(0, 200));
+      testLog('TC output contains R code',
+        tcOutput.includes('ancestor') && (tcOutput.includes('<-') || tcOutput.includes('function')),
+        '');
+      testLog('TC nb_write confirmed',
+        tcOutput.includes('R code written to cell'),
+        '');
+
+      // Verify the R cell was updated
+      const tcCellCode = await page.evaluate(() => {
+        const cell = window._cells.find(c => c.name === 'r_ancestor_tc');
+        return cell ? cell.code : '';
+      });
+      testLog('r_ancestor_tc cell updated',
+        tcCellCode.includes('ancestor') || tcCellCode.includes('parent'),
+        tcCellCode.substring(0, 100));
+
+      // Run compile_ancestor_skip (skip TC → tail recursion, bash target)
+      const skipResult = await page.evaluate(async (cellId) => {
+        const cell = window._cells.find(c => c.id === cellId);
+        if (!cell) return { error: 'cell not found' };
+        try {
+          const result = await window.kernelManager.execute(cell.code, 'prolog');
+          return { stdout: result.stdout || '', error: result.error || null };
+        } catch (e) {
+          return { error: e.message };
+        }
+      }, compileSkipCell.id);
+
+      const skipOutput = skipResult.stdout || '';
+      testLog('Skip compiler cell executed', !skipResult.error, skipResult.error || '');
+      testLog('Skip output contains bash code',
+        skipOutput.includes('ancestor') && (skipOutput.includes('bash') || skipOutput.includes('#!/bin/bash') || skipOutput.includes('local')),
+        skipOutput.substring(0, 200));
+      testLog('Skip nb_write confirmed',
+        skipOutput.includes('Bash code written to cell'),
+        '');
+
+      // Verify bash cell was updated
+      const bashCellCode = await page.evaluate(() => {
+        const cell = window._cells.find(c => c.name === 'bash_ancestor_alt');
+        return cell ? cell.code : '';
+      });
+      testLog('bash_ancestor_alt cell updated',
+        bashCellCode.includes('ancestor') || bashCellCode.includes('bash'),
+        bashCellCode.substring(0, 100));
+    } else {
+      testLog('Ancestor compilation (skipped — cells not found)', false, 'ancestor cells missing');
+    }
+
+    // ---- 12. Run the generated R code (if webR loads) ----
+    console.log('12. Attempting to run generated R code (webR download)...');
 
     let rReady = false;
     try {

@@ -5,12 +5,12 @@
   "notebook": {
     "id": "nb-prolog-gen-r-001",
     "name": "Prolog Generates R: Compiler Demo",
-    "description": "Demonstrates UnifyWeaver compiling a Prolog factorial predicate into R code, using the linear recursion compiler and Notebook VFS.",
+    "description": "Demonstrates UnifyWeaver compiling Prolog predicates into R code. Part 1: factorial (linear→tail transformation). Part 2: ancestor (transitive closure vs skip/pattern).",
     "kernelLanguage": null,
-    "cellCounter": 14,
+    "cellCounter": 26,
     "cells": [
       {
-        "code": "# Prolog Generates R — UnifyWeaver Compiler Demo\n\nThis workbook demonstrates **UnifyWeaver** compiling Prolog logic into executable R code — live, inside a notebook.\n\nThe workflow:\n1. Load the UnifyWeaver compiler environment\n2. Define a recursive `factorial/2` in Prolog\n3. The compiler reads the Prolog source from the previous cell via `nb_read/3`, consults it, and generates an equivalent R `for` loop\n4. The generated R code is written to another cell via `nb_write/3`\n5. Run the R cell to verify correctness",
+        "code": "# Prolog Generates R — UnifyWeaver Compiler Demo\n\nThis workbook demonstrates **UnifyWeaver** compiling Prolog logic into executable R code — live, inside a notebook.\n\n## Part 1: Factorial (Linear Recursion)\n1. Load the UnifyWeaver compiler environment\n2. Define a recursive `factorial/2` in Prolog\n3. The compiler detects the recursion pattern and generates an equivalent R loop\n4. The generated R code is written to another cell via `nb_write/3`\n5. Run the R cell to verify correctness\n\n## Part 2: Ancestor (Transitive Closure & Pattern Control)\n8. Define `parent/2` facts and `ancestor/2` in Prolog\n9. Compile with default pattern → transitive closure (BFS graph traversal)\n10. Compile again with `skip(transitive_closure)` → different generated code\n11. Compare the two approaches side by side",
         "type": "markdown",
         "language": "python",
         "name": "",
@@ -26,7 +26,7 @@
         "lastOutputHtml": ""
       },
       {
-        "code": "['../init'].\n:- use_module(unifyweaver(targets/r_target)).\n:- use_module(unifyweaver(core/advanced/linear_recursion)).",
+        "code": "['../init'].\n:- use_module(unifyweaver(targets/r_target)).\n:- use_module(unifyweaver(core/advanced/linear_recursion)).\n:- use_module(unifyweaver(core/recursive_compiler)).",
         "type": "code",
         "language": "prolog",
         "name": "load_uw",
@@ -118,6 +118,102 @@
         "type": "code",
         "language": "bash",
         "name": "accumulate",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "---\n\n# Part 2: Ancestor — Transitive Closure & Pattern Control\n\nThe same compiler handles relational predicates too. Here we define `ancestor/2` as a transitive closure over `parent/2` facts.\n\nThe compiler recognizes the pattern and generates **BFS graph traversal** code in R. But we can also `skip(transitive_closure)` to force a different compilation strategy — demonstrating how `skip` and `pattern` options control which code the compiler emits.",
+        "type": "markdown",
+        "language": "prolog",
+        "name": "",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "## Step 8: Define Family Tree in Prolog\n\nA small family tree using `parent/2` facts, and `ancestor/2` defined as a transitive closure.\n\nNote how concise the Prolog is — just 2 clauses for `ancestor/2`. The compiler will generate all the graph traversal machinery.",
+        "type": "markdown",
+        "language": "prolog",
+        "name": "",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": ":- dynamic parent/2, ancestor/2.\n\n%% Family tree\nparent(alice, bob).\nparent(bob, charlie).\nparent(bob, diana).\nparent(charlie, eve).\n\n%% Transitive closure: ancestor(X, Y) if X is an ancestor of Y\nancestor(X, Y) :- parent(X, Y).\nancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).",
+        "type": "code",
+        "language": "prolog",
+        "name": "prolog_ancestor",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "## Step 9: Compile ancestor/2 → R (default: transitive closure)\n\nThe compiler classifies `ancestor/2` as a **transitive closure** over `parent/2` and generates R code with:\n- An adjacency list (environment hash map)\n- BFS traversal functions (`ancestor_all`, `ancestor_check`)\n- An `add_parent` function to populate the graph\n\nThis is the optimal compilation for graph reachability queries.",
+        "type": "markdown",
+        "language": "prolog",
+        "name": "",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "%% Consult the ancestor definitions\nuser:nb_read('prolog_ancestor', '.code', AncSrc),\nformat('Read from prolog_ancestor:~n~w~n~n', [AncSrc]),\nsetup_call_cleanup(\n    open('/tmp/_nb_anc.pl', write, Out),\n    write(Out, AncSrc),\n    close(Out)),\nconsult('/tmp/_nb_anc.pl'),\n\n%% Compile with default pattern detection → transitive closure\nrecursive_compiler:compile_recursive(ancestor/2, [target(r)], Code1),\nformat('--- Pattern: transitive_closure ---~n~w~n', [Code1]),\n\n%% Write to the R cell\nuser:nb_write('r_ancestor_tc', '.code', Code1),\nwriteln('\\nR code written to cell: r_ancestor_tc').",
+        "type": "code",
+        "language": "prolog",
+        "name": "compile_ancestor_tc",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "## Step 10: The Generated R Code (Transitive Closure)\n\nThis cell is overwritten by the compiler with BFS graph traversal code.\nRun the `compile_ancestor_tc` cell above first.",
+        "type": "markdown",
+        "language": "r",
+        "name": "",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "# This cell will be overwritten by the compiler.\n# Run 'compile_ancestor_tc' above first.",
+        "type": "code",
+        "language": "r",
+        "name": "r_ancestor_tc",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "## Step 11: Compile with skip(transitive_closure) → Bash\n\nNow we compile the **same predicate** but skip the transitive closure pattern. The compiler falls through to **tail recursion** (since the recursive `ancestor(Z,Y)` call is in tail position) and targets **Bash** instead of R.\n\nThis demonstrates two things:\n- `skip()` controls which compilation strategy the compiler uses\n- The same Prolog predicate can target different languages\n\nYou could also use `skip([transitive_closure, tail_recursion])` to skip multiple patterns and get memoized recursion instead.",
+        "type": "markdown",
+        "language": "prolog",
+        "name": "",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "%% Compile ancestor/2 again, but skip transitive closure → falls to tail recursion\n%% Also target bash to show cross-language compilation\nrecursive_compiler:compile_recursive(\n    ancestor/2,\n    [target(bash), skip(transitive_closure)],\n    Code2),\nformat('--- Pattern: tail_recursion (bash) ---~n~w~n', [Code2]),\n\n%% Write to the bash cell\nuser:nb_write('bash_ancestor_alt', '.code', Code2),\nwriteln('\\nBash code written to cell: bash_ancestor_alt').",
+        "type": "code",
+        "language": "prolog",
+        "name": "compile_ancestor_skip",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "# This cell will be overwritten by the compiler.\n# Run 'compile_ancestor_skip' above first.",
+        "type": "code",
+        "language": "bash",
+        "name": "bash_ancestor_alt",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "## Step 12: Compare the Two Approaches\n\nUse the Notebook VFS to read both generated cells side by side:",
+        "type": "markdown",
+        "language": "bash",
+        "name": "",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "echo \"=== R (transitive closure / BFS) ===\"\necho \"Language: $(cat /nb/r_ancestor_tc/.language)\"\necho \"---\"\ncat /nb/r_ancestor_tc/.code\necho \"\"\necho \"\"\necho \"=== Bash (tail recursion) ===\"\necho \"Language: $(cat /nb/bash_ancestor_alt/.language)\"\necho \"---\"\ncat /nb/bash_ancestor_alt/.code",
+        "type": "code",
+        "language": "bash",
+        "name": "compare_outputs",
         "lastOutput": "",
         "lastOutputHtml": ""
       }
