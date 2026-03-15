@@ -363,6 +363,71 @@ Near-term items to make R and cross-language features demo-ready:
 - [ ] **Byte-level download progress** — Track actual download progress via Service Worker interception or ReadableStream
 - [ ] **Background package installs** — Install packages/workbooks without switching to the target notebook tab; requires notebook-aware card creation
 
+## Testing
+
+### Playwright Tests
+
+SciREPL includes Playwright tests that verify cross-cell communication (Notebook VFS) examples across all six kernels.
+
+```bash
+# Start local server
+npm run serve
+
+# Run all VFS tests
+npx playwright install chromium   # first time only
+node test_help_vfs_examples.mjs
+```
+
+#### WSL2 Memory Requirements
+
+CDN kernels (Python/Pyodide, R/webR, Prolog/SWI-WASM) compile large WebAssembly modules in-browser. This requires significant memory:
+
+| Component | Memory Usage |
+|-----------|-------------|
+| Chromium (headless) | ~200–400 MB resident |
+| Pyodide WASM compilation | ~3–4 GB peak (50 MB download → JIT compile) |
+| webR WASM compilation | ~1–2 GB peak |
+| SWI-Prolog WASM compilation | ~500 MB–1 GB peak |
+| Node.js (Playwright host) | ~100–200 MB |
+
+When running tests on **WSL2**, the default memory and swap allocation (typically 50% of host RAM / ~1 GB swap) is often insufficient. The Linux OOM killer will terminate the browser process mid-compilation.
+
+**Recommended `.wslconfig`** (edit `C:\Users\<username>\.wslconfig`, then `wsl --shutdown`):
+
+```ini
+[wsl2]
+memory=5GB
+swap=5GB
+```
+
+- **5 GB RAM** gives enough headroom for Chromium + one large WASM module with room for the OS
+- **5 GB swap** acts as overflow when peak WASM compilation temporarily exceeds physical RAM — the kernel spills pages to swap instead of OOM-killing
+
+Without adequate swap, Pyodide compilation reliably triggers the OOM killer at ~4 GB RSS, even with 5 GB total RAM.
+
+#### Playwright + Large WASM: DOM Signaling Pattern
+
+Standard `page.evaluate()` calls fail with `ERR_STRING_TOO_LONG` after loading large WASM modules (Pyodide, webR). This is a Node.js/Playwright limitation: the Chrome DevTools Protocol serializes the full execution context, and when WASM memory is large, the resulting message exceeds Node's maximum string size (~512 MB).
+
+**Workaround:** Use `page.addScriptTag()` to inject code and DOM `data-*` attributes to pass results back:
+
+```javascript
+// Instead of: const result = await page.evaluate(() => heavyWasmCall());
+// Do this:
+await page.addScriptTag({ content: `
+    heavyWasmCall()
+        .then(r => document.body.setAttribute('data-result', JSON.stringify(r)))
+        .catch(e => document.body.setAttribute('data-error', e.message));
+`});
+await page.waitForFunction(
+    () => document.body.hasAttribute('data-result') || document.body.hasAttribute('data-error'),
+    { timeout: 300000, polling: 2000 }
+);
+const result = JSON.parse(await page.getAttribute('body', 'data-result'));
+```
+
+This pattern is used in `test_help_vfs_examples.mjs` for all CDN kernel interactions.
+
 ## License
 
 MIT License — see [LICENSE](LICENSE)
