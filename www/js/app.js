@@ -988,7 +988,8 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                     existingCards.forEach(c => c.remove());
 
                     const cellDefs = (nb.cells || []).map(c => ({
-                        code: c.code, type: c.type, language: c.language || 'python'
+                        code: c.code, type: c.type, language: c.language || 'python',
+                        name: c.name || ''
                     }));
                     window._cells.length = 0;
                     window._cellCounter = 0;
@@ -1006,10 +1007,15 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                             code: saved.code,
                             type: saved.type,
                             language: language,
+                            name: saved.name || '',
                             inputCard: inputCard,
                             outputCard: outputCard
                         };
                         window._cells.push(cell);
+
+                        if (cell.name && window.notebookVFS) {
+                            window.notebookVFS._updateCellUI(window._cells.length - 1, 'name');
+                        }
 
                         if (saved.type === 'markdown') {
                             const body = outputCard.querySelector('.card-body');

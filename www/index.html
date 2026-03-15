@@ -267,8 +267,11 @@ print(s:match("(%a+)%s+(%a+)"))
 prev = nb.read("In[1]", ".output")
 print("Cell 1 said: " .. (prev or "(empty)"))
 
--- Write to a named cell
-nb.write("results", ".code", "print('updated by Lua!')")</code></pre>
+-- Write to a named cell (name a cell "results" first)
+nb.write("results", ".code", "print('updated by Lua!')")
+
+-- WARNING: overwrites the first cell's code!
+nb.write("In[1]", ".code", "print('overwritten by Lua')")</code></pre>
 
             <h3>Cross-Cell Communication (Notebook VFS)</h3>
             <p>Every cell is accessible as a virtual file at <code>/nb/</code>. You can read and write cell code, output, language, and name from any kernel. Cells can be addressed three ways:</p>
