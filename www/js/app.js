@@ -235,16 +235,40 @@
             const renameCellPrompt = () => {
                 const cell = window._cells.find(c => c.id === cellId);
                 if (!cell) return;
-                const currentName = cell.name || '';
-                const newName = prompt('Cell name (empty to clear):', currentName);
-                if (newName === null) return; // cancelled
-                if (window.notebookVFS) {
-                    const idx = window._cells.indexOf(cell);
-                    if (idx >= 0) {
-                        window.notebookVFS._setCellName(idx, newName.trim());
-                        saveCellsToSession();
+                const modal = document.getElementById('rename-cell-modal');
+                const input = document.getElementById('rename-cell-input');
+                const okBtn = document.getElementById('rename-cell-ok');
+                const cancelBtn = document.getElementById('rename-cell-cancel');
+                if (!modal || !input) return;
+
+                input.value = cell.name || '';
+                modal.classList.remove('hidden');
+                setTimeout(() => { input.focus(); input.select(); }, 50);
+
+                const cleanup = () => {
+                    modal.classList.add('hidden');
+                    okBtn.removeEventListener('click', onOk);
+                    cancelBtn.removeEventListener('click', onCancel);
+                    modal.querySelector('.modal-close').removeEventListener('click', onCancel);
+                };
+                const onOk = () => {
+                    cleanup();
+                    if (window.notebookVFS) {
+                        const idx = window._cells.indexOf(cell);
+                        if (idx >= 0) {
+                            window.notebookVFS._setCellName(idx, input.value.trim());
+                            saveCellsToSession();
+                        }
                     }
-                }
+                };
+                const onCancel = () => { cleanup(); };
+                okBtn.addEventListener('click', onOk);
+                cancelBtn.addEventListener('click', onCancel);
+                modal.querySelector('.modal-close').addEventListener('click', onCancel);
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') onOk();
+                    if (e.key === 'Escape') onCancel();
+                }, { once: true });
             };
 
             promptIcon.addEventListener('dblclick', (e) => {
