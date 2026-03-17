@@ -556,7 +556,7 @@ class ExportManager {
 
     // ── CSS for HTML Export ──
 
-    _getExportCSS(theme, pageBg) {
+    _getExportCSS(theme, pageBg, margins) {
         const darkVars = `
     --bg-primary: #0d1117;
     --bg-secondary: #161b22;
@@ -812,8 +812,9 @@ ${theme === 'light' ? `
 .hljs-strong{font-weight:700}
 
 /* Print overrides */
-@media print {${pageBg === 'dark' ? `
-    @page { margin: 0; }` : ''}
+@media print {
+    @page { ${margins && margins.type === 'print' ? `margin: ${margins.top}${margins.unit} ${margins.right}${margins.unit} ${margins.bottom}${margins.unit} ${margins.left}${margins.unit};` : margins && margins.type === 'virtual' ? 'margin: 0;' : pageBg === 'dark' ? 'margin: 0;' : ''} }
+    ${margins && margins.type === 'virtual' ? `body { padding: ${margins.top}${margins.unit} ${margins.right}${margins.unit} ${margins.bottom}${margins.unit} ${margins.left}${margins.unit}; }` : ''}
     .cell-group { break-inside: avoid; }
     .export-header h1 {
         background: none;
@@ -945,7 +946,7 @@ ${theme === 'light' ? `
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${this._escapeHtml(name)}</title>
-<style>${this._getExportCSS(options.theme, options.pageBg)}</style>
+<style>${this._getExportCSS(options.theme, options.pageBg, options.margins)}</style>
 ${katexCSS ? '<style>' + katexCSS + '</style>' : ''}
 </head>
 <body>
@@ -1134,7 +1135,8 @@ ${cellsHtml}
 
         const theme = opts.theme || 'keep';
         const pageBg = opts.pageBg || 'white';
-        const { html } = await this._buildHTMLString({ embedImages: true, theme, pageBg });
+        const margins = opts.margins || null;
+        const { html } = await this._buildHTMLString({ embedImages: true, theme, pageBg, margins });
         const name = this._getNotebookName();
 
         // Capacitor/Android: use PDF generator plugin (avoids WebView print issues)

@@ -530,6 +530,47 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                         <span class="export-format-desc">No forced background</span>
                     </label>
                 </div>
+
+                <div id="export-margins-section" class="hidden">
+                    <div class="settings-section">Page Margins</div>
+                    <label class="settings-item" style="margin-bottom:8px">
+                        <span style="font-size:12px;color:var(--text-muted)">Type</span>
+                        <select id="export-margin-type" style="margin-left:8px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:13px">
+                            <option value="virtual" selected>Virtual (background fills page)</option>
+                            <option value="print">Print (browser margins)</option>
+                        </select>
+                    </label>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 0">
+                        <label class="settings-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+                            <span style="font-size:12px;color:var(--text-muted)">Top</span>
+                            <input type="number" id="export-margin-top" value="10" min="0" step="1"
+                                   style="width:100%;padding:6px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:14px;box-sizing:border-box">
+                        </label>
+                        <label class="settings-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+                            <span style="font-size:12px;color:var(--text-muted)">Right</span>
+                            <input type="number" id="export-margin-right" value="10" min="0" step="1"
+                                   style="width:100%;padding:6px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:14px;box-sizing:border-box">
+                        </label>
+                        <label class="settings-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+                            <span style="font-size:12px;color:var(--text-muted)">Bottom</span>
+                            <input type="number" id="export-margin-bottom" value="10" min="0" step="1"
+                                   style="width:100%;padding:6px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:14px;box-sizing:border-box">
+                        </label>
+                        <label class="settings-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+                            <span style="font-size:12px;color:var(--text-muted)">Left</span>
+                            <input type="number" id="export-margin-left" value="10" min="0" step="1"
+                                   style="width:100%;padding:6px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:14px;box-sizing:border-box">
+                        </label>
+                    </div>
+                    <label class="settings-item" style="margin-top:4px">
+                        <span style="font-size:12px;color:var(--text-muted)">Unit</span>
+                        <select id="export-margin-unit" style="margin-left:8px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:13px">
+                            <option value="mm" selected>mm</option>
+                            <option value="in">inches</option>
+                            <option value="cm">cm</option>
+                        </select>
+                    </label>
+                </div>
             </div>
             <div class="export-modal-actions">
                 <button id="btn-do-export" class="export-action-btn">Export</button>
