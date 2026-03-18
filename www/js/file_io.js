@@ -2054,6 +2054,7 @@ class FileIO {
         { id: 'bash',       label: 'Bash',        abbrev: 'Sh' },
         { id: 'javascript', label: 'JavaScript',  abbrev: 'JS' },
         { id: 'lua',        label: 'Lua',         abbrev: 'Lua' },
+        { id: 'typr',       label: 'TypR',        abbrev: 'TyR' },
     ];
 
     /**
