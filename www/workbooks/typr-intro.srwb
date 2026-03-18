@@ -6,18 +6,18 @@
     "cells": [
       {
         "type": "markdown",
-        "code": "# TypR — Typed R\n\nTypR is a typed superset of R that compiles to standard R code.\nIt adds type annotations, type checking, and generics while\nkeeping full R compatibility.\n\n**Note:** TypR requires semicolons at the end of statements.",
+        "code": "# TypR — Typed R\n\nTypR is a typed superset of R that compiles to standard R code.\nIt adds type annotations, type checking, and generics while\nkeeping full R compatibility.\n\n**Syntax notes:**\n- Statements end with semicolons: `let x <- 42;`\n- Use `paste()` for multi-arg output: `cat(paste(\"x =\", x));`\n- TypR functions take single arguments (no variadic calls yet)",
         "language": "markdown"
       },
       {
         "type": "code",
-        "code": "let x <- 42;\ncat(\"x =\", x, \"\\n\");",
+        "code": "let x <- 42;\ncat(paste(\"x =\", x));",
         "language": "typr",
         "name": "basics"
       },
       {
         "type": "code",
-        "code": "let add <- function(a, b) a + b;\ncat(\"3 + 4 =\", add(3, 4), \"\\n\");",
+        "code": "let add <- function(a, b) a + b;\nlet result <- add(3, 4);\nprint(result);",
         "language": "typr",
         "name": "functions"
       },
@@ -29,7 +29,7 @@
       },
       {
         "type": "code",
-        "code": "let square <- function(x) x * x;\nlet result <- square(7);\ncat(\"7 squared =\", result, \"\\n\");",
+        "code": "let square <- function(x) x * x;\nlet result <- square(7);\ncat(paste(\"7 squared =\", result));",
         "language": "typr",
         "name": "square"
       },
@@ -40,7 +40,7 @@
       },
       {
         "type": "code",
-        "code": "#!transpile\nlet fib <- function(n) {\n  if (n <= 1) n\n  else fib(n - 1) + fib(n - 2)\n};\ncat(fib(10));",
+        "code": "#!transpile\nlet fib <- function(n) {\n  if (n <= 1) n\n  else fib(n - 1) + fib(n - 2)\n};\nprint(fib(10));",
         "language": "typr",
         "name": "transpile_demo"
       }
