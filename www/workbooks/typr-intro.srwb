@@ -6,7 +6,7 @@
     "cells": [
       {
         "type": "markdown",
-        "code": "# TypR — Typed R\n\nTypR is a typed superset of R that compiles to standard R code.\nIt adds type annotations, type checking, and generics while\nkeeping full R compatibility.\n\n**Syntax notes:**\n- Statements end with semicolons: `let x <- 42;`\n- Function bodies require braces: `function(x) { x * x }`\n- TypR doesn't support variadic functions yet, so `cat(\"x =\", x)` won't work. Use `cat(paste(\"x =\", x));` instead.",
+        "code": "# TypR — Typed R\n\nTypR is a typed superset of R that compiles to standard R code.\nIt adds type annotations, type checking, and generics while\nkeeping full R compatibility.\n\n**Syntax notes:**\n- Statements end with semicolons: `let x <- 42;`\n- Function bodies require braces: `function(x) { x * x }`\n- TypR doesn't support variadic functions yet, so `cat(\"x =\", x)` won't work. Use `cat(paste(\"x =\", x));` instead.\n- Prefer `cat()` over `print()` — `print()` may duplicate output due to webR auto-print.",
         "language": "markdown"
       },
       {
@@ -17,13 +17,13 @@
       },
       {
         "type": "code",
-        "code": "# Function bodies require braces\nlet add <- function(a, b) { a + b };\nlet result <- add(3, 4);\nprint(result);",
+        "code": "# Function bodies require braces\nlet add <- function(a, b) { a + b };\nlet result <- add(3, 4);\n# Use cat() not print() to avoid duplicate output (webR auto-print)\ncat(result);",
         "language": "typr",
         "name": "functions"
       },
       {
         "type": "code",
-        "code": "let greeting: char <- \"Hello from TypR!\";\nprint(greeting);",
+        "code": "let greeting: char <- \"Hello from TypR!\";\n# Use cat() not print() to avoid duplicate output\ncat(greeting);",
         "language": "typr",
         "name": "typed"
       },
@@ -40,7 +40,7 @@
       },
       {
         "type": "code",
-        "code": "#!transpile\nlet fib <- function(n) {\n  if (n <= 1) { n }\n  else { fib(n - 1) + fib(n - 2) }\n};\nprint(fib(10));",
+        "code": "#!transpile\nlet fib <- function(n) {\n  if (n <= 1) { n }\n  else { fib(n - 1) + fib(n - 2) }\n};\ncat(fib(10));",
         "language": "typr",
         "name": "transpile_demo"
       }
