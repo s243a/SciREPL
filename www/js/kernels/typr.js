@@ -36,7 +36,9 @@ class TypRKernel {
         try {
             // Phase 1: Load TypR WASM compiler
             if (km) km.updateProgress('Loading TypR compiler…');
-            this._typrModule = await import('/vendor/typr/typr_wasm.js');
+            const base = document.baseURI || location.href;
+            const baseDir = base.substring(0, base.lastIndexOf('/') + 1);
+            this._typrModule = await import(baseDir + 'vendor/typr/typr_wasm.js');
             await this._typrModule.default();
             console.log('[TypRKernel] WASM compiler loaded');
 
