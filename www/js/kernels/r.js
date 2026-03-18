@@ -445,6 +445,69 @@ class RKernel {
     }
 
     /**
+     * Execute R code without autoprint (for use by transpiler kernels like TypR).
+     * Only explicit print/cat calls produce output.
+     */
+    async executeRaw(code) {
+        if (!this._ready) await this.init();
+
+        const trimmed = code.trim();
+        if (!trimmed) return { stdout: '', result: null, error: null };
+
+        try {
+            await this._syncToWebR();
+            await this._syncNbToWebR();
+
+            const shelter = await new this._webr.Shelter();
+            const capture = await shelter.captureR(trimmed, {
+                withAutoprint: false,
+                captureStreams: true,
+                captureConditions: false,
+                captureGraphics: { width: 504, height: 504 }
+            });
+
+            let stdout = '';
+            for (const msg of capture.output) {
+                if (msg.type === 'stdout' || msg.type === 'stderr') {
+                    stdout += msg.data + '\n';
+                }
+            }
+
+            let images = [];
+            if (capture.images && capture.images.length > 0) {
+                for (const img of capture.images) {
+                    try {
+                        const canvas = new OffscreenCanvas(img.width, img.height);
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        const blob = await canvas.convertToBlob({ type: 'image/png' });
+                        const url = URL.createObjectURL(blob);
+                        images.push(url);
+                    } catch (e) {
+                        console.warn('[RKernel] Failed to render plot:', e);
+                    }
+                }
+            }
+
+            shelter.purge();
+
+            const plotlyRegex = /__SCIREPL_PLOTLY__ (.*?) __END_PLOTLY__/g;
+            let plotlyMatch;
+            while ((plotlyMatch = plotlyRegex.exec(stdout)) !== null) {
+                try { window.renderPlot(plotlyMatch[1]); } catch (e) {}
+            }
+            stdout = stdout.replace(/__SCIREPL_PLOTLY__ .*? __END_PLOTLY__\n?/g, '');
+
+            await this._syncFromWebR();
+            await this._syncNbFromWebR();
+
+            return { stdout: stdout.trimEnd(), result: null, error: null, images };
+        } catch (e) {
+            return { stdout: '', result: null, error: e.message || String(e) };
+        }
+    }
+
+    /**
      * Offer to pre-install popular R packages after init.
      * Shows a non-blocking prompt in the REPL output area.
      */

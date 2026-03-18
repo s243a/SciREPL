@@ -117,9 +117,9 @@ class TypRKernel {
                 };
             }
 
-            // Wrap in invisible() to suppress autoprint of last expression
-            const wrappedCode = 'invisible({\n' + result.r_code + '\n})';
-            const rResult = await window.kernelManager.execute(wrappedCode, 'r');
+            // Execute R code directly through the R kernel's webR instance
+            // to avoid withAutoprint which causes duplicate output with print()
+            const rResult = await rKernel.executeRaw(result.r_code);
 
             // Combine outputs
             if (rResult.stdout) output += rResult.stdout;
