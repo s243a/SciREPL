@@ -108,7 +108,7 @@ class TypRKernel {
                 output += '── Generated R ──\n' + mainCode.trim() + '\n\n';
             }
 
-            // Execute via R kernel
+            // Execute via R kernel (disable autoprint to avoid duplicate output)
             const rKernel = window.kernelManager.getKernel('r');
             if (!rKernel || !rKernel.isReady()) {
                 return {
@@ -117,7 +117,9 @@ class TypRKernel {
                 };
             }
 
-            const rResult = await window.kernelManager.execute(result.r_code, 'r');
+            // Wrap in invisible() to suppress autoprint of last expression
+            const wrappedCode = 'invisible({\n' + result.r_code + '\n})';
+            const rResult = await window.kernelManager.execute(wrappedCode, 'r');
 
             // Combine outputs
             if (rResult.stdout) output += rResult.stdout;
