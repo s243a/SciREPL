@@ -6,12 +6,12 @@
     "cells": [
       {
         "type": "markdown",
-        "code": "# TypR — Typed R\n\nTypR is a typed superset of R that compiles to standard R code.\nIt adds type annotations, type checking, and generics while\nkeeping full R compatibility.\n\n**Syntax notes:**\n- Statements end with semicolons: `let x <- 42;`\n- Use `paste()` for multi-arg output: `cat(paste(\"x =\", x));`\n- TypR functions take single arguments (no variadic calls yet)",
+        "code": "# TypR — Typed R\n\nTypR is a typed superset of R that compiles to standard R code.\nIt adds type annotations, type checking, and generics while\nkeeping full R compatibility.\n\n**Syntax notes:**\n- Statements end with semicolons: `let x <- 42;`\n- TypR doesn't support variadic functions yet, so `cat(\"x =\", x)` won't work. Use `cat(paste(\"x =\", x));` instead.\n- Same applies to `print`, `paste0`, etc. — single argument only for now.",
         "language": "markdown"
       },
       {
         "type": "code",
-        "code": "let x <- 42;\ncat(paste(\"x =\", x));",
+        "code": "let x <- 42;\n# Variadic cat not yet supported — use paste() to combine args\ncat(paste(\"x =\", x));",
         "language": "typr",
         "name": "basics"
       },
@@ -29,7 +29,7 @@
       },
       {
         "type": "code",
-        "code": "let square <- function(x) x * x;\nlet result <- square(7);\ncat(paste(\"7 squared =\", result));",
+        "code": "let square <- function(x) x * x;\nlet result <- square(7);\n# Variadic cat not yet supported — see cell [1]\ncat(paste(\"7 squared =\", result));",
         "language": "typr",
         "name": "square"
       },
