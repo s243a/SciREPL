@@ -88,6 +88,7 @@ class PackageCatalog {
                 description: 'Typed R superset — variable binding, functions, type annotations, and transpiler directives (#!transpile, #!show-r). Compiles to R via WASM.',
                 type: 'workbook',
                 format: 'srwb',
+                url: 'https://github.com/s243a/SciREPL/releases/download/v0.11.0/typr-intro.srwb',
                 pages_url: 'workbooks/typr-intro.srwb',
                 size: '~2 KB',
                 kernels: ['typr', 'r'],
