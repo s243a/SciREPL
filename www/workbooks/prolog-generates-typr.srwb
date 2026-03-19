@@ -6,7 +6,7 @@
     "cells": [
       {
         "type": "markdown",
-        "code": "# Prolog Generates TypR\n\nThis workbook demonstrates UnifyWeaver compiling Prolog predicates into **TypR** — a typed superset of R.\n\nThe workflow:\n1. Define Prolog predicates (facts + rules)\n2. UnifyWeaver detects the recursion pattern (transitive closure)\n3. The compiler generates typed TypR code with `let`, `fn`, and type annotations\n4. Execute the generated TypR code in the TypR kernel\n\n**Requires:** Install the UnifyWeaver package first (Browse Packages).",
+        "code": "# Prolog Generates TypR\n\nThis workbook demonstrates UnifyWeaver compiling Prolog predicates into **TypR** — a typed superset of R.\n\nThe workflow:\n1. Define Prolog predicates (facts + rules)\n2. UnifyWeaver detects the recursion pattern (transitive closure)\n3. The compiler generates typed TypR code with `let`, `fn`, and type annotations\n4. Execute the generated TypR code in the TypR kernel\n\n**Requires:** Install the UnifyWeaver package first (Browse Packages).\n\n**Limitation:** TypR variables don't persist across cells — each cell runs independently. All generated code and queries must be in a single cell. Cross-cell persistence is planned for a future release.",
         "language": "markdown"
       },
       {
