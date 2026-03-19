@@ -23,7 +23,7 @@
       },
       {
         "type": "code",
-        "code": "% Compile ancestor/2 to TypR and append queries\ncompile_recursive(ancestor/2, [target(typr)], Code),\natomic_list_concat([\n    Code,\n    '\\n\\n# --- Queries ---\\n',\n    'let results <- ancestor_all(\"alice\");\\n',\n    'cat(paste(\"Descendants of alice:\", paste(results, collapse=\", \")));\\n',\n    'cat(\"\\n\");\\n',\n    'let is_anc <- ancestor_check(\"alice\", \"eve\");\\n',\n    'cat(paste(\"alice is ancestor of eve:\", is_anc));\\n',\n    'cat(\"\\n\");\\n',\n    'let is_anc2 <- ancestor_check(\"alice\", \"frank\");\\n',\n    'cat(paste(\"alice is ancestor of frank:\", is_anc2));\\n'\n], FullCode),\nnb_write('typr_output', '.code', FullCode).",
+        "code": "% Compile ancestor/2 to TypR and append queries\ncompile_recursive(ancestor/2, [target(typr)], Code),\nformat(string(Queries), '~n~n# --- Queries ---~nlet results <- ancestor_all(\"alice\");~ncat(paste(\"Descendants of alice:\", paste(results, collapse=\", \")));~ncat(\"\\n\");~nlet is_anc <- ancestor_check(\"alice\", \"eve\");~ncat(paste(\"alice is ancestor of eve:\", is_anc));~ncat(\"\\n\");~nlet is_anc2 <- ancestor_check(\"alice\", \"frank\");~ncat(paste(\"alice is ancestor of frank:\", is_anc2));~n', []),\nformat(string(FullCode), '~w~w', [Code, Queries]),\nnb_write('typr_output', '.code', FullCode).",
         "language": "prolog",
         "name": "compile_to_typr"
       },
@@ -45,7 +45,7 @@
       },
       {
         "type": "code",
-        "code": "% Compile the same predicate to plain R for comparison, with queries\ncompile_recursive(ancestor/2, [target(r)], RCode),\natomic_list_concat([\n    RCode,\n    '\\n\\n# --- Queries ---\\n',\n    'results <- ancestor_all(\"alice\")\\n',\n    'cat(paste(\"Descendants of alice:\", paste(results, collapse=\", \")), \"\\n\")\\n',\n    'cat(paste(\"alice is ancestor of eve:\", ancestor_check(\"alice\", \"eve\")), \"\\n\")\\n',\n    'cat(paste(\"alice is ancestor of frank:\", ancestor_check(\"alice\", \"frank\")), \"\\n\")\\n'\n], FullRCode),\nnb_write('r_output', '.code', FullRCode).",
+        "code": "% Compile the same predicate to plain R for comparison, with queries\ncompile_recursive(ancestor/2, [target(r)], RCode),\nformat(string(Queries), '~n~n# --- Queries ---~nresults <- ancestor_all(\"alice\")~ncat(paste(\"Descendants of alice:\", paste(results, collapse=\", \")), \"\\n\")~ncat(paste(\"alice is ancestor of eve:\", ancestor_check(\"alice\", \"eve\")), \"\\n\")~ncat(paste(\"alice is ancestor of frank:\", ancestor_check(\"alice\", \"frank\")), \"\\n\")~n', []),\nformat(string(FullRCode), '~w~w', [RCode, Queries]),\nnb_write('r_output', '.code', FullRCode).",
         "language": "prolog",
         "name": "compile_to_r"
       },
