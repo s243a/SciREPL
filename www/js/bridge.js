@@ -27,7 +27,7 @@ window.renderPlot = function (jsonStr) {
         return [trace];
     })();
 
-    const layout = Object.assign({
+    const baseLayout = {
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: '#161b22',
         font: { color: '#e6edf3', family: '-apple-system, sans-serif', size: 12 },
@@ -44,7 +44,17 @@ window.renderPlot = function (jsonStr) {
         },
         title: data.title || '',
         showlegend: traces.length > 1
-    }, data.layout || {});
+    };
+    // Deep merge user layout so nested keys (yaxis.scaleanchor) don't clobber defaults
+    const userLayout = data.layout || {};
+    const layout = baseLayout;
+    for (const [k, v] of Object.entries(userLayout)) {
+        if (v && typeof v === 'object' && !Array.isArray(v) && layout[k] && typeof layout[k] === 'object') {
+            Object.assign(layout[k], v);
+        } else {
+            layout[k] = v;
+        }
+    }
 
     const config = {
         responsive: true,
