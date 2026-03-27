@@ -90,58 +90,26 @@ class TypRKernel {
 
         try {
             // Handle @{ ... }@ raw-R blocks:
-            // Split code into alternating TypR and raw-R segments,
-            // compile each TypR segment via WASM, pass raw-R through as-is.
+            // Strip markers and compile whole thing. If TypR compiler fails
+            // (raw R confuses parser), fall back to R with TypR syntax stripped.
             const hasRawBlocks = /@\{[\s\S]*?\}@/.test(trimmed);
+            const stripped = hasRawBlocks
+                ? trimmed.replace(/@\{/g, '').replace(/\}@/g, '')
+                : trimmed;
 
             let result;
-            if (hasRawBlocks) {
-                // Split into segments: [typr, rawR, typr, rawR, ...]
-                const parts = trimmed.split(/@\{|\}@/);
-                // Odd indices are raw-R, even indices are TypR
-                let combinedR = '';
-                let allErrors = '';
-                let hasErrors = false;
-                // Track if we need the std library preamble (only from first TypR compile)
-                let preambleAdded = false;
-
-                for (let i = 0; i < parts.length; i++) {
-                    const segment = parts[i].trim();
-                    if (!segment) continue;
-
-                    if (i % 2 === 0) {
-                        // TypR segment — compile
-                        if (!segment) continue;
-                        try {
-                            const compiled = this._typrModule.compile(segment);
-                            if (compiled.has_errors) {
-                                hasErrors = true;
-                                allErrors += compiled.errors + '\n';
-                            }
-                            if (!preambleAdded) {
-                                combinedR += compiled.r_code;
-                                preambleAdded = true;
-                            } else {
-                                // Skip std library preamble on subsequent segments
-                                const mainIdx = compiled.r_code.indexOf('# === Main Code ===');
-                                combinedR += mainIdx >= 0
-                                    ? '\n' + compiled.r_code.substring(mainIdx)
-                                    : '\n' + compiled.r_code;
-                            }
-                        } catch (e) {
-                            // TypR compile failed — pass as-is (might be R-compatible)
-                            combinedR += '\n' + segment;
-                        }
-                    } else {
-                        // Raw-R segment — pass through directly
-                        combinedR += '\n' + segment;
-                    }
-                }
-
-                result = { r_code: combinedR, has_errors: hasErrors, errors: allErrors };
-            } else {
-                // Pure TypR — compile via WASM
-                result = this._typrModule.compile(trimmed);
+            try {
+                result = this._typrModule.compile(stripped);
+            } catch (e) {
+                if (!hasRawBlocks) throw e; // re-throw if no raw blocks
+                // TypR compile failed on mixed code — fall back to plain R
+                // Convert TypR syntax to R: let → remove, fn → function, strip type annotations
+                const rCode = stripped
+                    .replace(/\blet\s+/g, '')
+                    .replace(/\bfn\s*\(/g, 'function(')
+                    .replace(/\)\s*:\s*\[[^\]]*\]\s*\{/g, ') {')
+                    .replace(/\)\s*:\s*\w+\s*\{/g, ') {');
+                result = { r_code: rCode, has_errors: false, errors: '' };
             }
 
             // Build output parts
