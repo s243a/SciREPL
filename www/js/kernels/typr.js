@@ -89,23 +89,19 @@ class TypRKernel {
         }
 
         try {
-            // Extract @{ ... }@ raw-R blocks before compilation.
-            // Replace with simple variable assignments that TypR passes through,
-            // then swap the raw R back into the compiled output.
-            const rawBlocks = [];
-            const preprocessed = trimmed.replace(/@\{([\s\S]*?)\}@/g, (match, rawR) => {
-                const idx = rawBlocks.length;
-                rawBlocks.push(rawR.trim());
-                return `RAWR${idx}PLACEHOLDER`;
-            });
+            // If code contains @{ ... }@ raw-R blocks, skip TypR compilation
+            // and pass directly to R with @{ }@ markers stripped.
+            // The code is already valid R with TypR annotations that R ignores.
+            const hasRawBlocks = /@\{[\s\S]*?\}@/.test(trimmed);
 
-            // Compile TypR → R (with placeholders for raw blocks)
-            const result = this._typrModule.compile(preprocessed);
-
-            // Splice raw-R blocks back into compiled output
-            if (rawBlocks.length > 0) {
-                result.r_code = result.r_code.replace(/RAWR(\d+)PLACEHOLDER/g, (_, idx) =>
-                    rawBlocks[parseInt(idx, 10)] || '');
+            let result;
+            if (hasRawBlocks) {
+                // Strip @{ and }@ markers, leaving the raw R code
+                const rCode = trimmed.replace(/@\{/g, '').replace(/\}@/g, '');
+                result = { r_code: rCode, has_errors: false, errors: '' };
+            } else {
+                // Pure TypR — compile via WASM
+                result = this._typrModule.compile(trimmed);
             }
 
             // Build output parts
