@@ -48,6 +48,11 @@ class RKernel {
             await this._webr.evalRVoid('webr::shim_install()');
             console.log('[RKernel] install.packages() shimmed');
 
+            // Define interactive() to return TRUE in notebook context
+            // webR doesn't provide it, and generated R code uses if(!interactive()) guards
+            await this._webr.evalRVoid('interactive <- function() TRUE');
+            console.log('[RKernel] interactive() defined as TRUE');
+
             if (km) km.updateProgress('Loading helpers...');
             // Load SharedVFS helper functions
             await this._loadSharedFSHelpers();
