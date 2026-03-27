@@ -89,28 +89,8 @@ class TypRKernel {
         }
 
         try {
-            // Handle @{ ... }@ raw-R blocks:
-            // Strip markers and compile whole thing. If TypR compiler fails
-            // (raw R confuses parser), fall back to R with TypR syntax stripped.
-            const hasRawBlocks = /@\{[\s\S]*?\}@/.test(trimmed);
-            const stripped = hasRawBlocks
-                ? trimmed.replace(/@\{/g, '').replace(/\}@/g, '')
-                : trimmed;
-
-            let result;
-            try {
-                result = this._typrModule.compile(stripped);
-            } catch (e) {
-                if (!hasRawBlocks) throw e; // re-throw if no raw blocks
-                // TypR compile failed on mixed code — fall back to plain R
-                // Convert TypR syntax to R: let → remove, fn → function, strip type annotations
-                const rCode = stripped
-                    .replace(/\blet\s+/g, '')
-                    .replace(/\bfn\s*\(/g, 'function(')
-                    .replace(/\)\s*:\s*\[[^\]]*\]\s*\{/g, ') {')
-                    .replace(/\)\s*:\s*\w+\s*\{/g, ') {');
-                result = { r_code: rCode, has_errors: false, errors: '' };
-            }
+            // Compile TypR → R
+            const result = this._typrModule.compile(trimmed);
 
             // Build output parts
             let output = '';
