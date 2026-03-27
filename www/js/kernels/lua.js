@@ -50,6 +50,20 @@ class LuaKernel {
         // Install nb table for NotebookVFS access
         this._installNotebookVFS();
 
+        // Stub out CLI functions that don't work in browser
+        // io.lines() returns empty iterator, os.exit() is no-op, arg is empty
+        const stubCode = `
+            local _orig_io_lines = io.lines
+            io.lines = function(f)
+                if f then return _orig_io_lines(f) end
+                return function() return nil end
+            end
+            os.exit = function() end
+            arg = arg or {}
+            io.stderr = io.stderr or { write = function(self, ...) end }
+        `;
+        this._lauxlib.luaL_dostring(this._L, this._fengari.to_luastring(stubCode));
+
         this._ready = true;
 
         if (window.kernelManager) {
