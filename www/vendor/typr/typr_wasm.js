@@ -348,11 +348,6 @@ export class TypeCheckResult {
 if (Symbol.dispose) TypeCheckResult.prototype[Symbol.dispose] = TypeCheckResult.prototype.free;
 
 /**
- * Compile TypR source code to R
- *
- * This is the main entry point for compilation.
- * Returns a CompileResult with the generated R code, including all
- * support code (std library, type annotations, generic functions) inlined.
  * @param {string} source
  * @returns {CompileResult}
  */
