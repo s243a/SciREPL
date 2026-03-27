@@ -89,8 +89,22 @@ class TypRKernel {
         }
 
         try {
-            // Compile TypR → R
-            const result = this._typrModule.compile(trimmed);
+            // Extract @{ ... }@ raw-R blocks before compilation
+            const rawBlocks = [];
+            const preprocessed = trimmed.replace(/@\{([\s\S]*?)\}@/g, (match, rawR) => {
+                const placeholder = `__RAW_R_${rawBlocks.length}__`;
+                rawBlocks.push(rawR.trim());
+                return placeholder;
+            });
+
+            // Compile TypR → R (with placeholders for raw blocks)
+            const result = this._typrModule.compile(preprocessed);
+
+            // Splice raw-R blocks back into compiled output
+            if (rawBlocks.length > 0) {
+                result.r_code = result.r_code.replace(/__RAW_R_(\d+)__/g, (_, idx) =>
+                    rawBlocks[parseInt(idx, 10)] || '');
+            }
 
             // Build output parts
             let output = '';
