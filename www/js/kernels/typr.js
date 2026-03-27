@@ -89,12 +89,14 @@ class TypRKernel {
         }
 
         try {
-            // Extract @{ ... }@ raw-R blocks before compilation
+            // Extract @{ ... }@ raw-R blocks before compilation.
+            // Replace with simple variable assignments that TypR passes through,
+            // then swap the raw R back into the compiled output.
             const rawBlocks = [];
             const preprocessed = trimmed.replace(/@\{([\s\S]*?)\}@/g, (match, rawR) => {
-                const placeholder = `__RAW_R_${rawBlocks.length}__`;
+                const idx = rawBlocks.length;
                 rawBlocks.push(rawR.trim());
-                return placeholder;
+                return `RAWR${idx}PLACEHOLDER`;
             });
 
             // Compile TypR → R (with placeholders for raw blocks)
@@ -102,7 +104,7 @@ class TypRKernel {
 
             // Splice raw-R blocks back into compiled output
             if (rawBlocks.length > 0) {
-                result.r_code = result.r_code.replace(/__RAW_R_(\d+)__/g, (_, idx) =>
+                result.r_code = result.r_code.replace(/RAWR(\d+)PLACEHOLDER/g, (_, idx) =>
                     rawBlocks[parseInt(idx, 10)] || '');
             }
 
