@@ -6,7 +6,7 @@
     "cells": [
       {
         "type": "markdown",
-        "code": "# Prolog Generates Lua\n\nThis workbook demonstrates UnifyWeaver compiling Prolog predicates into **Lua** code.\n\nThe workflow:\n1. Define Prolog predicates (facts + rules)\n2. UnifyWeaver detects the recursion pattern (transitive closure)\n3. The compiler generates idiomatic Lua with tables and BFS traversal\n4. Execute the generated Lua code in the Lua kernel\n\n**Requires:** Install the UnifyWeaver package first (Browse Packages).\n\n**Limitation:** Lua variables don't persist across cells. The generated code includes a CLI entry point that reads from stdin — in the notebook we can't use stdin, so we seed facts and queries manually in a separate cell.",
+        "code": "# Prolog Generates Lua\n\nThis workbook demonstrates UnifyWeaver compiling Prolog predicates into **Lua** code.\n\nTwo input modes are shown:\n1. **Embedded** — facts compiled directly into the Lua code\n2. **VFS** — facts read from another notebook cell at runtime\n\n**Requires:** Install the UnifyWeaver package first (Browse Packages).",
         "language": "markdown"
       },
       {
@@ -22,32 +22,44 @@
         "name": "family_tree"
       },
       {
+        "type": "markdown",
+        "code": "## Pattern 1: Embedded Input\n\nUsing `input(embedded)`, the Prolog facts are compiled directly into the Lua code as `add_fact()` calls. The generated code is self-contained — no external data needed.",
+        "language": "markdown"
+      },
+      {
         "type": "code",
-        "code": "% Compile ancestor/2 to Lua — write raw generated code to cell\nrecursive_compiler:compile_recursive(ancestor/2, [target(lua)], Code),\nuser:nb_write('lua_generated', '.code', Code),\nwriteln('Lua code written to cell: lua_generated').",
+        "code": "% Compile with input(embedded) — facts baked into the code\nrecursive_compiler:compile_recursive(ancestor/2, [target(lua), input(embedded)], Code),\nformat(string(Queries), '~n~n-- Queries~nlocal results = find_all(\"alice\")~nprint(\"Descendants of alice: \" .. table.concat(results, \", \"))~nprint(\"alice -> eve: \" .. tostring(check(\"alice\", \"eve\")))~nprint(\"alice -> frank: \" .. tostring(check(\"alice\", \"frank\")))~n', []),\nformat(string(FullCode), '~w~w', [Code, Queries]),\nuser:nb_write('lua_embedded', '.code', FullCode),\nwriteln('Lua code (embedded) written to cell: lua_embedded').",
         "language": "prolog",
-        "name": "compile_to_lua"
+        "name": "compile_embedded"
+      },
+      {
+        "type": "code",
+        "code": "-- This cell will be populated by the compiler.\n-- Run the 'compile_embedded' cell above first.",
+        "language": "lua",
+        "name": "lua_embedded"
       },
       {
         "type": "markdown",
-        "code": "## Generated Lua Code\n\nThe cell below shows the generated Lua code. It includes a CLI section\nthat reads from stdin — this won't work in the notebook, so the next cell\nseeds the facts and runs queries directly.",
+        "code": "## Pattern 2: VFS Input\n\nUsing `input(vfs(facts_data))`, the generated Lua reads facts from another cell at runtime via the NotebookVFS. This allows the data to be changed without recompiling.\n\nFirst, create a data cell with facts in `from:to` format:",
         "language": "markdown"
       },
       {
         "type": "code",
-        "code": "-- This cell will be populated by the compiler.\n-- Run the 'compile_to_lua' cell above first.",
+        "code": "alice:bob\nbob:charlie\nbob:diana\ncharlie:eve\ndiana:frank",
         "language": "lua",
-        "name": "lua_generated"
-      },
-      {
-        "type": "markdown",
-        "code": "## Run Queries\n\nThe cell below seeds the family tree facts manually and runs ancestor queries.\nThis is separate because the generated code's stdin-based CLI doesn't work in-browser.",
-        "language": "markdown"
+        "name": "facts_data"
       },
       {
         "type": "code",
-        "code": "-- Seed facts and query (standalone — doesn't depend on generated cell)\nlocal rel = {}\nlocal function add_fact(from, to)\n    if not rel[from] then rel[from] = {} end\n    table.insert(rel[from], to)\nend\nlocal function find_all(start)\n    local results = {}\n    local visited = { [start] = true }\n    local queue = { start }\n    local qi = 1\n    while qi <= #queue do\n        local current = queue[qi]\n        qi = qi + 1\n        for _, next_node in ipairs(rel[current] or {}) do\n            if not visited[next_node] then\n                visited[next_node] = true\n                table.insert(queue, next_node)\n                table.insert(results, next_node)\n            end\n        end\n    end\n    return results\nend\nlocal function check(start, target)\n    for _, v in ipairs(find_all(start)) do\n        if v == target then return true end\n    end\n    return false\nend\n\nadd_fact(\"alice\", \"bob\")\nadd_fact(\"bob\", \"charlie\")\nadd_fact(\"bob\", \"diana\")\nadd_fact(\"charlie\", \"eve\")\nadd_fact(\"diana\", \"frank\")\n\nlocal results = find_all(\"alice\")\nprint(\"Descendants of alice: \" .. table.concat(results, \", \"))\nprint(\"alice -> eve: \" .. tostring(check(\"alice\", \"eve\")))\nprint(\"alice -> frank: \" .. tostring(check(\"alice\", \"frank\")))",
+        "code": "% Compile with input(vfs(facts_data)) — reads from the cell above\nrecursive_compiler:compile_recursive(ancestor/2, [target(lua), input(vfs(facts_data))], Code),\nformat(string(Queries), '~n~n-- Queries~nlocal results = find_all(\"alice\")~nprint(\"Descendants of alice: \" .. table.concat(results, \", \"))~nprint(\"alice -> eve: \" .. tostring(check(\"alice\", \"eve\")))~nprint(\"alice -> frank: \" .. tostring(check(\"alice\", \"frank\")))~n', []),\nformat(string(FullCode), '~w~w', [Code, Queries]),\nuser:nb_write('lua_vfs', '.code', FullCode),\nwriteln('Lua code (VFS) written to cell: lua_vfs').",
+        "language": "prolog",
+        "name": "compile_vfs"
+      },
+      {
+        "type": "code",
+        "code": "-- This cell will be populated by the compiler.\n-- Run the 'compile_vfs' cell above first.",
         "language": "lua",
-        "name": "lua_queries"
+        "name": "lua_vfs"
       }
     ]
   }
