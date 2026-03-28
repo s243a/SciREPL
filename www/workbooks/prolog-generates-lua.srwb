@@ -40,18 +40,18 @@
       },
       {
         "type": "markdown",
-        "code": "## Pattern 2: VFS Input\n\nUsing `input(vfs(facts_data))`, the generated Lua reads facts from another cell at runtime via the NotebookVFS. This allows the data to be changed without recompiling.\n\nFirst, create a data cell with facts in `from:to` format:",
+        "code": "## Pattern 2: VFS Input\n\nUsing `input(vfs(facts_data, '.code'))`, the generated Lua reads facts from another cell's code at runtime via `nb.read()`. This allows the data to be changed without recompiling.\n\nThe data cell below contains facts as `from:to` lines inside a Lua comment block:",
         "language": "markdown"
       },
       {
         "type": "code",
-        "code": "alice:bob\nbob:charlie\nbob:diana\ncharlie:eve\ndiana:frank",
+        "code": "-- Data cell: facts in from:to format (one per line)\n-- The VFS-compiled cell reads this via nb.read(\"facts_data\", \".code\")\n--[[\nalice:bob\nbob:charlie\nbob:diana\ncharlie:eve\ndiana:frank\n]]",
         "language": "lua",
         "name": "facts_data"
       },
       {
         "type": "code",
-        "code": "% Compile with input(vfs(facts_data)) — reads from the cell above\nrecursive_compiler:compile_recursive(ancestor/2, [target(lua), input(vfs(facts_data))], Code),\nformat(string(Queries), '~n~n-- Queries~nlocal results = find_all(\"alice\")~nprint(\"Descendants of alice: \" .. table.concat(results, \", \"))~nprint(\"alice -> eve: \" .. tostring(check(\"alice\", \"eve\")))~nprint(\"alice -> frank: \" .. tostring(check(\"alice\", \"frank\")))~n', []),\nformat(string(FullCode), '~w~w', [Code, Queries]),\nuser:nb_write('lua_vfs', '.code', FullCode),\nwriteln('Lua code (VFS) written to cell: lua_vfs').",
+        "code": "% Compile with input(vfs(facts_data)) — reads from the cell above\nrecursive_compiler:compile_recursive(ancestor/2, [target(lua), input(vfs(facts_data, '.code'))], Code),\nformat(string(Queries), '~n~n-- Queries~nlocal results = find_all(\"alice\")~nprint(\"Descendants of alice: \" .. table.concat(results, \", \"))~nprint(\"alice -> eve: \" .. tostring(check(\"alice\", \"eve\")))~nprint(\"alice -> frank: \" .. tostring(check(\"alice\", \"frank\")))~n', []),\nformat(string(FullCode), '~w~w', [Code, Queries]),\nuser:nb_write('lua_vfs', '.code', FullCode),\nwriteln('Lua code (VFS) written to cell: lua_vfs').",
         "language": "prolog",
         "name": "compile_vfs"
       },
