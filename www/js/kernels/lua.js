@@ -53,8 +53,16 @@ class LuaKernel {
         // Install sharedfs table for SharedVFS access
         this._installSharedVFS();
 
-        // Override io.lines() to support SharedVFS paths
+        // Override io.lines()/io.open() to support SharedVFS paths
         this._installIOOverrides();
+
+        // Stub out CLI functions that don't work in browser
+        const stubCode = `
+            os.exit = function() end
+            arg = arg or {}
+            io.stderr = io.stderr or { write = function(self, ...) end }
+        `;
+        this._lauxlib.luaL_dostring(this._L, this._fengari.to_luastring(stubCode));
 
         this._ready = true;
 

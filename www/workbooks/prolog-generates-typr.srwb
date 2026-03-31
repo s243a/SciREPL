@@ -45,7 +45,7 @@
       },
       {
         "type": "code",
-        "code": "% Compile the same predicate to plain R for comparison\nrecursive_compiler:compile_recursive(ancestor/2, [target(r)], RCode),\nformat('--- Generated R code ---~n', []),\n% Add seed facts and queries\nformat(string(Seeds), '~n# --- Seed facts ---~nadd_parent(\"alice\", \"bob\")~nadd_parent(\"bob\", \"charlie\")~nadd_parent(\"bob\", \"diana\")~nadd_parent(\"charlie\", \"eve\")~nadd_parent(\"diana\", \"frank\")~n~n# --- Queries ---~nresults <- ancestor_all(\"alice\")~ncat(paste(\"Descendants of alice:\", paste(results, collapse=\", \")), \"\\n\")~ncat(paste(\"alice is ancestor of eve:\", ancestor_check(\"alice\", \"eve\")), \"\\n\")~ncat(paste(\"alice is ancestor of frank:\", ancestor_check(\"alice\", \"frank\")), \"\\n\")~n', []),\nformat(string(FullRCode), '~w~w', [RCode, Seeds]),\nuser:nb_write('r_output', '.code', FullRCode),\nwriteln('R code written to cell: r_output').",
+        "code": "% Compile to R with embedded facts + queries\nrecursive_compiler:compile_recursive(ancestor/2, [target(r), input(embedded)], RCode),\nformat('--- Generated R code ---~n', []),\nformat(string(Queries), '~n~n# --- Queries ---~nresults <- ancestor_all(\"alice\")~ncat(paste(\"Descendants of alice:\", paste(results, collapse=\", \")), \"\\n\")~ncat(paste(\"alice is ancestor of eve:\", ancestor_check(\"alice\", \"eve\")), \"\\n\")~ncat(paste(\"alice is ancestor of frank:\", ancestor_check(\"alice\", \"frank\")), \"\\n\")~n', []),\nformat(string(FullRCode), '~w~w', [RCode, Queries]),\nuser:nb_write('r_output', '.code', FullRCode),\nwriteln('R code written to cell: r_output').",
         "language": "prolog",
         "name": "compile_to_r"
       },
