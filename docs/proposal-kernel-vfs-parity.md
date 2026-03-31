@@ -14,7 +14,7 @@ partial access or none:
 | Python  | via sharedfs.py     | `sharedfs.read_text()` + sync  | pre/post     |
 | R       | `nb_read()`         | `sharedfs_read()` + sync       | pre/post     |
 | Prolog  | `nb_read/3`         | Emscripten FS + event sync     | event-driven |
-| Lua     | `nb.read()`         | **NONE**                       | **none**     |
+| Lua     | `nb.read()`         | `sharedfs.read()` + io bridge  | none needed  |
 | JS      | direct JS access    | direct JS access               | none needed  |
 
 Lua is the most isolated — it can read/write notebook cells but cannot
@@ -111,10 +111,11 @@ bridge. The `input(embedded)` mode needs no I/O at all. Only
 
 ## Priority Order
 
-1. **SharedVFS table for Lua** (high) — unblocks cross-kernel file
-   sharing, ~60 lines JS
-2. **`io.lines()` override** (medium) — enables `input(file(...))` in
-   generated code, ~40 lines JS
+1. **SharedVFS table for Lua** (high) — ✅ DONE. `sharedfs` table with
+   read/write/exists/list/mkdir/remove via `lua_pushjsfunction`
+2. **`io.lines()` override** (medium) — ✅ DONE. `io.lines(path)` and
+   `io.open(path, mode)` routed through SharedVFS for `/shared/`, `/tmp/`,
+   `/nb/`, `/education/` paths
 3. **Kernel sync module** (low) — reduces duplication, helps future
    kernels, ~100 lines JS
 
