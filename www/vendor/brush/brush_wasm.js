@@ -236,6 +236,10 @@ function __wbg_get_imports() {
             const ret = window.sharedVFS.vfs_remove(getStringFromWasm0(arg0, arg1));
             return ret;
         },
+        __wbg_vfs_stat_4064077426402ef1: function(arg0, arg1) {
+            const ret = window.sharedVFS.vfs_stat(getStringFromWasm0(arg0, arg1));
+            return addHeapObject(ret);
+        },
         __wbg_vfs_write_file_5a33cb5dca56c723: function(arg0, arg1, arg2, arg3) {
             window.sharedVFS.vfs_write_file(getStringFromWasm0(arg0, arg1), getArrayU8FromWasm0(arg2, arg3));
         },
