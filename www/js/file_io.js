@@ -100,9 +100,9 @@ class FileIO {
                     await Promise.all(names.filter(n => !n.includes('-cdn-')).map(n => caches.delete(n)));
                 } catch (_) { }
                 try {
-                    // Tell SW to update so it picks up new app assets
+                    // Unregister the old SW so the reload gets fresh assets
                     const reg = await navigator.serviceWorker.getRegistration();
-                    if (reg) await reg.update();
+                    if (reg) await reg.unregister();
                 } catch (_) { }
                 location.reload();
             });
@@ -331,6 +331,7 @@ class FileIO {
         const exportImageSection = document.getElementById('export-image-section');
         const exportThemeSection = document.getElementById('export-theme-section');
         const exportPageBgSection = document.getElementById('export-pagebg-section');
+        const exportMarginsSection = document.getElementById('export-margins-section');
         const doExportBtn = document.getElementById('btn-do-export');
 
         if (exportBtn && exportModal) {
@@ -356,7 +357,7 @@ class FileIO {
 
             exportModal.addEventListener('change', (e) => {
                 if (e.target.name === 'export-format') {
-                    this._updateExportSections(exportModal, exportImageSection, exportThemeSection, exportPageBgSection);
+                    this._updateExportSections(exportModal, exportImageSection, exportThemeSection, exportPageBgSection, exportMarginsSection);
                 }
             });
 
@@ -366,12 +367,27 @@ class FileIO {
                     const imageMode = exportModal.querySelector('input[name="export-images"]:checked');
                     const theme = exportModal.querySelector('input[name="export-theme"]:checked');
                     const pageBg = exportModal.querySelector('input[name="export-pagebg"]:checked');
+                    const marginTop = document.getElementById('export-margin-top');
+                    const marginRight = document.getElementById('export-margin-right');
+                    const marginBottom = document.getElementById('export-margin-bottom');
+                    const marginLeft = document.getElementById('export-margin-left');
+                    const marginUnit = document.getElementById('export-margin-unit');
+                    const marginType = document.getElementById('export-margin-type');
+                    const margins = {
+                        top: marginTop ? parseFloat(marginTop.value) || 0 : 10,
+                        right: marginRight ? parseFloat(marginRight.value) || 0 : 10,
+                        bottom: marginBottom ? parseFloat(marginBottom.value) || 0 : 10,
+                        left: marginLeft ? parseFloat(marginLeft.value) || 0 : 10,
+                        unit: marginUnit ? marginUnit.value : 'mm',
+                        type: marginType ? marginType.value : 'virtual'
+                    };
                     exportModal.classList.add('hidden');
                     await this._dispatchExport(
                         format ? format.value : 'html',
                         imageMode ? imageMode.value : 'embed',
                         theme ? theme.value : 'keep',
-                        pageBg ? pageBg.value : 'white'
+                        pageBg ? pageBg.value : 'white',
+                        margins
                     );
                 });
             }
@@ -781,7 +797,7 @@ class FileIO {
     /**
      * Show/hide image and theme sections based on selected export format.
      */
-    _updateExportSections(modal, imageSection, themeSection, pageBgSection) {
+    _updateExportSections(modal, imageSection, themeSection, pageBgSection, marginsSection) {
         const format = modal.querySelector('input[name="export-format"]:checked');
         const fmt = format ? format.value : 'html';
 
@@ -817,14 +833,24 @@ class FileIO {
                 pageBgSection.classList.add('hidden');
             }
         }
+
+        // Page Margins: show for PDF only
+        if (marginsSection) {
+            if (fmt === 'pdf') {
+                marginsSection.classList.remove('hidden');
+            } else {
+                marginsSection.classList.add('hidden');
+            }
+        }
     }
 
     /**
      * Dispatch export based on format, image mode, and theme selections.
      */
-    async _dispatchExport(format, imageMode, theme, pageBg) {
+    async _dispatchExport(format, imageMode, theme, pageBg, margins) {
         const em = window.exportManager;
         const opts = { embedImages: imageMode === 'embed', theme: theme || 'keep', pageBg: pageBg || 'white' };
+        if (margins) opts.margins = margins;
         switch (format) {
             case 'html':
                 if (em) await em.exportHTML(opts);
@@ -2028,6 +2054,7 @@ class FileIO {
         { id: 'bash',       label: 'Bash',        abbrev: 'Sh' },
         { id: 'javascript', label: 'JavaScript',  abbrev: 'JS' },
         { id: 'lua',        label: 'Lua',         abbrev: 'Lua' },
+        { id: 'typr',       label: 'TypR',        abbrev: 'TyR' },
     ];
 
     /**

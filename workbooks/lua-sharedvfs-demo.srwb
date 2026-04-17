@@ -1,0 +1,50 @@
+{
+  "format": "srwb",
+  "format_version": "1.0",
+  "exported_at": "2026-03-31T17:36:16.000Z",
+  "notebook": {
+    "name": "Lua SharedVFS Demo",
+    "cells": [
+      {
+        "language": "lua",
+        "type": "markdown",
+        "code": "# Lua SharedVFS Integration\n\nThis workbook demonstrates Lua's SharedVFS bridge \u2014 reading and writing files that are accessible to all kernels (Bash, Python, R, Prolog).\n\n## The `sharedfs` Table\n\nLua gets a `sharedfs` global table with these functions:\n- `sharedfs.read(path)` \u2014 read a file as string\n- `sharedfs.write(path, content)` \u2014 write string to file\n- `sharedfs.exists(path)` \u2014 check if path exists\n- `sharedfs.list(path)` \u2014 list directory (JSON)\n- `sharedfs.mkdir(path)` \u2014 create directory\n- `sharedfs.remove(path)` \u2014 remove file"
+      },
+      {
+        "language": "lua",
+        "type": "code",
+        "code": "-- Write a CSV file to SharedVFS\nsharedfs.write(\"/shared/planets.csv\", table.concat({\n    \"name,radius_km,has_rings\",\n    \"Mercury,2440,false\",\n    \"Venus,6052,false\",\n    \"Earth,6371,false\",\n    \"Mars,3390,false\",\n    \"Jupiter,69911,true\",\n    \"Saturn,58232,true\",\n    \"Uranus,25362,true\",\n    \"Neptune,24622,true\"\n}, \"\n\"))\nprint(\"Wrote planets.csv to /shared/\")"
+      },
+      {
+        "language": "lua",
+        "type": "code",
+        "code": "-- Read it back and parse\nlocal csv = sharedfs.read(\"/shared/planets.csv\")\nprint(\"Read \" .. #csv .. \" bytes\")\n\n-- Parse CSV lines\nlocal count = 0\nfor line in csv:gmatch(\"[^\n]+\") do\n    count = count + 1\n    if count > 1 then  -- skip header\n        local name, radius, rings = line:match(\"(%w+),(%d+),(%w+)\")\n        if name then\n            print(string.format(\"  %s: %s km%s\", name, radius,\n                rings == \"true\" and \" (ringed)\" or \"\"))\n        end\n    end\nend"
+      },
+      {
+        "language": "lua",
+        "type": "markdown",
+        "code": "## Using `io.lines()` with SharedVFS\n\nLua's standard `io.lines(path)` is overridden to work with SharedVFS paths. This means generated code using `input(file(\"/shared/...\"))` works transparently."
+      },
+      {
+        "language": "lua",
+        "type": "code",
+        "code": "-- io.lines() works with SharedVFS paths\nlocal count = 0\nfor line in io.lines(\"/shared/planets.csv\") do\n    count = count + 1\n    if count == 1 then\n        print(\"Header: \" .. line)\n    end\nend\nprint(\"Total lines: \" .. count)"
+      },
+      {
+        "language": "lua",
+        "type": "code",
+        "code": "-- io.open() also works for reading\nlocal f = io.open(\"/shared/planets.csv\", \"r\")\nif f then\n    local header = f:read()\n    print(\"First line: \" .. (header or \"nil\"))\n    f:close()\nend"
+      },
+      {
+        "language": "lua",
+        "type": "markdown",
+        "code": "## Cross-Kernel File Sharing\n\nFiles written by Lua via  or  are immediately visible to Python, Bash, R, and Prolog. Try switching to a Python cell and running:\n\n"
+      },
+      {
+        "language": "lua",
+        "type": "code",
+        "code": "-- Check file existence and directory listing\nprint(\"planets.csv exists:\", sharedfs.exists(\"/shared/planets.csv\"))\n\n-- Create a subdirectory\nsharedfs.mkdir(\"/shared/lua_output\")\nsharedfs.write(\"/shared/lua_output/result.txt\", \"Hello from Lua!\")\nprint(\"Created /shared/lua_output/result.txt\")\nprint(\"Exists:\", sharedfs.exists(\"/shared/lua_output/result.txt\"))"
+      }
+    ]
+  }
+}

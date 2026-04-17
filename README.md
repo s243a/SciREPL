@@ -12,6 +12,7 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **Bash kernel** — Unix shell via brush-wasm with coreutils, findutils, grep (all Rust reimplementations)
 - **JavaScript kernel** — Native browser JS execution with zero download. Direct access to WASM modules, SharedVFS, and browser APIs
 - **R kernel** — Full R via webR (WASM), loaded on demand (~50 MB, cached after first use). Supports plotting, `install.packages()`, and SharedVFS file sharing.
+- **TypR kernel** — Typed R superset via typr-wasm (~1.7 MB). Compiles TypR to R, then executes through webR. Type checking, `#!transpile` and `#!show-r` directives.
 - **Kernel abstraction layer** — Pluggable architecture for adding new language runtimes
 - **Package system v2** — Install packages with notebooks, data files, Python modules, Prolog knowledge bases, and WASM libraries. See [docs/packages.md](docs/packages.md).
 - **SharedVFS** — In-memory filesystem shared across all kernels. Python, Bash, Prolog, R, and JavaScript can read/write the same files. Persisted to IndexedDB — files survive page reloads.
@@ -232,7 +233,8 @@ KernelManager (kernel_manager.js)
 ├── PrologKernel     (kernels/prolog.js)       — swipl-wasm + wasm_call/3
 ├── BashKernel       (kernels/bash.js)         — brush-wasm (coreutils + findutils + grep)
 ├── JavaScriptKernel (kernels/javascript.js)   — native browser JS (zero download)
-└── RKernel          (kernels/r.js)            — webR (lazy-loaded ~50MB, plotting, SharedVFS, install.packages)
+├── RKernel          (kernels/r.js)            — webR (lazy-loaded ~50MB, plotting, SharedVFS, install.packages)
+└── TypRKernel       (kernels/typr.js)         — typr-wasm (1.7MB) → R transpilation → webR execution
 ```
 
 Each kernel implements: `init()`, `execute(code)`, `isReady()`, `getName()`, `getLanguage()`, `destroy()`
@@ -272,6 +274,7 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - **[www/js/kernels/prolog.js](www/js/kernels/prolog.js)** — Prolog kernel (swipl-wasm + wasm_call/3)
 - **[www/js/kernels/bash.js](www/js/kernels/bash.js)** — Bash kernel (brush-wasm)
 - **[www/js/kernels/javascript.js](www/js/kernels/javascript.js)** — JavaScript kernel (native browser)
+- **[www/js/kernels/typr.js](www/js/kernels/typr.js)** — TypR kernel (typr-wasm → webR transpiler pipeline)
 - **[www/js/bridge.js](www/js/bridge.js)** — JS rendering: `renderPlot()`, `renderLatex()`, `renderTable()`
 - **[www/js/prelude.py](www/js/prelude.py)** — Python bridge: `plot()`, `mplot()`, `table()`, `wasm_call()`
 - **[www/js/sharedfs.py](www/js/sharedfs.py)** — Python SharedVFS bridge (`import sharedfs`)
@@ -358,10 +361,76 @@ Near-term items to make R and cross-language features demo-ready:
 - [ ] **Undo delete cell** — Undo stack to recover accidentally deleted cells
 - [ ] **Dark/light theme toggle** — Light theme option for classrooms/sunlight
 - [ ] **Notebook sharing via URL** — Encode small notebooks as base64 URL fragments or gist links
-- [ ] **Lua kernel** — Fengari (Lua in WASM, ~500KB)
+- [x] **Lua kernel** — Fengari (Lua in WASM, ~500KB)
+- [x] **TypR kernel** — Typed R superset (typr-wasm, ~1.7 MB) transpiles to R via webR
 - [ ] **Capacitor WebView media query investigation** — `@media (hover: none) and (pointer: coarse)` may not trigger in Android WebView; determine cause and fix
 - [ ] **Byte-level download progress** — Track actual download progress via Service Worker interception or ReadableStream
 - [ ] **Background package installs** — Install packages/workbooks without switching to the target notebook tab; requires notebook-aware card creation
+
+## Testing
+
+### Playwright Tests
+
+SciREPL includes Playwright tests that verify cross-cell communication (Notebook VFS) examples across all six kernels.
+
+```bash
+# Start local server
+npm run serve
+
+# Run all VFS tests
+npx playwright install chromium   # first time only
+node test_help_vfs_examples.mjs
+```
+
+#### WSL2 Memory Requirements
+
+CDN kernels (Python/Pyodide, R/webR, Prolog/SWI-WASM) compile large WebAssembly modules in-browser. This requires significant memory:
+
+| Component | Memory Usage |
+|-----------|-------------|
+| Chromium (headless) | ~200–400 MB resident |
+| Pyodide WASM compilation | ~3–4 GB peak (50 MB download → JIT compile) |
+| webR WASM compilation | ~1–2 GB peak |
+| SWI-Prolog WASM compilation | ~500 MB–1 GB peak |
+| Node.js (Playwright host) | ~100–200 MB |
+
+When running tests on **WSL2**, the default memory and swap allocation (typically 50% of host RAM / ~1 GB swap) is often insufficient. The Linux OOM killer will terminate the browser process mid-compilation.
+
+**Recommended `.wslconfig`** (edit `C:\Users\<username>\.wslconfig`, then `wsl --shutdown`):
+
+```ini
+[wsl2]
+memory=5GB
+swap=5GB
+```
+
+- **5 GB RAM** gives enough headroom for Chromium + one large WASM module with room for the OS
+- **5 GB swap** acts as overflow when peak WASM compilation temporarily exceeds physical RAM — the kernel spills pages to swap instead of OOM-killing
+
+Without adequate swap, Pyodide compilation reliably triggers the OOM killer at ~4 GB RSS, even with 5 GB total RAM.
+
+#### Playwright + Large WASM: DOM Signaling Pattern
+
+Standard `page.evaluate()` calls fail with `ERR_STRING_TOO_LONG` after loading large WASM modules (Pyodide, webR). This is a Node.js/Playwright limitation: the Chrome DevTools Protocol serializes the full execution context, and when WASM memory is large, the resulting message exceeds Node's maximum string size (~512 MB).
+
+**Workaround:** Use `page.addScriptTag()` to inject code and DOM `data-*` attributes to pass results back:
+
+```javascript
+// Instead of: const result = await page.evaluate(() => heavyWasmCall());
+// Do this:
+await page.addScriptTag({ content: `
+    heavyWasmCall()
+        .then(r => document.body.setAttribute('data-result', JSON.stringify(r)))
+        .catch(e => document.body.setAttribute('data-error', e.message));
+`});
+await page.waitForFunction(
+    () => document.body.hasAttribute('data-result') || document.body.hasAttribute('data-error'),
+    { timeout: 300000, polling: 2000 }
+);
+const result = JSON.parse(await page.getAttribute('body', 'data-result'));
+```
+
+This pattern is used in `test_help_vfs_examples.mjs` for all CDN kernel interactions.
 
 ## License
 

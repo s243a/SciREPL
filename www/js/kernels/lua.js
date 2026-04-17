@@ -50,6 +50,20 @@ class LuaKernel {
         // Install nb table for NotebookVFS access
         this._installNotebookVFS();
 
+        // Install sharedfs table for SharedVFS access
+        this._installSharedVFS();
+
+        // Override io.lines()/io.open() to support SharedVFS paths
+        this._installIOOverrides();
+
+        // Stub out CLI functions that don't work in browser
+        const stubCode = `
+            os.exit = function() end
+            arg = arg or {}
+            io.stderr = io.stderr or { write = function(self, ...) end }
+        `;
+        this._lauxlib.luaL_dostring(this._L, this._fengari.to_luastring(stubCode));
+
         this._ready = true;
 
         if (window.kernelManager) {
@@ -163,6 +177,257 @@ class LuaKernel {
         lua.lua_setfield(L, -2, f.to_luastring('name'));
 
         lua.lua_setglobal(L, f.to_luastring('nb'));
+    }
+
+    /**
+     * Install the sharedfs table for SharedVFS access.
+     * sharedfs.read(path), sharedfs.write(path, content), sharedfs.exists(path),
+     * sharedfs.list(path), sharedfs.mkdir(path), sharedfs.remove(path)
+     */
+    _installSharedVFS() {
+        const L = this._L;
+        const lua = this._lua;
+        const f = this._fengari;
+
+        lua.lua_newtable(L);
+
+        // sharedfs.read(path) → string or nil
+        lua.lua_pushjsfunction(L, function(L) {
+            const vfs = window.sharedVFS;
+            if (!vfs) { lua.lua_pushnil(L); return 1; }
+            const path = f.to_jsstring(lua.lua_tostring(L, 1));
+            const result = vfs.readFile(path, 'utf8');
+            if (result === null || result === undefined) {
+                lua.lua_pushnil(L);
+            } else {
+                lua.lua_pushstring(L, f.to_luastring(String(result)));
+            }
+            return 1;
+        });
+        lua.lua_setfield(L, -2, f.to_luastring('read'));
+
+        // sharedfs.write(path, content) → boolean
+        lua.lua_pushjsfunction(L, function(L) {
+            const vfs = window.sharedVFS;
+            if (!vfs) { lua.lua_pushboolean(L, false); return 1; }
+            const path = f.to_jsstring(lua.lua_tostring(L, 1));
+            const content = f.to_jsstring(lua.lua_tostring(L, 2));
+            try {
+                vfs.writeFile(path, content, 'lua');
+                lua.lua_pushboolean(L, true);
+            } catch (e) {
+                lua.lua_pushboolean(L, false);
+            }
+            return 1;
+        });
+        lua.lua_setfield(L, -2, f.to_luastring('write'));
+
+        // sharedfs.exists(path) → boolean
+        lua.lua_pushjsfunction(L, function(L) {
+            const vfs = window.sharedVFS;
+            if (!vfs) { lua.lua_pushboolean(L, false); return 1; }
+            const path = f.to_jsstring(lua.lua_tostring(L, 1));
+            lua.lua_pushboolean(L, !!vfs.exists(path));
+            return 1;
+        });
+        lua.lua_setfield(L, -2, f.to_luastring('exists'));
+
+        // sharedfs.list(path) → JSON string of entries
+        lua.lua_pushjsfunction(L, function(L) {
+            const vfs = window.sharedVFS;
+            if (!vfs) { lua.lua_pushnil(L); return 1; }
+            const path = lua.lua_gettop(L) >= 1
+                ? f.to_jsstring(lua.lua_tostring(L, 1))
+                : '/shared';
+            const result = vfs.vfs_list_dir(path);
+            if (result === null || result === undefined) {
+                lua.lua_pushnil(L);
+            } else {
+                lua.lua_pushstring(L, f.to_luastring(String(result)));
+            }
+            return 1;
+        });
+        lua.lua_setfield(L, -2, f.to_luastring('list'));
+
+        // sharedfs.mkdir(path) → boolean
+        lua.lua_pushjsfunction(L, function(L) {
+            const vfs = window.sharedVFS;
+            if (!vfs) { lua.lua_pushboolean(L, false); return 1; }
+            const path = f.to_jsstring(lua.lua_tostring(L, 1));
+            try {
+                vfs.mkdir(path);
+                lua.lua_pushboolean(L, true);
+            } catch (e) {
+                lua.lua_pushboolean(L, false);
+            }
+            return 1;
+        });
+        lua.lua_setfield(L, -2, f.to_luastring('mkdir'));
+
+        // sharedfs.remove(path) → boolean
+        lua.lua_pushjsfunction(L, function(L) {
+            const vfs = window.sharedVFS;
+            if (!vfs) { lua.lua_pushboolean(L, false); return 1; }
+            const path = f.to_jsstring(lua.lua_tostring(L, 1));
+            try {
+                const ok = vfs.vfs_remove(path);
+                lua.lua_pushboolean(L, !!ok);
+            } catch (e) {
+                lua.lua_pushboolean(L, false);
+            }
+            return 1;
+        });
+        lua.lua_setfield(L, -2, f.to_luastring('remove'));
+
+        lua.lua_setglobal(L, f.to_luastring('sharedfs'));
+    }
+
+    /**
+     * Override io.lines() and io.open() to support SharedVFS paths.
+     * Paths starting with /shared/, /tmp/, /nb/, /education/ are routed
+     * through SharedVFS instead of the (non-existent) local filesystem.
+     */
+    _installIOOverrides() {
+        const L = this._L;
+        const lua = this._lua;
+        const lauxlib = this._lauxlib;
+        const f = this._fengari;
+
+        // Ensure io table exists
+        lua.lua_getglobal(L, f.to_luastring('io'));
+        if (lua.lua_type(L, -1) !== lua.LUA_TTABLE) {
+            lua.lua_pop(L, 1);
+            lua.lua_newtable(L);
+            lua.lua_setglobal(L, f.to_luastring('io'));
+            lua.lua_getglobal(L, f.to_luastring('io'));
+        }
+
+        const vfsPrefixes = ['/shared/', '/tmp/', '/nb/', '/education/'];
+
+        // io.lines(path) → iterator over lines from SharedVFS
+        lua.lua_pushjsfunction(L, function(L) {
+            if (lua.lua_gettop(L) < 1 || lua.lua_type(L, 1) !== lua.LUA_TSTRING) {
+                return lauxlib.luaL_error(L, f.to_luastring('io.lines: path argument required'));
+            }
+            const path = f.to_jsstring(lua.lua_tostring(L, 1));
+            const isVfs = vfsPrefixes.some(p => path.startsWith(p));
+            if (!isVfs) {
+                return lauxlib.luaL_error(L, f.to_luastring('io.lines: only SharedVFS paths supported (/shared/, /tmp/, /nb/, /education/)'));
+            }
+            const vfs = window.sharedVFS;
+            if (!vfs) {
+                return lauxlib.luaL_error(L, f.to_luastring('io.lines: SharedVFS not available'));
+            }
+            const content = vfs.readFile(path, 'utf8');
+            if (content === null || content === undefined) {
+                return lauxlib.luaL_error(L, f.to_luastring(`io.lines: file not found: ${path}`));
+            }
+            const lines = String(content).split('\n');
+            let idx = 0;
+            // Push iterator function
+            lua.lua_pushjsfunction(L, function(L) {
+                if (idx >= lines.length) {
+                    lua.lua_pushnil(L);
+                    return 1;
+                }
+                lua.lua_pushstring(L, f.to_luastring(lines[idx]));
+                idx++;
+                return 1;
+            });
+            return 1;
+        });
+        lua.lua_setfield(L, -2, f.to_luastring('lines'));
+
+        // io.open(path, mode) → file handle table (simplified)
+        lua.lua_pushjsfunction(L, function(L) {
+            if (lua.lua_gettop(L) < 1 || lua.lua_type(L, 1) !== lua.LUA_TSTRING) {
+                lua.lua_pushnil(L);
+                lua.lua_pushstring(L, f.to_luastring('io.open: path required'));
+                return 2;
+            }
+            const path = f.to_jsstring(lua.lua_tostring(L, 1));
+            const mode = lua.lua_gettop(L) >= 2
+                ? f.to_jsstring(lua.lua_tostring(L, 2))
+                : 'r';
+            const isVfs = vfsPrefixes.some(p => path.startsWith(p));
+            if (!isVfs) {
+                lua.lua_pushnil(L);
+                lua.lua_pushstring(L, f.to_luastring('io.open: only SharedVFS paths supported'));
+                return 2;
+            }
+            const vfs = window.sharedVFS;
+            if (!vfs) {
+                lua.lua_pushnil(L);
+                lua.lua_pushstring(L, f.to_luastring('io.open: SharedVFS not available'));
+                return 2;
+            }
+
+            if (mode.startsWith('r')) {
+                const content = vfs.readFile(path, 'utf8');
+                if (content === null || content === undefined) {
+                    lua.lua_pushnil(L);
+                    lua.lua_pushstring(L, f.to_luastring(`No such file: ${path}`));
+                    return 2;
+                }
+                const lines = String(content).split('\n');
+                let lineIdx = 0;
+
+                // Return a file handle table with read() and lines() and close()
+                lua.lua_newtable(L);
+
+                lua.lua_pushjsfunction(L, function(L) {
+                    if (lineIdx >= lines.length) { lua.lua_pushnil(L); return 1; }
+                    lua.lua_pushstring(L, f.to_luastring(lines[lineIdx]));
+                    lineIdx++;
+                    return 1;
+                });
+                lua.lua_setfield(L, -2, f.to_luastring('read'));
+
+                lua.lua_pushjsfunction(L, function(L) {
+                    let lIdx = 0;
+                    lua.lua_pushjsfunction(L, function(L) {
+                        if (lIdx >= lines.length) { lua.lua_pushnil(L); return 1; }
+                        lua.lua_pushstring(L, f.to_luastring(lines[lIdx]));
+                        lIdx++;
+                        return 1;
+                    });
+                    return 1;
+                });
+                lua.lua_setfield(L, -2, f.to_luastring('lines'));
+
+                lua.lua_pushjsfunction(L, function() { return 0; });
+                lua.lua_setfield(L, -2, f.to_luastring('close'));
+
+                return 1;
+            } else if (mode.startsWith('w')) {
+                // Write mode: collect writes, flush on close
+                const chunks = [];
+
+                lua.lua_newtable(L);
+
+                lua.lua_pushjsfunction(L, function(L) {
+                    const text = f.to_jsstring(lua.lua_tostring(L, 1));
+                    chunks.push(text);
+                    return 0;
+                });
+                lua.lua_setfield(L, -2, f.to_luastring('write'));
+
+                lua.lua_pushjsfunction(L, function() {
+                    vfs.writeFile(path, chunks.join(''), 'lua');
+                    return 0;
+                });
+                lua.lua_setfield(L, -2, f.to_luastring('close'));
+
+                return 1;
+            }
+
+            lua.lua_pushnil(L);
+            lua.lua_pushstring(L, f.to_luastring(`io.open: unsupported mode: ${mode}`));
+            return 2;
+        });
+        lua.lua_setfield(L, -2, f.to_luastring('open'));
+
+        lua.lua_pop(L, 1); // pop io table
     }
 
     isReady() {

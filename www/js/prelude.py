@@ -48,12 +48,13 @@ def _sympy_list_to_latex(obj):
 # ---- Plotting bridge (defined AFTER SymPy to override its plot) ----
 
 def plot(x, y=None, *, title="", xlabel="", ylabel="",
-         label="", type="scatter", mode="lines", **kwargs):
+         label="", type="scatter", mode="lines", layout=None, **kwargs):
     """Plot data using Plotly.js via the bridge.
 
     Usage:
         x = np.linspace(0, 2*pi, 100)
         plot(x, np.sin(x), title="Sine wave")
+        plot(x, y, layout={"yaxis": {"scaleanchor": "x"}})  # equal aspect
     """
     if y is None:
         y_data = x
@@ -77,6 +78,8 @@ def plot(x, y=None, *, title="", xlabel="", ylabel="",
         "type": type,
         "mode": mode,
     }
+    if layout:
+        payload["layout"] = layout
     js.renderPlot(json.dumps(payload))
 
 

@@ -23,8 +23,8 @@ class PackageCatalog {
                 name: 'UnifyWeaver SciREPL',
                 description: 'Physics knowledge-base notebooks with Prolog inference, embedding search, and mindmap tools.',
                 type: 'package',
-                version: 'v0.3.0',
-                url: 'https://github.com/s243a/SciREPL/releases/download/v0.3.0/unifyweaver_scirepl.zip',
+                version: 'v0.11.0',
+                url: 'https://github.com/s243a/SciREPL/releases/download/v0.11.0/unifyweaver_scirepl.zip',
                 pages_url: 'packages/unifyweaver_scirepl.zip',
                 size: '~2 MB',
                 kernels: ['prolog', 'python'],
@@ -82,6 +82,16 @@ class PackageCatalog {
                 pages_url: 'workbooks/lua-parsing-coroutines.srwb',
                 size: '~14 KB',
                 kernels: ['lua'],
+            },
+            {
+                name: 'TypR Introduction',
+                description: 'Typed R superset — variable binding, functions, type annotations, and transpiler directives (#!transpile, #!show-r). Compiles to R via WASM.',
+                type: 'workbook',
+                format: 'srwb',
+                url: 'https://github.com/s243a/SciREPL/releases/download/v0.11.0/typr-intro.srwb',
+                pages_url: 'workbooks/typr-intro.srwb',
+                size: '~2 KB',
+                kernels: ['typr', 'r'],
             },
         ];
     }
@@ -165,13 +175,14 @@ class PackageCatalog {
         btn.textContent = 'Downloading...';
 
         // 1. Download (concurrent — multiple downloads can run at once)
+        //    Try release asset URL first, fall back to pages_url
         let blob;
         try {
-            if (pkg.pages_url) {
-                try { blob = await this._fetchPackage(pkg.pages_url); } catch (e) {}
+            if (pkg.url) {
+                try { blob = await this._fetchPackage(pkg.url); } catch (e) {}
             }
-            if (!blob) {
-                blob = await this._fetchPackage(pkg.url);
+            if (!blob && pkg.pages_url) {
+                blob = await this._fetchPackage(pkg.pages_url);
             }
         } catch (err) {
             console.error('[PackageCatalog] Download failed:', err);

@@ -1,0 +1,49 @@
+{
+  "format": "srwb",
+  "version": "1.0",
+  "notebook": {
+    "name": "TypR Introduction",
+    "cells": [
+      {
+        "type": "markdown",
+        "code": "# TypR — Typed R\n\nTypR is a typed superset of R that compiles to standard R code.\nIt adds type annotations, type checking, and generics while\nkeeping full R compatibility.\n\n**Syntax notes:**\n- Statements end with semicolons: `let x <- 42;`\n- Function bodies require braces: `function(x) { x * x }`\n- TypR doesn't support variadic functions yet, so `cat(\"x =\", x)` won't work. Use `cat(paste(\"x =\", x));` instead.",
+        "language": "markdown"
+      },
+      {
+        "type": "code",
+        "code": "let x <- 42;\n# Variadic cat not yet supported — use paste() to combine args\ncat(paste(\"x =\", x));",
+        "language": "typr",
+        "name": "basics"
+      },
+      {
+        "type": "code",
+        "code": "# Function bodies require braces\nlet add <- function(a, b) { a + b };\nlet result <- add(3, 4);\nprint(result);",
+        "language": "typr",
+        "name": "functions"
+      },
+      {
+        "type": "code",
+        "code": "let greeting: char <- \"Hello from TypR!\";\nprint(greeting);",
+        "language": "typr",
+        "name": "typed"
+      },
+      {
+        "type": "code",
+        "code": "# Function bodies require braces\nlet square <- function(x) { x * x };\nlet result <- square(7);\n# Variadic cat not yet supported — see cell [1]\ncat(paste(\"7 squared =\", result));",
+        "language": "typr",
+        "name": "square"
+      },
+      {
+        "type": "markdown",
+        "code": "## Directives\n\nUse `#!show-r` in a cell to toggle viewing the generated R code.\nUse `#!typecheck` followed by code to type-check without executing.\nUse `#!transpile` followed by code to see the transpiled R output.",
+        "language": "markdown"
+      },
+      {
+        "type": "code",
+        "code": "#!transpile\nlet fib <- function(n) {\n  if (n <= 1) { n }\n  else { fib(n - 1) + fib(n - 2) }\n};\nprint(fib(10));",
+        "language": "typr",
+        "name": "transpile_demo"
+      }
+    ]
+  }
+}

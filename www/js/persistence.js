@@ -100,13 +100,14 @@ class SessionManager {
     }
 
     /**
-     * Save the current cells list (code + type only, no DOM refs).
+     * Save the current cells list (code + type + name, no DOM refs).
      */
     saveCells(cells) {
         this.session.cells = cells.map(c => ({
             code: c.code,
             type: c.type,
-            language: c.language || 'python'
+            language: c.language || 'python',
+            name: c.name || ''
         }));
         this.save();
     }
