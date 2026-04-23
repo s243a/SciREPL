@@ -18,6 +18,16 @@ class RKernel {
 
     static displayName = 'R';
 
+    /**
+     * Pinned webR version. Used unless the user overrides via the
+     * `scirepl_webr_version` localStorage setting (e.g. set to "latest"
+     * or another tag like "v0.5.3" to opt into a different release).
+     *
+     * Bump this together with CDN_CACHE in sw.js when upgrading, so
+     * stale cached webR assets get evicted.
+     */
+    static DEFAULT_WEBR_VERSION = 'v0.5.4';
+
     async init() {
         if (this._ready) return;
         if (this._loading) {
@@ -30,8 +40,13 @@ class RKernel {
         const km = window.kernelManager;
         this._loading = true;
         try {
-            if (km) km.updateProgress('Downloading R runtime...');
-            const { WebR } = await import('https://webr.r-wasm.org/latest/webr.mjs');
+            const version = (typeof localStorage !== 'undefined'
+                && localStorage.getItem('scirepl_webr_version'))
+                || RKernel.DEFAULT_WEBR_VERSION;
+            const webrUrl = `https://webr.r-wasm.org/${version}/webr.mjs`;
+            console.log(`[RKernel] Loading webR ${version}`);
+            if (km) km.updateProgress(`Downloading R runtime (webR ${version})...`);
+            const { WebR } = await import(webrUrl);
 
             if (km) km.updateProgress('Initializing R environment...');
             this._webr = new WebR();

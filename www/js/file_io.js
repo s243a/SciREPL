@@ -2058,6 +2058,17 @@ class FileIO {
     ];
 
     /**
+     * Per-kernel version override metadata for the Languages modal.
+     * Each entry's settingKey is read by the kernel at init time;
+     * leaving the input blank uses the kernel's pinned default.
+     * Use "latest" to opt into the rolling release.
+     */
+    static KERNEL_VERSION_META = {
+        r:      { settingKey: 'scirepl_webr_version',     defaultVersion: 'v0.5.4' },
+        prolog: { settingKey: 'scirepl_swipl_version',    defaultVersion: 'latest' },
+    };
+
+    /**
      * Get the set of enabled language IDs from localStorage.
      * Defaults to all languages enabled.
      */
@@ -2084,8 +2095,11 @@ class FileIO {
         list.innerHTML = '';
 
         for (const lang of FileIO.LANGUAGE_META) {
+            const row = document.createElement('div');
+            row.className = 'settings-item';
+
             const label = document.createElement('label');
-            label.className = 'settings-item';
+            label.style.flex = '1';
             const cb = document.createElement('input');
             cb.type = 'checkbox';
             cb.className = 'lang-toggle';
@@ -2099,11 +2113,50 @@ class FileIO {
             if (info) {
                 const hint = document.createElement('span');
                 hint.className = 'export-format-desc';
-                hint.textContent = info.size;
+                hint.textContent = ' ' + info.size;
                 label.appendChild(hint);
             }
-            list.appendChild(label);
+            row.appendChild(label);
+
+            // Version override input for kernels that support it.
+            // Setting key + default version per kernel.
+            const versionMeta = FileIO.KERNEL_VERSION_META[lang.id];
+            if (versionMeta) {
+                const versionWrap = document.createElement('span');
+                versionWrap.className = 'kernel-version-wrap';
+                versionWrap.style.marginLeft = '0.5em';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'kernel-version-input';
+                input.dataset.lang = lang.id;
+                input.dataset.settingKey = versionMeta.settingKey;
+                input.placeholder = versionMeta.defaultVersion;
+                input.title = `Version (default: ${versionMeta.defaultVersion}). Use "latest" for the rolling release. Reload page after changing.`;
+                input.style.width = '8em';
+                input.value = (typeof localStorage !== 'undefined'
+                    && localStorage.getItem(versionMeta.settingKey)) || '';
+                input.addEventListener('change', (e) => {
+                    const v = e.target.value.trim();
+                    if (v) {
+                        localStorage.setItem(versionMeta.settingKey, v);
+                    } else {
+                        localStorage.removeItem(versionMeta.settingKey);
+                    }
+                });
+                versionWrap.appendChild(input);
+                row.appendChild(versionWrap);
+            }
+
+            list.appendChild(row);
         }
+
+        // Hint about reloading
+        const note = document.createElement('p');
+        note.className = 'export-format-desc';
+        note.style.marginTop = '0.75em';
+        note.textContent = 'Version changes apply on next page reload. Leave blank to use the default. Use "latest" for the rolling release (may break unexpectedly).';
+        list.appendChild(note);
     }
 
     /**
