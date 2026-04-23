@@ -15,10 +15,24 @@ class PrologKernel {
     }
 
     /**
-     * CDN URL for swipl-wasm single-file bundle.
-     * Using dynamic-import.js which embeds .wasm + .data in one file.
+     * Pinned swipl-wasm version. Used unless the user overrides via the
+     * `scirepl_swipl_version` localStorage setting (e.g. set to "latest"
+     * or another tag like "9.3.32" to opt into a different release).
+     *
+     * Bump this together with CDN_CACHE in sw.js when upgrading, so
+     * stale cached swipl-wasm assets get evicted.
+     *
+     * Format: a path segment under https://SWI-Prolog.github.io/npm-swipl-wasm/3/
+     * e.g. "latest" or a numeric version like "9.3.32".
      */
-    static CDN_URL = 'https://SWI-Prolog.github.io/npm-swipl-wasm/3/latest/dynamic-import.js';
+    static DEFAULT_SWIPL_VERSION = 'latest';
+
+    static cdnUrl() {
+        const version = (typeof localStorage !== 'undefined'
+            && localStorage.getItem('scirepl_swipl_version'))
+            || PrologKernel.DEFAULT_SWIPL_VERSION;
+        return `https://SWI-Prolog.github.io/npm-swipl-wasm/3/${version}/dynamic-import.js`;
+    }
 
     async init() {
         if (this._ready) return;
@@ -33,8 +47,10 @@ class PrologKernel {
         const km = window.kernelManager;
         this._loading = true;
         try {
+            const cdnUrl = PrologKernel.cdnUrl();
+            console.log(`[PrologKernel] Loading swipl-wasm from ${cdnUrl}`);
             if (km) km.updateProgress('Downloading Prolog runtime...');
-            const module = await import(PrologKernel.CDN_URL);
+            const module = await import(cdnUrl);
             const SWIPL = module.SWIPL || module.default;
             const self = this;
 

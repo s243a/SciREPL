@@ -1,9 +1,9 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v106';
+const CACHE_VERSION = 'v107';
 const APP_CACHE = 'scirepl-app-' + CACHE_VERSION;
-const CDN_CACHE = 'scirepl-cdn-v1';
+const CDN_CACHE = 'scirepl-cdn-v2';
 
 // App shell: local assets to pre-cache on install
 const APP_SHELL = [
@@ -77,13 +77,16 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate: clean up old app caches, claim clients
+// Activate: clean up old app + CDN caches, claim clients
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
         keys
-          .filter(key => key.startsWith('scirepl-app-') && key !== APP_CACHE)
+          .filter(key =>
+            (key.startsWith('scirepl-app-') && key !== APP_CACHE) ||
+            (key.startsWith('scirepl-cdn-') && key !== CDN_CACHE)
+          )
           .map(key => caches.delete(key))
       );
     }).then(() => self.clients.claim())
