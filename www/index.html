@@ -373,6 +373,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
 
             <h3>Language Settings</h3>
             <p>Open <strong>Menu → Languages</strong> to show or hide languages in the cell dropdown. Unchecking a language removes it from the selector but doesn't unload its runtime. All languages are enabled by default. Your preferences are saved across sessions.</p>
+            <p><strong>Runtime versions:</strong> Languages loaded from CDN (R, Prolog) have a version field on the Languages page. Leave it blank to use the pinned default (recommended), enter a tag like <code>v0.5.4</code> to use a specific version, or enter <code>latest</code> for the rolling release. The rolling release can occasionally serve mismatched files (e.g. <code>ASM_CONSTS[code] is not a function</code>) — if that happens, switch to the pinned default and clear the SciREPL cache.</p>
 
             <h3>Keyboard Shortcuts</h3>
             <ul>
