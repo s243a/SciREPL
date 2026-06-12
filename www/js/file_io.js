@@ -499,26 +499,12 @@ class FileIO {
             });
         }
 
-        const kernelMap = {
-            python: { display_name: 'Python 3 (Pyodide)', language: 'python', name: 'python3' },
-            prolog: { display_name: 'SWI-Prolog (WASM)', language: 'prolog', name: 'swipl' },
-            javascript: { display_name: 'JavaScript (Browser)', language: 'javascript', name: 'javascript' },
-            lua: { display_name: 'Lua (Fengari)', language: 'lua', name: 'lua' }
-        };
-
-        const langInfoMap = {
-            python: { name: 'python', version: '3.12', mimetype: 'text/x-python', file_extension: '.py' },
-            prolog: { name: 'prolog', version: '9.x', mimetype: 'text/x-prolog', file_extension: '.pl' },
-            javascript: { name: 'javascript', version: 'ES2022', mimetype: 'text/javascript', file_extension: '.js' },
-            lua: { name: 'lua', version: '5.3', mimetype: 'text/x-lua', file_extension: '.lua' }
-        };
-
         const notebook = {
             nbformat: 4,
             nbformat_minor: 5,
             metadata: {
-                kernelspec: kernelMap[primaryLang] || kernelMap.python,
-                language_info: langInfoMap[primaryLang] || langInfoMap.python,
+                kernelspec: FileIO.IPYNB_KERNELSPEC[primaryLang] || FileIO.IPYNB_KERNELSPEC.python,
+                language_info: FileIO.IPYNB_LANGUAGE_INFO[primaryLang] || FileIO.IPYNB_LANGUAGE_INFO.python,
                 scirepl: {
                     version: 'pro',
                     exported_at: new Date().toISOString(),
@@ -1216,28 +1202,11 @@ class FileIO {
                 });
             }
 
-            const kernelMap = {
-                python: { display_name: 'Python 3 (Pyodide)', language: 'python', name: 'python3' },
-                r: { display_name: 'R (webR)', language: 'r', name: 'ir' },
-                prolog: { display_name: 'SWI-Prolog (WASM)', language: 'prolog', name: 'swipl' },
-                javascript: { display_name: 'JavaScript (Browser)', language: 'javascript', name: 'javascript' },
-                bash: { display_name: 'Bash', language: 'bash', name: 'bash' },
-                lua: { display_name: 'Lua (Fengari)', language: 'lua', name: 'lua' }
-            };
-            const langInfoMap = {
-                python: { name: 'python', version: '3.12', mimetype: 'text/x-python', file_extension: '.py' },
-                r: { name: 'R', version: '4.x', mimetype: 'text/x-r', file_extension: '.r' },
-                prolog: { name: 'prolog', version: '9.x', mimetype: 'text/x-prolog', file_extension: '.pl' },
-                javascript: { name: 'javascript', version: 'ES2022', mimetype: 'text/javascript', file_extension: '.js' },
-                bash: { name: 'bash', version: '5.x', mimetype: 'text/x-sh', file_extension: '.sh' },
-                lua: { name: 'lua', version: '5.3', mimetype: 'text/x-lua', file_extension: '.lua' }
-            };
-
             const notebook = {
                 nbformat: 4, nbformat_minor: 5,
                 metadata: {
-                    kernelspec: kernelMap[defaultKernel] || kernelMap.python,
-                    language_info: langInfoMap[defaultKernel] || langInfoMap.python,
+                    kernelspec: FileIO.IPYNB_KERNELSPEC[defaultKernel] || FileIO.IPYNB_KERNELSPEC.python,
+                    language_info: FileIO.IPYNB_LANGUAGE_INFO[defaultKernel] || FileIO.IPYNB_LANGUAGE_INFO.python,
                     scirepl: { version: 'pro', exported_at: new Date().toISOString() }
                 },
                 cells: nbCells
@@ -1326,25 +1295,12 @@ class FileIO {
             || Object.keys(langCounts).sort((a, b) => langCounts[b] - langCounts[a])[0]
             || 'python';
 
-        const kernelMap = {
-            python: { display_name: 'Python 3 (Pyodide)', language: 'python', name: 'python3' },
-            prolog: { display_name: 'SWI-Prolog (WASM)', language: 'prolog', name: 'swipl' },
-            javascript: { display_name: 'JavaScript (Browser)', language: 'javascript', name: 'javascript' },
-            lua: { display_name: 'Lua (Fengari)', language: 'lua', name: 'lua' }
-        };
-        const langInfoMap = {
-            python: { name: 'python', version: '3.12', mimetype: 'text/x-python', file_extension: '.py' },
-            prolog: { name: 'prolog', version: '9.x', mimetype: 'text/x-prolog', file_extension: '.pl' },
-            javascript: { name: 'javascript', version: 'ES2022', mimetype: 'text/javascript', file_extension: '.js' },
-            lua: { name: 'lua', version: '5.3', mimetype: 'text/x-lua', file_extension: '.lua' }
-        };
-
         return {
             nbformat: 4,
             nbformat_minor: 5,
             metadata: {
-                kernelspec: kernelMap[primaryLang] || kernelMap.python,
-                language_info: langInfoMap[primaryLang] || langInfoMap.python,
+                kernelspec: FileIO.IPYNB_KERNELSPEC[primaryLang] || FileIO.IPYNB_KERNELSPEC.python,
+                language_info: FileIO.IPYNB_LANGUAGE_INFO[primaryLang] || FileIO.IPYNB_LANGUAGE_INFO.python,
                 scirepl: { version: 'pro', exported_at: new Date().toISOString() }
             },
             cells: (cells || []).map(cell => {
@@ -2058,6 +2014,43 @@ class FileIO {
     ];
 
     /**
+     * Canonical ipynb export metadata for every supported language.
+     * Single source of truth for the kernelspec / language_info written by
+     * exportNotebook, the package exporter, and _buildIpynb — keep complete:
+     * a language missing here silently exports with a python3 kernelspec.
+     */
+    static IPYNB_KERNELSPEC = {
+        python:     { display_name: 'Python 3 (Pyodide)', language: 'python', name: 'python3' },
+        r:          { display_name: 'R (webR)', language: 'r', name: 'ir' },
+        prolog:     { display_name: 'SWI-Prolog (WASM)', language: 'prolog', name: 'swipl' },
+        bash:       { display_name: 'Bash', language: 'bash', name: 'bash' },
+        javascript: { display_name: 'JavaScript (Browser)', language: 'javascript', name: 'javascript' },
+        lua:        { display_name: 'Lua (Fengari)', language: 'lua', name: 'lua' },
+        typr:       { display_name: 'TypR', language: 'typr', name: 'typr' },
+    };
+
+    static IPYNB_LANGUAGE_INFO = {
+        python:     { name: 'python', version: '3.12', mimetype: 'text/x-python', file_extension: '.py' },
+        r:          { name: 'R', version: '4.x', mimetype: 'text/x-r', file_extension: '.r' },
+        prolog:     { name: 'prolog', version: '9.x', mimetype: 'text/x-prolog', file_extension: '.pl' },
+        bash:       { name: 'bash', version: '5.x', mimetype: 'text/x-sh', file_extension: '.sh' },
+        javascript: { name: 'javascript', version: 'ES2022', mimetype: 'text/javascript', file_extension: '.js' },
+        lua:        { name: 'lua', version: '5.3', mimetype: 'text/x-lua', file_extension: '.lua' },
+        typr:       { name: 'typr', version: '0.x', mimetype: 'text/x-typr', file_extension: '.ty' },
+    };
+
+    /**
+     * Per-kernel version override metadata for the Languages modal.
+     * Each entry's settingKey is read by the kernel at init time;
+     * leaving the input blank uses the kernel's pinned default.
+     * Use "latest" to opt into the rolling release.
+     */
+    static KERNEL_VERSION_META = {
+        r:      { settingKey: 'scirepl_webr_version',     defaultVersion: 'v0.5.4' },
+        prolog: { settingKey: 'scirepl_swipl_version',    defaultVersion: 'latest' },
+    };
+
+    /**
      * Get the set of enabled language IDs from localStorage.
      * Defaults to all languages enabled.
      */
@@ -2084,8 +2077,11 @@ class FileIO {
         list.innerHTML = '';
 
         for (const lang of FileIO.LANGUAGE_META) {
+            const row = document.createElement('div');
+            row.className = 'settings-item';
+
             const label = document.createElement('label');
-            label.className = 'settings-item';
+            label.style.flex = '1';
             const cb = document.createElement('input');
             cb.type = 'checkbox';
             cb.className = 'lang-toggle';
@@ -2099,11 +2095,50 @@ class FileIO {
             if (info) {
                 const hint = document.createElement('span');
                 hint.className = 'export-format-desc';
-                hint.textContent = info.size;
+                hint.textContent = ' ' + info.size;
                 label.appendChild(hint);
             }
-            list.appendChild(label);
+            row.appendChild(label);
+
+            // Version override input for kernels that support it.
+            // Setting key + default version per kernel.
+            const versionMeta = FileIO.KERNEL_VERSION_META[lang.id];
+            if (versionMeta) {
+                const versionWrap = document.createElement('span');
+                versionWrap.className = 'kernel-version-wrap';
+                versionWrap.style.marginLeft = '0.5em';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'kernel-version-input';
+                input.dataset.lang = lang.id;
+                input.dataset.settingKey = versionMeta.settingKey;
+                input.placeholder = versionMeta.defaultVersion;
+                input.title = `Version (default: ${versionMeta.defaultVersion}). Use "latest" for the rolling release. Reload page after changing.`;
+                input.style.width = '8em';
+                input.value = (typeof localStorage !== 'undefined'
+                    && localStorage.getItem(versionMeta.settingKey)) || '';
+                input.addEventListener('change', (e) => {
+                    const v = e.target.value.trim();
+                    if (v) {
+                        localStorage.setItem(versionMeta.settingKey, v);
+                    } else {
+                        localStorage.removeItem(versionMeta.settingKey);
+                    }
+                });
+                versionWrap.appendChild(input);
+                row.appendChild(versionWrap);
+            }
+
+            list.appendChild(row);
         }
+
+        // Hint about reloading
+        const note = document.createElement('p');
+        note.className = 'export-format-desc';
+        note.style.marginTop = '0.75em';
+        note.textContent = 'Version changes apply on next page reload. Leave blank to use the default. Use "latest" for the rolling release (may break unexpectedly).';
+        list.appendChild(note);
     }
 
     /**

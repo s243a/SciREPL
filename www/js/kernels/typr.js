@@ -62,7 +62,7 @@ class TypRKernel {
     }
 
     isReady() { return this._ready; }
-    getName() { return 'typr'; }
+    getName() { return 'TypR'; }
     getLanguage() { return 'typr'; }
     getMemoryUsage() { return 0; }
 
@@ -81,7 +81,7 @@ class TypRKernel {
         if (!this._ready) await this.init();
 
         const trimmed = code.trim();
-        if (!trimmed) return { stdout: '', error: '' };
+        if (!trimmed) return { stdout: '', error: null };
 
         // Handle directives
         if (trimmed.startsWith('#!')) {
@@ -128,7 +128,7 @@ class TypRKernel {
 
             return {
                 stdout: output,
-                error: rResult.error || '',
+                error: rResult.error || null,
                 result: rResult.result || null,
                 images: rResult.images || null,
             };
@@ -153,7 +153,7 @@ class TypRKernel {
                 this._showGenerated = !this._showGenerated;
                 return {
                     stdout: `Generated R code display: ${this._showGenerated ? 'ON' : 'OFF'}`,
-                    error: '',
+                    error: null,
                 };
 
             case 'typecheck': {

@@ -16,8 +16,22 @@ class KernelManager {
         this._registry = {};
         // Active kernel instances: language id → kernel instance
         this._instances = {};
+        // In-flight init promises: language id → Promise (guards concurrent init)
+        this._initPromises = {};
         // Currently selected language
         this.currentLanguage = 'python';
+
+        // Backdrop / × click hides the download modal at any phase.
+        // During the Download/Cancel confirmation, _confirmDownload attaches its
+        // own dismiss handler that also rejects the pending promise.
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('runtime-download-modal');
+            if (!modal || modal.classList.contains('hidden')) return;
+            if (e.target === modal ||
+                (modal.contains(e.target) && e.target.classList.contains('modal-close'))) {
+                this.hideDownloadModal();
+            }
+        });
     }
 
     /**
@@ -72,13 +86,27 @@ class KernelManager {
      */
     async ensureReady(language) {
         const kernel = this.getKernel(language);
-        if (!kernel.isReady()) {
-            if (KernelManager.CDN_KERNELS.has(language)) {
-                await this._ensurePrivacyConsent();
-                await this._confirmDownload(language);
-            }
-            await kernel.init();
+        if (kernel.isReady()) return kernel;
+
+        // Share one in-flight init per language: a second Run while a heavy
+        // runtime (e.g. Pyodide) is still loading must not start a second load.
+        if (!this._initPromises[language]) {
+            this._initPromises[language] = (async () => {
+                try {
+                    if (KernelManager.CDN_KERNELS.has(language)) {
+                        await this._ensurePrivacyConsent();
+                        await this._confirmDownload(language);
+                    }
+                    await kernel.init();
+                } catch (err) {
+                    this.hideDownloadModal();
+                    throw err;
+                } finally {
+                    delete this._initPromises[language];
+                }
+            })();
         }
+        await this._initPromises[language];
         return kernel;
     }
 
@@ -189,13 +217,20 @@ class KernelManager {
                 modal.classList.add('hidden');
                 reject(new Error(info.name + ' download cancelled by user'));
             };
+            const onDismiss = (e) => {
+                if (e.target === modal || e.target.classList.contains('modal-close')) {
+                    onCancel();
+                }
+            };
             const cleanup = () => {
                 downloadBtn.removeEventListener('click', onDownload);
                 cancelBtn.removeEventListener('click', onCancel);
+                modal.removeEventListener('click', onDismiss);
             };
 
             downloadBtn.addEventListener('click', onDownload);
             cancelBtn.addEventListener('click', onCancel);
+            modal.addEventListener('click', onDismiss);
         });
     }
 

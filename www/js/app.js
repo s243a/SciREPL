@@ -60,19 +60,29 @@
         return langSelector ? langSelector.value : 'python';
     }
 
+    // Derive label/placeholder from FileIO.LANGUAGE_META so new languages
+    // can't drift out of these maps again.
+    function langLabel(lang) {
+        // class declarations are lexical globals, not window properties
+        const meta = ((typeof FileIO !== 'undefined' && FileIO.LANGUAGE_META) || []).find(m => m.id === lang);
+        return meta ? meta.label : null;
+    }
+
+    function codePlaceholder(lang) {
+        return 'Type ' + (langLabel(lang) || 'Python') + ' here…';
+    }
+
     if (langSelector) {
         langSelector.addEventListener('change', () => {
             const lang = langSelector.value;
             if (window.kernelManager) {
                 window.kernelManager.setLanguage(lang);
             }
-            // Update visual styling
-            const activeClasses = { prolog: 'prolog-active', bash: 'bash-active', javascript: 'javascript-active', r: 'r-active', lua: 'lua-active' };
-            langSelector.className = activeClasses[lang] || '';
+            // Update visual styling (style.css defines <lang>-active per language)
+            langSelector.className = lang === 'python' ? '' : lang + '-active';
             // Update placeholder
             if (currentCellType === 'code') {
-                const placeholders = { prolog: 'Type Prolog here…', bash: 'Type Bash here…', javascript: 'Type JavaScript here…', r: 'Type R here…', lua: 'Type Lua here…' };
-                input.placeholder = placeholders[lang] || 'Type Python here…';
+                input.placeholder = codePlaceholder(lang);
             }
         });
     }
@@ -89,9 +99,7 @@
             currentCellType = 'code';
             cellTypeToggle.textContent = 'Code';
             cellTypeToggle.classList.remove('markdown-active');
-            const lang = getCurrentLanguage();
-            const ph = { prolog: 'Type Prolog here…', bash: 'Type Bash here…', javascript: 'Type JavaScript here…', r: 'Type R here…' };
-            input.placeholder = ph[lang] || 'Type Python here…';
+            input.placeholder = codePlaceholder(getCurrentLanguage());
         }
     });
 
@@ -900,13 +908,14 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                     try { pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`); } catch (_) { }
                 }
             }
-            window.renderText(err.message, true);
+            window.renderText(err && err.message ? err.message : String(err), true);
+        } finally {
+            // Always re-enable the cell, even if error rendering itself threw
+            window._currentOutputCard = null;
+            badge.textContent = 'ready';
+            badge.className = 'ready';
+            runBtn.disabled = false;
         }
-
-        window._currentOutputCard = null;
-        badge.textContent = 'ready';
-        badge.className = 'ready';
-        runBtn.disabled = false;
         saveCellsToSession();
     }
 
@@ -1445,12 +1454,14 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                         try { pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`); } catch (_) { }
                     }
                 }
-                window.renderText(err.message, true);
+                window.renderText(err && err.message ? err.message : String(err), true);
+            } finally {
+                // Always re-enable the input bar, even if error rendering itself threw
+                window._currentOutputCard = null;
+                badge.textContent = 'ready';
+                badge.className = 'ready';
+                runBtn.disabled = false;
             }
-
-            window._currentOutputCard = null;
-            badge.textContent = 'ready';
-            badge.className = 'ready';
         }
 
         runBtn.disabled = false;
