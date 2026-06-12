@@ -27,3 +27,6 @@ tests/*/Cargo.lock
 # Logs
 *.log
 npm-debug.log*
+
+# Playwright runner state
+test-results/
