@@ -30,3 +30,7 @@ npm-debug.log*
 
 # Playwright runner state
 test-results/
+
+# UnifyWeaver package is a build artifact (built by build-package.sh,
+# distributed as a release asset) — not tracked in git.
+www/packages/*.zip

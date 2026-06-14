@@ -1,32 +1,33 @@
 {
-    "name": "sci-repl",
-    "version": "0.11.0",
-    "description": "Mobile Scientific REPL — Python + Pyodide + Plotly.js",
-    "main": "index.js",
-    "scripts": {
-        "serve": "node server.js",
-        "sync": "npx cap sync",
-        "build": "npx cap sync && cd android && ./gradlew assembleDebug"
-    },
-    "keywords": [
-        "python",
-        "pyodide",
-        "repl",
-        "science",
-        "capacitor",
-        "android"
-    ],
-    "license": "MIT",
-    "dependencies": {
-        "@capacitor/android": "^8.0.2",
-        "@capacitor/browser": "^8.0.1",
-        "@capacitor/core": "^8.0.2",
-        "@capacitor/filesystem": "^8.1.2",
-        "@capacitor/share": "^8.0.1",
-        "@capgo/capacitor-pdf-generator": "^8.0.19",
-        "playwright": "^1.58.2"
-    },
-    "devDependencies": {
-        "@capacitor/cli": "^7.4.5"
-    }
+  "name": "sci-repl",
+  "version": "0.11.0",
+  "description": "Mobile Scientific REPL \u2014 Python + Pyodide + Plotly.js",
+  "main": "index.js",
+  "scripts": {
+    "serve": "node server.js",
+    "sync": "npm run package && npx cap sync",
+    "build": "npm run package && npx cap sync && cd android && ./gradlew assembleDebug",
+    "package": "bash build-package.sh"
+  },
+  "keywords": [
+    "python",
+    "pyodide",
+    "repl",
+    "science",
+    "capacitor",
+    "android"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^8.0.2",
+    "@capacitor/browser": "^8.0.1",
+    "@capacitor/core": "^8.0.2",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/share": "^8.0.1",
+    "@capgo/capacitor-pdf-generator": "^8.0.19",
+    "playwright": "^1.58.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.5"
+  }
 }
