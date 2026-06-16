@@ -956,8 +956,28 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
     }
 
     window.runAllCells = async function () {
-        for (let i = 0; i < window._cells.length; i++) {
-            await reRunCell(window._cells[i].id, window._cells[i].code);
+        const cells = [...(window._cells || [])];
+        const total = cells.length;
+        if (!total) return;
+        try {
+            for (let i = 0; i < total; i++) {
+                const cell = cells[i];
+                // Visible progress so the user knows it's working.
+                badge.textContent = `running ${i + 1}/${total}…`;
+                badge.className = 'running';
+                // Keep the running cell in view so updates are visible.
+                if (cell.inputCard && cell.inputCard.scrollIntoView) {
+                    cell.inputCard.scrollIntoView({ block: 'nearest' });
+                }
+                await reRunCell(cell.id, cell.code);
+                // Yield to the browser between cells so this cell's output
+                // paints and the WASM engine gets a breather (smoother, and
+                // avoids one uninterrupted burst).
+                await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
+            }
+        } finally {
+            badge.textContent = 'ready';
+            badge.className = 'ready';
         }
     };
 

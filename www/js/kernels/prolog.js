@@ -471,10 +471,20 @@ class PrologKernel {
                 // It's a query — enumerate solutions using manual iteration.
                 // Note: swipl-wasm may return the last solution with done:true,
                 // so for...of would miss it. We use .next() explicitly.
+                //
+                // Guard against runaway goals: a non-terminating query (infinite
+                // loop, or an unbound variable used as a generator like member/2
+                // over an unbound list) would block the WASM thread forever and
+                // Android then kills the unresponsive WebView renderer (a hard
+                // crash). call_with_inference_limit/3 caps the work so such a
+                // query aborts with a recoverable error instead. The limit var
+                // is filtered out of user-facing bindings (_formatBindings).
                 const solutions = [];
                 let count = 0;
                 const MAX_SOLUTIONS = 100;
-                const q = prolog.query(query);
+                const INFERENCE_LIMIT = 100000000; // ~a few seconds on WASM; trips infinite loops
+                const goalNoDot = query.replace(/\.\s*$/, '');
+                const q = prolog.query(`call_with_inference_limit((${goalNoDot}), ${INFERENCE_LIMIT}, ScireplLimit).`);
 
                 try {
                     let step = q.next();
@@ -485,6 +495,10 @@ class PrologKernel {
                         // instead of throwing. Re-throw so the catch block handles it.
                         if (val && val.error && val.message) {
                             throw new Error(val.message);
+                        }
+                        // Runaway guard tripped — abort with a helpful message.
+                        if (val && val.ScireplLimit === 'inference_limit_exceeded') {
+                            throw new Error('Query stopped after ~' + INFERENCE_LIMIT + ' inferences (likely an infinite loop or an unbound variable used as a generator — e.g. member/2 over an unbound list, or a variable expected from an earlier cell that did not carry over). Make the cell self-contained.');
                         }
                         if (val && val.success !== false) {
                             count++;
@@ -962,7 +976,7 @@ class PrologKernel {
         const bindings = [];
         for (const [key, value] of Object.entries(result)) {
             // Skip internal properties and error metadata
-            if (key === 'success' || key === 'done' || key === 'error' || key === 'message' || key.startsWith('$')) continue;
+            if (key === 'success' || key === 'done' || key === 'error' || key === 'message' || key === 'ScireplLimit' || key.startsWith('$')) continue;
             // Skip anonymous variables
             if (key.startsWith('_')) continue;
 
