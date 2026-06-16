@@ -125,7 +125,10 @@ self.addEventListener('fetch', (event) => {
       caches.match(event.request).then(cached => {
         if (cached) return cached;
         return fetch(event.request).then(response => {
-          if (response.ok && event.request.method === 'GET') {
+          // Cache opaque (cross-origin no-cors) CDN responses too — some
+          // swipl-wasm / webR sub-assets come back opaque (ok=false) and would
+          // otherwise never be cached, forcing a re-download on every launch.
+          if ((response.ok || response.type === 'opaque') && event.request.method === 'GET') {
             const clone = response.clone();
             caches.open(CDN_CACHE).then(cache => cache.put(event.request, clone));
           }
