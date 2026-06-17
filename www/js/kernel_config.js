@@ -24,8 +24,18 @@ window.KERNEL_CONFIG = {
     // layout that doesn't map cleanly to jsdelivr/unpkg, so no verified mirror
     // yet. The timeout still converts a stall into a recoverable error.
     prolog: { enabled: true, timeoutMs: 60000, sources: [] },
-    python: { enabled: true, timeoutMs: 120000, sources: [] },
+    // Pyodide primary is pyodide/v0.27.4/full/pyodide.js (kernel default).
+    // Mirrors below are the npm-packaged 0.27.4 build (verified 200); keep the
+    // version in sync with kernels/python.js when bumping.
+    python: { enabled: true, timeoutMs: 120000, sources: [
+      { type: 'cdn', url: 'https://cdn.jsdelivr.net/npm/pyodide@0.27.4/pyodide.js' },
+      { type: 'cdn', url: 'https://unpkg.com/pyodide@0.27.4/pyodide.js' },
+    ] },
     r:      { enabled: true, timeoutMs: 180000, sources: [] },
-    lua:    { enabled: true, timeoutMs: 30000, sources: [] },
+    // Fengari primary is the jsdelivr 0.1.4 build (kernel default); unpkg mirror
+    // verified 200. Keep the version in sync with kernels/lua.js when bumping.
+    lua:    { enabled: true, timeoutMs: 30000, sources: [
+      { type: 'cdn', url: 'https://unpkg.com/fengari-web@0.1.4/dist/fengari-web.js' },
+    ] },
   },
 };

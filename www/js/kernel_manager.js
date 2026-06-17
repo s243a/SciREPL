@@ -315,6 +315,20 @@ class KernelManager {
     }
 
     /**
+     * Load a classic (non-module) script by URL; resolves on load, rejects on
+     * error. Use as the loadFn for script-tag kernels (Pyodide, Fengari).
+     */
+    _loadScript(url) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = url;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('script failed to load: ' + url));
+            document.head.appendChild(script);
+        });
+    }
+
+    /**
      * Execute code using the specified language kernel.
      * Lazy-loads the kernel if needed.
      * Returns { stdout, result, error }

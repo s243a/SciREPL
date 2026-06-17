@@ -19,13 +19,18 @@ class PythonKernel {
         // Dynamically load Pyodide script if not already available
         if (typeof loadPyodide === 'undefined') {
             if (km) km.updateProgress('Downloading Python runtime…');
-            await new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.js';
-                script.onload = resolve;
-                script.onerror = () => reject(new Error('Failed to load Pyodide from CDN'));
-                document.body.appendChild(script);
-            });
+            const primary = 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.js';
+            if (km && km.loadKernelSource) {
+                await km.loadKernelSource('python', primary, (url) => km._loadScript(url));
+            } else {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = primary;
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error('Failed to load Pyodide from CDN'));
+                    document.body.appendChild(script);
+                });
+            }
         }
 
         if (km) km.updateProgress('Initializing Pyodide + NumPy + SymPy…');
