@@ -5,8 +5,9 @@
     "main": "index.js",
     "scripts": {
         "serve": "node server.js",
-        "sync": "npx cap sync",
-        "build": "npx cap sync && cd android && ./gradlew assembleDebug"
+        "configure": "node scripts/configure-build.mjs",
+        "sync": "npm run configure && npx cap sync",
+        "build": "npm run configure && npx cap sync && cd android && ./gradlew assembleDebug"
     },
     "keywords": [
         "python",

@@ -1,0 +1,23 @@
+{
+  "$comment": "Source of truth for build profiles + kernel sources. The build (scripts/configure-build.mjs) reads this and generates www/js/kernel_config.js. 'languages' holds stable per-language metadata (runtime type, per-attempt timeout, and FALLBACK mirror sources beyond each kernel's hardcoded primary URL). 'profiles' select which languages are enabled (and, later, bundled). Bundling of swipl/pyodide is deferred; 'bundle' is recorded but not yet acted on.",
+  "default": "full",
+  "languages": {
+    "javascript": { "runtime": "native", "timeoutMs": 0, "sources": [] },
+    "bash":       { "runtime": "local", "timeoutMs": 0, "sources": [{ "type": "local", "url": "vendor/brush/brush_wasm.js" }] },
+    "typr":       { "runtime": "local", "timeoutMs": 0, "sources": [{ "type": "local", "url": "vendor/typr/typr_wasm.js" }] },
+    "lua":        { "runtime": "cdn", "timeoutMs": 30000, "sources": [
+                     { "type": "cdn", "url": "https://unpkg.com/fengari-web@0.1.4/dist/fengari-web.js" }
+                   ] },
+    "prolog":     { "runtime": "cdn", "timeoutMs": 60000, "sources": [] },
+    "python":     { "runtime": "cdn", "timeoutMs": 120000, "sources": [
+                     { "type": "cdn", "url": "https://cdn.jsdelivr.net/npm/pyodide@0.27.4/pyodide.js" },
+                     { "type": "cdn", "url": "https://unpkg.com/pyodide@0.27.4/pyodide.js" }
+                   ] },
+    "r":          { "runtime": "cdn", "timeoutMs": 180000, "sources": [] }
+  },
+  "profiles": {
+    "mini":  { "enabled": ["javascript", "bash", "typr", "lua"] },
+    "light": { "enabled": ["javascript", "bash", "typr", "lua", "prolog", "python"] },
+    "full":  { "enabled": ["javascript", "bash", "typr", "lua", "prolog", "python", "r"], "bundle": ["prolog", "python"] }
+  }
+}

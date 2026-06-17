@@ -272,6 +272,11 @@ class KernelManager {
     async loadKernelSource(language, primaryUrl, loadFn) {
         const cfg = (typeof window !== 'undefined' && window.KERNEL_CONFIG
             && window.KERNEL_CONFIG.languages && window.KERNEL_CONFIG.languages[language]) || {};
+        // Build profiles (e.g. `mini`) can disable a language; refuse to load it.
+        if (cfg.enabled === false) {
+            throw new Error(language + ' is not enabled in this build (profile: '
+                + ((window.KERNEL_CONFIG && window.KERNEL_CONFIG.profile) || 'unknown') + ')');
+        }
         const timeoutMs = cfg.timeoutMs || 60000;
 
         const candidates = [];
