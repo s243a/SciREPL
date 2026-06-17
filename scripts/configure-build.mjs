@@ -45,12 +45,20 @@ const bundleSet = new Set(profile.bundle || []);
 // Build the languages map: every known language, with enabled set by the profile.
 const langs = {};
 for (const [name, meta] of Object.entries(spec.languages)) {
-  langs[name] = {
+  const entry = {
     enabled: enabledSet.has(name),
     runtime: meta.runtime || 'cdn',
     timeoutMs: meta.timeoutMs || 0,
-    sources: meta.sources || [],
+    sources: (meta.sources || []).slice(),
   };
+  // If this profile bundles the language, prepend a local source and mark it
+  // preferred so the runtime tries the bundled copy first (offline-capable,
+  // CDN as fallback). The asset is fetched by scripts/fetch-bundles.mjs.
+  if (bundleSet.has(name) && meta.localUrl) {
+    entry.sources.unshift({ type: 'local', url: meta.localUrl });
+    entry.preferLocal = true;
+  }
+  langs[name] = entry;
 }
 
 // Warn about anything the profile references that we don't know about.

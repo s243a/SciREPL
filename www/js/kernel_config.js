@@ -59,13 +59,23 @@ window.KERNEL_CONFIG = {
       "enabled": true,
       "runtime": "cdn",
       "timeoutMs": 60000,
-      "sources": []
+      "sources": [
+        {
+          "type": "local",
+          "url": "vendor/swipl/dynamic-import.js"
+        }
+      ],
+      "preferLocal": true
     },
     "python": {
       "enabled": true,
       "runtime": "cdn",
       "timeoutMs": 120000,
       "sources": [
+        {
+          "type": "local",
+          "url": "vendor/pyodide/pyodide.js"
+        },
         {
           "type": "cdn",
           "url": "https://cdn.jsdelivr.net/npm/pyodide@0.27.4/pyodide.js"
@@ -74,7 +84,8 @@ window.KERNEL_CONFIG = {
           "type": "cdn",
           "url": "https://unpkg.com/pyodide@0.27.4/pyodide.js"
         }
-      ]
+      ],
+      "preferLocal": true
     },
     "r": {
       "enabled": true,

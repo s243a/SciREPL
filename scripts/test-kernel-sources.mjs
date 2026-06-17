@@ -140,5 +140,43 @@ await test('no config → no entry uses default 60s timeout, primary still works
   eq(r.url, 'PRIMARY', 'works with no config');
 });
 
+// Bundled-build behavior: preferLocal makes the local source win before CDN.
+const BUNDLED = {
+  profile: 'full',
+  languages: {
+    python: { enabled: true, timeoutMs: 200, preferLocal: true, sources: [
+      { type: 'local', url: 'vendor/pyodide/pyodide.js' },
+      { type: 'cdn', url: 'CDN_MIRROR' },
+    ] },
+  },
+};
+
+await test('preferLocal → bundled local source is tried before the CDN primary', async () => {
+  const km = makeManager({ config: BUNDLED });
+  const tried = [];
+  const r = await km.loadKernelSource('python', 'PRIMARY_CDN', (u) => { tried.push(u); return ok('v')(u); });
+  eq(tried[0], 'vendor/pyodide/pyodide.js', 'local first');
+  eq(r.url, 'vendor/pyodide/pyodide.js', 'returned local');
+});
+
+await test('preferLocal → missing local file falls back to CDN primary', async () => {
+  const km = makeManager({ config: BUNDLED });
+  const tried = [];
+  const r = await km.loadKernelSource('python', 'PRIMARY_CDN',
+    (u) => { tried.push(u); return failOn(['vendor/pyodide/pyodide.js'])(u); });
+  eq(tried[0], 'vendor/pyodide/pyodide.js', 'tried local first');
+  eq(r.url, 'PRIMARY_CDN', 'recovered on CDN primary');
+});
+
+await test("override 'local' also forces local-first even without preferLocal", async () => {
+  const cfg = { profile: 'full', languages: { lua: { enabled: true, timeoutMs: 200, sources: [
+    { type: 'local', url: 'vendor/lua/local.js' }, { type: 'cdn', url: 'MIRROR_A' } ] } } };
+  const km = makeManager({ config: cfg, overrides: { scirepl_lua_source: 'local' } });
+  const tried = [];
+  const r = await km.loadKernelSource('lua', 'PRIMARY', (u) => { tried.push(u); return ok('v')(u); });
+  eq(tried[0], 'vendor/lua/local.js', 'local first via override');
+  eq(r.url, 'vendor/lua/local.js', 'returned local');
+});
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

@@ -283,12 +283,17 @@ class KernelManager {
         const seen = new Set();
         const add = (url) => { if (url && !seen.has(url)) { seen.add(url); candidates.push(url); } };
 
-        // Per-kernel override (a URL); 'local' is handled by the config's local source.
+        // Per-kernel override (a URL); 'local' means "prefer the bundled source".
         const override = (typeof localStorage !== 'undefined') && localStorage.getItem('scirepl_' + language + '_source');
         if (override && override !== 'local') add(override);
+        // Local-first when the build bundled this kernel (cfg.preferLocal) or the
+        // user override asked for 'local': try the bundled copy before the CDN.
+        if (cfg.preferLocal || override === 'local') {
+            for (const s of (cfg.sources || [])) { if (s && s.type === 'local' && s.url) add(s.url); }
+        }
         // Kernel's own primary (honors version override).
         add(primaryUrl);
-        // Mirrors / local fallback from config.
+        // Mirrors / remaining (incl. local as a last resort) from config.
         for (const s of (cfg.sources || [])) { if (s && s.url) add(s.url); }
 
         if (!candidates.length) throw new Error('No sources configured for ' + language);

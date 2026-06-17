@@ -16,12 +16,17 @@ class PythonKernel {
 
         const km = window.kernelManager;
 
-        // Dynamically load Pyodide script if not already available
+        // Dynamically load Pyodide script if not already available.
+        // Track which source actually loaded so loadPyodide() resolves its
+        // package files (numpy/sympy/stdlib) from the SAME location — the
+        // bundled copy when offline, the CDN otherwise.
+        const primary = 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.js';
+        let pyodideJsUrl = primary;
         if (typeof loadPyodide === 'undefined') {
             if (km) km.updateProgress('Downloading Python runtime…');
-            const primary = 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.js';
             if (km && km.loadKernelSource) {
-                await km.loadKernelSource('python', primary, (url) => km._loadScript(url));
+                await km.loadKernelSource('python', primary, (url) =>
+                    km._loadScript(url).then(() => { pyodideJsUrl = url; }));
             } else {
                 await new Promise((resolve, reject) => {
                     const script = document.createElement('script');
@@ -34,7 +39,10 @@ class PythonKernel {
         }
 
         if (km) km.updateProgress('Initializing Pyodide + NumPy + SymPy…');
-        this._pyodide = await loadPyodide();
+        // indexURL = directory containing pyodide.js, so package wheels load from
+        // the same source (local vendor dir or CDN) that served the loader.
+        const indexURL = pyodideJsUrl.replace(/[^/]*$/, '');
+        this._pyodide = await loadPyodide({ indexURL });
         await this._pyodide.loadPackage(['numpy', 'sympy']);
         await this._pyodide.loadPackage('micropip');
 

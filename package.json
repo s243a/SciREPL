@@ -6,9 +6,10 @@
     "scripts": {
         "serve": "node server.js",
         "configure": "node scripts/configure-build.mjs",
+        "fetch:bundles": "node scripts/fetch-bundles.mjs",
         "test:sources": "node scripts/test-kernel-sources.mjs",
-        "sync": "npm run configure && npx cap sync",
-        "build": "npm run configure && npx cap sync && cd android && ./gradlew assembleDebug"
+        "sync": "npm run configure && npm run fetch:bundles && npx cap sync",
+        "build": "npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew assembleDebug"
     },
     "keywords": [
         "python",
