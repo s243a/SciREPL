@@ -6,6 +6,7 @@
     "scripts": {
         "serve": "node server.js",
         "configure": "node scripts/configure-build.mjs",
+        "test:sources": "node scripts/test-kernel-sources.mjs",
         "sync": "npm run configure && npx cap sync",
         "build": "npm run configure && npx cap sync && cd android && ./gradlew assembleDebug"
     },
