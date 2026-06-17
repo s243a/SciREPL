@@ -50,7 +50,12 @@ class PrologKernel {
             const cdnUrl = PrologKernel.cdnUrl();
             console.log(`[PrologKernel] Loading swipl-wasm from ${cdnUrl}`);
             if (km) km.updateProgress('Downloading Prolog runtime...');
-            const module = await import(cdnUrl);
+            // Load with source fallback + per-attempt timeout (so a stalled CDN
+            // fails fast instead of hanging the WASM thread). Falls back to a
+            // plain import() if the manager helper isn't available.
+            const module = (km && km.loadKernelSource)
+                ? await km.loadKernelSource('prolog', cdnUrl, (url) => import(url))
+                : await import(cdnUrl);
             const SWIPL = module.SWIPL || module.default;
             const self = this;
 
