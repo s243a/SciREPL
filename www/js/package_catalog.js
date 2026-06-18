@@ -175,14 +175,17 @@ class PackageCatalog {
         btn.textContent = 'Downloading...';
 
         // 1. Download (concurrent — multiple downloads can run at once)
-        //    Try release asset URL first, fall back to pages_url
+        //    Prefer the locally-bundled copy (reliable + offline, and on the
+        //    Pro build it's the up-to-date one); fall back to the remote release
+        //    URL only if there's no bundled copy or it fails.
         let blob;
         try {
-            if (pkg.url) {
-                try { blob = await this._fetchPackage(pkg.url); } catch (e) {}
+            if (pkg.pages_url) {
+                try { blob = await this._fetchPackage(pkg.pages_url); }
+                catch (e) { console.warn('[PackageCatalog] bundled fetch failed, trying release URL:', e); }
             }
-            if (!blob && pkg.pages_url) {
-                blob = await this._fetchPackage(pkg.pages_url);
+            if (!blob && pkg.url) {
+                blob = await this._fetchPackage(pkg.url);
             }
         } catch (err) {
             console.error('[PackageCatalog] Download failed:', err);
@@ -324,7 +327,18 @@ class PackageCatalog {
      * 4. Error with manual download instructions
      */
     async _fetchPackage(url) {
-        // Capacitor native path — download via native HTTP
+        // Same-origin / relative URLs (e.g. the bundled pages_url) — fetch
+        // directly. The Capacitor WebView serves these via its asset loader; the
+        // native downloader can't resolve the app's virtual host or a relative
+        // path (it hangs/fails), so it must NOT be routed through downloadFile.
+        const _isAbsolute = /^https?:\/\//i.test(url);
+        if (!_isAbsolute || (typeof location !== 'undefined' && url.startsWith(location.origin))) {
+            const response = await fetch(url);
+            if (response.ok) return await response.blob();
+            throw new Error('Failed to fetch ' + url + ' (HTTP ' + response.status + ')');
+        }
+
+        // Capacitor native path (cross-origin absolute URLs) — download via native HTTP
         if (window.Capacitor && window.Capacitor.isNativePlatform()) {
             const { Filesystem } = window.Capacitor.Plugins;
             if (Filesystem && Filesystem.downloadFile) {
