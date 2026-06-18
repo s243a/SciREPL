@@ -1010,6 +1010,19 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <!-- PWA Service Worker -->
     <script>
     if ('serviceWorker' in navigator) {
+        // When an updated service worker takes control, reload once so a freshly
+        // installed build doesn't keep running stale cached assets (e.g. an old
+        // index.html missing js/kernel_config.js → window.KERNEL_CONFIG undefined).
+        // Guard against reload loops and skip the first-ever install (no prior
+        // controller — nothing stale to replace).
+        if (navigator.serviceWorker.controller) {
+            let _swReloading = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (_swReloading) return;
+                _swReloading = true;
+                window.location.reload();
+            });
+        }
         navigator.serviceWorker.register('sw.js');
     }
     </script>
