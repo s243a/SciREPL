@@ -110,8 +110,18 @@
         if (localStorage.getItem('scirepl_mobile_emulation') === '1') {
             document.body.classList.add('force-mobile');
         }
+
+        // Drive the language selector(s) from the active build profile. The
+        // hardcoded <option>s in index.html are a fallback; this replaces them
+        // with the profile-available set (e.g. `mini` drops python/prolog/r).
+        if (window.fileIO && window.fileIO._rebuildLanguageDropdowns) {
+            try { window.fileIO._rebuildLanguageDropdowns(); } catch (_) {}
+        }
+
         const defaultLang = localStorage.getItem('scirepl_default_language');
-        if (defaultLang && window.kernelManager) {
+        const defaultAvailable = defaultLang && (!window.fileIO
+            || !window.fileIO._isLanguageAvailable || window.fileIO._isLanguageAvailable(defaultLang));
+        if (defaultLang && defaultAvailable && window.kernelManager) {
             try {
                 window.kernelManager.setLanguage(defaultLang);
                 const sel = document.getElementById('lang-selector');
@@ -375,8 +385,10 @@
         const actions = document.createElement('div');
         actions.className = 'cell-edit-actions';
         const cellLang = cell ? (cell.language || 'python') : 'python';
-        // Build language options from enabled set
-        const _langMeta = (window.fileIO && window.fileIO.constructor.LANGUAGE_META) || [
+        // Build language options from the profile-available + user-enabled set
+        const _langMeta = (window.fileIO && window.fileIO._availableLanguageMeta
+            ? window.fileIO._availableLanguageMeta()
+            : (window.fileIO && window.fileIO.constructor.LANGUAGE_META)) || [
             {id:'python',abbrev:'Py'},{id:'r',abbrev:'R'},{id:'prolog',abbrev:'PL'},
             {id:'bash',abbrev:'Sh'},{id:'javascript',abbrev:'JS'},{id:'lua',abbrev:'Lua'}
         ];

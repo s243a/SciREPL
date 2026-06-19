@@ -256,6 +256,89 @@ class KernelManager {
     }
 
     /**
+     * Load a kernel runtime with source fallback + per-attempt timeout.
+     *
+     * Candidate order: a per-kernel override (localStorage scirepl_<lang>_source,
+     * a URL), then the kernel's own primaryUrl (which still honors version
+     * overrides), then any mirror/local sources from window.KERNEL_CONFIG. Each
+     * attempt is bounded by timeoutMs so a slow/dead source fails fast and falls
+     * through instead of hanging the WASM thread (which would crash the WebView).
+     *
+     * @param {string} language
+     * @param {string} primaryUrl  the kernel's computed primary source URL
+     * @param {(url:string)=>Promise<any>} loadFn  performs the actual load (e.g. url => import(url))
+     * @returns {Promise<any>} whatever loadFn resolves to
+     */
+    async loadKernelSource(language, primaryUrl, loadFn) {
+        const cfg = (typeof window !== 'undefined' && window.KERNEL_CONFIG
+            && window.KERNEL_CONFIG.languages && window.KERNEL_CONFIG.languages[language]) || {};
+        // Build profiles (e.g. `mini`) can disable a language; refuse to load it.
+        if (cfg.enabled === false) {
+            throw new Error(language + ' is not enabled in this build (profile: '
+                + ((window.KERNEL_CONFIG && window.KERNEL_CONFIG.profile) || 'unknown') + ')');
+        }
+        const timeoutMs = cfg.timeoutMs || 60000;
+
+        const candidates = [];
+        const seen = new Set();
+        const add = (url) => { if (url && !seen.has(url)) { seen.add(url); candidates.push(url); } };
+
+        // Per-kernel override (a URL); 'local' means "prefer the bundled source".
+        const override = (typeof localStorage !== 'undefined') && localStorage.getItem('scirepl_' + language + '_source');
+        if (override && override !== 'local') add(override);
+        // Local-first when the build bundled this kernel (cfg.preferLocal) or the
+        // user override asked for 'local': try the bundled copy before the CDN.
+        if (cfg.preferLocal || override === 'local') {
+            for (const s of (cfg.sources || [])) { if (s && s.type === 'local' && s.url) add(s.url); }
+        }
+        // Kernel's own primary (honors version override).
+        add(primaryUrl);
+        // Mirrors / remaining (incl. local as a last resort) from config.
+        for (const s of (cfg.sources || [])) { if (s && s.url) add(s.url); }
+
+        if (!candidates.length) throw new Error('No sources configured for ' + language);
+
+        let lastErr;
+        for (const url of candidates) {
+            try {
+                console.log('[KernelSource] ' + language + ': loading ' + url);
+                return await this._withTimeout(loadFn(url), timeoutMs, url);
+            } catch (e) {
+                lastErr = e;
+                console.warn('[KernelSource] ' + language + ' source failed: ' + url + ' — ' + (e && e.message || e));
+            }
+        }
+        throw new Error('All sources failed for ' + language + ': ' + (lastErr ? (lastErr.message || lastErr) : 'unknown'));
+    }
+
+    /**
+     * Race a load against a timeout (the only way to bound an import()/fetch
+     * that stalls — the underlying request can't be cancelled, but we stop
+     * waiting and move to the next source).
+     */
+    _withTimeout(promise, ms, url) {
+        let timer;
+        const timeout = new Promise((_, reject) => {
+            timer = setTimeout(() => reject(new Error('source timed out after ' + ms + 'ms: ' + url)), ms);
+        });
+        return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+    }
+
+    /**
+     * Load a classic (non-module) script by URL; resolves on load, rejects on
+     * error. Use as the loadFn for script-tag kernels (Pyodide, Fengari).
+     */
+    _loadScript(url) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = url;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('script failed to load: ' + url));
+            document.head.appendChild(script);
+        });
+    }
+
+    /**
      * Execute code using the specified language kernel.
      * Lazy-loads the kernel if needed.
      * Returns { stdout, result, error }

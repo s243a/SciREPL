@@ -18,16 +18,22 @@ class LuaKernel {
 
         // Load fengari-web from CDN if not already present
         if (!window.fengari) {
-            if (window.kernelManager) {
-                window.kernelManager.updateProgress('Downloading Fengari Lua runtime…');
+            const km = window.kernelManager;
+            if (km) {
+                km.updateProgress('Downloading Fengari Lua runtime…');
             }
-            await new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js';
-                script.onload = resolve;
-                script.onerror = () => reject(new Error('Failed to load Fengari from CDN'));
-                document.head.appendChild(script);
-            });
+            const primary = 'https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js';
+            if (km && km.loadKernelSource) {
+                await km.loadKernelSource('lua', primary, (url) => km._loadScript(url));
+            } else {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = primary;
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error('Failed to load Fengari from CDN'));
+                    document.head.appendChild(script);
+                });
+            }
         }
 
         if (window.kernelManager) {

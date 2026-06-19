@@ -46,7 +46,10 @@ class RKernel {
             const webrUrl = `https://webr.r-wasm.org/${version}/webr.mjs`;
             console.log(`[RKernel] Loading webR ${version}`);
             if (km) km.updateProgress(`Downloading R runtime (webR ${version})...`);
-            const { WebR } = await import(webrUrl);
+            const mod = (km && km.loadKernelSource)
+                ? await km.loadKernelSource('r', webrUrl, (url) => import(url))
+                : await import(webrUrl);
+            const { WebR } = mod;
 
             if (km) km.updateProgress('Initializing R environment...');
             this._webr = new WebR();

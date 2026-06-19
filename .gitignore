@@ -30,3 +30,7 @@ npm-debug.log*
 
 # Playwright runner state
 test-results/
+
+# Bundled kernel runtimes (build artifacts fetched by scripts/fetch-bundles.mjs)
+www/vendor/pyodide/
+www/vendor/swipl/

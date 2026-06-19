@@ -47,6 +47,27 @@ class PackageLoader {
     }
 
     /**
+     * Quietly re-mount a package's supporting files + search paths WITHOUT
+     * creating or switching notebooks. Used to restore installed packages into
+     * the (ephemeral, in-memory) Prolog VFS on startup so an "installed" package
+     * survives an app restart. Notebooks already persist separately, so we skip
+     * them here to avoid creating duplicates.
+     * @param {File|Blob} file — the package archive
+     */
+    async remountFromFile(file) {
+        const fileMap = await ArchiveExtractors.extract(file);
+        const manifest = this._findManifest(fileMap);
+        if (!manifest) return; // nothing structured to remount
+        const baseDir = manifest._baseDir || '';
+        if (manifest.files && manifest.files.length > 0) {
+            await this._mountFiles(manifest.files, fileMap, baseDir);
+        }
+        if (manifest.search_paths && manifest.search_paths.length > 0) {
+            this._addSearchPaths(manifest.search_paths);
+        }
+    }
+
+    /**
      * Find and parse scirepl.json from the file map.
      * Handles archives where files may be inside a top-level directory.
      */

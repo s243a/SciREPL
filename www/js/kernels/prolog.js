@@ -12,6 +12,24 @@ class PrologKernel {
         this._loading = false;
         this._stdoutBuffer = [];
         this._stderrBuffer = [];
+        this._packagesRestored = false;
+    }
+
+    /**
+     * Re-mount any installed packages into the (in-memory) Prolog VFS once per
+     * session, so packages survive app restarts. Runs before the first cell so
+     * the setup cell (['../init'], use_module(...)) can find the library files.
+     */
+    async _ensurePackagesRestored() {
+        if (this._packagesRestored) return;
+        this._packagesRestored = true;
+        try {
+            if (window.packageCatalog && window.packageCatalog.restoreInstalledToProlog) {
+                await window.packageCatalog.restoreInstalledToProlog();
+            }
+        } catch (e) {
+            console.warn('[PrologKernel] package restore failed:', e);
+        }
     }
 
     /**
@@ -50,7 +68,12 @@ class PrologKernel {
             const cdnUrl = PrologKernel.cdnUrl();
             console.log(`[PrologKernel] Loading swipl-wasm from ${cdnUrl}`);
             if (km) km.updateProgress('Downloading Prolog runtime...');
-            const module = await import(cdnUrl);
+            // Load with source fallback + per-attempt timeout (so a stalled CDN
+            // fails fast instead of hanging the WASM thread). Falls back to a
+            // plain import() if the manager helper isn't available.
+            const module = (km && km.loadKernelSource)
+                ? await km.loadKernelSource('prolog', cdnUrl, (url) => import(url))
+                : await import(cdnUrl);
             const SWIPL = module.SWIPL || module.default;
             const self = this;
 
@@ -164,6 +187,9 @@ class PrologKernel {
         if (!trimmed) {
             return { stdout: '', result: null, error: null };
         }
+
+        // Restore installed packages into the VFS before the first cell runs.
+        await this._ensurePackagesRestored();
 
         try {
             // Sync NotebookVFS cell properties into Emscripten FS

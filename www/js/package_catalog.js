@@ -175,14 +175,17 @@ class PackageCatalog {
         btn.textContent = 'Downloading...';
 
         // 1. Download (concurrent — multiple downloads can run at once)
-        //    Try release asset URL first, fall back to pages_url
+        //    Prefer the locally-bundled copy (reliable + offline, and on the
+        //    Pro build it's the up-to-date one); fall back to the remote release
+        //    URL only if there's no bundled copy or it fails.
         let blob;
         try {
-            if (pkg.url) {
-                try { blob = await this._fetchPackage(pkg.url); } catch (e) {}
+            if (pkg.pages_url) {
+                try { blob = await this._fetchPackage(pkg.pages_url); }
+                catch (e) { console.warn('[PackageCatalog] bundled fetch failed, trying release URL:', e); }
             }
-            if (!blob && pkg.pages_url) {
-                blob = await this._fetchPackage(pkg.pages_url);
+            if (!blob && pkg.url) {
+                blob = await this._fetchPackage(pkg.url);
             }
         } catch (err) {
             console.error('[PackageCatalog] Download failed:', err);
@@ -205,6 +208,7 @@ class PackageCatalog {
             job.btn.textContent = 'Importing...';
             try {
                 await this._doImport(job.pkg, job.blob);
+                this._rememberInstalled(job.pkg);
                 job.btn.textContent = 'Installed';
                 job.btn.classList.add('pkg-installed');
             } catch (err) {
@@ -222,6 +226,72 @@ class PackageCatalog {
         if (autoSwitch && this.modal) {
             setTimeout(() => this.modal.classList.add('hidden'), 500);
         }
+    }
+
+    /**
+     * Remember a successfully installed non-workbook package so its supporting
+     * files (which mount into the ephemeral in-memory Prolog VFS) can be
+     * re-mounted on a later app launch. Workbooks are skipped — they persist as
+     * notebooks already.
+     */
+    _rememberInstalled(pkg) {
+        if (!pkg || pkg.type === 'workbook') return;
+        if (!pkg.pages_url && !pkg.url) return; // need a re-fetchable source
+        try {
+            const key = 'scirepl_installed_packages';
+            const list = JSON.parse(localStorage.getItem(key) || '[]');
+            if (!list.some(p => p.name === pkg.name)) {
+                list.push({ name: pkg.name, pages_url: pkg.pages_url || null, url: pkg.url || null });
+                localStorage.setItem(key, JSON.stringify(list));
+            }
+        } catch (e) {
+            console.warn('[PackageCatalog] could not remember installed package:', e);
+        }
+    }
+
+    /**
+     * Re-mount every remembered package's supporting files into the Prolog VFS.
+     * Called once per session when the Prolog kernel first runs, so installed
+     * packages (e.g. the UnifyWeaver library) are present after an app restart
+     * without the user re-installing them. Notebooks are NOT recreated.
+     */
+    async restoreInstalledToProlog() {
+        if (this._restoredToProlog) return;
+        this._restoredToProlog = true;
+        let list;
+        try { list = JSON.parse(localStorage.getItem('scirepl_installed_packages') || '[]'); }
+        catch (_) { list = []; }
+        if (!Array.isArray(list) || list.length === 0) return;
+        if (!window.packageLoader || !window.packageLoader.remountFromFile) return;
+
+        for (const pkg of list) {
+            try {
+                const blob = await this._fetchForRestore(pkg);
+                if (!blob) { console.warn('[PackageCatalog] no source to restore', pkg.name); continue; }
+                const file = new File([blob], (pkg.name || 'package') + '.zip', { type: 'application/zip' });
+                await window.packageLoader.remountFromFile(file);
+                console.log('[PackageCatalog] restored package to Prolog VFS:', pkg.name);
+            } catch (e) {
+                console.warn('[PackageCatalog] restore failed for', pkg && pkg.name, e);
+            }
+        }
+    }
+
+    /**
+     * Fetch a remembered package's archive for restore. Prefer the locally
+     * bundled copy (pages_url — offline-capable), fall back to the release URL.
+     */
+    async _fetchForRestore(pkg) {
+        const candidates = [];
+        if (pkg.pages_url) candidates.push(pkg.pages_url);
+        if (pkg.url) candidates.push(pkg.url);
+        for (const u of candidates) {
+            try {
+                const r = await fetch(u);
+                if (r.ok) return await r.blob();
+            } catch (_) { /* try next candidate */ }
+        }
+        return null;
     }
 
     /**
@@ -257,7 +327,18 @@ class PackageCatalog {
      * 4. Error with manual download instructions
      */
     async _fetchPackage(url) {
-        // Capacitor native path — download via native HTTP
+        // Same-origin / relative URLs (e.g. the bundled pages_url) — fetch
+        // directly. The Capacitor WebView serves these via its asset loader; the
+        // native downloader can't resolve the app's virtual host or a relative
+        // path (it hangs/fails), so it must NOT be routed through downloadFile.
+        const _isAbsolute = /^https?:\/\//i.test(url);
+        if (!_isAbsolute || (typeof location !== 'undefined' && url.startsWith(location.origin))) {
+            const response = await fetch(url);
+            if (response.ok) return await response.blob();
+            throw new Error('Failed to fetch ' + url + ' (HTTP ' + response.status + ')');
+        }
+
+        // Capacitor native path (cross-origin absolute URLs) — download via native HTTP
         if (window.Capacitor && window.Capacitor.isNativePlatform()) {
             const { Filesystem } = window.Capacitor.Plugins;
             if (Filesystem && Filesystem.downloadFile) {
