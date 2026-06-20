@@ -272,11 +272,9 @@ class KernelManager {
     async loadKernelSource(language, primaryUrl, loadFn) {
         const cfg = (typeof window !== 'undefined' && window.KERNEL_CONFIG
             && window.KERNEL_CONFIG.languages && window.KERNEL_CONFIG.languages[language]) || {};
-        // Build profiles (e.g. `mini`) can disable a language; refuse to load it.
-        if (cfg.enabled === false) {
-            throw new Error(language + ' is not enabled in this build (profile: '
-                + ((window.KERNEL_CONFIG && window.KERNEL_CONFIG.profile) || 'unknown') + ')');
-        }
+        // A profile's `enabled:false` only means "off by default / not bundled" —
+        // it does NOT forbid the kernel. If a load was requested, the user enabled
+        // it (Languages modal), so honor it and pull the runtime from the CDN.
         const timeoutMs = cfg.timeoutMs || 60000;
 
         const candidates = [];

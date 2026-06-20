@@ -119,9 +119,11 @@
         }
 
         const defaultLang = localStorage.getItem('scirepl_default_language');
-        const defaultAvailable = defaultLang && (!window.fileIO
-            || !window.fileIO._isLanguageAvailable || window.fileIO._isLanguageAvailable(defaultLang));
-        if (defaultLang && defaultAvailable && window.kernelManager) {
+        // Honor the saved default if the user has it enabled (which may include a
+        // CDN language the profile doesn't ship by default).
+        const defaultOk = defaultLang && (!window.fileIO || !window.fileIO._getEnabledLanguages
+            || window.fileIO._getEnabledLanguages().has(defaultLang));
+        if (defaultLang && defaultOk && window.kernelManager) {
             try {
                 window.kernelManager.setLanguage(defaultLang);
                 const sel = document.getElementById('lang-selector');
@@ -385,10 +387,10 @@
         const actions = document.createElement('div');
         actions.className = 'cell-edit-actions';
         const cellLang = cell ? (cell.language || 'python') : 'python';
-        // Build language options from the profile-available + user-enabled set
-        const _langMeta = (window.fileIO && window.fileIO._availableLanguageMeta
-            ? window.fileIO._availableLanguageMeta()
-            : (window.fileIO && window.fileIO.constructor.LANGUAGE_META)) || [
+        // All known languages; the per-cell dropdown is filtered to the user's
+        // enabled set below (which may include CDN languages the profile doesn't
+        // enable by default).
+        const _langMeta = (window.fileIO && window.fileIO.constructor.LANGUAGE_META) || [
             {id:'python',abbrev:'Py'},{id:'r',abbrev:'R'},{id:'prolog',abbrev:'PL'},
             {id:'bash',abbrev:'Sh'},{id:'javascript',abbrev:'JS'},{id:'lua',abbrev:'Lua'}
         ];
