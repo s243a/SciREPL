@@ -1,5 +1,5 @@
 {
-  "$comment": "Source of truth for build profiles + kernel sources. The build (scripts/configure-build.mjs) reads this and generates www/js/kernel_config.js. 'languages' holds stable per-language metadata (runtime type, per-attempt timeout, and FALLBACK mirror sources beyond each kernel's hardcoded primary URL). 'profiles' select which languages are enabled (and, later, bundled). Bundling of swipl/pyodide is deferred; 'bundle' is recorded but not yet acted on.",
+  "$comment": "Source of truth for build profiles + kernel sources. The build (scripts/configure-build.mjs) reads this and generates www/js/kernel_config.js. 'languages' holds stable per-language metadata (runtime type, per-attempt timeout, optional localUrl for offline bundling, and FALLBACK mirror sources beyond each kernel's hardcoded primary URL). 'profiles' select which languages are enabled and which are 'bundle'd offline; scripts/fetch-bundles.mjs downloads each bundled runtime into www/vendor/<lang>/ so cap sync copies it into the APK. This file is identical across the Free and Pro repos; tier differences (when any) live in the profile a repo defaults to.",
   "default": "full",
   "languages": {
     "javascript": { "runtime": "native", "timeoutMs": 0, "sources": [] },
@@ -8,7 +8,7 @@
     "lua":        { "runtime": "cdn", "timeoutMs": 30000, "sources": [
                      { "type": "cdn", "url": "https://unpkg.com/fengari-web@0.1.4/dist/fengari-web.js" }
                    ] },
-    "clojurescript": { "runtime": "cdn", "timeoutMs": 30000, "sources": [
+    "clojurescript": { "runtime": "cdn", "timeoutMs": 30000, "localUrl": "vendor/scittle/scittle.js", "sources": [
                      { "type": "cdn", "url": "https://cdn.jsdelivr.net/npm/scittle@0.6.22/dist/scittle.js" }
                    ] },
     "prolog":     { "runtime": "cdn", "timeoutMs": 60000, "localUrl": "vendor/swipl/dynamic-import.js", "sources": [] },
@@ -20,7 +20,7 @@
   },
   "profiles": {
     "mini":  { "enabled": ["javascript", "bash", "typr", "lua"] },
-    "light": { "enabled": ["javascript", "bash", "typr", "lua", "clojurescript", "prolog", "python"] },
-    "full":  { "enabled": ["javascript", "bash", "typr", "lua", "clojurescript", "prolog", "python", "r"], "bundle": ["prolog", "python"] }
+    "light": { "enabled": ["javascript", "bash", "typr", "lua", "clojurescript", "prolog", "python"], "bundle": ["clojurescript"] },
+    "full":  { "enabled": ["javascript", "bash", "typr", "lua", "clojurescript", "prolog", "python", "r"], "bundle": ["prolog", "python", "clojurescript"] }
   }
 }

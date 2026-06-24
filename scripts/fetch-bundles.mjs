@@ -26,6 +26,7 @@ const PROFILES_PATH = join(ROOT, 'build-profiles.json');
 
 const PYODIDE_BASE = 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full';
 const SWIPL_SRC = 'https://SWI-Prolog.github.io/npm-swipl-wasm/3/latest/dynamic-import.js';
+const SCITTLE_SRC = 'https://cdn.jsdelivr.net/npm/scittle@0.6.22/dist/scittle.js'; // keep in sync with kernels/clojurescript.js
 
 function fail(msg) { console.error('[fetch-bundles] ' + msg); process.exit(1); }
 
@@ -75,7 +76,11 @@ async function bundleProlog() {
   await download(SWIPL_SRC, join(WWW, 'vendor', 'swipl', 'dynamic-import.js'));
 }
 
-const HANDLERS = { python: bundlePython, prolog: bundleProlog };
+async function bundleClojurescript() {
+  await download(SCITTLE_SRC, join(WWW, 'vendor', 'scittle', 'scittle.js'));
+}
+
+const HANDLERS = { python: bundlePython, prolog: bundleProlog, clojurescript: bundleClojurescript };
 
 async function main() {
   const spec = JSON.parse(readFileSync(PROFILES_PATH, 'utf8'));
