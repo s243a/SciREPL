@@ -45,14 +45,28 @@ class RKernel {
                 || RKernel.DEFAULT_WEBR_VERSION;
             const webrUrl = `https://webr.r-wasm.org/${version}/webr.mjs`;
             console.log(`[RKernel] Loading webR ${version}`);
-            if (km) km.updateProgress(`Downloading R runtime (webR ${version})...`);
+            if (km) km.updateProgress(`Loading R runtime (webR ${version})...`);
+            // loadKernelSource may resolve to a bundled copy (vendor/webr/webr.mjs)
+            // when the build bundles R. Capture whichever URL actually loaded so we
+            // can point webR's worker assets (R.wasm + the VFS) at the same base —
+            // webR derives those from baseUrl, which must match where webr.mjs came
+            // from (local for offline, CDN otherwise).
+            let resolvedUrl = webrUrl;
+            const importFrom = (url) => {
+                resolvedUrl = (typeof document !== 'undefined')
+                    ? new URL(url, document.baseURI).href
+                    : url;
+                return import(resolvedUrl);
+            };
             const mod = (km && km.loadKernelSource)
-                ? await km.loadKernelSource('r', webrUrl, (url) => import(url))
+                ? await km.loadKernelSource('r', webrUrl, importFrom)
                 : await import(webrUrl);
             const { WebR } = mod;
 
             if (km) km.updateProgress('Initializing R environment...');
-            this._webr = new WebR();
+            const baseUrl = resolvedUrl.replace(/[^/]*$/, ''); // dir holding webr.mjs
+            console.log(`[RKernel] webR baseUrl: ${baseUrl}`);
+            this._webr = new WebR({ baseUrl });
             await this._webr.init();
 
             // Create shared directories in webR's filesystem
