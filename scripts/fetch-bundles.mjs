@@ -15,9 +15,10 @@
  * Run: node scripts/fetch-bundles.mjs [profile]   (or BUILD_PROFILE=full ...)
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync, unlinkSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { gunzipSync } from 'node:zlib';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -113,9 +114,35 @@ async function bundleR() {
   const files = await listWebrDistFiles(WEBR_VERSION);
   console.log(`  webR ${WEBR_VERSION}: ${files.length} runtime files`);
   for (const rel of files) {
+    // Skip downloading a .data.gz we've already decompressed to .data (idempotent).
+    if (rel.endsWith('.data.gz')) {
+      const dataAbs = join(WWW, 'vendor', 'webr', rel.replace(/\.gz$/, ''));
+      if (existsSync(dataAbs) && statSync(dataAbs).size > 0) { console.log(`  ✓ cached  vendor/webr/${rel.replace(/\.gz$/, '')}`); continue; }
+    }
     const url = `https://cdn.jsdelivr.net/npm/webr@${WEBR_VERSION}/dist/${rel}`;
     await download(url, join(WWW, 'vendor', 'webr', rel));
   }
+  // The Android/Capacitor WebView asset server returns a bad status for `.gz`
+  // assets (it serves `.js.metadata` and plain binaries fine), which breaks
+  // webR's on-demand image mounts. Decompress every `.data.gz` to a plain
+  // `.data` and flip the sibling metadata's gzip flag so webR fetches `.data`.
+  // The APK zip re-compresses these, so on-device size is ~unchanged.
+  let decompressed = 0;
+  for (const rel of files) {
+    if (!rel.endsWith('.data.gz')) continue;
+    const gz = join(WWW, 'vendor', 'webr', rel);
+    if (!existsSync(gz)) continue;
+    const data = gz.replace(/\.gz$/, '');
+    writeFileSync(data, gunzipSync(readFileSync(gz)));
+    const meta = data.replace(/\.data$/, '.js.metadata');
+    if (existsSync(meta)) {
+      const m = JSON.parse(readFileSync(meta, 'utf8'));
+      if (m.gzip) { m.gzip = false; writeFileSync(meta, JSON.stringify(m)); }
+    }
+    unlinkSync(gz);
+    decompressed++;
+  }
+  if (decompressed) console.log(`  decompressed ${decompressed} .data.gz → .data (Android serves .gz with a bad status)`);
 }
 
 const HANDLERS = { python: bundlePython, prolog: bundleProlog, clojurescript: bundleClojurescript, r: bundleR };
