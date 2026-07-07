@@ -1,8 +1,55 @@
+import java.util.Properties
+
 apply plugin: 'com.android.application'
+
+def releaseSigningPropertiesFile = rootProject.file("release-signing.properties")
+def releaseSigningProperties = new Properties()
+if (releaseSigningPropertiesFile.exists()) {
+    releaseSigningPropertiesFile.withInputStream { stream ->
+        releaseSigningProperties.load(stream)
+    }
+}
+
+def signingProperty = { key, envName ->
+    def value = releaseSigningProperties.getProperty(key)
+    if (value == null || value.trim().isEmpty()) {
+        value = System.getenv(envName)
+    }
+    return value
+}
+
+def releaseStoreFilePath = signingProperty('storeFile', 'SCIREPL_RELEASE_STORE_FILE')
+def releaseStorePassword = signingProperty('storePassword', 'SCIREPL_RELEASE_STORE_PASSWORD')
+def releaseKeyAlias = signingProperty('keyAlias', 'SCIREPL_RELEASE_KEY_ALIAS')
+def releaseKeyPassword = signingProperty('keyPassword', 'SCIREPL_RELEASE_KEY_PASSWORD')
+def releaseSigningConfigured = [releaseStoreFilePath, releaseStorePassword, releaseKeyAlias, releaseKeyPassword].every {
+    it != null && !it.trim().isEmpty()
+}
+
+def resolveReleaseStoreFile = {
+    def storeFileCandidate = new File(releaseStoreFilePath)
+    if (!storeFileCandidate.isAbsolute()) {
+        storeFileCandidate = new File(releaseSigningPropertiesFile.parentFile, releaseStoreFilePath)
+    }
+    return storeFileCandidate
+}
 
 android {
     namespace "com.unifyweaver.scirepl"
     compileSdk rootProject.ext.compileSdkVersion
+    signingConfigs {
+        release {
+            if (releaseSigningConfigured) {
+                storeFile resolveReleaseStoreFile()
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+                enableV1Signing true
+                enableV2Signing true
+                enableV3Signing true
+            }
+        }
+    }
     defaultConfig {
         applicationId "com.unifyweaver.scirepl"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -19,6 +66,9 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            if (releaseSigningConfigured) {
+                signingConfig signingConfigs.release
+            }
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
