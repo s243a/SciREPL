@@ -1,0 +1,6 @@
+# Copy this file to android/release-signing.properties and keep that copy out of git.
+# Paths are resolved relative to the android/ directory unless absolute.
+storeFile=../signing/scirepl-release.keystore
+storePassword=replace-with-keystore-password
+keyAlias=scirepl
+keyPassword=replace-with-key-password

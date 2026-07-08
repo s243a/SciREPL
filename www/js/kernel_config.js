@@ -55,6 +55,22 @@ window.KERNEL_CONFIG = {
         }
       ]
     },
+    "clojurescript": {
+      "enabled": true,
+      "runtime": "cdn",
+      "timeoutMs": 30000,
+      "sources": [
+        {
+          "type": "local",
+          "url": "vendor/scittle/scittle.js"
+        },
+        {
+          "type": "cdn",
+          "url": "https://cdn.jsdelivr.net/npm/scittle@0.6.22/dist/scittle.js"
+        }
+      ],
+      "preferLocal": true
+    },
     "prolog": {
       "enabled": true,
       "runtime": "cdn",

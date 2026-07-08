@@ -4,6 +4,7 @@ android/build/
 android/app/build/
 android/.gradle/
 android/local.properties
+android/release-signing.properties
 .DS_Store
 
 # Signing keys (NEVER commit these!)
@@ -34,3 +35,5 @@ test-results/
 # Bundled kernel runtimes (build artifacts fetched by scripts/fetch-bundles.mjs)
 www/vendor/pyodide/
 www/vendor/swipl/
+www/vendor/scittle/
+www/vendor/webr/

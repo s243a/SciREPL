@@ -89,6 +89,6 @@ const banner =
 const body = 'window.KERNEL_CONFIG = ' + JSON.stringify(config, null, 2) + ';\n';
 writeFileSync(OUTPUT_PATH, banner + body);
 
-const bundled = bundleSet.size ? ` (bundle declared: ${[...bundleSet].join(', ')} — deferred, CDN for now)` : '';
+const bundled = bundleSet.size ? ` (bundled offline: ${[...bundleSet].join(', ')} — run scripts/fetch-bundles.mjs to fetch)` : '';
 console.log(`[configure-build] wrote ${OUTPUT_PATH} for profile '${profileName}'`);
 console.log(`[configure-build] enabled: ${[...enabledSet].join(', ')}${bundled}`);

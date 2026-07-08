@@ -1898,7 +1898,7 @@ class FileIO {
 
             // Detect notebook-level language from kernelspec
             let notebookLang = 'python';
-            const knownLangs = new Set(['python', 'prolog', 'javascript', 'bash', 'r', 'lua']);
+            const knownLangs = new Set(['python', 'prolog', 'javascript', 'bash', 'r', 'lua', 'clojurescript']);
             if (nb.metadata && nb.metadata.kernelspec) {
                 const ks = nb.metadata.kernelspec;
                 if (ks.language && knownLangs.has(ks.language)) {
@@ -2011,6 +2011,7 @@ class FileIO {
         { id: 'javascript', label: 'JavaScript',  abbrev: 'JS' },
         { id: 'lua',        label: 'Lua',         abbrev: 'Lua' },
         { id: 'typr',       label: 'TypR',        abbrev: 'TyR' },
+        { id: 'clojurescript', label: 'ClojureScript', abbrev: 'CLJS' },
     ];
 
     /**
@@ -2027,6 +2028,7 @@ class FileIO {
         javascript: { display_name: 'JavaScript (Browser)', language: 'javascript', name: 'javascript' },
         lua:        { display_name: 'Lua (Fengari)', language: 'lua', name: 'lua' },
         typr:       { display_name: 'TypR', language: 'typr', name: 'typr' },
+        clojurescript: { display_name: 'ClojureScript (Scittle)', language: 'clojurescript', name: 'clojurescript' },
     };
 
     static IPYNB_LANGUAGE_INFO = {
@@ -2037,6 +2039,7 @@ class FileIO {
         javascript: { name: 'javascript', version: 'ES2022', mimetype: 'text/javascript', file_extension: '.js' },
         lua:        { name: 'lua', version: '5.3', mimetype: 'text/x-lua', file_extension: '.lua' },
         typr:       { name: 'typr', version: '0.x', mimetype: 'text/x-typr', file_extension: '.ty' },
+        clojurescript: { name: 'clojurescript', version: '1.x', mimetype: 'text/x-clojure', file_extension: '.cljs' },
     };
 
     /**

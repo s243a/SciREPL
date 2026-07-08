@@ -15,9 +15,10 @@
  * Run: node scripts/fetch-bundles.mjs [profile]   (or BUILD_PROFILE=full ...)
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync, unlinkSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { gunzipSync } from 'node:zlib';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -26,6 +27,8 @@ const PROFILES_PATH = join(ROOT, 'build-profiles.json');
 
 const PYODIDE_BASE = 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full';
 const SWIPL_SRC = 'https://SWI-Prolog.github.io/npm-swipl-wasm/3/latest/dynamic-import.js';
+const SCITTLE_SRC = 'https://cdn.jsdelivr.net/npm/scittle@0.6.22/dist/scittle.js'; // keep in sync with kernels/clojurescript.js
+const WEBR_VERSION = '0.5.4'; // npm version; keep in sync with kernels/r.js DEFAULT_WEBR_VERSION ('v' + this)
 
 function fail(msg) { console.error('[fetch-bundles] ' + msg); process.exit(1); }
 
@@ -75,7 +78,74 @@ async function bundleProlog() {
   await download(SWIPL_SRC, join(WWW, 'vendor', 'swipl', 'dynamic-import.js'));
 }
 
-const HANDLERS = { python: bundlePython, prolog: bundleProlog };
+async function bundleClojurescript() {
+  await download(SCITTLE_SRC, join(WWW, 'vendor', 'scittle', 'scittle.js'));
+}
+
+// webR is a multi-file runtime (R.wasm + a packaged VFS) loaded from a base URL,
+// not a single script. Enumerate the runtime files under the npm package's dist/
+// via the jsdelivr data API, then mirror them into www/vendor/webr/ preserving
+// paths, so r.js can point webR's baseUrl at the local copy. ~50 MB total.
+async function listWebrDistFiles(version) {
+  const api = `https://data.jsdelivr.com/v1/packages/npm/webr@${version}`;
+  const res = await fetch(api);
+  if (!res.ok) throw new Error(`HTTP ${res.status} listing webr@${version}`);
+  const tree = await res.json();
+  const out = [];
+  // Dev-only files webR never fetches at runtime.
+  const skip = (rel) =>
+    rel.endsWith('.map') || rel.endsWith('.d.ts') || rel.endsWith('.cjs') ||
+    rel === 'esbuild.d.ts' || rel.startsWith('tests/') || rel.startsWith('repl/');
+  const walk = (node, prefix) => {
+    for (const f of node.files || []) {
+      const p = prefix ? `${prefix}/${f.name}` : f.name;
+      if (f.type === 'directory') walk(f, p);
+      else if (p.startsWith('dist/')) {
+        const rel = p.slice('dist/'.length);
+        if (!skip(rel)) out.push(rel);
+      }
+    }
+  };
+  walk(tree, '');
+  return out;
+}
+
+async function bundleR() {
+  const files = await listWebrDistFiles(WEBR_VERSION);
+  console.log(`  webR ${WEBR_VERSION}: ${files.length} runtime files`);
+  for (const rel of files) {
+    // Skip downloading a .data.gz we've already decompressed to .data (idempotent).
+    if (rel.endsWith('.data.gz')) {
+      const dataAbs = join(WWW, 'vendor', 'webr', rel.replace(/\.gz$/, ''));
+      if (existsSync(dataAbs) && statSync(dataAbs).size > 0) { console.log(`  ✓ cached  vendor/webr/${rel.replace(/\.gz$/, '')}`); continue; }
+    }
+    const url = `https://cdn.jsdelivr.net/npm/webr@${WEBR_VERSION}/dist/${rel}`;
+    await download(url, join(WWW, 'vendor', 'webr', rel));
+  }
+  // The Android/Capacitor WebView asset server returns a bad status for `.gz`
+  // assets (it serves `.js.metadata` and plain binaries fine), which breaks
+  // webR's on-demand image mounts. Decompress every `.data.gz` to a plain
+  // `.data` and flip the sibling metadata's gzip flag so webR fetches `.data`.
+  // The APK zip re-compresses these, so on-device size is ~unchanged.
+  let decompressed = 0;
+  for (const rel of files) {
+    if (!rel.endsWith('.data.gz')) continue;
+    const gz = join(WWW, 'vendor', 'webr', rel);
+    if (!existsSync(gz)) continue;
+    const data = gz.replace(/\.gz$/, '');
+    writeFileSync(data, gunzipSync(readFileSync(gz)));
+    const meta = data.replace(/\.data$/, '.js.metadata');
+    if (existsSync(meta)) {
+      const m = JSON.parse(readFileSync(meta, 'utf8'));
+      if (m.gzip) { m.gzip = false; writeFileSync(meta, JSON.stringify(m)); }
+    }
+    unlinkSync(gz);
+    decompressed++;
+  }
+  if (decompressed) console.log(`  decompressed ${decompressed} .data.gz → .data (Android serves .gz with a bad status)`);
+}
+
+const HANDLERS = { python: bundlePython, prolog: bundleProlog, clojurescript: bundleClojurescript, r: bundleR };
 
 async function main() {
   const spec = JSON.parse(readFileSync(PROFILES_PATH, 'utf8'));
