@@ -93,6 +93,15 @@ class PackageCatalog {
                 size: '~2 KB',
                 kernels: ['typr', 'r'],
             },
+            {
+                name: 'Prolog Generates TypR',
+                description: 'Compile a Prolog transitive-closure predicate to typed TypR, then execute the generated code with native variadic output calls.',
+                type: 'workbook',
+                format: 'srwb',
+                pages_url: 'workbooks/prolog-generates-typr.srwb',
+                size: '~5 KB',
+                kernels: ['prolog', 'typr', 'r'],
+            },
         ];
     }
 

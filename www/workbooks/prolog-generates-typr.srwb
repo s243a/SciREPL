@@ -23,7 +23,7 @@
       },
       {
         "type": "code",
-        "code": "% Compile ancestor/2 to TypR and append queries\nrecursive_compiler:compile_recursive(ancestor/2, [target(typr)], Code),\nformat('--- Generated TypR code ---~n~w~n', [Code]),\nformat(string(Queries), '~n~n# --- Queries ---~nlet results <- ancestor_all(\"alice\");~ncat(paste(\"Descendants of alice:\", paste(results, collapse=\", \")));~ncat(\"\\n\");~nlet is_anc <- ancestor_check(\"alice\", \"eve\");~ncat(paste(\"alice is ancestor of eve:\", is_anc));~ncat(\"\\n\");~nlet is_anc2 <- ancestor_check(\"alice\", \"frank\");~ncat(paste(\"alice is ancestor of frank:\", is_anc2));~n', []),\nformat(string(FullCode), '~w~w', [Code, Queries]),\nuser:nb_write('typr_output', '.code', FullCode),\nwriteln('TypR code written to cell: typr_output').",
+        "code": "% Compile ancestor/2 to TypR and append queries\nrecursive_compiler:compile_recursive(ancestor/2, [target(typr)], Code),\nformat('--- Generated TypR code ---~n~w~n', [Code]),\nformat(string(Queries), '~n~n# --- Queries ---~nlet results <- ancestor_all(\"alice\");~ncat(\"Descendants of alice:\", paste(results, collapse=\", \"), \"\\n\");~nlet is_anc <- ancestor_check(\"alice\", \"eve\");~ncat(\"alice is ancestor of eve:\", is_anc, \"\\n\");~nlet is_anc2 <- ancestor_check(\"alice\", \"frank\");~ncat(\"alice is ancestor of frank:\", is_anc2, \"\\n\");~n', []),\nformat(string(FullCode), '~w~w', [Code, Queries]),\nuser:nb_write('typr_output', '.code', FullCode),\nwriteln('TypR code written to cell: typr_output').",
         "language": "prolog",
         "name": "compile_to_typr"
       },
