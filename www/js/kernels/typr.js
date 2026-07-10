@@ -4,7 +4,7 @@
  * Compiles TypR source to R via the typr-wasm compiler, then
  * executes the generated R code through the R kernel (webR).
  *
- * Two-phase: TypR WASM (~1.7MB) + webR (~50MB on first use).
+ * Two-phase: TypR WASM (~2.5MB) + webR (~50MB on first use).
  * Both are cached after first download.
  *
  * The kernel maintains a private /mnt/typr/ directory for

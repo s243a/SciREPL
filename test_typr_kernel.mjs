@@ -5,10 +5,11 @@
  * 1. TypR appears in language selector
  * 2. TypR WASM compiler loads
  * 3. Simple TypR code compiles to R
- * 4. #!typecheck directive works
- * 5. #!transpile directive shows R output
+ * 4. R-style variadics and forwarding compile to name-preserving do.call
+ * 5. #!typecheck directive works
  * 6. Type error is reported as warning
- * 7. Full execution via webR (if webR loads)
+ * 7. #!transpile directive shows R output
+ * 8. Full execution via webR (if webR loads)
  *
  * Uses DOM signaling for CDN kernel interactions.
  */
@@ -115,8 +116,36 @@ async function domExec(page, asyncJsCode, { timeout = 30000 } = {}) {
         fail('TypR WASM compile', e.message);
     }
 
-    // Test 4: Type check only
-    console.log('\n4. Testing #!typecheck...');
+    // Test 4: R-style variadics and forwarding
+    console.log("\n4. Testing variadic forwarding...");
+    try {
+        const variadicResult = await domExec(page, `
+            const mod = await import("./vendor/typr/typr_wasm.js");
+            const source = [
+                "let sink <- fn(...values: Any): Any { values };",
+                "let forward <- fn(...args: Any): Any { sink(...args) };",
+                "forward(count = 1, enabled = true);"
+            ].join("\\n");
+            const checked = mod.typeCheck(source);
+            const transpiled = mod.transpile(source);
+            return {
+                has_errors: checked.has_errors,
+                errors: checked.errors,
+                has_do_call: transpiled.includes("do.call(sink"),
+                has_forwarded_pack: transpiled.includes("typr_call_args(args)"),
+            };
+        `);
+        if (!variadicResult.has_errors && variadicResult.has_do_call && variadicResult.has_forwarded_pack) {
+            ok("Variadic forwarding type-checks and emits name-preserving do.call");
+        } else {
+            fail("Variadic forwarding", JSON.stringify(variadicResult));
+        }
+    } catch (e) {
+        fail("Variadic forwarding", e.message);
+    }
+
+    // Test 5: Type check only
+    console.log('\n5. Testing #!typecheck...');
     try {
         const tcResult = await domExec(page, `
             const mod = await import('./vendor/typr/typr_wasm.js');
@@ -129,8 +158,8 @@ async function domExec(page, asyncJsCode, { timeout = 30000 } = {}) {
         fail('typeCheck', e.message);
     }
 
-    // Test 5: Type error detection
-    console.log('\n5. Testing type error detection...');
+    // Test 6: Type error detection
+    console.log('\n6. Testing type error detection...');
     try {
         const errResult = await domExec(page, `
             const mod = await import('./vendor/typr/typr_wasm.js');
@@ -143,8 +172,8 @@ async function domExec(page, asyncJsCode, { timeout = 30000 } = {}) {
         fail('Type error detection', e.message);
     }
 
-    // Test 6: Transpile only
-    console.log('\n6. Testing transpile...');
+    // Test 7: Transpile only
+    console.log('\n7. Testing transpile...');
     try {
         const transpiled = await domExec(page, `
             const mod = await import('./vendor/typr/typr_wasm.js');
@@ -156,8 +185,8 @@ async function domExec(page, asyncJsCode, { timeout = 30000 } = {}) {
         fail('Transpile', e.message);
     }
 
-    // Test 7: Full kernel execution (requires webR — may be slow)
-    console.log('\n7. Testing full TypR kernel execution (loads webR)...');
+    // Test 8: Full kernel execution (requires webR — may be slow)
+    console.log('\n8. Testing full TypR kernel execution (loads webR)...');
     try {
         // Use DOM signaling for the heavy webR load
         const attr = 'data-typr-exec-result';
