@@ -12,7 +12,7 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **Bash kernel** — Unix shell via brush-wasm with coreutils, findutils, grep (all Rust reimplementations)
 - **JavaScript kernel** — Native browser JS execution with zero download. Direct access to WASM modules, SharedVFS, and browser APIs
 - **R kernel** — Full R via webR (WASM), loaded on demand (~50 MB, cached after first use). Supports plotting, `install.packages()`, and SharedVFS file sharing.
-- **TypR kernel** — Typed R superset via typr-wasm (~1.7 MB). Compiles TypR to R, then executes through webR. Type checking, `#!transpile` and `#!show-r` directives.
+- **TypR kernel** — Typed R superset via typr-wasm (~2.5 MB). Compiles TypR to R, then executes through webR. Type checking, `#!transpile` and `#!show-r` directives.
 - **Kernel abstraction layer** — Pluggable architecture for adding new language runtimes
 - **Package system v2** — Install packages with notebooks, data files, Python modules, Prolog knowledge bases, and WASM libraries. See [docs/packages.md](docs/packages.md).
 - **SharedVFS** — In-memory filesystem shared across all kernels. Python, Bash, Prolog, R, and JavaScript can read/write the same files. Persisted to IndexedDB — files survive page reloads.
@@ -234,7 +234,7 @@ KernelManager (kernel_manager.js)
 ├── BashKernel       (kernels/bash.js)         — brush-wasm (coreutils + findutils + grep)
 ├── JavaScriptKernel (kernels/javascript.js)   — native browser JS (zero download)
 ├── RKernel          (kernels/r.js)            — webR (lazy-loaded ~50MB, plotting, SharedVFS, install.packages)
-└── TypRKernel       (kernels/typr.js)         — typr-wasm (1.7MB) → R transpilation → webR execution
+└── TypRKernel       (kernels/typr.js)         — typr-wasm (2.5MB) → R transpilation → webR execution
 ```
 
 Each kernel implements: `init()`, `execute(code)`, `isReady()`, `getName()`, `getLanguage()`, `destroy()`
@@ -362,7 +362,7 @@ Near-term items to make R and cross-language features demo-ready:
 - [ ] **Dark/light theme toggle** — Light theme option for classrooms/sunlight
 - [ ] **Notebook sharing via URL** — Encode small notebooks as base64 URL fragments or gist links
 - [x] **Lua kernel** — Fengari (Lua in WASM, ~500KB)
-- [x] **TypR kernel** — Typed R superset (typr-wasm, ~1.7 MB) transpiles to R via webR
+- [x] **TypR kernel** — Typed R superset (typr-wasm, ~2.5 MB) transpiles to R via webR
 - [ ] **Capacitor WebView media query investigation** — `@media (hover: none) and (pointer: coarse)` may not trigger in Android WebView; determine cause and fix
 - [ ] **Byte-level download progress** — Track actual download progress via Service Worker interception or ReadableStream
 - [ ] **Background package installs** — Install packages/workbooks without switching to the target notebook tab; requires notebook-aware card creation
