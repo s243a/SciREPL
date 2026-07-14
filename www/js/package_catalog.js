@@ -101,6 +101,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/prolog-generates-typr.srwb',
                 size: '~5 KB',
                 kernels: ['prolog', 'typr', 'r'],
+                requires: ['UnifyWeaver SciREPL'],
             },
         ];
     }
@@ -216,6 +217,7 @@ class PackageCatalog {
             const job = this._importQueue.shift();
             job.btn.textContent = 'Importing...';
             try {
+                await this._ensureDependencies(job.pkg);
                 await this._doImport(job.pkg, job.blob);
                 this._rememberInstalled(job.pkg);
                 job.btn.textContent = 'Installed';
@@ -255,6 +257,35 @@ class PackageCatalog {
             }
         } catch (e) {
             console.warn('[PackageCatalog] could not remember installed package:', e);
+        }
+    }
+
+    /**
+     * Install package dependencies declared by a workbook before importing it.
+     * Remembered packages are restored to the Prolog VFS when that kernel first
+     * starts, so they do not need to be downloaded again here.
+     */
+    async _ensureDependencies(pkg) {
+        if (!pkg || !Array.isArray(pkg.requires)) return;
+
+        let remembered = [];
+        try {
+            remembered = JSON.parse(localStorage.getItem('scirepl_installed_packages') || '[]');
+        } catch (_) { /* treat malformed storage as empty */ }
+
+        for (const name of pkg.requires) {
+            if (Array.isArray(remembered) && remembered.some(p => p.name === name)) continue;
+
+            const dependency = this.packages.find(p => p.name === name && p.type !== 'workbook');
+            if (!dependency) throw new Error('Unknown package dependency: ' + name);
+
+            const blob = await this._fetchForRestore(dependency);
+            if (!blob) throw new Error('Could not download required package: ' + name);
+
+            await this._doImport(dependency, blob);
+            this._rememberInstalled(dependency);
+            remembered.push({ name });
+            console.log('[PackageCatalog] installed workbook dependency:', name);
         }
     }
 
