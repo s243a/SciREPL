@@ -40,7 +40,7 @@ async function runAllAndCollect(page) {
         headless: true,
         args: ['--disable-dev-shm-usage', '--disable-gpu', '--no-sandbox'],
     });
-    const context = await browser.newContext();
+    const context = await browser.newContext({ serviceWorkers: 'block' });
     await context.addInitScript(() => {
         localStorage.clear();
         localStorage.setItem('scirepl_privacy_accepted', '1');
@@ -101,12 +101,17 @@ async function runAllAndCollect(page) {
         const compileCell = generated.find(c => c.name === 'compile_to_typr');
         const typrCell = generated.find(c => c.name === 'typr_output');
         const rCell = generated.find(c => c.name === 'r_output');
+        const generatedR = await page.evaluate(source => {
+            const kernel = window.kernelManager.getKernel('typr');
+            return kernel._typrModule.compile(source).r_code;
+        }, typrCell?.code || '');
         assert(compileCell?.output.includes('TypR code written to cell'), 'Prolog populates the TypR cell');
-        assert(typrCell?.code.includes('fn(start: char)') && typrCell.code.includes('@{'),
-            'UnifyWeaver emits typed TypR with raw-R traversal blocks');
+        assert(typrCell?.code.includes('fn(start: char)') && !typrCell.code.includes('@{'),
+            'UnifyWeaver emits native typed TypR without raw-R traversal blocks');
         assert(!typrCell?.output.includes('Type errors'), 'generated TypR type-checks', typrCell?.output);
         assert(typrCell?.output.includes('Descendants of alice:') && typrCell.output.includes('eve'),
-            'generated TypR executes the transitive closure', typrCell?.output);
+            'generated TypR executes the transitive closure',
+            `${typrCell?.output}\nGenerated casts:\n${generatedR.split('\n').filter(line => line.includes('as.Array')).join('\n')}`);
         assert(typrCell?.output.includes('alice is ancestor of eve: TRUE'),
             'generated TypR check query succeeds', typrCell?.output);
         assert(rCell?.output.includes('Descendants of alice:') && !rCell.error,
