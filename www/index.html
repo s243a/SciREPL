@@ -212,7 +212,7 @@ sharedfs_read("/shared/data/results.csv")
 % Prolog — consult a shared knowledge base
 :- consult('/shared/lib/prolog/kb.pl').</code></pre>
 
-            <p><strong>Packages &amp; workbooks:</strong> When you install a package or workbook from Browse Packages &amp; Workbooks, files with <code>/shared/</code> destination paths are written to SharedVFS automatically. Package files targeting a specific kernel (e.g., Prolog modules at <code>/user/</code>) go to that kernel's own filesystem.</p>
+            <p><strong>Packages, bundles &amp; workbooks:</strong> When you install an item from Browse Packages, Bundles &amp; Workbooks, bundle dependencies are installed first and files with <code>/shared/</code> destination paths are written to SharedVFS automatically. Package files targeting a specific kernel (e.g., Prolog modules at <code>/user/</code>) go to that kernel's own filesystem.</p>
 
             <p><strong>Browsing files:</strong> Open <strong>Menu → Files &amp; Storage</strong> to browse. Select <strong>SharedVFS</strong> from the dropdown to see shared files, or select a kernel (Python, Prolog) to see its internal filesystem. Use the <em>Show empty folders</em> checkbox to toggle visibility of empty directories.</p>
 
@@ -448,7 +448,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                 <button id="btn-export-workbook">📦 Export Workbooks &amp; Packages</button>
                 <button id="btn-import-file">📂 Import File (e.g. .srwb, .ipynb, .csv, .py, .zip)</button>
                 <button id="btn-import-package">📦 Import Package (.zip / .tar.gz)</button>
-                <button id="btn-browse-packages">📦 Browse Packages &amp; Workbooks</button>
+                <button id="btn-browse-packages">📦 Browse Packages, Bundles &amp; Workbooks</button>
                 <button id="btn-prolog-settings">⚙ Files &amp; Storage (VFS / Paths)</button>
                 <button id="btn-memory">📊 Memory &amp; Storage</button>
                 <button id="btn-languages">🔤 Languages</button>
@@ -760,8 +760,8 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
     <div id="package-catalog-modal" class="modal hidden">
         <div class="modal-content modal-content-scroll">
             <button class="modal-close">&times;</button>
-            <h2>Browse Packages &amp; Workbooks</h2>
-            <p>One-click install packages and workbook templates into SciREPL.</p>
+            <h2>Browse Packages, Bundles &amp; Workbooks</h2>
+            <p>One-click install packages, dependency-aware workbook bundles, and individual workbook templates into SciREPL.</p>
             <div id="package-catalog-list"></div>
         </div>
     </div>

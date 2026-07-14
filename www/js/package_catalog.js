@@ -1,5 +1,5 @@
 /**
- * package_catalog.js — Browse and install packages/workbooks from predefined URLs.
+ * package_catalog.js — Browse and install packages, bundles, and workbooks.
  *
  * A lightweight catalog of curated packages (.zip) and workbook templates
  * (.ipynb) that users can install with one click.
@@ -14,12 +14,14 @@ class PackageCatalog {
 
     /**
      * The catalog.  Add entries here to make them available to users.
-     * Each entry needs: name, description, url, and optionally version/size/type.
-     * type: 'package' (default, .zip) or 'workbook' (.ipynb)
+     * Each entry needs: id, name, description, and a type-specific source.
+     * type: 'package' (default, .zip), 'bundle' (a set of catalog entries),
+     * or 'workbook' (.ipynb/.srwb).
      */
     get packages() {
         return [
             {
+                id: 'unifyweaver-scirepl',
                 name: 'UnifyWeaver SciREPL',
                 description: 'Physics knowledge-base notebooks with Prolog inference, embedding search, and mindmap tools.',
                 type: 'package',
@@ -30,6 +32,80 @@ class PackageCatalog {
                 kernels: ['prolog', 'python'],
             },
             {
+                id: 'unifyweaver-workbooks',
+                name: 'UnifyWeaver Tutorials & Compiler Demos',
+                description: 'The four workbooks declared by UnifyWeaver\'s SciREPL package builder: three tutorials and the Prolog-to-R compiler demo.',
+                type: 'bundle',
+                size: '~50 KB',
+                contents: '4 workbooks',
+                kernels: ['prolog', 'r', 'bash'],
+                requires: ['unifyweaver-scirepl'],
+                items: [
+                    'unifyweaver-family-tree',
+                    'unifyweaver-recursion-patterns',
+                    'unifyweaver-call-graph',
+                    'prolog-generates-r',
+                ],
+            },
+            {
+                id: 'unifyweaver-family-tree',
+                name: 'Family Tree Tutorial with UnifyWeaver',
+                notebookName: 'Family Tree Tutorial with UnifyWeaver',
+                description: 'Build and query a family-tree knowledge base while learning UnifyWeaver and Prolog fundamentals.',
+                type: 'workbook',
+                pages_url: 'workbooks/01_family_tree_tutorial.ipynb',
+                size: '~10 KB',
+                kernels: ['prolog'],
+                requires: ['unifyweaver-scirepl'],
+            },
+            {
+                id: 'unifyweaver-recursion-patterns',
+                name: 'Advanced Recursion Patterns in UnifyWeaver',
+                notebookName: 'Advanced Recursion Patterns in UnifyWeaver',
+                description: 'Explore recursive predicates and the compilation patterns UnifyWeaver recognizes.',
+                type: 'workbook',
+                pages_url: 'workbooks/02_recursion_patterns.ipynb',
+                size: '~15 KB',
+                kernels: ['prolog'],
+                requires: ['unifyweaver-scirepl'],
+            },
+            {
+                id: 'unifyweaver-call-graph',
+                name: 'Call Graph Analysis and SCC Detection',
+                notebookName: 'Call Graph Analysis and SCC Detection',
+                description: 'Analyze predicate call graphs and strongly connected components with UnifyWeaver.',
+                type: 'workbook',
+                pages_url: 'workbooks/03_call_graph_analysis.ipynb',
+                size: '~13 KB',
+                kernels: ['prolog'],
+                requires: ['unifyweaver-scirepl'],
+            },
+            {
+                id: 'prolog-generates-r',
+                name: 'Prolog Generates R',
+                notebookName: 'Prolog Generates R: Compiler Demo',
+                description: 'Compile recursive Prolog predicates into executable R and inspect the generated program through notebook cells.',
+                type: 'workbook',
+                format: 'srwb',
+                pages_url: 'workbooks/prolog-generates-r.srwb',
+                size: '~13 KB',
+                kernels: ['prolog', 'r', 'bash'],
+                requires: ['unifyweaver-scirepl'],
+            },
+            {
+                id: 'prolog-generates-lua',
+                name: 'Prolog Generates Lua',
+                notebookName: 'Prolog Generates Lua: Compiler Demo',
+                description: 'Compile a Prolog transitive closure to Lua using embedded and notebook-VFS inputs.',
+                type: 'workbook',
+                format: 'srwb',
+                pages_url: 'workbooks/prolog-generates-lua.srwb',
+                size: '~5 KB',
+                kernels: ['prolog', 'lua'],
+                requires: ['unifyweaver-scirepl'],
+            },
+            {
+                id: 'life-expectancy-analysis',
                 name: 'Life Expectancy Analysis',
                 description: 'Mixed Python/R workbook: Gapminder & WHO datasets with pandas, plotly, and R base graphics.',
                 type: 'workbook',
@@ -39,6 +115,7 @@ class PackageCatalog {
                 kernels: ['python', 'r'],
             },
             {
+                id: 'ggplot2-showcase',
                 name: 'ggplot2 Showcase',
                 description: 'Scatter, bar, density, box, and heatmap charts with ggplot2 dark theme. Uses built-in R datasets.',
                 type: 'workbook',
@@ -48,6 +125,7 @@ class PackageCatalog {
                 kernels: ['r'],
             },
             {
+                id: 'tidyverse-data-wrangling',
                 name: 'Tidyverse Data Wrangling',
                 description: 'dplyr/tidyr pipelines with cross-language CSV sharing: Python downloads, R processes, Python visualizes.',
                 type: 'workbook',
@@ -57,6 +135,7 @@ class PackageCatalog {
                 kernels: ['python', 'r'],
             },
             {
+                id: 'statistics-with-r',
                 name: 'Statistics with R',
                 description: 'Hypothesis testing (t-test, chi-squared, ANOVA), regression, confidence intervals, and diagnostic plots.',
                 type: 'workbook',
@@ -66,6 +145,7 @@ class PackageCatalog {
                 kernels: ['r'],
             },
             {
+                id: 'lua-tables-coroutines',
                 name: 'Lua: Tables, Coroutines & Closures',
                 description: 'Tour of Lua\'s core features — tables as universal data structure, coroutines for cooperative multitasking, closures, custom iterators, and a lazy Stream library.',
                 type: 'workbook',
@@ -75,6 +155,7 @@ class PackageCatalog {
                 kernels: ['lua'],
             },
             {
+                id: 'lua-parsing-coroutines',
                 name: 'Lua: Parsing with Coroutines',
                 description: 'Build a calculator from scratch — coroutine lexer, recursive descent parser, AST evaluator, parser combinators, and a CSV parser. No external libraries.',
                 type: 'workbook',
@@ -84,7 +165,9 @@ class PackageCatalog {
                 kernels: ['lua'],
             },
             {
+                id: 'typr-introduction',
                 name: 'TypR Introduction',
+                notebookName: 'TypR Introduction',
                 description: 'Typed R superset — variable binding, functions, type annotations, and transpiler directives (#!transpile, #!show-r). Compiles to R via WASM.',
                 type: 'workbook',
                 format: 'srwb',
@@ -94,14 +177,16 @@ class PackageCatalog {
                 kernels: ['typr', 'r'],
             },
             {
+                id: 'prolog-generates-typr',
                 name: 'Prolog Generates TypR',
+                notebookName: 'Prolog Generates TypR: Compiler Demo',
                 description: 'Compile a Prolog transitive-closure predicate to typed TypR, then execute the generated code with native variadic output calls.',
                 type: 'workbook',
                 format: 'srwb',
                 pages_url: 'workbooks/prolog-generates-typr.srwb',
                 size: '~5 KB',
                 kernels: ['prolog', 'typr', 'r'],
-                requires: ['UnifyWeaver SciREPL'],
+                requires: ['unifyweaver-scirepl'],
             },
         ];
     }
@@ -137,12 +222,17 @@ class PackageCatalog {
         }
 
         const packages = all.filter(p => (p.type || 'package') === 'package');
+        const bundles = all.filter(p => p.type === 'bundle');
         const workbooks = all.filter(p => p.type === 'workbook');
 
         let html = '';
         if (packages.length > 0) {
             html += '<h3 class="catalog-section-header">Packages</h3>';
             html += packages.map((pkg) => this._renderCard(pkg, all.indexOf(pkg))).join('');
+        }
+        if (bundles.length > 0) {
+            html += '<h3 class="catalog-section-header">Bundles</h3>';
+            html += bundles.map((pkg) => this._renderCard(pkg, all.indexOf(pkg))).join('');
         }
         if (workbooks.length > 0) {
             html += '<h3 class="catalog-section-header">Workbooks</h3>';
@@ -158,45 +248,125 @@ class PackageCatalog {
     }
 
     _renderCard(pkg, idx) {
+        const installed = this._isInstalled(pkg);
+        const dependencyNames = (pkg.requires || [])
+            .map(ref => this._findEntry(ref)?.name || ref)
+            .join(', ');
         return `
-            <div class="pkg-card">
+            <div class="pkg-card ${pkg.type === 'bundle' ? 'pkg-bundle-card' : ''}">
                 <div class="pkg-info">
                     <strong>${this._esc(pkg.name)}</strong>
                     ${pkg.version ? `<span class="pkg-version">${this._esc(pkg.version)}</span>` : ''}
                     ${pkg.size ? `<span class="pkg-size">${this._esc(pkg.size)}</span>` : ''}
+                    ${pkg.contents ? `<span class="pkg-contents">${this._esc(pkg.contents)}</span>` : ''}
                     ${pkg.kernels ? `<span class="pkg-kernels">${pkg.kernels.map(k => this._esc(k)).join(', ')}</span>` : ''}
                     <p>${this._esc(pkg.description)}</p>
+                    ${dependencyNames ? `<small class="pkg-requires">Requires: ${this._esc(dependencyNames)}</small>` : ''}
                 </div>
-                <button class="pkg-install-btn" data-idx="${idx}">Install</button>
+                <button class="pkg-install-btn${installed ? ' pkg-installed' : ''}" data-idx="${idx}"${installed ? ' disabled' : ''}>${installed ? 'Installed' : 'Install'}</button>
             </div>
         `;
     }
 
+    _findEntry(ref) {
+        return this.packages.find(p => p.id === ref || p.name === ref);
+    }
+
+    _installedPackages() {
+        try {
+            const list = JSON.parse(localStorage.getItem('scirepl_installed_packages') || '[]');
+            return Array.isArray(list) ? list : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    _isInstalled(pkg) {
+        if (!pkg) return false;
+
+        if ((pkg.type || 'package') === 'package') {
+            return this._installedPackages().some(saved =>
+                saved && (saved.id === pkg.id || saved.name === pkg.name));
+        }
+
+        if (pkg.type === 'workbook') {
+            const notebooks = window.notebookManager?.getNotebooks?.() || [];
+            const expectedName = pkg.notebookName || pkg.name;
+            return notebooks.some(nb => nb && nb.name === expectedName);
+        }
+
+        if (pkg.type === 'bundle') {
+            const dependenciesInstalled = (pkg.requires || []).every(ref =>
+                this._isInstalled(this._findEntry(ref)));
+            const itemsInstalled = (pkg.items || []).every(ref =>
+                this._isInstalled(this._findEntry(ref)));
+            return dependenciesInstalled && itemsInstalled;
+        }
+
+        return false;
+    }
+
+    _syncInstallButtons() {
+        if (!this.listEl) return;
+        const all = this.packages;
+        this.listEl.querySelectorAll('.pkg-install-btn').forEach(btn => {
+            const pkg = all[parseInt(btn.dataset.idx, 10)];
+            const installed = this._isInstalled(pkg);
+            btn.textContent = installed ? 'Installed' : 'Install';
+            btn.disabled = installed;
+            btn.classList.toggle('pkg-installed', installed);
+        });
+    }
+
+    async _fetchCatalogItem(pkg) {
+        if (!pkg || pkg.type === 'bundle') return null;
+
+        let blob = null;
+        let lastError = null;
+        if (pkg.pages_url) {
+            try {
+                blob = await this._fetchPackage(pkg.pages_url);
+            } catch (e) {
+                lastError = e;
+                console.warn('[PackageCatalog] bundled fetch failed, trying release URL:', e);
+            }
+        }
+        if (!blob && pkg.url) {
+            try {
+                blob = await this._fetchPackage(pkg.url);
+            } catch (e) {
+                lastError = e;
+            }
+        }
+        if (!blob) {
+            throw lastError || new Error('No download source for ' + pkg.name);
+        }
+        return blob;
+    }
+
     /**
-     * Install a package/workbook.  Downloads start immediately (concurrent),
+     * Install a package, bundle, or workbook. Downloads start immediately,
      * but imports are queued so notebook state stays consistent.
      */
     async _install(btn) {
         const idx = parseInt(btn.dataset.idx, 10);
         const pkg = this.packages[idx];
         if (!pkg) return;
+        if (this._isInstalled(pkg)) {
+            this._syncInstallButtons();
+            return;
+        }
 
         btn.disabled = true;
-        btn.textContent = 'Downloading...';
+        btn.textContent = pkg.type === 'bundle' ? 'Preparing...' : 'Downloading...';
 
         // 1. Download (concurrent — multiple downloads can run at once)
         //    Prefer the locally-bundled copy (reliable + offline, and on the
         //    Pro build it's the up-to-date one); fall back to the remote release
         //    URL only if there's no bundled copy or it fails.
-        let blob;
+        let blob = null;
         try {
-            if (pkg.pages_url) {
-                try { blob = await this._fetchPackage(pkg.pages_url); }
-                catch (e) { console.warn('[PackageCatalog] bundled fetch failed, trying release URL:', e); }
-            }
-            if (!blob && pkg.url) {
-                blob = await this._fetchPackage(pkg.url);
-            }
+            blob = await this._fetchCatalogItem(pkg);
         } catch (err) {
             console.error('[PackageCatalog] Download failed:', err);
             btn.textContent = 'Failed';
@@ -220,13 +390,12 @@ class PackageCatalog {
                 await this._ensureDependencies(job.pkg);
                 await this._doImport(job.pkg, job.blob);
                 this._rememberInstalled(job.pkg);
-                job.btn.textContent = 'Installed';
-                job.btn.classList.add('pkg-installed');
+                this._syncInstallButtons();
             } catch (err) {
                 console.error('[PackageCatalog] Import failed:', err);
                 job.btn.textContent = 'Failed';
                 job.btn.disabled = false;
-                setTimeout(() => { job.btn.textContent = 'Install'; }, 3000);
+                setTimeout(() => this._syncInstallButtons(), 3000);
             }
         }
 
@@ -240,19 +409,19 @@ class PackageCatalog {
     }
 
     /**
-     * Remember a successfully installed non-workbook package so its supporting
+     * Remember a successfully installed package so its supporting
      * files (which mount into the ephemeral in-memory Prolog VFS) can be
      * re-mounted on a later app launch. Workbooks are skipped — they persist as
      * notebooks already.
      */
     _rememberInstalled(pkg) {
-        if (!pkg || pkg.type === 'workbook') return;
+        if (!pkg || (pkg.type || 'package') !== 'package') return;
         if (!pkg.pages_url && !pkg.url) return; // need a re-fetchable source
         try {
             const key = 'scirepl_installed_packages';
             const list = JSON.parse(localStorage.getItem(key) || '[]');
-            if (!list.some(p => p.name === pkg.name)) {
-                list.push({ name: pkg.name, pages_url: pkg.pages_url || null, url: pkg.url || null });
+            if (!list.some(p => p && (p.id === pkg.id || p.name === pkg.name))) {
+                list.push({ id: pkg.id || null, name: pkg.name, pages_url: pkg.pages_url || null, url: pkg.url || null });
                 localStorage.setItem(key, JSON.stringify(list));
             }
         } catch (e) {
@@ -268,24 +437,19 @@ class PackageCatalog {
     async _ensureDependencies(pkg) {
         if (!pkg || !Array.isArray(pkg.requires)) return;
 
-        let remembered = [];
-        try {
-            remembered = JSON.parse(localStorage.getItem('scirepl_installed_packages') || '[]');
-        } catch (_) { /* treat malformed storage as empty */ }
+        for (const ref of pkg.requires) {
+            const dependency = this._findEntry(ref);
+            if (!dependency || (dependency.type || 'package') !== 'package') {
+                throw new Error('Unknown package dependency: ' + ref);
+            }
+            if (this._isInstalled(dependency)) continue;
 
-        for (const name of pkg.requires) {
-            if (Array.isArray(remembered) && remembered.some(p => p.name === name)) continue;
-
-            const dependency = this.packages.find(p => p.name === name && p.type !== 'workbook');
-            if (!dependency) throw new Error('Unknown package dependency: ' + name);
-
-            const blob = await this._fetchForRestore(dependency);
-            if (!blob) throw new Error('Could not download required package: ' + name);
+            const blob = await this._fetchCatalogItem(dependency);
 
             await this._doImport(dependency, blob);
             this._rememberInstalled(dependency);
-            remembered.push({ name });
-            console.log('[PackageCatalog] installed workbook dependency:', name);
+            this._syncInstallButtons();
+            console.log('[PackageCatalog] installed dependency:', dependency.name);
         }
     }
 
@@ -335,11 +499,24 @@ class PackageCatalog {
     }
 
     /**
-     * Perform the actual import for a single package/workbook.
+     * Perform the actual import for a single package, bundle, or workbook.
      * Returns a promise that resolves when the import is fully complete.
      */
     async _doImport(pkg, blob) {
-        if (pkg.type === 'workbook' && pkg.format === 'srwb') {
+        if (pkg.type === 'bundle') {
+            for (const ref of pkg.items || []) {
+                const item = this._findEntry(ref);
+                if (!item || item.type !== 'workbook') {
+                    throw new Error('Unknown workbook in bundle: ' + ref);
+                }
+                if (this._isInstalled(item)) continue;
+
+                await this._ensureDependencies(item);
+                const itemBlob = await this._fetchCatalogItem(item);
+                await this._doImport(item, itemBlob);
+                this._syncInstallButtons();
+            }
+        } else if (pkg.type === 'workbook' && pkg.format === 'srwb') {
             const text = await blob.text();
             if (!window.fileIO) throw new Error('File IO not available');
             window.fileIO.importSrwb(text);
@@ -349,7 +526,8 @@ class PackageCatalog {
             // importIpynb now returns a promise (resolves when importCells finishes)
             await window.fileIO.importIpynb(text);
         } else {
-            const urlParts = pkg.url.split('/');
+            const sourceUrl = pkg.url || pkg.pages_url || 'package.zip';
+            const urlParts = sourceUrl.split('/');
             const filename = urlParts[urlParts.length - 1] || 'package.zip';
             const file = new File([blob], filename, { type: blob.type });
             if (!window.packageLoader) throw new Error('Package loader not available');

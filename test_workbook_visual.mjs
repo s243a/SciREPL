@@ -29,7 +29,7 @@ const TIMEOUT = 180_000;
     await page.click('#menu-btn');
     await page.waitForTimeout(500);
 
-    // 2. Click "Browse Packages & Workbooks"
+    // 2. Click "Browse Packages, Bundles & Workbooks"
     console.log('Opening package catalog...');
     await page.click('#btn-browse-packages');
     await page.waitForSelector('#package-catalog-list', { timeout: 10000 });

@@ -1276,16 +1276,27 @@ html, body {
     font-size: 1rem;
 }
 
-.pkg-version, .pkg-size, .pkg-kernels {
+.pkg-version, .pkg-size, .pkg-contents, .pkg-kernels {
     font-size: 0.8rem;
     color: var(--fg-secondary);
     margin-left: 8px;
+}
+
+.pkg-bundle-card {
+    border-left: 3px solid var(--accent);
 }
 
 .pkg-info p {
     margin: 4px 0 0;
     font-size: 0.85rem;
     color: var(--fg-secondary);
+}
+
+.pkg-requires {
+    display: block;
+    margin-top: 4px;
+    color: var(--fg-secondary);
+    font-size: 0.78rem;
 }
 
 .pkg-install-btn {

@@ -281,7 +281,7 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - **[www/js/r_prelude.R](www/js/r_prelude.R)** — R prelude: SharedVFS bridge + interactive `plotly()` / `mplotly()`
 - **[www/js/shared_vfs.js](www/js/shared_vfs.js)** — SharedVFS — in-memory filesystem shared across kernels
 - **[www/js/package_loader.js](www/js/package_loader.js)** — Package loading, target routing, WASM module loading
-- **[www/js/package_catalog.js](www/js/package_catalog.js)** — Browse Packages UI and one-click install
+- **[www/js/package_catalog.js](www/js/package_catalog.js)** — Packages, dependency-aware bundles, workbooks, and installed-state UI
 - **[www/js/persistence.js](www/js/persistence.js)** — Session save/restore via localStorage + IndexedDB (with language per cell)
 - **[www/js/indexeddb_store.js](www/js/indexeddb_store.js)** — IndexedDB storage for Prolog VFS and SharedVFS files
 - **[www/js/notebook_manager.js](www/js/notebook_manager.js)** — Multi-notebook management (tabs/sidebar/dropdown, rename, persistence)

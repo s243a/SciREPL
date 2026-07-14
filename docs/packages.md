@@ -10,7 +10,7 @@ The package system lets you bundle notebooks, data files, Python modules, Prolog
 
 ### Installing a Package
 
-**From the catalog:** Menu > Browse Packages > Install
+**From the catalog:** Menu > Browse Packages, Bundles & Workbooks > Install
 
 **From a file:** Menu > Import Package > select a `.zip` file
 
@@ -489,18 +489,31 @@ Packages with `format_version: "1.0"` continue to work. Files without a `target`
 
 ## Package Catalog
 
-The built-in catalog (Menu > Browse Packages) lists curated packages with one-click install. Catalog entries include metadata about which kernels a package uses.
+The built-in catalog (Menu > Browse Packages, Bundles & Workbooks) lists curated runtime packages, dependency-aware workbook bundles, and individually installable workbooks. Installed package state persists across app launches; workbook state is derived from the notebooks currently present.
 
 To add packages to the catalog, edit `www/js/package_catalog.js`:
 
 ```javascript
 {
+    id: 'my-package',
     name: 'My Package',
     description: 'Description here',
     version: 'v1.0.0',
     url: 'https://github.com/user/repo/releases/download/v1.0.0/package.zip',
     size: '~500 KB',
     kernels: ['python', 'prolog'],
+}
+```
+
+A bundle groups existing workbook entries and declares any package dependencies. Dependencies are installed first, and already installed packages or workbooks are skipped:
+
+```javascript
+{
+    id: 'my-workbook-bundle',
+    name: 'My Workbook Bundle',
+    type: 'bundle',
+    requires: ['my-package'],
+    items: ['tutorial-one', 'tutorial-two'],
 }
 ```
 
@@ -511,7 +524,7 @@ To add packages to the catalog, edit `www/js/package_catalog.js`:
 | File | Purpose |
 |------|---------|
 | `www/js/package_loader.js` | Core package loading, manifest parsing, target routing, WASM module loading |
-| `www/js/package_catalog.js` | Browse Packages UI and one-click install |
+| `www/js/package_catalog.js` | Package/bundle/workbook catalog, dependency installation, and installed-state UI |
 | `www/js/shared_vfs.js` | SharedVFS — in-memory filesystem shared across all kernels |
 | `www/js/sharedfs.py` | Python bridge to SharedVFS (`import sharedfs`) |
 | `www/js/kernels/python.js` | Python kernel — loads sharedfs, syncs `/shared/lib/python/` |

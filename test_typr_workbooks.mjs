@@ -105,6 +105,8 @@ async function runAllAndCollect(page) {
             const kernel = window.kernelManager.getKernel('typr');
             return kernel._typrModule.compile(source).r_code;
         }, typrCell?.code || '');
+        assert(compileCell?.code.includes("nb_read('family_tree', '.code', PrologSrc)"),
+            'compiler reads Prolog source from the named family_tree cell');
         assert(compileCell?.output.includes('TypR code written to cell'), 'Prolog populates the TypR cell');
         assert(typrCell?.code.includes('fn(start: char)') && !typrCell.code.includes('@{'),
             'UnifyWeaver emits native typed TypR without raw-R traversal blocks');

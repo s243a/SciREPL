@@ -1,4 +1,4 @@
-// Playwright test: Browse Packages & Workbooks catalog
+// Playwright test: Browse Packages, Bundles & Workbooks catalog
 import { chromium } from 'playwright';
 
 const TIMEOUT = 180_000;
@@ -26,6 +26,10 @@ const TIMEOUT = 180_000;
         const context = browser.contexts()[0];
         await context.addInitScript(() => {
             localStorage.setItem('scirepl_privacy_accepted', '1');
+            localStorage.setItem('scirepl_installed_packages', JSON.stringify([{
+                name: 'UnifyWeaver SciREPL',
+                pages_url: 'packages/unifyweaver_scirepl.zip'
+            }]));
         });
 
         await page.goto('http://localhost:8085/', { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
@@ -38,7 +42,8 @@ const TIMEOUT = 180_000;
         const btnText = await page.evaluate(() => {
             return document.getElementById('btn-browse-packages')?.textContent?.trim();
         });
-        testLog('Menu button contains "Browse Packages & Workbooks"', btnText && btnText.includes('Browse Packages & Workbooks'), btnText);
+        testLog('Menu button includes Packages, Bundles & Workbooks',
+            btnText && btnText.includes('Packages, Bundles & Workbooks'), btnText);
 
         // ── Test: Modal title ──
 
@@ -48,7 +53,8 @@ const TIMEOUT = 180_000;
             const modal = document.getElementById('package-catalog-modal');
             return modal?.querySelector('h2')?.textContent?.trim();
         });
-        testLog('Modal title says "Browse Packages & Workbooks"', modalTitle === 'Browse Packages & Workbooks', modalTitle);
+        testLog('Modal title includes Packages, Bundles & Workbooks',
+            modalTitle === 'Browse Packages, Bundles & Workbooks', modalTitle);
 
         // ── Test: Open catalog modal ──
 
@@ -71,7 +77,10 @@ const TIMEOUT = 180_000;
         });
 
         testLog('Has "Packages" section', sections.includes('Packages'), sections.join(', '));
+        testLog('Has "Bundles" section', sections.includes('Bundles'), sections.join(', '));
         testLog('Has "Workbooks" section', sections.includes('Workbooks'), sections.join(', '));
+        testLog('Sections are ordered Packages, Bundles, Workbooks',
+            sections.join('|') === 'Packages|Bundles|Workbooks', sections.join(', '));
 
         // ── Test: Catalog entries ──
 
@@ -83,25 +92,70 @@ const TIMEOUT = 180_000;
                 return {
                     name: card.querySelector('strong')?.textContent?.trim(),
                     kernels: card.querySelector('.pkg-kernels')?.textContent?.trim(),
+                    contents: card.querySelector('.pkg-contents')?.textContent?.trim(),
+                    requires: card.querySelector('.pkg-requires')?.textContent?.trim(),
+                    buttonText: card.querySelector('.pkg-install-btn')?.textContent?.trim(),
+                    buttonDisabled: !!card.querySelector('.pkg-install-btn')?.disabled,
                     hasInstallBtn: !!card.querySelector('.pkg-install-btn')
                 };
             });
         });
 
-        testLog('Has at least 9 catalog entries', cards.length >= 9, `${cards.length} entries`);
+        testLog('Has at least 15 catalog entries', cards.length >= 15, `${cards.length} entries`);
 
         const packageEntry = cards.find(c => c.name === 'UnifyWeaver SciREPL');
+        const bundleEntry = cards.find(c => c.name === 'UnifyWeaver Tutorials & Compiler Demos');
         const workbookEntry = cards.find(c => c.name === 'Life Expectancy Analysis');
         const typrIntroEntry = cards.find(c => c.name === 'TypR Introduction');
         const generatedTyprEntry = cards.find(c => c.name === 'Prolog Generates TypR');
 
         testLog('Package entry exists', !!packageEntry);
+        testLog('Previously installed package is labelled Installed',
+            packageEntry?.buttonText === 'Installed' && packageEntry?.buttonDisabled,
+            `${packageEntry?.buttonText}, disabled=${packageEntry?.buttonDisabled}`);
+        testLog('UnifyWeaver bundle entry exists', !!bundleEntry);
+        testLog('UnifyWeaver bundle advertises four workbooks', bundleEntry?.contents === '4 workbooks', bundleEntry?.contents);
+        testLog('UnifyWeaver bundle displays its package dependency',
+            bundleEntry?.requires === 'Requires: UnifyWeaver SciREPL', bundleEntry?.requires);
         testLog('Workbook entry exists', !!workbookEntry);
         testLog('Workbook shows python, r kernels', workbookEntry?.kernels === 'python, r', workbookEntry?.kernels);
         testLog('TypR introduction entry exists', !!typrIntroEntry);
         testLog('TypR introduction shows typr, r kernels', typrIntroEntry?.kernels === 'typr, r', typrIntroEntry?.kernels);
         testLog('Generated TypR entry exists', !!generatedTyprEntry);
         testLog('Generated TypR shows prolog, typr, r kernels', generatedTyprEntry?.kernels === 'prolog, typr, r', generatedTyprEntry?.kernels);
+
+        const bundleDefinition = await page.evaluate(() => {
+            const bundle = window.packageCatalog.packages.find(p => p.id === 'unifyweaver-workbooks');
+            return { items: bundle?.items || [], requires: bundle?.requires || [] };
+        });
+        testLog('Bundle matches package-builder workbook list',
+            bundleDefinition.items.join('|') === [
+                'unifyweaver-family-tree',
+                'unifyweaver-recursion-patterns',
+                'unifyweaver-call-graph',
+                'prolog-generates-r'
+            ].join('|'), bundleDefinition.items.join(', '));
+        testLog('Bundle declares UnifyWeaver package dependency',
+            bundleDefinition.requires.includes('unifyweaver-scirepl'), bundleDefinition.requires.join(', '));
+
+        const bundleInstall = await page.evaluate(async () => {
+            const catalog = window.packageCatalog;
+            const bundle = catalog.packages.find(p => p.id === 'unifyweaver-workbooks');
+            await catalog._ensureDependencies(bundle);
+            await catalog._doImport(bundle, null);
+            catalog._syncInstallButtons();
+            const names = window.notebookManager.getNotebooks().map(nb => nb.name);
+            return { names, installed: catalog._isInstalled(bundle) };
+        });
+        for (const name of [
+            'Family Tree Tutorial with UnifyWeaver',
+            'Advanced Recursion Patterns in UnifyWeaver',
+            'Call Graph Analysis and SCC Detection',
+            'Prolog Generates R: Compiler Demo'
+        ]) {
+            testLog(`Bundle installs ${name}`, bundleInstall.names.includes(name));
+        }
+        testLog('Bundle reports Installed after all members are present', bundleInstall.installed);
 
         // ── Test: Workbook fetch via pages_url ──
 
@@ -142,6 +196,7 @@ const TIMEOUT = 180_000;
                 const code = compileCell?.code || '';
                 return {
                     fetched: true,
+                    readsNamedPrologCell: code.includes("nb_read('family_tree', '.code', PrologSrc)"),
                     usesDirectVariadicCat: code.includes('cat("Descendants of alice:", paste(results'),
                     hasLegacyCatPaste: code.includes('cat(paste(')
                 };
@@ -152,6 +207,7 @@ const TIMEOUT = 180_000;
 
         testLog('Generated TypR workbook fetches from pages_url', typrWorkbookResult.fetched, typrWorkbookResult.error || '');
         if (typrWorkbookResult.fetched) {
+            testLog('Generated TypR compiler reads the named Prolog source cell', typrWorkbookResult.readsNamedPrologCell);
             testLog('Generated TypR queries use direct variadic cat', typrWorkbookResult.usesDirectVariadicCat);
             testLog('Generated TypR queries omit legacy cat(paste(...))', !typrWorkbookResult.hasLegacyCatPaste);
         }
