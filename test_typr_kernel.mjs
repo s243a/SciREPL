@@ -124,7 +124,8 @@ async function domExec(page, asyncJsCode, { timeout = 30000 } = {}) {
             const source = [
                 "let sink <- fn(...values: Any): Any { values };",
                 "let forward <- fn(...args: Any): Any { sink(...args) };",
-                "forward(count = 1, enabled = true);"
+                "forward(count = 1, enabled = true);",
+                "cat(1, paste(2, true, sep = 0), 3);"
             ].join("\\n");
             const checked = mod.typeCheck(source);
             const transpiled = mod.transpile(source);

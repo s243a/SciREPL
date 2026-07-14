@@ -119,9 +119,17 @@ class TypRKernel {
                 };
             }
 
-            // Execute R code directly through the R kernel's webR instance
-            // to avoid withAutoprint which causes duplicate output with print()
-            const rResult = await rKernel.executeRaw(result.r_code);
+            // Each TypR cell is a self-contained compilation unit. Execute its
+            // generated standard library and user code in a child environment
+            // so declarations such as `exists` do not mask base R functions in
+            // later plain-R cells.
+            const isolatedR =
+                'base::local({\n' + result.r_code +
+                '\n}, envir = base::new.env(parent = base::globalenv()))';
+
+            // Execute directly through webR to avoid withAutoprint, which would
+            // duplicate output produced by print()/cat().
+            const rResult = await rKernel.executeRaw(isolatedR);
 
             // Combine outputs
             if (rResult.stdout) output += rResult.stdout;

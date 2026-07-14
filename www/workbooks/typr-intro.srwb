@@ -6,7 +6,7 @@
     "cells": [
       {
         "type": "markdown",
-        "code": "# TypR — Typed R\n\nTypR is a typed superset of R that compiles to standard R code.\nIt adds type annotations, type checking, and generics while\nkeeping full R compatibility.\n\n**Syntax notes:**\n- Statements end with semicolons: `let x <- 42;`\n- Function bodies require braces: `function(x) { x * x }`\n- TypR supports variadic functions and named dots, so `cat(\"x =\", x);` works directly.",
+        "code": "# TypR — Typed R\n\nTypR is a typed superset of R that compiles to standard R code.\nIt adds type annotations, type checking, and generics while\nkeeping full R compatibility.\n\n**Syntax notes:**\n- Statements end with semicolons: `let x <- 42;`\n- Typed functions use `fn(x: int): int { x * x }`\n- TypR supports variadic functions and named dots, so `cat(\"x =\", x);` works directly.",
         "language": "markdown"
       },
       {
@@ -29,13 +29,13 @@
       },
       {
         "type": "code",
-        "code": "# Function bodies require braces\nlet square <- function(x) { x * x };\nlet result <- square(7);\n# Variadic arguments work directly\ncat(\"7 squared =\", result);",
+        "code": "# Explicit parameter and return types make calls statically checkable\nlet square <- fn(x: int): int { x * x };\nlet result <- square(7);\n# Variadic arguments work directly\ncat(\"7 squared =\", result);",
         "language": "typr",
         "name": "square"
       },
       {
         "type": "code",
-        "code": "# Forward heterogeneous named arguments\nlet collect <- fn(...args: Any): [#N, Any] { args };\nlet forward <- fn(...args: Any): [#N, Any] { collect(...args) };\nlet values <- forward(count = 1, enabled = true);\nprint(values);",
+        "code": "# Forward heterogeneous named arguments\nlet collect <- fn(...args: Any): [#N, Any] { args };\nlet forward <- fn(...args: Any): [#N, Any] { collect(...args) };\nlet values <- forward(count = 1, enabled = true);\nprint(values);\n@{ base::cat(\"Names:\", base::paste(base::names(values$data), collapse = \", \"), \"\\n\") }@;",
         "language": "typr",
         "name": "variadic_forwarding"
       },
@@ -46,7 +46,7 @@
       },
       {
         "type": "code",
-        "code": "#!transpile\nlet fib <- function(n) {\n  if (n <= 1) { n }\n  else { fib(n - 1) + fib(n - 2) }\n};\nprint(fib(10));",
+        "code": "#!transpile\nlet fib <- fn(n: int): int {\n  if (n <= 1) { n }\n  else { fib(n - 1) + fib(n - 2) }\n};\nprint(fib(10));",
         "language": "typr",
         "name": "transpile_demo"
       }

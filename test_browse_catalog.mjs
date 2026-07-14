@@ -30,11 +30,6 @@ const TIMEOUT = 180_000;
 
         await page.goto('http://localhost:8085/', { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
 
-        console.log('   Waiting for Pyodide...');
-        await page.waitForFunction(() => {
-            const km = window.kernelManager;
-            return km && km._instances && km._instances.python && km._instances.python.isReady();
-        }, { timeout: TIMEOUT });
 
         // ── Test: Menu button text ──
 
@@ -93,14 +88,20 @@ const TIMEOUT = 180_000;
             });
         });
 
-        testLog('Has 2 catalog entries', cards.length === 2, `${cards.length} entries`);
+        testLog('Has at least 9 catalog entries', cards.length >= 9, `${cards.length} entries`);
 
         const packageEntry = cards.find(c => c.name === 'UnifyWeaver SciREPL');
         const workbookEntry = cards.find(c => c.name === 'Life Expectancy Analysis');
+        const typrIntroEntry = cards.find(c => c.name === 'TypR Introduction');
+        const generatedTyprEntry = cards.find(c => c.name === 'Prolog Generates TypR');
 
         testLog('Package entry exists', !!packageEntry);
         testLog('Workbook entry exists', !!workbookEntry);
         testLog('Workbook shows python, r kernels', workbookEntry?.kernels === 'python, r', workbookEntry?.kernels);
+        testLog('TypR introduction entry exists', !!typrIntroEntry);
+        testLog('TypR introduction shows typr, r kernels', typrIntroEntry?.kernels === 'typr, r', typrIntroEntry?.kernels);
+        testLog('Generated TypR entry exists', !!generatedTyprEntry);
+        testLog('Generated TypR shows prolog, typr, r kernels', generatedTyprEntry?.kernels === 'prolog, typr, r', generatedTyprEntry?.kernels);
 
         // ── Test: Workbook fetch via pages_url ──
 
@@ -128,9 +129,36 @@ const TIMEOUT = 180_000;
             testLog('Workbook has cells', installResult.cellCount > 5, `${installResult.cellCount} cells`);
         }
 
+        // ── Test: Generated TypR workbook ──
+
+        console.log('8. Testing generated TypR workbook...');
+
+        const typrWorkbookResult = await page.evaluate(async () => {
+            try {
+                const resp = await fetch('workbooks/prolog-generates-typr.srwb');
+                if (!resp.ok) return { fetched: false, error: 'HTTP ' + resp.status };
+                const workbook = await resp.json();
+                const compileCell = workbook.notebook?.cells?.find(cell => cell.name === 'compile_to_typr');
+                const code = compileCell?.code || '';
+                return {
+                    fetched: true,
+                    usesDirectVariadicCat: code.includes('cat("Descendants of alice:", paste(results'),
+                    hasLegacyCatPaste: code.includes('cat(paste(')
+                };
+            } catch (e) {
+                return { fetched: false, error: e.message };
+            }
+        });
+
+        testLog('Generated TypR workbook fetches from pages_url', typrWorkbookResult.fetched, typrWorkbookResult.error || '');
+        if (typrWorkbookResult.fetched) {
+            testLog('Generated TypR queries use direct variadic cat', typrWorkbookResult.usesDirectVariadicCat);
+            testLog('Generated TypR queries omit legacy cat(paste(...))', !typrWorkbookResult.hasLegacyCatPaste);
+        }
+
         // ── Test: importIpynb integration ──
 
-        console.log('8. Testing importIpynb integration...');
+        console.log('9. Testing importIpynb integration...');
 
         const importResult = await page.evaluate(async () => {
             const resp = await fetch('workbooks/life_expectancy_csv_demo.ipynb');
