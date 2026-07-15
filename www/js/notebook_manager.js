@@ -12,6 +12,8 @@ class Notebook {
         this.name = opts.name || 'Notebook 1';
         this.description = opts.description || '';
         this.kernelLanguage = opts.kernelLanguage || null; // null = infer from cells
+        this.catalogId = opts.catalogId || null;
+        this.catalogRevision = opts.catalogRevision ?? null;
         this.cells = opts.cells || [];
         this.cellCounter = opts.cellCounter || 0;
         this.replContainer = null; // DOM element
@@ -38,6 +40,8 @@ class Notebook {
             name: this.name,
             description: this.description,
             kernelLanguage: this.kernelLanguage,
+            catalogId: this.catalogId,
+            catalogRevision: this.catalogRevision,
             cellCounter: this.cellCounter,
             cells: this.cells.map(c => ({
                 code: c.code,
@@ -56,6 +60,8 @@ class Notebook {
             name: data.name,
             description: data.description,
             kernelLanguage: data.kernelLanguage,
+            catalogId: data.catalogId,
+            catalogRevision: data.catalogRevision,
             cellCounter: data.cellCounter,
             cells: data.cells || []
         });
