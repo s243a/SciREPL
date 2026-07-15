@@ -47,6 +47,15 @@ jobs:
       - name: Run WASM FFI tests
         run: node test_wasm_ffi.mjs
 
+      - name: Run package catalog tests
+        run: node test_browse_catalog.mjs
+
+      - name: Run TypR workbook tests
+        run: node test_typr_workbooks.mjs
+
+      - name: Run PWA offline catalog tests
+        run: node test_pwa_release.mjs
+
   deploy:
     needs: test
     runs-on: ubuntu-latest

@@ -25,11 +25,14 @@ const TIMEOUT = 180_000;
 
         const context = browser.contexts()[0];
         await context.addInitScript(() => {
-            localStorage.setItem('scirepl_privacy_accepted', '1');
-            localStorage.setItem('scirepl_installed_packages', JSON.stringify([{
-                name: 'UnifyWeaver SciREPL',
-                pages_url: 'packages/unifyweaver_scirepl.zip'
-            }]));
+            if (!sessionStorage.getItem('catalog_test_seeded')) {
+                sessionStorage.setItem('catalog_test_seeded', '1');
+                localStorage.setItem('scirepl_privacy_accepted', '1');
+                localStorage.setItem('scirepl_installed_packages', JSON.stringify([{
+                    name: 'UnifyWeaver SciREPL',
+                    pages_url: 'packages/unifyweaver_scirepl.zip'
+                }]));
+            }
         });
 
         await page.goto('http://localhost:8085/', { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
@@ -233,6 +236,36 @@ const TIMEOUT = 180_000;
 
         testLog('importIpynb loads workbook content', importResult.hasLifeExp,
             `${importResult.cellsAfter} cells, hasLifeExp=${importResult.hasLifeExp}`);
+
+        // ── Test: Clear History resets catalog installation state ──
+
+        console.log('10. Testing Clear History package-state reset...');
+
+        await Promise.all([
+            page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: TIMEOUT }),
+            page.evaluate(() => {
+                const button = document.getElementById('btn-clear-session');
+                button.click();
+                button.click();
+            })
+        ]);
+        await page.waitForSelector('#run-btn:not([disabled])');
+        await page.evaluate(() => document.getElementById('btn-browse-packages').click());
+        const clearedPackageState = await page.evaluate(() => {
+            const cards = [...document.querySelectorAll('#package-catalog-list .pkg-card')];
+            const card = cards.find(item => item.querySelector('strong')?.textContent?.trim() === 'UnifyWeaver SciREPL');
+            const button = card?.querySelector('.pkg-install-btn');
+            return {
+                stored: localStorage.getItem('scirepl_installed_packages'),
+                buttonText: button?.textContent?.trim(),
+                disabled: !!button?.disabled
+            };
+        });
+        testLog('Clear History removes remembered package installations',
+            clearedPackageState.stored === null, clearedPackageState.stored || 'not stored');
+        testLog('Catalog shows Install after Clear History and reload',
+            clearedPackageState.buttonText === 'Install' && !clearedPackageState.disabled,
+            `${clearedPackageState.buttonText}, disabled=${clearedPackageState.disabled}`);
 
         // --- Summary ---
         console.log('\n' + '='.repeat(50));
