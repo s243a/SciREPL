@@ -1,7 +1,7 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v121';
+const CACHE_VERSION = 'v122';
 const APP_CACHE = 'scirepl-app-' + CACHE_VERSION;
 const CDN_CACHE = 'scirepl-cdn-v2';
 
@@ -58,15 +58,23 @@ const APP_SHELL = [
   './vendor/brush/brush_wasm_bg.wasm',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  // Same-origin catalog payloads. Pre-cache these so an installed PWA can add
+  // packages, bundles, and workbooks without cross-origin or network access.
+  './packages/unifyweaver_scirepl.zip',
+  './workbooks/01_family_tree_tutorial.ipynb',
+  './workbooks/02_recursion_patterns.ipynb',
+  './workbooks/03_call_graph_analysis.ipynb',
+  './workbooks/life_expectancy_csv_demo.ipynb',
+  './workbooks/r_ggplot2_showcase.ipynb',
+  './workbooks/r_tidyverse_wrangling.ipynb',
+  './workbooks/r_statistics.ipynb',
   './workbooks/lua-tables-coroutines.srwb',
   './workbooks/lua-parsing-coroutines.srwb',
   './workbooks/prolog-generates-r.srwb',
   './workbooks/prolog-generates-clojurescript.srwb',
+  './workbooks/prolog-generates-lua.srwb',
   './workbooks/typr-intro.srwb',
   './workbooks/prolog-generates-typr.srwb',
-  './workbooks/01_family_tree_tutorial.ipynb',
-  './workbooks/02_recursion_patterns.ipynb',
-  './workbooks/03_call_graph_analysis.ipynb',
 ];
 
 // CDN domains to cache (Pyodide ~25MB, swipl-wasm ~10MB, webR ~50MB)

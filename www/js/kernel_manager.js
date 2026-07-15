@@ -175,7 +175,7 @@ class KernelManager {
         let cached = false;
         if (info.cdnHost) {
             try {
-                const cdnCache = await caches.open('scirepl-cdn-v1');
+                const cdnCache = await caches.open(KernelManager.CDN_CACHE);
                 const keys = await cdnCache.keys();
                 cached = keys.some(r => new URL(r.url).hostname === info.cdnHost);
             } catch (_) { }
@@ -407,6 +407,7 @@ class KernelManager {
 
 // Kernels that require CDN downloads
 KernelManager.CDN_KERNELS = new Set(['python', 'prolog', 'r', 'lua']);
+KernelManager.CDN_CACHE = 'scirepl-cdn-v2';
 
 // Runtime display info for download confirmation modal
 KernelManager.RUNTIME_INFO = {

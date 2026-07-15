@@ -57,6 +57,10 @@ class FileIO {
             window._clearingSession = true; // Prevent beforeunload from re-saving
             localStorage.removeItem('scirepl_session_v2');
             localStorage.removeItem('scirepl_session_v1');
+            // Package installation state belongs to the cleared app history too.
+            // Leaving this behind makes the catalog claim a package is installed
+            // after its session/VFS state has been removed.
+            localStorage.removeItem('scirepl_installed_packages');
             // Also clear IndexedDB (VFS files, search paths, and SharedVFS)
             if (window.vfsStore && window.vfsStore.isReady()) {
                 try {
@@ -1514,7 +1518,7 @@ class FileIO {
                     // Show "Clear Cache" if CDN cache has entries for this runtime
                     if (runtimeInfo && runtimeInfo.cdnHost) {
                         try {
-                            const cdnCache = await caches.open('scirepl-cdn-v1');
+                            const cdnCache = await caches.open(KernelManager.CDN_CACHE);
                             const keys = await cdnCache.keys();
                             const hasCached = keys.some(r => new URL(r.url).hostname === runtimeInfo.cdnHost);
                             if (hasCached) {
@@ -1525,7 +1529,7 @@ class FileIO {
                                     clearBtn.textContent = 'Clearing...';
                                     clearBtn.disabled = true;
                                     try {
-                                        const cache = await caches.open('scirepl-cdn-v1');
+                                        const cache = await caches.open(KernelManager.CDN_CACHE);
                                         const allKeys = await cache.keys();
                                         await Promise.all(
                                             allKeys
