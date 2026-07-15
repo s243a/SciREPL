@@ -215,9 +215,72 @@ const TIMEOUT = 180_000;
             testLog('Generated TypR queries omit legacy cat(paste(...))', !typrWorkbookResult.hasLegacyCatPaste);
         }
 
+        // ── Test: stale catalog workbook update ──
+
+        console.log('9. Testing stale workbook update...');
+
+        const workbookUpdate = await page.evaluate(async () => {
+            const catalog = window.packageCatalog;
+            const nm = window.notebookManager;
+            const pkg = catalog.packages.find(item => item.id === 'prolog-generates-typr');
+            const pkgIndex = catalog.packages.findIndex(item => item.id === pkg.id);
+
+            // Simulate a workbook restored from before catalog revisions existed.
+            nm.createNotebook({ name: pkg.notebookName });
+            catalog._syncInstallButtons();
+            const button = document.querySelector(`.pkg-install-btn[data-idx="${pkgIndex}"]`);
+            const before = button.textContent.trim();
+
+            const response = await fetch(pkg.pages_url);
+            await catalog._doImport(pkg, await response.blob());
+            catalog._syncInstallButtons();
+
+            const matches = nm.getNotebooks().filter(nb => nb.name === pkg.notebookName);
+            const updated = matches[0];
+            const compileCell = updated?.cells?.find(cell => cell.name === 'compile_to_typr');
+            return {
+                before,
+                after: button.textContent.trim(),
+                disabled: button.disabled,
+                matchCount: matches.length,
+                catalogId: updated?.catalogId,
+                catalogRevision: updated?.catalogRevision,
+                readsNamedCell: compileCell?.code?.includes("nb_read('family_tree', '.code', PrologSrc)") || false
+            };
+        });
+
+        testLog('Stale TypR workbook is labelled Update', workbookUpdate.before === 'Update', workbookUpdate.before);
+        testLog('Update replaces the stale workbook instead of duplicating it',
+            workbookUpdate.matchCount === 1, `${workbookUpdate.matchCount} copies`);
+        testLog('Updated workbook records its catalog revision',
+            workbookUpdate.catalogId === 'prolog-generates-typr' && workbookUpdate.catalogRevision === 2,
+            `${workbookUpdate.catalogId}@${workbookUpdate.catalogRevision}`);
+        testLog('Updated workbook uses the named family_tree cell', workbookUpdate.readsNamedCell);
+        testLog('Updated workbook is labelled Installed',
+            workbookUpdate.after === 'Installed' && workbookUpdate.disabled,
+            `${workbookUpdate.after}, disabled=${workbookUpdate.disabled}`);
+
+        await page.reload({ waitUntil: 'domcontentloaded' });
+        await page.waitForSelector('#run-btn:not([disabled])');
+        await page.evaluate(() => document.getElementById('btn-browse-packages').click());
+        const persistedUpdateState = await page.evaluate(() => {
+            const catalog = window.packageCatalog;
+            const pkg = catalog.packages.find(item => item.id === 'prolog-generates-typr');
+            const notebook = window.notebookManager.getNotebooks().find(nb => nb.name === pkg.notebookName);
+            return {
+                installed: catalog._isInstalled(pkg),
+                catalogId: notebook?.catalogId,
+                catalogRevision: notebook?.catalogRevision
+            };
+        });
+        testLog('Workbook revision survives app reload',
+            persistedUpdateState.installed &&
+            persistedUpdateState.catalogId === 'prolog-generates-typr' &&
+            persistedUpdateState.catalogRevision === 2);
+
         // ── Test: importIpynb integration ──
 
-        console.log('9. Testing importIpynb integration...');
+        console.log('10. Testing importIpynb integration...');
 
         const importResult = await page.evaluate(async () => {
             const resp = await fetch('workbooks/life_expectancy_csv_demo.ipynb');
@@ -239,7 +302,7 @@ const TIMEOUT = 180_000;
 
         // ── Test: Clear History resets catalog installation state ──
 
-        console.log('10. Testing Clear History package-state reset...');
+        console.log('11. Testing Clear History package-state reset...');
 
         await Promise.all([
             page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: TIMEOUT }),

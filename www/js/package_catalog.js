@@ -183,6 +183,7 @@ class PackageCatalog {
                 description: 'Compile a Prolog transitive-closure predicate to typed TypR, then execute the generated code with native variadic output calls.',
                 type: 'workbook',
                 format: 'srwb',
+                revision: 2,
                 pages_url: 'workbooks/prolog-generates-typr.srwb',
                 size: '~5 KB',
                 kernels: ['prolog', 'typr', 'r'],
@@ -282,28 +283,41 @@ class PackageCatalog {
     }
 
     _isInstalled(pkg) {
-        if (!pkg) return false;
+        return this._installState(pkg) === 'current';
+    }
+
+    _installState(pkg) {
+        if (!pkg) return 'missing';
 
         if ((pkg.type || 'package') === 'package') {
             return this._installedPackages().some(saved =>
-                saved && (saved.id === pkg.id || saved.name === pkg.name));
+                saved && (saved.id === pkg.id || saved.name === pkg.name)) ? 'current' : 'missing';
         }
 
         if (pkg.type === 'workbook') {
             const notebooks = window.notebookManager?.getNotebooks?.() || [];
             const expectedName = pkg.notebookName || pkg.name;
-            return notebooks.some(nb => nb && nb.name === expectedName);
+            const matches = notebooks.filter(nb => nb && nb.name === expectedName);
+            if (matches.length === 0) return 'missing';
+            if (pkg.revision == null) return 'current';
+            return matches.some(nb =>
+                nb.catalogId === pkg.id &&
+                String(nb.catalogRevision) === String(pkg.revision)
+            ) ? 'current' : 'outdated';
         }
 
         if (pkg.type === 'bundle') {
             const dependenciesInstalled = (pkg.requires || []).every(ref =>
                 this._isInstalled(this._findEntry(ref)));
-            const itemsInstalled = (pkg.items || []).every(ref =>
-                this._isInstalled(this._findEntry(ref)));
-            return dependenciesInstalled && itemsInstalled;
+            const itemStates = (pkg.items || []).map(ref =>
+                this._installState(this._findEntry(ref)));
+            if (dependenciesInstalled && itemStates.every(state => state === 'current')) {
+                return 'current';
+            }
+            return itemStates.some(state => state === 'outdated') ? 'outdated' : 'missing';
         }
 
-        return false;
+        return 'missing';
     }
 
     _syncInstallButtons() {
@@ -311,10 +325,10 @@ class PackageCatalog {
         const all = this.packages;
         this.listEl.querySelectorAll('.pkg-install-btn').forEach(btn => {
             const pkg = all[parseInt(btn.dataset.idx, 10)];
-            const installed = this._isInstalled(pkg);
-            btn.textContent = installed ? 'Installed' : 'Install';
-            btn.disabled = installed;
-            btn.classList.toggle('pkg-installed', installed);
+            const state = this._installState(pkg);
+            btn.textContent = state === 'current' ? 'Installed' : (state === 'outdated' ? 'Update' : 'Install');
+            btn.disabled = state === 'current';
+            btn.classList.toggle('pkg-installed', state === 'current');
         });
     }
 
@@ -519,12 +533,12 @@ class PackageCatalog {
         } else if (pkg.type === 'workbook' && pkg.format === 'srwb') {
             const text = await blob.text();
             if (!window.fileIO) throw new Error('File IO not available');
-            window.fileIO.importSrwb(text);
+            await this._importWorkbook(pkg, () => window.fileIO.importSrwb(text));
         } else if (pkg.type === 'workbook') {
             const text = await blob.text();
             if (!window.fileIO) throw new Error('File IO not available');
             // importIpynb now returns a promise (resolves when importCells finishes)
-            await window.fileIO.importIpynb(text);
+            await this._importWorkbook(pkg, () => window.fileIO.importIpynb(text));
         } else {
             const sourceUrl = pkg.url || pkg.pages_url || 'package.zip';
             const urlParts = sourceUrl.split('/');
@@ -533,6 +547,35 @@ class PackageCatalog {
             if (!window.packageLoader) throw new Error('Package loader not available');
             await window.packageLoader.loadFromFile(file);
         }
+    }
+
+    /**
+     * Import a catalog workbook and replace older catalog revisions with the
+     * newly-created notebook. User-created notebooks with other names remain
+     * untouched, and replacement only happens after a successful import.
+     */
+    async _importWorkbook(pkg, importer) {
+        const nm = window.notebookManager;
+        if (!nm) throw new Error('NotebookManager not available');
+
+        const expectedName = pkg.notebookName || pkg.name;
+        const previous = nm.getNotebooks().filter(nb => nb && nb.name === expectedName);
+        await Promise.resolve(importer());
+
+        const matches = nm.getNotebooks().filter(nb => nb && nb.name === expectedName);
+        const imported = [...matches].reverse().find(nb => !previous.includes(nb));
+        if (!imported) throw new Error('Imported workbook was not created: ' + expectedName);
+
+        imported.catalogId = pkg.id;
+        imported.catalogRevision = pkg.revision ?? null;
+
+        // Import first, then remove stale copies, so a parse/import failure can
+        // never destroy the user's existing workbook.
+        for (const oldNotebook of previous) {
+            if (oldNotebook !== imported) nm.removeNotebook(oldNotebook.id);
+        }
+        nm.saveState();
+        return imported;
     }
 
     /**
