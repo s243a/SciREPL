@@ -121,7 +121,16 @@ try {
         localStorage.setItem('scirepl_auto_download', '1');
     });
     await page.reload({ waitUntil: 'domcontentloaded' });
-    const scope = await page.evaluate(async () => (await navigator.serviceWorker.ready).scope);
+    const scope = await page.evaluate(async () => {
+        const registration = await Promise.race([
+            navigator.serviceWorker.ready,
+            new Promise((_, reject) => setTimeout(
+                () => reject(new Error('service worker did not become ready within 30 seconds')),
+                30_000,
+            )),
+        ]);
+        return registration.scope;
+    });
     await page.waitForFunction(() => !!navigator.serviceWorker.controller);
     assert(scope.endsWith(PREFIX), 'service worker scope preserves the repository subpath', scope);
 
