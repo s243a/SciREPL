@@ -196,12 +196,19 @@ const TIMEOUT = 180_000;
                 if (!resp.ok) return { fetched: false, error: 'HTTP ' + resp.status };
                 const workbook = await resp.json();
                 const compileCell = workbook.notebook?.cells?.find(cell => cell.name === 'compile_to_typr');
+                const queryCell = workbook.notebook?.cells?.find(cell => cell.name === 'typr_queries');
+                const rCompileCell = workbook.notebook?.cells?.find(cell => cell.name === 'compile_to_r');
+                const rQueryCell = workbook.notebook?.cells?.find(cell => cell.name === 'r_queries');
                 const code = compileCell?.code || '';
                 return {
                     fetched: true,
                     readsNamedPrologCell: code.includes("nb_read('family_tree', '.code', PrologSrc)"),
-                    usesDirectVariadicCat: code.includes('cat("Descendants of alice:", paste(results'),
-                    hasLegacyCatPaste: code.includes('cat(paste(')
+                    readsNamedQueryCell: code.includes("nb_read('typr_queries', '.code', QuerySource)"),
+                    hasInlineQueryProgram: code.includes('format(string(Queries)'),
+                    queryIsSourceCell: queryCell?.language === 'typr' && queryCell?.code?.startsWith('#!source\n'),
+                    usesDirectVariadicCat: queryCell?.code?.includes('cat("Descendants of alice:", paste(results'),
+                    rQueriesAreSeparate: !rCompileCell?.code?.includes('format(string(Queries)') &&
+                        rQueryCell?.language === 'r' && rQueryCell?.code?.includes('ancestor_all("alice")')
                 };
             } catch (e) {
                 return { fetched: false, error: e.message };
@@ -211,8 +218,11 @@ const TIMEOUT = 180_000;
         testLog('Generated TypR workbook fetches from pages_url', typrWorkbookResult.fetched, typrWorkbookResult.error || '');
         if (typrWorkbookResult.fetched) {
             testLog('Generated TypR compiler reads the named Prolog source cell', typrWorkbookResult.readsNamedPrologCell);
+            testLog('Generated TypR compiler reads the named query source cell', typrWorkbookResult.readsNamedQueryCell);
+            testLog('Generated TypR compiler omits inline query programs', !typrWorkbookResult.hasInlineQueryProgram);
+            testLog('Generated TypR queries use a non-executing source cell', typrWorkbookResult.queryIsSourceCell);
             testLog('Generated TypR queries use direct variadic cat', typrWorkbookResult.usesDirectVariadicCat);
-            testLog('Generated TypR queries omit legacy cat(paste(...))', !typrWorkbookResult.hasLegacyCatPaste);
+            testLog('Plain R queries live in their own highlighted cell', typrWorkbookResult.rQueriesAreSeparate);
         }
 
         // ── Test: stale catalog workbook update ──
@@ -245,7 +255,8 @@ const TIMEOUT = 180_000;
                 matchCount: matches.length,
                 catalogId: updated?.catalogId,
                 catalogRevision: updated?.catalogRevision,
-                readsNamedCell: compileCell?.code?.includes("nb_read('family_tree', '.code', PrologSrc)") || false
+                readsNamedCell: compileCell?.code?.includes("nb_read('family_tree', '.code', PrologSrc)") || false,
+                readsNamedQueries: compileCell?.code?.includes("nb_read('typr_queries', '.code', QuerySource)") || false
             };
         });
 
@@ -253,9 +264,10 @@ const TIMEOUT = 180_000;
         testLog('Update replaces the stale workbook instead of duplicating it',
             workbookUpdate.matchCount === 1, `${workbookUpdate.matchCount} copies`);
         testLog('Updated workbook records its catalog revision',
-            workbookUpdate.catalogId === 'prolog-generates-typr' && workbookUpdate.catalogRevision === 2,
+            workbookUpdate.catalogId === 'prolog-generates-typr' && workbookUpdate.catalogRevision === 3,
             `${workbookUpdate.catalogId}@${workbookUpdate.catalogRevision}`);
         testLog('Updated workbook uses the named family_tree cell', workbookUpdate.readsNamedCell);
+        testLog('Updated workbook uses the named typr_queries cell', workbookUpdate.readsNamedQueries);
         testLog('Updated workbook is labelled Installed',
             workbookUpdate.after === 'Installed' && workbookUpdate.disabled,
             `${workbookUpdate.after}, disabled=${workbookUpdate.disabled}`);
@@ -276,7 +288,7 @@ const TIMEOUT = 180_000;
         testLog('Workbook revision survives app reload',
             persistedUpdateState.installed &&
             persistedUpdateState.catalogId === 'prolog-generates-typr' &&
-            persistedUpdateState.catalogRevision === 2);
+            persistedUpdateState.catalogRevision === 3);
 
         // ── Test: importIpynb integration ──
 

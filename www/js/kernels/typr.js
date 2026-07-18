@@ -147,6 +147,7 @@ class TypRKernel {
 
     /**
      * Handle #! directives:
+     *   #!source        — keep a highlighted source fragment without executing it
      *   #!show-r        — toggle showing generated R code
      *   #!typecheck      — type check only, don't execute
      *   #!transpile      — show transpiled R without type checking
@@ -157,6 +158,9 @@ class TypRKernel {
         const rest = lines.slice(1).join('\n').trim();
 
         switch (directive) {
+            case 'source':
+                return { stdout: '', error: null };
+
             case 'show-r':
                 this._showGenerated = !this._showGenerated;
                 return {
