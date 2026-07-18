@@ -99,14 +99,33 @@ async function runAllAndCollect(page) {
             generatedErrors.map(c => `${c.name || '(unnamed)'}: ${c.output}`).join(' | '));
 
         const compileCell = generated.find(c => c.name === 'compile_to_typr');
+        const querySourceCell = generated.find(c => c.name === 'typr_queries');
         const typrCell = generated.find(c => c.name === 'typr_output');
         const rCell = generated.find(c => c.name === 'r_output');
+        const rQueries = generated.find(c => c.name === 'r_queries');
+        const querySourceHighlight = await page.evaluate(() => {
+            const cell = (window._cells || []).find(c => c.name === 'typr_queries');
+            const code = cell?.inputCard?.querySelector('pre code');
+            return { hasCode: !!code, stringTokens: code?.querySelectorAll('.hljs-string').length || 0 };
+        });
         const generatedR = await page.evaluate(source => {
             const kernel = window.kernelManager.getKernel('typr');
             return kernel._typrModule.compile(source).r_code;
         }, typrCell?.code || '');
         assert(compileCell?.code.includes("nb_read('family_tree', '.code', PrologSrc)"),
             'compiler reads Prolog source from the named family_tree cell');
+        assert(querySourceCell?.code.startsWith('#!source\n') &&
+            querySourceCell.code.includes('ancestor_all("alice")'),
+            'TypR queries live in a named source cell');
+        assert(compileCell?.code.includes("nb_read('typr_queries', '.code', QuerySource)"),
+            'compiler reads queries from the named typr_queries cell');
+        assert(!compileCell?.code.includes('format(string(Queries)'),
+            'compiler cell contains no inline TypR query program');
+        assert(querySourceHighlight.hasCode && querySourceHighlight.stringTokens > 0,
+            'TypR query source receives syntax highlighting',
+            JSON.stringify(querySourceHighlight));
+        assert(!querySourceCell?.error && querySourceCell?.output === '',
+            '#!source keeps the named query fragment non-executing during Run All');
         assert(compileCell?.output.includes('TypR code written to cell'), 'Prolog populates the TypR cell');
         assert(typrCell?.code.includes('fn(start: char)') && !typrCell.code.includes('@{'),
             'UnifyWeaver emits native typed TypR without raw-R traversal blocks');
@@ -116,8 +135,12 @@ async function runAllAndCollect(page) {
             `${typrCell?.output}\nGenerated casts:\n${generatedR.split('\n').filter(line => line.includes('as.Array')).join('\n')}`);
         assert(typrCell?.output.includes('alice is ancestor of eve: TRUE'),
             'generated TypR check query succeeds', typrCell?.output);
-        assert(rCell?.output.includes('Descendants of alice:') && !rCell.error,
-            'plain R comparison still executes after TypR', rCell?.output);
+        assert(!rCell?.error && !rCell?.code.includes('Descendants of alice:'),
+            'R compiler output contains definitions rather than appended queries', rCell?.code);
+        assert(rQueries?.output.includes('Descendants of alice:') &&
+            rQueries.output.includes('alice is ancestor of eve: TRUE') && !rQueries.error,
+            'separate highlighted R query cell executes after generated definitions',
+            rQueries?.output);
 
         console.log('\nAll TypR workbook regressions passed.');
     } finally {

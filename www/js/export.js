@@ -15,7 +15,7 @@ class ExportManager {
     _highlightCode(code, language) {
         if (typeof window.hljs !== 'undefined') {
             // Map SciREPL language names to hljs names
-            const langMap = { python: 'python', javascript: 'javascript', r: 'r', bash: 'bash', prolog: 'prolog' };
+            const langMap = { python: 'python', javascript: 'javascript', r: 'r', typr: 'r', bash: 'bash', prolog: 'prolog' };
             const hljsLang = langMap[language];
             if (hljsLang && window.hljs.getLanguage(hljsLang)) {
                 try {

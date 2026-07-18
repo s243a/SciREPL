@@ -339,7 +339,7 @@
     /** Syntax-highlight code using highlight.js if available. Falls back to escapeHtml. */
     function highlightCode(code, language) {
         if (typeof window.hljs !== 'undefined') {
-            const langMap = { python: 'python', javascript: 'javascript', r: 'r', bash: 'bash', prolog: 'prolog', lua: 'lua' };
+            const langMap = { python: 'python', javascript: 'javascript', r: 'r', typr: 'r', bash: 'bash', prolog: 'prolog', lua: 'lua' };
             const hljsLang = langMap[language];
             if (hljsLang && window.hljs.getLanguage(hljsLang)) {
                 try { return window.hljs.highlight(code, { language: hljsLang }).value; } catch (e) { /* fall through */ }
