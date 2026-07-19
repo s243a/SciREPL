@@ -23,8 +23,8 @@ Add regression tests for:
 - `compile_recursive(factorial/2, [target(typr), memo(false)], Code)` — linear recursion
 - Compare TypR output vs R output for semantic equivalence
 
-### 4. TypR upstream issues to track
-- **Variadic functions**: `cat("x =", x)` doesn't work, need `cat(paste("x =", x))`
+### 4. TypR upstream status
+- **Variadic functions**: Supported in the fork, including heterogeneous named arguments and forwarding; retain the SciREPL regression coverage.
 - **Braceless function bodies**: `function(x) x * x` drops the body, must use braces
 - **`io.ty` not loadable**: New .ty files aren't picked up by the std generator parser
 - **`default.ty` skipped**: Contains syntax the parser rejects (`{}` record types, `let` definitions mixed with `@` declarations)
@@ -37,16 +37,16 @@ The "Prolog generates TypR" workbook pattern works well for demos:
 
 Consider auto-generating this workbook pattern as a SciREPL package.
 
-### 6. TypR std library preamble optimization
-Cross-cell variable persistence works — tested and confirmed. Variables
-assigned in one TypR cell are available in subsequent cells.
+### 6. Multi-cell source composition
+TypR cells intentionally execute as self-contained compilation units in isolated
+R environments. Variables defined in one TypR cell are not available in another.
 
-Remaining optimization: each TypR cell re-emits the full std library
-preamble (~400 lines of type constructors). This is redundant after
-the first cell. The kernel should:
+For compiler and code-generation workflows:
 
-1. Track whether the std library has been loaded in this session
-2. Skip re-emitting `Integer()`, `Character()`, `Boolean()`, etc.
-3. Only emit the `# === Main Code ===` section on subsequent cells
+1. Give the reusable source cell a stable name.
+2. Put `#!source` on its first line.
+3. Read its `.code` through the Notebook VFS.
+4. Combine it with generated definitions and write the complete program to an executable TypR cell.
 
-This is a performance optimization, not a correctness issue.
+A source-only cell keeps syntax highlighting, does not execute its contents, and
+intentionally produces no `Out [n]`.

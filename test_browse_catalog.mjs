@@ -124,6 +124,14 @@ const TIMEOUT = 180_000;
         testLog('Workbook shows python, r kernels', workbookEntry?.kernels === 'python, r', workbookEntry?.kernels);
         testLog('TypR introduction entry exists', !!typrIntroEntry);
         testLog('TypR introduction shows typr, r kernels', typrIntroEntry?.kernels === 'typr, r', typrIntroEntry?.kernels);
+        const typrIntroDefinition = await page.evaluate(() => {
+            const item = window.packageCatalog.packages.find(p => p.id === 'typr-introduction');
+            return { revision: item?.revision, description: item?.description || '' };
+        });
+        testLog('TypR introduction advertises source directives',
+            typrIntroDefinition.description.includes('source/type-check/transpiler'));
+        testLog('TypR introduction has an update revision',
+            typrIntroDefinition.revision === 1, String(typrIntroDefinition.revision));
         testLog('Generated TypR entry exists', !!generatedTyprEntry);
         testLog('Generated TypR shows prolog, typr, r kernels', generatedTyprEntry?.kernels === 'prolog, typr, r', generatedTyprEntry?.kernels);
 

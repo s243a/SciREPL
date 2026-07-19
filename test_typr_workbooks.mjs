@@ -103,11 +103,31 @@ async function runAllAndCollect(page) {
         const typrCell = generated.find(c => c.name === 'typr_output');
         const rCell = generated.find(c => c.name === 'r_output');
         const rQueries = generated.find(c => c.name === 'r_queries');
-        const querySourceHighlight = await page.evaluate(() => {
+        const querySourceUi = await page.evaluate(() => {
             const cell = (window._cells || []).find(c => c.name === 'typr_queries');
             const code = cell?.inputCard?.querySelector('pre code');
-            return { hasCode: !!code, stringTokens: code?.querySelectorAll('.hljs-string').length || 0 };
+            const badge = cell?.inputCard?.querySelector('.source-only-badge');
+            const executable = (window._cells || []).find(c => c.name === 'typr_output');
+            const magicCard = window._appInternals.createInputCard(
+                '%%typr\n  #!SOURCE\nlet stored <- 1;', 99999, 'code', 'python'
+            );
+            const magicHasBadge = !!magicCard.querySelector('.source-only-badge');
+            magicCard.remove();
+            return {
+                hasCode: !!code,
+                stringTokens: code?.querySelectorAll('.hljs-string').length || 0,
+                badgeText: badge?.textContent?.trim(),
+                badgeTitle: badge?.title,
+                badgeAria: badge?.getAttribute('aria-label'),
+                badgeRole: badge?.getAttribute('role'),
+                sourceOnlyClass: cell?.inputCard?.classList.contains('card-source-only'),
+                sourceOnlyData: cell?.inputCard?.dataset.sourceOnly,
+                hasOutputCard: !!cell?.outputCard,
+                executableHasBadge: !!executable?.inputCard?.querySelector('.source-only-badge'),
+                magicHasBadge,
+            };
         });
+        const sourceBadgeAccessibility = await page.locator('.source-only-badge').first().ariaSnapshot();
         const generatedR = await page.evaluate(source => {
             const kernel = window.kernelManager.getKernel('typr');
             return kernel._typrModule.compile(source).r_code;
@@ -121,11 +141,59 @@ async function runAllAndCollect(page) {
             'compiler reads queries from the named typr_queries cell');
         assert(!compileCell?.code.includes('format(string(Queries)'),
             'compiler cell contains no inline TypR query program');
-        assert(querySourceHighlight.hasCode && querySourceHighlight.stringTokens > 0,
+        assert(querySourceUi.hasCode && querySourceUi.stringTokens > 0,
             'TypR query source receives syntax highlighting',
-            JSON.stringify(querySourceHighlight));
+            JSON.stringify(querySourceUi));
         assert(!querySourceCell?.error && querySourceCell?.output === '',
             '#!source keeps the named query fragment non-executing during Run All');
+        assert(querySourceUi.badgeText === 'source only' &&
+            querySourceUi.badgeTitle?.includes('no output is expected') &&
+            querySourceUi.badgeAria === querySourceUi.badgeTitle &&
+            querySourceUi.badgeRole === 'note',
+            'source-only cell shows an accessible explanatory badge',
+            JSON.stringify(querySourceUi));
+        assert(sourceBadgeAccessibility.includes('note') &&
+            sourceBadgeAccessibility.includes('no output is expected'),
+            'source-only explanation appears in Chromium accessibility tree',
+            sourceBadgeAccessibility);
+        assert(querySourceUi.sourceOnlyClass && querySourceUi.sourceOnlyData === 'true' &&
+            !querySourceUi.hasOutputCard && !querySourceUi.executableHasBadge &&
+            querySourceUi.magicHasBadge,
+            'direct and %%typr source fragments are marked without mislabelling executable cells',
+            JSON.stringify(querySourceUi));
+
+        const sourceBadgeLifecycle = await page.evaluate(() => {
+            const cells = window._cells || [];
+            const index = cells.findIndex(c => c.name === 'typr_queries');
+            const cell = cells[index];
+            const original = cell.code;
+            const withoutDirective = original.replace(/^\s*#!source\s*\r?\n/i, '');
+
+            window.notebookVFS._setCellProperty(index, '.code', withoutDirective);
+            const removed = !cell.inputCard.querySelector('.source-only-badge') &&
+                !cell.inputCard.classList.contains('card-source-only');
+
+            window.notebookVFS._setCellProperty(index, '.code', original);
+            const restored = !!cell.inputCard.querySelector('.source-only-badge') &&
+                cell.inputCard.dataset.sourceOnly === 'true';
+            return { removed, restored };
+        });
+        assert(sourceBadgeLifecycle.removed && sourceBadgeLifecycle.restored,
+            'source-only badge follows Notebook VFS code changes',
+            JSON.stringify(sourceBadgeLifecycle));
+
+        await page.setViewportSize({ width: 360, height: 740 });
+        const mobileHeader = await page.evaluate(() => {
+            const cell = (window._cells || []).find(c => c.name === 'typr_queries');
+            const header = cell?.inputCard?.querySelector('.card-label');
+            return {
+                clientWidth: header?.clientWidth || 0,
+                scrollWidth: header?.scrollWidth || 0,
+            };
+        });
+        assert(mobileHeader.clientWidth > 0 && mobileHeader.scrollWidth <= mobileHeader.clientWidth,
+            'named source-only header fits a 360px mobile viewport',
+            JSON.stringify(mobileHeader));
         assert(compileCell?.output.includes('TypR code written to cell'), 'Prolog populates the TypR cell');
         assert(typrCell?.code.includes('fn(start: char)') && !typrCell.code.includes('@{'),
             'UnifyWeaver emits native typed TypR without raw-R traversal blocks');

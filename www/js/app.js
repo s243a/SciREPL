@@ -186,6 +186,48 @@
 
     // ---- Card creation ----
 
+    function isSourceOnlyCell(code, cellType, language) {
+        if (cellType === 'markdown') return false;
+
+        let effectiveLanguage = language;
+        let effectiveCode = String(code || '');
+        const magicMatch = effectiveCode.match(/^%%(\w+)\s*\n([\s\S]*)$/);
+        if (magicMatch) {
+            effectiveLanguage = magicMatch[1].toLowerCase();
+            effectiveCode = magicMatch[2];
+        }
+
+        if (effectiveLanguage !== 'typr') return false;
+        const firstLine = effectiveCode.trimStart().split(/\r?\n/, 1)[0].trim().toLowerCase();
+        return firstLine === '#!source';
+    }
+
+    function updateSourceOnlyIndicator(inputCard, code, cellType, language) {
+        if (!inputCard) return;
+
+        const sourceOnly = isSourceOnlyCell(code, cellType, language);
+        let indicator = inputCard.querySelector('.source-only-badge');
+
+        if (sourceOnly && !indicator) {
+            indicator = document.createElement('span');
+            indicator.className = 'cell-mode-badge source-only-badge';
+            indicator.textContent = 'source only';
+            indicator.setAttribute('role', 'note');
+            indicator.title = 'Stored for use by other cells; not executed; no output is expected.';
+            indicator.setAttribute('aria-label', indicator.title);
+
+            const languageBadge = inputCard.querySelector('.lang-badge');
+            const promptIcon = inputCard.querySelector('.prompt-icon');
+            (languageBadge || promptIcon)?.insertAdjacentElement('afterend', indicator);
+        } else if (!sourceOnly && indicator) {
+            indicator.remove();
+        }
+
+        inputCard.classList.toggle('card-source-only', sourceOnly);
+        if (sourceOnly) inputCard.dataset.sourceOnly = 'true';
+        else delete inputCard.dataset.sourceOnly;
+    }
+
     function createInputCard(code, cellId, cellType, language) {
         const card = document.createElement('div');
         const isMarkdown = cellType === 'markdown';
@@ -210,6 +252,7 @@
             </div>
             <pre${isMarkdown ? ' class="md-source"' : ''}>${isMarkdown ? escapeHtml(code) : '<code>' + highlightCode(code, language) + '</code>'}</pre>
         `;
+        updateSourceOnlyIndicator(card, code, cellType, language || 'python');
         card.querySelector('.cell-edit-btn').addEventListener('click', (e) => {
             e.stopPropagation();
             enterEditMode(card, cellId);
@@ -355,6 +398,11 @@
         } else {
             pre.innerHTML = '<code>' + highlightCode(code, language) + '</code>';
         }
+
+        const inputCard = pre.closest('.card-input');
+        if (inputCard) {
+            updateSourceOnlyIndicator(inputCard, code, isMarkdown ? 'markdown' : 'code', language);
+        }
     }
 
     // ---- Editable cells ----
@@ -423,6 +471,7 @@
                 badge.textContent = newLang;
                 labelSpan.insertAdjacentElement('afterend', badge);
             }
+            updateSourceOnlyIndicator(targetCell.inputCard, targetCell.code, targetCell.type, newLang);
         }
         langSwitch.addEventListener('change', () => {
             if (cell) updateCellLangBadge(cell, langSwitch.value);
@@ -450,6 +499,7 @@
                 typeSwitch.textContent = cell.type === 'markdown' ? 'Md' : 'Code';
                 typeSwitch.classList.toggle('markdown-active', cell.type === 'markdown');
                 textarea.spellcheck = cell.type === 'markdown';
+                updateSourceOnlyIndicator(inputCard, textarea.value, cell.type, langSwitch.value);
             }
         });
         typeSwitch.classList.toggle('markdown-active', cellType === 'markdown');
@@ -506,6 +556,7 @@
         const language = cell ? cell.language : (inputCard.dataset.language || 'python');
         setPreHighlighted(pre, code, language, cellType === 'markdown');
         if (textarea) textarea.replaceWith(pre);
+        updateSourceOnlyIndicator(inputCard, code, cellType, language);
 
         // Update label
         const label = inputCard.querySelector('.prompt-icon');
@@ -850,6 +901,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
         const pre = cell.inputCard.querySelector('pre');
         if (pre) setPreHighlighted(pre, code, cell.language || 'python', cell.type === 'markdown');
+        updateSourceOnlyIndicator(cell.inputCard, code, cell.type, cell.language || 'python');
 
         if (cell.type === 'markdown') {
             reRenderMarkdownCell(cell);
@@ -1832,7 +1884,8 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         getCurrentLanguage: getCurrentLanguage,
         escapeHtml: escapeHtml,
         highlightCode: highlightCode,
-        setPreHighlighted: setPreHighlighted
+        setPreHighlighted: setPreHighlighted,
+        updateSourceOnlyIndicator: updateSourceOnlyIndicator
     };
 
     // ---- Start ----

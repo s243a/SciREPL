@@ -243,9 +243,10 @@ class NotebookVFS {
         if (changedProp === 'code' && cell.inputCard) {
             const pre = cell.inputCard.querySelector('pre');
             if (pre) {
-                const code = pre.querySelector('code');
-                if (code) {
-                    code.textContent = cell.code;
+                if (window._appInternals && window._appInternals.setPreHighlighted) {
+                    window._appInternals.setPreHighlighted(
+                        pre, cell.code, cell.language || 'python', cell.type === 'markdown'
+                    );
                 } else {
                     pre.textContent = cell.code;
                 }
@@ -275,6 +276,13 @@ class NotebookVFS {
                 badge.className = 'lang-badge lang-' + cell.language;
             }
             cell.inputCard.dataset.language = cell.language;
+        }
+
+        if (['code', 'language'].includes(changedProp) &&
+            cell.inputCard && window._appInternals?.updateSourceOnlyIndicator) {
+            window._appInternals.updateSourceOnlyIndicator(
+                cell.inputCard, cell.code, cell.type, cell.language || 'python'
+            );
         }
     }
 

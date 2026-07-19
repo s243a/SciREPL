@@ -41,7 +41,7 @@
       },
       {
         "type": "markdown",
-        "code": "## Directives\n\nUse `#!show-r` in a cell to toggle viewing the generated R code.\nUse `#!typecheck` followed by code to type-check without executing.\nUse `#!transpile` followed by code to see the transpiled R output.",
+        "code": "## Directives\n\nPut a directive on the first line of a TypR cell:\n\n- `#!source` keeps a named, highlighted source fragment without compiling or executing its contents. A source-only cell intentionally produces no `Out [n]` and remains readable through the Notebook VFS.\n- `#!typecheck` type-checks the following code without executing it.\n- `#!transpile` shows the transpiled R output.\n- `#!show-r` toggles generated R display for subsequent TypR executions.",
         "language": "markdown"
       },
       {
