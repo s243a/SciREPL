@@ -109,8 +109,10 @@ const TIMEOUT = 180_000;
         const packageEntry = cards.find(c => c.name === 'UnifyWeaver SciREPL');
         const bundleEntry = cards.find(c => c.name === 'UnifyWeaver Tutorials & Compiler Demos');
         const workbookEntry = cards.find(c => c.name === 'Life Expectancy Analysis');
+        const generatedLuaEntry = cards.find(c => c.name === 'Prolog Generates Lua');
         const typrIntroEntry = cards.find(c => c.name === 'TypR Introduction');
         const generatedTyprEntry = cards.find(c => c.name === 'Prolog Generates TypR');
+        const callGraphEntry = cards.find(c => c.name === 'Call Graph Analysis and SCC Detection');
 
         testLog('Package entry exists', !!packageEntry);
         testLog('Previously installed package is labelled Installed',
@@ -122,6 +124,17 @@ const TIMEOUT = 180_000;
             bundleEntry?.requires === 'Requires: UnifyWeaver SciREPL', bundleEntry?.requires);
         testLog('Workbook entry exists', !!workbookEntry);
         testLog('Workbook shows python, r kernels', workbookEntry?.kernels === 'python, r', workbookEntry?.kernels);
+        testLog('Generated Lua entry exists', !!generatedLuaEntry);
+        testLog('Generated Lua shows prolog, lua kernels', generatedLuaEntry?.kernels === 'prolog, lua', generatedLuaEntry?.kernels);
+        const generatedLuaDefinition = await page.evaluate(() => {
+            const item = window.packageCatalog.packages.find(p => p.id === 'prolog-generates-lua');
+            return { revision: item?.revision, description: item?.description || '' };
+        });
+        testLog('Generated Lua advertises named queries and direct cell I/O',
+            generatedLuaDefinition.description.includes('named query source cell') &&
+            generatedLuaDefinition.description.includes('direct Lua cell I/O'));
+        testLog('Generated Lua has an update revision',
+            generatedLuaDefinition.revision === 1, String(generatedLuaDefinition.revision));
         testLog('TypR introduction entry exists', !!typrIntroEntry);
         testLog('TypR introduction shows typr, r kernels', typrIntroEntry?.kernels === 'typr, r', typrIntroEntry?.kernels);
         const typrIntroDefinition = await page.evaluate(() => {
@@ -134,6 +147,13 @@ const TIMEOUT = 180_000;
             typrIntroDefinition.revision === 1, String(typrIntroDefinition.revision));
         testLog('Generated TypR entry exists', !!generatedTyprEntry);
         testLog('Generated TypR shows prolog, typr, r kernels', generatedTyprEntry?.kernels === 'prolog, typr, r', generatedTyprEntry?.kernels);
+        testLog('Call Graph workbook entry exists', !!callGraphEntry);
+        const callGraphDefinition = await page.evaluate(() => {
+            const item = window.packageCatalog.packages.find(p => p.id === 'unifyweaver-call-graph');
+            return { revision: item?.revision };
+        });
+        testLog('Call Graph workbook has an update revision',
+            callGraphDefinition.revision === 1, String(callGraphDefinition.revision));
 
         const bundleDefinition = await page.evaluate(() => {
             const bundle = window.packageCatalog.packages.find(p => p.id === 'unifyweaver-workbooks');
@@ -168,6 +188,51 @@ const TIMEOUT = 180_000;
         }
         testLog('Bundle reports Installed after all members are present', bundleInstall.installed);
 
+        const callGraphWorkbook = await page.evaluate(async () => {
+            try {
+                const resp = await fetch('workbooks/03_call_graph_analysis.ipynb');
+                if (!resp.ok) return { fetched: false, error: `HTTP ${resp.status}` };
+                const workbook = await resp.json();
+                const codeCells = (workbook.cells || [])
+                    .filter(cell => cell.cell_type === 'code')
+                    .map(cell => (cell.source || []).join(''));
+                const scc = codeCells.find(code => code.includes("% Find SCCs using Tarjan's algorithm")) || '';
+                const classification = codeCells.find(code => code.includes('% Check each SCC')) || '';
+                const saveDot = codeCells.find(code => code.includes('even_odd_graph.dot') && code.includes('open(')) || '';
+                const ordered = (code, snippets) => {
+                    let position = -1;
+                    return snippets.every(snippet => {
+                        position = code.indexOf(snippet, position + 1);
+                        return position >= 0;
+                    });
+                };
+                const prose = (workbook.cells || [])
+                    .map(cell => (cell.source || []).join(''))
+                    .join('\n');
+                return {
+                    fetched: true,
+                    sccSelfContained: ordered(scc, ['build_call_graph(', 'find_sccs(']),
+                    classificationSelfContained: ordered(classification,
+                        ['build_call_graph(', 'find_sccs(', 'forall(member(SCC, SCCs)']),
+                    dotSaveSelfContained: ordered(saveDot, ['build_call_graph(', 'generate_dot(', 'open(']),
+                    dotSaveClosesSafely: saveDot.includes('setup_call_cleanup('),
+                    dotSaveUsesSharedVfs: saveDot.includes("'/shared/data/even_odd_graph.dot'"),
+                    groupTerminologyIsAccurate: prose.includes('mutually recursive predicate group') &&
+                        !prose.includes('All predicates reachable from cousin/2'),
+                };
+            } catch (error) {
+                return { fetched: false, error: error.message };
+            }
+        });
+        testLog('Call Graph workbook fetches', callGraphWorkbook.fetched, callGraphWorkbook.error || '');
+        testLog('SCC display cell reconstructs its graph', callGraphWorkbook.sccSelfContained);
+        testLog('SCC classification cell reconstructs graph and components',
+            callGraphWorkbook.classificationSelfContained);
+        testLog('DOT save cell reconstructs its graph and DOT source', callGraphWorkbook.dotSaveSelfContained);
+        testLog('DOT save cell closes its stream safely', callGraphWorkbook.dotSaveClosesSafely);
+        testLog('DOT save cell writes to SharedVFS', callGraphWorkbook.dotSaveUsesSharedVfs);
+        testLog('Predicate-group explanation describes an SCC', callGraphWorkbook.groupTerminologyIsAccurate);
+
         // ── Test: Workbook fetch via pages_url ──
 
         console.log('7. Testing workbook fetch...');
@@ -194,9 +259,57 @@ const TIMEOUT = 180_000;
             testLog('Workbook has cells', installResult.cellCount > 5, `${installResult.cellCount} cells`);
         }
 
+        // ── Test: Generated Lua workbook ──
+
+        console.log('8. Testing generated Lua workbook...');
+
+        const luaWorkbookResult = await page.evaluate(async () => {
+            try {
+                const resp = await fetch('workbooks/prolog-generates-lua.srwb');
+                if (!resp.ok) return { fetched: false, error: 'HTTP ' + resp.status };
+                const workbook = await resp.json();
+                const cells = workbook.notebook?.cells || [];
+                const embedded = cells.find(cell => cell.name === 'compile_embedded');
+                const vfs = cells.find(cell => cell.name === 'compile_vfs');
+                const query = cells.find(cell => cell.name === 'lua_queries');
+                const cellIo = cells.find(cell => cell.name === 'lua_cell_io');
+                const target = cells.find(cell => cell.name === 'lua_written');
+                const compilerCode = [embedded?.code || '', vfs?.code || ''];
+                return {
+                    fetched: true,
+                    bothReadNamedQueries: compilerCode.every(code =>
+                        code.includes("nb_read('lua_queries', '.code', QuerySource)")),
+                    hasInlineQueryFormatter: compilerCode.some(code =>
+                        code.includes('format(string(Queries)')),
+                    hasInlineQueryProgram: compilerCode.some(code =>
+                        code.includes('find_all("alice")')),
+                    queryIsSourceCell: query?.language === 'lua' &&
+                        query?.code?.startsWith('#!source\n'),
+                    queryHasHighlightedProgram: query?.code?.includes('local results = find_all("alice")'),
+                    demonstratesCellIo: cellIo?.language === 'lua' &&
+                        cellIo?.code?.includes('nb.read("lua_queries", ".code")') &&
+                        cellIo?.code?.includes('nb.write("lua_written", ".code", note)'),
+                    hasWriteTarget: target?.language === 'lua'
+                };
+            } catch (e) {
+                return { fetched: false, error: e.message };
+            }
+        });
+
+        testLog('Generated Lua workbook fetches from pages_url', luaWorkbookResult.fetched, luaWorkbookResult.error || '');
+        if (luaWorkbookResult.fetched) {
+            testLog('Both Lua compiler cells read the named query source', luaWorkbookResult.bothReadNamedQueries);
+            testLog('Lua compiler cells omit inline query formatters', !luaWorkbookResult.hasInlineQueryFormatter);
+            testLog('Lua compiler cells omit inline query programs', !luaWorkbookResult.hasInlineQueryProgram);
+            testLog('Lua queries live in a highlighted source-only cell',
+                luaWorkbookResult.queryIsSourceCell && luaWorkbookResult.queryHasHighlightedProgram);
+            testLog('Lua workbook demonstrates direct cell read and write',
+                luaWorkbookResult.demonstratesCellIo && luaWorkbookResult.hasWriteTarget);
+        }
+
         // ── Test: Generated TypR workbook ──
 
-        console.log('8. Testing generated TypR workbook...');
+        console.log('9. Testing generated TypR workbook...');
 
         const typrWorkbookResult = await page.evaluate(async () => {
             try {
@@ -235,7 +348,7 @@ const TIMEOUT = 180_000;
 
         // ── Test: stale catalog workbook update ──
 
-        console.log('9. Testing stale workbook update...');
+        console.log('10. Testing stale workbook update...');
 
         const workbookUpdate = await page.evaluate(async () => {
             const catalog = window.packageCatalog;
@@ -300,7 +413,7 @@ const TIMEOUT = 180_000;
 
         // ── Test: importIpynb integration ──
 
-        console.log('10. Testing importIpynb integration...');
+        console.log('11. Testing importIpynb integration...');
 
         const importResult = await page.evaluate(async () => {
             const resp = await fetch('workbooks/life_expectancy_csv_demo.ipynb');
@@ -322,7 +435,7 @@ const TIMEOUT = 180_000;
 
         // ── Test: Clear History resets catalog installation state ──
 
-        console.log('11. Testing Clear History package-state reset...');
+        console.log('12. Testing Clear History package-state reset...');
 
         await Promise.all([
             page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: TIMEOUT }),

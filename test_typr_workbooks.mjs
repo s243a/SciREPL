@@ -210,7 +210,67 @@ async function runAllAndCollect(page) {
             'separate highlighted R query cell executes after generated definitions',
             rQueries?.output);
 
-        console.log('\nAll TypR workbook regressions passed.');
+        console.log('\n4. Installing and running Prolog Generates Lua...');
+        await page.setViewportSize({ width: 1280, height: 900 });
+        await installCatalogItem(page, 'Prolog Generates Lua');
+        const generatedLua = await runAllAndCollect(page);
+        const luaErrors = generatedLua.filter(c => c.error);
+        assert(luaErrors.length === 0, 'Prolog Generates Lua Run All has no error cards',
+            luaErrors.map(c => `${c.name || '(unnamed)'}: ${c.output}`).join(' | '));
+
+        const luaQueries = generatedLua.find(c => c.name === 'lua_queries');
+        const compileEmbedded = generatedLua.find(c => c.name === 'compile_embedded');
+        const compileVfs = generatedLua.find(c => c.name === 'compile_vfs');
+        const luaEmbedded = generatedLua.find(c => c.name === 'lua_embedded');
+        const luaVfs = generatedLua.find(c => c.name === 'lua_vfs');
+        const luaCellIo = generatedLua.find(c => c.name === 'lua_cell_io');
+        const luaWritten = generatedLua.find(c => c.name === 'lua_written');
+        const luaSourceUi = await page.evaluate(() => {
+            const cell = (window._cells || []).find(c => c.name === 'lua_queries');
+            const code = cell?.inputCard?.querySelector('pre code');
+            const badge = cell?.inputCard?.querySelector('.source-only-badge');
+            return {
+                stringTokens: code?.querySelectorAll('.hljs-string').length || 0,
+                badgeText: badge?.textContent?.trim(),
+                badgeRole: badge?.getAttribute('role'),
+                sourceOnlyClass: cell?.inputCard?.classList.contains('card-source-only'),
+                hasOutputCard: !!cell?.outputCard,
+            };
+        });
+
+        assert(luaQueries?.code.startsWith('#!source\n') &&
+            luaQueries.code.includes('local results = find_all("alice")'),
+            'Lua queries live in a named source cell');
+        assert(!luaQueries?.error && luaQueries?.output === '' &&
+            luaSourceUi.badgeText === 'source only' &&
+            luaSourceUi.badgeRole === 'note' &&
+            luaSourceUi.sourceOnlyClass && !luaSourceUi.hasOutputCard,
+            '#!source keeps the highlighted Lua query program non-executing',
+            JSON.stringify(luaSourceUi));
+        assert(luaSourceUi.stringTokens > 0, 'Lua query strings retain syntax highlighting',
+            JSON.stringify(luaSourceUi));
+        for (const compiler of [compileEmbedded, compileVfs]) {
+            assert(compiler?.code.includes("nb_read('lua_queries', '.code', QuerySource)"),
+                `${compiler?.name} reads the named Lua query cell`);
+            assert(!compiler?.code.includes('format(string(Queries)') &&
+                !compiler?.code.includes('find_all("alice")'),
+                `${compiler?.name} contains no inline Lua query program`);
+        }
+        for (const target of [luaEmbedded, luaVfs]) {
+            const output = target?.output?.toLowerCase() || '';
+            assert(target?.code.includes('local results = find_all("alice")') &&
+                !target.code.includes('#!source'),
+                `${target?.name} receives the named Lua queries`);
+            assert(output.includes('descendants of alice:') && output.includes('eve') &&
+                output.includes('alice -> eve: true') && output.includes('alice -> frank: true'),
+                `${target?.name} executes the generated transitive closure`, target?.output);
+        }
+        assert(luaCellIo?.output.includes('Lua read lua_queries and wrote lua_written'),
+            'Lua reads and writes notebook cells through nb.read/nb.write', luaCellIo?.output);
+        assert(luaWritten?.code.includes('Written from Lua after reading lua_queries'),
+            'Lua nb.write updates the named target cell', luaWritten?.code);
+
+        console.log('\nAll generated-language workbook regressions passed.');
     } finally {
         await browser.close();
     }

@@ -371,10 +371,10 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             <h3>Cell Language</h3>
             <p>Each cell remembers its language. To change a cell's language, click ✎ to edit, then use the language dropdown. Click <strong>All→</strong> to apply the language to all code cells in the notebook.</p>
 
-            <h3>TypR Directives</h3>
-            <p>Put a directive on the first line of a TypR cell:</p>
+            <h3>Source-only Cells and TypR Directives</h3>
+            <p>Put <code>#!source</code> on the first line of a named TypR or Lua cell to keep highlighted code available through the Notebook VFS without executing it. The remaining directives are TypR-specific:</p>
             <ul>
-                <li><code>#!source</code> — keep a named, highlighted source fragment without executing its contents. The cell shows <strong>Source only</strong>, intentionally has no <code>Out [n]</code>, and remains readable through the Notebook VFS.</li>
+                <li><code>#!source</code> — the cell shows <strong>Source only</strong>, intentionally has no <code>Out [n]</code>, and remains readable through the Notebook VFS.</li>
                 <li><code>#!typecheck</code> — type-check the following code without executing it.</li>
                 <li><code>#!transpile</code> — show the transpiled R code.</li>
                 <li><code>#!show-r</code> — toggle generated R display for subsequent TypR executions.</li>
@@ -990,6 +990,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <script src="js/prolog_settings.js"></script>
     <script src="js/notebook_manager.js"></script>
     <script src="vendor/hljs/highlight.min.js"></script>
+    <script src="vendor/hljs/lua.min.js"></script>
     <script src="js/export.js"></script>
     <script src="js/app.js"></script>
 

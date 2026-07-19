@@ -1,7 +1,7 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v125';
+const CACHE_VERSION = 'v127';
 const APP_CACHE = 'scirepl-app-' + CACHE_VERSION;
 const CDN_CACHE = 'scirepl-cdn-v2';
 
@@ -30,6 +30,7 @@ const APP_SHELL = [
   './js/package_loader.js',
   './js/package_catalog.js',
   './vendor/hljs/highlight.min.js',
+  './vendor/hljs/lua.min.js',
   './vendor/hljs/atom-one-dark.min.css',
   './js/export.js',
   './js/file_io.js',

@@ -11,8 +11,10 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **SWI-Prolog kernel** — Full SWI-Prolog via swipl-wasm, loaded on demand from CDN
 - **Bash kernel** — Unix shell via brush-wasm with coreutils, findutils, grep (all Rust reimplementations)
 - **JavaScript kernel** — Native browser JS execution with zero download. Direct access to WASM modules, SharedVFS, and browser APIs
+- **Lua kernel** — Lua via Fengari, with `nb.read()`, `nb.write()`, `nb.list()`, and `nb.name()` access to notebook cells
 - **R kernel** — Full R via webR (WASM), loaded on demand (~50 MB, cached after first use). Supports plotting, `install.packages()`, and SharedVFS file sharing.
-- **TypR kernel** — Typed R superset via typr-wasm (~2.5 MB). Compiles TypR to R, then executes through webR. Supports `#!source`, `#!typecheck`, `#!transpile`, and `#!show-r` directives.
+- **TypR kernel** — Typed R superset via typr-wasm (~2.5 MB). Compiles TypR to R, then executes through webR. Supports `#!typecheck`, `#!transpile`, and `#!show-r` directives.
+- **Named source-only cells** — TypR and Lua cells beginning with `#!source` remain highlighted and VFS-readable without executing or producing an output card
 - **Kernel abstraction layer** — Pluggable architecture for adding new language runtimes
 - **Package system v2** — Install packages with notebooks, data files, Python modules, Prolog knowledge bases, and WASM libraries. See [docs/packages.md](docs/packages.md).
 - **SharedVFS** — In-memory filesystem shared across all kernels. Python, Bash, Prolog, R, and JavaScript can read/write the same files. Persisted to IndexedDB — files survive page reloads.
@@ -331,7 +333,7 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - [x] File browser: folder selection, download files/folders, create folders, zip extraction
 - [x] Multi-notebook tabs with rename support
 - [x] Workbook import creates new tab (auto-named from heading)
-- [ ] Additional languages (Lua)
+- [x] Additional languages (Lua and TypR)
 - [x] Cell reordering (drag-and-drop + move arrows)
 - [x] Delete individual cells
 
