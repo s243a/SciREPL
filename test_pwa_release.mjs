@@ -93,6 +93,39 @@ const requiredCatalogPaths = [
     'workbooks/prolog-generates-typr.srwb',
 ];
 
+function inspectCallGraphStructure(workbook) {
+    const codeCells = (workbook.cells || [])
+        .filter(cell => cell.cell_type === 'code')
+        .map(cell => (cell.source || []).join(''));
+    const scc = codeCells.find(code => code.includes("% Find SCCs using Tarjan's algorithm")) || '';
+    const classification = codeCells.find(code => code.includes('% Check each SCC')) || '';
+    const saveDot = codeCells.find(code => code.includes('even_odd_graph.dot') && code.includes('open(')) || '';
+    const ordered = (code, snippets) => {
+        let position = -1;
+        return snippets.every(snippet => {
+            position = code.indexOf(snippet, position + 1);
+            return position >= 0;
+        });
+    };
+    return {
+        sccSelfContained: ordered(scc, ['build_call_graph(', 'find_sccs(']),
+        classificationSelfContained: ordered(classification,
+            ['build_call_graph(', 'find_sccs(', 'forall(member(SCC, SCCs)']),
+        dotSaveSelfContained: ordered(saveDot, ['build_call_graph(', 'generate_dot(', 'open(']),
+    };
+}
+
+console.log('0. Checking Call Graph cells before starting Chromium...');
+const callGraphSource = JSON.parse(await readFile(
+    resolve(WWW, 'workbooks/03_call_graph_analysis.ipynb'),
+    'utf8',
+));
+const callGraphStructure = inspectCallGraphStructure(callGraphSource);
+assert(callGraphStructure.sccSelfContained, 'SCC display cell reconstructs its graph');
+assert(callGraphStructure.classificationSelfContained,
+    'SCC classification cell reconstructs graph and components');
+assert(callGraphStructure.dotSaveSelfContained, 'DOT save cell reconstructs its source');
+
 const server = await startStaticServer();
 const browser = await chromium.launch({
     headless: true,
@@ -141,7 +174,7 @@ try {
     console.log('2. Verifying every local catalog payload is pre-cached...');
     const cacheState = await page.evaluate(async () => {
         const names = await caches.keys();
-        const appCache = names.find(name => name === 'scirepl-app-v125');
+        const appCache = names.find(name => name === 'scirepl-app-v127');
         if (!appCache) return { names, paths: [] };
         const keys = await (await caches.open(appCache)).keys();
         return {
@@ -149,7 +182,7 @@ try {
             paths: keys.map(request => new URL(request.url).pathname),
         };
     });
-    assert(cacheState.names.includes('scirepl-app-v125'), 'release cache v125 is active', cacheState.names.join(', '));
+    assert(cacheState.names.includes('scirepl-app-v127'), 'release cache v127 is active', cacheState.names.join(', '));
     for (const relative of requiredCatalogPaths) {
         assert(cacheState.paths.includes(PREFIX + relative), `pre-cache contains ${relative}`);
     }
@@ -184,11 +217,53 @@ try {
         assert(offlineInstall.notebooks.includes(name), `offline bundle contains ${name}`);
     }
 
+    console.log('5. Running the Call Graph workbook while offline...');
+    const callGraphRun = await page.evaluate(async () => {
+        const notebook = window.notebookManager.getNotebooks()
+            .find(item => item.name === 'Call Graph Analysis and SCC Detection');
+        if (!notebook) return { found: false };
+        window.notebookManager.switchTo(notebook.id);
+        await window.runAllCells();
+
+        const cells = (window._cells || []).map(cell => ({
+            code: cell.code || '',
+            output: cell.outputCard?.querySelector('.card-body')?.textContent || '',
+            error: !!cell.outputCard?.classList.contains('card-error'),
+        }));
+        const outputFor = marker => cells.find(cell => cell.code.includes(marker))?.output || '';
+        let savedDot = '';
+        try {
+            savedDot = window.sharedVFS.readFile('/shared/data/even_odd_graph.dot', 'utf8');
+        } catch (_) {
+            // The assertions below report a missing file with the other run details.
+        }
+        return {
+            found: true,
+            errors: cells.filter(cell => cell.error).map(cell => cell.output),
+            scc: outputFor("% Find SCCs using Tarjan's algorithm"),
+            classification: outputFor('% Check each SCC'),
+            dot: outputFor('% Helper to generate DOT format'),
+            savedDot,
+        };
+    });
+    assert(callGraphRun.found, 'Call Graph workbook is selectable');
+    assert(callGraphRun.errors.length === 0, 'Call Graph Run All has no error cards',
+        callGraphRun.errors.join(' | '));
+    assert(callGraphRun.scc.includes('Strongly Connected Components:') &&
+        callGraphRun.scc.includes('is_even/1') && callGraphRun.scc.includes('is_odd/1'),
+        'Call Graph Run All reports the even/odd SCC', callGraphRun.scc);
+    assert(callGraphRun.classification.includes('NON-TRIVIAL (mutual recursion!)'),
+        'Call Graph Run All classifies mutual recursion', callGraphRun.classification);
+    for (const edge of ['"is_even/1" -> "is_odd/1";', '"is_odd/1" -> "is_even/1";']) {
+        assert(callGraphRun.dot.includes(edge), `DOT output contains ${edge}`, callGraphRun.dot);
+        assert(callGraphRun.savedDot.includes(edge), `saved DOT contains ${edge}`, callGraphRun.savedDot);
+    }
+
     // A normal user may decline automatic future downloads. The next offline
     // launch must still recognize that this CDN runtime is already cached.
     await page.evaluate(() => localStorage.setItem('scirepl_auto_download', '0'));
 
-    console.log('5. Reloading the complete PWA while still offline...');
+    console.log('6. Reloading the complete PWA while still offline...');
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#run-btn:not([disabled])');
     const offlineReload = await page.evaluate(() => ({
@@ -200,7 +275,7 @@ try {
     assert(!offlineReload.online, 'browser remained offline during reload');
     assert(offlineReload.title === 'Sci REPL', 'offline app shell rendered', offlineReload.title);
 
-    console.log('6. Restarting the CDN-backed Prolog kernel while still offline...');
+    console.log('7. Restarting the CDN-backed Prolog kernel while still offline...');
     await page.evaluate(() => window.kernelManager.ensureReady('prolog'));
     assert(
         await page.evaluate(() => window.kernelManager.isReady('prolog')),

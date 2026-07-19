@@ -197,7 +197,7 @@
             effectiveCode = magicMatch[2];
         }
 
-        if (effectiveLanguage !== 'typr') return false;
+        if (effectiveLanguage !== 'typr' && effectiveLanguage !== 'lua') return false;
         const firstLine = effectiveCode.trimStart().split(/\r?\n/, 1)[0].trim().toLowerCase();
         return firstLine === '#!source';
     }
@@ -911,6 +911,19 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
         // Code cell — needs a kernel
         const language = cell.language || 'python';
+
+        // Source fragments are notebook data, not executable cells. Handle
+        // them here so languages such as Lua can share the same safe named-cell
+        // workflow as TypR without teaching every kernel about #!source.
+        if (isSourceOnlyCell(code, cell.type, language)) {
+            if (cell.outputCard) cell.outputCard.remove();
+            cell.outputCard = null;
+            cell.lastOutput = '';
+            cell.lastOutputHtml = '';
+            saveCellsToSession();
+            return;
+        }
+
         const km = window.kernelManager;
 
         if (!km || !km.isReady(language)) {
