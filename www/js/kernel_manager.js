@@ -93,7 +93,8 @@ class KernelManager {
         if (!this._initPromises[language]) {
             this._initPromises[language] = (async () => {
                 try {
-                    if (KernelManager.CDN_KERNELS.has(language)) {
+                    if (KernelManager.CDN_KERNELS.has(language) &&
+                        !this._prefersBundledSource(language)) {
                         await this._ensurePrivacyConsent();
                         await this._confirmDownload(language);
                     }
@@ -108,6 +109,21 @@ class KernelManager {
         }
         await this._initPromises[language];
         return kernel;
+    }
+
+    /**
+     * Whether this build will try a declared same-origin runtime before any
+     * network source. An explicit URL override remains a network choice.
+     */
+    _prefersBundledSource(language) {
+        const cfg = (typeof window !== 'undefined' && window.KERNEL_CONFIG
+            && window.KERNEL_CONFIG.languages && window.KERNEL_CONFIG.languages[language]) || {};
+        const override = (typeof localStorage !== 'undefined') &&
+            localStorage.getItem('scirepl_' + language + '_source');
+        if (override && override !== 'local') return false;
+        const hasLocal = (cfg.sources || []).some(source =>
+            source && source.type === 'local' && source.url);
+        return hasLocal && (cfg.preferLocal || override === 'local');
     }
 
     /**
@@ -279,6 +295,11 @@ class KernelManager {
 
         const candidates = [];
         const seen = new Set();
+        const localUrls = new Set(
+            (cfg.sources || [])
+                .filter(source => source && source.type === 'local' && source.url)
+                .map(source => source.url)
+        );
         const add = (url) => { if (url && !seen.has(url)) { seen.add(url); candidates.push(url); } };
 
         // Per-kernel override (a URL); 'local' means "prefer the bundled source".
@@ -297,8 +318,15 @@ class KernelManager {
         if (!candidates.length) throw new Error('No sources configured for ' + language);
 
         let lastErr;
+        let externalFallbackApproved = !this._prefersBundledSource(language);
         for (const url of candidates) {
             try {
+                if (!localUrls.has(url) && !externalFallbackApproved &&
+                    KernelManager.CDN_KERNELS.has(language)) {
+                    await this._ensurePrivacyConsent();
+                    await this._confirmDownload(language);
+                    externalFallbackApproved = true;
+                }
                 console.log('[KernelSource] ' + language + ': loading ' + url);
                 return await this._withTimeout(loadFn(url), timeoutMs, url);
             } catch (e) {

@@ -34,7 +34,7 @@
       },
       {
         "type": "code",
-        "code": "% Read the highlighted Lua query program from its named source cell\nuser:nb_read('lua_queries', '.code', QuerySource),\nsplit_string(QuerySource, \"\\n\", \"\\r\", [\"#!source\"|QueryLines]),\natomics_to_string(QueryLines, \"\\n\", Queries),\n\n% Compile with input(embedded) — facts baked into the code\nrecursive_compiler:compile_recursive(ancestor/2, [target(lua), input(embedded)], Code),\nformat(string(FullCode), '~w~n~n~w~n', [Code, Queries]),\nuser:nb_write('lua_embedded', '.code', FullCode),\nwriteln('Lua code (embedded) written to cell: lua_embedded').",
+        "code": "% Read the highlighted Lua query program from its named source cell\n\\+ \\+ (\n    user:nb_read('lua_queries', '.code', _QuerySource),\n    split_string(_QuerySource, \"\\n\", \"\\r\", [\"#!source\"|_QueryLines]),\n    atomics_to_string(_QueryLines, \"\\n\", _Queries),\n\n    % Compile with input(embedded) — facts baked into the code\n    recursive_compiler:compile_recursive(ancestor/2, [target(lua), input(embedded)], _Code),\n    format(string(_FullCode), '~w~n~n~w~n', [_Code, _Queries]),\n    user:nb_write('lua_embedded', '.code', _FullCode),\n    writeln('Lua code (embedded) written to cell: lua_embedded')\n).",
         "language": "prolog",
         "name": "compile_embedded"
       },
@@ -57,7 +57,7 @@
       },
       {
         "type": "code",
-        "code": "% Read the same highlighted Lua query program\nuser:nb_read('lua_queries', '.code', QuerySource),\nsplit_string(QuerySource, \"\\n\", \"\\r\", [\"#!source\"|QueryLines]),\natomics_to_string(QueryLines, \"\\n\", Queries),\n\n% Compile with input(vfs(facts_data)) — reads from the cell above\nrecursive_compiler:compile_recursive(ancestor/2, [target(lua), input(vfs(facts_data, '.code'))], Code),\nformat(string(FullCode), '~w~n~n~w~n', [Code, Queries]),\nuser:nb_write('lua_vfs', '.code', FullCode),\nwriteln('Lua code (VFS) written to cell: lua_vfs').",
+        "code": "% Read the same highlighted Lua query program\n\\+ \\+ (\n    user:nb_read('lua_queries', '.code', _QuerySource),\n    split_string(_QuerySource, \"\\n\", \"\\r\", [\"#!source\"|_QueryLines]),\n    atomics_to_string(_QueryLines, \"\\n\", _Queries),\n\n    % Compile with input(vfs(facts_data)) — reads from the cell above\n    recursive_compiler:compile_recursive(ancestor/2, [target(lua), input(vfs(facts_data, '.code'))], _Code),\n    format(string(_FullCode), '~w~n~n~w~n', [_Code, _Queries]),\n    user:nb_write('lua_vfs', '.code', _FullCode),\n    writeln('Lua code (VFS) written to cell: lua_vfs')\n).",
         "language": "prolog",
         "name": "compile_vfs"
       },

@@ -85,24 +85,19 @@ const TIMEOUT = 180_000; // 3 min — webR is ~50 MB download
 
     console.log('3. Testing download confirmation prompt...');
 
-    // Test that cancelling the confirm dialog prevents initialization
-    page.on('dialog', async dialog => {
-      if (dialog.type() === 'confirm' && dialog.message().includes('50 MB')) {
-        await dialog.dismiss(); // cancel
-      }
-    });
-
-    const cancelResult = await page.evaluate(async () => {
+    // Start initialization, then use SciREPL's custom download modal.
+    const cancelPromise = page.evaluate(async () => {
       const km = window.kernelManager;
-      const RKernel = km._registry['r'];
-      const inst = new RKernel();
       try {
-        await inst.init();
-        return { error: null, ready: inst.isReady() };
+        await km.ensureReady('r');
+        return { error: null, ready: km.isReady('r') };
       } catch (e) {
-        return { error: e.message, ready: inst.isReady() };
+        return { error: e.message, ready: km.isReady('r') };
       }
     });
+    await page.waitForSelector('#runtime-download-modal:not(.hidden)');
+    await page.click('#runtime-cancel-btn');
+    const cancelResult = await cancelPromise;
     testLog('Cancel stops R init',
       cancelResult.error && cancelResult.error.includes('cancelled'),
       cancelResult.error || 'no error');
@@ -110,27 +105,19 @@ const TIMEOUT = 180_000; // 3 min — webR is ~50 MB download
       cancelResult.ready === false,
       String(cancelResult.ready));
 
-    // Remove the cancel handler
-    page.removeAllListeners('dialog');
-
     // --- Test: Accept download and actually load webR ---
 
     console.log('4. Testing webR download + init (this may take a while)...');
 
-    // Accept the confirm dialog
-    page.on('dialog', async dialog => {
-      if (dialog.type() === 'confirm') {
-        console.log('   [dialog] Accepting webR download prompt');
-        await dialog.accept();
-      }
-    });
-
     let rReady = false;
     try {
-      await page.evaluate(async () => {
+      const readyPromise = page.evaluate(async () => {
         const km = window.kernelManager;
         await km.ensureReady('r');
-      }, { timeout: TIMEOUT });
+      });
+      await page.waitForSelector('#runtime-download-modal:not(.hidden)');
+      await page.click('#runtime-download-btn');
+      await readyPromise;
       rReady = true;
     } catch (e) {
       console.log('   webR init failed or timed out:', e.message);
@@ -151,8 +138,8 @@ const TIMEOUT = 180_000; // 3 min — webR is ~50 MB download
         return await km.execute('1 + 1', 'r');
       });
       const arithOutput = (arithTest.stdout || '') + ' ' + (arithTest.result ? arithTest.result.content : '');
-      testLog('R arithmetic (1+1)',
-        arithOutput.includes('2'),
+      testLog('R arithmetic (1+1) autoprints exactly once',
+        arithTest.stdout.trim() === '[1] 2' && arithTest.result === null,
         arithOutput.trim() || arithTest.error);
 
       // --- Test: Vector operations ---
@@ -162,9 +149,21 @@ const TIMEOUT = 180_000; // 3 min — webR is ~50 MB download
         return await km.execute('c(1, 2, 3, 4, 5)', 'r');
       });
       const vecOutput = (vecTest.stdout || '') + ' ' + (vecTest.result ? vecTest.result.content : '');
-      testLog('R vector (c(1,2,3,4,5))',
-        vecOutput.includes('1') && vecOutput.includes('5'),
+      testLog('R vector autoprints exactly once',
+        vecTest.stdout.trim() === '[1] 1 2 3 4 5' && vecTest.result === null,
         vecOutput.trim() || vecTest.error);
+
+      const dataFrameTest = await page.evaluate(async () => {
+        const km = window.kernelManager;
+        return await km.execute('data.frame(x = 1:2, y = c("a", "b"))', 'r');
+      });
+      const dataFrameOutput = (dataFrameTest.stdout || '') +
+        ' ' + (dataFrameTest.result ? dataFrameTest.result.content : '');
+      testLog('R structured values use canonical output',
+        dataFrameOutput.includes('x y') &&
+          !dataFrameOutput.includes('[object Object]') &&
+          dataFrameTest.result === null,
+        dataFrameOutput.trim() || dataFrameTest.error);
 
       // --- Test: cat() output ---
 
@@ -259,7 +258,8 @@ const TIMEOUT = 180_000; // 3 min — webR is ~50 MB download
       // Skip execution tests if webR didn't load
       console.log('   Skipping R execution tests (webR not available)');
       const skipTests = [
-        'R arithmetic (1+1)', 'R vector (c(1,2,3,4,5))', 'R cat() output',
+        'R arithmetic (1+1)', 'R vector (c(1,2,3,4,5))',
+        'R structured values use canonical output', 'R cat() output',
         'R variable persistence', 'R string paste()', 'R mean()',
         'R error handling', 'R empty code returns no error',
         'R multi-line code', 'R plot() generates images'
