@@ -156,12 +156,20 @@ const TIMEOUT = 180_000;
         testLog('Generated TypR entry exists', !!generatedTyprEntry);
         testLog('Generated TypR shows prolog, typr, r kernels', generatedTyprEntry?.kernels === 'prolog, typr, r', generatedTyprEntry?.kernels);
         testLog('Call Graph workbook entry exists', !!callGraphEntry);
-        const callGraphDefinition = await page.evaluate(() => {
-            const item = window.packageCatalog.packages.find(p => p.id === 'unifyweaver-call-graph');
-            return { revision: item?.revision };
+        const tutorialRevisions = await page.evaluate(() => {
+            const byId = Object.fromEntries(window.packageCatalog.packages.map(item => [item.id, item]));
+            return {
+                familyTree: byId['unifyweaver-family-tree']?.revision,
+                recursionPatterns: byId['unifyweaver-recursion-patterns']?.revision,
+                callGraph: byId['unifyweaver-call-graph']?.revision,
+            };
         });
-        testLog('Call Graph workbook has an update revision',
-            callGraphDefinition.revision === 2, String(callGraphDefinition.revision));
+        testLog('Family Tree workbook has the clean-output revision',
+            tutorialRevisions.familyTree === 2, String(tutorialRevisions.familyTree));
+        testLog('Recursion Patterns workbook has the clean-output revision',
+            tutorialRevisions.recursionPatterns === 2, String(tutorialRevisions.recursionPatterns));
+        testLog('Call Graph workbook has the clean-output revision',
+            tutorialRevisions.callGraph === 3, String(tutorialRevisions.callGraph));
 
         const bundleDefinition = await page.evaluate(() => {
             const bundle = window.packageCatalog.packages.find(p => p.id === 'unifyweaver-workbooks');
@@ -221,7 +229,7 @@ const TIMEOUT = 180_000;
                     fetched: true,
                     sccSelfContained: ordered(scc, ['build_call_graph(', 'find_sccs(']),
                     classificationSelfContained: ordered(classification,
-                        ['build_call_graph(', 'find_sccs(', 'forall(member(SCC, SCCs)']),
+                        ['build_call_graph(', 'find_sccs(', 'forall(member(']),
                     dotSaveSelfContained: ordered(saveDot, ['build_call_graph(', 'generate_dot(', 'open(']),
                     dotSaveClosesSafely: saveDot.includes('setup_call_cleanup('),
                     dotSaveUsesSharedVfs: saveDot.includes("'/shared/data/even_odd_graph.dot'"),
