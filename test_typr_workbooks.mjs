@@ -32,6 +32,7 @@ async function runAllAndCollect(page) {
         code: cell.code,
         output: cell.outputCard?.querySelector('.card-body')?.textContent || '',
         error: !!cell.outputCard?.classList.contains('card-error'),
+        plots: cell.outputCard?.querySelectorAll('.js-plotly-plot').length || 0,
     })));
 }
 
@@ -132,12 +133,12 @@ async function runAllAndCollect(page) {
             const kernel = window.kernelManager.getKernel('typr');
             return kernel._typrModule.compile(source).r_code;
         }, typrCell?.code || '');
-        assert(compileCell?.code.includes("nb_read('family_tree', '.code', PrologSrc)"),
+        assert(/nb_read\('family_tree', '\.code', _?PrologSrc\)/.test(compileCell?.code || ''),
             'compiler reads Prolog source from the named family_tree cell');
         assert(querySourceCell?.code.startsWith('#!source\n') &&
             querySourceCell.code.includes('ancestor_all("alice")'),
             'TypR queries live in a named source cell');
-        assert(compileCell?.code.includes("nb_read('typr_queries', '.code', QuerySource)"),
+        assert(/nb_read\('typr_queries', '\.code', _?QuerySource\)/.test(compileCell?.code || ''),
             'compiler reads queries from the named typr_queries cell');
         assert(!compileCell?.code.includes('format(string(Queries)'),
             'compiler cell contains no inline TypR query program');
@@ -198,8 +199,8 @@ async function runAllAndCollect(page) {
         assert(typrCell?.code.includes('fn(start: char)') && !typrCell.code.includes('@{'),
             'UnifyWeaver emits native typed TypR without raw-R traversal blocks');
         assert(!typrCell?.output.includes('Type errors'), 'generated TypR type-checks', typrCell?.output);
-        assert(typrCell?.output.includes('Descendants of alice:') && typrCell.output.includes('eve'),
-            'generated TypR executes the transitive closure',
+        assert(typrCell?.output.includes('Descendants of alice: bob, charlie, diana, eve, frank'),
+            'generated TypR spreads the descendant list into comma-separated variadic arguments',
             `${typrCell?.output}\nGenerated casts:\n${generatedR.split('\n').filter(line => line.includes('as.Array')).join('\n')}`);
         assert(typrCell?.output.includes('alice is ancestor of eve: TRUE'),
             'generated TypR check query succeeds', typrCell?.output);
@@ -250,7 +251,7 @@ async function runAllAndCollect(page) {
         assert(luaSourceUi.stringTokens > 0, 'Lua query strings retain syntax highlighting',
             JSON.stringify(luaSourceUi));
         for (const compiler of [compileEmbedded, compileVfs]) {
-            assert(compiler?.code.includes("nb_read('lua_queries', '.code', QuerySource)"),
+            assert(/nb_read\('lua_queries', '\.code', _?QuerySource\)/.test(compiler?.code || ''),
                 `${compiler?.name} reads the named Lua query cell`);
             assert(!compiler?.code.includes('format(string(Queries)') &&
                 !compiler?.code.includes('find_all("alice")'),
@@ -269,6 +270,62 @@ async function runAllAndCollect(page) {
             'Lua reads and writes notebook cells through nb.read/nb.write', luaCellIo?.output);
         assert(luaWritten?.code.includes('Written from Lua after reading lua_queries'),
             'Lua nb.write updates the named target cell', luaWritten?.code);
+
+        console.log('\n5. Installing and running Prolog Generates ClojureScript...');
+        await installCatalogItem(page, 'Prolog Generates ClojureScript');
+        const generatedCljs = await runAllAndCollect(page);
+        const cljsErrors = generatedCljs.filter(c => c.error);
+        assert(cljsErrors.length === 0, 'Prolog Generates ClojureScript Run All has no error cards',
+            cljsErrors.map(c => `${c.name || '(unnamed)'}: ${c.output}`).join(' | '));
+
+        const compileCljs = generatedCljs.find(c => c.name === 'compile_to_clojurescript');
+        const cljsDefinitions = generatedCljs.find(c => c.name === 'cljs_output');
+        const cljsQueries = generatedCljs.find(c => c.name === 'cljs_queries');
+        assert(!compileCljs?.code.includes('format(string(Queries)') &&
+            !compileCljs?.code.includes('find-all "alice"'),
+            'ClojureScript compiler cell contains definitions rather than inline queries',
+            compileCljs?.code);
+        assert(cljsDefinitions?.code.includes('(def base-relation') &&
+            !cljsDefinitions.code.includes('Descendants of alice:') &&
+            cljsDefinitions.code.trimEnd().endsWith('nil'),
+            'generated ClojureScript definitions live in their own cell',
+            cljsDefinitions?.code);
+        assert(cljsQueries?.code.includes('(find-all "alice")') &&
+            cljsQueries.output.includes('Descendants of alice:') &&
+            cljsQueries.output.includes('eve') && cljsQueries.output.includes('frank') &&
+            cljsQueries.output.includes('alice is ancestor of eve: true') &&
+            cljsQueries.output.includes('alice is ancestor of frank: true'),
+            'separate highlighted ClojureScript queries execute with readable line breaks',
+            cljsQueries?.output);
+        assert(cljsQueries?.output.split('\n').filter(Boolean).length === 3,
+            'ClojureScript query output contains three separate lines', cljsQueries?.output);
+
+        console.log('\n6. Installing and running Compute Pi with Archimedean Bounds...');
+        await installCatalogItem(page, 'Compute Pi with Archimedean Bounds');
+        const computePi = await runAllAndCollect(page);
+        const computeErrors = computePi.filter(c => c.error);
+        assert(computeErrors.length === 0, 'Compute Pi Run All has no error cards',
+            computeErrors.map(c => `${c.name || '(unnamed)'}: ${c.output}`).join(' | '));
+        const geometry = computePi.find(c => c.name === 'geometry');
+        const bounds = computePi.find(c => c.name === 'bounds');
+        const accuracy = computePi.find(c => c.name === 'accuracy');
+        const symbolic = computePi.find(c => c.name === 'symbolic_limit');
+        const comparison = computePi.find(c => c.name === 'comparison');
+        assert(geometry?.plots === 1, 'Compute Pi renders the circle-and-hexagon plot',
+            String(geometry?.plots));
+        assert(bounds?.output.includes('3.000000000000') &&
+            bounds.output.includes('3.464101615138') &&
+            bounds.output.includes('Final enclosure:'),
+            'Compute Pi reports valid lower and upper polygon bounds', bounds?.output);
+        assert(accuracy?.output.includes('786,432') && accuracy.output.includes('2.51e-11'),
+            'Compute Pi reports its computed ten-decimal enclosure', accuracy?.output);
+        assert(symbolic?.output.includes('limit as n approaches infinity = pi'),
+            'Compute Pi symbolic limit is pi rather than zero', symbolic?.output);
+        assert(comparison?.output.includes('20,000,000,000 terms') &&
+            comparison.output.includes('786,432 sides') &&
+            comparison.output.includes('7 terms per arctangent'),
+            'Compute Pi comparison uses computed, internally consistent work estimates',
+            comparison?.output);
 
         console.log('\nAll generated-language workbook regressions passed.');
     } finally {

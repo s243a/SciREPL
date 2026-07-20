@@ -30,7 +30,7 @@
         "language": "lua"
       },
       {
-        "code": "-- string.find: locate patterns with positions\nlocal s = \"function foo(x, y)\"\nlocal i, j, name = string.find(s, \"function%s+(%w+)\")\nprint(string.format(\"Found '%s' at positions %d-%d\", name, i, j))\n\n-- Frontier pattern %f[]: match at boundary transitions\nlocal text = \"camelCaseVariable\"\nlocal parts = {}\nfor word in string.gmatch(text, \"%u?%l+\") do\n  parts[#parts + 1] = word\nend\nprint(\"Split camelCase:\", table.concat(parts, \" | \"))",
+        "code": "-- string.find: locate the complete match and capture the function name\nlocal s = \"function foo(x, y)\"\nlocal i, j, name = string.find(s, \"function%s+(%w+)\")\nprint(string.format(\"Matched '%s' at positions %d-%d; captured name '%s'\", s:sub(i, j), i, j, name))\n\n-- Frontier pattern %f[]: match at boundary transitions\nlocal text = \"camelCaseVariable\"\nlocal parts = {}\nfor word in string.gmatch(text, \"%u?%l+\") do\n  parts[#parts + 1] = word\nend\nprint(\"Split camelCase:\", table.concat(parts, \" | \"))",
         "type": "code",
         "language": "lua"
       },

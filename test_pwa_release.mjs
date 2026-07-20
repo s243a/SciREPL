@@ -9,7 +9,7 @@ import { extname, resolve, sep } from 'node:path';
 import { chromium } from 'playwright';
 
 const HOST = '127.0.0.1';
-const PORT = 8086;
+const PORT = Number(process.env.PORT || 8086);
 const PREFIX = '/SciREPL/';
 const BASE_URL = `http://${HOST}:${PORT}${PREFIX}`;
 const WWW = resolve('www');
@@ -31,6 +31,23 @@ const MIME = {
 function assert(condition, message, detail = '') {
     if (!condition) throw new Error(message + (detail ? `: ${detail}` : ''));
     console.log(`  PASS: ${message}`);
+}
+
+async function withTimeout(promise, timeoutMs, label) {
+    let timer;
+    try {
+        return await Promise.race([
+            promise,
+            new Promise((_, reject) => {
+                timer = setTimeout(
+                    () => reject(new Error(label + ' timed out after ' + timeoutMs + 'ms')),
+                    timeoutMs,
+                );
+            }),
+        ]);
+    } finally {
+        clearTimeout(timer);
+    }
 }
 
 function startStaticServer() {
@@ -83,6 +100,8 @@ const requiredCatalogPaths = [
     'workbooks/03_call_graph_analysis.ipynb',
     'workbooks/prolog-generates-r.srwb',
     'workbooks/prolog-generates-lua.srwb',
+    'workbooks/prolog-generates-clojurescript.srwb',
+    'workbooks/compute-pi-workbook.srwb',
     'workbooks/life_expectancy_csv_demo.ipynb',
     'workbooks/r_ggplot2_showcase.ipynb',
     'workbooks/r_tidyverse_wrangling.ipynb',
@@ -133,9 +152,24 @@ const browser = await chromium.launch({
 });
 const context = await browser.newContext();
 const page = await context.newPage();
+const prologRuntimeRequests = [];
+let prologCdnAttempts = 0;
+const pageErrors = [];
 page.setDefaultTimeout(TIMEOUT);
+page.on('request', request => {
+    if (request.url().includes('dynamic-import.js')) {
+        prologRuntimeRequests.push(request.url());
+    }
+});
+await page.route('https://swi-prolog.github.io/**', async route => {
+    prologCdnAttempts++;
+    await route.abort('blockedbyclient');
+});
 page.on('console', message => console.log(`  BROWSER ${message.type()}: ${message.text()}`));
-page.on('pageerror', error => console.error(`  BROWSER pageerror: ${error.message}`));
+page.on('pageerror', error => {
+    pageErrors.push(error.message);
+    console.error(`  BROWSER pageerror: ${error.message}`);
+});
 page.on('requestfailed', request => console.error(
     `  BROWSER requestfailed: ${request.url()} (${request.failure()?.errorText || 'unknown error'})`,
 ));
@@ -174,7 +208,7 @@ try {
     console.log('2. Verifying every local catalog payload is pre-cached...');
     const cacheState = await page.evaluate(async () => {
         const names = await caches.keys();
-        const appCache = names.find(name => name === 'scirepl-app-v127');
+        const appCache = names.find(name => name === 'scirepl-app-v128');
         if (!appCache) return { names, paths: [] };
         const keys = await (await caches.open(appCache)).keys();
         return {
@@ -182,14 +216,21 @@ try {
             paths: keys.map(request => new URL(request.url).pathname),
         };
     });
-    assert(cacheState.names.includes('scirepl-app-v127'), 'release cache v127 is active', cacheState.names.join(', '));
+    assert(cacheState.names.includes('scirepl-app-v128'), 'release cache v128 is active', cacheState.names.join(', '));
     for (const relative of requiredCatalogPaths) {
         assert(cacheState.paths.includes(PREFIX + relative), `pre-cache contains ${relative}`);
     }
 
-    console.log('3. Warming the CDN-backed Prolog runtime while online...');
+    console.log('3. Loading the bundled Prolog runtime while its CDN fallback is blocked...');
     await page.evaluate(() => window.kernelManager.ensureReady('prolog'));
     assert(await page.evaluate(() => window.kernelManager.isReady('prolog')), 'Prolog kernel initializes in PWA mode');
+    assert(
+        prologRuntimeRequests.length > 0 &&
+            prologRuntimeRequests.every(url => url === BASE_URL + 'vendor/swipl/dynamic-import.js'),
+        'Prolog loads only the bundled same-origin runtime',
+        prologRuntimeRequests.join(', '),
+    );
+    assert(prologCdnAttempts === 0, 'Prolog does not attempt its CDN fallback', String(prologCdnAttempts));
 
     console.log('4. Going offline before installing the dependency-aware bundle...');
     await context.setOffline(true);
@@ -218,7 +259,7 @@ try {
     }
 
     console.log('5. Running the Call Graph workbook while offline...');
-    const callGraphRun = await page.evaluate(async () => {
+    const callGraphRun = await withTimeout(page.evaluate(async () => {
         const notebook = window.notebookManager.getNotebooks()
             .find(item => item.name === 'Call Graph Analysis and SCC Detection');
         if (!notebook) return { found: false };
@@ -245,7 +286,7 @@ try {
             dot: outputFor('% Helper to generate DOT format'),
             savedDot,
         };
-    });
+    }), TIMEOUT, 'Call Graph Run All');
     assert(callGraphRun.found, 'Call Graph workbook is selectable');
     assert(callGraphRun.errors.length === 0, 'Call Graph Run All has no error cards',
         callGraphRun.errors.join(' | '));
@@ -260,7 +301,7 @@ try {
     }
 
     // A normal user may decline automatic future downloads. The next offline
-    // launch must still recognize that this CDN runtime is already cached.
+    // launch must still restart from the same-origin runtime cached on demand.
     await page.evaluate(() => localStorage.setItem('scirepl_auto_download', '0'));
 
     console.log('6. Reloading the complete PWA while still offline...');
@@ -274,12 +315,13 @@ try {
     assert(offlineReload.controlled, 'offline reload remains service-worker controlled');
     assert(!offlineReload.online, 'browser remained offline during reload');
     assert(offlineReload.title === 'Sci REPL', 'offline app shell rendered', offlineReload.title);
+    assert(pageErrors.length === 0, 'offline app reload raises no uncaught page errors', pageErrors.join(' | '));
 
-    console.log('7. Restarting the CDN-backed Prolog kernel while still offline...');
+    console.log('7. Restarting the bundled Prolog kernel while still offline...');
     await page.evaluate(() => window.kernelManager.ensureReady('prolog'));
     assert(
         await page.evaluate(() => window.kernelManager.isReady('prolog')),
-        'cached cross-origin Prolog runtime restarts offline',
+        'cached same-origin Prolog runtime restarts offline',
     );
 
     console.log('\nPWA release regression passed.');

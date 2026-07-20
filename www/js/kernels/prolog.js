@@ -71,8 +71,13 @@ class PrologKernel {
             // Load with source fallback + per-attempt timeout (so a stalled CDN
             // fails fast instead of hanging the WASM thread). Falls back to a
             // plain import() if the manager helper isn't available.
+            const importFrom = (url) => import(
+                (typeof document !== 'undefined')
+                    ? new URL(url, document.baseURI).href
+                    : url
+            );
             const module = (km && km.loadKernelSource)
-                ? await km.loadKernelSource('prolog', cdnUrl, (url) => import(url))
+                ? await km.loadKernelSource('prolog', cdnUrl, importFrom)
                 : await import(cdnUrl);
             const SWIPL = module.SWIPL || module.default;
             const self = this;

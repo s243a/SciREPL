@@ -124,14 +124,15 @@ await test('all sources hang → times out each, then rejects', async () => {
   assert(/timed out/.test(threw.message), 'timeout in message: ' + threw.message);
 });
 
-await test('profile-disabled language → throws immediately, never calls loadFn', async () => {
+await test('profile-disabled-by-default language still loads when explicitly requested', async () => {
   const km = makeManager({ config: FULL }); // python.enabled = false
-  let called = false, threw = null;
-  try { await km.loadKernelSource('python', 'PRIMARY', () => { called = true; return ok('v')('x'); }); }
-  catch (e) { threw = e; }
-  assert(threw, 'should have thrown');
-  assert(/not enabled in this build/.test(threw.message), 'disabled message: ' + threw.message);
-  assert(!called, 'loadFn must not be called for a disabled language');
+  let called = false;
+  const r = await km.loadKernelSource('python', 'PRIMARY', (url) => {
+    called = true;
+    return ok('v')(url);
+  });
+  assert(called, 'loadFn must be called for a user-requested language');
+  eq(r.url, 'PRIMARY', 'explicit request uses the kernel primary');
 });
 
 await test('no config → no entry uses default 60s timeout, primary still works', async () => {
@@ -154,18 +155,25 @@ const BUNDLED = {
 await test('preferLocal → bundled local source is tried before the CDN primary', async () => {
   const km = makeManager({ config: BUNDLED });
   const tried = [];
+  let confirmations = 0;
+  km._confirmDownload = async () => { confirmations++; };
   const r = await km.loadKernelSource('python', 'PRIMARY_CDN', (u) => { tried.push(u); return ok('v')(u); });
   eq(tried[0], 'vendor/pyodide/pyodide.js', 'local first');
   eq(r.url, 'vendor/pyodide/pyodide.js', 'returned local');
+  eq(confirmations, 0, 'bundled success needs no CDN confirmation');
 });
 
 await test('preferLocal → missing local file falls back to CDN primary', async () => {
   const km = makeManager({ config: BUNDLED });
   const tried = [];
+  let confirmations = 0;
+  km._ensurePrivacyConsent = async () => {};
+  km._confirmDownload = async () => { confirmations++; };
   const r = await km.loadKernelSource('python', 'PRIMARY_CDN',
     (u) => { tried.push(u); return failOn(['vendor/pyodide/pyodide.js'])(u); });
   eq(tried[0], 'vendor/pyodide/pyodide.js', 'tried local first');
   eq(r.url, 'PRIMARY_CDN', 'recovered on CDN primary');
+  eq(confirmations, 1, 'CDN fallback is confirmed once');
 });
 
 await test("override 'local' also forces local-first even without preferLocal", async () => {

@@ -4,7 +4,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 8085;
+const PORT = Number(process.env.PORT) || 8085;
 const WWW = path.join(__dirname, 'www');
 
 const MIME = {
@@ -55,7 +55,8 @@ http.createServer((req, res) => {
   }
 
   // Static file server
-  let filePath = path.join(WWW, req.url === '/' ? 'index.html' : req.url.split('?')[0]);
+  const requestPath = req.url.split('?')[0];
+  let filePath = path.join(WWW, requestPath === '/' ? 'index.html' : requestPath);
   filePath = path.normalize(filePath);
 
   // Security: don't serve files outside www/

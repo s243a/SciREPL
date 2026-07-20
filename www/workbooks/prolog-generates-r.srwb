@@ -58,7 +58,7 @@
         "lastOutputHtml": ""
       },
       {
-        "code": "%% Read the Prolog source from the previous cell\nuser:nb_read('prolog_factorial', '.code', PrologSrc),\nformat('Read from prolog_factorial:~n~w~n~n', [PrologSrc]),\n\n%% Consult it to assert the clauses\nsetup_call_cleanup(\n    open('/tmp/_nb_src.pl', write, Out),\n    write(Out, PrologSrc),\n    close(Out)),\nconsult('/tmp/_nb_src.pl'),\n\n%% Compile factorial/2 → R\nr_target:init_r_target,\nlinear_recursion:compile_linear_recursion(factorial/2, [target(r), memo(false)], Code),\nformat('--- Generated R code ---~n~w~n', [Code]),\n\n%% Write compiler output to the R cell\nuser:nb_write('r_factorial', '.code', Code),\nwriteln('\\nR code written to cell: r_factorial').",
+        "code": "%% Read the Prolog source from the previous cell\nuser:nb_read('prolog_factorial', '.code', _PrologSrc),\nformat('Read from prolog_factorial:~n~w~n~n', [_PrologSrc]),\n\n%% Consult it to assert the clauses\nsetup_call_cleanup(\n    open('/tmp/_nb_src.pl', write, _Out),\n    write(_Out, _PrologSrc),\n    close(_Out)),\nconsult('/tmp/_nb_src.pl'),\n\n%% Compile factorial/2 → R\nr_target:init_r_target,\nlinear_recursion:compile_linear_recursion(factorial/2, [target(r), memo(false)], _Code),\nformat('--- Generated R code ---~n~w~n', [_Code]),\n\n%% Write compiler output to the R cell\nuser:nb_write('r_factorial', '.code', _Code),\nwriteln('\\nR code written to cell: r_factorial').",
         "type": "code",
         "language": "prolog",
         "name": "compile_to_r",
@@ -154,7 +154,7 @@
         "lastOutputHtml": ""
       },
       {
-        "code": "%% Consult the ancestor definitions\nuser:nb_read('prolog_ancestor', '.code', AncSrc),\nformat('Read from prolog_ancestor:~n~w~n~n', [AncSrc]),\nsetup_call_cleanup(\n    open('/tmp/_nb_anc.pl', write, Out),\n    write(Out, AncSrc),\n    close(Out)),\nconsult('/tmp/_nb_anc.pl'),\n\n%% Compile with default pattern detection → transitive closure\nrecursive_compiler:compile_recursive(ancestor/2, [target(r)], Code1),\nformat('--- Pattern: transitive_closure ---~n~w~n', [Code1]),\n\n%% Write to the R cell\nuser:nb_write('r_ancestor_tc', '.code', Code1),\nwriteln('\\nR code written to cell: r_ancestor_tc').",
+        "code": "%% Consult the ancestor definitions\nuser:nb_read('prolog_ancestor', '.code', _AncSrc),\nformat('Read from prolog_ancestor:~n~w~n~n', [_AncSrc]),\nsetup_call_cleanup(\n    open('/tmp/_nb_anc.pl', write, _Out),\n    write(_Out, _AncSrc),\n    close(_Out)),\nconsult('/tmp/_nb_anc.pl'),\n\n%% Compile with default pattern detection → transitive closure\nrecursive_compiler:compile_recursive(ancestor/2, [target(r)], _Code1),\nformat('--- Pattern: transitive_closure ---~n~w~n', [_Code1]),\n\n%% Write to the R cell\nuser:nb_write('r_ancestor_tc', '.code', _Code1),\nwriteln('\\nR code written to cell: r_ancestor_tc').",
         "type": "code",
         "language": "prolog",
         "name": "compile_ancestor_tc",
@@ -178,7 +178,23 @@
         "lastOutputHtml": ""
       },
       {
-        "code": "## Step 11: Compile with skip(transitive_closure) → Bash\n\nNow we compile the **same predicate** but skip the transitive closure pattern. The compiler falls through to **tail recursion** (since the recursive `ancestor(Z,Y)` call is in tail position) and targets **Bash** instead of R.\n\nThis demonstrates two things:\n- `skip()` controls which compilation strategy the compiler uses\n- The same Prolog predicate can target different languages\n\nYou could also use `skip([transitive_closure, tail_recursion])` to skip multiple patterns and get memoized recursion instead.",
+        "code": "## Step 11: Query the Generated R Program\n\nThe generated definitions and embedded parent facts persist in the R kernel, so this cell verifies both reachability APIs.",
+        "type": "markdown",
+        "language": "r",
+        "name": "",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "descendants <- ancestor_all(\"alice\")\ncat(\"Descendants of alice:\", paste(descendants, collapse = \", \"), \"\\n\")\ncat(\"alice is ancestor of eve:\", ancestor_check(\"alice\", \"eve\"), \"\\n\")\ncat(\"alice is ancestor of frank:\", ancestor_check(\"alice\", \"frank\"), \"\\n\")",
+        "type": "code",
+        "language": "r",
+        "name": "test_r_ancestor",
+        "lastOutput": "",
+        "lastOutputHtml": ""
+      },
+      {
+        "code": "## Step 12: Inspect the Experimental Bash Fallback\n\nNow we compile the **same predicate** while skipping the transitive-closure pattern. The compiler falls through to its generic tail-recursion Bash scaffold.\n\nThis demonstrates target-selection and skip-option plumbing, but the generated Bash contains an explicit TODO and is **not a behavior-preserving implementation of ancestor/2**. Treat it as compiler-development output, not as an equivalent program.",
         "type": "markdown",
         "language": "prolog",
         "name": "",
@@ -186,7 +202,7 @@
         "lastOutputHtml": ""
       },
       {
-        "code": "%% Compile ancestor/2 again, but skip transitive closure → falls to tail recursion\n%% Also target bash to show cross-language compilation\nrecursive_compiler:compile_recursive(\n    ancestor/2,\n    [target(bash), skip(transitive_closure)],\n    Code2),\nformat('--- Pattern: tail_recursion (bash) ---~n~w~n', [Code2]),\n\n%% Write to the bash cell\nuser:nb_write('bash_ancestor_alt', '.code', Code2),\nwriteln('\\nBash code written to cell: bash_ancestor_alt').",
+        "code": "%% Compile ancestor/2 again, but skip transitive closure → falls to tail recursion\n%% Also target bash to show cross-language compilation\nrecursive_compiler:compile_recursive(\n    ancestor/2,\n    [target(bash), skip(transitive_closure)],\n    _Code2),\nformat('--- Pattern: tail_recursion (bash) ---~n~w~n', [_Code2]),\n\n%% Write to the bash cell\nuser:nb_write('bash_ancestor_alt', '.code', _Code2),\nwriteln('\\nBash code written to cell: bash_ancestor_alt').",
         "type": "code",
         "language": "prolog",
         "name": "compile_ancestor_skip",
@@ -202,7 +218,7 @@
         "lastOutputHtml": ""
       },
       {
-        "code": "## Step 12: Compare the Two Approaches\n\nUse the Notebook VFS to read both generated cells side by side:",
+        "code": "## Step 13: Compare the Generated Outputs\n\nUse the Notebook VFS to inspect the complete R implementation and the explicitly experimental Bash scaffold side by side:",
         "type": "markdown",
         "language": "bash",
         "name": "",

@@ -68,9 +68,15 @@ async function bundlePython() {
   const core = ['pyodide.js', 'pyodide.asm.js', 'pyodide.asm.wasm', 'python_stdlib.zip', 'pyodide-lock.json'];
   for (const f of core) await download(`${PYODIDE_BASE}/${f}`, join(dir, f));
 
-  // Resolve the packages the Python kernel preloads (numpy, sympy, micropip).
+  // Resolve the packages the Python kernel preloads plus compiled/runtime
+  // dependencies used by catalog workbooks. With a bundled Pyodide index,
+  // micropip resolves these built-in packages locally rather than from the CDN.
   const lock = JSON.parse(readFileSync(join(dir, 'pyodide-lock.json'), 'utf8'));
-  const wheels = resolvePyodidePackages(lock, ['numpy', 'sympy', 'micropip']);
+  const wheels = resolvePyodidePackages(lock, [
+    'numpy', 'sympy', 'micropip',
+    'pandas',       // Life Expectancy + Tidyverse cross-language workbooks
+    'narwhals',     // Plotly.py runtime dependency represented in Pyodide's lock
+  ]);
   for (const w of wheels) await download(`${PYODIDE_BASE}/${w}`, join(dir, w));
 }
 

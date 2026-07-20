@@ -140,7 +140,7 @@ async function kernelExec(page, kernel, code, { timeout = 60000 } = {}) {
         // Step 6: Query
         console.log('\n8. Running query...');
         const queryResult = await kernelExec(page, 'typr',
-            'let results <- ancestor_all("alice");\ncat(paste("Descendants:", paste(results, collapse=", ")));',
+            'let results <- ancestor_all("alice");\ncat(paste("Descendants:", paste(sep=", ", ...results)));',
             { timeout: 30000 });
         console.log('   Query result:', queryResult.stdout);
         if (queryResult.error) console.log('   Query ERROR:', queryResult.error.substring(0, 200));

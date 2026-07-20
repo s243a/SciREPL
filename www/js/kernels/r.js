@@ -411,23 +411,11 @@ class RKernel {
                 }
             }
 
-            // Convert result to displayable value
-            let result = null;
-            if (capture.result && capture.result.type !== 'null') {
-                try {
-                    const jsVal = await capture.result.toJs();
-                    if (jsVal && jsVal.values !== undefined) {
-                        const vals = jsVal.values;
-                        if (Array.isArray(vals) && vals.length === 1) {
-                            result = { type: 'text', content: String(vals[0]) };
-                        } else if (Array.isArray(vals)) {
-                            result = { type: 'text', content: vals.join(' ') };
-                        }
-                    }
-                } catch (e) {
-                    // Non-convertible result (e.g. environment), skip
-                }
-            }
+            // withAutoprint already writes R's canonical representation to the
+            // captured stream. Rendering capture.result as JavaScript a second
+            // time duplicates scalars and turns structured R values into
+            // "[object Object]" noise.
+            const result = null;
 
             // Handle plot images
             let images = [];

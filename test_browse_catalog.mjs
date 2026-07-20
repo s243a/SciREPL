@@ -104,12 +104,14 @@ const TIMEOUT = 180_000;
             });
         });
 
-        testLog('Has at least 15 catalog entries', cards.length >= 15, `${cards.length} entries`);
+        testLog('Has at least 17 catalog entries', cards.length >= 17, `${cards.length} entries`);
 
         const packageEntry = cards.find(c => c.name === 'UnifyWeaver SciREPL');
         const bundleEntry = cards.find(c => c.name === 'UnifyWeaver Tutorials & Compiler Demos');
         const workbookEntry = cards.find(c => c.name === 'Life Expectancy Analysis');
+        const computePiEntry = cards.find(c => c.name === 'Compute Pi with Archimedean Bounds');
         const generatedLuaEntry = cards.find(c => c.name === 'Prolog Generates Lua');
+        const generatedCljsEntry = cards.find(c => c.name === 'Prolog Generates ClojureScript');
         const typrIntroEntry = cards.find(c => c.name === 'TypR Introduction');
         const generatedTyprEntry = cards.find(c => c.name === 'Prolog Generates TypR');
         const callGraphEntry = cards.find(c => c.name === 'Call Graph Analysis and SCC Detection');
@@ -124,6 +126,9 @@ const TIMEOUT = 180_000;
             bundleEntry?.requires === 'Requires: UnifyWeaver SciREPL', bundleEntry?.requires);
         testLog('Workbook entry exists', !!workbookEntry);
         testLog('Workbook shows python, r kernels', workbookEntry?.kernels === 'python, r', workbookEntry?.kernels);
+        testLog('Compute Pi workbook exists', !!computePiEntry);
+        testLog('Compute Pi workbook uses the Python kernel',
+            computePiEntry?.kernels === 'python', computePiEntry?.kernels);
         testLog('Generated Lua entry exists', !!generatedLuaEntry);
         testLog('Generated Lua shows prolog, lua kernels', generatedLuaEntry?.kernels === 'prolog, lua', generatedLuaEntry?.kernels);
         const generatedLuaDefinition = await page.evaluate(() => {
@@ -134,7 +139,10 @@ const TIMEOUT = 180_000;
             generatedLuaDefinition.description.includes('named query source cell') &&
             generatedLuaDefinition.description.includes('direct Lua cell I/O'));
         testLog('Generated Lua has an update revision',
-            generatedLuaDefinition.revision === 1, String(generatedLuaDefinition.revision));
+            generatedLuaDefinition.revision === 2, String(generatedLuaDefinition.revision));
+        testLog('Generated ClojureScript entry exists', !!generatedCljsEntry);
+        testLog('Generated ClojureScript shows prolog, clojurescript kernels',
+            generatedCljsEntry?.kernels === 'prolog, clojurescript', generatedCljsEntry?.kernels);
         testLog('TypR introduction entry exists', !!typrIntroEntry);
         testLog('TypR introduction shows typr, r kernels', typrIntroEntry?.kernels === 'typr, r', typrIntroEntry?.kernels);
         const typrIntroDefinition = await page.evaluate(() => {
@@ -153,7 +161,7 @@ const TIMEOUT = 180_000;
             return { revision: item?.revision };
         });
         testLog('Call Graph workbook has an update revision',
-            callGraphDefinition.revision === 1, String(callGraphDefinition.revision));
+            callGraphDefinition.revision === 2, String(callGraphDefinition.revision));
 
         const bundleDefinition = await page.evaluate(() => {
             const bundle = window.packageCatalog.packages.find(p => p.id === 'unifyweaver-workbooks');
@@ -278,7 +286,7 @@ const TIMEOUT = 180_000;
                 return {
                     fetched: true,
                     bothReadNamedQueries: compilerCode.every(code =>
-                        code.includes("nb_read('lua_queries', '.code', QuerySource)")),
+                        /nb_read\('lua_queries', '\.code', _?QuerySource\)/.test(code)),
                     hasInlineQueryFormatter: compilerCode.some(code =>
                         code.includes('format(string(Queries)')),
                     hasInlineQueryProgram: compilerCode.some(code =>
@@ -323,11 +331,11 @@ const TIMEOUT = 180_000;
                 const code = compileCell?.code || '';
                 return {
                     fetched: true,
-                    readsNamedPrologCell: code.includes("nb_read('family_tree', '.code', PrologSrc)"),
-                    readsNamedQueryCell: code.includes("nb_read('typr_queries', '.code', QuerySource)"),
+                    readsNamedPrologCell: /nb_read\('family_tree', '\.code', _?PrologSrc\)/.test(code),
+                    readsNamedQueryCell: /nb_read\('typr_queries', '\.code', _?QuerySource\)/.test(code),
                     hasInlineQueryProgram: code.includes('format(string(Queries)'),
                     queryIsSourceCell: queryCell?.language === 'typr' && queryCell?.code?.startsWith('#!source\n'),
-                    usesDirectVariadicCat: queryCell?.code?.includes('cat("Descendants of alice:", paste(results'),
+                    forwardsVariadicResults: queryCell?.code?.includes('paste(sep = ", ", ...results)'),
                     rQueriesAreSeparate: !rCompileCell?.code?.includes('format(string(Queries)') &&
                         rQueryCell?.language === 'r' && rQueryCell?.code?.includes('ancestor_all("alice")')
                 };
@@ -342,7 +350,8 @@ const TIMEOUT = 180_000;
             testLog('Generated TypR compiler reads the named query source cell', typrWorkbookResult.readsNamedQueryCell);
             testLog('Generated TypR compiler omits inline query programs', !typrWorkbookResult.hasInlineQueryProgram);
             testLog('Generated TypR queries use a non-executing source cell', typrWorkbookResult.queryIsSourceCell);
-            testLog('Generated TypR queries use direct variadic cat', typrWorkbookResult.usesDirectVariadicCat);
+            testLog('Generated TypR queries forward the descendant list through variadic paste',
+                typrWorkbookResult.forwardsVariadicResults);
             testLog('Plain R queries live in their own highlighted cell', typrWorkbookResult.rQueriesAreSeparate);
         }
 
@@ -357,7 +366,10 @@ const TIMEOUT = 180_000;
             const pkgIndex = catalog.packages.findIndex(item => item.id === pkg.id);
 
             // Simulate a workbook restored from before catalog revisions existed.
-            nm.createNotebook({ name: pkg.notebookName });
+            const stale = nm.createNotebook({
+                name: pkg.notebookName,
+                cells: [{ code: 'user-edited legacy content', type: 'code', language: 'typr' }]
+            });
             catalog._syncInstallButtons();
             const button = document.querySelector(`.pkg-install-btn[data-idx="${pkgIndex}"]`);
             const before = button.textContent.trim();
@@ -368,6 +380,7 @@ const TIMEOUT = 180_000;
 
             const matches = nm.getNotebooks().filter(nb => nb.name === pkg.notebookName);
             const updated = matches[0];
+            const backup = nm.getNotebook(stale.id);
             const compileCell = updated?.cells?.find(cell => cell.name === 'compile_to_typr');
             return {
                 before,
@@ -376,16 +389,24 @@ const TIMEOUT = 180_000;
                 matchCount: matches.length,
                 catalogId: updated?.catalogId,
                 catalogRevision: updated?.catalogRevision,
-                readsNamedCell: compileCell?.code?.includes("nb_read('family_tree', '.code', PrologSrc)") || false,
-                readsNamedQueries: compileCell?.code?.includes("nb_read('typr_queries', '.code', QuerySource)") || false
+                backupName: backup?.name,
+                backupCode: backup?.cells?.[0]?.code,
+                backupCatalogId: backup?.catalogId,
+                readsNamedCell: /nb_read\('family_tree', '\.code', _?PrologSrc\)/.test(compileCell?.code || ''),
+                readsNamedQueries: /nb_read\('typr_queries', '\.code', _?QuerySource\)/.test(compileCell?.code || '')
             };
         });
 
         testLog('Stale TypR workbook is labelled Update', workbookUpdate.before === 'Update', workbookUpdate.before);
-        testLog('Update replaces the stale workbook instead of duplicating it',
+        testLog('Update installs one current workbook under the canonical name',
             workbookUpdate.matchCount === 1, `${workbookUpdate.matchCount} copies`);
+        testLog('Update preserves user-edited legacy content as a backup',
+            workbookUpdate.backupName?.startsWith('Prolog Generates TypR: Compiler Demo (backup of ') &&
+            workbookUpdate.backupCode === 'user-edited legacy content' &&
+            workbookUpdate.backupCatalogId == null,
+            workbookUpdate.backupName || 'missing backup');
         testLog('Updated workbook records its catalog revision',
-            workbookUpdate.catalogId === 'prolog-generates-typr' && workbookUpdate.catalogRevision === 3,
+            workbookUpdate.catalogId === 'prolog-generates-typr' && workbookUpdate.catalogRevision === 4,
             `${workbookUpdate.catalogId}@${workbookUpdate.catalogRevision}`);
         testLog('Updated workbook uses the named family_tree cell', workbookUpdate.readsNamedCell);
         testLog('Updated workbook uses the named typr_queries cell', workbookUpdate.readsNamedQueries);
@@ -409,7 +430,7 @@ const TIMEOUT = 180_000;
         testLog('Workbook revision survives app reload',
             persistedUpdateState.installed &&
             persistedUpdateState.catalogId === 'prolog-generates-typr' &&
-            persistedUpdateState.catalogRevision === 3);
+            persistedUpdateState.catalogRevision === 4);
 
         // ── Test: importIpynb integration ──
 

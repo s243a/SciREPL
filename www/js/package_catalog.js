@@ -53,6 +53,7 @@ class PackageCatalog {
                 notebookName: 'Family Tree Tutorial with UnifyWeaver',
                 description: 'Build and query a family-tree knowledge base while learning UnifyWeaver and Prolog fundamentals.',
                 type: 'workbook',
+                revision: 1,
                 pages_url: 'workbooks/01_family_tree_tutorial.ipynb',
                 size: '~10 KB',
                 kernels: ['prolog'],
@@ -64,6 +65,7 @@ class PackageCatalog {
                 notebookName: 'Advanced Recursion Patterns in UnifyWeaver',
                 description: 'Explore recursive predicates and the compilation patterns UnifyWeaver recognizes.',
                 type: 'workbook',
+                revision: 1,
                 pages_url: 'workbooks/02_recursion_patterns.ipynb',
                 size: '~15 KB',
                 kernels: ['prolog'],
@@ -75,7 +77,7 @@ class PackageCatalog {
                 notebookName: 'Call Graph Analysis and SCC Detection',
                 description: 'Analyze predicate call graphs and strongly connected components with UnifyWeaver.',
                 type: 'workbook',
-                revision: 1,
+                revision: 2,
                 pages_url: 'workbooks/03_call_graph_analysis.ipynb',
                 size: '~13 KB',
                 kernels: ['prolog'],
@@ -87,6 +89,7 @@ class PackageCatalog {
                 notebookName: 'Prolog Generates R: Compiler Demo',
                 description: 'Compile recursive Prolog predicates into executable R and inspect the generated program through notebook cells.',
                 type: 'workbook',
+                revision: 1,
                 format: 'srwb',
                 pages_url: 'workbooks/prolog-generates-r.srwb',
                 size: '~13 KB',
@@ -99,7 +102,7 @@ class PackageCatalog {
                 notebookName: 'Prolog Generates Lua: Compiler Demo',
                 description: 'Compile a Prolog transitive closure to Lua using a named query source cell, embedded or notebook-VFS facts, and direct Lua cell I/O.',
                 type: 'workbook',
-                revision: 1,
+                revision: 2,
                 format: 'srwb',
                 pages_url: 'workbooks/prolog-generates-lua.srwb',
                 size: '~6 KB',
@@ -107,14 +110,40 @@ class PackageCatalog {
                 requires: ['unifyweaver-scirepl'],
             },
             {
+                id: 'prolog-generates-clojurescript',
+                name: 'Prolog Generates ClojureScript',
+                notebookName: 'Prolog Generates ClojureScript: Compiler Demo',
+                description: 'Compile a Prolog transitive closure to browser-runnable ClojureScript, then query the generated definitions in Scittle.',
+                type: 'workbook',
+                revision: 1,
+                format: 'srwb',
+                pages_url: 'workbooks/prolog-generates-clojurescript.srwb',
+                size: '~5 KB',
+                kernels: ['prolog', 'clojurescript'],
+                requires: ['unifyweaver-scirepl'],
+            },
+            {
                 id: 'life-expectancy-analysis',
                 name: 'Life Expectancy Analysis',
                 description: 'Mixed Python/R workbook: Gapminder & WHO datasets with pandas, plotly, and R base graphics.',
                 type: 'workbook',
+                revision: 1,
                 url: 'https://github.com/s243a/SciREPL/releases/download/v0.7.0/life_expectancy_csv_demo.ipynb',
                 pages_url: 'workbooks/life_expectancy_csv_demo.ipynb',
                 size: '~8 KB',
                 kernels: ['python', 'r'],
+            },
+            {
+                id: 'compute-pi-archimedean',
+                name: 'Compute Pi with Archimedean Bounds',
+                notebookName: 'Compute Pi: Archimedean Bounds',
+                description: 'Squeeze pi between inscribed and circumscribed polygon bounds using a stable, non-circular side-doubling recurrence.',
+                type: 'workbook',
+                revision: 1,
+                format: 'srwb',
+                pages_url: 'workbooks/compute-pi-workbook.srwb',
+                size: '~6 KB',
+                kernels: ['python'],
             },
             {
                 id: 'ggplot2-showcase',
@@ -131,6 +160,7 @@ class PackageCatalog {
                 name: 'Tidyverse Data Wrangling',
                 description: 'dplyr/tidyr pipelines with cross-language CSV sharing: Python downloads, R processes, Python visualizes.',
                 type: 'workbook',
+                revision: 1,
                 url: 'https://github.com/s243a/SciREPL/releases/download/v0.8.0/r_tidyverse_wrangling.ipynb',
                 pages_url: 'workbooks/r_tidyverse_wrangling.ipynb',
                 size: '~6 KB',
@@ -141,6 +171,7 @@ class PackageCatalog {
                 name: 'Statistics with R',
                 description: 'Hypothesis testing (t-test, chi-squared, ANOVA), regression, confidence intervals, and diagnostic plots.',
                 type: 'workbook',
+                revision: 1,
                 url: 'https://github.com/s243a/SciREPL/releases/download/v0.8.0/r_statistics.ipynb',
                 pages_url: 'workbooks/r_statistics.ipynb',
                 size: '~5 KB',
@@ -161,6 +192,7 @@ class PackageCatalog {
                 name: 'Lua: Parsing with Coroutines',
                 description: 'Build a calculator from scratch — coroutine lexer, recursive descent parser, AST evaluator, parser combinators, and a CSV parser. No external libraries.',
                 type: 'workbook',
+                revision: 1,
                 format: 'srwb',
                 pages_url: 'workbooks/lua-parsing-coroutines.srwb',
                 size: '~14 KB',
@@ -186,7 +218,7 @@ class PackageCatalog {
                 description: 'Compile a Prolog transitive-closure predicate to typed TypR, then execute the generated code with native variadic output calls.',
                 type: 'workbook',
                 format: 'srwb',
-                revision: 3,
+                revision: 4,
                 pages_url: 'workbooks/prolog-generates-typr.srwb',
                 size: '~5 KB',
                 kernels: ['prolog', 'typr', 'r'],
@@ -572,10 +604,26 @@ class PackageCatalog {
         imported.catalogId = pkg.id;
         imported.catalogRevision = pkg.revision ?? null;
 
-        // Import first, then remove stale copies, so a parse/import failure can
-        // never destroy the user's existing workbook.
+        // Import first, then preserve stale copies under unique backup names.
+        // Catalog workbooks are editable, and older releases did not record
+        // enough provenance to distinguish an untouched template from user
+        // work. Never silently delete either kind during an update.
+        const existingNames = new Set(nm.getNotebooks().map(nb => nb && nb.name).filter(Boolean));
         for (const oldNotebook of previous) {
-            if (oldNotebook !== imported) nm.removeNotebook(oldNotebook.id);
+            if (oldNotebook === imported) continue;
+            const revision = oldNotebook.catalogRevision == null
+                ? 'unversioned'
+                : 'revision ' + oldNotebook.catalogRevision;
+            const baseName = expectedName + ' (backup of ' + revision + ')';
+            let backupName = baseName;
+            let suffix = 2;
+            while (existingNames.has(backupName)) {
+                backupName = baseName + ' ' + suffix++;
+            }
+            oldNotebook.catalogId = null;
+            oldNotebook.catalogRevision = null;
+            nm.renameNotebook(oldNotebook.id, backupName);
+            existingNames.add(backupName);
         }
         nm.saveState();
         return imported;

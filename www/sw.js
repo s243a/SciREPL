@@ -1,7 +1,7 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v127';
+const CACHE_VERSION = 'v128';
 const APP_CACHE = 'scirepl-app-' + CACHE_VERSION;
 const CDN_CACHE = 'scirepl-cdn-v2';
 
@@ -74,6 +74,7 @@ const APP_SHELL = [
   './workbooks/prolog-generates-r.srwb',
   './workbooks/prolog-generates-clojurescript.srwb',
   './workbooks/prolog-generates-lua.srwb',
+  './workbooks/compute-pi-workbook.srwb',
   './workbooks/typr-intro.srwb',
   './workbooks/prolog-generates-typr.srwb',
 ];
