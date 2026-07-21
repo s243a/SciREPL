@@ -129,7 +129,7 @@ function inspectCallGraphStructure(workbook) {
     return {
         sccSelfContained: ordered(scc, ['build_call_graph(', 'find_sccs(']),
         classificationSelfContained: ordered(classification,
-            ['build_call_graph(', 'find_sccs(', 'forall(member(SCC, SCCs)']),
+            ['build_call_graph(', 'find_sccs(', 'forall(member(']),
         dotSaveSelfContained: ordered(saveDot, ['build_call_graph(', 'generate_dot(', 'open(']),
     };
 }
@@ -208,7 +208,7 @@ try {
     console.log('2. Verifying every local catalog payload is pre-cached...');
     const cacheState = await page.evaluate(async () => {
         const names = await caches.keys();
-        const appCache = names.find(name => name === 'scirepl-app-v128');
+        const appCache = names.find(name => name === 'scirepl-app-v129');
         if (!appCache) return { names, paths: [] };
         const keys = await (await caches.open(appCache)).keys();
         return {
@@ -216,13 +216,17 @@ try {
             paths: keys.map(request => new URL(request.url).pathname),
         };
     });
-    assert(cacheState.names.includes('scirepl-app-v128'), 'release cache v128 is active', cacheState.names.join(', '));
+    assert(cacheState.names.includes('scirepl-app-v129'), 'release cache v129 is active', cacheState.names.join(', '));
     for (const relative of requiredCatalogPaths) {
         assert(cacheState.paths.includes(PREFIX + relative), `pre-cache contains ${relative}`);
     }
 
     console.log('3. Loading the bundled Prolog runtime while its CDN fallback is blocked...');
-    await page.evaluate(() => window.kernelManager.ensureReady('prolog'));
+    await withTimeout(
+        page.evaluate(() => window.kernelManager.ensureReady('prolog')),
+        TIMEOUT,
+        'initial bundled Prolog startup',
+    );
     assert(await page.evaluate(() => window.kernelManager.isReady('prolog')), 'Prolog kernel initializes in PWA mode');
     assert(
         prologRuntimeRequests.length > 0 &&
@@ -281,6 +285,7 @@ try {
         return {
             found: true,
             errors: cells.filter(cell => cell.error).map(cell => cell.output),
+            allOutput: cells.map(cell => cell.output).join('\n'),
             scc: outputFor("% Find SCCs using Tarjan's algorithm"),
             classification: outputFor('% Check each SCC'),
             dot: outputFor('% Helper to generate DOT format'),
@@ -290,6 +295,9 @@ try {
     assert(callGraphRun.found, 'Call Graph workbook is selectable');
     assert(callGraphRun.errors.length === 0, 'Call Graph Run All has no error cards',
         callGraphRun.errors.join(' | '));
+    const bindingNoise = /\[object Object\]|\b(?:AccInfo|BashCode|BashLines|Count|Deps|DotCode|Edge|FibBody|FibHead|Graph|Group|LibraryCode|LibraryLines|SCC|SCCs|Stream)\s*=/;
+    assert(!bindingNoise.test(callGraphRun.allOutput),
+        'Call Graph output hides internal Prolog bindings', callGraphRun.allOutput);
     assert(callGraphRun.scc.includes('Strongly Connected Components:') &&
         callGraphRun.scc.includes('is_even/1') && callGraphRun.scc.includes('is_odd/1'),
         'Call Graph Run All reports the even/odd SCC', callGraphRun.scc);
@@ -318,10 +326,59 @@ try {
     assert(pageErrors.length === 0, 'offline app reload raises no uncaught page errors', pageErrors.join(' | '));
 
     console.log('7. Restarting the bundled Prolog kernel while still offline...');
-    await page.evaluate(() => window.kernelManager.ensureReady('prolog'));
+    await withTimeout(
+        page.evaluate(() => window.kernelManager.ensureReady('prolog')),
+        TIMEOUT,
+        'offline bundled Prolog restart',
+    );
     assert(
         await page.evaluate(() => window.kernelManager.isReady('prolog')),
         'cached same-origin Prolog runtime restarts offline',
+    );
+
+    // Run the Bash-heavy tutorials after the offline Prolog restart. Starting
+    // a second SWI-Prolog WASM instance while Brush is still at peak memory can
+    // stall resource-constrained CI browsers.
+    console.log('8. Running the other cleaned UnifyWeaver tutorials while offline...');
+    const tutorialRuns = await withTimeout(page.evaluate(async () => {
+        const names = [
+            'Family Tree Tutorial with UnifyWeaver',
+            'Advanced Recursion Patterns in UnifyWeaver',
+        ];
+        const runs = {};
+        for (const name of names) {
+            const notebook = window.notebookManager.getNotebooks().find(item => item.name === name);
+            if (!notebook) {
+                runs[name] = { found: false };
+                continue;
+            }
+            window.notebookManager.switchTo(notebook.id);
+            await window.runAllCells();
+            const cells = (window._cells || []).map(cell => ({
+                code: cell.code || '',
+                output: cell.outputCard?.querySelector('.card-body')?.textContent || '',
+                error: !!cell.outputCard?.classList.contains('card-error'),
+            }));
+            runs[name] = {
+                found: true,
+                errors: cells.filter(cell => cell.error).map(cell => cell.output),
+                allOutput: cells.map(cell => cell.output).join('\n'),
+                ancestorCheck: cells.find(cell => cell.code.includes('Is Abraham an ancestor'))?.output || '',
+            };
+        }
+        return runs;
+    }), TIMEOUT * 2, 'UnifyWeaver tutorial Run All');
+
+    for (const [name, run] of Object.entries(tutorialRuns)) {
+        assert(run.found, `${name} is selectable`);
+        assert(run.errors.length === 0, `${name} Run All has no error cards`, run.errors.join(' | '));
+        assert(!bindingNoise.test(run.allOutput), `${name} hides internal Prolog bindings`, run.allOutput);
+    }
+    assert(
+        tutorialRuns['Family Tree Tutorial with UnifyWeaver'].ancestorCheck.includes(
+            'Yes: Abraham is an ancestor of Jacob'),
+        'Family Tree prints the ground-query result explicitly',
+        tutorialRuns['Family Tree Tutorial with UnifyWeaver'].ancestorCheck,
     );
 
     console.log('\nPWA release regression passed.');
