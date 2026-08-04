@@ -6,10 +6,11 @@ on:
       - main
     tags:
       - 'v*'  # Triggers on version tags like v0.1.0, v1.0.0-beta, etc.
-    # Publish when the Pro policy changes on main without moving an existing release tag.
+    # Publish when the Pro landing page or policy changes on main without moving
+    # an existing release tag.
     # GitHub does not evaluate path filters for tag pushes, so all v* tags still deploy.
     paths:
-      - 'www/pro/privacy.html'
+      - 'www/pro/**'
 
 permissions:
   contents: read
