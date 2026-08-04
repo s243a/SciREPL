@@ -119,6 +119,14 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
+  // The public Pro landing and privacy pages are not part of the PWA app shell.
+  // Always let the browser fetch them normally so marketing/policy edits are not
+  // held behind the app's cache-first lifecycle.
+  const appScopePath = new URL(self.registration.scope).pathname;
+  if (url.origin === self.location.origin && url.pathname.startsWith(`${appScopePath}pro/`)) {
+    return;
+  }
+
   // App shell: cache-first
   if (url.origin === self.location.origin) {
     event.respondWith(
