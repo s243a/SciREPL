@@ -23,9 +23,22 @@ const {
 const { applyWebContentsPolicy } = require('./security');
 const { registerIpcHandlers } = require('./ipc');
 
-/** Repository root, two levels up from desktop/electron/. */
-const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const WWW_ROOT = process.env.SCIREPL_WWW || path.join(REPO_ROOT, 'www');
+const { resolveWwwRoot, resolveBuildInfoPath, resolveRepoRoot } = require('./paths');
+
+/**
+ * Content locations. These differ between the development checkout and a
+ * packaged build, so they come from paths.js rather than being derived inline
+ * from `__dirname` — inside a packaged app `__dirname` is within
+ * resources/app.asar and has no repository above it.
+ */
+const LAYOUT = {
+  isPackaged: app.isPackaged,
+  resourcesPath: process.resourcesPath,
+  moduleDir: __dirname,
+  env: process.env,
+};
+const WWW_ROOT = resolveWwwRoot(LAYOUT);
+const REPO_ROOT = resolveRepoRoot(LAYOUT); // null when packaged
 
 /**
  * A distinct userData directory. The shell must not collide with any other
@@ -38,7 +51,26 @@ if (process.env.SCIREPL_USER_DATA) {
   app.setPath('userData', path.join(app.getPath('appData'), 'SciREPL-Free-Electron'));
 }
 
+/**
+ * Build metadata written by desktop/electron/packaging/build-portable.mjs.
+ * Present only in packaged builds; absent in development, which is not an error.
+ */
+function readBuildInfo() {
+  try {
+    return JSON.parse(fs.readFileSync(resolveBuildInfoPath(LAYOUT), 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
 function readAppVersion() {
+  // Packaged: the version baked into the app by the packager, which is the
+  // repository's version at build time. Reading package.json from a repository
+  // that no longer exists next to the binary would always fail here.
+  if (app.isPackaged) {
+    const info = readBuildInfo();
+    return (info && info.appVersion) || app.getVersion();
+  }
   try {
     const pkg = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf8'));
     return pkg.version || '0.0.0';
@@ -48,6 +80,12 @@ function readAppVersion() {
 }
 
 function readProfile() {
+  // In a packaged build the profile was fixed when the tree was configured, and
+  // the packager recorded it. Prefer that; fall back to reading the generated
+  // config, which works in both layouts.
+  const info = readBuildInfo();
+  if (info && info.profile) return info.profile;
+
   // scripts/configure-build.mjs writes www/js/kernel_config.js from
   // build-profiles.json. Report which profile the tree was configured with so
   // the shell never has to guess which kernels should be present.
@@ -169,7 +207,11 @@ app.whenReady().then(() => {
   }
 
   registerProtocolHandler(WWW_ROOT);
-  registerIpcHandlers({ appVersion: readAppVersion(), profile: readProfile() });
+  registerIpcHandlers({
+    appVersion: readAppVersion(),
+    profile: readProfile(),
+    buildInfo: readBuildInfo(),
+  });
 
   createWindow();
 

@@ -93,16 +93,60 @@ function electronExecutable() {
  *   rather than fail — pass `prime: false` only when testing that gate itself.
  */
 export async function launchShell(opts = {}) {
-  const userDataDir = opts.userDataDir || mkdtempSync(path.join(tmpdir(), 'scirepl-electron-'));
+  return launchAny({
+    ...opts,
+    executablePath: electronExecutable(),
+    appArgs: [ELECTRON_DIR],
+    // Development runs are pointed at the repository's prepared tree.
+    env: { SCIREPL_WWW: opts.www || WWW_ROOT },
+    userDataPrefix: 'scirepl-electron-',
+  });
+}
+
+/**
+ * Launch a **packaged** build — the actual `SciREPL.exe` (or platform
+ * equivalent) produced by packaging/build-portable.mjs.
+ *
+ * Differences from `launchShell`, both deliberate:
+ *   - the executable IS the app, so there is no app-directory argument;
+ *   - `SCIREPL_WWW` is NOT set, so the app must find its own bundled
+ *     `resources/www`. Overriding it would test the repository tree and quietly
+ *     defeat the point of testing a package at all.
+ *
+ * @param {object} opts
+ * @param {string} opts.exePath path to the packaged executable
+ */
+export async function launchPackagedShell(opts = {}) {
+  if (!opts.exePath) throw new Error('launchPackagedShell requires { exePath }');
+  if (!existsSync(opts.exePath)) {
+    throw new Error(
+      `No packaged executable at ${opts.exePath}.\n` +
+      'Build one first:  npm run package:windows'
+    );
+  }
+  return launchAny({
+    ...opts,
+    executablePath: opts.exePath,
+    appArgs: [],
+    env: {},               // the packaged app resolves its own content
+    userDataPrefix: 'scirepl-packaged-',
+    packaged: true,
+  });
+}
+
+/** Shared launch path for both the development shell and a packaged build. */
+async function launchAny(opts = {}) {
+  const userDataDir = opts.userDataDir
+    || mkdtempSync(path.join(tmpdir(), opts.userDataPrefix || 'scirepl-'));
   const ownsUserData = !opts.userDataDir && !opts.keepUserData;
 
-  const args = [ELECTRON_DIR];
+  const args = [...(opts.appArgs || [])];
   // WSL/CI containers frequently lack a usable setuid sandbox helper. We only
   // relax this when explicitly asked, and every security probe records whether
   // it ran with the sandbox on so the report cannot overclaim.
   if (process.env.SCIREPL_ELECTRON_NO_SANDBOX === '1') args.push('--no-sandbox');
 
-  const executablePath = electronExecutable();
+  const executablePath = opts.executablePath;
   let electronApp;
   try {
     electronApp = await electron.launch({
@@ -110,8 +154,10 @@ export async function launchShell(opts = {}) {
       args,
       env: {
         ...process.env,
+        // Never let an ambient SCIREPL_WWW leak into a packaged run.
+        SCIREPL_WWW: undefined,
+        ...opts.env,
         SCIREPL_USER_DATA: userDataDir,
-        SCIREPL_WWW: opts.www || WWW_ROOT,
         ELECTRON_ENABLE_LOGGING: '1',
       },
       timeout: 120_000,
@@ -123,10 +169,11 @@ export async function launchShell(opts = {}) {
     // needed and did not have.
     throw new Error(
       `Failed to launch the Electron shell.\n` +
+      `  mode:       ${opts.packaged ? 'packaged build' : 'development shell'}\n` +
       `  executable: ${executablePath}\n` +
       `  args:       ${JSON.stringify(args)}\n` +
       `  platform:   ${process.platform}-${process.arch}\n` +
-      `  www root:   ${opts.www || WWW_ROOT}\n` +
+      `  www root:   ${opts.packaged ? '(from the package itself)' : (opts.www || WWW_ROOT)}\n` +
       `  userData:   ${userDataDir}\n` +
       `If the executable path looks wrong for this platform, the Electron install ` +
       `is incomplete. If it looks right, the main process most likely threw during ` +

@@ -432,18 +432,26 @@ file the Android build reads was changed. `npm run build:play` and
 
 ## 8. The shell's own test suite
 
-`npm run test:windows` — **verified, 199 assertions, 0 failures**:
+`npm run test:windows` — **verified, 0 failures**:
 
 | Suite | Result | Needs Electron? |
 | --- | --- | --- |
-| `policy-unit` | 52 passed | no |
+| `policy-unit` | 59 passed | no |
 | `shell-launch` | 18 passed | yes |
-| `security` | 34 passed | yes |
+| `security` | 22 passed | yes |
 | `artifact-boundary` | 14 passed | yes |
 | `download` | 9 passed | yes |
 | `persistence` | 9 passed | yes |
-| `kernels` | 46 passed, 2 known-gap skips | yes |
+| `kernels` | 46 passed, 2 known-gap skips (23 without the browser baseline) | yes |
 | `offline` | 17 passed | yes |
+| `packaged` | 56 passed | yes, **and a built package** — opt-in, see §13 |
+
+Counts shifted in Phase 0.5 and the totals are not comparable to the Phase 0
+figure of 199. `security` fell from 34 to 22 because its checks moved into
+`probes/security.mjs`, where related assertions are graded as a group rather
+than one per Node global — the same ground is covered, by one definition now
+shared with the packaged suite. `policy-unit` rose with the packaged-layout
+path tests.
 
 Export *correctness* is deliberately **not** re-tested — the existing browser
 tests already cover which bytes each format produces, and that logic is
@@ -660,3 +668,120 @@ anything. None is justified by a Phase 0 observation.
 **Recommendation: proceed to Phase 1**, starting with the realm-boundary decision
 (§11.1) rather than with a broad platform-interface refactor. Do not proceed to
 MSIX, Store submission or Pro work until §9 has been executed on real Windows.
+
+---
+
+## 13. Phase 0.5: portable Windows preview
+
+Phase 0 proved the shell works. Phase 0.5 makes it possible to *look at it* on
+Windows without a toolchain — the gap between "CI says it passes" and "someone
+can actually try it".
+
+Two deliverables, both Free-only, neither a release. Running instructions:
+[`WINDOWS_PREVIEW.md`](WINDOWS_PREVIEW.md).
+
+### One-command developer launch
+
+`npm run dev:windows` (`desktop/electron/scripts/dev-windows.mjs`) checks Node
+(>= 22) and the platform, configures the Free profile, fetches the bundled
+runtimes, installs the isolated Electron dependencies, provisions the Electron
+binary, and launches. Completed steps are detected and skipped, so it doubles as
+the everyday start command. It installs nothing system-wide and needs no
+elevation.
+
+Two failure modes it reports rather than stumbles into: a Node older than 22,
+and a checkout on a UNC path (`\\wsl.localhost\…`), which Windows Node tooling
+and Electron handle unreliably. On a non-Windows host it warns instead of
+failing — running under WSLg is a useful look at the UI, but it launches the
+*Linux* Electron build and cannot substitute for Windows verification.
+
+### Unsigned portable preview
+
+`npm run package:windows` (`packaging/build-portable.mjs`, `@electron/packager`
+pinned to `20.2.0`) produces a directory containing a directly launchable
+`SciREPL.exe`. The `Windows portable preview` workflow — `workflow_dispatch`
+only — builds it on `windows-latest`, verifies it, and uploads it as
+`SciREPL-windows-x64-preview-<sha>`. The artifact GitHub produces *is* the
+distributable ZIP: download, extract, run. Measured: **~472 MB unpacked**
+(win32-x64).
+
+**The build is unsigned, so SmartScreen warns on first run.** That is expected
+for an unsigned binary and is documented for testers rather than papered over.
+Signing belongs with Store packaging and is out of scope.
+
+#### Packaged layout, and why it needed a code change
+
+Phase 0's `main.js` derived everything from `__dirname`:
+
+```js
+const REPO_ROOT = path.resolve(__dirname, '..', '..');   // wrong once packaged
+const WWW_ROOT  = path.join(REPO_ROOT, 'www');
+```
+
+In a packaged app `__dirname` is inside `resources/app.asar` and there is no
+repository above it, so both `www/` and the version lookup would have broken —
+silently, as a window that opens and 404s everything. `paths.js` now resolves
+both layouts as pure functions, unit-tested rather than only discoverable by
+launching a build:
+
+```
+SciREPL-win32-x64/
+  SciREPL.exe
+  resources/
+    app.asar          the shell (main, protocol, security, preload, ipc, paths)
+    www/              the application tree — deliberately OUTSIDE the asar
+    build-info.json   version, profile, commit, timestamp
+```
+
+`www/` stays outside the asar because protocol.js serves it with
+`net.fetch(file://…)`, which reads real files and does not go through Electron's
+asar layer. Version and profile come from `build-info.json`, so both survive the
+packaged layout — asserted by the `packaged` suite, not assumed.
+
+### A finding the packaged tests caught
+
+The first build shipped **`www/pro/`** inside the artifact: the Pro landing
+page, its privacy and testing pages, and ~800 kB of Pro branding (app icon and
+Play Store feature graphic). Those files are in the repository so GitHub Pages
+can serve them — nothing in `www/js` links to them and the shell never navigates
+there — but a Free preview must not carry Pro assets to a tester.
+
+They are now filtered out of the staged copy at package time and their absence
+is asserted twice: once by the build script, once by `packaged.test.mjs`.
+
+**The website is unaffected.** `www/pro/**` remains tracked in git and
+`deploy-pages.yml` is unchanged, so the Pro landing page still publishes exactly
+as before. The filter applies only to the copy staged into the `.exe`.
+
+### Packaged verification **[verified]**
+
+`packaged.test.mjs` — 56 assertions, 0 failures — drives the real packaged
+binary with `SCIREPL_WWW` deliberately unset, so the app must find its own
+bundled tree or fail:
+
+| Check | Result |
+| --- | --- |
+| loads `app://scirepl/index.html` from its own resources | ✅ |
+| version and build profile resolve in the packaged layout | ✅ |
+| Node unreachable from a notebook cell (same `probes/security.mjs` as the dev shell) | ✅ |
+| `nodeIntegration` off, `contextIsolation`/`sandbox` on, no escape hatch | ✅ |
+| off-origin navigation and `window.open` refused | ✅ |
+| bundled kernels run — JavaScript, Bash, ClojureScript, SWI-Prolog, Python | ✅ |
+| SharedVFS + localStorage survive a packaged-app restart | ✅ |
+| no Pro material, no bundled R, no build machinery in the artifact | ✅ |
+
+Reuse is the point: the boundary is defined once in `probes/security.mjs` and
+applied to both the development shell and the package. A packaged build that
+quietly regained Node access while a separate copy of the assertions kept
+passing is the failure this arrangement is designed to prevent.
+
+Verified on Linux (`SciREPL-linux-x64`) locally and on `windows-latest` in the
+preview workflow. The Windows executable cannot be executed from this
+development environment, so the win32 build is verified by CI, not by hand here.
+
+### Still out of scope
+
+MSIX, Store submission, code signing, auto-update, entitlement or licence
+checking, Pro anything. Unchanged from §9: the manual Windows checks — display
+scaling, native dialogs, accessibility, sleep/resume, non-ASCII profile paths —
+are exactly what the portable preview now makes it practical for a human to do.

@@ -6,9 +6,11 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "node test/run-all.mjs"
+    "test": "node test/run-all.mjs",
+    "package": "node packaging/build-portable.mjs"
   },
   "devDependencies": {
+    "@electron/packager": "20.2.0",
     "electron": "43.3.0"
   }
 }

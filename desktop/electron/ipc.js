@@ -32,6 +32,7 @@ function assertNullary(channel, args) {
 function registerIpcHandlers(options = {}) {
   const appVersion = options.appVersion || '0.0.0';
   const profile = options.profile || 'unknown';
+  const buildInfo = options.buildInfo || null;
 
   ipcMain.handle(CHANNELS.APP_INFO, (_event, ...args) => {
     assertNullary(CHANNELS.APP_INFO, args);
@@ -60,6 +61,12 @@ function registerIpcHandlers(options = {}) {
       packaged: app.isPackaged,
       profile,
       store: null,
+      // Build provenance for a packaged preview, so a tester can say exactly
+      // which build they are looking at. Null in development. These are inert
+      // facts — no behaviour keys off them.
+      commit: (buildInfo && buildInfo.commit) || null,
+      builtAt: (buildInfo && buildInfo.builtAt) || null,
+      channel: (buildInfo && buildInfo.channel) || 'development',
     };
   });
 }

@@ -78,6 +78,50 @@ export default async function run() {
       protocol.resolveRequestPath(ROOT, input) === null);
   }
 
+  /* ---------------- packaged vs development layout ---------------- */
+
+  // Getting this wrong is silent — the window opens and every asset 404s — so
+  // it is asserted here rather than only discovered by launching a package.
+  const paths = require(path.join(ELECTRON_DIR, 'paths.js'));
+
+  const devLayout = {
+    isPackaged: false,
+    resourcesPath: '/irrelevant',
+    moduleDir: path.join(path.sep, 'repo', 'desktop', 'electron'),
+    env: {},
+  };
+  r.log('development: www/ resolves next to the repository root',
+    paths.resolveWwwRoot(devLayout) === path.join(path.sep, 'repo', 'www'),
+    paths.resolveWwwRoot(devLayout));
+  r.log('development: the repository root is known',
+    paths.resolveRepoRoot(devLayout) === path.join(path.sep, 'repo'));
+
+  const packagedLayout = {
+    isPackaged: true,
+    resourcesPath: path.join(path.sep, 'apps', 'SciREPL', 'resources'),
+    moduleDir: path.join(path.sep, 'apps', 'SciREPL', 'resources', 'app.asar'),
+    env: {},
+  };
+  r.log('packaged: www/ resolves inside resources, not via the module directory',
+    paths.resolveWwwRoot(packagedLayout)
+      === path.join(path.sep, 'apps', 'SciREPL', 'resources', 'www'),
+    paths.resolveWwwRoot(packagedLayout));
+  r.log('packaged: build-info.json resolves inside resources',
+    paths.resolveBuildInfoPath(packagedLayout)
+      === path.join(path.sep, 'apps', 'SciREPL', 'resources', 'build-info.json'));
+  r.log('packaged: there is no repository root to fall back on',
+    paths.resolveRepoRoot(packagedLayout) === null);
+
+  // The override has to win in both layouts — the tests rely on it.
+  for (const [label, layout] of [['development', devLayout], ['packaged', packagedLayout]]) {
+    const overridden = paths.resolveWwwRoot({
+      ...layout,
+      env: { SCIREPL_WWW: path.join(path.sep, 'custom', 'tree') },
+    });
+    r.log(`${label}: SCIREPL_WWW overrides the resolved tree`,
+      overridden === path.join(path.sep, 'custom', 'tree'), overridden);
+  }
+
   /* ---------------- external URL classification ---------------- */
 
   const allowedExternal = [

@@ -1,4 +1,4 @@
-# SciREPL — Windows/Electron shell (Phase 0 feasibility spike)
+# SciREPL — Windows/Electron shell
 
 A thin Electron shell around the **existing** prepared `www/` application. It is
 the Windows-specific half of the split described in
@@ -15,21 +15,33 @@ Capacitor. The shared application code imports neither framework — the shell
 loads `www/` exactly as the PWA does, and the app takes its existing browser
 code paths because `window.Capacitor` is absent.
 
-**Status: feasibility spike, Free edition only.** There is no packaging, no
-Microsoft Store integration and no entitlement logic here, deliberately. See
-[`docs/WINDOWS_ELECTRON_SPIKE.md`](../../docs/WINDOWS_ELECTRON_SPIKE.md) for
-measured results and the recommendation.
+**Status: Free edition only.** Phase 0 established feasibility
+([`docs/WINDOWS_ELECTRON_SPIKE.md`](../../docs/WINDOWS_ELECTRON_SPIKE.md));
+Phase 0.5 added a one-command developer launch and an unsigned **portable
+preview** so the app can be evaluated on Windows without a toolchain.
+
+There is still no Microsoft Store integration, no MSIX, no entitlement logic and
+no signing — deliberately. The preview is not a release. To run it, see
+[`docs/WINDOWS_PREVIEW.md`](../../docs/WINDOWS_PREVIEW.md).
 
 ## Commands
 
 Run from the repository root:
 
 ```bash
-npm run windows:install    # install Electron (isolated; see "Dependency isolation")
-npm run dev:windows        # configure + fetch runtimes + launch the shell
+npm run dev:windows        # one command: check, configure, fetch, install, launch
+npm run setup:windows      # the same, without launching
+npm run package:windows    # build the unsigned portable preview
 npm run test:windows       # all shell tests (needs Electron + a display)
 npm run test:windows:unit  # policy unit tests only (no display, no Electron binary)
+npm run windows:install    # just the Electron install step
 ```
+
+`dev:windows` is the entry point for a fresh checkout. It verifies Node (>= 22),
+reports the platform, configures the Free profile, fetches the bundled runtimes,
+installs the isolated Electron dependencies, provisions the Electron binary, and
+launches — skipping whatever is already done, so it is also the everyday "start
+the app" command. It installs nothing system-wide and needs no elevation.
 
 Individual suites:
 
@@ -144,6 +156,9 @@ drifting. The proper fix is a shared change — replace the widget with a plain
 | `security.js` | navigation / window-open / permission policy |
 | `preload.js` | the entire renderer-visible surface (two read-only calls) |
 | `ipc.js` | the canonical IPC allowlist, owned by the main process |
+| `paths.js` | resolves `www/` and build metadata in **both** layouts (development and packaged) |
+| `scripts/dev-windows.mjs` | the one-command setup + launch |
+| `packaging/build-portable.mjs` | builds the unsigned portable preview |
 | `test/` | see below |
 
 ## Tests
@@ -158,6 +173,14 @@ drifting. The proper fix is a shared change — replace the widget with a plain
 | `persistence.test.mjs` | yes | IndexedDB / SharedVFS / localStorage across a real restart |
 | `kernels.test.mjs` | yes | one execution per kernel + SharedVFS; optional browser A/B |
 | `offline.test.mjs` | yes | bundled kernels with the network cut; CDN kernels fail cleanly |
+| `packaged.test.mjs` | yes, **and a built package** | the packaged app: own `www/`, security boundary, kernels, restart persistence, no Pro material |
+
+`packaged.test.mjs` is opt-in — it needs an artifact most runs do not have:
+
+```bash
+npm run package:windows
+node desktop/electron/test/run-all.mjs packaged   # or: run-all.mjs --packaged
+```
 
 Two tools sit alongside the suites and are run explicitly, not by `run-all`:
 
@@ -173,8 +196,15 @@ On failure it retries once with `--disable-gpu --no-sandbox
 --disable-software-rasterizer`, so one run distinguishes a broken shell from a
 host that needs GPU flags. Reach for it first whenever the shell will not start.
 
-`test/probes/kernels.mjs` holds the kernel assertions and is driven by **both**
-the Electron runner and the Chromium baseline runner, so a difference in results
-is a real platform difference rather than two divergent test suites. Export
-*correctness* is not re-tested here — the existing browser tests in the
+The probes under `test/probes/` are the reason these suites do not drift apart:
+
+- `probes/kernels.mjs` is driven by the Electron runner, the Chromium baseline
+  runner **and** the packaged suite, so a difference in results is a real
+  platform difference rather than two divergent test suites.
+- `probes/security.mjs` holds the renderer/native boundary checks and is applied
+  identically to the development shell and the packaged build. That is
+  deliberate: a packaged app quietly regaining Node access while a separate copy
+  of the assertions kept passing is exactly the failure worth designing out.
+
+Export *correctness* is not re-tested here — the existing browser tests in the
 repository root already cover it and that logic is platform-independent.
