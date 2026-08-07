@@ -60,13 +60,22 @@ Bundled and fully offline:
 - **JavaScript**, **Bash/Brush**, **ClojureScript/Scittle**, **SWI-Prolog**,
   **Python/Pyodide** (with numpy, pandas, sympy)
 
+Needs a network connection the **first** time, then works offline:
+
+- **Lua/Fengari** (~200 kB) is fetched from a CDN. The service worker's cache
+  does not work under the `app://` origin, but Chromium's ordinary HTTP cache
+  retains something this small, so Lua keeps working offline after one online
+  use.
+
 Needs a network connection **every session**:
 
-- **Lua/Fengari** and **R/webR** are fetched from a CDN. They are *not* cached
-  for offline use, because the service worker's cache does not work under the
-  `app://` origin the shell serves from — see
-  [`WINDOWS_ELECTRON_SPIKE.md`](WINDOWS_ELECTRON_SPIKE.md) §5. Expect the
-  download prompt each time you start the app and use them.
+- **R/webR** (~50 MB) is too large for the HTTP cache to retain, and the cache
+  that would have held it is the broken one. Expect it to download each session.
+
+Either way you will see the **download prompt every session**, even when the
+files come straight from cache: the app checks the (empty) service-worker cache
+to decide whether to ask. Cosmetic — click through it and the load is instant if
+it was cached. See [`WINDOWS_ELECTRON_SPIKE.md`](WINDOWS_ELECTRON_SPIKE.md) §5.
 
 Also absent by design:
 
@@ -79,9 +88,14 @@ entitlement checking, or in-app purchase.
 
 ### Where your data goes
 
-`%APPDATA%\SciREPL-Free-Electron` — notebooks, SharedVFS contents, settings.
-Deleting that folder resets the application. Uninstalling is deleting the
-extracted folder; nothing else is installed.
+`%APPDATA%\SciREPL-Free-Electron` — notebooks and settings in `localStorage`,
+SharedVFS contents in IndexedDB. Deleting that folder resets the application.
+Uninstalling is deleting the extracted folder; nothing else is installed.
+
+The shell requests **persistent storage** for its origin, so Chromium will not
+discard your notebooks to reclaim disk space. (Android already gets this by
+having a private app data directory; a browser PWA does not, which is one of the
+few durable advantages the desktop build has.)
 
 ---
 

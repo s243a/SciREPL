@@ -277,30 +277,44 @@ sw.js:97  Uncaught (in promise) TypeError:
 ```
 
 The Cache API only accepts `http`/`https` requests, so `www/sw.js`'s app-shell
-precache (`CACHE_VERSION` / `APP_CACHE`) and its CDN runtime cache
-(`CDN_CACHE`) are both non-functional in the shell.
+precache (`APP_CACHE`) and its CDN runtime cache (`CDN_CACHE`) are both
+non-functional. Measured after a session that loaded a CDN kernel: both caches
+exist and both contain **0 entries**.
 
-Impact is smaller than it looks, and the measured results already reflect it:
+The practical impact is narrower than that sounds, and was initially overstated
+in this report. Chromium's ordinary **HTTP disk cache** still works for
+cross-origin fetches, and it covers much of what the service worker would have.
+Measured across a real restart with the same profile and the network then cut:
 
-- **App shell** — unaffected in practice. Every local asset is served by the
-  `app://` protocol handler straight off disk, so the precache was redundant
-  here. The offline suite confirms the app starts, reloads and runs its bundled
-  kernels with the network cut **[verified]**.
-- **CDN kernels** — this is the real cost. In the PWA, `CDN_CACHE` is what lets
-  Lua and R work offline after one online use. In the shell they cannot be
-  cached at all, so they need the network every session. That is consistent
-  with, and part of the explanation for, the offline result already reported
-  above (Lua fails cleanly offline).
+| Runtime | Size | Offline after one online use |
+| --- | --- | --- |
+| App shell (HTML/CSS/JS/WASM) | — | ✅ served from `app://` off disk; the precache was redundant here |
+| **Lua / Fengari** | ~200 kB | ✅ **works** — retained by the HTTP cache |
+| **R / webR** | ~50 MB | ❌ **fails** — too large to survive; times out offline |
 
-It also means the "cached" branch of the download-consent check in
-`kernel_manager.js:190-202` never sees a hit under `app://`, so the consent
-modal reappears for CDN kernels every session.
+So the correct statement is *not* "CDN kernels need the network every session".
+It is:
 
-Not a blocker, and deliberately not worked around in Phase 0. The proper fix is
-a platform-appropriate one: a packaged desktop app should bundle its runtimes
-rather than cache CDN downloads — i.e. Windows builds should use a profile that
-bundles Lua and R offline, which is exactly what the existing `pro` profile
-already does for R. Recorded for Phase 2 profile selection (§11).
+- **Lua** works offline after one online use, like the PWA.
+- **R** does not. It needs the network every session, because the HTTP cache does
+  not retain a payload that size and the explicit cache that would have is
+  broken.
+
+Two secondary consequences remain regardless of size:
+
+- The "cached" branch of the download-consent check
+  (`kernel_manager.js:190-202`) asks the **Cache API**, which is always empty
+  here. So the consent modal reappears for CDN kernels every session even when
+  the fetch will be served instantly from the HTTP cache. Cosmetic, but it is
+  what made the first kernel matrix in this spike look like a hang (§5).
+- Nothing is guaranteed. The HTTP cache is heuristic and evictable, so this is a
+  weaker promise than an explicit cache, not a replacement for one.
+
+Not worked around in Phase 0. The platform-appropriate fix is for a packaged
+desktop application to **bundle** its runtimes rather than cache CDN downloads —
+see §11. Lua is ~200 kB and could simply be bundled; R is the profile difference
+that distinguishes Free from Pro, so bundling it in a Free build is a product
+decision, not a technical one.
 
 ### Known divergence from the PWA: the Ko-fi support widget
 
@@ -567,7 +581,7 @@ Risks, in the order they should be addressed:
 | 7 | **CDN download-consent modal on a packaged app.** | Low | Product decision (§5). |
 | 8 | **TypR output gap.** | Low | Pre-existing, reproduces in browser, unrelated to Windows. |
 | 9 | **Ko-fi widget blocked in the shell** (§5). | Low | Deliberate; degrades silently; pinned by tests. Resolve with a shared plain-link change (§11.5), not a CSP exception. |
-| 10 | **Service worker cache inert under `app://`** (§5) — CDN kernels cannot be cached for offline use. | Medium | Fix by bundling runtimes in the Windows profile rather than relying on web caches, which is the right shape for a packaged app anyway. |
+| 10 | **Service worker cache inert under `app://`** (§5). Chromium's HTTP cache covers small CDN runtimes (Lua works offline after one use) but not large ones (R does not). The consent modal also reappears every session. | Low-Medium | Bundle Lua in the Windows profile; R is a Free/Pro product decision. |
 
 ---
 
@@ -641,12 +655,18 @@ the shell, removes a third-party script from the PWA and Android builds too, and
 needs no CSP exception on any platform. Listed here rather than done in this PR
 because it touches shared `www/` code, which the spike deliberately leaves alone.
 
-**6. Choose a Windows build profile that bundles its runtimes.** The service
-worker cache is inert under `app://` (§5), so a Windows build cannot rely on
-caching CDN downloads for offline use. A packaged desktop application should
-bundle what it needs anyway: define a `windows-free` profile that additionally
-bundles Lua (and, for Pro, R) rather than leaving them on a CDN. This is a
-`build-profiles.json` change, not application code.
+**6. Bundle Lua in a Windows profile; treat R as a product decision.** The
+service worker cache is inert under `app://` (§5). Measurement shows Chromium's
+HTTP cache covers Lua (~200 kB) but not R (~50 MB), so only R actually needs the
+network every session. Bundling Lua is a one-line `build-profiles.json` change
+with no downside. Bundling R offline is what currently distinguishes the `pro`
+profile from `full`, so doing it in a Free Windows build is a pricing decision
+rather than an engineering one — flagged, not assumed.
+
+Separately, the consent modal reappears every session for CDN kernels because
+the cached-check asks the broken Cache API. Fixing that means touching
+`kernel_manager.js`, which is shared with the PWA and Android, so it belongs in
+the shared-code phase rather than the shell.
 
 **7. Keep the artifact boundary test in CI.** It already fails the build if Pro
 content, a hardcoded `isPro`, a Store licence call, or commerce code appears in

@@ -119,7 +119,7 @@ jobs:
             echo "no auto-update, and not a Microsoft Store package."
             echo
             echo "Kernels bundled offline: Bash/Brush, ClojureScript/Scittle, SWI-Prolog, Python/Pyodide."
-            echo "Lua and R load from a CDN and need a network connection **every session** —"
-            echo "the service worker cache does not work under the \`app://\` origin, so they"
-            echo "are not cached for offline use. See docs/WINDOWS_ELECTRON_SPIKE.md."
+            echo "Lua and R load from a CDN. Lua keeps working offline after one online use;"
+            echo "R (~50 MB) needs the network each session. The download prompt appears every"
+            echo "session either way. See docs/WINDOWS_ELECTRON_SPIKE.md section 5."
           } >> "$GITHUB_STEP_SUMMARY"

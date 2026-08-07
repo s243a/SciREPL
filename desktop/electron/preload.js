@@ -57,6 +57,26 @@ const api = {
 
 contextBridge.exposeInMainWorld('sciREPLPlatform', Object.freeze(api));
 
+/**
+ * Ask Chromium to make this origin's storage exempt from eviction.
+ *
+ * Chromium storage is "best-effort" by default: under disk pressure it may
+ * discard an origin's IndexedDB, which here means the user's notebooks and
+ * SharedVFS contents. `navigator.storage.persist()` is what marks an origin
+ * durable, and nothing was calling it — measured, not assumed.
+ *
+ * This lives in the preload rather than in the application because `www/` is
+ * shared with the PWA and the Android build and is deliberately not modified by
+ * the shell. Durability is a property of *this container*, so the container
+ * asks for it. It runs in the isolated world, changes nothing the page can see,
+ * and exposes no new surface: storage permission is per-origin, so requesting
+ * it here applies to the document.
+ *
+ * Best-effort and non-blocking. If it is refused the application still works;
+ * it is simply back to evictable storage, which is what the PWA has.
+ */
+navigator.storage?.persist?.().catch(() => { /* durability is a bonus, not a requirement */ });
+
 // Nothing is exported: this file runs as a sandboxed preload, which cannot
 // `require` relative modules. The channel names above are duplicated in
 // ipc.js, which owns the canonical allowlist; test/preload-boundary.test.mjs
