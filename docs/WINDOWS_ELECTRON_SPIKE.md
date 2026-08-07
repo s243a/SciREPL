@@ -5,55 +5,69 @@ proposed Electron as a Windows-only shell around the existing web application.
 This document records what was **actually built and measured**, using the Free
 edition only.
 
-**Recommendation: proceed to Phase 1.** No incompatibility was found between
-SciREPL and a packaged Electron origin. Every enabled kernel behaves identically
-to the browser baseline, and notebook/SharedVFS state survives a real restart.
-Two findings change the *shape* of the Phase 1 plan and are described below.
+**Recommendation: proceed to Phase 1.** No incompatibility was found that stops
+SciREPL running as a packaged Electron application. Every enabled kernel behaves
+identically to the browser baseline, and notebook/SharedVFS state survives a
+real restart — both now measured on Windows as well as Linux.
+
+Three findings change the *shape* of the Phase 1 plan rather than blocking it:
+the renderer realm boundary (§4), the service worker cache being inert under a
+custom scheme (§5), and the Ko-fi widget divergence (§5). All three are
+described below and reflected in §11.
 
 ---
 
 ## 1. Read this first: what "verified" means here
 
-> **Except where §2.1 says otherwise, all automated results in this document
-> were produced on Linux (WSL2, kernel 6.18, x64) with Electron 43.3.0 /
-> Chromium 150.**
+**The full automated suite now passes on Windows.** The `windows-shell` CI job
+on `windows-latest` (Windows Server 2025) runs all eight suites — **199
+assertions, 0 failures** — including the Playwright Chromium baseline, so the
+kernel-parity result below is measured on Windows and not inherited from Linux.
 
-### 2.1 What has now run on Windows
+Development and the measurements in §6 were done on Linux (WSL2, kernel 6.18,
+x64) with Electron 43.3.0 / Chromium 150. Both platforms produce the same suite
+result.
 
-A first `windows-latest` CI run has happened. Partial result:
+What that does **not** cover is everything a human has to look at: display
+scaling, native dialogs, accessibility, sleep/resume, non-ASCII profile paths.
+Those are still untested and are listed in §9.
 
-| Suite | Windows result |
-| --- | --- |
-| `policy-unit` | **52/52 passed on Windows** |
-| everything else | **did not run** — the shell failed to launch |
-
-The Windows `policy-unit` pass is worth more than the Linux one: it exercised
-path containment against real `D:\` drive-letter paths and backslash separators,
-including the percent-encoded traversal cases. Those assertions are now verified
-on the target platform.
-
-The launch failure was a bug in the **test harness**, not the shell: the Electron
-executable path was hardcoded as `dist/electron`, which does not exist on
-Windows (`dist/electron.exe`). Playwright surfaced it only as
-`Error: Process failed to launch!`. Fixed by asking the `electron` package for
-its own platform-specific path — the package resolves it from the `path.txt`
-its installer writes — plus a launch-failure message that reports the
-executable, args and platform instead of failing opaquely.
-
-**The Windows suite has therefore not yet completed. No Electron-dependent
-result in this document is Windows-verified.** The next run on the spike branch
-is the one that settles it.
-
-That is a real limitation and it is not glossed over anywhere below. Every claim
-is tagged:
+Claims are tagged throughout:
 
 | Tag | Meaning |
 | --- | --- |
-| **[verified]** | An automated test in `desktop/electron/test/` executed and passed. Output quoted or reproducible by running the suite. |
-| **[verified, platform-independent]** | As above, and the behaviour is decided by Chromium/Electron code that does not vary by host OS (origin semantics, storage keying, `webPreferences`, CSP). Windows re-verification is expected to be a formality, but it has not happened. |
-| **[pending Windows]** | Not executed. Listed in §9 with the exact steps to run. |
+| **[verified]** | An automated test in `desktop/electron/test/` executed and passed **on both Linux and Windows CI**. |
+| **[verified, Linux only]** | Executed on Linux; the Windows figure has not been captured. Used for the §6 measurements. |
+| **[pending Windows, manual]** | Requires a human at a Windows desktop. Listed in §9. |
 
-Nothing in this document claims a Windows-only check passed.
+Nothing in this document claims an unexecuted check passed.
+
+### 1.1 How the Windows job got there
+
+Worth recording, because both failures were in the **test harness**, not the
+shell — and both are the kind of thing only a real Windows runner surfaces.
+
+1. **`policy-unit` passed on Windows from the first run** (52/52), which is
+   worth more than the Linux pass: it exercised path containment against real
+   `D:\` drive-letter paths and backslash separators, including the
+   percent-encoded traversal cases.
+2. **Run 1 — Electron would not launch.** The executable path was hardcoded as
+   `dist/electron`; on Windows it is `dist/electron.exe`. Playwright surfaced
+   this only as `Error: Process failed to launch!`. Fixed by asking the
+   `electron` package for its own platform-specific path.
+3. **Run 2 — the process launched but `app` never became ready.** Two causes.
+   `electron@43.3.0` ships **no `postinstall`**; it downloads lazily on first
+   `require()`, so the install step provisioned nothing and the download fired
+   mid-test. And `main.js` called `app.quit()` on a failed single-instance lock
+   and then carried on to register `whenReady` anyway — a process that is
+   quitting but still waiting for `ready` never becomes ready and never exits.
+4. **Run 3 — green.**
+
+The lasting fix is `test/smoke.mjs`: it launches the shell directly, without
+Playwright, and prints the main process's own stdout/stderr, because Playwright
+reports any launch failure as a bare timeout with no output. It runs before the
+suite so its output survives a suite failure. That diagnostic is also what
+surfaced the service-worker limitation in §5.
 
 ---
 
@@ -97,7 +111,7 @@ Registered with `standard`, `secure`, `supportFetchAPI`, `corsEnabled`,
 | `WebAssembly.instantiateStreaming` | fails — no `Content-Type` | **[verified]** `compileStreaming` succeeds |
 | Relative asset resolution | fragile | **[verified]** KaTeX, Marked, Plotly, JSZip, hljs all load |
 
-Measured under the shell **[verified, platform-independent]**:
+Measured under the shell **[verified]** (Linux and Windows CI):
 
 ```
 window.location.origin  === "app://scirepl"     (not "null" — non-opaque)
@@ -146,7 +160,7 @@ notebooks, because a filter would have to tell them apart and cannot.
 
 The shell therefore **withholds capability rather than filtering it**.
 
-### Configuration **[verified, platform-independent]**
+### Configuration **[verified]** (Linux and Windows CI)
 
 | Setting | Value | Asserted from the live window |
 | --- | --- | --- |
@@ -340,7 +354,7 @@ avoid publishing.
 
 ## 6. Measurements
 
-**[verified on Linux/WSL2 x64 — Windows figures must be re-measured, §9]**
+**[verified, Linux only — Windows figures must be re-measured on real hardware, §9]**
 
 ### Size
 
@@ -409,8 +423,8 @@ dependency was added to the web application.
 | `test_sharedvfs_sync.mjs` | passed |
 | `test_notebook_vfs.mjs` | ALL TESTS PASSED |
 
-Android build **[pending Windows/Android toolchain]** — not run here (no Android
-SDK in this environment). The argument that it is unaffected is structural: no
+Android build — **not executed** (no Android SDK in this environment). The
+argument that it is unaffected is structural rather than empirical: no
 file the Android build reads was changed. `npm run build:play` and
 `build-release.yml` are byte-identical to `main`.
 
@@ -446,69 +460,81 @@ for anything:
   **[verified]** by reproducing the job's exact environment: a tree with only
   `desktop/electron` deps installed via `--ignore-scripts`, no Electron binary,
   no Playwright → 52/52 passed.
-- **`windows-shell`** (windows-latest) — **`workflow_dispatch` only, on purpose.**
-  It has never been observed to pass on a Windows runner. Making an unproven,
-  ~330 MB-downloading GUI job an automatic gate would block PRs. Promote it to
-  `pull_request` after §9 is done.
+- **`windows-shell`** (windows-latest, on PRs touching `desktop/electron/**`,
+  plus `workflow_dispatch`) — **verified green:** all eight suites, 199
+  assertions, 0 failures, all eight kernels at browser parity.
 
-  This job runs with `SCIREPL_COMPARE_BASELINE=1` and an explicit
+  It runs with `SCIREPL_COMPARE_BASELINE=1` and an explicit
   `npx playwright install chromium` step. Playwright is the shared test driver —
   `_electron.launch()` drives the shell, `chromium.launch()` drives the browser
   baseline — and `npm install` provisions the Playwright *package* but not its
   browser binaries. The two settings go together deliberately: without the
   baseline flag the suite never calls `chromium.launch()` and the download would
-  be dead weight; with it, the job re-measures the Electron-vs-browser kernel
-  parity of §5 on real Windows rather than inheriting the Linux result.
+  be dead weight; with it, the job measures Electron-vs-browser kernel parity on
+  real Windows rather than inheriting the Linux result.
 
-  **A GitHub constraint affects the merge order.** `workflow_dispatch` is only
-  offered for workflows that already exist on the **default branch**, so a
-  brand-new workflow file cannot be dispatched against its own PR head. Getting
-  a green Windows run *before* merge therefore needs one of: a temporary
-  branch-scoped `push` trigger (what this branch does — clearly marked, and to be
-  removed in the merge commit), merging the workflow file to `main` on its own
-  first, or running §9 by hand on a Windows machine. Without one of those, "run
-  it on the PR, then merge" is not achievable as stated.
+  A `smoke.mjs` step runs first and prints the main process's own
+  stdout/stderr, because Playwright reports any launch failure as a bare
+  timeout. Keep it: it is what made the two Windows-only harness bugs in §1.1
+  diagnosable, and it surfaced the service-worker finding in §5.
+
+  It reaches CDN hosts for the baseline comparison, so it carries some network
+  flakiness risk. If that becomes noise, drop it back to `workflow_dispatch`
+  rather than tolerating a habitually red job.
+
+  **A note for anyone adding a workflow like this in future.**
+  `workflow_dispatch` is only offered for workflows that already exist on the
+  **default branch**, so a brand-new workflow file cannot be dispatched against
+  its own PR head — "run it on the PR, then merge" is not achievable as stated.
+  This branch used a temporary branch-scoped `push` trigger to get a green run
+  before merge; it has been removed now that the job runs on `pull_request`.
 
 ---
 
-## 9. Remaining Windows-only manual verification
+## 9. Remaining Windows verification
 
-None of these were executed. Run on a Windows 10/11 x64 machine:
+The automated suite is covered — it passes on `windows-latest` in CI (§1). What
+remains needs a human at a Windows desktop, or a physical machine rather than a
+CI VM. **None of the following has been executed.**
+
+To reproduce the automated run locally on Windows 10/11 x64:
 
 ```powershell
 npm install
 npm run configure
 npm run fetch:bundles
 npm run windows:install
-npm run test:windows          # expect the §8 table
+node desktop/electron/test/smoke.mjs   # direct launch + raw main-process output
+npm run test:windows                   # expect the §8 table
 node desktop/electron/test/measure.mjs --with-python
 ```
 
 Then confirm by hand:
 
-1. **The whole suite passes on Windows.** `policy-unit` already does (§2.1); the
-   seven Electron-dependent suites have not yet completed a Windows run.
-2. **Windows path containment** — that `app://scirepl/..%5C..%5Cpackage.json`
-   (backslash) is refused. `policy.unit.test.mjs` now covers drive-letter and
-   backslash cases **on Windows**, but this specific encoded form should be
-   confirmed against the live protocol handler.
-3. **Startup, size and memory re-measured on Windows** — §6 is Linux-only.
-   The GPU figure in particular will differ with real hardware acceleration.
-4. **Native Save dialog.** The shell installs no `will-download` handler, so
+1. **Windows path containment against the live handler** — that
+   `app://scirepl/..%5C..%5Cpackage.json` (encoded backslash) is refused.
+   `policy.unit.test.mjs` covers drive-letter and backslash cases on Windows,
+   but this specific encoded form is only asserted against `resolveRequestPath`,
+   not the running protocol handler.
+2. **Startup, size and memory re-measured on Windows** — §6 is Linux-only, and
+   the GPU figure in particular will differ with real hardware acceleration.
+   A CI VM is not a fair sample either; use a real machine.
+3. **Native Save dialog.** The shell installs no `will-download` handler, so
    Electron shows its default Save dialog. Confirm each export format
    (HTML, Markdown, LaTeX, DOCX, PDF, `.srwb`, `.ipynb`) reaches disk with a
    correct default filename and extension.
-5. **PDF export** — the browser `window.print()` path; the Capacitor
+4. **PDF export** — the browser `window.print()` path; the Capacitor
    `PdfGenerator` plugin is absent here.
-6. **External links** open in the default Windows browser and focus it.
-7. **Display scaling** (125/150/200%), high contrast, keyboard-only navigation,
+5. **External links** open in the default Windows browser and focus it.
+6. **Display scaling** (125/150/200%), high contrast, keyboard-only navigation,
    and a screen reader (Narrator/NVDA).
-8. **Sleep/resume** with a kernel loaded; **shutdown while a kernel is running**.
-9. **Long paths / non-ASCII usernames** — `userData` under a profile such as
+7. **Sleep/resume** with a kernel loaded; **shutdown while a kernel is running**.
+8. **Long paths / non-ASCII usernames** — `userData` under a profile such as
    `C:\Users\Ünïcode\AppData\Roaming\SciREPL-Free-Electron`.
-10. **Second-instance behaviour** — the single-instance lock focuses the existing
-    window rather than opening a second renderer on the same IndexedDB.
-11. **arm64**, if offered.
+9. **Second-instance behaviour — the focus half.** That a losing instance exits
+   promptly rather than hanging is verified (§1.1); that it *focuses the
+   existing window* is not, and needs a visible desktop.
+10. **arm64**, if offered.
 
 Explicitly **not** attempted, per the brief: MSIX packaging, Store submission,
 `StoreContext.GetAppLicenseAsync()`, and anything Pro.
@@ -526,7 +552,7 @@ Risks, in the order they should be addressed:
 | --- | --- | --- | --- |
 | 1 | **Notebook code shares the renderer realm with UI code.** Any future native operation exposed to the main world is callable by a notebook cell. | **High — architectural** | Contained today (nothing exposed carries authority). Becomes the central constraint the moment `saveFile`/`openFile` are added. See §11. |
 | 2 | **Electron runtime size** — 327 MB unpacked on Linux, plus 108 MB of `www/`. | Medium | Known, and exactly the Phase 4 Tauri trigger. Not a Phase 0 blocker. |
-| 3 | **Windows entirely unverified.** | Medium | Structural argument is strong (Chromium-level behaviour), but §9 must be done before Phase 2. |
+| 3 | **No human has used it on Windows.** The automated suite passes on windows-latest, but display scaling, native dialogs, accessibility and sleep/resume are untested. | Medium | §9 must be done before Phase 2. |
 | 4 | **Memory footprint** — ~0.9 GB with Pyodide loaded, on inflated Linux metrics. | Medium | Needs honest Windows numbers before any Store claim about system requirements. |
 | 5 | **`'unsafe-eval'` is mandatory.** | Low-Medium | Unavoidable — the product is a REPL. Documented and asserted. Compensate by restricting origins and keeping Chromium current. |
 | 6 | **Electron/Chromium upgrade treadmill.** | Low-Medium | Pinned to 43.3.0. Needs a standing update policy, not a one-off. |
@@ -626,9 +652,9 @@ anything. None is justified by a Phase 0 observation.
 | --- | --- |
 | All important WASM kernels work in the packaged origin | ✅ **[verified]** 8/8, at parity with the browser |
 | Notebook code cannot cross the native bridge | ✅ **[verified]** — and there is almost no bridge to cross |
-| IndexedDB and SharedVFS survive | ✅ **[verified]** across a real restart; across an *MSIX update* is **[pending Windows]** |
+| IndexedDB and SharedVFS survive | ✅ **[verified]** across a real restart, on Linux and Windows CI; across an *MSIX update* is untested |
 | The same web bundle still runs under Capacitor without a fork | ✅ `www/` unchanged; existing browser tests pass |
-| Offline assets fit practical Store limits | ⚠️ measured (108 MB + runtime) but Windows/MSIX figures **[pending Windows]** |
+| Offline assets fit practical Store limits | ⚠️ measured on Linux (108 MB + runtime); Windows/MSIX figures still to be captured (§9) |
 | Expected Windows demand justifies the cost | ❌ out of scope — a product judgement, not a spike output |
 
 **Recommendation: proceed to Phase 1**, starting with the realm-boundary decision

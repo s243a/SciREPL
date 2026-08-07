@@ -159,6 +159,20 @@ drifting. The proper fix is a shared change — replace the widget with a plain
 | `kernels.test.mjs` | yes | one execution per kernel + SharedVFS; optional browser A/B |
 | `offline.test.mjs` | yes | bundled kernels with the network cut; CDN kernels fail cleanly |
 
+Two tools sit alongside the suites and are run explicitly, not by `run-all`:
+
+```bash
+node desktop/electron/test/smoke.mjs            # launch diagnostic
+node desktop/electron/test/measure.mjs --with-python   # startup/size/memory
+```
+
+`smoke.mjs` launches the shell **directly, without Playwright**, and prints the
+main process's own stdout/stderr — Playwright reports any launch failure as a
+bare timeout with no output, which is close to undiagnosable on a CI machine.
+On failure it retries once with `--disable-gpu --no-sandbox
+--disable-software-rasterizer`, so one run distinguishes a broken shell from a
+host that needs GPU flags. Reach for it first whenever the shell will not start.
+
 `test/probes/kernels.mjs` holds the kernel assertions and is driven by **both**
 the Electron runner and the Chromium baseline runner, so a difference in results
 is a real platform difference rather than two divergent test suites. Export
