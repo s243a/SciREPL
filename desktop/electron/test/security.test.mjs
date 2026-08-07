@@ -22,7 +22,7 @@ async function runNotebookCell(page, code) {
 export default async function run() {
   const r = createReporter('security');
   const shell = await launchShell();
-  attachLogs(shell.page);
+  const attachedLogs = attachLogs(shell.page);
 
   try {
     const { page } = shell;
@@ -184,6 +184,43 @@ export default async function run() {
     r.log('sandbox is true', prefs.sandbox === true, String(prefs.sandbox));
     r.log('webSecurity is enabled', prefs.webSecurity !== false, String(prefs.webSecurity));
     r.log('webviewTag is disabled', prefs.webviewTag === false, String(prefs.webviewTag));
+
+    /* ---------------- known, deliberate PWA divergence: Ko-fi widget ---------------- */
+
+    // www/index.html:407 loads the Ko-fi support widget from storage.ko-fi.com,
+    // which is not on the CSP allowlist (see KOFI_EXCLUSION in protocol.js).
+    // This asserts the divergence is real, contained, and silent — and captures
+    // the actual CSP violation so the check cannot pass vacuously on a machine
+    // that simply has no network.
+    await page.addInitScript(() => {
+      window.__cspViolations = [];
+      document.addEventListener('securitypolicyviolation', (e) => {
+        window.__cspViolations.push({ uri: e.blockedURI, directive: e.effectiveDirective });
+      });
+    });
+    await page.reload({ waitUntil: 'load', timeout: 120_000 });
+    await waitForAppReady(page);
+    await page.waitForTimeout(1500); // let the blocked <script> resolve
+
+    const kofi = await page.evaluate(() => ({
+      widgetGlobal: typeof window.kofiwidget2,
+      violations: window.__cspViolations || [],
+      // Proof that only the widget was lost: the rest of the Help panel is intact.
+      helpPrivacyLink: !!document.getElementById('help-privacy-link'),
+      helpPanel: !!document.getElementById('help-modal') || !!document.querySelector('#help-privacy-link'),
+    }));
+
+    const kofiBlockedByCsp = kofi.violations.some(v => String(v.uri).includes('ko-fi.com'));
+    r.log('the Ko-fi widget origin is blocked by CSP, not merely unreachable',
+      kofiBlockedByCsp, JSON.stringify(kofi.violations));
+    r.log('the Ko-fi widget does not load in the shell (known divergence)',
+      kofi.widgetGlobal === 'undefined', kofi.widgetGlobal);
+    r.log('blocking the widget degrades silently — the rest of Help is intact',
+      kofi.helpPrivacyLink === true, JSON.stringify(kofi));
+
+    const kofiErrors = attachedLogs.filter(l => l.startsWith('[pageerror]') && /ko-?fi/i.test(l));
+    r.log('blocking the widget raises no uncaught page error',
+      kofiErrors.length === 0, kofiErrors.join(' | '));
 
     /* ---------------- no remote module ---------------- */
 

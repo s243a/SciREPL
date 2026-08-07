@@ -139,7 +139,19 @@ export async function startDevServer() {
 /** Launch plain Chromium against the dev server — the comparison baseline. */
 export async function launchBrowserBaseline() {
   const server = await startDevServer();
-  const browser = await chromium.launch({ headless: true });
+  let browser;
+  try {
+    browser = await chromium.launch({ headless: true });
+  } catch (err) {
+    server.stop();
+    // `npm install` installs the Playwright package but not its browser
+    // binaries. Say so plainly instead of surfacing Playwright's stack.
+    throw new Error(
+      'Could not launch Chromium for the browser baseline. Playwright browser ' +
+      'binaries are not provisioned by `npm install` — run `npx playwright install chromium`.\n' +
+      `Original error: ${err && err.message}`
+    );
+  }
   const context = await browser.newContext();
   await primeContext(context);
   const page = await context.newPage();

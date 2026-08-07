@@ -38,6 +38,15 @@ node desktop/electron/test/run-all.mjs security persistence
 SCIREPL_COMPARE_BASELINE=1 node desktop/electron/test/kernels.test.mjs
 ```
 
+Playwright is the shared test driver — `_electron.launch()` drives the shell and
+`chromium.launch()` drives the browser baseline. `npm install` provides the
+Playwright *package* but not its browser binaries, so the baseline comparison
+additionally needs:
+
+```bash
+npx playwright install chromium
+```
+
 These are additive. `npm run build`, `build:release:aab`, `build:play` and the
 Android/PWA workflows are untouched.
 
@@ -109,6 +118,22 @@ is unaffected.
 `'unsafe-eval'` and `'wasm-unsafe-eval'` are permitted and cannot be removed —
 the JavaScript kernel, Scittle and Pyodide all require them. The CSP is
 restrictive about *origins*, which is the part that protects a packaged app.
+
+### Known divergence: the Ko-fi widget
+
+`www/index.html:407` loads the Ko-fi support widget from
+`https://storage.ko-fi.com`. That origin is **deliberately not** on the
+allowlist, so the widget is blocked and the support button does not appear in
+the shell. It degrades silently — the widget is already guarded by
+`if (typeof kofiwidget2 !== 'undefined')` — and the rest of the Help panel is
+unaffected.
+
+Allowing it would grant a third-party host arbitrary script execution in the
+same realm that runs user notebooks, which is not a trade worth making for a
+donate button. See `KOFI_EXCLUSION` in `protocol.js`; the exclusion is pinned by
+`policy.unit.test.mjs` and `security.test.mjs` so it stays a decision rather than
+drifting. The proper fix is a shared change — replace the widget with a plain
+`target="_blank"` link — which is proposed as Phase 1 follow-up work.
 
 ## Files
 

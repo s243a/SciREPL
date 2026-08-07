@@ -28,6 +28,18 @@ on:
       - '.github/workflows/windows-electron-spike.yml'
   workflow_dispatch:
 
+  # TEMPORARY — remove in the commit that merges this branch.
+  #
+  # GitHub only offers `workflow_dispatch` for workflows that already exist on
+  # the default branch, so a brand-new workflow file cannot be dispatched
+  # against its own PR head. Without this trigger there is no way to get a green
+  # Windows run *before* merging, which is the order review asked for.
+  #
+  # Scoped to this one branch so it is not a gate on anything else.
+  push:
+    branches:
+      - 'feat/electron-windows-spike'
+
 # Never cancel someone else's Android/PWA run; scope concurrency to this file.
 concurrency:
   group: windows-electron-spike-${{ github.ref }}
@@ -62,7 +74,10 @@ jobs:
 
   windows-shell:
     name: Electron shell on Windows (manual)
-    if: github.event_name == 'workflow_dispatch'
+    # Runs on explicit dispatch, and on pushes to the spike branch (see the
+    # temporary `push` trigger above). Never on ordinary pull requests — it is
+    # unproven and downloads ~330 MB, so it must not gate other people's work.
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
@@ -84,8 +99,22 @@ jobs:
       - name: Install Electron
         run: npm run windows:install
 
-      - name: Run the Electron shell suite
+      # Playwright is the shared test driver: `_electron.launch()` drives the
+      # shell and `chromium.launch()` drives the browser baseline. `npm install`
+      # brings in the Playwright package but does NOT provision browser binaries,
+      # so the Chromium download must be explicit.
+      - name: Install the Playwright Chromium build
+        run: npx playwright install chromium
+
+      # SCIREPL_COMPARE_BASELINE=1 is what makes the step above load-bearing:
+      # without it the suite never calls chromium.launch() and the download would
+      # be dead weight. It also buys the thing this job exists for — the
+      # kernel-parity claim in docs/WINDOWS_ELECTRON_SPIKE.md was measured on
+      # Linux, and this re-measures Electron-vs-browser parity on real Windows.
+      - name: Run the Electron shell suite (with browser baseline)
         run: npm run test:windows
+        env:
+          SCIREPL_COMPARE_BASELINE: '1'
 
       - name: Upload results
         if: always()

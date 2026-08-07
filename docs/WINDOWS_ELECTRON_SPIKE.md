@@ -226,6 +226,40 @@ parity check still fails if Electron ever diverges.
 | External links | `https:`/`mailto:` to the OS; everything else refused; no child window |
 | Offline (network cut) | app starts and reloads; JS, Bash, ClojureScript, Prolog, Python all run; Lua fails cleanly with a clear error; app stays responsive; a bundled kernel still runs afterwards |
 
+### Known divergence from the PWA: the Ko-fi support widget
+
+`www/index.html:407` loads the Ko-fi support widget as a third-party script from
+`https://storage.ko-fi.com`. That origin is **deliberately absent** from the
+shell's CSP allowlist, so the widget is blocked and the support button does not
+render in the Electron build **[verified]**:
+
+```
+securitypolicyviolation  script-src-elem  https://storage.ko-fi.com/cdn/widget/Widget_2.js
+typeof window.kofiwidget2 === "undefined"
+```
+
+The widget is already guarded by `if (typeof kofiwidget2 !== 'undefined')`, so
+blocking it **degrades silently** — nothing throws, and the rest of the Help
+panel is intact **[verified]**.
+
+It is excluded rather than allowed because adding a third-party host to
+`script-src` grants it arbitrary script execution in the same realm that runs
+user notebooks and holds all IndexedDB state (§4). That supply-chain exposure is
+out of proportion to a donate button, and the CSP's entire value here is being
+restrictive about origins.
+
+**This is a divergence, not a fix.** The right resolution is a *shared* change:
+replace the widget with a plain `target="_blank"` link to the Ko-fi page, which
+behaves identically in the PWA, on Android and in the shell, and needs no CSP
+exception anywhere. That touches `www/`, which this spike deliberately does not
+modify, so it is proposed as a Phase 1 follow-up (§11).
+
+Until then the exclusion is pinned by tests — `policy.unit.test.mjs` asserts the
+origin is absent from the allowlist and from the CSP, and `security.test.mjs`
+asserts the live block and its silent degradation — so allowing the origin, or
+dropping the documented exclusion, fails the build and forces the choice to be
+re-made rather than drifting.
+
 ### One behaviour worth calling out for product review
 
 `KernelManager` gates CDN runtime downloads behind a confirmation modal unless
@@ -322,13 +356,13 @@ file the Android build reads was changed. `npm run build:play` and
 
 ## 8. The shell's own test suite
 
-`npm run test:windows` — **verified, 192 assertions, 0 failures**:
+`npm run test:windows` — **verified, 199 assertions, 0 failures**:
 
 | Suite | Result | Needs Electron? |
 | --- | --- | --- |
-| `policy-unit` | 49 passed | no |
+| `policy-unit` | 52 passed | no |
 | `shell-launch` | 18 passed | yes |
-| `security` | 30 passed | yes |
+| `security` | 34 passed | yes |
 | `artifact-boundary` | 14 passed | yes |
 | `download` | 9 passed | yes |
 | `persistence` | 9 passed | yes |
@@ -345,15 +379,33 @@ is tested here. This is the "reuse rather than clone" rule in practice.
 `.github/workflows/windows-electron-spike.yml`, additive, not a required check
 for anything:
 
-- **`shell-policy`** (ubuntu, on PRs touching `desktop/electron/**`) — the 49
+- **`shell-policy`** (ubuntu, on PRs touching `desktop/electron/**`) — the 52
   unit assertions. Needs no display and no Electron download.
   **[verified]** by reproducing the job's exact environment: a tree with only
   `desktop/electron` deps installed via `--ignore-scripts`, no Electron binary,
-  no Playwright → 49/49 passed.
+  no Playwright → 52/52 passed.
 - **`windows-shell`** (windows-latest) — **`workflow_dispatch` only, on purpose.**
   It has never been observed to pass on a Windows runner. Making an unproven,
   ~330 MB-downloading GUI job an automatic gate would block PRs. Promote it to
   `pull_request` after §9 is done.
+
+  This job runs with `SCIREPL_COMPARE_BASELINE=1` and an explicit
+  `npx playwright install chromium` step. Playwright is the shared test driver —
+  `_electron.launch()` drives the shell, `chromium.launch()` drives the browser
+  baseline — and `npm install` provisions the Playwright *package* but not its
+  browser binaries. The two settings go together deliberately: without the
+  baseline flag the suite never calls `chromium.launch()` and the download would
+  be dead weight; with it, the job re-measures the Electron-vs-browser kernel
+  parity of §5 on real Windows rather than inheriting the Linux result.
+
+  **A GitHub constraint affects the merge order.** `workflow_dispatch` is only
+  offered for workflows that already exist on the **default branch**, so a
+  brand-new workflow file cannot be dispatched against its own PR head. Getting
+  a green Windows run *before* merge therefore needs one of: a temporary
+  branch-scoped `push` trigger (what this branch does — clearly marked, and to be
+  removed in the merge commit), merging the workflow file to `main` on its own
+  first, or running §9 by hand on a Windows machine. Without one of those, "run
+  it on the PR, then merge" is not achievable as stated.
 
 ---
 
@@ -417,6 +469,7 @@ Risks, in the order they should be addressed:
 | 6 | **Electron/Chromium upgrade treadmill.** | Low-Medium | Pinned to 43.3.0. Needs a standing update policy, not a one-off. |
 | 7 | **CDN download-consent modal on a packaged app.** | Low | Product decision (§5). |
 | 8 | **TypR output gap.** | Low | Pre-existing, reproduces in browser, unrelated to Windows. |
+| 9 | **Ko-fi widget blocked in the shell** (§5). | Low | Deliberate; degrades silently; pinned by tests. Resolve with a shared plain-link change (§11.5), not a CSP exception. |
 
 ---
 
@@ -477,7 +530,14 @@ with a correct default filename, rather than Electron's default dialog behaviour
 with a materially different desktop implementation, and it needs the Windows
 print verification from §9 first.
 
-**5. Keep the artifact boundary test in CI.** It already fails the build if Pro
+**5. Replace the Ko-fi widget with a plain external link** (§5). A one-line
+change in `www/index.html`: swap the third-party `<script>` for a
+`target="_blank"` anchor to the Ko-fi page. It restores the support button in
+the shell, removes a third-party script from the PWA and Android builds too, and
+needs no CSP exception on any platform. Listed here rather than done in this PR
+because it touches shared `www/` code, which the spike deliberately leaves alone.
+
+**6. Keep the artifact boundary test in CI.** It already fails the build if Pro
 content, a hardcoded `isPro`, a Store licence call, or commerce code appears in
 the shell.
 
