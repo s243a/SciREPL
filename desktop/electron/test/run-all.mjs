@@ -29,6 +29,8 @@ const SUITES = [
   // Not in the default set: it needs a built package, which most runs do not
   // have. Select it explicitly (`run-all.mjs packaged`) or via --packaged.
   { name: 'packaged', file: './packaged.test.mjs', unit: false, optIn: true },
+  // Needs live network for its online half, so it is opt-in too.
+  { name: 'runtime-cache', file: './runtime-cache.test.mjs', unit: false, optIn: true },
 ];
 
 const argv = process.argv.slice(2);

@@ -290,15 +290,10 @@ Measured across a real restart with the same profile and the network then cut:
 | --- | --- | --- |
 | App shell (HTML/CSS/JS/WASM) | — | ✅ served from `app://` off disk; the precache was redundant here |
 | **Lua / Fengari** | ~200 kB | ✅ **works** — retained by the HTTP cache |
-| **R / webR** | ~50 MB | ❌ **fails** — too large to survive; times out offline |
+| **R / webR** | ~50 MB | ❌ **failed** — too large to survive (fixed below by the shell's own cache) |
 
-So the correct statement is *not* "CDN kernels need the network every session".
-It is:
-
-- **Lua** works offline after one online use, like the PWA.
-- **R** does not. It needs the network every session, because the HTTP cache does
-  not retain a payload that size and the explicit cache that would have is
-  broken.
+That was the position before the fix below. With the shell's own cache in place,
+**both** Lua and R work offline after one online use.
 
 Raising Chromium's disk cache does **not** rescue R: re-measured with
 `--disk-cache-size=2147483648` (2 GB) and it still times out offline. So this is
@@ -310,22 +305,46 @@ One further caveat regardless of size: nothing here is guaranteed. The HTTP
 cache is heuristic and evictable, so it is a weaker promise than an explicit
 cache, not a replacement for one.
 
-#### Can R be made to work offline? Yes — but not by caching
+#### Fixed: the shell keeps its own cache in the data directory
 
-Worth stating plainly, because "R is not cached" reads as "R cannot work
-offline", and that is not the case:
+**[verified]** Rather than work around the inert Cache API, the shell now keeps
+the cache the service worker cannot: `desktop/electron/runtime-cache.js`
+intercepts `https` for an allowlist of runtime hosts and stores responses in
+`userData/runtime-cache/`. That directory is the application's own storage —
+not evictable by Chromium, not size-limited, and it survives restarts and
+updates.
 
-| Approach | Works? | Notes |
+Measured, fetch once online then restart with the network cut:
+
+| Runtime | Before | After |
 | --- | --- | --- |
-| Service worker `CDN_CACHE` | ❌ never | Cache API rejects the `app://` scheme outright. Not tunable. |
-| Chromium HTTP disk cache | ❌ | Fails at default size and at 2 GB. Not a size problem. |
-| **Bundle R in the profile** | ✅ | Already implemented — this is exactly what the `pro` profile does (`build-profiles.json`). ~50 MB added to the download. |
-| **Shell-side runtime download** | ✅ likely | Fetch webR once into `userData` and serve it from `app://`. Gives offline R without inflating the initial download. **Not implemented or tested** — proposed for Phase 1/2. |
+| Lua / Fengari (~200 kB) | worked, but only by luck of the HTTP cache | ✅ 0.2 MB cached, runs offline |
+| **R / webR (~50 MB)** | ❌ timed out after 86 s | ✅ **22.6 MB cached, runs offline in ~1 s** |
 
-So offline R is a solved problem technically; the open question is which
-solution, and bundling it into a *Free* build would remove what currently
-distinguishes `full` from `pro`. That makes it a product decision rather than an
-engineering one.
+Two details were needed to make webR work, and both are the kind only
+measurement finds:
+
+- **`HEAD` requests.** webR probes its virtual filesystem with `HEAD` before
+  fetching with `GET`. Caching only `GET` left every probe going to the network,
+  so R still failed offline even with 22 MB cached. The cache key includes the
+  method.
+- **`404` responses.** webR probes for optional files. A probe that *errors*
+  offline behaves differently from one that answers "not found", so 404s are
+  cached too. Safe here because these hosts serve version-pinned immutable
+  paths.
+
+Deliberately narrow: only allowlisted runtime hosts are touched, everything else
+passes through untouched; only `GET`/`HEAD`, never a range request (a partial
+body stored as if whole is a corrupt entry); only `200` and `404`. It is
+main-process only and exposes nothing to the renderer, so the boundary in §4 is
+unchanged. `SCIREPL_RUNTIME_CACHE=0` disables it.
+
+Guarded by `runtime-cache.test.mjs`, which includes a cold-profile check that a
+run which never went online still fails — so the suite cannot pass because
+something else is quietly serving the bytes.
+
+This also removes the argument for bundling R into a Windows build: offline R no
+longer costs 50 MB of download, so the Free/Pro profile difference stays intact.
 
 #### The consent prompt is a setting, not a defect
 
@@ -625,7 +644,7 @@ Risks, in the order they should be addressed:
 | 7 | **CDN download-consent modal on a packaged app.** | Low | Product decision (§5). |
 | 8 | **TypR output gap.** | Low | Pre-existing, reproduces in browser, unrelated to Windows. |
 | 9 | **Ko-fi widget blocked in the shell** (§5). | Low | Deliberate; degrades silently; pinned by tests. Resolve with a shared plain-link change (§11.5), not a CSP exception. |
-| 10 | **Service worker cache inert under `app://`** (§5). Chromium's HTTP cache covers small CDN runtimes (Lua works offline after one use) but not large ones (R does not). | Low | Bundle Lua in the Windows profile; R is a Free/Pro product decision. The consent prompt is an existing user setting, not a defect. |
+| 10 | ~~Service worker cache inert under `app://`~~ — **resolved** (§5). The shell keeps its own cache in `userData`; Lua and R both work offline after one online use. | Resolved | Guarded by `runtime-cache.test.mjs`. |
 
 ---
 
@@ -699,13 +718,12 @@ the shell, removes a third-party script from the PWA and Android builds too, and
 needs no CSP exception on any platform. Listed here rather than done in this PR
 because it touches shared `www/` code, which the spike deliberately leaves alone.
 
-**6. Bundle Lua in a Windows profile; treat R as a product decision.** The
-service worker cache is inert under `app://` (§5). Measurement shows Chromium's
-HTTP cache covers Lua (~200 kB) but not R (~50 MB), so only R actually needs the
-network every session. Bundling Lua is a one-line `build-profiles.json` change
-with no downside. Bundling R offline is what currently distinguishes the `pro`
-profile from `full`, so doing it in a Free Windows build is a pricing decision
-rather than an engineering one — flagged, not assumed.
+**6. ~~Bundle runtimes to work around the inert cache~~ — done differently, and
+already resolved.** The shell now keeps its own cache in `userData`
+(`runtime-cache.js`, §5), so Lua and R both work offline after one online use
+without bundling either. That leaves the Free/Pro profile difference intact and
+avoids adding ~50 MB to the download, which is a better outcome than the
+bundling this item originally proposed. Nothing left to do here.
 
 No change is needed for the consent prompt: it is a designed, persisted setting
 that already exists on all three platforms (§5). Nothing to fix there.

@@ -22,6 +22,7 @@ const {
 } = require('./protocol');
 const { applyWebContentsPolicy } = require('./security');
 const { registerIpcHandlers } = require('./ipc');
+const { installRuntimeCache } = require('./runtime-cache');
 
 const { resolveWwwRoot, resolveBuildInfoPath, resolveRepoRoot } = require('./paths');
 
@@ -116,6 +117,7 @@ if (!gotLock) {
 }
 
 let mainWindow = null;
+let runtimeCache = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -207,6 +209,22 @@ app.whenReady().then(() => {
   }
 
   registerProtocolHandler(WWW_ROOT);
+
+  // Persistent cache for CDN runtimes, in the app's own data directory.
+  // Replaces the service worker's CDN_CACHE, which cannot function under the
+  // app:// origin (see runtime-cache.js). Set SCIREPL_RUNTIME_CACHE=0 to
+  // disable and fall back to Chromium's own heuristic HTTP cache.
+  if (process.env.SCIREPL_RUNTIME_CACHE !== '0') {
+    try {
+      runtimeCache = installRuntimeCache(session.defaultSession, {
+        cacheDir: path.join(app.getPath('userData'), 'runtime-cache'),
+      });
+    } catch (e) {
+      // A shell that starts without its cache is fine; one that fails to start
+      // because of it is not.
+      console.error('[scirepl] runtime cache unavailable:', e && e.message);
+    }
+  }
   registerIpcHandlers({
     appVersion: readAppVersion(),
     profile: readProfile(),

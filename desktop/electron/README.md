@@ -69,6 +69,8 @@ Android/PWA workflows are untouched.
 | `SCIREPL_WWW` | serve a different prepared `www/` tree |
 | `SCIREPL_USER_DATA` | use a specific profile directory (the persistence tests rely on this) |
 | `SCIREPL_COMPARE_BASELINE=1` | also run the kernel probes in plain Chromium and compare |
+| `SCIREPL_RUNTIME_CACHE=0` | disable the on-disk runtime cache and fall back to Chromium's own heuristic HTTP cache |
+| `SCIREPL_RUNTIME_CACHE_DEBUG=1` | log every cache decision to `userData/runtime-cache-debug.log` |
 | `SCIREPL_ELECTRON_NO_SANDBOX=1` | launch with `--no-sandbox` for containers without a usable setuid helper. The security suite records this and refuses to claim the sandbox was verified. |
 
 ## Dependency isolation
@@ -156,6 +158,7 @@ drifting. The proper fix is a shared change — replace the widget with a plain
 | `security.js` | navigation / window-open / permission policy |
 | `preload.js` | the entire renderer-visible surface (two read-only calls) |
 | `ipc.js` | the canonical IPC allowlist, owned by the main process |
+| `runtime-cache.js` | persistent on-disk cache for CDN runtimes, in `userData` — replaces the service worker's `CDN_CACHE`, which cannot work under `app://` |
 | `paths.js` | resolves `www/` and build metadata in **both** layouts (development and packaged) |
 | `scripts/dev-windows.mjs` | the one-command setup + launch |
 | `packaging/build-portable.mjs` | builds the unsigned portable preview |
@@ -174,6 +177,7 @@ drifting. The proper fix is a shared change — replace the widget with a plain
 | `kernels.test.mjs` | yes | one execution per kernel + SharedVFS; optional browser A/B |
 | `offline.test.mjs` | yes | bundled kernels with the network cut; CDN kernels fail cleanly |
 | `packaged.test.mjs` | yes, **and a built package** | the packaged app: own `www/`, security boundary, kernels, restart persistence, no Pro material |
+| `runtime-cache.test.mjs` | yes, **and network** | Lua and R still run offline after a restart; a cold profile still fails |
 
 `packaged.test.mjs` is opt-in — it needs an artifact most runs do not have:
 

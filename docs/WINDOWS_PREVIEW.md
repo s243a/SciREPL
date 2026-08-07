@@ -62,15 +62,10 @@ Bundled and fully offline:
 
 Needs a network connection the **first** time, then works offline:
 
-- **Lua/Fengari** (~200 kB) is fetched from a CDN. The service worker's cache
-  does not work under the `app://` origin, but Chromium's ordinary HTTP cache
-  retains something this small, so Lua keeps working offline after one online
-  use.
-
-Needs a network connection **every session**:
-
-- **R/webR** (~50 MB) is too large for the HTTP cache to retain, and the cache
-  that would have held it is the broken one. Expect it to download each session.
+- **Lua/Fengari** and **R/webR** are downloaded from a CDN on first use and then
+  kept in the application's own data directory
+  (`%APPDATA%\SciREPL-Free-Electron\runtime-cache`). After that they work with
+  no network at all, and they survive restarts. R is ~23 MB cached; Lua ~0.2 MB.
 
 If you would rather not be asked before each runtime download, turn on
 **Settings → Runtime Downloads → "Auto-download runtimes (skip confirmation)"**.
