@@ -775,9 +775,22 @@ applied to both the development shell and the package. A packaged build that
 quietly regained Node access while a separate copy of the assertions kept
 passing is the failure this arrangement is designed to prevent.
 
-Verified on Linux (`SciREPL-linux-x64`) locally and on `windows-latest` in the
-preview workflow. The Windows executable cannot be executed from this
-development environment, so the win32 build is verified by CI, not by hand here.
+**Verified on native Windows.** The `win32-x64` build was executed on Windows
+11 via WSL interop — `SciREPL.exe` launched, resolved its own bundled tree at
+`C:\…\resources\www`, loaded `app://scirepl/index.html`, and passed all 56
+assertions with `platform: "win32"` in the reported app info:
+
+```
+SCIREPL_SMOKE_READY electron=43.3.0 chrome=150.0.7871.212 www=C:\Users\…\resources\www
+SCIREPL_SMOKE_OK    url=app://scirepl/index.html
+packaged: 56 passed, 0 failed, 0 skipped
+```
+
+Also verified on Linux (`SciREPL-linux-x64`). The preview workflow re-runs the
+same suite on `windows-latest`.
+
+Measured on Windows: Bash 64 ms init, ClojureScript 49 ms, SWI-Prolog 669 ms,
+Pyodide 6716 ms — all slightly faster than the Linux/WSL figures in §6.
 
 ### Still out of scope
 

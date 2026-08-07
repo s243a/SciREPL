@@ -15,6 +15,11 @@ neither is a Microsoft Store package.
 A ZIP with a `SciREPL.exe` you can double-click. No Node, no Git, no web server,
 no installer, nothing written to the registry.
 
+The `win32-x64` build has been run on native Windows 11 and passes the full
+packaged suite (56 assertions): it launches, serves `app://scirepl/index.html`
+from its own bundled `resources\www`, keeps notebook code away from Node,
+runs the bundled kernels, and keeps notebook/SharedVFS state across a restart.
+
 ### Get it
 
 1. Open the repository's **Actions** tab.
@@ -145,6 +150,26 @@ nothing useful in it. If the default launch fails it retries once with GPU and
 sandbox flags, which distinguishes a broken build from a host that needs them.
 
 ---
+
+## Building a preview from WSL
+
+You do not need Windows Node to *produce* a preview — `@electron/packager`
+cross-builds, so a Windows package can be built from WSL and then run natively:
+
+```bash
+cd ~/Projects/SciREPL          # a checkout with the branch
+nvm use 22
+npm install
+npm run windows:install
+npm run package:windows        # produces desktop/electron/out/SciREPL-win32-x64/
+
+cp -r desktop/electron/out/SciREPL-win32-x64 /mnt/c/Users/<you>/SciREPL-preview
+```
+
+Then run `C:\Users\<you>\SciREPL-preview\SciREPL.exe` from Windows. Copy it
+to a real Windows path first — running from `\\wsl.localhost\…` is unreliable.
+
+This is a genuine native Windows build, unlike the WSLg launch below.
 
 ## Running through WSL
 
