@@ -106,6 +106,16 @@ jobs:
       - name: Install the Playwright Chromium build
         run: npx playwright install chromium
 
+      # Launch the shell directly, without Playwright, and print the main
+      # process's own stdout/stderr. Playwright reports a failed Electron launch
+      # as a bare timeout with no output, which is nearly undiagnosable on a
+      # machine you cannot log into. This runs first so its output is available
+      # even when the suite below fails, and it retries once with GPU/sandbox
+      # flags so a host-configuration problem is distinguishable from a broken
+      # shell in a single run.
+      - name: Smoke-launch the shell (diagnostic)
+        run: node desktop/electron/test/smoke.mjs
+
       # SCIREPL_COMPARE_BASELINE=1 is what makes the step above load-bearing:
       # without it the suite never calls chromium.launch() and the download would
       # be dead weight. It also buys the thing this job exists for — the

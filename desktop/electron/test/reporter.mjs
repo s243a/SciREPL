@@ -11,7 +11,11 @@
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
-export const ELECTRON_DIR = fileURLToPath(new URL('..', import.meta.url));
+// path.resolve() strips the trailing separator that fileURLToPath leaves on a
+// directory URL. That matters: this path is passed to Electron as the app
+// directory argument, and a Windows path ending in a backslash ("D:\...\electron\")
+// is a hazard for command-line quoting.
+export const ELECTRON_DIR = path.resolve(fileURLToPath(new URL('..', import.meta.url)));
 export const REPO_ROOT = path.resolve(ELECTRON_DIR, '..', '..');
 export const WWW_ROOT = path.join(REPO_ROOT, 'www');
 

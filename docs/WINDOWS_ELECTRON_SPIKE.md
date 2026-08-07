@@ -252,6 +252,42 @@ parity check still fails if Electron ever diverges.
 | External links | `https:`/`mailto:` to the OS; everything else refused; no child window |
 | Offline (network cut) | app starts and reloads; JS, Bash, ClojureScript, Prolog, Python all run; Lua fails cleanly with a clear error; app stays responsive; a bundled kernel still runs afterwards |
 
+### Known divergence from the PWA: the service worker cache is inert
+
+**[verified]** The service worker registers under `app://` (the scheme is
+`secure` and `allowServiceWorkers`), but its caching does not work:
+
+```
+sw.js:97  Uncaught (in promise) TypeError:
+          Failed to execute 'addAll' on 'Cache': Request scheme 'app' is unsupported
+```
+
+The Cache API only accepts `http`/`https` requests, so `www/sw.js`'s app-shell
+precache (`CACHE_VERSION` / `APP_CACHE`) and its CDN runtime cache
+(`CDN_CACHE`) are both non-functional in the shell.
+
+Impact is smaller than it looks, and the measured results already reflect it:
+
+- **App shell** — unaffected in practice. Every local asset is served by the
+  `app://` protocol handler straight off disk, so the precache was redundant
+  here. The offline suite confirms the app starts, reloads and runs its bundled
+  kernels with the network cut **[verified]**.
+- **CDN kernels** — this is the real cost. In the PWA, `CDN_CACHE` is what lets
+  Lua and R work offline after one online use. In the shell they cannot be
+  cached at all, so they need the network every session. That is consistent
+  with, and part of the explanation for, the offline result already reported
+  above (Lua fails cleanly offline).
+
+It also means the "cached" branch of the download-consent check in
+`kernel_manager.js:190-202` never sees a hit under `app://`, so the consent
+modal reappears for CDN kernels every session.
+
+Not a blocker, and deliberately not worked around in Phase 0. The proper fix is
+a platform-appropriate one: a packaged desktop app should bundle its runtimes
+rather than cache CDN downloads — i.e. Windows builds should use a profile that
+bundles Lua and R offline, which is exactly what the existing `pro` profile
+already does for R. Recorded for Phase 2 profile selection (§11).
+
 ### Known divergence from the PWA: the Ko-fi support widget
 
 `www/index.html:407` loads the Ko-fi support widget as a third-party script from
@@ -497,6 +533,7 @@ Risks, in the order they should be addressed:
 | 7 | **CDN download-consent modal on a packaged app.** | Low | Product decision (§5). |
 | 8 | **TypR output gap.** | Low | Pre-existing, reproduces in browser, unrelated to Windows. |
 | 9 | **Ko-fi widget blocked in the shell** (§5). | Low | Deliberate; degrades silently; pinned by tests. Resolve with a shared plain-link change (§11.5), not a CSP exception. |
+| 10 | **Service worker cache inert under `app://`** (§5) — CDN kernels cannot be cached for offline use. | Medium | Fix by bundling runtimes in the Windows profile rather than relying on web caches, which is the right shape for a packaged app anyway. |
 
 ---
 
@@ -564,7 +601,14 @@ the shell, removes a third-party script from the PWA and Android builds too, and
 needs no CSP exception on any platform. Listed here rather than done in this PR
 because it touches shared `www/` code, which the spike deliberately leaves alone.
 
-**6. Keep the artifact boundary test in CI.** It already fails the build if Pro
+**6. Choose a Windows build profile that bundles its runtimes.** The service
+worker cache is inert under `app://` (§5), so a Windows build cannot rely on
+caching CDN downloads for offline use. A packaged desktop application should
+bundle what it needs anyway: define a `windows-free` profile that additionally
+bundles Lua (and, for Pro, R) rather than leaving them on a CDN. This is a
+`build-profiles.json` change, not application code.
+
+**7. Keep the artifact boundary test in CI.** It already fails the build if Pro
 content, a hardcoded `isPro`, a Store licence call, or commerce code appears in
 the shell.
 

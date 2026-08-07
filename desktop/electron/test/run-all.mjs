@@ -46,8 +46,24 @@ if (selected.length === 0) {
 const summaries = [];
 let totalFailed = 0;
 
+/**
+ * If the shell cannot be launched at all, every Electron-dependent suite will
+ * fail the same way after its own 120s launch timeout. That is ~12 minutes of
+ * identical output that buries the one message worth reading, so the first
+ * launch failure stops the rest from being attempted.
+ */
+let launchFailure = null;
+const isLaunchFailure = (err) => String(err && err.message).includes('Failed to launch the Electron shell');
+
 for (const suite of selected) {
   console.log(`\n=== ${suite.name} ===`);
+
+  if (launchFailure && !suite.unit) {
+    console.log('  [SKIP] not attempted — the shell failed to launch in an earlier suite.');
+    summaries.push({ suiteName: suite.name, failed: 0, passed: 0, skipped: 1, notAttempted: true });
+    continue;
+  }
+
   try {
     const mod = await import(suite.file);
     const summary = await mod.default();
@@ -57,6 +73,15 @@ for (const suite of selected) {
     console.log(`  [FAIL] suite crashed: ${err && err.stack ? err.stack : err}`);
     summaries.push({ suiteName: suite.name, failed: 1, passed: 0, skipped: 0, crashed: String(err) });
     totalFailed += 1;
+    if (isLaunchFailure(err)) {
+      launchFailure = err;
+      console.log(
+        '\n  The Electron shell could not be launched. Remaining shell suites will be\n' +
+        '  skipped rather than repeating this failure. Run the diagnostic for the\n' +
+        "  main process's own output:\n" +
+        '    node desktop/electron/test/smoke.mjs'
+      );
+    }
   }
 }
 

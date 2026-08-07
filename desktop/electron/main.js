@@ -68,7 +68,13 @@ registerScheme();
 // concurrent writes to notebooks and SharedVFS.
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
+  // `return` is legal at the top level of a CommonJS module and stops the rest
+  // of this file from running. Without it, a losing instance called quit() and
+  // then went on to register `whenReady` and build a window anyway — a process
+  // that is quitting but still waiting for `ready` never becomes ready and never
+  // exits, which presents as a launch that hangs until it is killed.
   app.quit();
+  return;
 }
 
 let mainWindow = null;
@@ -120,11 +126,54 @@ app.on('second-instance', () => {
   }
 });
 
+/**
+ * Smoke mode (SCIREPL_SMOKE_EXIT=1): load the app once, print a machine-readable
+ * verdict on stdout, and exit.
+ *
+ * This exists because Playwright reports a failed Electron launch as an opaque
+ * timeout with no output from the main process, which makes a CI-only startup
+ * failure very hard to diagnose. Running the shell directly and printing what
+ * happened turns that into a one-line answer. It is inert unless the variable
+ * is set, and it never runs during normal use or the test suite proper.
+ */
+function runSmokeCheck(win) {
+  const done = (line, code) => {
+    console.log(line);
+    setImmediate(() => app.exit(code));
+  };
+
+  const timer = setTimeout(
+    () => done('SCIREPL_SMOKE_FAIL timeout: window never finished loading', 3),
+    60_000
+  );
+
+  win.webContents.once('did-finish-load', () => {
+    clearTimeout(timer);
+    done(`SCIREPL_SMOKE_OK url=${win.webContents.getURL()}`, 0);
+  });
+
+  win.webContents.once('did-fail-load', (_e, code, desc, url) => {
+    clearTimeout(timer);
+    done(`SCIREPL_SMOKE_FAIL did-fail-load code=${code} desc=${desc} url=${url}`, 2);
+  });
+
+  win.webContents.once('render-process-gone', (_e, details) => {
+    clearTimeout(timer);
+    done(`SCIREPL_SMOKE_FAIL render-process-gone reason=${details && details.reason}`, 4);
+  });
+}
+
 app.whenReady().then(() => {
+  if (process.env.SCIREPL_SMOKE_EXIT === '1') {
+    console.log(`SCIREPL_SMOKE_READY electron=${process.versions.electron} chrome=${process.versions.chrome} www=${WWW_ROOT}`);
+  }
+
   registerProtocolHandler(WWW_ROOT);
   registerIpcHandlers({ appVersion: readAppVersion(), profile: readProfile() });
 
   createWindow();
+
+  if (process.env.SCIREPL_SMOKE_EXIT === '1') runSmokeCheck(mainWindow);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
