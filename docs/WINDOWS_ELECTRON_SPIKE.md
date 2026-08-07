@@ -624,9 +624,15 @@ Everything else keeps its working browser path until evidence says otherwise.
 with a correct default filename, rather than Electron's default dialog behaviour
 (§9 item 4).
 
-**4. Migrate `export.js:1143` (`PdfGenerator`) last.** It is the one call site
-with a materially different desktop implementation, and it needs the Windows
-print verification from §9 first.
+**4. Add `printOrExportPdf`, backed by `webContents.printToPDF()`.** Promoted
+from "last, and only after verification" to a first-class item, because the
+verification happened (§13): the browser fallback opens the *native Windows
+printer dialog*, so exporting a PDF means picking "Microsoft Print to PDF" from
+a printer list. It works, but it is a worse flow than the PWA's Save-as-PDF and
+gives no control over the filename. `printToPDF()` returns bytes directly, so
+the Electron adapter can write a file through a normal Save dialog — aligning
+desktop with what Android already does via the Capacitor `PdfGenerator` plugin
+(`export.js:1143`). This is now the best-evidenced of the platform operations.
 
 **5. Replace the Ko-fi widget with a plain external link** (§5). A one-line
 change in `www/index.html`: swap the third-party `<script>` for a
@@ -791,6 +797,43 @@ same suite on `windows-latest`.
 
 Measured on Windows: Bash 64 ms init, ClojureScript 49 ms, SWI-Prolog 669 ms,
 Pyodide 6716 ms — all slightly faster than the Linux/WSL figures in §6.
+
+### Manual verification on Windows (in progress)
+
+First hands-on session with the packaged preview on Windows 11. Confirmed by a
+human, not by CI:
+
+| Check | Result |
+| --- | --- |
+| `SciREPL.exe` starts from an extracted folder | ✅ |
+| **Package/workbook installation** — the family-tree workbook installed from Browse Packages | ✅ |
+| **PDF export** reaches the Windows print dialog; "Microsoft Print to PDF" selectable | ✅ reached; output fidelity not yet confirmed |
+
+The workbook install is worth calling out: it is a live fetch from GitHub
+releases, so it exercises the CSP `connect-src` allowlist, the package catalog
+and archive extraction inside the packaged origin — an end-to-end path CI does
+not cover.
+
+#### Divergence: PDF export opens the Windows print dialog
+
+`ExportManager.exportPDF` falls back to `iframe.contentWindow.print()`
+(`www/js/export.js:1189`) when the Capacitor PDF plugin is absent, which is the
+case here. In Chrome that call opens Chrome's own print preview, where
+**Save as PDF** is a built-in destination. In Electron it opens the **native
+Windows print dialog** instead, so the user must pick "Microsoft Print to PDF"
+from a printer list.
+
+It works, and "Microsoft Print to PDF" is present on all supported Windows
+versions, so nothing is blocked. But it is a worse flow than the PWA's: an extra
+selection step, a printer-shaped mental model for what is really a file export,
+and no control over the default filename.
+
+This is the strongest concrete argument yet for the `printOrExportPdf` operation
+sketched in the proposal. Electron's `webContents.printToPDF()` returns PDF
+bytes directly, so the Electron adapter could produce a file and show a normal
+Save dialog with a sensible name — matching what Android already does through
+the Capacitor plugin, and better than the browser fallback on both. Added to
+§11 as a Phase 1 item with evidence behind it rather than as a hypothetical.
 
 ### Still out of scope
 
