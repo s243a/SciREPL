@@ -140,7 +140,10 @@ async function launchAny(opts = {}) {
     || mkdtempSync(path.join(tmpdir(), opts.userDataPrefix || 'scirepl-'));
   const ownsUserData = !opts.userDataDir && !opts.keepUserData;
 
-  const args = [...(opts.appArgs || [])];
+  // opts.extraArgs passes Chromium switches through, so behaviour that depends
+  // on engine configuration (disk cache size, GPU flags) can be measured rather
+  // than assumed.
+  const args = [...(opts.appArgs || []), ...(opts.extraArgs || [])];
   // WSL/CI containers frequently lack a usable setuid sandbox helper. We only
   // relax this when explicitly asked, and every security probe records whether
   // it ran with the sandbox on so the report cannot overclaim.

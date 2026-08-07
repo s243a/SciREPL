@@ -300,9 +300,32 @@ It is:
   not retain a payload that size and the explicit cache that would have is
   broken.
 
-One secondary consequence remains regardless of size: nothing here is
-guaranteed. The HTTP cache is heuristic and evictable, so it is a weaker promise
-than an explicit cache, not a replacement for one.
+Raising Chromium's disk cache does **not** rescue R: re-measured with
+`--disk-cache-size=2147483648` (2 GB) and it still times out offline. So this is
+not a cache-size limit, and tuning the engine will not fix it. webR fetches its
+runtime through Emscripten's own filesystem layer, which does not settle into
+the HTTP cache the way a single script file does.
+
+One further caveat regardless of size: nothing here is guaranteed. The HTTP
+cache is heuristic and evictable, so it is a weaker promise than an explicit
+cache, not a replacement for one.
+
+#### Can R be made to work offline? Yes — but not by caching
+
+Worth stating plainly, because "R is not cached" reads as "R cannot work
+offline", and that is not the case:
+
+| Approach | Works? | Notes |
+| --- | --- | --- |
+| Service worker `CDN_CACHE` | ❌ never | Cache API rejects the `app://` scheme outright. Not tunable. |
+| Chromium HTTP disk cache | ❌ | Fails at default size and at 2 GB. Not a size problem. |
+| **Bundle R in the profile** | ✅ | Already implemented — this is exactly what the `pro` profile does (`build-profiles.json`). ~50 MB added to the download. |
+| **Shell-side runtime download** | ✅ likely | Fetch webR once into `userData` and serve it from `app://`. Gives offline R without inflating the initial download. **Not implemented or tested** — proposed for Phase 1/2. |
+
+So offline R is a solved problem technically; the open question is which
+solution, and bundling it into a *Free* build would remove what currently
+distinguishes `full` from `pro`. That makes it a product decision rather than an
+engineering one.
 
 #### The consent prompt is a setting, not a defect
 
