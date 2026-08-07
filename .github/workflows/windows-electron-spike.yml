@@ -1,0 +1,123 @@
+# Phase 0 Windows/Electron feasibility spike.
+#
+# Additive by design: this workflow touches nothing the Android or PWA pipelines
+# depend on. build-release.yml and deploy-pages.yml are unchanged, and neither
+# job here is a required check for them.
+#
+# Two jobs:
+#
+#   shell-policy  — pure Node unit tests (path containment, external-URL policy,
+#                   IPC allowlist, CSP shape). No display, no Electron download,
+#                   a few seconds.
+#
+#   windows-shell — the full Electron suite on a real Windows runner, including
+#                   the Playwright Chromium baseline comparison. Verified green
+#                   on windows-latest (199 assertions, 0 failures, all 8 kernels
+#                   at browser parity).
+#
+# Both run only on pull requests that touch the shell, because that is the
+# change that can break them. windows-shell downloads ~220 MB of Electron plus
+# ~104 MB of kernel runtimes and drives a GUI application, so it is bounded by
+# `timeout-minutes` and kept off every other PR by the paths filter. It also
+# reaches CDN hosts for the browser-baseline comparison; if that proves flaky in
+# practice, drop it back to `workflow_dispatch` rather than letting a red job
+# become background noise.
+
+name: Windows Electron spike
+
+on:
+  pull_request:
+    paths:
+      - 'desktop/electron/**'
+      - '.github/workflows/windows-electron-spike.yml'
+  workflow_dispatch:
+
+# Never cancel someone else's Android/PWA run; scope concurrency to this file.
+concurrency:
+  group: windows-electron-spike-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  shell-policy:
+    name: Shell policy unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Only the shell's own dependency tree is needed, and the unit tests do
+      # not require the Electron binary itself.
+      - name: Install shell dependencies (no Electron download)
+        run: npm --prefix desktop/electron install --ignore-scripts
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+
+      # No build profile, no www/ tree and no display are required: these tests
+      # exercise the shell's pure decision functions only.
+      - name: Run policy unit tests
+        run: node desktop/electron/test/run-all.mjs --unit
+
+  windows-shell:
+    name: Electron shell on Windows
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Configure Free build profile
+        run: npm run configure
+
+      - name: Fetch bundled runtimes
+        run: npm run fetch:bundles
+
+      - name: Install Electron
+        run: npm run windows:install
+
+      # Playwright is the shared test driver: `_electron.launch()` drives the
+      # shell and `chromium.launch()` drives the browser baseline. `npm install`
+      # brings in the Playwright package but does NOT provision browser binaries,
+      # so the Chromium download must be explicit.
+      - name: Install the Playwright Chromium build
+        run: npx playwright install chromium
+
+      # Launch the shell directly, without Playwright, and print the main
+      # process's own stdout/stderr. Playwright reports a failed Electron launch
+      # as a bare timeout with no output, which is nearly undiagnosable on a
+      # machine you cannot log into. This runs first so its output is available
+      # even when the suite below fails, and it retries once with GPU/sandbox
+      # flags so a host-configuration problem is distinguishable from a broken
+      # shell in a single run.
+      - name: Smoke-launch the shell (diagnostic)
+        run: node desktop/electron/test/smoke.mjs
+
+      # SCIREPL_COMPARE_BASELINE=1 is what makes the step above load-bearing:
+      # without it the suite never calls chromium.launch() and the download would
+      # be dead weight. It also buys the thing this job exists for — the
+      # kernel-parity claim in docs/WINDOWS_ELECTRON_SPIKE.md was measured on
+      # Linux, and this re-measures Electron-vs-browser parity on real Windows.
+      - name: Run the Electron shell suite (with browser baseline)
+        run: npm run test:windows
+        env:
+          SCIREPL_COMPARE_BASELINE: '1'
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-electron-results
+          path: desktop/electron/test/results/
+          if-no-files-found: warn
