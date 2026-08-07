@@ -14,9 +14,35 @@ Two findings change the *shape* of the Phase 1 plan and are described below.
 
 ## 1. Read this first: what "verified" means here
 
-> **All automated results in this document were produced on Linux
-> (WSL2, kernel 6.18, x64) with Electron 43.3.0 / Chromium 150.**
-> **No test in this document was executed on Windows.**
+> **Except where §2.1 says otherwise, all automated results in this document
+> were produced on Linux (WSL2, kernel 6.18, x64) with Electron 43.3.0 /
+> Chromium 150.**
+
+### 2.1 What has now run on Windows
+
+A first `windows-latest` CI run has happened. Partial result:
+
+| Suite | Windows result |
+| --- | --- |
+| `policy-unit` | **52/52 passed on Windows** |
+| everything else | **did not run** — the shell failed to launch |
+
+The Windows `policy-unit` pass is worth more than the Linux one: it exercised
+path containment against real `D:\` drive-letter paths and backslash separators,
+including the percent-encoded traversal cases. Those assertions are now verified
+on the target platform.
+
+The launch failure was a bug in the **test harness**, not the shell: the Electron
+executable path was hardcoded as `dist/electron`, which does not exist on
+Windows (`dist/electron.exe`). Playwright surfaced it only as
+`Error: Process failed to launch!`. Fixed by asking the `electron` package for
+its own platform-specific path — the package resolves it from the `path.txt`
+its installer writes — plus a launch-failure message that reports the
+executable, args and platform instead of failing opaquely.
+
+**The Windows suite has therefore not yet completed. No Electron-dependent
+result in this document is Windows-verified.** The next run on the spike branch
+is the one that settles it.
 
 That is a real limitation and it is not glossed over anywhere below. Every claim
 is tagged:
@@ -424,11 +450,12 @@ node desktop/electron/test/measure.mjs --with-python
 
 Then confirm by hand:
 
-1. **The whole suite passes on Windows.** The only host-specific code is
-   `protocol.js` path handling; `policy.unit.test.mjs` covers Windows separator
-   and drive-letter cases, but has not run on Windows.
+1. **The whole suite passes on Windows.** `policy-unit` already does (§2.1); the
+   seven Electron-dependent suites have not yet completed a Windows run.
 2. **Windows path containment** — that `app://scirepl/..%5C..%5Cpackage.json`
-   (backslash) is refused. `path.relative` is separator-aware, but verify.
+   (backslash) is refused. `policy.unit.test.mjs` now covers drive-letter and
+   backslash cases **on Windows**, but this specific encoded form should be
+   confirmed against the live protocol handler.
 3. **Startup, size and memory re-measured on Windows** — §6 is Linux-only.
    The GPU figure in particular will differ with real hardware acceleration.
 4. **Native Save dialog.** The shell installs no `will-download` handler, so

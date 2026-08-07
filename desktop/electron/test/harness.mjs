@@ -9,7 +9,8 @@
 
 import { _electron as electron, chromium } from 'playwright';
 import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync, existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { mkdtempSync, rmSync, existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -22,14 +23,60 @@ import { ELECTRON_DIR, REPO_ROOT, WWW_ROOT } from './reporter.mjs';
 /* Electron                                                            */
 /* ------------------------------------------------------------------ */
 
-function electronBinary() {
-  const p = path.join(ELECTRON_DIR, 'node_modules', 'electron');
-  if (!existsSync(p)) {
+const requireFromHere = createRequire(import.meta.url);
+
+/**
+ * Absolute path to the Electron executable for THIS platform.
+ *
+ * The executable name is platform-specific — `electron` on Linux,
+ * `electron.exe` on Windows, `Electron.app/Contents/MacOS/Electron` on macOS —
+ * so it must never be hardcoded. (It was, and the first Windows CI run failed
+ * with Playwright's opaque "Process failed to launch!" because
+ * `dist/electron` does not exist there.)
+ *
+ * The `electron` package already solves this: its entry point exports the
+ * absolute path, resolved from the `path.txt` its installer writes. Ask the
+ * package rather than guessing, and fall back to reading `path.txt` directly if
+ * the entry point is unavailable.
+ *
+ * Playwright cannot resolve this itself here: Electron lives in
+ * `desktop/electron/node_modules`, deliberately isolated from the root
+ * dependency tree, so `executablePath` must be passed explicitly.
+ */
+function electronExecutable() {
+  const pkgDir = path.join(ELECTRON_DIR, 'node_modules', 'electron');
+  if (!existsSync(pkgDir)) {
     throw new Error(
       'Electron is not installed. Run `npm --prefix desktop/electron install` first.'
     );
   }
-  return p;
+
+  let exe;
+  try {
+    // electron/index.js exports the absolute path to the binary.
+    exe = requireFromHere(pkgDir);
+  } catch (err) {
+    try {
+      const rel = readFileSync(path.join(pkgDir, 'path.txt'), 'utf8').trim();
+      exe = path.join(pkgDir, 'dist', rel);
+    } catch {
+      throw new Error(
+        `Could not determine the Electron executable path under ${pkgDir}. ` +
+        'The install may have been run with --ignore-scripts, which skips the ' +
+        'binary download. Re-run `npm --prefix desktop/electron install`.\n' +
+        `Original error: ${err && err.message}`
+      );
+    }
+  }
+
+  if (typeof exe !== 'string' || !existsSync(exe)) {
+    throw new Error(
+      `The Electron executable was not found at ${exe}. ` +
+      'The binary download may have been skipped (ELECTRON_SKIP_BINARY_DOWNLOAD / ' +
+      '--ignore-scripts). Re-run `npm --prefix desktop/electron install`.'
+    );
+  }
+  return exe;
 }
 
 /**
@@ -55,17 +102,39 @@ export async function launchShell(opts = {}) {
   // it ran with the sandbox on so the report cannot overclaim.
   if (process.env.SCIREPL_ELECTRON_NO_SANDBOX === '1') args.push('--no-sandbox');
 
-  const electronApp = await electron.launch({
-    executablePath: path.join(electronBinary(), 'dist', 'electron'),
-    args,
-    env: {
-      ...process.env,
-      SCIREPL_USER_DATA: userDataDir,
-      SCIREPL_WWW: opts.www || WWW_ROOT,
-      ELECTRON_ENABLE_LOGGING: '1',
-    },
-    timeout: 120_000,
-  });
+  const executablePath = electronExecutable();
+  let electronApp;
+  try {
+    electronApp = await electron.launch({
+      executablePath,
+      args,
+      env: {
+        ...process.env,
+        SCIREPL_USER_DATA: userDataDir,
+        SCIREPL_WWW: opts.www || WWW_ROOT,
+        ELECTRON_ENABLE_LOGGING: '1',
+      },
+      timeout: 120_000,
+    });
+  } catch (err) {
+    // Playwright reports launch failures as a bare "Process failed to launch!"
+    // with no indication of what it tried to run. Attach the details that
+    // actually narrow it down — this is what the first Windows CI failure
+    // needed and did not have.
+    throw new Error(
+      `Failed to launch the Electron shell.\n` +
+      `  executable: ${executablePath}\n` +
+      `  args:       ${JSON.stringify(args)}\n` +
+      `  platform:   ${process.platform}-${process.arch}\n` +
+      `  www root:   ${opts.www || WWW_ROOT}\n` +
+      `  userData:   ${userDataDir}\n` +
+      `If the executable path looks wrong for this platform, the Electron install ` +
+      `is incomplete. If it looks right, the main process most likely threw during ` +
+      `startup — run it directly to see the error:\n` +
+      `  npm --prefix desktop/electron start\n` +
+      `Original error: ${err && err.message}`
+    );
+  }
 
   const page = await electronApp.firstWindow({ timeout: 120_000 });
 

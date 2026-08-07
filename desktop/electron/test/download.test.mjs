@@ -59,10 +59,14 @@ export default async function run() {
     await electronApp.evaluate(async ({ session }, dir) => {
       globalThis.__spikeDownloads = [];
       const base = String(dir).replace(/[\\/]+$/, '');
+      // Use the separator the directory itself is written with, so a Windows
+      // temp path (C:\Users\...\Temp\x) does not end up with a mixed-separator
+      // save path. `require('path')` is not in scope inside this evaluate.
+      const sep = base.includes('\\') ? '\\' : '/';
       session.defaultSession.on('will-download', (_event, item) => {
-        let target = `${base}/download.bin`;
+        let target = `${base}${sep}download.bin`;
         try {
-          target = `${base}/${item.getFilename()}`;
+          target = `${base}${sep}${item.getFilename()}`;
         } catch { /* keep the fallback */ }
         // Always set a path, even on error, so no modal dialog can appear.
         item.setSavePath(target);
