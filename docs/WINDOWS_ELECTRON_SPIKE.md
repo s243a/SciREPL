@@ -346,6 +346,72 @@ something else is quietly serving the bytes.
 This also removes the argument for bundling R into a Windows build: offline R no
 longer costs 50 MB of download, so the Free/Pro profile difference stays intact.
 
+#### Root cause: the service worker registers, then dies during install
+
+Traced properly, rather than inferred from the `addAll` error alone:
+
+```
+navigator.serviceWorker.register('sw.js')  ->  succeeds, scope app://scirepl/
+after 4s: installing=false waiting=false active=false   ->  never activates
+caches.open(c).put(httpsRequest, response) ->  WORKS from an app:// page
+caches.open(c).add('index.html')           ->  throws: scheme 'app' unsupported
+```
+
+So the chain is: `sw.js`'s `install` calls `addAll(APP_SHELL)` on `app://` URLs,
+which rejects; `event.waitUntil` therefore rejects; the worker never reaches
+*activated*; its `fetch` handler never runs; and `CDN_CACHE` is never written.
+
+The important part is the third line. **Caching `https` requests from an
+`app://` page works.** The CDN cache mechanism is not the thing that is broken —
+only the app-shell precache is, and it takes the whole worker down with it.
+
+That also means this is a robustness bug beyond the shell: today a single
+unreachable entry in `APP_SHELL` fails the entire install on *any* platform,
+silently disabling offline support for the PWA and Android too.
+
+#### Consistency with Android — an open decision
+
+This matters because the mobile build sets the expected behaviour, and the two
+available fixes do not agree on it.
+
+| | Android / PWA today | Shell with `runtime-cache.js` | Shell if `sw.js` install were tolerant |
+| --- | --- | --- | --- |
+| Reload App keeps runtimes | ✅ | ✅ | ✅ |
+| **Memory → Clear Cache** removes them | ✅ | ❌ clears two empty caches and reports success | ✅ |
+| **Per-runtime Clear Cache** button | ✅ appears | ❌ never appears | ✅ |
+| Storage figure includes them | ✅ | ❌ reports 0 B | ✅ |
+| R works offline after one use | untested | ✅ | likely partial — see below |
+
+`runtime-cache.js` delivers offline R, but through a cache the application's own
+**Memory & Storage** panel cannot see or clear, because that panel works through
+the Cache API. Measured: after loading Lua, the panel reports `0 B`, "Clear
+Cache" leaves the bytes on disk, and the per-runtime button does not appear. The
+shell therefore adds a management surface it owns (`menu.js` → **Runtimes**),
+but that is a *different* surface from the one mobile users learn — which is
+exactly the divergence to avoid.
+
+The mobile-consistent fix is to make `sw.js`'s install tolerate a failed
+app-shell precache, so the worker activates and populates `CDN_CACHE` exactly as
+it does on Android. Every existing affordance then works identically on both
+platforms with no shell-specific UI at all.
+
+Two caveats before doing it:
+
+- It is a change to shared `www/` code, which this work has deliberately not
+  touched, and it needs re-testing on Android and the PWA.
+- It may not fully replace `runtime-cache.js` for R. webR probes its virtual
+  filesystem with `HEAD`, and the service worker only caches `GET`
+  (`sw.js:155`), so R may still fail offline under the service worker alone.
+  Whether R currently works offline **on Android** is untested and worth
+  measuring first — if it does not, then the shell would be *ahead* of mobile
+  rather than inconsistent with it, which is a different conversation.
+
+**Recommendation:** measure Android's offline-R behaviour, then fix `sw.js`
+install tolerance in the shared phase and re-evaluate whether the main-process
+cache is still earning its place. Until that decision is made, the shell's cache
+stays behind `SCIREPL_RUNTIME_CACHE` (set it to `0` to get the pre-fix
+behaviour) and its management lives in the application menu.
+
 #### The consent prompt is a setting, not a defect
 
 An earlier draft of this report called the recurring download prompt a papercut

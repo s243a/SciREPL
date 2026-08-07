@@ -57,6 +57,40 @@ export default async function run() {
     await waitForAppReady(page);
     r.log('can navigate back to the application root', /index\.html$/.test(page.url()), page.url());
 
+    /* ---------------- the application menu ---------------- */
+    //
+    // The shell replaces Electron's default menu, partly for branding (the
+    // default Help links to electronjs.org) but mainly because the menu is the
+    // only place the runtime cache can be inspected or cleared — the app's own
+    // Memory & Storage panel works through the Cache API, which is empty under
+    // app://. Asserted here so the surface cannot quietly disappear.
+    const menu = await shell.electronApp.evaluate(({ Menu }) => {
+      const m = Menu.getApplicationMenu();
+      if (!m) return null;
+      return m.items.map((i) => ({
+        label: i.label,
+        items: (i.submenu ? i.submenu.items : []).map((x) => x.label).filter(Boolean),
+      }));
+    });
+    r.log('an application menu is installed', menu !== null);
+    const labels = (menu || []).map((m) => m.label.replace(/&/g, ''));
+    r.log('the menu is SciREPL\'s, not Electron\'s default',
+      labels.includes('Runtimes'), labels.join(', '));
+
+    const runtimes = (menu || []).find((m) => m.label.replace(/&/g, '') === 'Runtimes');
+    r.log('the runtime cache can be inspected from the menu',
+      !!runtimes && runtimes.items.some((l) => /Downloaded runtimes/i.test(l)),
+      runtimes && runtimes.items.join(' | '));
+    r.log('the runtime cache can be cleared from the menu',
+      !!runtimes && runtimes.items.some((l) => /Clear downloaded runtimes/i.test(l)));
+
+    // Copy/paste accelerators matter in a REPL and are easy to lose when the
+    // default menu is replaced.
+    const edit = (menu || []).find((m) => m.label.replace(/&/g, '') === 'Edit');
+    r.log('Edit still provides cut/copy/paste',
+      !!edit && ['Cut', 'Copy', 'Paste'].every((l) => edit.items.includes(l)),
+      edit && edit.items.join(' | '));
+
     /* ---------------- no remote module ---------------- */
 
     const remote = await shell.electronApp.evaluate(async ({ app }) => {

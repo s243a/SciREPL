@@ -23,6 +23,7 @@ const {
 const { applyWebContentsPolicy } = require('./security');
 const { registerIpcHandlers } = require('./ipc');
 const { installRuntimeCache } = require('./runtime-cache');
+const { installApplicationMenu } = require('./menu');
 
 const { resolveWwwRoot, resolveBuildInfoPath, resolveRepoRoot } = require('./paths');
 
@@ -232,6 +233,17 @@ app.whenReady().then(() => {
   });
 
   createWindow();
+
+  // Replaces Electron's default menu. It carries the only surface from which
+  // the runtime cache can be inspected or cleared: the application's own
+  // Memory & Storage panel works through the Cache API, which is always empty
+  // under app://, so it neither sees nor clears this cache. See menu.js.
+  installApplicationMenu({
+    getCache: () => runtimeCache,
+    getBuildInfo: readBuildInfo,
+    getWindow: () => mainWindow,
+    appVersion: readAppVersion(),
+  });
 
   if (process.env.SCIREPL_SMOKE_EXIT === '1') runSmokeCheck(mainWindow);
 
