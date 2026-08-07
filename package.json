@@ -13,7 +13,11 @@
         "build:debug": "npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew assembleDebug",
         "build:release:aab": "npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew bundleRelease",
         "build:release:apk": "npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew assembleRelease",
-        "build:play": "npm run build:release:aab"
+        "build:play": "npm run build:release:aab",
+        "windows:install": "npm --prefix desktop/electron install",
+        "dev:windows": "npm run configure && npm run fetch:bundles && npm --prefix desktop/electron start",
+        "test:windows": "node desktop/electron/test/run-all.mjs",
+        "test:windows:unit": "node desktop/electron/test/run-all.mjs --unit"
     },
     "keywords": [
         "python",

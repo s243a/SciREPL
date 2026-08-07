@@ -37,3 +37,11 @@ www/vendor/pyodide/
 www/vendor/swipl/
 www/vendor/scittle/
 www/vendor/webr/
+
+# Windows/Electron shell (desktop/electron). The downloaded Electron runtime
+# lives under its own node_modules/ (already ignored above); these are the
+# packaging output and test artifacts, which must never be committed.
+desktop/electron/dist/
+desktop/electron/out/
+desktop/electron/release/
+desktop/electron/test/results/

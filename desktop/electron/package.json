@@ -1,0 +1,14 @@
+{
+  "name": "scirepl-desktop-electron",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Phase 0 Windows feasibility shell for SciREPL Free. Isolated from the root Android/PWA dependency tree on purpose.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/run-all.mjs"
+  },
+  "devDependencies": {
+    "electron": "43.3.0"
+  }
+}

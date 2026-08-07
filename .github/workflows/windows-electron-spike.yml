@@ -1,0 +1,96 @@
+# Phase 0 Windows/Electron feasibility spike.
+#
+# Additive by design: this workflow touches nothing the Android or PWA pipelines
+# depend on. build-release.yml and deploy-pages.yml are unchanged, and neither
+# job here is a required check for them.
+#
+# Two jobs with deliberately different triggers:
+#
+#   shell-policy  — pure Node unit tests (path containment, external-URL policy,
+#                   IPC allowlist, CSP shape). No display, no Electron download,
+#                   a few seconds. Safe to run on every PR that touches the shell.
+#
+#   windows-shell — the full Electron suite on a real Windows runner. This is
+#                   `workflow_dispatch` only, on purpose: it downloads ~220 MB of
+#                   Electron plus ~104 MB of kernel runtimes and drives a GUI
+#                   application, and it has NOT yet been observed to pass on a
+#                   Windows runner (the spike was developed on Linux). Making it
+#                   an automatic gate before anyone has seen it go green would
+#                   block PRs on an unproven job. Promote it to `pull_request`
+#                   once it has been run manually and is stable.
+
+name: Windows Electron spike
+
+on:
+  pull_request:
+    paths:
+      - 'desktop/electron/**'
+      - '.github/workflows/windows-electron-spike.yml'
+  workflow_dispatch:
+
+# Never cancel someone else's Android/PWA run; scope concurrency to this file.
+concurrency:
+  group: windows-electron-spike-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  shell-policy:
+    name: Shell policy unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Only the shell's own dependency tree is needed, and the unit tests do
+      # not require the Electron binary itself.
+      - name: Install shell dependencies (no Electron download)
+        run: npm --prefix desktop/electron install --ignore-scripts
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+
+      # No build profile, no www/ tree and no display are required: these tests
+      # exercise the shell's pure decision functions only.
+      - name: Run policy unit tests
+        run: node desktop/electron/test/run-all.mjs --unit
+
+  windows-shell:
+    name: Electron shell on Windows (manual)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Configure Free build profile
+        run: npm run configure
+
+      - name: Fetch bundled runtimes
+        run: npm run fetch:bundles
+
+      - name: Install Electron
+        run: npm run windows:install
+
+      - name: Run the Electron shell suite
+        run: npm run test:windows
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-electron-results
+          path: desktop/electron/test/results/
+          if-no-files-found: warn
