@@ -72,10 +72,17 @@ Needs a network connection **every session**:
 - **R/webR** (~50 MB) is too large for the HTTP cache to retain, and the cache
   that would have held it is the broken one. Expect it to download each session.
 
-Either way you will see the **download prompt every session**, even when the
-files come straight from cache: the app checks the (empty) service-worker cache
-to decide whether to ask. Cosmetic — click through it and the load is instant if
-it was cached. See [`WINDOWS_ELECTRON_SPIKE.md`](WINDOWS_ELECTRON_SPIKE.md) §5.
+If you would rather not be asked before each runtime download, turn on
+**Settings → Runtime Downloads → "Auto-download runtimes (skip confirmation)"**.
+The choice is saved, and it works the same here as on Android and the PWA.
+
+Leave it off and the shell will ask each session, even when the files then load
+instantly from cache — it decides whether to ask by checking the service-worker
+cache, which is empty here. That one checkbox is the whole difference; see
+[`WINDOWS_ELECTRON_SPIKE.md`](WINDOWS_ELECTRON_SPIKE.md) §5.
+
+The privacy notice is separate and is shown **once** — accepting it is
+remembered, and it can be revoked from Settings.
 
 Also absent by design:
 

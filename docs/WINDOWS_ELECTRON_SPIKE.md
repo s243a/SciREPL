@@ -300,15 +300,36 @@ It is:
   not retain a payload that size and the explicit cache that would have is
   broken.
 
-Two secondary consequences remain regardless of size:
+One secondary consequence remains regardless of size: nothing here is
+guaranteed. The HTTP cache is heuristic and evictable, so it is a weaker promise
+than an explicit cache, not a replacement for one.
 
-- The "cached" branch of the download-consent check
-  (`kernel_manager.js:190-202`) asks the **Cache API**, which is always empty
-  here. So the consent modal reappears for CDN kernels every session even when
-  the fetch will be served instantly from the HTTP cache. Cosmetic, but it is
-  what made the first kernel matrix in this spike look like a hang (§5).
-- Nothing is guaranteed. The HTTP cache is heuristic and evictable, so this is a
-  weaker promise than an explicit cache, not a replacement for one.
+#### The consent prompt is a setting, not a defect
+
+An earlier draft of this report called the recurring download prompt a papercut
+needing a shared-code fix. That was wrong on both counts.
+
+The prompts are deliberate consent gates, both persisted, and both already
+under user control — in shared `www/` code, so the behaviour is **identical on
+Android, the PWA and the shell**:
+
+| Prompt | Where the decision is stored | How to stop being asked |
+| --- | --- | --- |
+| Privacy notice | `scirepl_privacy_accepted` | Accepted once, then never shown again (`kernel_manager.js:134`). Revocable from Settings. |
+| Runtime download | `scirepl_auto_download` | Settings → **Runtime Downloads** → *Auto-download runtimes (skip confirmation)* (`www/index.html`, handled at `file_io.js:163`). |
+
+With auto-download enabled, `kernel_manager.js:202` skips the confirmation
+outright, so the inert Cache API never enters into it.
+
+The genuine Electron-specific nuance is narrow: for a user who has *not*
+enabled that setting, the `cached` shortcut in the same line never fires here,
+because it asks the Cache API. On Android and the PWA the service worker cache
+works, so after the first download the prompt is skipped automatically. In the
+shell it is asked each session even when the bytes then arrive instantly from
+the HTTP cache. One checkbox removes the difference.
+
+This is also what made the first kernel matrix in this spike look like a hang —
+the test harness had not granted the consent the browser tests grant.
 
 Not worked around in Phase 0. The platform-appropriate fix is for a packaged
 desktop application to **bundle** its runtimes rather than cache CDN downloads —
@@ -581,7 +602,7 @@ Risks, in the order they should be addressed:
 | 7 | **CDN download-consent modal on a packaged app.** | Low | Product decision (§5). |
 | 8 | **TypR output gap.** | Low | Pre-existing, reproduces in browser, unrelated to Windows. |
 | 9 | **Ko-fi widget blocked in the shell** (§5). | Low | Deliberate; degrades silently; pinned by tests. Resolve with a shared plain-link change (§11.5), not a CSP exception. |
-| 10 | **Service worker cache inert under `app://`** (§5). Chromium's HTTP cache covers small CDN runtimes (Lua works offline after one use) but not large ones (R does not). The consent modal also reappears every session. | Low-Medium | Bundle Lua in the Windows profile; R is a Free/Pro product decision. |
+| 10 | **Service worker cache inert under `app://`** (§5). Chromium's HTTP cache covers small CDN runtimes (Lua works offline after one use) but not large ones (R does not). | Low | Bundle Lua in the Windows profile; R is a Free/Pro product decision. The consent prompt is an existing user setting, not a defect. |
 
 ---
 
@@ -663,10 +684,8 @@ with no downside. Bundling R offline is what currently distinguishes the `pro`
 profile from `full`, so doing it in a Free Windows build is a pricing decision
 rather than an engineering one — flagged, not assumed.
 
-Separately, the consent modal reappears every session for CDN kernels because
-the cached-check asks the broken Cache API. Fixing that means touching
-`kernel_manager.js`, which is shared with the PWA and Android, so it belongs in
-the shared-code phase rather than the shell.
+No change is needed for the consent prompt: it is a designed, persisted setting
+that already exists on all three platforms (§5). Nothing to fix there.
 
 **7. Keep the artifact boundary test in CI.** It already fails the build if Pro
 content, a hardcoded `isPro`, a Store licence call, or commerce code appears in
