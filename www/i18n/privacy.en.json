@@ -1,0 +1,12 @@
+{
+  "__meta": {
+    "locale": "en",
+    "domain": "privacy",
+    "status": "reviewed",
+    "note": "Authoritative text. Every other privacy locale is a translation of this one and is informational only."
+  },
+  "strings": {
+    "privacy.translationNotice": "This translation is provided for information only. The English version is the official privacy policy.",
+    "privacy.viewOfficial": "View the official English policy"
+  }
+}

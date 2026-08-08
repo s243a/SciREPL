@@ -1,7 +1,7 @@
 {
     "name": "sci-repl",
     "version": "1.0.1",
-    "description": "Mobile Scientific REPL — Python + Pyodide + Plotly.js",
+    "description": "Mobile Scientific REPL \u2014 Python + Pyodide + Plotly.js",
     "main": "index.js",
     "scripts": {
         "serve": "node server.js",
@@ -19,7 +19,9 @@
         "setup:windows": "node desktop/electron/scripts/dev-windows.mjs --skip-launch",
         "package:windows": "node desktop/electron/packaging/build-portable.mjs",
         "test:windows": "node desktop/electron/test/run-all.mjs",
-        "test:windows:unit": "node desktop/electron/test/run-all.mjs --unit"
+        "test:windows:unit": "node desktop/electron/test/run-all.mjs --unit",
+        "i18n:manifest": "node scripts/build-i18n-manifest.mjs",
+        "i18n:check": "node scripts/build-i18n-manifest.mjs --check"
     },
     "keywords": [
         "python",

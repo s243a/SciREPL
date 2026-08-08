@@ -74,6 +74,38 @@ on language, not on misplaced margins.
 > `inset-inline-start`). RTL layout is therefore **not yet correct**, and that
 > should be fixed before an RTL locale is marked `reviewed`.
 
+## Privacy and consent text is separate
+
+Privacy strings live in their own catalogue, `privacy.<code>.json`, with its own
+`status`. A locale can have a fully reviewed UI and a draft policy at the same
+time — the manifest records both — and the two never block each other.
+
+This is deliberate. A mistranslated button is a papercut; a mistranslated
+privacy disclosure is a legal document that says the wrong thing, and Google
+Play requires the policy to be accurate.
+
+**Every translated policy is informational only. The English version is the
+official one, and the translation must say so.** That notice is itself a string
+(`privacy.translationNotice`) precisely because it is the sentence a reader of a
+translated policy most needs to understand — so it must appear in their
+language, not in English.
+
+A privacy catalogue should not be marked `reviewed` on the strength of a
+fluent-sounding draft. It needs someone accountable for the claims it makes.
+
+## Regenerating the manifest
+
+`i18n/manifest.json` is generated, not hand-edited. After adding or changing any
+catalogue:
+
+```bash
+npm run i18n:manifest     # regenerate
+npm run i18n:check        # verify it is current (CI-friendly)
+```
+
+The app reads the manifest to populate the language picker, so a locale that is
+not in it will not appear no matter how complete the catalogue is.
+
 ## Tone
 
 SciREPL is a tool for scientific and technical work. Aim for clear, neutral,

@@ -1,0 +1,30 @@
+{
+  "generatedBy": "scripts/build-i18n-manifest.mjs",
+  "base": "en",
+  "locales": [
+    {
+      "code": "en",
+      "endonym": "English",
+      "dir": "ltr",
+      "status": "reviewed",
+      "completeness": 1,
+      "domains": {
+        "privacy": {
+          "status": "reviewed"
+        }
+      }
+    },
+    {
+      "code": "es",
+      "endonym": "Español",
+      "dir": "ltr",
+      "status": "reviewed",
+      "completeness": 1,
+      "domains": {
+        "privacy": {
+          "status": "draft"
+        }
+      }
+    }
+  ]
+}

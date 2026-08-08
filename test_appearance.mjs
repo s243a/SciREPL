@@ -182,6 +182,43 @@ try {
 
     await page.evaluate(() => window.i18n.activate('en'));
 
+    // The manifest exists so startup does not fetch every catalogue just to
+    // score them — two requests today, twenty at twenty locales.
+    const manifest = await page.evaluate(async () => {
+        const res = await fetch('i18n/manifest.json');
+        const m = await res.json();
+        return { ok: res.ok, count: m.locales.length, hasScores: m.locales.every((l) => 'completeness' in l) };
+    });
+    check('a precomputed locale manifest is served', manifest.ok && manifest.count >= 2);
+    check('the manifest carries completeness, so startup need not fetch every catalogue',
+        manifest.hasScores);
+
+    const fetched = await page.evaluate(() =>
+        Object.keys(window.i18n.catalogues).filter((c) => !c.startsWith('__')));
+    check('only the catalogues actually in use are fetched',
+        fetched.length <= 3, `loaded: ${fetched.join(', ')}`);
+
+    // Privacy text is legal copy and is reviewed on its own schedule, so a
+    // locale can have a reviewed UI and a draft policy at the same time.
+    const domains = await page.evaluate(() => ({
+        esUi: window.i18n.statusOf('es'),
+        esPrivacy: window.i18n.domainStatusOf('es', 'privacy'),
+        enPrivacy: window.i18n.domainStatusOf('en', 'privacy'),
+    }));
+    check('privacy translations are gated separately from the UI',
+        domains.esUi === 'reviewed' && domains.esPrivacy === 'draft',
+        JSON.stringify(domains));
+    check('the English policy is the reviewed, authoritative one',
+        domains.enPrivacy === 'reviewed');
+
+    const notice = await page.evaluate(async () => {
+        const res = await fetch('i18n/privacy.es.json');
+        const d = await res.json();
+        return d.strings['privacy.translationNotice'];
+    });
+    check('a translated policy declares itself informational, pointing at English',
+        /informativo/i.test(notice) && /ingl/i.test(notice), notice);
+
     /* ------------------------------ dialog ------------------------------ */
     console.log('\n5. Dialog');
 
