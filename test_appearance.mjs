@@ -161,8 +161,10 @@ try {
             === 'Apariencia');
     check('untranslated keys fall back to English rather than showing the key id',
         await page.evaluate(() => {
-            const v = window.t('help.quickStartPython');
-            return v && !v.includes('.') && v === 'Quick Start — Python';
+            window.i18n.catalogues.en['__test_fallback_sample'] = 'Sample English Fallback';
+            const v = window.t('__test_fallback_sample');
+            delete window.i18n.catalogues.en['__test_fallback_sample'];
+            return v && !v.includes('.') && v === 'Sample English Fallback';
         }));
     check('the document language attribute follows',
         await page.evaluate(() => document.documentElement.getAttribute('lang')) === 'es');
