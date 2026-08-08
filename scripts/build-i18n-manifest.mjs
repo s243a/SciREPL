@@ -46,6 +46,51 @@ const codes = readdirSync(I18N_DIR)
     // Domain catalogues (privacy.*) are indexed separately below.
     .filter((c) => !c.includes('.'));
 
+/**
+ * UI coverage ratchet.
+ *
+ * The completeness score answers "how much of the catalogue is translated?" —
+ * NOT "how much of the app is translated?". Those diverged badly once: the
+ * catalogue was 100% translated while 91% of the interface was still hard-coded
+ * English, and nothing complained. A locale could have been marked reviewed and
+ * offered to users in that state.
+ *
+ * So: count visible text that is not wired for translation, and refuse to let
+ * that number grow. New untagged UI fails the build with the offending strings
+ * listed. Lowering the baseline is the only permitted direction.
+ */
+const UI_UNWIRED_BASELINE = 18;   // decorative × glyphs and one JS-driven status badge
+
+function auditUiCoverage() {
+    const html = readFileSync(path.join(ROOT, 'www', 'index.html'), 'utf8')
+        .replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, '');
+    const re = /<(button|h1|h2|h3|h4|label|option|p|th|summary|span)\b([^>]*)>([\s\S]*?)<\/\1>/gi;
+    const unwired = [];
+    let wired = 0, m;
+    while ((m = re.exec(html))) {
+        const [, , attrs, inner] = m;
+        const text = inner.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+        if (!text || !/[A-Za-z]{3}/.test(text)) continue;
+        if (attrs.includes('data-i18n') || inner.includes('data-i18n')) wired++;
+        else unwired.push(text.slice(0, 72));
+    }
+    return { wired, unwired };
+}
+
+const ui = auditUiCoverage();
+const uiTotal = ui.wired + ui.unwired.length;
+if (ui.unwired.length > UI_UNWIRED_BASELINE) {
+    console.error(`[i18n] ${ui.unwired.length} visible strings are not wired for translation ` +
+        `(baseline ${UI_UNWIRED_BASELINE}). Add data-i18n / data-i18n-html and a catalogue key:`);
+    // Prose first: the baseline is mostly decorative &times; glyphs, and burying
+    // the string someone just added among them makes the error useless.
+    const isProse = (t) => /[A-Za-z]{3}/.test(t.replace(/&\w+;/g, ''));
+    const ranked = [...ui.unwired].sort((a, b) => Number(isProse(b)) - Number(isProse(a)));
+    for (const t of ranked.slice(0, 15)) console.error(`       "${t}"`);
+    if (ranked.length > 15) console.error(`       … and ${ranked.length - 15} more`);
+    process.exit(1);
+}
+
 const base = read(BASE);
 
 /**
@@ -143,6 +188,9 @@ if (process.argv.includes('--check')) {
 }
 
 writeFileSync(MANIFEST, serialised);
+console.log(`[i18n] UI coverage: ${ui.wired}/${uiTotal} strings wired ` +
+    `(${Math.round((ui.wired / uiTotal) * 100)}%), ${ui.unwired.length} unwired ` +
+    `(baseline ${UI_UNWIRED_BASELINE}).`);
 console.log(`[i18n] wrote manifest.json for ${locales.length} locale(s):`);
 for (const l of locales) {
     console.log(`  ${l.code.padEnd(6)} ${String(Math.round(l.completeness * 100) + '%').padStart(4)}  ${l.status}` +

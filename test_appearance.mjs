@@ -127,9 +127,16 @@ try {
 
     const locales = await page.evaluate(() => window.i18n.available()
         .map((l) => ({ code: l.code, pct: Math.round(l.completeness * 100), partial: l.partial })));
-    check('shipped locales are listed', locales.length >= 2, JSON.stringify(locales));
+    check('English is always available', locales.some((l) => l.code === 'en'),
+        JSON.stringify(locales));
     check('every offered locale meets the completeness threshold',
         locales.every((l) => l.pct >= 80), JSON.stringify(locales));
+    // es is a real, in-progress draft rather than a fixture: extracting the UI
+    // took the catalogue from 57 strings to 327, so a translation that was
+    // complete against the old surface now covers 17% of the app. It must not be
+    // offered, and this is the check that would catch it being offered anyway.
+    check('a partially translated locale is withheld, not offered half-done',
+        !locales.some((l) => l.code === 'es'), JSON.stringify(locales));
 
     // The point of the completeness score: a stub catalogue must not look ready.
     const stubScore = await page.evaluate(() => {
@@ -143,13 +150,20 @@ try {
     check('a catalogue that merely copies English scores as untranslated',
         stubScore < 0.8, `scored ${Math.round(stubScore * 100)}%`);
 
+    // activate() bypasses the offered-locale filter on purpose: it is how a
+    // reviewer inspects a draft in situ. es is a draft, and still switchable.
     await page.evaluate(() => window.i18n.activate('es'));
-    await page.waitForTimeout(200);
-    check('switching language translates the UI',
+    await page.waitForTimeout(300);
+    check('a draft locale can still be activated for review',
         await page.evaluate(() => window.t('menu.appearance')) === 'Apariencia');
     check('translation reaches the DOM',
         (await page.evaluate(() => document.getElementById('btn-appearance').textContent.trim()))
             === 'Apariencia');
+    check('untranslated keys fall back to English rather than showing the key id',
+        await page.evaluate(() => {
+            const v = window.t('help.quickStartPython');
+            return v && !v.includes('.') && v === 'Quick Start — Python';
+        }));
     check('the document language attribute follows',
         await page.evaluate(() => document.documentElement.getAttribute('lang')) === 'es');
     check('the document direction is set',
@@ -201,13 +215,23 @@ try {
 
     // Privacy text is legal copy and is reviewed on its own schedule, so a
     // locale can have a reviewed UI and a draft policy at the same time.
-    const domains = await page.evaluate(() => ({
-        esUi: window.i18n.statusOf('es'),
-        esPrivacy: window.i18n.domainStatusOf('es', 'privacy'),
-        enPrivacy: window.i18n.domainStatusOf('en', 'privacy'),
-    }));
-    check('privacy translations are gated separately from the UI',
-        domains.esUi === 'reviewed' && domains.esPrivacy === 'draft',
+    const domains = await page.evaluate(() => {
+        // Independence has to be tested on data that actually differs, so use a
+        // synthetic locale rather than whichever real one happens to differ today.
+        window.i18n.LOCALES.push({
+            code: '__dom', endonym: 'D', dir: 'ltr', status: 'reviewed',
+            domains: { privacy: { status: 'draft' } },
+        });
+        const out = {
+            ui: window.i18n.statusOf('__dom'),
+            privacy: window.i18n.domainStatusOf('__dom', 'privacy'),
+            enPrivacy: window.i18n.domainStatusOf('en', 'privacy'),
+        };
+        window.i18n.LOCALES.pop();
+        return out;
+    });
+    check('privacy is gated separately from the UI, in both directions',
+        domains.ui === 'reviewed' && domains.privacy === 'draft',
         JSON.stringify(domains));
     check('the English policy is the reviewed, authoritative one',
         domains.enPrivacy === 'reviewed');

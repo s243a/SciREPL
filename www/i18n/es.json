@@ -3,8 +3,8 @@
     "locale": "es",
     "endonym": "Español",
     "dir": "ltr",
-    "note": "Traducción completa de la superficie de Apariencia y menú. Revisada para español neutro.",
-    "status": "reviewed"
+    "note": "Was reviewed against the 57-string catalogue. The UI extraction took it to 327 strings, so this is a partial draft again and is correctly not offered to users until completed and re-reviewed.",
+    "status": "draft"
   },
   "__glossary": {
     "Cell-Notebook": "celda",

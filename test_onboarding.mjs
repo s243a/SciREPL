@@ -82,12 +82,35 @@ try {
 
     /* ------------------------ language switch ------------------------- */
     console.log('\n4. Language');
+    // The picker only lists locales that are reviewed and complete enough, so
+    // with es back to draft after the UI extraction, English is the only real
+    // entry. Mark it reviewed in memory to exercise the switching path — the
+    // gate itself is covered in test_appearance.
+    const offered = await page.evaluate(async () => {
+        await window.i18n.load('es');
+        const es = window.i18n.LOCALES.find((l) => l.code === 'es');
+        if (es) { es.status = 'reviewed'; es.completeness = 1; }
+        // statusOf() prefers the status declared inside the catalogue over the
+        // manifest entry, so both have to say reviewed.
+        if (window.i18n.catalogues.es) window.i18n.catalogues.es.__status = 'reviewed';
+        window.i18n.completeness.es = 1;
+        return window.i18n.available().map((l) => l.code);
+    });
+    check('the picker lists only usable locales',
+        offered.includes('en') && offered.includes('es'), offered.join(','));
+
     await page.evaluate(() => window.onboarding.start());
     await page.selectOption('#tour-language-select', 'es');
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(500);
     check('changing language re-renders the tour in that language',
         (await titleNow()) === 'Elige el idioma de la interfaz', await titleNow());
-    await page.evaluate(async () => { window.i18n.setPreference('auto'); await window.i18n.activate('en'); });
+    await page.evaluate(async () => {
+        const es = window.i18n.LOCALES.find((l) => l.code === 'es');
+        if (es) { es.status = 'draft'; es.completeness = 0.17; }
+        if (window.i18n.catalogues.es) window.i18n.catalogues.es.__status = 'draft';
+        window.i18n.setPreference('auto');
+        await window.i18n.activate('en');
+    });
 
     /* ---------------------------- finish ------------------------------ */
     console.log('\n5. Finishing');

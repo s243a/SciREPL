@@ -81,6 +81,40 @@
      */
     const RTL_PREVIEW = 'en-x-rtl';
 
+    /**
+     * Inline markup permitted inside a translated string. Deliberately tiny:
+     * enough for a code sample, an emphasis and a documentation link, and
+     * nothing that can execute or load anything.
+     */
+    const INLINE_TAGS = new Set(['CODE', 'STRONG', 'EM', 'B', 'I', 'BR', 'A', 'SPAN']);
+
+    function sanitiseInline(html) {
+        const tpl = document.createElement('template');
+        tpl.innerHTML = html;
+        const walk = (node) => {
+            for (const child of Array.from(node.childNodes)) {
+                if (child.nodeType === Node.TEXT_NODE) continue;
+                if (child.nodeType !== Node.ELEMENT_NODE || !INLINE_TAGS.has(child.tagName)) {
+                    // Keep the words, drop the element.
+                    child.replaceWith(...Array.from(child.childNodes || []));
+                    continue;
+                }
+                for (const attr of Array.from(child.attributes)) {
+                    const ok = child.tagName === 'A' && attr.name === 'href'
+                        && /^(https?:|mailto:|#)/i.test(attr.value.trim());
+                    if (!ok) child.removeAttribute(attr.name);
+                }
+                if (child.tagName === 'A') {
+                    child.setAttribute('rel', 'noopener noreferrer');
+                    child.setAttribute('target', '_blank');
+                }
+                walk(child);
+            }
+        };
+        walk(tpl.content);
+        return tpl.innerHTML;
+    }
+
     class I18n {
         constructor() {
             this.catalogues = {};      // code -> { key: string }
@@ -144,7 +178,13 @@
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 if (Array.isArray(data.locales) && data.locales.length) {
-                    LOCALES = data.locales;
+                    // Replace the contents rather than rebinding. `LOCALES` is
+                    // also exposed as i18n.LOCALES, captured once at module load;
+                    // reassigning left that reference pointing at the stale
+                    // English-only fallback, so anything reading it — a console
+                    // session, a test — silently saw the wrong list.
+                    LOCALES.length = 0;
+                    LOCALES.push(...data.locales);
                     for (const l of LOCALES) {
                         // Seed the scores so resolve() and available() work
                         // before any catalogue has been fetched.
@@ -319,6 +359,17 @@
                 const key = el.getAttribute('data-i18n');
                 const translated = this.t(key);
                 if (translated !== key) el.textContent = translated;
+            }
+            // Strings whose English contains inline markup — <code>%pip install</code>,
+            // a <strong> emphasis, a documentation link. textContent would delete
+            // the markup, so these are set as HTML through a strict allowlist.
+            // Catalogues are bundled repo assets rather than user input, but a
+            // translator pasting from a rich-text editor is an ordinary accident,
+            // and this is the one place translated data reaches innerHTML.
+            for (const el of rootEl.querySelectorAll('[data-i18n-html]')) {
+                const key = el.getAttribute('data-i18n-html');
+                const translated = this.t(key);
+                if (translated !== key) el.innerHTML = sanitiseInline(translated);
             }
             const attrs = [
                 ['data-i18n-title', 'title'],

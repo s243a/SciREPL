@@ -36,8 +36,8 @@
       "code": "es",
       "endonym": "Español",
       "dir": "ltr",
-      "status": "reviewed",
-      "completeness": 1,
+      "status": "draft",
+      "completeness": 0.174,
       "glossary": {
         "defined": 16,
         "total": 16

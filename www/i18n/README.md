@@ -41,6 +41,25 @@ Keep placeholders exactly as written. You **may** move them within the sentence
 to suit your word order — `"{percent}% translated"` and
 `"traducido al {percent}%"` are both fine.
 
+## Strings that contain markup
+
+Some values carry inline HTML, because the English sentence wraps a code sample
+or a link:
+
+```json
+"help.installPurePythonPackagesFrom": "Install pure-Python packages from PyPI with <code>%pip install</code>:"
+```
+
+Translate the prose around the tags and leave the tags and their contents alone.
+`%pip install` is a command the user types; translating it breaks it.
+
+Only `<code>`, `<strong>`, `<em>`, `<b>`, `<i>`, `<br>`, `<span>` and `<a href>`
+survive. Anything else is stripped at render time — including any styling your
+editor might paste in — and attributes other than `href` are dropped. So paste
+as plain text, and do not add markup that was not in the English.
+
+You may reorder the tags within the sentence if your language needs it.
+
 If a whole string is meant to stay identical to English, list its key in
 `strings.__literal`. Keys listed there are excluded from the completeness score,
 so they do not count against you as untranslated.
@@ -197,6 +216,24 @@ await window.i18n.activate('ar')  // switch, including direction
 
 A catalogue that merely copies the English values scores as **untranslated** —
 that check exists so a stub cannot look finished.
+
+### What the completeness score does *not* tell you
+
+It measures how much of the **catalogue** is translated, not how much of the
+**app** is. Those diverged once already: the catalogue was 100% translated while
+91% of the interface was still hard-coded English, and nothing complained.
+
+`npm run i18n:manifest` now also counts visible strings that are not wired for
+translation and refuses to let that number grow, printing a line like:
+
+```
+[i18n] UI coverage: 230/248 strings wired (93%), 18 unwired (baseline 18).
+```
+
+If you add UI, tag it (`data-i18n`, `data-i18n-html`, `data-i18n-title`,
+`data-i18n-placeholder`, `data-i18n-aria-label`) and add the key, or the build
+fails and lists what you missed. The remaining 18 are decorative `×` glyphs and
+one status badge written from JavaScript.
 
 ## Reviewing a draft
 
