@@ -34,6 +34,24 @@ const { SCHEME, HOST } = require('./protocol');
 const EXTERNAL_SCHEMES = new Set(['https:', 'mailto:']);
 
 /**
+ * Permissions the application may hold. Everything not listed is refused.
+ *
+ * `persistent-storage` is the single exception, and it is a correction rather
+ * than a convenience. Chromium storage is "best-effort" by default and may be
+ * evicted under disk pressure; `navigator.storage.persist()` is what marks an
+ * origin exempt. A blanket denial here silently refused that request, so a
+ * desktop application whose entire point is durable notebooks was keeping them
+ * in evictable storage — measured, not assumed: `navigator.storage.persisted()`
+ * returned false and `persist()` returned false before this exception existed.
+ *
+ * Granting it confers no ability to read or write anything new. It only stops
+ * the user's own notebooks and SharedVFS contents from being discarded to
+ * reclaim disk, which is the behaviour a locally installed application should
+ * have and one of the few things it genuinely offers over the PWA.
+ */
+const ALLOWED_PERMISSIONS = new Set(['persistent-storage']);
+
+/**
  * Decide whether a URL may be handed to the system browser.
  * Exported so tests can assert the policy directly, without a live window.
  */
@@ -134,19 +152,22 @@ function applyWebContentsPolicy(contents, options = {}) {
     event.preventDefault();
   });
 
-  // 5. Deny device/permission requests wholesale. SciREPL needs none of
-  //    geolocation, camera, microphone, MIDI, USB, serial, HID or
-  //    notifications for Phase 0. Anything it does need can be added here
-  //    deliberately rather than inherited by default.
+  // 5. Deny permission requests by default, with one deliberate exception.
+  //    SciREPL needs none of geolocation, camera, microphone, MIDI, USB,
+  //    serial, HID or notifications, and anything it does need is added to
+  //    ALLOWED_PERMISSIONS explicitly rather than inherited by default.
   const session = contents.session;
   session.setPermissionRequestHandler((_wc, permission, callback) => {
-    log('denied-permission', permission);
-    callback(false);
+    const allowed = ALLOWED_PERMISSIONS.has(permission);
+    log(allowed ? 'granted-permission' : 'denied-permission', permission);
+    callback(allowed);
   });
   session.setPermissionCheckHandler((_wc, permission) => {
-    log('denied-permission-check', permission);
-    return false;
+    const allowed = ALLOWED_PERMISSIONS.has(permission);
+    log(allowed ? 'granted-permission-check' : 'denied-permission-check', permission);
+    return allowed;
   });
+  // Device access (USB/serial/HID/Bluetooth) stays refused outright.
   session.setDevicePermissionHandler(() => false);
 
   return contents;

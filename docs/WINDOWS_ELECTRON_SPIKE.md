@@ -277,30 +277,192 @@ sw.js:97  Uncaught (in promise) TypeError:
 ```
 
 The Cache API only accepts `http`/`https` requests, so `www/sw.js`'s app-shell
-precache (`CACHE_VERSION` / `APP_CACHE`) and its CDN runtime cache
-(`CDN_CACHE`) are both non-functional in the shell.
+precache (`APP_CACHE`) and its CDN runtime cache (`CDN_CACHE`) are both
+non-functional. Measured after a session that loaded a CDN kernel: both caches
+exist and both contain **0 entries**.
 
-Impact is smaller than it looks, and the measured results already reflect it:
+The practical impact is narrower than that sounds, and was initially overstated
+in this report. Chromium's ordinary **HTTP disk cache** still works for
+cross-origin fetches, and it covers much of what the service worker would have.
+Measured across a real restart with the same profile and the network then cut:
 
-- **App shell** — unaffected in practice. Every local asset is served by the
-  `app://` protocol handler straight off disk, so the precache was redundant
-  here. The offline suite confirms the app starts, reloads and runs its bundled
-  kernels with the network cut **[verified]**.
-- **CDN kernels** — this is the real cost. In the PWA, `CDN_CACHE` is what lets
-  Lua and R work offline after one online use. In the shell they cannot be
-  cached at all, so they need the network every session. That is consistent
-  with, and part of the explanation for, the offline result already reported
-  above (Lua fails cleanly offline).
+| Runtime | Size | Offline after one online use |
+| --- | --- | --- |
+| App shell (HTML/CSS/JS/WASM) | — | ✅ served from `app://` off disk; the precache was redundant here |
+| **Lua / Fengari** | ~200 kB | ✅ **works** — retained by the HTTP cache |
+| **R / webR** | ~50 MB | ❌ **failed** — too large to survive (fixed below by the shell's own cache) |
 
-It also means the "cached" branch of the download-consent check in
-`kernel_manager.js:190-202` never sees a hit under `app://`, so the consent
-modal reappears for CDN kernels every session.
+That was the position before the fix below. With the shell's own cache in place,
+**both** Lua and R work offline after one online use.
 
-Not a blocker, and deliberately not worked around in Phase 0. The proper fix is
-a platform-appropriate one: a packaged desktop app should bundle its runtimes
-rather than cache CDN downloads — i.e. Windows builds should use a profile that
-bundles Lua and R offline, which is exactly what the existing `pro` profile
-already does for R. Recorded for Phase 2 profile selection (§11).
+Raising Chromium's disk cache does **not** rescue R: re-measured with
+`--disk-cache-size=2147483648` (2 GB) and it still times out offline. So this is
+not a cache-size limit, and tuning the engine will not fix it. webR fetches its
+runtime through Emscripten's own filesystem layer, which does not settle into
+the HTTP cache the way a single script file does.
+
+One further caveat regardless of size: nothing here is guaranteed. The HTTP
+cache is heuristic and evictable, so it is a weaker promise than an explicit
+cache, not a replacement for one.
+
+#### Fixed: the shell keeps its own cache in the data directory
+
+**[verified]** Rather than work around the inert Cache API, the shell now keeps
+the cache the service worker cannot: `desktop/electron/runtime-cache.js`
+intercepts `https` for an allowlist of runtime hosts and stores responses in
+`userData/runtime-cache/`. That directory is the application's own storage —
+not evictable by Chromium, not size-limited, and it survives restarts and
+updates.
+
+Measured, fetch once online then restart with the network cut:
+
+| Runtime | Before | After |
+| --- | --- | --- |
+| Lua / Fengari (~200 kB) | worked, but only by luck of the HTTP cache | ✅ 0.2 MB cached, runs offline |
+| **R / webR (~50 MB)** | ❌ timed out after 86 s | ✅ **22.6 MB cached, runs offline in ~1 s** |
+
+Two details were needed to make webR work, and both are the kind only
+measurement finds:
+
+- **`HEAD` requests.** webR probes its virtual filesystem with `HEAD` before
+  fetching with `GET`. Caching only `GET` left every probe going to the network,
+  so R still failed offline even with 22 MB cached. The cache key includes the
+  method.
+- **`404` responses.** webR probes for optional files. A probe that *errors*
+  offline behaves differently from one that answers "not found", so 404s are
+  cached too. Safe here because these hosts serve version-pinned immutable
+  paths.
+
+Deliberately narrow: only allowlisted runtime hosts are touched, everything else
+passes through untouched; only `GET`/`HEAD`, never a range request (a partial
+body stored as if whole is a corrupt entry); only `200` and `404`. It is
+main-process only and exposes nothing to the renderer, so the boundary in §4 is
+unchanged. `SCIREPL_RUNTIME_CACHE=0` disables it.
+
+**What is deliberately not cached.** `repo.r-wasm.org` is a *mutable* package
+repository: its `PACKAGES` indexes describe what exists right now. Keeping those
+forever would freeze the catalogue at whatever it was on the day a user first
+installed something — `install.packages()` would keep offering stale versions,
+and a future update checker would read a permanent snapshot and report "up to
+date" indefinitely. So the policy splits:
+
+| Request | Cached? |
+| --- | --- |
+| version-pinned assets (`/v0.5.4/…`, `name@1.2.3/…`, `ggplot2_3.5.1.tgz`) | yes, indefinitely |
+| `PACKAGES`, `PACKAGES.gz/.rds/.json`, anything with a query string | **never** |
+| `404` on a version-pinned path | yes — permanently true, and webR's `HEAD` probes need it offline |
+| `404` on a mutable path | **never** — absent today may exist tomorrow |
+
+Consequence: installing *new* R packages still needs a network connection, by
+design. Offline, the honest answer is "not checked", not a stale "up to date".
+The follow-up feature that depends on this is sketched in
+[`proposal-package-update-checks.md`](proposal-package-update-checks.md).
+
+Guarded by `runtime-cache.test.mjs`, which includes a cold-profile check that a
+run which never went online still fails — so the suite cannot pass because
+something else is quietly serving the bytes.
+
+This also removes the argument for bundling R into a Windows build: offline R no
+longer costs 50 MB of download, so the Free/Pro profile difference stays intact.
+
+#### Root cause: the service worker registers, then dies during install
+
+Traced properly, rather than inferred from the `addAll` error alone:
+
+```
+navigator.serviceWorker.register('sw.js')  ->  succeeds, scope app://scirepl/
+after 4s: installing=false waiting=false active=false   ->  never activates
+caches.open(c).put(httpsRequest, response) ->  WORKS from an app:// page
+caches.open(c).add('index.html')           ->  throws: scheme 'app' unsupported
+```
+
+So the chain is: `sw.js`'s `install` calls `addAll(APP_SHELL)` on `app://` URLs,
+which rejects; `event.waitUntil` therefore rejects; the worker never reaches
+*activated*; its `fetch` handler never runs; and `CDN_CACHE` is never written.
+
+The important part is the third line. **Caching `https` requests from an
+`app://` page works.** The CDN cache mechanism is not the thing that is broken —
+only the app-shell precache is, and it takes the whole worker down with it.
+
+That also means this is a robustness bug beyond the shell: today a single
+unreachable entry in `APP_SHELL` fails the entire install on *any* platform,
+silently disabling offline support for the PWA and Android too.
+
+#### Consistency with Android — an open decision
+
+This matters because the mobile build sets the expected behaviour, and the two
+available fixes do not agree on it.
+
+| | Android / PWA today | Shell with `runtime-cache.js` | Shell if `sw.js` install were tolerant |
+| --- | --- | --- | --- |
+| Reload App keeps runtimes | ✅ | ✅ | ✅ |
+| **Memory → Clear Cache** removes them | ✅ | ❌ clears two empty caches and reports success | ✅ |
+| **Per-runtime Clear Cache** button | ✅ appears | ❌ never appears | ✅ |
+| Storage figure includes them | ✅ | ❌ reports 0 B | ✅ |
+| R works offline after one use | untested | ✅ | likely partial — see below |
+
+`runtime-cache.js` delivers offline R, but through a cache the application's own
+**Memory & Storage** panel cannot see or clear, because that panel works through
+the Cache API. Measured: after loading Lua, the panel reports `0 B`, "Clear
+Cache" leaves the bytes on disk, and the per-runtime button does not appear. The
+shell therefore adds a management surface it owns (`menu.js` → **Runtimes**),
+but that is a *different* surface from the one mobile users learn — which is
+exactly the divergence to avoid.
+
+The mobile-consistent fix is to make `sw.js`'s install tolerate a failed
+app-shell precache, so the worker activates and populates `CDN_CACHE` exactly as
+it does on Android. Every existing affordance then works identically on both
+platforms with no shell-specific UI at all.
+
+Two caveats before doing it:
+
+- It is a change to shared `www/` code, which this work has deliberately not
+  touched, and it needs re-testing on Android and the PWA.
+- It may not fully replace `runtime-cache.js` for R. webR probes its virtual
+  filesystem with `HEAD`, and the service worker only caches `GET`
+  (`sw.js:155`), so R may still fail offline under the service worker alone.
+  Whether R currently works offline **on Android** is untested and worth
+  measuring first — if it does not, then the shell would be *ahead* of mobile
+  rather than inconsistent with it, which is a different conversation.
+
+**Recommendation:** measure Android's offline-R behaviour, then fix `sw.js`
+install tolerance in the shared phase and re-evaluate whether the main-process
+cache is still earning its place. Until that decision is made, the shell's cache
+stays behind `SCIREPL_RUNTIME_CACHE` (set it to `0` to get the pre-fix
+behaviour) and its management lives in the application menu.
+
+#### The consent prompt is a setting, not a defect
+
+An earlier draft of this report called the recurring download prompt a papercut
+needing a shared-code fix. That was wrong on both counts.
+
+The prompts are deliberate consent gates, both persisted, and both already
+under user control — in shared `www/` code, so the behaviour is **identical on
+Android, the PWA and the shell**:
+
+| Prompt | Where the decision is stored | How to stop being asked |
+| --- | --- | --- |
+| Privacy notice | `scirepl_privacy_accepted` | Accepted once, then never shown again (`kernel_manager.js:134`). Revocable from Settings. |
+| Runtime download | `scirepl_auto_download` | Settings → **Runtime Downloads** → *Auto-download runtimes (skip confirmation)* (`www/index.html`, handled at `file_io.js:163`). |
+
+With auto-download enabled, `kernel_manager.js:202` skips the confirmation
+outright, so the inert Cache API never enters into it.
+
+The genuine Electron-specific nuance is narrow: for a user who has *not*
+enabled that setting, the `cached` shortcut in the same line never fires here,
+because it asks the Cache API. On Android and the PWA the service worker cache
+works, so after the first download the prompt is skipped automatically. In the
+shell it is asked each session even when the bytes then arrive instantly from
+the HTTP cache. One checkbox removes the difference.
+
+This is also what made the first kernel matrix in this spike look like a hang —
+the test harness had not granted the consent the browser tests grant.
+
+Not worked around in Phase 0. The platform-appropriate fix is for a packaged
+desktop application to **bundle** its runtimes rather than cache CDN downloads —
+see §11. Lua is ~200 kB and could simply be bundled; R is the profile difference
+that distinguishes Free from Pro, so bundling it in a Free build is a product
+decision, not a technical one.
 
 ### Known divergence from the PWA: the Ko-fi support widget
 
@@ -432,18 +594,26 @@ file the Android build reads was changed. `npm run build:play` and
 
 ## 8. The shell's own test suite
 
-`npm run test:windows` — **verified, 199 assertions, 0 failures**:
+`npm run test:windows` — **verified, 0 failures**:
 
 | Suite | Result | Needs Electron? |
 | --- | --- | --- |
-| `policy-unit` | 52 passed | no |
+| `policy-unit` | 59 passed | no |
 | `shell-launch` | 18 passed | yes |
-| `security` | 34 passed | yes |
+| `security` | 22 passed | yes |
 | `artifact-boundary` | 14 passed | yes |
 | `download` | 9 passed | yes |
 | `persistence` | 9 passed | yes |
-| `kernels` | 46 passed, 2 known-gap skips | yes |
+| `kernels` | 46 passed, 2 known-gap skips (23 without the browser baseline) | yes |
 | `offline` | 17 passed | yes |
+| `packaged` | 56 passed | yes, **and a built package** — opt-in, see §13 |
+
+Counts shifted in Phase 0.5 and the totals are not comparable to the Phase 0
+figure of 199. `security` fell from 34 to 22 because its checks moved into
+`probes/security.mjs`, where related assertions are graded as a group rather
+than one per Node global — the same ground is covered, by one definition now
+shared with the packaged suite. `policy-unit` rose with the packaged-layout
+path tests.
 
 Export *correctness* is deliberately **not** re-tested — the existing browser
 tests already cover which bytes each format produces, and that logic is
@@ -559,7 +729,7 @@ Risks, in the order they should be addressed:
 | 7 | **CDN download-consent modal on a packaged app.** | Low | Product decision (§5). |
 | 8 | **TypR output gap.** | Low | Pre-existing, reproduces in browser, unrelated to Windows. |
 | 9 | **Ko-fi widget blocked in the shell** (§5). | Low | Deliberate; degrades silently; pinned by tests. Resolve with a shared plain-link change (§11.5), not a CSP exception. |
-| 10 | **Service worker cache inert under `app://`** (§5) — CDN kernels cannot be cached for offline use. | Medium | Fix by bundling runtimes in the Windows profile rather than relying on web caches, which is the right shape for a packaged app anyway. |
+| 10 | ~~Service worker cache inert under `app://`~~ — **resolved** (§5). The shell keeps its own cache in `userData`; Lua and R both work offline after one online use. | Resolved | Guarded by `runtime-cache.test.mjs`. |
 
 ---
 
@@ -616,9 +786,15 @@ Everything else keeps its working browser path until evidence says otherwise.
 with a correct default filename, rather than Electron's default dialog behaviour
 (§9 item 4).
 
-**4. Migrate `export.js:1143` (`PdfGenerator`) last.** It is the one call site
-with a materially different desktop implementation, and it needs the Windows
-print verification from §9 first.
+**4. Add `printOrExportPdf`, backed by `webContents.printToPDF()`.** Promoted
+from "last, and only after verification" to a first-class item, because the
+verification happened (§13): the browser fallback opens the *native Windows
+printer dialog*, so exporting a PDF means picking "Microsoft Print to PDF" from
+a printer list. It works, but it is a worse flow than the PWA's Save-as-PDF and
+gives no control over the filename. `printToPDF()` returns bytes directly, so
+the Electron adapter can write a file through a normal Save dialog — aligning
+desktop with what Android already does via the Capacitor `PdfGenerator` plugin
+(`export.js:1143`). This is now the best-evidenced of the platform operations.
 
 **5. Replace the Ko-fi widget with a plain external link** (§5). A one-line
 change in `www/index.html`: swap the third-party `<script>` for a
@@ -627,12 +803,15 @@ the shell, removes a third-party script from the PWA and Android builds too, and
 needs no CSP exception on any platform. Listed here rather than done in this PR
 because it touches shared `www/` code, which the spike deliberately leaves alone.
 
-**6. Choose a Windows build profile that bundles its runtimes.** The service
-worker cache is inert under `app://` (§5), so a Windows build cannot rely on
-caching CDN downloads for offline use. A packaged desktop application should
-bundle what it needs anyway: define a `windows-free` profile that additionally
-bundles Lua (and, for Pro, R) rather than leaving them on a CDN. This is a
-`build-profiles.json` change, not application code.
+**6. ~~Bundle runtimes to work around the inert cache~~ — done differently, and
+already resolved.** The shell now keeps its own cache in `userData`
+(`runtime-cache.js`, §5), so Lua and R both work offline after one online use
+without bundling either. That leaves the Free/Pro profile difference intact and
+avoids adding ~50 MB to the download, which is a better outcome than the
+bundling this item originally proposed. Nothing left to do here.
+
+No change is needed for the consent prompt: it is a designed, persisted setting
+that already exists on all three platforms (§5). Nothing to fix there.
 
 **7. Keep the artifact boundary test in CI.** It already fails the build if Pro
 content, a hardcoded `isPro`, a Store licence call, or commerce code appears in
@@ -660,3 +839,285 @@ anything. None is justified by a Phase 0 observation.
 **Recommendation: proceed to Phase 1**, starting with the realm-boundary decision
 (§11.1) rather than with a broad platform-interface refactor. Do not proceed to
 MSIX, Store submission or Pro work until §9 has been executed on real Windows.
+
+---
+
+## 13. Phase 0.5: portable Windows preview
+
+Phase 0 proved the shell works. Phase 0.5 makes it possible to *look at it* on
+Windows without a toolchain — the gap between "CI says it passes" and "someone
+can actually try it".
+
+Two deliverables, both Free-only, neither a release. Running instructions:
+[`WINDOWS_PREVIEW.md`](WINDOWS_PREVIEW.md).
+
+### One-command developer launch
+
+`npm run dev:windows` (`desktop/electron/scripts/dev-windows.mjs`) checks Node
+(>= 22) and the platform, configures the Free profile, fetches the bundled
+runtimes, installs the isolated Electron dependencies, provisions the Electron
+binary, and launches. Completed steps are detected and skipped, so it doubles as
+the everyday start command. It installs nothing system-wide and needs no
+elevation.
+
+Two failure modes it reports rather than stumbles into: a Node older than 22,
+and a checkout on a UNC path (`\\wsl.localhost\…`), which Windows Node tooling
+and Electron handle unreliably. On a non-Windows host it warns instead of
+failing — running under WSLg is a useful look at the UI, but it launches the
+*Linux* Electron build and cannot substitute for Windows verification.
+
+### Unsigned portable preview
+
+`npm run package:windows` (`packaging/build-portable.mjs`, `@electron/packager`
+pinned to `20.2.0`) produces a directory containing a directly launchable
+`SciREPL.exe`. The `Windows portable preview` workflow — `workflow_dispatch`
+only — builds it on `windows-latest`, verifies it, and uploads it as
+`SciREPL-windows-x64-preview-<sha>`. The artifact GitHub produces *is* the
+distributable ZIP: download, extract, run. Measured: **~472 MB unpacked**
+(win32-x64).
+
+**The build is unsigned, so SmartScreen warns on first run.** That is expected
+for an unsigned binary and is documented for testers rather than papered over.
+Signing belongs with Store packaging and is out of scope.
+
+#### Packaged layout, and why it needed a code change
+
+Phase 0's `main.js` derived everything from `__dirname`:
+
+```js
+const REPO_ROOT = path.resolve(__dirname, '..', '..');   // wrong once packaged
+const WWW_ROOT  = path.join(REPO_ROOT, 'www');
+```
+
+In a packaged app `__dirname` is inside `resources/app.asar` and there is no
+repository above it, so both `www/` and the version lookup would have broken —
+silently, as a window that opens and 404s everything. `paths.js` now resolves
+both layouts as pure functions, unit-tested rather than only discoverable by
+launching a build:
+
+```
+SciREPL-win32-x64/
+  SciREPL.exe
+  resources/
+    app.asar          the shell (main, protocol, security, preload, ipc, paths)
+    www/              the application tree — deliberately OUTSIDE the asar
+    build-info.json   version, profile, commit, timestamp
+```
+
+`www/` stays outside the asar because protocol.js serves it with
+`net.fetch(file://…)`, which reads real files and does not go through Electron's
+asar layer. Version and profile come from `build-info.json`, so both survive the
+packaged layout — asserted by the `packaged` suite, not assumed.
+
+### A finding the packaged tests caught
+
+The first build shipped **`www/pro/`** inside the artifact: the Pro landing
+page, its privacy and testing pages, and ~800 kB of Pro branding (app icon and
+Play Store feature graphic). Those files are in the repository so GitHub Pages
+can serve them — nothing in `www/js` links to them and the shell never navigates
+there — but a Free preview must not carry Pro assets to a tester.
+
+They are now filtered out of the staged copy at package time and their absence
+is asserted twice: once by the build script, once by `packaged.test.mjs`.
+
+**The website is unaffected.** `www/pro/**` remains tracked in git and
+`deploy-pages.yml` is unchanged, so the Pro landing page still publishes exactly
+as before. The filter applies only to the copy staged into the `.exe`.
+
+### Packaged verification **[verified]**
+
+`packaged.test.mjs` — 56 assertions, 0 failures — drives the real packaged
+binary with `SCIREPL_WWW` deliberately unset, so the app must find its own
+bundled tree or fail:
+
+| Check | Result |
+| --- | --- |
+| loads `app://scirepl/index.html` from its own resources | ✅ |
+| version and build profile resolve in the packaged layout | ✅ |
+| Node unreachable from a notebook cell (same `probes/security.mjs` as the dev shell) | ✅ |
+| `nodeIntegration` off, `contextIsolation`/`sandbox` on, no escape hatch | ✅ |
+| off-origin navigation and `window.open` refused | ✅ |
+| bundled kernels run — JavaScript, Bash, ClojureScript, SWI-Prolog, Python | ✅ |
+| SharedVFS + localStorage survive a packaged-app restart | ✅ |
+| no Pro material, no bundled R, no build machinery in the artifact | ✅ |
+
+Reuse is the point: the boundary is defined once in `probes/security.mjs` and
+applied to both the development shell and the package. A packaged build that
+quietly regained Node access while a separate copy of the assertions kept
+passing is the failure this arrangement is designed to prevent.
+
+**Verified on native Windows.** The `win32-x64` build was executed on Windows
+11 via WSL interop — `SciREPL.exe` launched, resolved its own bundled tree at
+`C:\…\resources\www`, loaded `app://scirepl/index.html`, and passed all 56
+assertions with `platform: "win32"` in the reported app info:
+
+```
+SCIREPL_SMOKE_READY electron=43.3.0 chrome=150.0.7871.212 www=C:\Users\…\resources\www
+SCIREPL_SMOKE_OK    url=app://scirepl/index.html
+packaged: 56 passed, 0 failed, 0 skipped
+```
+
+Also verified on Linux (`SciREPL-linux-x64`). The preview workflow re-runs the
+same suite on `windows-latest`.
+
+Measured on Windows: Bash 64 ms init, ClojureScript 49 ms, SWI-Prolog 669 ms,
+Pyodide 6716 ms — all slightly faster than the Linux/WSL figures in §6.
+
+### Manual verification on Windows (in progress)
+
+First hands-on session with the packaged preview on Windows 11. Confirmed by a
+human, not by CI:
+
+| Check | Result |
+| --- | --- |
+| `SciREPL.exe` starts from an extracted folder | ✅ |
+| **Package/workbook installation** — the family-tree workbook installed from Browse Packages | ✅ |
+| **PDF export** reaches the Windows print dialog; "Microsoft Print to PDF" selectable | ✅ reached; output fidelity not yet confirmed |
+
+The workbook install is worth calling out: it is a live fetch from GitHub
+releases, so it exercises the CSP `connect-src` allowlist, the package catalog
+and archive extraction inside the packaged origin — an end-to-end path CI does
+not cover.
+
+#### Divergence: PDF export opens the Windows print dialog
+
+`ExportManager.exportPDF` falls back to `iframe.contentWindow.print()`
+(`www/js/export.js:1189`) when the Capacitor PDF plugin is absent, which is the
+case here. In Chrome that call opens Chrome's own print preview, where
+**Save as PDF** is a built-in destination. In Electron it opens the **native
+Windows print dialog** instead, so the user must pick "Microsoft Print to PDF"
+from a printer list.
+
+It works, and "Microsoft Print to PDF" is present on all supported Windows
+versions, so nothing is blocked. But it is a worse flow than the PWA's: an extra
+selection step, a printer-shaped mental model for what is really a file export,
+and no control over the default filename.
+
+This is the strongest concrete argument yet for the `printOrExportPdf` operation
+sketched in the proposal. Electron's `webContents.printToPDF()` returns PDF
+bytes directly, so the Electron adapter could produce a file and show a normal
+Save dialog with a sensible name — matching what Android already does through
+the Capacitor plugin, and better than the browser fallback on both. Added to
+§11 as a Phase 1 item with evidence behind it rather than as a hypothetical.
+
+### Still out of scope
+
+MSIX, Store submission, code signing, auto-update, entitlement or licence
+checking, Pro anything. Unchanged from §9: the manual Windows checks — display
+scaling, native dialogs, accessibility, sleep/resume, non-ASCII profile paths —
+are exactly what the portable preview now makes it practical for a human to do.
+
+
+---
+
+## 14. Desktop-environment integration (Linux, WSLg)
+
+Findings from running the Linux preview under WSLg, which is worth recording
+because a Linux build is a candidate release asset alongside Windows.
+
+### Fixed: a window that existed but could never be shown
+
+**[verified]** `ready-to-show` **does not fire under WSLg**:
+
+```
+[scirepl] showing window via did-finish-load — ready-to-show did not fire
+```
+
+The window was created hidden and shown on `ready-to-show`, which avoids a white
+flash. When that event never arrives, the result is a window that exists and owns
+a task-bar entry but can never be raised, because it is still hidden — clicking
+the icon does nothing. That is precisely how it presented.
+
+`main.js` now shows the window on the first of `ready-to-show`,
+`did-finish-load`, `did-fail-load`, or a 10-second timeout, and logs which one
+won. Cosmetic polish lost the argument to always being reachable.
+
+Related and self-inflicted: several orphaned Electron processes from killed test
+runs were also sitting in the task bar in exactly this state. They have been
+cleaned up, and the fallback means a future orphan would at least be visible.
+
+### Not fixed: task-bar label and icon
+
+**[verified negative]** The Linux build registers with WSLg as:
+
+```
+appId: scirepl-desktop-electron    appIcon: (nil)
+```
+
+so the entry is labelled with the package directory name and, having no icon,
+renders as a generic penguin. Two attempts, both measured and both ineffective:
+
+| Attempt | Result |
+| --- | --- |
+| `app.setName('SciREPL')` | no change to `appId` |
+| `app.commandLine.appendSwitch('class', 'SciREPL')` | no change to `appId` |
+
+The switch was removed rather than left in place looking like it worked. The
+identity actually comes from the `name` field of the package.json inside
+`app.asar`, and the icon is resolved by matching that identity against an
+**installed `.desktop` file** — which a portable directory does not have.
+
+Fixing it properly means producing a real Linux package rather than a folder:
+a `.desktop` file, an installed icon, and a defined install location — i.e. an
+AppImage, `.deb`, or Flatpak. That is the right shape for a Linux *release
+asset* and is proposed as the next piece of work, not bodged into the portable
+preview.
+
+### A real advantage over Android: DevTools
+
+**[verified]** The packaged build opens Chromium DevTools from **View → Toggle
+Developer Tools** (or F12). On Android, inspecting the same application means
+`chrome://inspect`, USB debugging and a second machine; here it is one keystroke,
+against the identical `www/` code.
+
+That makes the desktop build the most convenient place to debug notebooks,
+inspect SharedVFS and IndexedDB, and see CSP violations — the Ko-fi block in §5
+is visible in the console exactly as it would be in a browser.
+
+It costs nothing in security, which is asserted rather than assumed. With
+DevTools open in the packaged app:
+
+```
+require = undefined   process = undefined   new Function('return process') = blocked
+window.sciREPLPlatform = [getAppInfo, getDistributionInfo]
+```
+
+The boundary is `contextIsolation` + `sandbox` + `nodeIntegration: false`, and
+those apply to whoever is typing. A user at the DevTools console has exactly what
+a notebook cell has — so this is parity with pressing F12 on the PWA, not an
+escalation. `packaged.test.mjs` asserts both halves: that DevTools still opens
+once packaged, and that opening it widens nothing.
+
+Worth noting for a future Pro build: DevTools does let a user read the bundled
+application code. That is not a new exposure — `app.asar` can be unpacked
+regardless, and the proposal is already explicit that packaging is not DRM. It
+is a reason to keep entitlement logic in the main process, which is where it
+already belongs.
+
+### Linux test hosts: `xdg-open` blocks graceful shutdown
+
+**[verified]** On Linux, `shell.openExternal()` shells out to `xdg-open`, which
+hands the URL to a desktop helper and keeps the application alive. Measured on
+WSLg: a single external-link probe made graceful shutdown time out at 20 s,
+while the identical run without one closed in **0.1 s**.
+
+This is a property of the host's URL handler, not of the shell — the same suite
+shuts down cleanly on the Windows CI runner, where `openExternal` returns
+immediately. It presented as a phantom "the packaged app shuts down gracefully"
+failure that survived a clean machine, and was only pinned down by bisecting the
+suite: DevTools alone closed in 0 s, all five kernels loaded closed in 0.1 s, and
+one `window.open` to an external URL reproduced it every time.
+
+The test harness now puts a no-op `xdg-open` first on `PATH` for Linux runs. The
+policy under test is untouched — `setWindowOpenHandler` still denies the window
+and still calls `openExternal` — only the hand-off to the desktop is stubbed.
+Worth knowing before anyone runs this suite on a Linux desktop and concludes the
+shell has a shutdown bug.
+
+### Out of scope: the `[WARN: COPY MODE]` title prefix
+
+Not ours. The string appears nowhere in the WSLg logs (`weston.log`,
+`wlog.log`, `stderr.log`), so it originates on the Windows side of WSLg's
+RDP/RAIL integration, and the same prefix appears on unrelated applications
+(Palemoon) on the same machine. WSLg here is 1.0.73.2. `wsl --shutdown` and
+restart is the usual remedy for WSLg window-management oddities.

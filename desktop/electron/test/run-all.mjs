@@ -26,15 +26,24 @@ const SUITES = [
   { name: 'persistence', file: './persistence.test.mjs', unit: false },
   { name: 'kernels', file: './kernels.test.mjs', unit: false },
   { name: 'offline', file: './offline.test.mjs', unit: false },
+  // Not in the default set: it needs a built package, which most runs do not
+  // have. Select it explicitly (`run-all.mjs packaged`) or via --packaged.
+  { name: 'packaged', file: './packaged.test.mjs', unit: false, optIn: true },
+  // Needs live network for its online half, so it is opt-in too.
+  { name: 'runtime-cache', file: './runtime-cache.test.mjs', unit: false, optIn: true },
 ];
 
 const argv = process.argv.slice(2);
 const unitOnly = argv.includes('--unit');
+const withPackaged = argv.includes('--packaged');
 const named = argv.filter(a => !a.startsWith('--'));
 
 const selected = SUITES.filter(s => {
   if (named.length) return named.includes(s.name);
   if (unitOnly) return s.unit;
+  // Opt-in suites need something the default run does not have (the `packaged`
+  // suite needs a built package), so they are never part of a bare run.
+  if (s.optIn) return withPackaged;
   return true;
 });
 

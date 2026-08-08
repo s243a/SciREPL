@@ -22,10 +22,25 @@ const {
 } = require('./protocol');
 const { applyWebContentsPolicy } = require('./security');
 const { registerIpcHandlers } = require('./ipc');
+const { installRuntimeCache } = require('./runtime-cache');
+const { installApplicationMenu } = require('./menu');
 
-/** Repository root, two levels up from desktop/electron/. */
-const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const WWW_ROOT = process.env.SCIREPL_WWW || path.join(REPO_ROOT, 'www');
+const { resolveWwwRoot, resolveBuildInfoPath, resolveRepoRoot } = require('./paths');
+
+/**
+ * Content locations. These differ between the development checkout and a
+ * packaged build, so they come from paths.js rather than being derived inline
+ * from `__dirname` — inside a packaged app `__dirname` is within
+ * resources/app.asar and has no repository above it.
+ */
+const LAYOUT = {
+  isPackaged: app.isPackaged,
+  resourcesPath: process.resourcesPath,
+  moduleDir: __dirname,
+  env: process.env,
+};
+const WWW_ROOT = resolveWwwRoot(LAYOUT);
+const REPO_ROOT = resolveRepoRoot(LAYOUT); // null when packaged
 
 /**
  * A distinct userData directory. The shell must not collide with any other
@@ -38,7 +53,26 @@ if (process.env.SCIREPL_USER_DATA) {
   app.setPath('userData', path.join(app.getPath('appData'), 'SciREPL-Free-Electron'));
 }
 
+/**
+ * Build metadata written by desktop/electron/packaging/build-portable.mjs.
+ * Present only in packaged builds; absent in development, which is not an error.
+ */
+function readBuildInfo() {
+  try {
+    return JSON.parse(fs.readFileSync(resolveBuildInfoPath(LAYOUT), 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
 function readAppVersion() {
+  // Packaged: the version baked into the app by the packager, which is the
+  // repository's version at build time. Reading package.json from a repository
+  // that no longer exists next to the binary would always fail here.
+  if (app.isPackaged) {
+    const info = readBuildInfo();
+    return (info && info.appVersion) || app.getVersion();
+  }
   try {
     const pkg = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf8'));
     return pkg.version || '0.0.0';
@@ -48,6 +82,12 @@ function readAppVersion() {
 }
 
 function readProfile() {
+  // In a packaged build the profile was fixed when the tree was configured, and
+  // the packager recorded it. Prefer that; fall back to reading the generated
+  // config, which works in both layouts.
+  const info = readBuildInfo();
+  if (info && info.profile) return info.profile;
+
   // scripts/configure-build.mjs writes www/js/kernel_config.js from
   // build-profiles.json. Report which profile the tree was configured with so
   // the shell never has to guess which kernels should be present.
@@ -59,6 +99,38 @@ function readProfile() {
   } catch { /* fall through */ }
   return 'unknown';
 }
+
+/**
+ * Identity. Without these the app registers under the package directory's name
+ * — `scirepl-desktop-electron` — which is what a desktop environment shows in
+ * the task bar. Under WSLg that also produced a second, iconless entry
+ * (`appIcon: (nil)` in weston.log), which Windows renders as a generic penguin.
+ *
+ * `setName` must run before `app.whenReady()`, and before userData is derived
+ * from it by anything else.
+ */
+app.setName('SciREPL');
+// Groups windows correctly on the Windows task bar and keeps the identity
+// stable across builds.
+if (process.platform === 'win32') app.setAppUserModelId('com.unifyweaver.scirepl');
+
+// NOTE for Linux packaging, measured rather than assumed: neither
+// `app.setName()` above nor Chromium's `--class` switch changes how a desktop
+// environment labels the window. WSLg kept reporting
+// `appId: scirepl-desktop-electron` with `appIcon: (nil)` after both, because
+// the identity comes from the `name` in the package.json inside app.asar, and
+// the icon is resolved by matching that identity against an *installed*
+// .desktop file — which a portable directory does not have. Fixing it properly
+// means shipping a .desktop file and icon, i.e. a real Linux package rather
+// than a portable folder. Recorded in docs/WINDOWS_ELECTRON_SPIKE.md.
+
+/**
+ * The window/task-bar icon. Shared with the PWA rather than duplicated, so the
+ * desktop build cannot drift from the icon users already associate with SciREPL.
+ * Windows takes its executable icon from the packager instead; this covers
+ * Linux, where the icon comes from the running window.
+ */
+const APP_ICON = path.join(WWW_ROOT, 'icons', 'icon-512.png');
 
 /** Scheme registration must happen before the app is ready. */
 registerScheme();
@@ -78,6 +150,7 @@ if (!gotLock) {
 }
 
 let mainWindow = null;
+let runtimeCache = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -88,6 +161,7 @@ function createWindow() {
     show: false,
     backgroundColor: '#0d1117', // matches the app's theme-color, avoids white flash
     title: 'SciREPL',
+    ...(fs.existsSync(APP_ICON) ? { icon: APP_ICON } : {}),
     webPreferences: {
       // --- the security boundary ---
       nodeIntegration: false,
@@ -107,8 +181,42 @@ function createWindow() {
 
   applyWebContentsPolicy(mainWindow.webContents);
 
-  mainWindow.once('ready-to-show', () => {
+  // The window is created hidden and shown on `ready-to-show` to avoid a white
+  // flash. The risk is that `ready-to-show` never fires — a stalled load, a
+  // renderer that died during startup — leaving a window that exists, owns a
+  // taskbar entry, and can never be raised because it is hidden. Clicking the
+  // icon then appears to do nothing, which is exactly how this presented in
+  // practice with stray instances left behind by killed test runs.
+  //
+  // So showing it is a race between "looks nice" and "always reachable", and
+  // reachable wins.
+  let shown = false;
+  const showOnce = (why) => {
+    if (shown || !mainWindow || mainWindow.isDestroyed()) return;
+    shown = true;
+    clearTimeout(showFallback);
+    if (why !== 'ready-to-show') {
+      console.warn(`[scirepl] showing window via ${why} — ready-to-show did not fire`);
+    }
     mainWindow.show();
+  };
+
+  const showFallback = setTimeout(() => showOnce('timeout'), 10_000);
+  mainWindow.once('ready-to-show', () => showOnce('ready-to-show'));
+  // A load that finished but never painted still deserves a visible window.
+  mainWindow.webContents.once('did-finish-load', () => showOnce('did-finish-load'));
+  mainWindow.webContents.once('did-fail-load', () => showOnce('did-fail-load'));
+
+  // Detached DevTools is a BrowserWindow of its own. If the user closes the main
+  // window while it is open, that window survives, `window-all-closed` never
+  // fires, and the application stays running with no visible window — it has to
+  // be killed. Close DevTools along with the window that owns it.
+  //
+  // Found by the packaged suite's DevTools assertions: graceful shutdown began
+  // timing out and needing SIGKILL once anything opened DevTools.
+  mainWindow.on('close', () => {
+    const wc = mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null;
+    if (wc && wc.isDevToolsOpened()) wc.closeDevTools();
   });
 
   mainWindow.on('closed', () => {
@@ -169,9 +277,40 @@ app.whenReady().then(() => {
   }
 
   registerProtocolHandler(WWW_ROOT);
-  registerIpcHandlers({ appVersion: readAppVersion(), profile: readProfile() });
+
+  // Persistent cache for CDN runtimes, in the app's own data directory.
+  // Replaces the service worker's CDN_CACHE, which cannot function under the
+  // app:// origin (see runtime-cache.js). Set SCIREPL_RUNTIME_CACHE=0 to
+  // disable and fall back to Chromium's own heuristic HTTP cache.
+  if (process.env.SCIREPL_RUNTIME_CACHE !== '0') {
+    try {
+      runtimeCache = installRuntimeCache(session.defaultSession, {
+        cacheDir: path.join(app.getPath('userData'), 'runtime-cache'),
+      });
+    } catch (e) {
+      // A shell that starts without its cache is fine; one that fails to start
+      // because of it is not.
+      console.error('[scirepl] runtime cache unavailable:', e && e.message);
+    }
+  }
+  registerIpcHandlers({
+    appVersion: readAppVersion(),
+    profile: readProfile(),
+    buildInfo: readBuildInfo(),
+  });
 
   createWindow();
+
+  // Replaces Electron's default menu. It carries the only surface from which
+  // the runtime cache can be inspected or cleared: the application's own
+  // Memory & Storage panel works through the Cache API, which is always empty
+  // under app://, so it neither sees nor clears this cache. See menu.js.
+  installApplicationMenu({
+    getCache: () => runtimeCache,
+    getBuildInfo: readBuildInfo,
+    getWindow: () => mainWindow,
+    appVersion: readAppVersion(),
+  });
 
   if (process.env.SCIREPL_SMOKE_EXIT === '1') runSmokeCheck(mainWindow);
 

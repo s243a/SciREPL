@@ -1,0 +1,167 @@
+# Phase 0.5 — unsigned portable Windows preview.
+#
+# Builds a downloadable ZIP containing a directly launchable SciREPL.exe, so the
+# Free application can be evaluated on Windows without installing Node, Git or a
+# web server. Extract, run, done.
+#
+# This is a PREVIEW, not a release:
+#   - unsigned, so SmartScreen warns on first run (see desktop/electron/README.md);
+#   - Free edition only — no Pro content, no Store or entitlement code;
+#   - no installer, no auto-update, no MSIX, no Store submission;
+#   - published only as a workflow artifact, never as a public release.
+#
+# `workflow_dispatch` only, deliberately. The job downloads ~220 MB of Electron
+# plus ~104 MB of kernel runtimes and produces a ~450 MB artifact; running it on
+# every push would be a poor trade for something a human asks for when they want
+# to look at the app. Correctness of the shell is already gated by
+# windows-electron-spike.yml on pull requests.
+#
+# Additive: nothing here touches the Android or PWA pipelines.
+
+name: Windows portable preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      run-tests:
+        description: 'Verify the packaged app before uploading (recommended)'
+        type: boolean
+        default: true
+      linux:
+        description: 'Also build a Linux x64 portable preview'
+        type: boolean
+        default: false
+
+concurrency:
+  group: windows-portable-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    name: Build and verify the portable preview
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install root dependencies
+        run: npm install
+
+      # The Free profile. build-portable.mjs refuses to package the `pro`
+      # profile or a tree containing the offline R runtime, so this is enforced
+      # rather than assumed.
+      - name: Configure the Free build profile
+        run: npm run configure
+
+      - name: Fetch the Free bundled runtimes
+        run: npm run fetch:bundles
+
+      - name: Install Electron (isolated, pinned)
+        run: npm run windows:install
+
+      - name: Build the portable preview
+        run: npm run package:windows
+
+      # Optional second asset. @electron/packager cross-builds, so the Linux
+      # preview is produced on the same Windows runner from the same prepared
+      # tree — one build, two platforms, no drift between them.
+      #
+      # It is unverified here: the packaged suite below runs the Windows binary,
+      # which is the only one this runner can execute. Treat the Linux artifact
+      # as built-not-tested until it is run on Linux.
+      - name: Build the Linux portable preview
+        if: ${{ inputs.linux }}
+        run: node desktop/electron/packaging/build-portable.mjs --platform linux --arch x64
+
+      # Prove the packaged application actually works before handing it to
+      # anyone: it must load app://scirepl/index.html from its own bundled
+      # resources, keep notebook code away from Node and unrestricted Electron
+      # APIs, run the bundled kernels, survive a restart with its IndexedDB and
+      # SharedVFS intact, and contain no Pro material. Reuses the same probes as
+      # the development suite — see desktop/electron/test/probes/.
+      - name: Verify the packaged application
+        if: ${{ inputs.run-tests }}
+        run: node desktop/electron/test/run-all.mjs packaged
+
+      # Uploading the *contents* of the packaged directory means the artifact
+      # GitHub produces is itself the distributable ZIP: download, extract,
+      # double-click SciREPL.exe. No nested archive to unwrap twice.
+      - name: Upload the preview ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: SciREPL-windows-x64-preview-${{ github.sha }}
+          path: desktop/electron/out/SciREPL-win32-x64/
+          if-no-files-found: error
+          retention-days: 14
+          # Already ~450 MB of mostly-incompressible binaries; recompressing
+          # buys little and costs minutes.
+          compression-level: 1
+
+      - name: Upload the Linux preview
+        if: ${{ inputs.linux }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: SciREPL-linux-x64-preview-${{ github.sha }}
+          path: desktop/electron/out/SciREPL-linux-x64/
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 1
+
+      - name: Upload test results
+        if: ${{ always() && inputs.run-tests }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-test-results-${{ github.sha }}
+          path: desktop/electron/test/results/
+          if-no-files-found: warn
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## SciREPL — unsigned portable Windows preview"
+            echo
+            echo "**Commit:** \`${GITHUB_SHA}\`"
+            echo
+            echo "1. Download **SciREPL-windows-x64-preview-${GITHUB_SHA}** from the artifacts below."
+            echo "2. Extract the ZIP somewhere local (not a network path)."
+            echo "3. Run **SciREPL.exe**."
+            echo
+            echo "The build is **unsigned**, so Windows SmartScreen will show"
+            echo "\"Windows protected your PC\" on first run. Choose **More info -> Run anyway**."
+            echo "That warning is expected for an unsigned preview and is not a sign of a problem."
+            echo
+            echo "This is a **preview build**, not a release: Free edition only, no installer,"
+            echo "no auto-update, and not a Microsoft Store package."
+            echo
+            if [ "${{ inputs.linux }}" = "true" ]; then
+              echo "A **Linux x64** preview is also attached. It is cross-built here and"
+              echo "**not executed** by this job — the runner can only run the Windows binary."
+              echo "On Linux: extract, then run \`./SciREPL\`. Note it installs no .desktop"
+              echo "file, so some desktop environments show a generic icon and label."
+              echo
+            fi
+            echo "Kernels bundled offline: Bash/Brush, ClojureScript/Scittle, SWI-Prolog, Python/Pyodide."
+            echo
+            echo "Lua and R are fetched from their CDNs the first time you use them, then kept"
+            echo "in SciREPL's own runtime cache under %APPDATA%\\SciREPL-Free-Electron. After that"
+            echo "first successful download they run offline, and the cache survives restarts."
+            echo "Measured: R goes from a 90s timeout offline to running in about a second."
+            echo
+            echo "The first download asks for confirmation. To stop being asked, turn on"
+            echo "Settings -> Runtime Downloads -> \"Auto-download runtimes (skip confirmation)\";"
+            echo "the choice is saved and behaves the same as on Android."
+            echo
+            echo "R package *listings* from repo.r-wasm.org are deliberately not cached, since"
+            echo "that repository is mutable — installing new R packages still needs a network"
+            echo "connection. See docs/WINDOWS_ELECTRON_SPIKE.md section 5."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -10,7 +10,7 @@
 import { _electron as electron, chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { mkdtempSync, rmSync, existsSync, readFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync, chmodSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -24,6 +24,30 @@ import { ELECTRON_DIR, REPO_ROOT, WWW_ROOT } from './reporter.mjs';
 /* ------------------------------------------------------------------ */
 
 const requireFromHere = createRequire(import.meta.url);
+
+/**
+ * On Linux, `shell.openExternal()` shells out to `xdg-open`, which hands the URL
+ * to a desktop helper and — measured on WSLg — keeps the application alive:
+ * a single external-link test made graceful shutdown time out at 20s, while the
+ * identical run without one closed in 0.1s. The Windows CI runner has no such
+ * problem.
+ *
+ * That is a property of the test host's URL handler, not of the shell, so tests
+ * put a no-op `xdg-open` first on PATH. The policy under test is untouched —
+ * `setWindowOpenHandler` still denies the window and still calls
+ * `openExternal` — only the hand-off to the desktop is stubbed.
+ */
+let stubbedPathDir = null;
+function pathWithInertUrlHandler() {
+  if (process.platform !== 'linux') return process.env.PATH;
+  if (!stubbedPathDir) {
+    stubbedPathDir = mkdtempSync(path.join(tmpdir(), 'scirepl-nourl-'));
+    const stub = path.join(stubbedPathDir, 'xdg-open');
+    writeFileSync(stub, '#!/bin/sh\nexit 0\n');
+    chmodSync(stub, 0o755);
+  }
+  return `${stubbedPathDir}${path.delimiter}${process.env.PATH}`;
+}
 
 /**
  * Absolute path to the Electron executable for THIS platform.
@@ -93,16 +117,63 @@ function electronExecutable() {
  *   rather than fail — pass `prime: false` only when testing that gate itself.
  */
 export async function launchShell(opts = {}) {
-  const userDataDir = opts.userDataDir || mkdtempSync(path.join(tmpdir(), 'scirepl-electron-'));
+  return launchAny({
+    ...opts,
+    executablePath: electronExecutable(),
+    appArgs: [ELECTRON_DIR],
+    // Development runs are pointed at the repository's prepared tree.
+    env: { SCIREPL_WWW: opts.www || WWW_ROOT },
+    userDataPrefix: 'scirepl-electron-',
+  });
+}
+
+/**
+ * Launch a **packaged** build — the actual `SciREPL.exe` (or platform
+ * equivalent) produced by packaging/build-portable.mjs.
+ *
+ * Differences from `launchShell`, both deliberate:
+ *   - the executable IS the app, so there is no app-directory argument;
+ *   - `SCIREPL_WWW` is NOT set, so the app must find its own bundled
+ *     `resources/www`. Overriding it would test the repository tree and quietly
+ *     defeat the point of testing a package at all.
+ *
+ * @param {object} opts
+ * @param {string} opts.exePath path to the packaged executable
+ */
+export async function launchPackagedShell(opts = {}) {
+  if (!opts.exePath) throw new Error('launchPackagedShell requires { exePath }');
+  if (!existsSync(opts.exePath)) {
+    throw new Error(
+      `No packaged executable at ${opts.exePath}.\n` +
+      'Build one first:  npm run package:windows'
+    );
+  }
+  return launchAny({
+    ...opts,
+    executablePath: opts.exePath,
+    appArgs: [],
+    env: {},               // the packaged app resolves its own content
+    userDataPrefix: 'scirepl-packaged-',
+    packaged: true,
+  });
+}
+
+/** Shared launch path for both the development shell and a packaged build. */
+async function launchAny(opts = {}) {
+  const userDataDir = opts.userDataDir
+    || mkdtempSync(path.join(tmpdir(), opts.userDataPrefix || 'scirepl-'));
   const ownsUserData = !opts.userDataDir && !opts.keepUserData;
 
-  const args = [ELECTRON_DIR];
+  // opts.extraArgs passes Chromium switches through, so behaviour that depends
+  // on engine configuration (disk cache size, GPU flags) can be measured rather
+  // than assumed.
+  const args = [...(opts.appArgs || []), ...(opts.extraArgs || [])];
   // WSL/CI containers frequently lack a usable setuid sandbox helper. We only
   // relax this when explicitly asked, and every security probe records whether
   // it ran with the sandbox on so the report cannot overclaim.
   if (process.env.SCIREPL_ELECTRON_NO_SANDBOX === '1') args.push('--no-sandbox');
 
-  const executablePath = electronExecutable();
+  const executablePath = opts.executablePath;
   let electronApp;
   try {
     electronApp = await electron.launch({
@@ -110,8 +181,11 @@ export async function launchShell(opts = {}) {
       args,
       env: {
         ...process.env,
+        PATH: pathWithInertUrlHandler(),
+        // Never let an ambient SCIREPL_WWW leak into a packaged run.
+        SCIREPL_WWW: undefined,
+        ...opts.env,
         SCIREPL_USER_DATA: userDataDir,
-        SCIREPL_WWW: opts.www || WWW_ROOT,
         ELECTRON_ENABLE_LOGGING: '1',
       },
       timeout: 120_000,
@@ -123,10 +197,11 @@ export async function launchShell(opts = {}) {
     // needed and did not have.
     throw new Error(
       `Failed to launch the Electron shell.\n` +
+      `  mode:       ${opts.packaged ? 'packaged build' : 'development shell'}\n` +
       `  executable: ${executablePath}\n` +
       `  args:       ${JSON.stringify(args)}\n` +
       `  platform:   ${process.platform}-${process.arch}\n` +
-      `  www root:   ${opts.www || WWW_ROOT}\n` +
+      `  www root:   ${opts.packaged ? '(from the package itself)' : (opts.www || WWW_ROOT)}\n` +
       `  userData:   ${userDataDir}\n` +
       `If the executable path looks wrong for this platform, the Electron install ` +
       `is incomplete. If it looks right, the main process most likely threw during ` +

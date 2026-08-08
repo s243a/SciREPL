@@ -78,6 +78,148 @@ export default async function run() {
       protocol.resolveRequestPath(ROOT, input) === null);
   }
 
+  /* ---------------- packaged vs development layout ---------------- */
+
+  // Getting this wrong is silent — the window opens and every asset 404s — so
+  // it is asserted here rather than only discovered by launching a package.
+  const paths = require(path.join(ELECTRON_DIR, 'paths.js'));
+
+  // Fixtures must be *absolute* paths for this platform. `path.join(path.sep, …)`
+  // produces a drive-relative path on Windows (`\repo`), while the resolvers
+  // return `path.resolve()` output (`D:\repo`), so the two never compare equal
+  // and the suite failed on Windows while passing on Linux. `path.resolve()` on
+  // both sides keeps the comparison platform-correct.
+  const REPO = path.resolve('/repo');
+  const APP_RES = path.resolve('/apps/SciREPL/resources');
+  const CUSTOM = path.resolve('/custom/tree');
+
+  const devLayout = {
+    isPackaged: false,
+    resourcesPath: path.resolve('/irrelevant'),
+    moduleDir: path.join(REPO, 'desktop', 'electron'),
+    env: {},
+  };
+  r.log('development: www/ resolves next to the repository root',
+    paths.resolveWwwRoot(devLayout) === path.join(REPO, 'www'),
+    paths.resolveWwwRoot(devLayout));
+  r.log('development: the repository root is known',
+    paths.resolveRepoRoot(devLayout) === REPO,
+    paths.resolveRepoRoot(devLayout));
+
+  const packagedLayout = {
+    isPackaged: true,
+    resourcesPath: APP_RES,
+    moduleDir: path.join(APP_RES, 'app.asar'),
+    env: {},
+  };
+  r.log('packaged: www/ resolves inside resources, not via the module directory',
+    paths.resolveWwwRoot(packagedLayout) === path.join(APP_RES, 'www'),
+    paths.resolveWwwRoot(packagedLayout));
+  r.log('packaged: build-info.json resolves inside resources',
+    paths.resolveBuildInfoPath(packagedLayout) === path.join(APP_RES, 'build-info.json'),
+    paths.resolveBuildInfoPath(packagedLayout));
+  r.log('packaged: there is no repository root to fall back on',
+    paths.resolveRepoRoot(packagedLayout) === null);
+
+  // Every resolved path must be absolute on this platform — the property that
+  // actually broke on Windows, asserted directly rather than inferred.
+  for (const [label, layout] of [['development', devLayout], ['packaged', packagedLayout]]) {
+    r.log(`${label}: the resolved www/ path is absolute`,
+      path.isAbsolute(paths.resolveWwwRoot(layout)), paths.resolveWwwRoot(layout));
+  }
+
+  // The override has to win in both layouts — the tests rely on it.
+  for (const [label, layout] of [['development', devLayout], ['packaged', packagedLayout]]) {
+    const overridden = paths.resolveWwwRoot({ ...layout, env: { SCIREPL_WWW: CUSTOM } });
+    r.log(`${label}: SCIREPL_WWW overrides the resolved tree`,
+      overridden === CUSTOM, overridden);
+  }
+
+  /* ---------------- the Free launcher must not reuse a Pro profile ---------------- */
+  //
+  // `npm run dev:windows` used to skip configuration whenever kernel_config.js
+  // existed, without checking which profile it described — so a checkout left
+  // configured with BUILD_PROFILE=pro would launch while identifying itself as
+  // the Free Electron edition.
+  const guard = require(path.join(ELECTRON_DIR, 'profile-guard.js'));
+
+  const decisions = [
+    [{ existingProfile: 'full', intendedProfile: 'full' }, 'skip', 'correct profile is reused'],
+    [{ existingProfile: 'pro', intendedProfile: 'full' }, 'configure', 'a Pro-configured tree is reconfigured'],
+    [{ existingProfile: 'mini', intendedProfile: 'full' }, 'configure', 'any mismatched profile is reconfigured'],
+    [{ existingProfile: null, intendedProfile: 'full' }, 'configure', 'an unconfigured tree is configured'],
+    [{ existingProfile: 'unknown', intendedProfile: 'full' }, 'configure', 'an unreadable profile is reconfigured'],
+    [{ existingProfile: 'full', intendedProfile: 'full', force: true }, 'configure', '--force always reconfigures'],
+  ];
+  for (const [state, expected, what] of decisions) {
+    const got = guard.decideConfiguration(state);
+    r.log(`launcher: ${what}`, got.action === expected, `${got.action} — ${got.reason}`);
+  }
+
+  r.log('launcher: pro is not a profile the Free launcher will prepare',
+    guard.isFreeProfile('pro') === false);
+  for (const free of ['mini', 'light', 'full']) {
+    r.log(`launcher: '${free}' is a Free profile`, guard.isFreeProfile(free) === true);
+  }
+  r.log('launcher: webr is known as Pro-only runtime content',
+    guard.PRO_ONLY_RUNTIME_DIRS.includes('webr'));
+
+  /* ---------------- runtime cache: what may be kept forever ---------------- */
+  //
+  // repo.r-wasm.org is a MUTABLE package repository. Caching its PACKAGES
+  // indexes indefinitely would freeze the catalogue at first use, so
+  // install.packages() would keep offering stale versions and a future update
+  // checker would read a permanent snapshot and always report "up to date".
+  const rc = require(path.join(ELECTRON_DIR, 'runtime-cache.js'));
+  const u = (s) => new URL(s);
+
+  const neverCache = [
+    'https://repo.r-wasm.org/bin/emscripten/contrib/4.4/PACKAGES',
+    'https://repo.r-wasm.org/bin/emscripten/contrib/4.4/PACKAGES.gz',
+    'https://repo.r-wasm.org/src/contrib/PACKAGES.rds',
+    'https://repo.r-wasm.org/bin/emscripten/contrib/4.4/PACKAGES.json',
+    'https://cdn.jsdelivr.net/npm/thing?v=latest',   // parameterised
+  ];
+  for (const url of neverCache) {
+    r.log(`mutable metadata is never cached: ${url.replace('https://', '')}`,
+      rc.isNeverCacheable(u(url)) === true);
+  }
+
+  const stillCacheable = [
+    'https://webr.r-wasm.org/v0.5.4/R.wasm',
+    'https://repo.r-wasm.org/bin/emscripten/contrib/4.4/ggplot2_3.5.1.tgz',
+    'https://cdn.jsdelivr.net/npm/scittle@0.6.22/dist/scittle.js',
+  ];
+  for (const url of stillCacheable) {
+    r.log(`runtime asset is still cacheable: ${url.replace('https://', '')}`,
+      rc.isNeverCacheable(u(url)) === false);
+  }
+
+  // A 404 may only be remembered for a version-pinned path. On a mutable path a
+  // package that does not exist today may exist tomorrow, and caching the 404
+  // would make it permanently missing for that user.
+  const pinned = [
+    'https://webr.r-wasm.org/v0.5.4/vfs/usr/lib/R/library/grDevices/afm.data.gz',
+    'https://cdn.jsdelivr.net/npm/scittle@0.6.22/dist/scittle.js',
+    'https://unpkg.com/fengari-web@0.1.4/dist/fengari-web.js',
+    'https://repo.r-wasm.org/bin/emscripten/contrib/4.4/ggplot2_3.5.1.tgz',
+    'https://files.pythonhosted.org/packages/ab/cd/thing-1.0-py3-none-any.whl',
+  ];
+  for (const url of pinned) {
+    r.log(`404 may be remembered (version-pinned): ${url.replace('https://', '').slice(0, 58)}`,
+      rc.isVersionPinned(u(url)) === true);
+  }
+
+  const unpinned = [
+    'https://repo.r-wasm.org/bin/emscripten/contrib/4.4/',
+    'https://repo.r-wasm.org/src/contrib/somepackage.tgz',
+    'https://cdn.jsdelivr.net/npm/scittle/dist/scittle.js',   // no @version
+  ];
+  for (const url of unpinned) {
+    r.log(`404 must NOT be remembered (mutable): ${url.replace('https://', '').slice(0, 58)}`,
+      rc.isVersionPinned(u(url)) === false);
+  }
+
   /* ---------------- external URL classification ---------------- */
 
   const allowedExternal = [

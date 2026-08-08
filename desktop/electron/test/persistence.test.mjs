@@ -79,6 +79,22 @@ export default async function run() {
       }, MARKER);
 
       r.log('first launch: origin is the stable app origin', originFirst === 'app://scirepl', originFirst);
+
+      // Durability, not just survival. Chromium storage is "best-effort" by
+      // default and may be discarded under disk pressure; persist() is what
+      // exempts an origin. A blanket permission denial in security.js silently
+      // refused it, so notebooks sat in evictable storage — measured false
+      // before the fix. Android gets this free from its private app data
+      // directory; a browser PWA does not.
+      const durability = await first.page.evaluate(async () => {
+        const est = await navigator.storage.estimate();
+        return {
+          persisted: await navigator.storage.persisted(),
+          quotaMB: Math.round((est.quota || 0) / 1e6),
+        };
+      });
+      r.log('first launch: storage is marked persistent (not evictable)',
+        durability.persisted === true, JSON.stringify(durability));
       r.log('first launch: SharedVFS write succeeded', wrote.vfsWritten === true);
       r.log('first launch: direct IndexedDB write succeeded', wrote.directIdb === true);
       r.log('first launch: localStorage write succeeded', wrote.localStorage === true);
