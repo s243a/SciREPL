@@ -145,7 +145,50 @@ try {
     await ctx.close();
 
     /* --------------------- consent ordering --------------------------- */
-    console.log('\n6. Consent ordering');
+    /* ---------------- existing installs are grandfathered --------------- */
+    console.log('\n6. Upgrading an existing install');
+
+    // Someone who already has saved cells knows where the menu is. Showing them
+    // a six-step introduction on upgrade reads as a regression, so the tour is
+    // marked seen without being shown — and stays reachable from the menu.
+    const upgradeCtx = await browser.newContext();
+    await upgradeCtx.addInitScript(() => {
+        localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.setItem('scirepl_auto_download', '1');
+        localStorage.setItem('scirepl_session_v2', JSON.stringify({
+            cells: [{ id: 1, language: 'python', code: 'print(1)' }], history: [],
+        }));
+        localStorage.removeItem('scirepl_onboarding_seen');
+    });
+    const upgradePage = await upgradeCtx.newPage();
+    await upgradePage.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await upgradePage.waitForTimeout(1800);
+    check('an install with saved work is not interrupted by the tour',
+        await upgradePage.evaluate(() => !document.getElementById('tour-overlay')));
+    check('grandfathering is recorded distinctly from completing the tour',
+        await upgradePage.evaluate(() =>
+            localStorage.getItem('scirepl_onboarding_seen')) === 'grandfathered');
+    check('the tour is still reachable from the menu after grandfathering',
+        await upgradePage.evaluate(() => !!document.getElementById('btn-show-tour-menu')));
+    await upgradeCtx.close();
+
+    // Consent alone must not count as "established" — a brand-new user accepts
+    // the privacy prompt too, so it cannot tell the two populations apart.
+    const emptyCtx = await browser.newContext();
+    await emptyCtx.addInitScript(() => {
+        localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.setItem('scirepl_auto_download', '1');
+        localStorage.setItem('scirepl_session_v2', JSON.stringify({ cells: [], history: [] }));
+        localStorage.removeItem('scirepl_onboarding_seen');
+    });
+    const emptyPage = await emptyCtx.newPage();
+    await emptyPage.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await emptyPage.waitForTimeout(2000);
+    check('an empty session still counts as a new user',
+        await emptyPage.evaluate(() => !!document.getElementById('tour-overlay')));
+    await emptyCtx.close();
+
+    console.log('\n7. Consent ordering');
     const ctx2 = await browser.newContext();          // privacy NOT accepted
     await ctx2.addInitScript(() => {
         localStorage.removeItem('scirepl_privacy_accepted');

@@ -85,11 +85,41 @@
         }
 
         hasSeen() {
-            return localStorage.getItem(SEEN_KEY) === '1';
+            return Boolean(localStorage.getItem(SEEN_KEY));
         }
 
-        markSeen() {
-            localStorage.setItem(SEEN_KEY, '1');
+        /**
+         * `how` distinguishes a tour that was actually shown from one skipped
+         * because the user plainly did not need it. Nothing branches on it
+         * today; it is recorded so that a later "what's new" prompt can tell
+         * the two populations apart instead of guessing.
+         */
+        markSeen(how) {
+            localStorage.setItem(SEEN_KEY, how || '1');
+        }
+
+        /**
+         * Has this install been used for real work already?
+         *
+         * Five of the six steps explain controls an existing user already knows.
+         * Walking them through "this is the menu" on an upgrade is condescending
+         * and reads as a regression, so established installs are grandfathered:
+         * the tour is marked seen without being shown, and stays available from
+         * the menu and from Help.
+         *
+         * Saved cells are the signal. Consent alone is not — a brand-new user
+         * accepts the privacy prompt too, so it cannot tell the two apart.
+         */
+        _isEstablished() {
+            for (const key of ['scirepl_session_v2', 'scirepl_session_v1']) {
+                const raw = localStorage.getItem(key);
+                if (!raw) continue;
+                try {
+                    const s = JSON.parse(raw);
+                    if ((s.cells && s.cells.length) || (s.history && s.history.length)) return true;
+                } catch { /* unreadable session — treat as no evidence */ }
+            }
+            return false;
         }
 
         /** Steps whose target exists, plus optional ones shown as illustrations. */
@@ -287,6 +317,7 @@
          */
         maybeStart() {
             if (this.hasSeen()) return;
+            if (this._isEstablished()) return this.markSeen('grandfathered');
             if (!localStorage.getItem('scirepl_privacy_accepted')) return;
             setTimeout(() => { if (!this.hasSeen()) this.start(); }, 600);
         }
