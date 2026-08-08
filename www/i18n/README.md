@@ -45,6 +45,25 @@ If a whole string is meant to stay identical to English, list its key in
 `strings.__literal`. Keys listed there are excluded from the completeness score,
 so they do not count against you as untranslated.
 
+## Context for ambiguous strings
+
+`en.json` carries a `__context` map keyed by string id. Read it — it is there
+because a short UI label frequently has no single correct translation without
+knowing what it refers to:
+
+```json
+"menu.runAll": "A notebook cell (celda/セル), not a biological cell."
+```
+
+"Cell", "Run", "Kernel" and "Workbook" all mean something specific in a
+scientific notebook and something else in ordinary use. Translating them from
+the English alone is guesswork, and the guess is often wrong in exactly the way
+a reviewer then has to catch.
+
+If you add a string whose meaning is not obvious in isolation, add a context
+entry for it at the same time. `__`-prefixed keys are ignored by the
+completeness score, so context costs nothing.
+
 ## Right-to-left languages
 
 Latin identifiers keep their own direction inside an RTL sentence. Write the

@@ -11,6 +11,21 @@
     "rtl": "In right-to-left locales, Latin identifiers keep their own direction inside the sentence. Write the sentence naturally in your language and leave the identifier as-is; the browser handles the bidirectional run.",
     "placeholders": "{name} placeholders are substituted at runtime. Keep them exactly as written; they may be reordered to suit your language's word order."
   },
+  "__context": {
+    "menu.runAll": "A notebook cell (celda/セル), not a biological cell. Executes every code cell in order.",
+    "menu.newNotebook": "A computational notebook document, in the Jupyter sense.",
+    "appearance.topMargin": "Vertical space above the app header. Layout term, not a page margin in printing.",
+    "appearance.buttonScale": "Physical on-screen size of the buttons, not a musical or measurement scale.",
+    "appearance.themeAuto": "Follow the operating system's light/dark setting.",
+    "appearance.themeCustom": "A user-defined colour scheme.",
+    "appearance.customise": "Opens an editor. Trailing ellipsis means 'this opens a dialog' — keep it.",
+    "appearance.buttonPreview": "A live sample shown next to the control, not a preview of a document.",
+    "appearance.advancedCss": "CSS is a technical identifier and stays as-is.",
+    "appearance.languageDetect": "Detect the user's language from their device settings.",
+    "appearance.languagePartial": "Shown in a dropdown: the language name, then how much of the UI is translated.",
+    "common.reset": "Restore defaults, not 'reset the device' or 'restart'.",
+    "common.apply": "Commit the pending changes in this dialog."
+  },
   "strings": {
     "menu.title": "Menu",
     "menu.appearance": "Appearance",
