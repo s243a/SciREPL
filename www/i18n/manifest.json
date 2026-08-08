@@ -1,6 +1,24 @@
 {
   "generatedBy": "scripts/build-i18n-manifest.mjs",
   "base": "en",
+  "senses": [
+    "Apply-Commit",
+    "Cell-Notebook",
+    "Export-SaveFile",
+    "Import-LoadFile",
+    "Kernel-Interpreter",
+    "Language-Interface",
+    "Language-Programming",
+    "Margin-Layout",
+    "Notebook-Document",
+    "Package-Library",
+    "Reset-RestoreDefaults",
+    "Run-Execute",
+    "Scale-Size",
+    "Session-AppState",
+    "Theme-Colours",
+    "Workbook-Bundle"
+  ],
   "locales": [
     {
       "code": "en",
@@ -20,6 +38,10 @@
       "dir": "ltr",
       "status": "reviewed",
       "completeness": 1,
+      "glossary": {
+        "defined": 16,
+        "total": 16
+      },
       "domains": {
         "privacy": {
           "status": "draft"

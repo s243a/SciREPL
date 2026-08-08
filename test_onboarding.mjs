@@ -119,6 +119,28 @@ try {
     check('replaying from Help works',
         await page.evaluate(() => !!document.getElementById('tour-overlay')));
 
+    // The tour explains where Help is, so an entry only inside Help is circular
+    // for exactly the user who needs it. The main menu carries one too.
+    const menuReplay = await page.evaluate(async () => {
+        localStorage.setItem('scirepl_onboarding_seen', '1');
+        document.getElementById('menu-btn').click();
+        await new Promise((r) => setTimeout(r, 200));
+        const btn = document.getElementById('btn-show-tour-menu');
+        if (!btn) return { present: false };
+        btn.click();
+        await new Promise((r) => setTimeout(r, 400));
+        return {
+            present: true,
+            started: Boolean(document.getElementById('tour-overlay')),
+            menuClosed: document.getElementById('menu-modal').classList.contains('hidden'),
+        };
+    });
+    check('the main menu offers the tour, not only Help', menuReplay.present === true);
+    check('replaying from the menu works', menuReplay.started === true);
+    check('replaying from the menu closes the menu behind it', menuReplay.menuClosed === true);
+    await page.evaluate(() => window.onboarding.finish());
+
+
     check('no uncaught page errors', errs.length === 0, errs.slice(0, 3).join(' | '));
     await ctx.close();
 

@@ -6,6 +6,24 @@
     "note": "Traducción completa de la superficie de Apariencia y menú. Revisada para español neutro.",
     "status": "reviewed"
   },
+  "__glossary": {
+    "Cell-Notebook": "celda",
+    "Run-Execute": "ejecutar",
+    "Kernel-Interpreter": "kernel",
+    "Notebook-Document": "cuaderno",
+    "Workbook-Bundle": "libro de trabajo",
+    "Package-Library": "paquete",
+    "Language-Interface": "idioma",
+    "Language-Programming": "lenguaje",
+    "Scale-Size": "tamaño",
+    "Margin-Layout": "margen",
+    "Theme-Colours": "tema",
+    "Reset-RestoreDefaults": "restablecer",
+    "Apply-Commit": "aplicar",
+    "Import-LoadFile": "importar",
+    "Export-SaveFile": "exportar",
+    "Session-AppState": "sesión"
+  },
   "strings": {
     "__literal": [],
     "menu.title": "Menú",
@@ -63,6 +81,7 @@
     "tour.skip": "Omitir",
     "tour.done": "Listo",
     "tour.progress": "{current} de {total}",
-    "help.showTour": "Ver el recorrido otra vez"
+    "help.showTour": "Ver el recorrido otra vez",
+    "menu.showTour": "Ver la guía"
   }
 }

@@ -47,6 +47,45 @@ const codes = readdirSync(I18N_DIR)
     .filter((c) => !c.includes('.'));
 
 const base = read(BASE);
+
+/**
+ * Sense vocabulary. A short mnemonic names a word sense once ("Cell-Notebook"),
+ * and strings point at it, rather than every string re-explaining that "cell"
+ * is not the biological kind. A locale then commits to one term per sense in
+ * its __glossary, which is what makes terminology consistency reviewable.
+ *
+ * Only the reference integrity is enforced: a typo'd sense id is a bug and
+ * fails the build. Whether a translation actually *uses* its declared term is
+ * deliberately NOT checked — inflection, agglutination and scripts without word
+ * boundaries make substring matching produce confident nonsense. The glossary
+ * is a decision record for the reviewer, not a lint rule.
+ */
+const SENSES = base.__senses || {};
+const senseErrors = [];
+for (const [key, ids] of Object.entries(base.__senseOf || {})) {
+    if (!(base.strings || {})[key]) senseErrors.push(`__senseOf: no such string "${key}"`);
+    for (const id of ids) {
+        if (!SENSES[id]) senseErrors.push(`__senseOf["${key}"]: unknown sense "${id}"`);
+    }
+}
+if (senseErrors.length) {
+    console.error('[i18n] sense vocabulary errors:');
+    for (const e of senseErrors) console.error(`       ${e}`);
+    process.exit(1);
+}
+
+/** Which senses a locale has committed to a term for. */
+function glossaryCoverage(cat) {
+    const g = cat.__glossary || {};
+    const ids = Object.keys(SENSES);
+    const unknown = Object.keys(g).filter((k) => !SENSES[k]);
+    return {
+        defined: ids.filter((id) => typeof g[id] === 'string' && g[id].trim()).length,
+        total: ids.length,
+        unknown,
+    };
+}
+
 const locales = [];
 
 for (const code of codes.sort()) {
@@ -65,12 +104,19 @@ for (const code of codes.sort()) {
         }
     }
 
+    const glossary = code === BASE ? null : glossaryCoverage(cat);
+    if (glossary && glossary.unknown.length) {
+        console.error(`[i18n] ${code}: __glossary has unknown sense id(s): ${glossary.unknown.join(', ')}`);
+        process.exit(1);
+    }
+
     locales.push({
         code,
         endonym: meta.endonym || code,
         dir: meta.dir || 'ltr',
         status: meta.status || 'draft',
         completeness: Math.round(completeness * 1000) / 1000,
+        ...(glossary ? { glossary: { defined: glossary.defined, total: glossary.total } } : {}),
         ...(Object.keys(domains).length ? { domains } : {}),
     });
 }
@@ -78,6 +124,7 @@ for (const code of codes.sort()) {
 const manifest = {
     generatedBy: 'scripts/build-i18n-manifest.mjs',
     base: BASE,
+    senses: Object.keys(SENSES).sort(),
     locales,
 };
 
@@ -99,5 +146,6 @@ writeFileSync(MANIFEST, serialised);
 console.log(`[i18n] wrote manifest.json for ${locales.length} locale(s):`);
 for (const l of locales) {
     console.log(`  ${l.code.padEnd(6)} ${String(Math.round(l.completeness * 100) + '%').padStart(4)}  ${l.status}` +
+        (l.glossary ? `  glossary: ${l.glossary.defined}/${l.glossary.total}` : '') +
         (l.domains ? `  domains: ${Object.entries(l.domains).map(([k, v]) => `${k}=${v.status}`).join(', ')}` : ''));
 }

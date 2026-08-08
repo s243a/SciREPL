@@ -11,11 +11,102 @@
     "rtl": "In right-to-left locales, Latin identifiers keep their own direction inside the sentence. Write the sentence naturally in your language and leave the identifier as-is; the browser handles the bidirectional run.",
     "placeholders": "{name} placeholders are substituted at runtime. Keep them exactly as written; they may be reordered to suit your language's word order."
   },
+  "__senses": {
+    "Cell-Notebook": "The unit of code and its output in a notebook document. Not biological, not a spreadsheet cell, not a prison cell.",
+    "Run-Execute": "To execute code. Not 'run' as in move quickly, and not a run/series of things.",
+    "Kernel-Interpreter": "The language runtime that executes a cell. Not an operating-system kernel and not a seed.",
+    "Notebook-Document": "A computational notebook document, in the Jupyter sense. Not a paper notebook and not a laptop.",
+    "Workbook-Bundle": "A saved SciREPL bundle of notebooks and their packages. Distinct from Notebook-Document.",
+    "Package-Library": "An installable software library. Not a parcel or a wrapper.",
+    "Language-Interface": "The display language of the app's own menus and messages — the locale.",
+    "Language-Programming": "The programming language a cell's code is written in (Python, Prolog, R…).",
+    "Scale-Size": "Physical on-screen size. Not a musical scale, a weighing scale, or a map ratio.",
+    "Margin-Layout": "Empty space at the edge of the interface. A layout term, not a printing margin or a profit margin.",
+    "Theme-Colours": "A named set of interface colours. Not a topic or motif.",
+    "Reset-RestoreDefaults": "Restore the default values. Not 'restart the device' and not 'erase data'.",
+    "Apply-Commit": "Commit the pending changes in this dialog. Not 'apply for' something.",
+    "Import-LoadFile": "Read a file into the app. Not importing goods.",
+    "Export-SaveFile": "Write the user's work out to a file. Not exporting goods.",
+    "Session-AppState": "The current working state of the app. Not a meeting or a class."
+  },
+  "__senseOf": {
+    "menu.runAll": [
+      "Run-Execute",
+      "Cell-Notebook"
+    ],
+    "menu.newNotebook": [
+      "Notebook-Document"
+    ],
+    "appearance.topMargin": [
+      "Margin-Layout"
+    ],
+    "appearance.topMarginHelp": [
+      "Margin-Layout"
+    ],
+    "appearance.buttonScale": [
+      "Scale-Size"
+    ],
+    "appearance.buttonScaleHelp": [
+      "Scale-Size"
+    ],
+    "appearance.theme": [
+      "Theme-Colours"
+    ],
+    "appearance.themeEditorTitle": [
+      "Theme-Colours"
+    ],
+    "appearance.language": [
+      "Language-Interface"
+    ],
+    "appearance.languageHelp": [
+      "Language-Interface"
+    ],
+    "appearance.reset": [
+      "Reset-RestoreDefaults"
+    ],
+    "common.reset": [
+      "Reset-RestoreDefaults"
+    ],
+    "common.apply": [
+      "Apply-Commit"
+    ],
+    "tour.language.title": [
+      "Language-Interface"
+    ],
+    "tour.language.body": [
+      "Language-Interface",
+      "Language-Programming"
+    ],
+    "tour.newCellLanguage.title": [
+      "Language-Programming",
+      "Cell-Notebook"
+    ],
+    "tour.newCellLanguage.body": [
+      "Language-Programming",
+      "Cell-Notebook"
+    ],
+    "tour.editCell.title": [
+      "Cell-Notebook"
+    ],
+    "tour.editCell.body": [
+      "Cell-Notebook"
+    ],
+    "tour.editCellLanguage.title": [
+      "Language-Programming",
+      "Cell-Notebook"
+    ],
+    "tour.editCellLanguage.body": [
+      "Language-Programming",
+      "Cell-Notebook"
+    ],
+    "tour.menu.body": [
+      "Notebook-Document",
+      "Import-LoadFile",
+      "Export-SaveFile",
+      "Package-Library"
+    ]
+  },
   "__context": {
-    "menu.runAll": "A notebook cell (celda/セル), not a biological cell. Executes every code cell in order.",
-    "menu.newNotebook": "A computational notebook document, in the Jupyter sense.",
-    "appearance.topMargin": "Vertical space above the app header. Layout term, not a page margin in printing.",
-    "appearance.buttonScale": "Physical on-screen size of the buttons, not a musical or measurement scale.",
     "appearance.themeAuto": "Follow the operating system's light/dark setting.",
     "appearance.themeCustom": "A user-defined colour scheme.",
     "appearance.customise": "Opens an editor. Trailing ellipsis means 'this opens a dialog' — keep it.",
@@ -23,12 +114,9 @@
     "appearance.advancedCss": "CSS is a technical identifier and stays as-is.",
     "appearance.languageDetect": "Detect the user's language from their device settings.",
     "appearance.languagePartial": "Shown in a dropdown: the language name, then how much of the UI is translated.",
-    "common.reset": "Restore defaults, not 'reset the device' or 'restart'.",
-    "common.apply": "Commit the pending changes in this dialog.",
-    "tour.language.title": "The UI/locale language, NOT the programming language. Keep these clearly distinct — this app has both.",
-    "tour.newCellLanguage.title": "Programming language (Python, Prolog...), NOT the UI language.",
     "tour.editCellLanguage.body": "'All→' is a button label on screen; keep the arrow. 'cell' is a notebook cell.",
-    "tour.progress": "Step counter, e.g. '2 of 6'."
+    "tour.progress": "Step counter, e.g. '2 of 6'.",
+    "menu.showTour": "Replays the first-run introduction. 'Tour' as in a guided walkthrough of the interface."
   },
   "strings": {
     "menu.title": "Menu",
@@ -86,6 +174,7 @@
     "tour.skip": "Skip",
     "tour.done": "Done",
     "tour.progress": "{current} of {total}",
-    "help.showTour": "Show the tour again"
+    "help.showTour": "Show the tour again",
+    "menu.showTour": "Take the Tour"
   }
 }

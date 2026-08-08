@@ -45,24 +45,67 @@ If a whole string is meant to stay identical to English, list its key in
 `strings.__literal`. Keys listed there are excluded from the completeness score,
 so they do not count against you as untranslated.
 
-## Context for ambiguous strings
+## Word senses
 
-`en.json` carries a `__context` map keyed by string id. Read it — it is there
-because a short UI label frequently has no single correct translation without
-knowing what it refers to:
+"Cell", "Run", "Kernel", "Language" and "Workbook" all mean something specific
+in a scientific notebook and something else in ordinary use. Translating them
+from the English alone is guesswork, and the guess is often wrong in exactly the
+way a reviewer then has to catch.
+
+So a sense is named **once**, with a short mnemonic, in `en.json`'s `__senses` —
+rather than every string that happens to contain the word re-explaining it:
 
 ```json
-"menu.runAll": "A notebook cell (celda/セル), not a biological cell."
+"__senses": {
+  "Cell-Notebook": "The unit of code and its output in a notebook document. Not biological, not a spreadsheet cell, not a prison cell.",
+  "Language-Interface": "The display language of the app's own menus and messages — the locale.",
+  "Language-Programming": "The programming language a cell's code is written in (Python, Prolog, R…)."
+}
 ```
 
-"Cell", "Run", "Kernel" and "Workbook" all mean something specific in a
-scientific notebook and something else in ordinary use. Translating them from
-the English alone is guesswork, and the guess is often wrong in exactly the way
-a reviewer then has to catch.
+Strings then point at the senses they carry, in `__senseOf`:
 
-If you add a string whose meaning is not obvious in isolation, add a context
-entry for it at the same time. `__`-prefixed keys are ignored by the
-completeness score, so context costs nothing.
+```json
+"__senseOf": {
+  "menu.runAll": ["Run-Execute", "Cell-Notebook"],
+  "tour.newCellLanguage.title": ["Language-Programming", "Cell-Notebook"]
+}
+```
+
+The `Language-Interface` / `Language-Programming` split is the one that matters
+most here. This app has both, English uses one word for them, and most languages
+do not — Spanish takes *idioma* and *lenguaje*. Getting that backwards in the
+onboarding tour would actively mislead the newcomer it exists to orient.
+
+### Your glossary
+
+Decide your term for each sense **once**, before translating, and record it in
+your catalogue's `__glossary`:
+
+```json
+"__glossary": {
+  "Cell-Notebook": "celda",
+  "Language-Interface": "idioma",
+  "Language-Programming": "lenguaje"
+}
+```
+
+Then use it consistently. This is what makes "consistent terminology" something
+a reviewer can actually check, rather than a instruction they have to hold in
+their head across 60 strings.
+
+**The glossary is a decision record, not a lint rule.** The build verifies that
+every sense id referenced actually exists — a typo fails the build — but it does
+**not** check that your strings contain your declared term. Inflection,
+agglutination and scripts without word boundaries make that kind of substring
+matching produce confident nonsense. The value is in forcing the decision once
+and making it visible, not in mechanical enforcement.
+
+If you add a string whose meaning is not obvious in isolation, tag it with a
+sense (or add a new one) at the same time. Per-string prose that is *not* about
+a term — "keep the trailing ellipsis", "this is a step counter" — still goes in
+`__context`. `__`-prefixed keys are ignored by the completeness score, so none
+of this costs you anything.
 
 ## Right-to-left languages
 

@@ -296,12 +296,23 @@
     onboarding.STEPS = STEPS;
     window.onboarding = onboarding;
 
+    /**
+     * Replay entry points. Help is the natural home, but the tour is partly
+     * *about* where Help is — so an entry only inside Help is circular for the
+     * user who most needs it. The main menu carries one too.
+     */
+    const REPLAY_TRIGGERS = ['btn-show-tour', 'btn-show-tour-menu'];
+
     const ready = () => {
-        const replay = document.getElementById('btn-show-tour');
-        if (replay) {
-            replay.addEventListener('click', () => {
-                const help = document.getElementById('help-modal');
-                if (help) help.classList.add('hidden');
+        for (const id of REPLAY_TRIGGERS) {
+            const btn = document.getElementById(id);
+            if (!btn) continue;
+            btn.addEventListener('click', () => {
+                // Whichever modal the trigger lives in has to get out of the way.
+                for (const m of ['help-modal', 'menu-modal']) {
+                    const el = document.getElementById(m);
+                    if (el) el.classList.add('hidden');
+                }
                 onboarding.start();
             });
         }
