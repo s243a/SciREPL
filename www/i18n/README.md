@@ -16,7 +16,8 @@ that has to be redone.
    (`العربية`, not `Arabic`), and `dir` is `rtl` for Arabic, Hebrew, Persian and
    Urdu, `ltr` otherwise.
 4. Set `"status": "draft"`.
-5. Register it in `LOCALES` in `../js/i18n.js`.
+5. Run `npm run i18n:manifest`. No code change is needed — the app discovers
+   locales from the generated manifest.
 
 A draft catalogue can be committed and reviewed but **is not offered to users**
 until someone who reads the language changes `status` to `reviewed`. That gate
