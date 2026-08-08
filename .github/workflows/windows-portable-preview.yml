@@ -27,6 +27,10 @@ on:
         description: 'Verify the packaged app before uploading (recommended)'
         type: boolean
         default: true
+      linux:
+        description: 'Also build a Linux x64 portable preview'
+        type: boolean
+        default: false
 
 concurrency:
   group: windows-portable-preview-${{ github.ref }}
@@ -66,6 +70,17 @@ jobs:
       - name: Build the portable preview
         run: npm run package:windows
 
+      # Optional second asset. @electron/packager cross-builds, so the Linux
+      # preview is produced on the same Windows runner from the same prepared
+      # tree — one build, two platforms, no drift between them.
+      #
+      # It is unverified here: the packaged suite below runs the Windows binary,
+      # which is the only one this runner can execute. Treat the Linux artifact
+      # as built-not-tested until it is run on Linux.
+      - name: Build the Linux portable preview
+        if: ${{ inputs.linux }}
+        run: node desktop/electron/packaging/build-portable.mjs --platform linux --arch x64
+
       # Prove the packaged application actually works before handing it to
       # anyone: it must load app://scirepl/index.html from its own bundled
       # resources, keep notebook code away from Node and unrestricted Electron
@@ -88,6 +103,16 @@ jobs:
           retention-days: 14
           # Already ~450 MB of mostly-incompressible binaries; recompressing
           # buys little and costs minutes.
+          compression-level: 1
+
+      - name: Upload the Linux preview
+        if: ${{ inputs.linux }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: SciREPL-linux-x64-preview-${{ github.sha }}
+          path: desktop/electron/out/SciREPL-linux-x64/
+          if-no-files-found: error
+          retention-days: 14
           compression-level: 1
 
       - name: Upload test results
@@ -118,6 +143,13 @@ jobs:
             echo "This is a **preview build**, not a release: Free edition only, no installer,"
             echo "no auto-update, and not a Microsoft Store package."
             echo
+            if [ "${{ inputs.linux }}" = "true" ]; then
+              echo "A **Linux x64** preview is also attached. It is cross-built here and"
+              echo "**not executed** by this job — the runner can only run the Windows binary."
+              echo "On Linux: extract, then run \`./SciREPL\`. Note it installs no .desktop"
+              echo "file, so some desktop environments show a generic icon and label."
+              echo
+            fi
             echo "Kernels bundled offline: Bash/Brush, ClojureScript/Scittle, SWI-Prolog, Python/Pyodide."
             echo "Lua and R load from a CDN. Lua keeps working offline after one online use;"
             echo "R (~50 MB) needs the network each session. The download prompt appears every"

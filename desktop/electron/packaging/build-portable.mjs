@@ -190,6 +190,12 @@ const appPaths = await packager({
     /^\/package-lock\.json$/,
   ],
   extraResource: [stagedWww, buildInfoPath],
+  // Desktop-environment icon. `icon-512.png` is the PWA's own icon, so the
+  // desktop builds show what users already recognise. @electron/packager wants
+  // a .ico for Windows and ignores a .png there, so the Windows executable
+  // keeps the default Electron icon for now — noted in the report as polish,
+  // not a blocker for an unsigned preview.
+  icon: path.join(WWW_ROOT, 'icons', 'icon-512'),
   win32metadata: {
     CompanyName: 'SciREPL',
     FileDescription: 'SciREPL — scientific REPL (Free, unsigned preview)',

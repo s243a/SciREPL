@@ -987,3 +987,67 @@ MSIX, Store submission, code signing, auto-update, entitlement or licence
 checking, Pro anything. Unchanged from §9: the manual Windows checks — display
 scaling, native dialogs, accessibility, sleep/resume, non-ASCII profile paths —
 are exactly what the portable preview now makes it practical for a human to do.
+
+
+---
+
+## 14. Desktop-environment integration (Linux, WSLg)
+
+Findings from running the Linux preview under WSLg, which is worth recording
+because a Linux build is a candidate release asset alongside Windows.
+
+### Fixed: a window that existed but could never be shown
+
+**[verified]** `ready-to-show` **does not fire under WSLg**:
+
+```
+[scirepl] showing window via did-finish-load — ready-to-show did not fire
+```
+
+The window was created hidden and shown on `ready-to-show`, which avoids a white
+flash. When that event never arrives, the result is a window that exists and owns
+a task-bar entry but can never be raised, because it is still hidden — clicking
+the icon does nothing. That is precisely how it presented.
+
+`main.js` now shows the window on the first of `ready-to-show`,
+`did-finish-load`, `did-fail-load`, or a 10-second timeout, and logs which one
+won. Cosmetic polish lost the argument to always being reachable.
+
+Related and self-inflicted: several orphaned Electron processes from killed test
+runs were also sitting in the task bar in exactly this state. They have been
+cleaned up, and the fallback means a future orphan would at least be visible.
+
+### Not fixed: task-bar label and icon
+
+**[verified negative]** The Linux build registers with WSLg as:
+
+```
+appId: scirepl-desktop-electron    appIcon: (nil)
+```
+
+so the entry is labelled with the package directory name and, having no icon,
+renders as a generic penguin. Two attempts, both measured and both ineffective:
+
+| Attempt | Result |
+| --- | --- |
+| `app.setName('SciREPL')` | no change to `appId` |
+| `app.commandLine.appendSwitch('class', 'SciREPL')` | no change to `appId` |
+
+The switch was removed rather than left in place looking like it worked. The
+identity actually comes from the `name` field of the package.json inside
+`app.asar`, and the icon is resolved by matching that identity against an
+**installed `.desktop` file** — which a portable directory does not have.
+
+Fixing it properly means producing a real Linux package rather than a folder:
+a `.desktop` file, an installed icon, and a defined install location — i.e. an
+AppImage, `.deb`, or Flatpak. That is the right shape for a Linux *release
+asset* and is proposed as the next piece of work, not bodged into the portable
+preview.
+
+### Out of scope: the `[WARN: COPY MODE]` title prefix
+
+Not ours. The string appears nowhere in the WSLg logs (`weston.log`,
+`wlog.log`, `stderr.log`), so it originates on the Windows side of WSLg's
+RDP/RAIL integration, and the same prefix appears on unrelated applications
+(Palemoon) on the same machine. WSLg here is 1.0.73.2. `wsl --shutdown` and
+restart is the usual remedy for WSLg window-management oddities.

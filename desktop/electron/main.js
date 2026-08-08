@@ -100,6 +100,38 @@ function readProfile() {
   return 'unknown';
 }
 
+/**
+ * Identity. Without these the app registers under the package directory's name
+ * — `scirepl-desktop-electron` — which is what a desktop environment shows in
+ * the task bar. Under WSLg that also produced a second, iconless entry
+ * (`appIcon: (nil)` in weston.log), which Windows renders as a generic penguin.
+ *
+ * `setName` must run before `app.whenReady()`, and before userData is derived
+ * from it by anything else.
+ */
+app.setName('SciREPL');
+// Groups windows correctly on the Windows task bar and keeps the identity
+// stable across builds.
+if (process.platform === 'win32') app.setAppUserModelId('com.unifyweaver.scirepl');
+
+// NOTE for Linux packaging, measured rather than assumed: neither
+// `app.setName()` above nor Chromium's `--class` switch changes how a desktop
+// environment labels the window. WSLg kept reporting
+// `appId: scirepl-desktop-electron` with `appIcon: (nil)` after both, because
+// the identity comes from the `name` in the package.json inside app.asar, and
+// the icon is resolved by matching that identity against an *installed*
+// .desktop file — which a portable directory does not have. Fixing it properly
+// means shipping a .desktop file and icon, i.e. a real Linux package rather
+// than a portable folder. Recorded in docs/WINDOWS_ELECTRON_SPIKE.md.
+
+/**
+ * The window/task-bar icon. Shared with the PWA rather than duplicated, so the
+ * desktop build cannot drift from the icon users already associate with SciREPL.
+ * Windows takes its executable icon from the packager instead; this covers
+ * Linux, where the icon comes from the running window.
+ */
+const APP_ICON = path.join(WWW_ROOT, 'icons', 'icon-512.png');
+
 /** Scheme registration must happen before the app is ready. */
 registerScheme();
 
@@ -129,6 +161,7 @@ function createWindow() {
     show: false,
     backgroundColor: '#0d1117', // matches the app's theme-color, avoids white flash
     title: 'SciREPL',
+    ...(fs.existsSync(APP_ICON) ? { icon: APP_ICON } : {}),
     webPreferences: {
       // --- the security boundary ---
       nodeIntegration: false,
@@ -148,9 +181,31 @@ function createWindow() {
 
   applyWebContentsPolicy(mainWindow.webContents);
 
-  mainWindow.once('ready-to-show', () => {
+  // The window is created hidden and shown on `ready-to-show` to avoid a white
+  // flash. The risk is that `ready-to-show` never fires — a stalled load, a
+  // renderer that died during startup — leaving a window that exists, owns a
+  // taskbar entry, and can never be raised because it is hidden. Clicking the
+  // icon then appears to do nothing, which is exactly how this presented in
+  // practice with stray instances left behind by killed test runs.
+  //
+  // So showing it is a race between "looks nice" and "always reachable", and
+  // reachable wins.
+  let shown = false;
+  const showOnce = (why) => {
+    if (shown || !mainWindow || mainWindow.isDestroyed()) return;
+    shown = true;
+    clearTimeout(showFallback);
+    if (why !== 'ready-to-show') {
+      console.warn(`[scirepl] showing window via ${why} — ready-to-show did not fire`);
+    }
     mainWindow.show();
-  });
+  };
+
+  const showFallback = setTimeout(() => showOnce('timeout'), 10_000);
+  mainWindow.once('ready-to-show', () => showOnce('ready-to-show'));
+  // A load that finished but never painted still deserves a visible window.
+  mainWindow.webContents.once('did-finish-load', () => showOnce('did-finish-load'));
+  mainWindow.webContents.once('did-fail-load', () => showOnce('did-fail-load'));
 
   mainWindow.on('closed', () => {
     mainWindow = null;
