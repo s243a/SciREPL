@@ -207,6 +207,18 @@ function createWindow() {
   mainWindow.webContents.once('did-finish-load', () => showOnce('did-finish-load'));
   mainWindow.webContents.once('did-fail-load', () => showOnce('did-fail-load'));
 
+  // Detached DevTools is a BrowserWindow of its own. If the user closes the main
+  // window while it is open, that window survives, `window-all-closed` never
+  // fires, and the application stays running with no visible window — it has to
+  // be killed. Close DevTools along with the window that owns it.
+  //
+  // Found by the packaged suite's DevTools assertions: graceful shutdown began
+  // timing out and needing SIGKILL once anything opened DevTools.
+  mainWindow.on('close', () => {
+    const wc = mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null;
+    if (wc && wc.isDevToolsOpened()) wc.closeDevTools();
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });

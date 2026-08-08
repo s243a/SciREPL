@@ -54,6 +54,58 @@ const CACHEABLE_HOSTS = new Set([
   'files.pythonhosted.org',
 ]);
 
+/**
+ * Requests that must never be cached, because the resource behind them changes.
+ *
+ * `repo.r-wasm.org` is a **mutable package repository**: its `PACKAGES` indexes
+ * list what is currently available and at which version. Caching those forever
+ * would freeze the catalogue at whatever it happened to be on the day a user
+ * first installed something — so `install.packages()` would keep offering stale
+ * versions, and any future update checker would be reading a permanent snapshot
+ * and reporting "up to date" indefinitely.
+ *
+ * A query string is treated the same way: it almost always means the response
+ * is parameterised rather than a fixed asset.
+ *
+ * These pass straight through to the network, so they are correct when online
+ * and simply unavailable offline — which is the honest behaviour for "what
+ * exists right now?".
+ */
+const NEVER_CACHE = [
+  /\/PACKAGES(\.gz|\.rds)?$/i,   // R repository indexes
+  /\/PACKAGES\.json$/i,
+  /\/index\.json$/i,
+];
+
+/**
+ * Is this URL a version-pinned, immutable asset?
+ *
+ * Only these may have a **404 cached**. A "not found" is a fact about a moment
+ * in time for a mutable path — a package that does not exist today may exist
+ * tomorrow — but for a version-pinned path it is permanent, and caching it is
+ * what lets webR's `HEAD` probes for optional files answer offline.
+ *
+ *   webr.r-wasm.org/v0.5.4/...            version segment
+ *   cdn.jsdelivr.net/npm/scittle@0.6.22/  name@version
+ *   unpkg.com/fengari-web@0.1.4/...       name@version
+ *   .../ggplot2_3.5.1.tgz                 R package with version in the filename
+ *   files.pythonhosted.org/...            content-addressed by hash
+ */
+function isVersionPinned(url) {
+  if (url.hostname === 'files.pythonhosted.org') return true;
+  const p = url.pathname;
+  if (/\/v\d+\.\d+(\.\d+)?\//.test(p)) return true;      // /v0.5.4/
+  if (/@\d+\.\d+/.test(p)) return true;                    // name@1.2.3
+  if (/_\d[\w.-]*\.(tgz|tar\.gz|zip)$/i.test(p)) return true; // name_1.2.3.tgz
+  return false;
+}
+
+/** Mutable repository metadata and other responses that must stay live. */
+function isNeverCacheable(url) {
+  if (url.search) return true;
+  return NEVER_CACHE.some((re) => re.test(url.pathname));
+}
+
 /** Metadata we need to reconstruct a response. */
 const META_SUFFIX = '.meta.json';
 
@@ -166,7 +218,8 @@ function installRuntimeCache(session, options = {}) {
     const cacheable =
       (method === 'GET' || method === 'HEAD') &&
       hosts.has(url.hostname) &&
-      !range; // never cache a partial body
+      !range &&                 // never cache a partial body
+      !isNeverCacheable(url);   // never cache mutable repository metadata
 
     if (debug) {
       // To a file, not the console: the main process's stderr is swallowed by
@@ -204,11 +257,16 @@ function installRuntimeCache(session, options = {}) {
       throw err;
     }
 
-    // Cache 200 and 404. A 404 matters: webR probes for optional files, and a
-    // probe that errors offline behaves differently from one that answers "no".
-    // These hosts serve version-pinned immutable paths, so a 404 will not
-    // become a 200 later. Anything else (5xx, redirects) is passed through
-    // uncached, since it may be transient.
+    // Cache 200 always; cache 404 only for version-pinned paths.
+    //
+    // The 404 case matters because webR probes for optional files and a probe
+    // that *errors* offline behaves differently from one that answers "no". But
+    // "not found" is only permanently true for an immutable, version-pinned
+    // URL. On a mutable path — an R package that has not been published yet —
+    // caching the 404 would make it permanently non-existent for that user.
+    // Anything else (5xx, redirects) passes through uncached as possibly
+    // transient.
+    if (response.status === 404 && !isVersionPinned(url)) return response;
     if (response.status !== 200 && response.status !== 404) return response;
 
     // A HEAD has no body to read or store.
@@ -233,4 +291,7 @@ function installRuntimeCache(session, options = {}) {
   return cache;
 }
 
-module.exports = { installRuntimeCache, RuntimeCache, CACHEABLE_HOSTS, keyFor };
+module.exports = {
+  installRuntimeCache, RuntimeCache, CACHEABLE_HOSTS, keyFor,
+  isVersionPinned, isNeverCacheable, NEVER_CACHE,
+};

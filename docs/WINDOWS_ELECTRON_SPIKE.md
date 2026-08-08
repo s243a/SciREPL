@@ -339,6 +339,25 @@ body stored as if whole is a corrupt entry); only `200` and `404`. It is
 main-process only and exposes nothing to the renderer, so the boundary in §4 is
 unchanged. `SCIREPL_RUNTIME_CACHE=0` disables it.
 
+**What is deliberately not cached.** `repo.r-wasm.org` is a *mutable* package
+repository: its `PACKAGES` indexes describe what exists right now. Keeping those
+forever would freeze the catalogue at whatever it was on the day a user first
+installed something — `install.packages()` would keep offering stale versions,
+and a future update checker would read a permanent snapshot and report "up to
+date" indefinitely. So the policy splits:
+
+| Request | Cached? |
+| --- | --- |
+| version-pinned assets (`/v0.5.4/…`, `name@1.2.3/…`, `ggplot2_3.5.1.tgz`) | yes, indefinitely |
+| `PACKAGES`, `PACKAGES.gz/.rds/.json`, anything with a query string | **never** |
+| `404` on a version-pinned path | yes — permanently true, and webR's `HEAD` probes need it offline |
+| `404` on a mutable path | **never** — absent today may exist tomorrow |
+
+Consequence: installing *new* R packages still needs a network connection, by
+design. Offline, the honest answer is "not checked", not a stale "up to date".
+The follow-up feature that depends on this is sketched in
+[`proposal-package-update-checks.md`](proposal-package-update-checks.md).
+
 Guarded by `runtime-cache.test.mjs`, which includes a cold-profile check that a
 run which never went online still fails — so the suite cannot pass because
 something else is quietly serving the bytes.
@@ -1074,6 +1093,26 @@ application code. That is not a new exposure — `app.asar` can be unpacked
 regardless, and the proposal is already explicit that packaging is not DRM. It
 is a reason to keep entitlement logic in the main process, which is where it
 already belongs.
+
+### Linux test hosts: `xdg-open` blocks graceful shutdown
+
+**[verified]** On Linux, `shell.openExternal()` shells out to `xdg-open`, which
+hands the URL to a desktop helper and keeps the application alive. Measured on
+WSLg: a single external-link probe made graceful shutdown time out at 20 s,
+while the identical run without one closed in **0.1 s**.
+
+This is a property of the host's URL handler, not of the shell — the same suite
+shuts down cleanly on the Windows CI runner, where `openExternal` returns
+immediately. It presented as a phantom "the packaged app shuts down gracefully"
+failure that survived a clean machine, and was only pinned down by bisecting the
+suite: DevTools alone closed in 0 s, all five kernels loaded closed in 0.1 s, and
+one `window.open` to an external URL reproduced it every time.
+
+The test harness now puts a no-op `xdg-open` first on `PATH` for Linux runs. The
+policy under test is untouched — `setWindowOpenHandler` still denies the window
+and still calls `openExternal` — only the hand-off to the desktop is stubbed.
+Worth knowing before anyone runs this suite on a Linux desktop and concludes the
+shell has a shutdown bug.
 
 ### Out of scope: the `[WARN: COPY MODE]` title prefix
 

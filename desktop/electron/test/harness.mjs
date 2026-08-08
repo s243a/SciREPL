@@ -10,7 +10,7 @@
 import { _electron as electron, chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { mkdtempSync, rmSync, existsSync, readFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync, chmodSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -24,6 +24,30 @@ import { ELECTRON_DIR, REPO_ROOT, WWW_ROOT } from './reporter.mjs';
 /* ------------------------------------------------------------------ */
 
 const requireFromHere = createRequire(import.meta.url);
+
+/**
+ * On Linux, `shell.openExternal()` shells out to `xdg-open`, which hands the URL
+ * to a desktop helper and — measured on WSLg — keeps the application alive:
+ * a single external-link test made graceful shutdown time out at 20s, while the
+ * identical run without one closed in 0.1s. The Windows CI runner has no such
+ * problem.
+ *
+ * That is a property of the test host's URL handler, not of the shell, so tests
+ * put a no-op `xdg-open` first on PATH. The policy under test is untouched —
+ * `setWindowOpenHandler` still denies the window and still calls
+ * `openExternal` — only the hand-off to the desktop is stubbed.
+ */
+let stubbedPathDir = null;
+function pathWithInertUrlHandler() {
+  if (process.platform !== 'linux') return process.env.PATH;
+  if (!stubbedPathDir) {
+    stubbedPathDir = mkdtempSync(path.join(tmpdir(), 'scirepl-nourl-'));
+    const stub = path.join(stubbedPathDir, 'xdg-open');
+    writeFileSync(stub, '#!/bin/sh\nexit 0\n');
+    chmodSync(stub, 0o755);
+  }
+  return `${stubbedPathDir}${path.delimiter}${process.env.PATH}`;
+}
 
 /**
  * Absolute path to the Electron executable for THIS platform.
@@ -157,6 +181,7 @@ async function launchAny(opts = {}) {
       args,
       env: {
         ...process.env,
+        PATH: pathWithInertUrlHandler(),
         // Never let an ambient SCIREPL_WWW leak into a packaged run.
         SCIREPL_WWW: undefined,
         ...opts.env,

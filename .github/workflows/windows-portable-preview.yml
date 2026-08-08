@@ -151,7 +151,17 @@ jobs:
               echo
             fi
             echo "Kernels bundled offline: Bash/Brush, ClojureScript/Scittle, SWI-Prolog, Python/Pyodide."
-            echo "Lua and R load from a CDN. Lua keeps working offline after one online use;"
-            echo "R (~50 MB) needs the network each session. The download prompt appears every"
-            echo "session either way. See docs/WINDOWS_ELECTRON_SPIKE.md section 5."
+            echo
+            echo "Lua and R are fetched from their CDNs the first time you use them, then kept"
+            echo "in SciREPL's own runtime cache under %APPDATA%\\SciREPL-Free-Electron. After that"
+            echo "first successful download they run offline, and the cache survives restarts."
+            echo "Measured: R goes from a 90s timeout offline to running in about a second."
+            echo
+            echo "The first download asks for confirmation. To stop being asked, turn on"
+            echo "Settings -> Runtime Downloads -> \"Auto-download runtimes (skip confirmation)\";"
+            echo "the choice is saved and behaves the same as on Android."
+            echo
+            echo "R package *listings* from repo.r-wasm.org are deliberately not cached, since"
+            echo "that repository is mutable — installing new R packages still needs a network"
+            echo "connection. See docs/WINDOWS_ELECTRON_SPIKE.md section 5."
           } >> "$GITHUB_STEP_SUMMARY"

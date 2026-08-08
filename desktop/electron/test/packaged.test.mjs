@@ -250,9 +250,23 @@ export default async function run() {
 
     /* ---------------- restart the packaged app ---------------- */
 
+    // Report what the app looked like going in, so a shutdown failure says why
+    // rather than just "timed out".
+    const preClose = await shell.electronApp.evaluate(({ BrowserWindow }) => {
+      const wins = BrowserWindow.getAllWindows();
+      return {
+        windows: wins.length,
+        devtoolsOpen: wins[0] ? wins[0].webContents.isDevToolsOpened() : null,
+        titles: wins.map((w) => w.getTitle()),
+      };
+    });
+    const closeStarted = Date.now();
     const { timedOut } = await shell.close();
+    const closeSeconds = ((Date.now() - closeStarted) / 1000).toFixed(1);
     r.log('the packaged app shuts down gracefully', timedOut === false,
-      timedOut ? 'close() timed out and needed SIGKILL' : '');
+      timedOut
+        ? `close() timed out after ${closeSeconds}s and needed SIGKILL — state going in: ${JSON.stringify(preClose)}`
+        : `${closeSeconds}s`);
 
     shell = await launchPackagedShell({ exePath: exe, userDataDir });
     await waitForAppReady(shell.page);

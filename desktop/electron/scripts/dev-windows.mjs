@@ -23,10 +23,14 @@
 
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ELECTRON_DIR = path.resolve(fileURLToPath(new URL('..', import.meta.url)));
+const { decideConfiguration, isFreeProfile, FREE_PROFILES, PRO_ONLY_RUNTIME_DIRS } =
+  createRequire(import.meta.url)(path.join(
+    path.resolve(fileURLToPath(new URL('..', import.meta.url))), 'profile-guard.js'));
 const REPO_ROOT = path.resolve(ELECTRON_DIR, '..', '..');
 const WWW_ROOT = path.join(REPO_ROOT, 'www');
 
@@ -110,12 +114,63 @@ if (process.platform === 'win32' && /^\\\\/.test(REPO_ROOT)) {
 /* ------------------------- 2. build profile ---------------------------- */
 
 const kernelConfig = path.join(WWW_ROOT, 'js', 'kernel_config.js');
-if (force || !existsSync(kernelConfig)) {
-  heading('Configuring the Free build profile');
-  run('npm', ['run', 'configure'], { what: 'npm run configure' });
-} else {
+
+/** The profile in the generated config, or null when there is none. */
+function configuredProfile() {
+  if (!existsSync(kernelConfig)) return null;
   const m = readFileSync(kernelConfig, 'utf8').match(/["']?profile["']?\s*:\s*["']([^"']+)["']/);
-  heading(`Build profile already configured (${m ? m[1] : 'unknown'}) — skipping`);
+  return m ? m[1] : 'unknown';
+}
+
+// The profile this launch intends to prepare. BUILD_PROFILE lets someone pick a
+// lighter Free profile; the repository default is used otherwise.
+const profiles = JSON.parse(readFileSync(path.join(REPO_ROOT, 'build-profiles.json'), 'utf8'));
+const intendedProfile = process.env.BUILD_PROFILE || profiles.default;
+
+if (!isFreeProfile(intendedProfile)) {
+  fail(
+    `This launcher only prepares Free profiles, and '${intendedProfile}' is not one.`,
+    `Free profiles: ${FREE_PROFILES.join(', ')}.`,
+    'Selecting the Pro profile is a deliberate act, so this refuses rather than',
+    'silently overwriting your configuration.'
+  );
+}
+
+// Pro-only runtime content must not be carried into a Free launch. Left in
+// place, it would be served by the Free build and make offline R appear to work
+// in an edition that does not ship it.
+const stalePro = PRO_ONLY_RUNTIME_DIRS
+  .map((d) => path.join(WWW_ROOT, 'vendor', d))
+  .filter(existsSync);
+if (stalePro.length) {
+  fail(
+    'This checkout contains Pro-only runtime content.',
+    ...stalePro.map((d) => `  ${d}`),
+    'That is bundled by the `pro` profile, not by any Free profile, so a Free',
+    'launch must not serve it. Remove the directory (or re-run',
+    '`npm run fetch:bundles` for a Free profile) and try again.'
+  );
+}
+
+const existingProfile = configuredProfile();
+const decision = decideConfiguration({ existingProfile, intendedProfile, force });
+
+if (decision.action === 'configure') {
+  heading(`Configuring the '${intendedProfile}' build profile — ${decision.reason}`);
+  // The profile is passed explicitly: relying on the repository default is what
+  // let a previously-Pro-configured tree launch as Free.
+  run('npm', ['run', 'configure', '--', intendedProfile], { what: 'npm run configure' });
+
+  const after = configuredProfile();
+  if (after !== intendedProfile) {
+    fail(
+      `Configuration did not produce the '${intendedProfile}' profile.`,
+      `www/js/kernel_config.js now reports '${after}'.`,
+      'Run `npm run configure` manually to see what happened.'
+    );
+  }
+} else {
+  heading(`Build profile already configured ('${intendedProfile}') — skipping`);
 }
 
 /* ------------------------- 3. bundled runtimes -------------------------- */
