@@ -21,6 +21,22 @@
   ],
   "locales": [
     {
+      "code": "ar",
+      "endonym": "العربية",
+      "dir": "rtl",
+      "status": "draft",
+      "completeness": 0.983,
+      "glossary": {
+        "defined": 16,
+        "total": 16
+      },
+      "domains": {
+        "privacy": {
+          "status": "draft"
+        }
+      }
+    },
+    {
       "code": "en",
       "endonym": "English",
       "dir": "ltr",
@@ -38,6 +54,22 @@
       "dir": "ltr",
       "status": "draft",
       "completeness": 0.98,
+      "glossary": {
+        "defined": 16,
+        "total": 16
+      },
+      "domains": {
+        "privacy": {
+          "status": "draft"
+        }
+      }
+    },
+    {
+      "code": "zh",
+      "endonym": "简体中文",
+      "dir": "ltr",
+      "status": "draft",
+      "completeness": 0.997,
       "glossary": {
         "defined": 16,
         "total": 16

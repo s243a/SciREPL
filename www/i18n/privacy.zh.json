@@ -1,0 +1,12 @@
+{
+  "__meta": {
+    "locale": "zh",
+    "domain": "privacy",
+    "status": "draft",
+    "note": "信息性翻译。英文版本为官方政策。"
+  },
+  "strings": {
+    "privacy.translationNotice": "此翻译仅供参考。英文版本为官方隐私政策。",
+    "privacy.viewOfficial": "查看官方英文政策"
+  }
+}
