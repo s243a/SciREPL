@@ -18,6 +18,19 @@
     --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
     --radius: 10px;
     --card-gap: 12px;
+
+    /* ===== Appearance (Menu -> Appearance) ===== */
+
+    /* Space reserved above the header so the app does not sit under a device
+       status bar. `auto` resolves to the real safe-area inset where the platform
+       reports one, and falls back to the icon-button height on engines with no
+       env() support. Users can override with an explicit value; 0 is valid and
+       distinct from unset. See www/js/appearance.js. */
+    --app-top-margin: env(safe-area-inset-top, 28px);
+
+    /* Multiplier for header icon buttons. 1 keeps the historical 28px. */
+    --ui-btn-scale: 1;
+    --icon-btn-size: 28px;
 }
 
 * {
@@ -148,7 +161,10 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 16px;
+    /* The top padding carries the status-bar allowance. Without this the header
+       draws underneath the clock and battery on edge-to-edge Android, which is
+       what testers reported. */
+    padding: calc(10px + var(--app-top-margin)) 16px 10px;
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border);
     backdrop-filter: blur(12px);
@@ -472,13 +488,17 @@ html, body {
 /* ===== Help Button ===== */
 
 .icon-btn {
-    width: 28px;
-    height: 28px;
+    width: calc(var(--icon-btn-size) * var(--ui-btn-scale));
+    height: calc(var(--icon-btn-size) * var(--ui-btn-scale));
+    font-size: calc(14px * var(--ui-btn-scale));
+    /* Never shrink. These are flex items in a header that runs out of room, and
+       the default flex-shrink:1 silently compressed them back to their original
+       size — which made the button-size setting appear to do nothing. */
+    flex: 0 0 auto;
     border: 1px solid var(--border);
     border-radius: 50%;
     background: var(--bg-card);
     color: var(--accent);
-    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1247,6 +1267,12 @@ html, body {
     display: flex;
     align-items: center;
     gap: 10px;
+    /* Keep the controls at their chosen size, and let them wrap onto a second
+       row rather than overflow when the buttons are scaled up on a narrow
+       screen. */
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 /* ===== Menu Modal ===== */
@@ -2248,4 +2274,123 @@ body.force-mobile .vfs-delete-btn {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* ===== Themes =====
+ *
+ * Every colour the app uses already comes from a custom property on :root, so a
+ * theme is just a different set of values for those properties — no selector
+ * rewriting, and a custom theme can be expressed as data (see appearance.js).
+ *
+ * `data-theme` on <html> is the switch:
+ *   absent / "dark"  → the values on :root above
+ *   "light"          → the block below
+ *   "auto"           → resolved to dark or light by appearance.js, which follows
+ *                      prefers-color-scheme and re-resolves when it changes.
+ * Custom themes set their properties inline on <html>, which wins over both.
+ */
+
+:root[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f6f8fa;
+    --bg-card: #ffffff;
+    --bg-input: #ffffff;
+    --border: #d0d7de;
+    --text-primary: #1f2328;
+    --text-secondary: #59636e;
+    --text-muted: #818b98;
+    --accent: #0969da;
+    --accent-glow: rgba(9, 105, 218, 0.12);
+    --green: #1a7f37;
+    --orange: #9a6700;
+    --red: #cf222e;
+}
+
+/* The header title is a gradient clipped to the text; on light backgrounds the
+   dark-theme gradient is close to invisible, so it gets its own pairing. */
+:root[data-theme="light"] #app-header h1 {
+    background: linear-gradient(135deg, var(--accent), #8250df);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+/* Right-to-left locales. Only the properties that are genuinely direction-
+   dependent are flipped; everything else is already logical or symmetric. */
+:root[dir="rtl"] .menu-grid,
+:root[dir="rtl"] .settings-item {
+    text-align: right;
+}
+
+/* ===== Appearance modal ===== */
+
+.appearance-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+}
+
+.appearance-row label {
+    color: var(--text-secondary);
+    flex: 1;
+}
+
+.appearance-value {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    min-width: 4.5em;
+    text-align: right;
+}
+
+.appearance-row input[type="range"] {
+    flex: 1.2;
+    accent-color: var(--accent);
+}
+
+/* A live sample of the button being scaled, so the effect is visible without
+   closing the dialog. */
+.appearance-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    margin-top: 4px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+#appearance-theme-editor textarea {
+    width: 100%;
+    min-height: 160px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 10px;
+    resize: vertical;
+}
+
+.appearance-note {
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 6px 0 2px;
+}
+
+.appearance-error {
+    color: var(--red);
+    font-size: 12px;
+    margin-top: 6px;
+    white-space: pre-wrap;
+}
+
+.appearance-warn {
+    color: var(--orange);
+    font-size: 12px;
+    margin-top: 6px;
 }

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Sci REPL</title>
     <meta name="description" content="Multi-language scientific REPL — Python, Prolog, Bash, JavaScript">
 
@@ -465,6 +465,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                 <button id="btn-prolog-settings">⚙ Files &amp; Storage (VFS / Paths)</button>
                 <button id="btn-memory">📊 Memory &amp; Storage</button>
                 <button id="btn-languages">🔤 Languages</button>
+                <button id="btn-appearance" data-i18n="menu.appearance">🎨 Appearance</button>
                 <button id="btn-settings">⚙ Settings</button>
                 <button id="btn-clear-session" class="danger">🗑 Clear History</button>
                 <button id="btn-open-browser">🌐 Open in Browser</button>
@@ -726,6 +727,98 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
         </div>
     </div>
 
+    <!-- Appearance Modal -->
+    <div id="appearance-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2 data-i18n="appearance.title">Appearance</h2>
+
+            <div class="settings-section" data-i18n="appearance.layout">Layout</div>
+            <p class="appearance-note" data-i18n="appearance.topMarginHelp">
+                Space above the header, so the app does not sit under the device status bar.
+                Auto follows the device's reported safe area. Set 0 to remove it entirely.
+            </p>
+            <div class="appearance-row">
+                <label for="appearance-top-margin" data-i18n="appearance.topMargin">Top margin</label>
+                <input type="range" id="appearance-top-margin" min="0" max="96" step="1">
+                <span class="appearance-value" id="appearance-top-margin-value"></span>
+            </div>
+            <div class="appearance-row">
+                <label>
+                    <input type="checkbox" id="appearance-top-margin-auto">
+                    <span data-i18n="appearance.topMarginAuto">Auto</span>
+                </label>
+            </div>
+
+            <div class="settings-section" data-i18n="appearance.buttons">Buttons</div>
+            <p class="appearance-note" data-i18n="appearance.buttonScaleHelp">
+                Scales the header buttons. Larger buttons are easier to hit on a touchscreen.
+            </p>
+            <div class="appearance-row">
+                <label for="appearance-btn-scale" data-i18n="appearance.buttonScale">Button size</label>
+                <input type="range" id="appearance-btn-scale" min="0.75" max="2.5" step="0.05">
+                <span class="appearance-value" id="appearance-btn-scale-value"></span>
+            </div>
+            <div class="appearance-preview">
+                <span data-i18n="appearance.buttonPreview">Preview</span>
+                <button class="icon-btn" type="button" tabindex="-1">☰</button>
+                <button class="icon-btn" type="button" tabindex="-1">🔍</button>
+                <button class="icon-btn" type="button" tabindex="-1">?</button>
+            </div>
+
+            <div class="settings-section" data-i18n="appearance.theme">Theme</div>
+            <div class="appearance-row">
+                <label for="appearance-theme" data-i18n="appearance.theme">Theme</label>
+                <select id="appearance-theme" class="settings-select">
+                    <option value="auto" data-i18n="appearance.themeAuto">Match system</option>
+                    <option value="dark" data-i18n="appearance.themeDark">Dark</option>
+                    <option value="light" data-i18n="appearance.themeLight">Light</option>
+                    <option value="custom" data-i18n="appearance.themeCustom">Custom</option>
+                </select>
+                <button id="appearance-customise" class="vfs-btn" data-i18n="appearance.customise">Customise…</button>
+            </div>
+
+            <div id="appearance-theme-editor" class="hidden">
+                <p class="appearance-note" data-i18n="appearance.themeEditorHelp">
+                    A theme is a set of colour variables. Edit the values below, then apply.
+                    Unknown names and non-colour values are rejected.
+                </p>
+                <textarea id="appearance-theme-json" spellcheck="false" aria-label="Theme JSON"></textarea>
+                <div id="appearance-theme-error" class="appearance-error"></div>
+                <div class="appearance-row">
+                    <button id="appearance-theme-apply" class="vfs-btn" data-i18n="appearance.themeApply">Apply theme</button>
+                    <button id="appearance-theme-revert" class="vfs-btn" data-i18n="appearance.themeRevert">Revert</button>
+                </div>
+
+                <details>
+                    <summary data-i18n="appearance.advancedCss">Advanced: custom CSS</summary>
+                    <p class="appearance-warn" data-i18n="appearance.advancedCssHelp">
+                        Raw CSS, applied last. This can make the app unusable — use
+                        Reset to defaults to recover.
+                    </p>
+                    <textarea id="appearance-custom-css-input" spellcheck="false" aria-label="Custom CSS"></textarea>
+                    <div class="appearance-row">
+                        <button id="appearance-css-apply" class="vfs-btn" data-i18n="common.apply">Apply</button>
+                    </div>
+                </details>
+            </div>
+
+            <div class="settings-section" data-i18n="appearance.language">Language</div>
+            <p class="appearance-note" data-i18n="appearance.languageHelp">
+                Only languages with a usable translation are listed. File extensions and
+                kernel names stay in their original form in every language.
+            </p>
+            <div class="appearance-row">
+                <label for="appearance-language" data-i18n="appearance.language">Language</label>
+                <select id="appearance-language" class="settings-select"></select>
+            </div>
+
+            <div class="appearance-row">
+                <button id="appearance-reset" class="vfs-btn danger" data-i18n="appearance.reset">Reset to defaults</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Languages Modal -->
     <div id="languages-modal" class="modal hidden">
         <div class="modal-content">
@@ -975,6 +1068,9 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <script src="js/file_io.js"></script>
     <script src="js/math_mode.js"></script>
     <script src="js/bridge.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/appearance.js"></script>
+    <script src="js/appearance_ui.js"></script>
     <script src="js/kernel_config.js"></script>
     <script src="js/kernel_manager.js"></script>
     <script src="js/shared_vfs.js"></script>

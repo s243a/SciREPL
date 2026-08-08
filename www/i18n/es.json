@@ -1,0 +1,57 @@
+{
+  "__meta": {
+    "locale": "es",
+    "endonym": "Español",
+    "dir": "ltr",
+    "note": "Traducción completa de la superficie de Apariencia y menú. Revisada para español neutro."
+  },
+
+  "strings": {
+    "__literal": [],
+
+    "menu.title": "Menú",
+    "menu.appearance": "Apariencia",
+    "menu.settings": "Ajustes",
+    "menu.runAll": "Ejecutar todas las celdas",
+    "menu.newNotebook": "Nuevo cuaderno",
+
+    "appearance.title": "Apariencia",
+
+    "appearance.layout": "Diseño",
+    "appearance.topMargin": "Margen superior",
+    "appearance.topMarginAuto": "Automático",
+    "appearance.topMarginHelp": "Espacio encima de la cabecera, para que la aplicación no quede debajo de la barra de estado del dispositivo. El modo automático usa el área segura que informa el dispositivo. Usa 0 para eliminarlo por completo.",
+    "appearance.topMarginAutoValue": "Automático ({pixels} px)",
+    "appearance.reset": "Restablecer valores predeterminados",
+
+    "appearance.buttons": "Botones",
+    "appearance.buttonScale": "Tamaño de los botones",
+    "appearance.buttonScaleHelp": "Ajusta el tamaño de los botones de la cabecera. Los botones más grandes son más fáciles de pulsar en una pantalla táctil.",
+    "appearance.buttonPreview": "Vista previa",
+
+    "appearance.theme": "Tema",
+    "appearance.themeAuto": "Igual que el sistema",
+    "appearance.themeDark": "Oscuro",
+    "appearance.themeLight": "Claro",
+    "appearance.themeCustom": "Personalizado",
+    "appearance.customise": "Personalizar…",
+    "appearance.themeEditorTitle": "Tema personalizado",
+    "appearance.themeEditorHelp": "Un tema es un conjunto de variables de color. Edita los valores y aplica los cambios. Se rechazan los nombres desconocidos y los valores que no sean colores.",
+    "appearance.themeApply": "Aplicar tema",
+    "appearance.themeRevert": "Deshacer",
+    "appearance.advancedCss": "Avanzado: CSS personalizado",
+    "appearance.advancedCssHelp": "CSS sin restricciones, aplicado al final. Puede dejar la aplicación inutilizable: usa «Restablecer valores predeterminados» para recuperarla.",
+    "appearance.themeApplied": "Tema aplicado.",
+
+    "appearance.language": "Idioma",
+    "appearance.languageDetect": "Detectar automáticamente",
+    "appearance.languageDetectValue": "Detectar automáticamente ({language})",
+    "appearance.languagePartial": "{language} — {percent}% traducido",
+    "appearance.languageHelp": "Solo se muestran los idiomas con una traducción utilizable. Las extensiones de archivo y los nombres de los kernels se mantienen en su forma original en todos los idiomas.",
+
+    "common.close": "Cerrar",
+    "common.cancel": "Cancelar",
+    "common.apply": "Aplicar",
+    "common.reset": "Restablecer"
+  }
+}
