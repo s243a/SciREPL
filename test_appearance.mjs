@@ -154,6 +154,32 @@ try {
     check('the document direction is set',
         ['ltr', 'rtl'].includes(await page.evaluate(() => document.documentElement.getAttribute('dir'))));
 
+    // A draft translation may live in the repo but must not be offered until a
+    // human who reads it has signed it off — the completeness score cannot tell
+    // a good translation from a confident wrong one.
+    const gating = await page.evaluate(() => {
+        window.i18n.catalogues.__draft = { 'menu.appearance': 'Apariencia-draft' };
+        window.i18n.completeness.__draft = 1;
+        window.i18n.LOCALES.push({ code: '__draft', endonym: 'Draft', dir: 'ltr', status: 'draft' });
+        const offered = window.i18n.available().some((l) => l.code === '__draft');
+        const status = window.i18n.statusOf('__draft');
+        window.i18n.LOCALES.pop();
+        delete window.i18n.catalogues.__draft;
+        delete window.i18n.completeness.__draft;
+        return { offered, status };
+    });
+    check('a complete but unreviewed translation is NOT offered',
+        gating.offered === false, `status=${gating.status}`);
+
+    // Layout and language are separate reviews; this is how the first is done
+    // without a translation existing.
+    await page.evaluate(() => window.i18n.activate('en-x-rtl'));
+    await page.waitForTimeout(200);
+    check('the RTL preview locale flips document direction',
+        await page.evaluate(() => document.documentElement.getAttribute('dir')) === 'rtl');
+    check('the RTL preview keeps English strings, so only layout is under test',
+        await page.evaluate(() => window.t('menu.appearance')) === 'Appearance');
+
     await page.evaluate(() => window.i18n.activate('en'));
 
     /* ------------------------------ dialog ------------------------------ */

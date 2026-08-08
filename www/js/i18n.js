@@ -35,9 +35,36 @@
      * "Spanish" is no use to someone who only reads Spanish.
      */
     const LOCALES = [
-        { code: 'en', endonym: 'English', english: 'English', dir: 'ltr' },
-        { code: 'es', endonym: 'Español', english: 'Spanish', dir: 'ltr' },
+        { code: 'en', endonym: 'English', english: 'English', dir: 'ltr', status: 'reviewed' },
+        { code: 'es', endonym: 'Español', english: 'Spanish', dir: 'ltr', status: 'reviewed' },
     ];
+
+    /**
+     * A locale is only offered once a human who reads it has signed it off.
+     *
+     * A machine translation can be complete and still be wrong in ways the
+     * completeness score cannot see — register, terminology, or simply being
+     * inaccurate. So a catalogue may declare `"status": "draft"` in its
+     * __meta, land in the repository, and be reviewable, without being
+     * offered to users until the status changes to "reviewed".
+     *
+     * Draft locales remain selectable through the RTL/preview mechanism below,
+     * which is how a reviewer looks at one in situ.
+     */
+    const REVIEWED = 'reviewed';
+
+    /**
+     * Pseudo-locale for checking right-to-left layout without a translation.
+     *
+     * Layout and language are separate problems, and mixing them wastes a
+     * reviewer's time: a native speaker asked to check an Arabic build should be
+     * reporting translation issues, not that a margin is on the wrong side.
+     * This renders the English strings right-to-left so the layout can be fixed
+     * first, independently.
+     *
+     *   window.i18n.activate('en-x-rtl')
+     */
+    const RTL_PREVIEW = 'en-x-rtl';
 
     class I18n {
         constructor() {
@@ -101,6 +128,8 @@
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 this.catalogues[code] = data.strings || {};
+                // Carried on the catalogue so statusOf() can see it.
+                this.catalogues[code].__status = (data.__meta || {}).status;
                 this._score(code);
                 return this.catalogues[code];
             } catch (e) {
@@ -169,7 +198,10 @@
                     ...l,
                     completeness: this.completeness[l.code] ?? 0,
                 }))
-                .filter((l) => l.code === BASE_LOCALE || l.completeness >= MIN_COMPLETENESS)
+                // Complete *and* reviewed. A draft stays in the repository and stays
+            // out of the picker until someone who reads it has checked it.
+            .filter((l) => l.code === BASE_LOCALE
+                || (l.completeness >= MIN_COMPLETENESS && this.statusOf(l.code) === REVIEWED))
                 .map((l) => ({
                     ...l,
                     partial: l.completeness < PARTIAL_THRESHOLD && l.code !== BASE_LOCALE,
@@ -177,7 +209,18 @@
         }
 
         localeInfo(code) {
+            if (code === RTL_PREVIEW) {
+                return { code: RTL_PREVIEW, endonym: 'English (RTL preview)', dir: 'rtl', status: 'draft' };
+            }
             return LOCALES.find((l) => l.code === code) || LOCALES[0];
+        }
+
+        /** Declared review status, defaulting to draft for anything unstated. */
+        statusOf(code) {
+            if (code === BASE_LOCALE) return REVIEWED;
+            const declared = (this.catalogues[code] || {}).__status;
+            const registered = (LOCALES.find((l) => l.code === code) || {}).status;
+            return declared || registered || 'draft';
         }
 
         /** Load what is needed and apply the resolved locale to the document. */
@@ -195,6 +238,12 @@
         }
 
         async activate(code) {
+            if (code === RTL_PREVIEW) {
+                // Reuse the base strings; only the direction changes.
+                await this.load(BASE_LOCALE);
+                this.catalogues[RTL_PREVIEW] = this.catalogues[BASE_LOCALE];
+                this.completeness[RTL_PREVIEW] = 1;
+            }
             await this.load(code);
             if (!this.catalogues[code]) code = BASE_LOCALE;
             this.current = code;
@@ -241,6 +290,8 @@
     i18n.LOCALES = LOCALES;
     i18n.MIN_COMPLETENESS = MIN_COMPLETENESS;
     i18n.BASE_LOCALE = BASE_LOCALE;
+    i18n.RTL_PREVIEW = RTL_PREVIEW;
+    i18n.REVIEWED = REVIEWED;
 
     window.i18n = i18n;
     window.t = (key, vars) => i18n.t(key, vars);

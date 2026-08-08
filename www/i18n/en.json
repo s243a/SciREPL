@@ -3,36 +3,31 @@
     "locale": "en",
     "endonym": "English",
     "dir": "ltr",
-    "note": "Base catalogue. Every other locale is scored against this one; see www/js/i18n.js."
+    "note": "Base catalogue. Every other locale is scored against this one; see www/js/i18n.js.",
+    "status": "reviewed"
   },
-
   "__translatorNotes": {
     "literal": "Keys listed in a locale's \"__literal\" array are expected to stay identical to English. File extensions (.srwb, .ipynb, .py) and kernel names (Python, Bash, Prolog, Lua, R) are identifiers, not prose — translating them would break what users type and search for.",
     "rtl": "In right-to-left locales, Latin identifiers keep their own direction inside the sentence. Write the sentence naturally in your language and leave the identifier as-is; the browser handles the bidirectional run.",
     "placeholders": "{name} placeholders are substituted at runtime. Keep them exactly as written; they may be reordered to suit your language's word order."
   },
-
   "strings": {
     "menu.title": "Menu",
     "menu.appearance": "Appearance",
     "menu.settings": "Settings",
     "menu.runAll": "Run All Cells",
     "menu.newNotebook": "New Notebook",
-
     "appearance.title": "Appearance",
-
     "appearance.layout": "Layout",
     "appearance.topMargin": "Top margin",
     "appearance.topMarginAuto": "Auto",
     "appearance.topMarginHelp": "Space above the header, so the app does not sit under the device status bar. Auto follows the device's reported safe area. Set 0 to remove it entirely.",
     "appearance.topMarginAutoValue": "Auto ({pixels} px)",
     "appearance.reset": "Reset to defaults",
-
     "appearance.buttons": "Buttons",
     "appearance.buttonScale": "Button size",
     "appearance.buttonScaleHelp": "Scales the header buttons. Larger buttons are easier to hit on a touchscreen.",
     "appearance.buttonPreview": "Preview",
-
     "appearance.theme": "Theme",
     "appearance.themeAuto": "Match system",
     "appearance.themeDark": "Dark",
@@ -46,13 +41,11 @@
     "appearance.advancedCss": "Advanced: custom CSS",
     "appearance.advancedCssHelp": "Raw CSS, applied last. This can make the app unusable — use Reset to defaults to recover.",
     "appearance.themeApplied": "Theme applied.",
-
     "appearance.language": "Language",
     "appearance.languageDetect": "Detect automatically",
     "appearance.languageDetectValue": "Detect automatically ({language})",
     "appearance.languagePartial": "{language} — {percent}% translated",
     "appearance.languageHelp": "Only languages with a usable translation are listed. File extensions and kernel names stay in their original form in every language.",
-
     "common.close": "Close",
     "common.cancel": "Cancel",
     "common.apply": "Apply",
