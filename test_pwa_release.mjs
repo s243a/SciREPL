@@ -184,6 +184,7 @@ try {
     await page.evaluate(() => {
         localStorage.clear();
         localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.setItem('scirepl_onboarding_seen', '1');
         localStorage.setItem('scirepl_auto_switch_workbook', '0');
         localStorage.setItem('scirepl_auto_download', '1');
     });

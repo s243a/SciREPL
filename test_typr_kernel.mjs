@@ -70,6 +70,7 @@ async function domExec(page, asyncJsCode, { timeout = 30000 } = {}) {
     console.log('1. Loading SciREPL...');
     await page.addInitScript(() => {
         localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.setItem('scirepl_onboarding_seen', '1');
         localStorage.setItem('scirepl_auto_download', '1');
         localStorage.removeItem('scirepl_enabled_languages'); // ensure all languages show
     });

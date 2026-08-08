@@ -53,6 +53,7 @@ const R_TIMEOUT = 180_000;     // 3 min for webR init
     const context = browser.contexts()[0];
     await context.addInitScript(() => {
       localStorage.setItem('scirepl_privacy_accepted', '1');
+      localStorage.setItem('scirepl_onboarding_seen', '1');
       localStorage.setItem('scirepl_auto_download', '1');
     });
 

@@ -8,6 +8,7 @@ const TIMEOUT = 180_000;
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     await context.addInitScript(() => {
         localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.setItem('scirepl_onboarding_seen', '1');
     });
     const page = await context.newPage();
 

@@ -45,6 +45,24 @@
     "common.close": "Cerrar",
     "common.cancel": "Cancelar",
     "common.apply": "Aplicar",
-    "common.reset": "Restablecer"
+    "common.reset": "Restablecer",
+    "tour.language.title": "Elige el idioma de la interfaz",
+    "tour.language.body": "Es el idioma de los menús y mensajes de SciREPL. Es independiente del lenguaje de programación en el que escribes tu código.",
+    "tour.menu.title": "El menú",
+    "tour.menu.body": "Aquí están los cuadernos, la importación y exportación, los paquetes, los ajustes y la apariencia.",
+    "tour.help.title": "Ayuda",
+    "tour.help.body": "Documentación, la política de privacidad y este recorrido si quieres verlo de nuevo.",
+    "tour.newCellLanguage.title": "Lenguaje de programación para celdas nuevas",
+    "tour.newCellLanguage.body": "Elige el lenguaje en el que se ejecutará tu próxima celda. Están disponibles Python, Prolog, Bash, JavaScript, R, Lua, TypR y ClojureScript.",
+    "tour.editCell.title": "Editar una celda",
+    "tour.editCell.body": "El lápiz de cualquier celda la reabre para editarla y volver a ejecutarla. Aparece cuando ya has ejecutado algo.",
+    "tour.editCellLanguage.title": "Cambiar el lenguaje de una celda",
+    "tour.editCellLanguage.body": "Mientras editas, este selector cambia el lenguaje de esa celda. «All→» aplica tu elección a todas las celdas de código del cuaderno.",
+    "tour.next": "Siguiente",
+    "tour.back": "Atrás",
+    "tour.skip": "Omitir",
+    "tour.done": "Listo",
+    "tour.progress": "{current} de {total}",
+    "help.showTour": "Ver el recorrido otra vez"
   }
 }

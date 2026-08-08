@@ -2394,3 +2394,118 @@ body.force-mobile .vfs-delete-btn {
     font-size: 12px;
     margin-top: 6px;
 }
+
+/* ===== First-run tour (onboarding.js) ===== */
+
+#tour-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+}
+
+/* The dim is produced by an enormous spread on the spotlight, so the target
+   stays fully lit and un-tinted rather than showing through a translucent
+   layer. */
+#tour-spotlight {
+    position: absolute;
+    border-radius: var(--radius);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.72);
+    border: 2px solid var(--accent);
+    pointer-events: none;
+    transition: all 0.25s ease;
+}
+
+#tour-card {
+    position: absolute;
+    max-width: min(340px, calc(100vw - 32px));
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    transition: top 0.25s ease, left 0.25s ease;
+}
+
+#tour-card h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+#tour-body {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+#tour-control:not(:empty) {
+    margin-top: 12px;
+}
+
+.tour-language select {
+    width: 100%;
+}
+
+/* Illustration used when the real control does not exist yet — an empty
+   notebook has no cell to point at. */
+.tour-mock {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    background: var(--bg-input);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+}
+
+.tour-mock-btn,
+.tour-mock-select {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-card);
+    color: var(--accent);
+    font-size: 13px;
+}
+
+#tour-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+#tour-progress {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+#tour-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.tour-btn,
+.tour-btn-quiet {
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg-input);
+    color: var(--text-secondary);
+}
+
+.tour-btn {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+}

@@ -22,6 +22,7 @@ const APP_SHELL = [
   './js/i18n.js',
   './js/appearance.js',
   './js/appearance_ui.js',
+  './js/onboarding.js',
   './i18n/manifest.json',
   './i18n/en.json',
   './i18n/es.json',

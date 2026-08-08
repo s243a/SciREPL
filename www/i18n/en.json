@@ -24,7 +24,11 @@
     "appearance.languageDetect": "Detect the user's language from their device settings.",
     "appearance.languagePartial": "Shown in a dropdown: the language name, then how much of the UI is translated.",
     "common.reset": "Restore defaults, not 'reset the device' or 'restart'.",
-    "common.apply": "Commit the pending changes in this dialog."
+    "common.apply": "Commit the pending changes in this dialog.",
+    "tour.language.title": "The UI/locale language, NOT the programming language. Keep these clearly distinct — this app has both.",
+    "tour.newCellLanguage.title": "Programming language (Python, Prolog...), NOT the UI language.",
+    "tour.editCellLanguage.body": "'All→' is a button label on screen; keep the arrow. 'cell' is a notebook cell.",
+    "tour.progress": "Step counter, e.g. '2 of 6'."
   },
   "strings": {
     "menu.title": "Menu",
@@ -64,6 +68,24 @@
     "common.close": "Close",
     "common.cancel": "Cancel",
     "common.apply": "Apply",
-    "common.reset": "Reset"
+    "common.reset": "Reset",
+    "tour.language.title": "Choose your display language",
+    "tour.language.body": "This is the language of SciREPL's own menus and messages. It is separate from the programming language your code is written in.",
+    "tour.menu.title": "The menu",
+    "tour.menu.body": "Notebooks, import and export, packages, settings and appearance all live here.",
+    "tour.help.title": "Help",
+    "tour.help.body": "Documentation, the privacy policy, and this tour if you want to see it again.",
+    "tour.newCellLanguage.title": "Programming language for new cells",
+    "tour.newCellLanguage.body": "Pick the language your next cell will run in. Python, Prolog, Bash, JavaScript, R, Lua, TypR and ClojureScript are available.",
+    "tour.editCell.title": "Editing a cell",
+    "tour.editCell.body": "The pencil on any cell reopens it for editing and re-running. It appears once you have run something.",
+    "tour.editCellLanguage.title": "Changing a cell's programming language",
+    "tour.editCellLanguage.body": "While editing, this selector changes that one cell's language. \"All→\" applies your choice to every code cell in the notebook.",
+    "tour.next": "Next",
+    "tour.back": "Back",
+    "tour.skip": "Skip",
+    "tour.done": "Done",
+    "tour.progress": "{current} of {total}",
+    "help.showTour": "Show the tour again"
   }
 }
