@@ -168,6 +168,45 @@ export default async function run() {
     // criterion that matters most: packaging must not relax anything.
     await assertBoundary(r, page, shell.electronApp, 'packaged');
 
+    /* ---------------- DevTools is available, and costs nothing ---------------- */
+    //
+    // DevTools in the packaged build is a genuine advantage over Android, where
+    // inspecting the WebView needs chrome://inspect, USB debugging and a second
+    // machine. It is worth asserting *both* halves: that it still works once
+    // packaged (some builds disable it), and that opening it does not widen
+    // what the page can reach.
+    //
+    // It does not, and cannot: the boundary is contextIsolation + sandbox +
+    // nodeIntegration:false, which apply to whoever is typing. A user at the
+    // DevTools console has exactly what a notebook cell has — which is why this
+    // is parity with pressing F12 on the PWA, not an escalation.
+    const devtools = await shell.electronApp.evaluate(async ({ BrowserWindow }) => {
+      const wc = BrowserWindow.getAllWindows()[0].webContents;
+      wc.openDevTools({ mode: 'detach' });
+      await new Promise((r) => setTimeout(r, 2500));
+      return { open: wc.isDevToolsOpened() };
+    });
+    r.log('packaged: DevTools can be opened', devtools.open === true);
+
+    const withDevtools = await page.evaluate(() => ({
+      require: typeof window.require,
+      process: typeof window.process,
+      viaCtor: (() => {
+        try { return typeof (new Function('return process'))(); } catch { return 'blocked'; }
+      })(),
+      api: Object.keys(window.sciREPLPlatform || {}).sort(),
+    }));
+    r.log('packaged: DevTools does not expose Node',
+      withDevtools.require === 'undefined' && withDevtools.process === 'undefined'
+        && withDevtools.viaCtor !== 'object' && withDevtools.viaCtor !== 'function',
+      JSON.stringify(withDevtools));
+    r.log('packaged: DevTools does not widen the platform API',
+      JSON.stringify(withDevtools.api) === JSON.stringify(['getAppInfo', 'getDistributionInfo']));
+
+    await shell.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0].webContents.closeDevTools();
+    });
+
     /* ---------------- representative bundled kernels ---------------- */
 
     const enabled = await enabledKernels(page);

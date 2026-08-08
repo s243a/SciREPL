@@ -1044,6 +1044,37 @@ AppImage, `.deb`, or Flatpak. That is the right shape for a Linux *release
 asset* and is proposed as the next piece of work, not bodged into the portable
 preview.
 
+### A real advantage over Android: DevTools
+
+**[verified]** The packaged build opens Chromium DevTools from **View → Toggle
+Developer Tools** (or F12). On Android, inspecting the same application means
+`chrome://inspect`, USB debugging and a second machine; here it is one keystroke,
+against the identical `www/` code.
+
+That makes the desktop build the most convenient place to debug notebooks,
+inspect SharedVFS and IndexedDB, and see CSP violations — the Ko-fi block in §5
+is visible in the console exactly as it would be in a browser.
+
+It costs nothing in security, which is asserted rather than assumed. With
+DevTools open in the packaged app:
+
+```
+require = undefined   process = undefined   new Function('return process') = blocked
+window.sciREPLPlatform = [getAppInfo, getDistributionInfo]
+```
+
+The boundary is `contextIsolation` + `sandbox` + `nodeIntegration: false`, and
+those apply to whoever is typing. A user at the DevTools console has exactly what
+a notebook cell has — so this is parity with pressing F12 on the PWA, not an
+escalation. `packaged.test.mjs` asserts both halves: that DevTools still opens
+once packaged, and that opening it widens nothing.
+
+Worth noting for a future Pro build: DevTools does let a user read the bundled
+application code. That is not a new exposure — `app.asar` can be unpacked
+regardless, and the proposal is already explicit that packaging is not DRM. It
+is a reason to keep entitlement logic in the main process, which is where it
+already belongs.
+
 ### Out of scope: the `[WARN: COPY MODE]` title prefix
 
 Not ours. The string appears nowhere in the WSLg logs (`weston.log`,
