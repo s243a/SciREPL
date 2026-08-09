@@ -24,8 +24,12 @@ const MANIFEST = path.join(I18N_DIR, 'manifest.json');
 const BASE = 'en';
 
 /** Same scoring rule as i18n.js: a value identical to English is untranslated. */
-function score(baseStrings, strings) {
-    const literal = new Set(strings.__literal || []);
+function score(baseStrings, strings, sharedLiteral = []) {
+    // Identifiers that stay English in every language — kernel names, file
+    // formats, mount paths — are declared once in en.json's __literal rather
+    // than re-listed by each translator, who would otherwise be penalised for
+    // correctly leaving "Python" alone. A locale may add its own on top.
+    const literal = new Set([...sharedLiteral, ...(strings.__literal || [])]);
     const keys = Object.keys(baseStrings).filter((k) => !k.startsWith('__') && !literal.has(k));
     if (!keys.length) return 1;
     let done = 0;
@@ -91,6 +95,31 @@ if (ui.unwired.length > UI_UNWIRED_BASELINE) {
     process.exit(1);
 }
 
+/**
+ * Offline coverage.
+ *
+ * A catalogue that is not in the service worker's APP_SHELL is fetched on
+ * demand, and offline that fetch fails and i18n falls back to English. An
+ * Arabic user with no connection would have silently lost their translation —
+ * in an app whose entire premise is that it works without a network.
+ *
+ * Adding a locale is two files and it is easy to forget the second, so this
+ * fails the build rather than trusting anyone to remember.
+ */
+function auditServiceWorker(codes) {
+    const swPath = path.join(ROOT, 'www', 'sw.js');
+    let sw;
+    try { sw = readFileSync(swPath, 'utf8'); } catch { return []; }
+    const missing = [];
+    for (const code of codes) {
+        if (!sw.includes(`'./i18n/${code}.json'`)) missing.push(`${code}.json`);
+    }
+    for (const f of readdirSync(I18N_DIR)) {
+        if (/^privacy\.[\w-]+\.json$/.test(f) && !sw.includes(`'./i18n/${f}'`)) missing.push(f);
+    }
+    return missing;
+}
+
 const base = read(BASE);
 
 /**
@@ -136,7 +165,7 @@ const locales = [];
 for (const code of codes.sort()) {
     const cat = read(code);
     const meta = cat.__meta || {};
-    const completeness = code === BASE ? 1 : score(base.strings || {}, cat.strings || {});
+    const completeness = code === BASE ? 1 : score(base.strings || {}, cat.strings || {}, base.__literal || []);
 
     // A domain catalogue may be reviewed on a different schedule from the UI —
     // privacy text in particular is legal copy and is gated separately.
@@ -164,6 +193,15 @@ for (const code of codes.sort()) {
         ...(glossary ? { glossary: { defined: glossary.defined, total: glossary.total } } : {}),
         ...(Object.keys(domains).length ? { domains } : {}),
     });
+}
+
+const swMissing = auditServiceWorker(codes);
+if (swMissing.length) {
+    console.error('[i18n] these catalogues are not precached in www/sw.js, so they ' +
+        'will be unavailable offline:');
+    for (const f of swMissing) console.error(`       ./i18n/${f}`);
+    console.error('       Add them to APP_SHELL and bump CACHE_VERSION.');
+    process.exit(1);
 }
 
 const manifest = {

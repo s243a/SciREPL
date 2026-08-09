@@ -23,11 +23,37 @@ const APP_SHELL = [
   './js/appearance.js',
   './js/appearance_ui.js',
   './js/onboarding.js',
+  // Every shipped locale is precached. A catalogue fetched on demand fails
+  // offline and silently falls back to English, which defeats the point of
+  // translating for users who may have no connection at all. Kept in sync by
+  // scripts/build-i18n-manifest.mjs, which fails the build on a missing entry.
   './i18n/manifest.json',
+  './i18n/ar.json',
+  './i18n/bn.json',
+  './i18n/de.json',
   './i18n/en.json',
   './i18n/es.json',
+  './i18n/fr.json',
+  './i18n/hi.json',
+  './i18n/id.json',
+  './i18n/ja.json',
+  './i18n/ko.json',
+  './i18n/pt-BR.json',
+  './i18n/ru.json',
+  './i18n/zh.json',
+  './i18n/privacy.ar.json',
+  './i18n/privacy.bn.json',
+  './i18n/privacy.de.json',
   './i18n/privacy.en.json',
   './i18n/privacy.es.json',
+  './i18n/privacy.fr.json',
+  './i18n/privacy.hi.json',
+  './i18n/privacy.id.json',
+  './i18n/privacy.ja.json',
+  './i18n/privacy.ko.json',
+  './i18n/privacy.pt-BR.json',
+  './i18n/privacy.ru.json',
+  './i18n/privacy.zh.json',
   './js/kernel_manager.js',
   './js/math_mode.js',
   './js/notebook_manager.js',
@@ -100,12 +126,34 @@ function isCDNRequest(url) {
 }
 
 // Install: pre-cache app shell
+// cache.addAll() is atomic: one 404 anywhere in APP_SHELL rejects the whole
+// install, skipWaiting() never runs, and the app silently has no offline
+// support at all. That was a narrow risk with forty entries; it is a real one
+// now that every shipped locale is listed and the list is derived from
+// filenames.
+//
+// So: try the fast atomic path, and if it fails, cache entries individually so
+// a single bad path costs one file instead of the entire offline experience.
+// The failures are logged with their URLs, because the alternative to a loud
+// partial install is a silent total one.
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(APP_CACHE)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(APP_CACHE);
+    try {
+      await cache.addAll(APP_SHELL);
+    } catch (err) {
+      console.warn('[sw] atomic precache failed, falling back to per-entry:', err);
+      const results = await Promise.allSettled(
+        APP_SHELL.map(url => cache.add(url))
+      );
+      const failed = APP_SHELL.filter((_, i) => results[i].status === 'rejected');
+      if (failed.length) {
+        console.error(`[sw] ${failed.length} of ${APP_SHELL.length} app-shell entries ` +
+          'could not be cached and will be unavailable offline:', failed);
+      }
+    }
+    await self.skipWaiting();
+  })());
 });
 
 // Activate: clean up old app + CDN caches, claim clients

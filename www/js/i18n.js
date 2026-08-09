@@ -239,6 +239,12 @@
                 this.catalogues[code] = data.strings || {};
                 // Carried on the catalogue so statusOf() can see it.
                 this.catalogues[code].__status = (data.__meta || {}).status;
+                // Identifiers that stay English everywhere are declared once, in
+                // the base catalogue. Held separately so _score() matches what
+                // scripts/build-i18n-manifest.mjs computed — two scorers
+                // disagreeing would put one number in the manifest and a
+                // different one in the picker.
+                if (code === BASE_LOCALE) this.sharedLiteral = data.__literal || [];
                 this._score(code);
                 return this.catalogues[code];
             } catch (e) {
@@ -264,7 +270,7 @@
             if (!base || !target) { this.completeness[code] = 0; return; }
             if (code === BASE_LOCALE) { this.completeness[code] = 1; return; }
 
-            const literal = new Set(target.__literal || []);
+            const literal = new Set([...(this.sharedLiteral || []), ...(target.__literal || [])]);
             const keys = Object.keys(base).filter((k) => !k.startsWith('__') && !literal.has(k));
             if (!keys.length) { this.completeness[code] = 1; return; }
 
