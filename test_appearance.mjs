@@ -227,11 +227,17 @@ try {
     // reviewer inspects a draft in situ. es is a draft, and still switchable.
     await page.evaluate(() => window.i18n.activate('es'));
     await page.waitForTimeout(300);
+    // The menu icon lives in the string, so the button keeps it in every
+    // language — assert on the word rather than pinning the exact label.
     check('a draft locale can still be activated for review',
-        await page.evaluate(() => window.t('menu.appearance')) === 'Apariencia');
+        (await page.evaluate(() => window.t('menu.appearance'))).includes('Apariencia'),
+        await page.evaluate(() => window.t('menu.appearance')));
     check('translation reaches the DOM',
-        (await page.evaluate(() => document.getElementById('btn-appearance').textContent.trim()))
-            === 'Apariencia');
+        (await page.evaluate(() => document.getElementById('btn-appearance').textContent))
+            .includes('Apariencia'));
+    check('the menu icon survives translation',
+        (await page.evaluate(() => document.getElementById('btn-appearance').textContent))
+            .includes('\u{1F3A8}'));
     check('untranslated keys fall back to English rather than showing the key id',
         await page.evaluate(() => {
             window.i18n.catalogues.en['__test_fallback_sample'] = 'Sample English Fallback';
@@ -271,7 +277,7 @@ try {
     check('the RTL preview locale flips document direction',
         await page.evaluate(() => document.documentElement.getAttribute('dir')) === 'rtl');
     check('the RTL preview keeps English strings, so only layout is under test',
-        await page.evaluate(() => window.t('menu.appearance')) === 'Appearance');
+        (await page.evaluate(() => window.t('menu.appearance'))).includes('Appearance'));
 
     await page.evaluate(() => window.i18n.activate('en'));
 

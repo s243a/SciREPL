@@ -48,7 +48,7 @@
       "wbKernel.python"
     ],
     "menu.title": "القائمة",
-    "menu.appearance": "المظهر",
+    "menu.appearance": "🎨 المظهر",
     "menu.settings": "الإعدادات",
     "menu.runAll": "تشغيل جميع الخلايا",
     "menu.newNotebook": "دفتر ملاحظات جديد",
@@ -103,7 +103,7 @@
     "tour.done": "تم",
     "tour.progress": "{current} من {total}",
     "help.showTour": "عرض الجولة مجددًا",
-    "menu.showTour": "بدء الجولة الإرشادية",
+    "menu.showTour": "🧭 بدء الجولة الإرشادية",
     "searchReplaceRow.replace": "استبدال",
     "searchReplaceRow.all": "الكل",
     "loading.loadingPythonEnvironment": "جارٍ تحميل بيئة Python…",

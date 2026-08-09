@@ -48,7 +48,7 @@
       "wbKernel.python"
     ],
     "menu.title": "Меню",
-    "menu.appearance": "Внешний вид",
+    "menu.appearance": "🎨 Внешний вид",
     "menu.settings": "Настройки",
     "menu.runAll": "Выполнить все ячейки",
     "menu.newNotebook": "Новый блокнот",
@@ -103,7 +103,7 @@
     "tour.done": "Готово",
     "tour.progress": "{current} из {total}",
     "help.showTour": "Показать тур снова",
-    "menu.showTour": "Пройти тур",
+    "menu.showTour": "🧭 Пройти тур",
     "searchReplaceRow.replace": "Заменить",
     "searchReplaceRow.all": "Все",
     "loading.loadingPythonEnvironment": "Загрузка среды Python…",

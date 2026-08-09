@@ -48,7 +48,7 @@
       "wbKernel.python"
     ],
     "menu.title": "मेनू",
-    "menu.appearance": "दिखावट",
+    "menu.appearance": "🎨 दिखावट",
     "menu.settings": "सेटिंग्स",
     "menu.runAll": "सभी सेल चलाएं",
     "menu.newNotebook": "नई नोटबुक",
@@ -103,7 +103,7 @@
     "tour.done": "पूर्ण",
     "tour.progress": "{total} में से {current}",
     "help.showTour": "टूर फिर से दिखाएं",
-    "menu.showTour": "टूर लें",
+    "menu.showTour": "🧭 टूर लें",
     "searchReplaceRow.replace": "बदलें",
     "searchReplaceRow.all": "सभी",
     "loading.loadingPythonEnvironment": "Python परिवेश लोड हो रहा है…",

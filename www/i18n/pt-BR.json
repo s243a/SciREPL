@@ -53,7 +53,7 @@
       "wbKernel.python"
     ],
     "menu.title": "Menu",
-    "menu.appearance": "Aparência",
+    "menu.appearance": "🎨 Aparência",
     "menu.settings": "Configurações",
     "menu.runAll": "Executar todas as células",
     "menu.newNotebook": "Novo caderno",
@@ -108,7 +108,7 @@
     "tour.done": "Concluir",
     "tour.progress": "{current} de {total}",
     "help.showTour": "Mostrar tour novamente",
-    "menu.showTour": "Fazer o tour",
+    "menu.showTour": "🧭 Fazer o tour",
     "searchReplaceRow.replace": "Substituir",
     "searchReplaceRow.all": "Todos",
     "loading.loadingPythonEnvironment": "Carregando ambiente Python…",

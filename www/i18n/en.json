@@ -149,7 +149,7 @@
   ],
   "strings": {
     "menu.title": "Menu",
-    "menu.appearance": "Appearance",
+    "menu.appearance": "🎨 Appearance",
     "menu.settings": "Settings",
     "menu.runAll": "Run All Cells",
     "menu.newNotebook": "New Notebook",
@@ -204,7 +204,7 @@
     "tour.done": "Done",
     "tour.progress": "{current} of {total}",
     "help.showTour": "Show the tour again",
-    "menu.showTour": "Take the Tour",
+    "menu.showTour": "🧭 Take the Tour",
     "searchReplaceRow.replace": "Replace",
     "searchReplaceRow.all": "All",
     "loading.loadingPythonEnvironment": "Loading Python environment…",

@@ -48,7 +48,7 @@
       "wbKernel.python"
     ],
     "menu.title": "菜单",
-    "menu.appearance": "外观",
+    "menu.appearance": "🎨 外观",
     "menu.settings": "设置",
     "menu.runAll": "运行所有单元格",
     "menu.newNotebook": "新建笔记本",
@@ -103,7 +103,7 @@
     "tour.done": "完成",
     "tour.progress": "{current} / {total}",
     "help.showTour": "重新查看导览",
-    "menu.showTour": "开始导览",
+    "menu.showTour": "🧭 开始导览",
     "searchReplaceRow.replace": "替换",
     "searchReplaceRow.all": "全部",
     "loading.loadingPythonEnvironment": "正在加载 Python 环境…",

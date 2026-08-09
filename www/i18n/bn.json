@@ -48,7 +48,7 @@
       "wbKernel.python"
     ],
     "menu.title": "মেনু",
-    "menu.appearance": "চেহারা ও রূপ",
+    "menu.appearance": "🎨 চেহারা ও রূপ",
     "menu.settings": "সেটিংস",
     "menu.runAll": "সব সেল রান করুন",
     "menu.newNotebook": "নতুন নোটবুক",
@@ -103,7 +103,7 @@
     "tour.done": "সম্পন্ন",
     "tour.progress": "{total}-এর মধ্যে {current}",
     "help.showTour": "ট্যুর আবার দেখুন",
-    "menu.showTour": "ট্যুর শুরু করুন",
+    "menu.showTour": "🧭 ট্যুর শুরু করুন",
     "searchReplaceRow.replace": "প্রতিস্থাপন",
     "searchReplaceRow.all": "সবগুলো",
     "loading.loadingPythonEnvironment": "Python পরিবেশ লোড হচ্ছে…",

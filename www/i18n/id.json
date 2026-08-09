@@ -52,7 +52,7 @@
       "wbKernel.python"
     ],
     "menu.title": "Menu",
-    "menu.appearance": "Tampilan",
+    "menu.appearance": "🎨 Tampilan",
     "menu.settings": "Pengaturan",
     "menu.runAll": "Jalankan semua sel",
     "menu.newNotebook": "Buku catatan baru",
@@ -107,7 +107,7 @@
     "tour.done": "Selesai",
     "tour.progress": "{current} dari {total}",
     "help.showTour": "Tampilkan tur lagi",
-    "menu.showTour": "Ikuti tur",
+    "menu.showTour": "🧭 Ikuti tur",
     "searchReplaceRow.replace": "Ganti",
     "searchReplaceRow.all": "Semua",
     "loading.loadingPythonEnvironment": "Memuat lingkungan Python…",

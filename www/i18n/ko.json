@@ -48,7 +48,7 @@
       "wbKernel.python"
     ],
     "menu.title": "메뉴",
-    "menu.appearance": "모양 및 화면",
+    "menu.appearance": "🎨 모양 및 화면",
     "menu.settings": "설정",
     "menu.runAll": "모든 셀 실행",
     "menu.newNotebook": "새 노트북",
@@ -103,7 +103,7 @@
     "tour.done": "완료",
     "tour.progress": "{total} 중 {current}",
     "help.showTour": "둘러보기 다시 보기",
-    "menu.showTour": "둘러보기 시작",
+    "menu.showTour": "🧭 둘러보기 시작",
     "searchReplaceRow.replace": "바꾸기",
     "searchReplaceRow.all": "모두",
     "loading.loadingPythonEnvironment": "Python 환경 로드 중…",
