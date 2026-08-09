@@ -54,13 +54,48 @@ const TERMINATORS = /[.!?。！？।॥؟…]+/g;
  * short lowercase token after a period) rather than enumerating them.
  */
 function maskNonTerminalPeriods(text) {
+    const NUL = String.fromCharCode(0);
     return text
+        // Dotted abbreviations first, and ALL of their periods: e.g. / i.e. /
+        // z. B. / p. ej. Order matters — the extension rule below masks the
+        // period inside "e.g", which left the trailing "g." looking like a
+        // sentence end. English "(e.g. .srwb)" then counted as two sentences
+        // while a correct French "(par exemple .srwb)" counted as one, and 71
+        // findings across nine locales were all spurious. The inner \s* covers
+        // German "z. B." where the units are spaced apart.
+        .replace(/\b(?:[A-Za-z]{1,3}\s*\.\s*){2,}/g, (m) => m.replace(/\./g, NUL))
         // File extensions and dotted identifiers: .srwb, .tar.gz, install.packages
-        .replace(/\.(?=[A-Za-z0-9]{1,8}\b)/g, '\u0000')
-        // Abbreviations: e.g. / i.e. / z. B. / p. ej. / cf. / etc.
-        .replace(/\b([A-Za-z])\s*\.(?=\s*[A-Za-z]\s*\.)/g, '$1\u0000')
-        .replace(/\b(etc|vs|cf|approx|ca|bzw|ggf|ej|ex)\s*\./gi, '$1\u0000');
+        .replace(/\.(?=[A-Za-z0-9]{1,8}\b)/g, NUL)
+        .replace(/\b(etc|vs|cf|approx|ca|bzw|ggf|ej|ex)\s*\./gi, `$1${NUL}`);
 }
+
+/**
+ * Self-check. This heuristic has been wrong twice — once missing the danda, once
+ * splitting on "e.g." — and each time it sent someone to fix correct
+ * translations. It now proves itself before reporting on anyone else's work.
+ */
+function selfTest() {
+    const cases = [
+        ['\u{1F4C2} Import File (e.g. .srwb, .ipynb, .csv, .py, .zip)', 1],
+        ['\u{1F4C2} Importer un fichier (par exemple .srwb, .ipynb, .csv)', 1],
+        ['\u{1F4C2} \u30D5\u30A1\u30A4\u30EB (\u4F8B: .srwb, .ipynb)', 1],
+        ['Datei importieren (z. B. .srwb, .ipynb)', 1],
+        ['Preferences (e.g. cell counter state)', 1],
+        ['First sentence here. Second sentence here.', 2],
+        ['One thing. Two thing. Three thing.', 3],
+        ['\u6700\u521D\u306E\u6587\u3002\u6B21\u306E\u6587\u3002', 2],
+        ['\u092F\u0939 \u090F\u0915 \u0939\u0948\u0964 \u0935\u0939 \u0926\u094B \u0939\u0948\u0964', 2],
+    ];
+    const bad = cases.filter(([t, want]) => countSentences(t) !== want);
+    if (bad.length) {
+        console.error('[i18n] sentence counter self-test failed — not reporting findings:');
+        for (const [t, want] of bad) {
+            console.error(`       want ${want}, got ${countSentences(t)}: ${JSON.stringify(t)}`);
+        }
+        process.exit(2);
+    }
+}
+
 
 const read = (f) => JSON.parse(readFileSync(path.join(I18N, f), 'utf8'));
 const stripTags = (s) => s.replace(/<[^>]+>/g, '');
@@ -70,6 +105,8 @@ const countSentences = (s) =>
 const placeholders = (s) => (s.match(/\{(\w+)\}/g) || []).sort().join(',');
 
 const base = read(`${BASE}.json`).strings || {};
+
+selfTest();
 
 const args = process.argv.slice(2);
 const strict = args.includes('--strict');
