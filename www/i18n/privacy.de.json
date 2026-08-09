@@ -1,0 +1,12 @@
+{
+  "__meta": {
+    "locale": "de",
+    "domain": "privacy",
+    "status": "draft",
+    "note": "Informative Übersetzung. Die englische Version ist die offizielle Richtlinie."
+  },
+  "strings": {
+    "privacy.translationNotice": "Diese Übersetzung dient nur zu Informationszwecken. Die englische Version ist die offizielle Datenschutzerklärung.",
+    "privacy.viewOfficial": "Offizielle englische Datenschutzerklärung ansehen"
+  }
+}

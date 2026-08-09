@@ -1,0 +1,12 @@
+{
+  "__meta": {
+    "locale": "id",
+    "domain": "privacy",
+    "status": "draft",
+    "note": "Terjemahan informatif. Versi bahasa Inggris adalah kebijakan resmi."
+  },
+  "strings": {
+    "privacy.translationNotice": "Terjemahan ini disediakan hanya untuk tujuan informasi. Versi bahasa Inggris adalah kebijakan privasi resmi.",
+    "privacy.viewOfficial": "Lihat kebijakan resmi dalam bahasa Inggris"
+  }
+}

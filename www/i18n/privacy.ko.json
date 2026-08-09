@@ -1,0 +1,12 @@
+{
+  "__meta": {
+    "locale": "ko",
+    "domain": "privacy",
+    "status": "draft",
+    "note": "안내용 번역입니다. 공식 개인정보 처리방침은 영문 버전입니다."
+  },
+  "strings": {
+    "privacy.translationNotice": "이 번역은 참고용으로만 제공됩니다. 공식적인 개인정보 처리방침은 영문 버전입니다.",
+    "privacy.viewOfficial": "공식 영문 방침 보기"
+  }
+}

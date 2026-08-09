@@ -1,0 +1,12 @@
+{
+  "__meta": {
+    "locale": "pt-BR",
+    "domain": "privacy",
+    "status": "draft",
+    "note": "Tradução informativa. A versão em inglês é a política oficial."
+  },
+  "strings": {
+    "privacy.translationNotice": "Esta tradução é fornecida apenas para fins informativos. A versão em inglês é a política de privacidade oficial.",
+    "privacy.viewOfficial": "Ver política oficial em inglês"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "__meta": {
+    "locale": "ja",
+    "domain": "privacy",
+    "status": "draft",
+    "note": "参考用翻訳です。公式なプライバシーポリシーは英語版です。"
+  },
+  "strings": {
+    "privacy.translationNotice": "この翻訳は情報提供のみを目的としています。公式なプライバシーポリシーは英語版です。",
+    "privacy.viewOfficial": "公式の英語版ポリシーを表示"
+  }
+}
