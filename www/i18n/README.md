@@ -150,11 +150,14 @@ That renders the English strings right-to-left, so layout problems can be found
 and fixed without a translator wading through them. A reviewer's time should go
 on language, not on misplaced margins.
 
-> **Known limitation.** The app's CSS still uses ~56 physical, direction-
-> dependent declarations (`margin-left`, `text-align: left`, `left:`) rather
-> than logical ones (`margin-inline-start`, `text-align: start`,
-> `inset-inline-start`). RTL layout is therefore **not yet correct**, and that
-> should be fixed before an RTL locale is marked `reviewed`.
+The layout itself is now direction-agnostic: the stylesheets use logical
+properties throughout (`margin-inline-start`, `inset-inline-end`,
+`text-align: start`), so RTL mirrors without any `[dir="rtl"]` overrides.
+`test_rtl_layout.mjs` checks that, and fails the build if a physical
+`margin-left` or `text-align: left` is reintroduced — that regression is
+invisible to translation review, so it is caught mechanically instead.
+
+So if something looks wrong in Arabic, report it: it is a bug, not a known gap.
 
 ## Privacy and consent text is separate
 

@@ -109,8 +109,10 @@ html, body {
     animation: progress-pulse 1.8s ease-in-out infinite;
 }
 @keyframes progress-pulse {
-    0%, 100% { width: 15%; margin-left: 0; }
-    50% { width: 40%; margin-left: 30%; }
+    /* Logical, so the bar travels in the reading direction rather than always
+       left-to-right — an RTL user reads progress the other way. */
+    0%, 100% { width: 15%; margin-inline-start: 0; }
+    50% { width: 40%; margin-inline-start: 30%; }
 }
 
 /* webR download modal */
@@ -249,8 +251,7 @@ html, body {
 
     .card {
         max-width: var(--cell-max-width);
-        margin-left: auto;
-        margin-right: auto;
+        margin-inline: auto;
         resize: horizontal;
         overflow: auto;
     }
@@ -389,7 +390,7 @@ html, body {
 .card-output table td {
     padding: 5px 8px;
     border: 1px solid var(--border);
-    text-align: right;
+    text-align: end;
 }
 
 .card-output table th {
@@ -555,7 +556,7 @@ html, body {
 .modal-close {
     position: absolute;
     top: 16px;
-    right: 16px;
+    inset-inline-end: 16px;
     width: 32px;
     height: 32px;
     border: none;
@@ -697,7 +698,7 @@ html, body {
     min-height: 28px;
     appearance: none;
     -webkit-appearance: none;
-    padding-right: 18px;
+    padding-inline-end: 18px;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238b949e'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 6px center;
@@ -859,7 +860,7 @@ html, body {
     border: 1px solid rgba(88, 166, 255, 0.25);
     border-radius: 3px;
     cursor: pointer;
-    margin-left: auto;
+    margin-inline-start: auto;
 }
 
 @media (max-width: 480px) {
@@ -868,7 +869,7 @@ html, body {
     }
 
     .card-input .cell-name-label {
-        margin-left: 0;
+        margin-inline-start: 0;
         max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -1001,7 +1002,7 @@ html, body {
 }
 
 .markdown-body ul, .markdown-body ol {
-    padding-left: 24px;
+    padding-inline-start: 24px;
     margin: 8px 0;
 }
 
@@ -1010,7 +1011,7 @@ html, body {
 }
 
 .markdown-body blockquote {
-    border-left: 3px solid var(--accent);
+    border-inline-start: 3px solid var(--accent);
     margin: 8px 0;
     padding: 4px 16px;
     color: var(--text-secondary);
@@ -1044,7 +1045,7 @@ html, body {
 .markdown-body table td {
     padding: 6px 10px;
     border: 1px solid var(--border);
-    text-align: left;
+    text-align: start;
 }
 
 .markdown-body table th {
@@ -1055,7 +1056,7 @@ html, body {
 /* ===== Editable Cells ===== */
 
 .cell-edit-btn {
-    margin-left: auto;
+    margin-inline-start: auto;
     background: none;
     border: none;
     color: var(--text-muted);
@@ -1208,8 +1209,7 @@ html, body {
 .math-palette {
     position: fixed;
     bottom: 65px; /* Above input bar */
-    left: 0;
-    right: 0;
+    inset-inline: 0;
     background: var(--bg-secondary);
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
@@ -1292,7 +1292,7 @@ html, body {
     font-family: var(--font-sans);
     font-size: 14px;
     cursor: pointer;
-    text-align: left;
+    text-align: start;
     transition: all 0.2s;
     display: flex;
     align-items: center;
@@ -1339,11 +1339,11 @@ html, body {
 .pkg-version, .pkg-size, .pkg-contents, .pkg-kernels {
     font-size: 0.8rem;
     color: var(--fg-secondary);
-    margin-left: 8px;
+    margin-inline-start: 8px;
 }
 
 .pkg-bundle-card {
-    border-left: 3px solid var(--accent);
+    border-inline-start: 3px solid var(--accent);
 }
 
 .pkg-info p {
@@ -1368,7 +1368,7 @@ html, body {
     cursor: pointer;
     font-size: 0.85rem;
     white-space: nowrap;
-    margin-left: 12px;
+    margin-inline-start: 12px;
 }
 
 .pkg-install-btn:hover {
@@ -1576,7 +1576,7 @@ tr:hover .vfs-delete-btn {
 .search-path-table td {
     padding: 6px 10px;
     border: 1px solid var(--border);
-    text-align: left;
+    text-align: start;
     color: var(--text-primary);
 }
 
@@ -1774,19 +1774,19 @@ tr:hover .vfs-delete-btn {
 /* Active file in list */
 .vfs-entry-active {
     background: var(--accent-glow);
-    border-left: 2px solid var(--accent);
+    border-inline-start: 2px solid var(--accent);
 }
 
 /* Selected folder */
 .vfs-dir-selected {
     background: rgba(88, 166, 255, 0.12);
-    border-left: 2px solid var(--accent);
+    border-inline-start: 2px solid var(--accent);
     cursor: pointer;
 }
 
 /* Action button group (download + delete) */
 .vfs-entry-actions {
-    margin-left: auto;
+    margin-inline-start: auto;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1836,7 +1836,7 @@ tr:hover .vfs-delete-btn {
 .export-format-desc {
     font-size: 11px;
     color: var(--text-muted);
-    margin-left: auto;
+    margin-inline-start: auto;
 }
 
 #export-image-section.hidden,
@@ -1909,7 +1909,7 @@ tr:hover .vfs-delete-btn {
     height: 14px;
 }
 .pkg-tree-size {
-    margin-left: auto;
+    margin-inline-start: auto;
     font-size: 11px;
     color: var(--text-muted, #666);
 }
@@ -1919,8 +1919,7 @@ tr:hover .vfs-delete-btn {
 .search-bar {
     position: fixed;
     top: 0;
-    left: 0;
-    right: 0;
+    inset-inline: 0;
     z-index: 3000;
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border);
@@ -2062,7 +2061,7 @@ tr:hover .vfs-delete-btn {
     border-radius: 4px;
     padding: 4px 8px;
     font-size: 13px;
-    margin-left: auto;
+    margin-inline-start: auto;
     color-scheme: dark;
 }
 .settings-select option {
@@ -2142,7 +2141,7 @@ tr:hover .vfs-delete-btn {
     font-size: 12px;
     color: var(--text-secondary);
     white-space: nowrap;
-    margin-right: 8px;
+    margin-inline-end: 8px;
 }
 
 .memory-unload-btn {
@@ -2314,12 +2313,10 @@ body.force-mobile .vfs-delete-btn {
     background-clip: text;
 }
 
-/* Right-to-left locales. Only the properties that are genuinely direction-
-   dependent are flipped; everything else is already logical or symmetric. */
-:root[dir="rtl"] .menu-grid,
-:root[dir="rtl"] .settings-item {
-    text-align: right;
-}
+/* No direction-specific overrides. Layout uses logical properties
+   (margin-inline-start, inset-inline-end, text-align: start), so right-to-left
+   locales mirror on their own. A [dir="rtl"] block here used to flip text-align
+   by hand; it now has nothing to correct, and would fight the base rules. */
 
 /* ===== Appearance modal ===== */
 
@@ -2341,7 +2338,7 @@ body.force-mobile .vfs-delete-btn {
     font-family: var(--font-mono);
     font-size: 13px;
     min-width: 4.5em;
-    text-align: right;
+    text-align: end;
 }
 
 .appearance-row input[type="range"] {
