@@ -383,6 +383,7 @@
     "help.includesFeatureList": "Enthaltene Funktionen: Mehrsprachige Unterstützung (Python, R, Prolog, Bash, JavaScript, Lua), editierbare Zellen, Markdown-Zellen, Sitzungspersistenz mit automatischer Speicherung, Mathe-Modus-Palette, .ipynb-Import/Export mit Ausgabenerhalt, .srwb-Arbeitsmappenformat, vielfältige Exporte (HTML, Markdown, PDF, DOCX mit Formeln, LaTeX) mit Syntax-Hervorhebung, virtuelles Dateisystem, Suchpfade, Ein-Klick-Paketkatalog, Paketformate (.zip/.tar.gz)",
     "appearance.showDrafts": "Übersetzungen in Prüfung einbeziehen",
     "appearance.showDraftsHelp": "Die meisten Übersetzungen wurden noch nicht von einem Muttersprachler überprüft. Sie werden dennoch angeboten und gekennzeichnet, da eine lesbare Oberfläche besser ist als eine unlesbare. Deaktivieren Sie dies, um nur überprüfte Übersetzungen anzuzeigen.",
-    "appearance.languageDraft": "{language} — in Prüfung ({percent}%)"
+    "appearance.languageDraft": "{language} — in Prüfung ({percent}%)",
+    "appearance.cssQuarantined": "Ihr benutzerdefiniertes CSS hat die Menüschaltfläche verdeckt und wurde daher deaktiviert. Es wird unter Erscheinungsbild → Erweitert aufbewahrt, damit Sie es bearbeiten können."
   }
 }

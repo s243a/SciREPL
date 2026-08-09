@@ -102,7 +102,7 @@
     "tour.newCellLanguage.body": "Choisissez le langage dans lequel la prochaine cellule s'exécutera. Prend en charge Python, Prolog, Bash, JavaScript, R, Lua, TypR et ClojureScript.",
     "tour.editCell.title": "Modifier une cellule",
     "tour.editCell.body": "L'icône de crayon sur n'importe quelle cellule la rouvre pour modification et réexécution. Elle apparaît dès que vous avez exécuté du code.",
-    "tour.editCellLanguage.title": "Changer le langage d'une cellule",
+    "tour.editCellLanguage.title": "Changer le langage de programmation d'une cellule",
     "tour.editCellLanguage.body": "Pendant l'édition, ce sélecteur modifie le langage de cette cellule. « All→ » applique votre choix à toutes les cellules de code du carnet.",
     "tour.next": "Suivant",
     "tour.back": "Précédent",
@@ -383,6 +383,7 @@
     "help.includesFeatureList": "Fonctionnalités incluses : Support multilingue (Python, R, Prolog, Bash, JavaScript, Lua), cellules éditables, cellules markdown, persistance de session avec sauvegarde automatique, palette mathématique, import/export .ipynb avec sorties préservées, format .srwb, export riche (HTML, Markdown, PDF, DOCX avec équations natives, LaTeX) avec coloration syntaxique, système de fichiers virtuel, chemins de recherche, catalogue de paquets en un clic, formats de paquet (.zip/.tar.gz)",
     "appearance.showDrafts": "Inclure les traductions en cours de révision",
     "appearance.showDraftsHelp": "La plupart des traductions n'ont pas encore été vérifiées par une personne parlant la langue. Elles sont néanmoins proposées et étiquetées, car une interface lisible vaut mieux qu'une interface incompréhensible. Désactivez cette option pour ne voir que les traductions révisées.",
-    "appearance.languageDraft": "{language} — en cours de révision ({percent}%)"
+    "appearance.languageDraft": "{language} — en cours de révision ({percent}%)",
+    "appearance.cssQuarantined": "Votre CSS personnalisé masquait le bouton de menu, il a donc été désactivé. Il est conservé dans Apparence → Avancé afin que vous puissiez le modifier."
   }
 }

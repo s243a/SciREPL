@@ -99,7 +99,7 @@
     "tour.newCellLanguage.body": "Elige el lenguaje en el que se ejecutará tu próxima celda. Están disponibles Python, Prolog, Bash, JavaScript, R, Lua, TypR y ClojureScript.",
     "tour.editCell.title": "Editar una celda",
     "tour.editCell.body": "El lápiz de cualquier celda la reabre para editarla y volver a ejecutarla. Aparece cuando ya has ejecutado algo.",
-    "tour.editCellLanguage.title": "Cambiar el lenguaje de una celda",
+    "tour.editCellLanguage.title": "Cambiar el lenguaje de programación de una celda",
     "tour.editCellLanguage.body": "Mientras editas, este selector cambia el lenguaje de esa celda. «All→» aplica tu elección a todas las celdas de código del cuaderno.",
     "tour.next": "Siguiente",
     "tour.back": "Atrás",
@@ -380,6 +380,7 @@
     "help.includesFeatureList": "Incluye: Multilenguaje (Python, R, Prolog, Bash, JavaScript, Lua), celdas editables, celdas markdown, persistencia de sesión con autoguardado y recuperación tras fallos, paleta de modo matemático, importación/exportación de .ipynb con conservación de salidas, formato de libro de trabajo .srwb, exportación enriquecida (HTML, Markdown, PDF, DOCX con ecuaciones nativas, LaTeX) con resaltado de sintaxis, sistema de archivos virtual, rutas de búsqueda, descarga de archivos desde URL, soporte para múltiples cuadernos, catálogo de paquetes con instalación en un clic, ajustes de lenguaje, formato de paquetes (.zip/.tar.gz)",
     "appearance.showDrafts": "Incluir traducciones en revisión",
     "appearance.showDraftsHelp": "La mayoría de las traducciones aún no han sido verificadas por un hablante del idioma. Se ofrecen de todos modos, y señaladas, porque una interfaz que se puede leer es mejor que una que no. Desactive esto para ver solo traducciones revisadas.",
-    "appearance.languageDraft": "{language} — en revisión ({percent}%)"
+    "appearance.languageDraft": "{language} — en revisión ({percent}%)",
+    "appearance.cssQuarantined": "Tu CSS personalizado ocultó el botón del menú, por lo que se ha desactivado. Se conserva en Aspecto → Avanzado para que puedas editarlo."
   }
 }

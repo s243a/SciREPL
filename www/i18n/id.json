@@ -380,6 +380,7 @@
     "help.includesFeatureList": "Fitur yang disertakan: Dukungan multibahasa (Python, R, Prolog, Bash, JavaScript, Lua), sel yang dapat diedit, sel markdown, persistensi sesi dengan penyimpanan otomatis, palet mode matematika, impor/ekspor .ipynb dengan output dipertahankan, format .srwb, ekspor kaya (HTML, Markdown, PDF, DOCX dengan persamaan asli, LaTeX) dengan penyorotan sintaksis, sistem berkas virtual, jalur pencarian, katalog paket satu klik, format paket (.zip/.tar.gz)",
     "appearance.showDrafts": "Sertakan terjemahan dalam peninjauan",
     "appearance.showDraftsHelp": "Sebagian besar terjemahan belum diperiksa oleh penutur bahasa tersebut. Terjemahan tetap disediakan dan diberi label, karena antarmuka yang dapat dibaca lebih baik daripada yang tidak. Matikan opsi ini untuk hanya melihat terjemahan yang telah ditinjau.",
-    "appearance.languageDraft": "{language} — dalam peninjauan ({percent}%)"
+    "appearance.languageDraft": "{language} — dalam peninjauan ({percent}%)",
+    "appearance.cssQuarantined": "CSS kustom Anda menyembunyikan tombol menu, sehingga telah dinonaktifkan. Pengaturan ini tetap disimpan di Tampilan → Lanjutan agar Anda dapat mengeditnya."
   }
 }

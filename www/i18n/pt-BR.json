@@ -381,6 +381,7 @@
     "help.includesFeatureList": "Recursos incluídos: Suporte multilíngue (Python, R, Prolog, Bash, JavaScript, Lua), células editáveis, células markdown, persistência de sessão com salvamento automático, paleta de modo matemático, importação/exportação de .ipynb com saídas preservadas, formato de pasta de trabalho .srwb, exportação avançada (HTML, Markdown, PDF, DOCX com equações nativas, LaTeX) com destaque de sintaxe, sistema de arquivos virtual, caminhos de busca, catálogo de pacotes com um clique, formatos de pacote (.zip/.tar.gz)",
     "appearance.showDrafts": "Incluir traduções em revisão",
     "appearance.showDraftsHelp": "A maioria das traduções ainda não foi verificada por um falante do idioma. Elas são oferecidas mesmo assim, e rotuladas, porque uma interface compreensível é melhor que uma que você não consiga ler. Desative isso para ver apenas traduções revisadas.",
-    "appearance.languageDraft": "{language} — em revisão ({percent}%)"
+    "appearance.languageDraft": "{language} — em revisão ({percent}%)",
+    "appearance.cssQuarantined": "Seu CSS personalizado ocultou o botão de menu, portanto foi desativado. Ele foi mantido em Aparência → Avançado para que você possa editá-lo."
   }
 }

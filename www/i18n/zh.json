@@ -376,6 +376,7 @@
     "help.includesFeatureList": "功能包含：多语言支持（Python、R、Prolog、Bash、JavaScript、Lua）、可编辑单元格、Markdown 单元格、具备自动保存和崩溃恢复功能的会话持久化、数学模式面板、保留输出的 .ipynb 导入/导出、.srwb 工作簿格式、带语法高亮的丰富格式导出（HTML、Markdown、PDF、带原生公式的 DOCX、LaTeX）、虚拟文件系统、搜索路径、URL 文件获取、多笔记本支持、一键安装的软件包目录、语言设置、软件包格式（.zip/.tar.gz）",
     "appearance.showDrafts": "包含正在审核中的翻译",
     "appearance.showDraftsHelp": "大部分翻译尚未经过母语人士的校对。但由于可读的界面总好过无法理解的界面，因此我们仍提供这些翻译并予以标注。关闭此项可仅查看已审核的翻译。",
-    "appearance.languageDraft": "{language} — 审核中 ({percent}%)"
+    "appearance.languageDraft": "{language} — 审核中 ({percent}%)",
+    "appearance.cssQuarantined": "您的自定义CSS隐藏了菜单按钮，因此已被关闭。它仍保留在“外观 → 高级”中，以便您进行编辑。"
   }
 }
