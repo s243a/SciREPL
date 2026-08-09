@@ -209,7 +209,7 @@ try {
     console.log('2. Verifying every local catalog payload is pre-cached...');
     const cacheState = await page.evaluate(async () => {
         const names = await caches.keys();
-        const appCache = names.find(name => name === 'scirepl-app-v129');
+        const appCache = names.find(name => name === 'scirepl-app-v130');
         if (!appCache) return { names, paths: [] };
         const keys = await (await caches.open(appCache)).keys();
         return {
@@ -217,7 +217,7 @@ try {
             paths: keys.map(request => new URL(request.url).pathname),
         };
     });
-    assert(cacheState.names.includes('scirepl-app-v129'), 'release cache v129 is active', cacheState.names.join(', '));
+    assert(cacheState.names.includes('scirepl-app-v130'), 'release cache v130 is active', cacheState.names.join(', '));
     for (const relative of requiredCatalogPaths) {
         assert(cacheState.paths.includes(PREFIX + relative), `pre-cache contains ${relative}`);
     }
