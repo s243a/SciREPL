@@ -408,6 +408,30 @@ try {
         await window.i18n.activate('en');
     });
 
+    // Localisation must update interactive elements in place. Replacing the
+    // privacy link used to strip its id and listener; on a warm reload that made
+    // the inline bootstrap throw before _startApp(), so saved cells never
+    // restored even though persistence itself was intact.
+    const privacyLink = await page.evaluate(async () => {
+        const before = document.getElementById('help-privacy-link');
+        await window.i18n.activate('es');
+        await window.i18n.activate('en');
+        const after = document.getElementById('help-privacy-link');
+        if (after) after.click();
+        const modal = document.getElementById('privacy-modal');
+        const out = {
+            exists: Boolean(after),
+            sameNode: before === after,
+            opensPolicy: Boolean(modal && !modal.classList.contains('hidden')),
+            text: after ? after.textContent : '',
+        };
+        if (modal) modal.classList.add('hidden');
+        return out;
+    });
+    check('localisation preserves the live privacy link and its click handler',
+        privacyLink.exists && privacyLink.sameNode && privacyLink.opensPolicy,
+        JSON.stringify(privacyLink));
+
     /* ------------------------------ dialog ------------------------------ */
     console.log('\n5. Dialog');
 

@@ -403,7 +403,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             <p data-i18n="help.includesFeatureList">Includes: Multi-language (Python, R, Prolog, Bash, JavaScript, Lua), editable cells, markdown cells, session persistence with auto-save and crash recovery, Math Mode palette, .ipynb import/export with output preservation, .srwb workbook format, rich export (HTML, Markdown, PDF, DOCX with native equations, LaTeX) with syntax highlighting, virtual filesystem, search paths, URL file fetching, multi-notebook support, package catalog with one-click install, language settings, package format (.zip/.tar.gz)</p>
 
             <h3 data-i18n="help.privacy">Privacy</h3>
-            <p data-i18n-html="help.privacyPolicy"><a href="#" id="help-privacy-link">Privacy Policy</a></p>
+            <p><a href="#" id="help-privacy-link" data-i18n="privacy.privacyPolicy">Privacy Policy</a></p>
 
             <div style="margin-top: 15px;">
                 <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
@@ -1118,18 +1118,23 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
         var helpLink = document.getElementById('help-privacy-link');
 
         // Help page link opens the privacy modal
-        helpLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('help-modal').classList.add('hidden');
-            modal.classList.remove('hidden');
-        });
+        if (helpLink && modal) {
+            helpLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                var helpModal = document.getElementById('help-modal');
+                if (helpModal) helpModal.classList.add('hidden');
+                modal.classList.remove('hidden');
+            });
+        }
 
         // Close privacy modal via backdrop or X (without accepting)
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal || e.target.classList.contains('modal-close')) {
-                modal.classList.add('hidden');
-            }
-        });
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal || e.target.classList.contains('modal-close')) {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
 
         // Start app immediately — kernels load lazily on first use
         if (window._startApp) window._startApp();

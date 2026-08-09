@@ -3,6 +3,8 @@
 import { chromium } from 'playwright';
 
 const TIMEOUT = 180_000;
+const PORT = process.env.PORT || 8085;
+const URL = `http://localhost:${PORT}/`;
 
 (async () => {
     const browser = await chromium.launch({ headless: true });
@@ -30,7 +32,7 @@ const TIMEOUT = 180_000;
             localStorage.setItem('scirepl_onboarding_seen', '1');
         });
 
-        await page.goto('http://localhost:8085/', { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+        await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
 
         console.log('   Waiting for Pyodide...');
         await page.evaluate(async () => {
