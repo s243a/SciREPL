@@ -43,10 +43,30 @@ const ALLOWED_TAGS = new Set(['code', 'strong', 'em', 'b', 'i', 'br', 'a', 'span
 /** Sentence terminators across the scripts we ship. */
 const TERMINATORS = /[.!?。！？।॥؟…]+/g;
 
+/**
+ * A period is not always a sentence end, and getting this wrong sends a
+ * translator to fix strings that were already correct.
+ *
+ * "Import File (e.g. .srwb, .ipynb, .csv)" is one sentence containing six
+ * periods. Its correct German rendering — "(z. B. .srwb, …)" — was reported as
+ * dropped content in nine locales before this masking existed. Abbreviations
+ * vary by language, so match the shape (single letters joined by periods, or a
+ * short lowercase token after a period) rather than enumerating them.
+ */
+function maskNonTerminalPeriods(text) {
+    return text
+        // File extensions and dotted identifiers: .srwb, .tar.gz, install.packages
+        .replace(/\.(?=[A-Za-z0-9]{1,8}\b)/g, '\u0000')
+        // Abbreviations: e.g. / i.e. / z. B. / p. ej. / cf. / etc.
+        .replace(/\b([A-Za-z])\s*\.(?=\s*[A-Za-z]\s*\.)/g, '$1\u0000')
+        .replace(/\b(etc|vs|cf|approx|ca|bzw|ggf|ej|ex)\s*\./gi, '$1\u0000');
+}
+
 const read = (f) => JSON.parse(readFileSync(path.join(I18N, f), 'utf8'));
 const stripTags = (s) => s.replace(/<[^>]+>/g, '');
 const countSentences = (s) =>
-    stripTags(s).split(TERMINATORS).filter((x) => x.trim()).length;
+    maskNonTerminalPeriods(stripTags(s))
+        .split(TERMINATORS).filter((x) => x.trim()).length;
 const placeholders = (s) => (s.match(/\{(\w+)\}/g) || []).sort().join(',');
 
 const base = read(`${BASE}.json`).strings || {};
