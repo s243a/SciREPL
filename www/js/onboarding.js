@@ -114,10 +114,19 @@
             for (const key of ['scirepl_session_v2', 'scirepl_session_v1']) {
                 const raw = localStorage.getItem(key);
                 if (!raw) continue;
-                try {
-                    const s = JSON.parse(raw);
-                    if ((s.cells && s.cells.length) || (s.history && s.history.length)) return true;
-                } catch { /* unreadable session — treat as no evidence */ }
+                let s;
+                try { s = JSON.parse(raw); } catch { continue; }
+                if ((s.cells && s.cells.length) || (s.history && s.history.length)) return true;
+                // Work lives in notebooks in v2; a session with several
+                // notebooks, or one holding cells, is plainly not a first run.
+                const books = Array.isArray(s.notebooks) ? s.notebooks : [];
+                if (books.length > 1) return true;
+                if (books.some((b) => b && Array.isArray(b.cells) && b.cells.length)) return true;
+            }
+            // Settings the user can only have reached through the menu.
+            for (const key of ['scirepl_appearance_theme', 'scirepl_appearance_btn_scale',
+                'scirepl_appearance_top_margin', 'scirepl_language', 'scirepl_enabled_languages']) {
+                if (localStorage.getItem(key) !== null) return true;
             }
             return false;
         }
@@ -168,13 +177,35 @@
             // Clicking the dimmed area moves on; Escape leaves.
             el.addEventListener('click', (e) => { if (e.target === el) this.go(1); });
             this._onKey = (e) => {
-                if (e.key === 'Escape') this.finish();
-                else if (e.key === 'ArrowRight' || e.key === 'Enter') this.go(1);
-                else if (e.key === 'ArrowLeft') this.go(-1);
+                if (!this.el || this.el.style.display === 'none') return;
+                if (e.key === 'Escape') { e.preventDefault(); return this.finish(); }
+                if (e.key === 'Tab') return this._trapFocus(e);
+                // Arrow keys belong to the language <select> while it has focus,
+                // and Enter should activate the focused button rather than
+                // always advancing.
+                const onControl = e.target && e.target.closest
+                    && e.target.closest('#tour-control');
+                if (onControl) return;
+                if (e.key === 'ArrowRight') { e.preventDefault(); this.go(1); }
+                else if (e.key === 'ArrowLeft') { e.preventDefault(); this.go(-1); }
             };
             document.addEventListener('keydown', this._onKey);
             this._onResize = () => this._position();
             window.addEventListener('resize', this._onResize);
+            // Mobile keyboards and browser chrome resize the visual viewport
+            // without firing resize, which leaves the card stranded off-screen.
+            if (window.visualViewport) {
+                this._onVV = () => this._position();
+                window.visualViewport.addEventListener('resize', this._onVV);
+                window.visualViewport.addEventListener('scroll', this._onVV);
+            }
+
+            // Remember where focus was so it can be handed back on exit, and
+            // move it into the dialog — a modal that leaves focus behind is
+            // unusable by keyboard and invisible to a screen reader.
+            this._returnFocusTo = document.activeElement;
+            const first = el.querySelector('#tour-next');
+            if (first) first.focus();
         }
 
         go(delta) {
@@ -271,8 +302,18 @@
             const card = this.el.querySelector('#tour-card');
             const target = step.target ? document.querySelector(step.target) : null;
 
+            // Use the visual viewport where it exists: on mobile the layout
+            // viewport does not shrink for the on-screen keyboard or the URL
+            // bar, and positioning against it puts the card off-screen.
+            const vv = window.visualViewport;
+            const vw = vv ? vv.width : window.innerWidth;
+            const vh = vv ? vv.height : window.innerHeight;
+            const margin = 8;
+
+            card.classList.remove('tour-card-docked');
+            card.style.maxWidth = '';
+
             if (!target) {
-                // Nothing to point at: centre the card and hide the cutout.
                 spotlight.style.display = 'none';
                 card.style.left = '50%';
                 card.style.top = '50%';
@@ -289,25 +330,71 @@
             spotlight.style.height = `${r.height + pad * 2}px`;
 
             card.style.transform = 'none';
+            // Never let the card be wider than the viewport it must fit inside.
+            card.style.maxWidth = `${Math.max(220, vw - margin * 2)}px`;
             const cardRect = card.getBoundingClientRect();
+
+            // If the card cannot fit above or below the target, dock it to the
+            // bottom of the viewport rather than pushing it off-screen. The
+            // spotlight still marks the control, so the association survives.
             const gap = 14;
-            // Prefer below the target, flip above when there is no room.
-            let top = r.bottom + gap;
-            if (top + cardRect.height > window.innerHeight - 8) {
-                top = Math.max(8, r.top - cardRect.height - gap);
+            const below = vh - r.bottom - gap;
+            const above = r.top - gap;
+            if (cardRect.height > Math.max(below, above)) {
+                card.classList.add('tour-card-docked');
+                card.style.left = `${margin}px`;
+                card.style.top = `${Math.max(margin, vh - cardRect.height - margin)}px`;
+                card.style.maxWidth = `${vw - margin * 2}px`;
+                return;
             }
+
+            let top = below >= cardRect.height ? r.bottom + gap : r.top - cardRect.height - gap;
+            top = Math.max(margin, Math.min(top, vh - cardRect.height - margin));
             let left = r.left + r.width / 2 - cardRect.width / 2;
-            left = Math.max(8, Math.min(left, window.innerWidth - cardRect.width - 8));
+            left = Math.max(margin, Math.min(left, vw - cardRect.width - margin));
             card.style.top = `${top}px`;
             card.style.left = `${left}px`;
         }
 
         /* ------------------------------ finish ----------------------------- */
 
+        /** Keep Tab inside the dialog, cycling at both ends. */
+        _trapFocus(e) {
+            const focusable = [...this.el.querySelectorAll(
+                'button, select, input, a[href], [tabindex]:not([tabindex="-1"])')]
+                .filter((n) => !n.disabled && n.offsetParent !== null);
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            const active = document.activeElement;
+            if (e.shiftKey && (active === first || !this.el.contains(active))) {
+                e.preventDefault(); last.focus();
+            } else if (!e.shiftKey && active === last) {
+                e.preventDefault(); first.focus();
+            }
+        }
+
         finish() {
             this.markSeen();
             document.removeEventListener('keydown', this._onKey);
             window.removeEventListener('resize', this._onResize);
+            if (this._onVV && window.visualViewport) {
+                window.visualViewport.removeEventListener('resize', this._onVV);
+                window.visualViewport.removeEventListener('scroll', this._onVV);
+                this._onVV = null;
+            }
+            if (this._consentObserver) {
+                this._consentObserver.disconnect();
+                this._consentObserver = null;
+            }
+            // Hand focus back where it was, or somewhere sensible.
+            const back = this._returnFocusTo;
+            this._returnFocusTo = null;
+            if (back && document.contains(back) && back.focus) back.focus();
+            else {
+                const menu = document.getElementById('menu-btn');
+                if (menu) menu.focus();
+            }
             if (this.el) { this.el.remove(); this.el = null; }
         }
 
@@ -318,8 +405,47 @@
         maybeStart() {
             if (this.hasSeen()) return;
             if (this._isEstablished()) return this.markSeen('grandfathered');
-            if (!localStorage.getItem('scirepl_privacy_accepted')) return;
-            setTimeout(() => { if (!this.hasSeen()) this.start(); }, 600);
+
+            // Consent is requested lazily, and only for runtimes fetched from a
+            // CDN. On a build with Python bundled it may never be requested at
+            // all — so gating the tour on scirepl_privacy_accepted meant a
+            // genuine first-run user never saw it. What the tour actually has to
+            // avoid is *covering* the consent dialog, which is a question about
+            // the modal being on screen, not about the flag.
+            this._watchConsentModal();
+            const modal = document.getElementById('privacy-modal');
+            if (modal && !modal.classList.contains('hidden')) return;   // resumes on close
+            setTimeout(() => { if (!this.hasSeen() && !this._consentVisible()) this.start(); }, 600);
+        }
+
+        _consentVisible() {
+            const modal = document.getElementById('privacy-modal');
+            return Boolean(modal) && !modal.classList.contains('hidden');
+        }
+
+        /**
+         * The consent dialog always outranks the tour, whenever it appears —
+         * including part-way through, which happens the first time a user runs
+         * a cell that needs a CDN runtime. Hide the tour while it is up and
+         * bring it back afterwards rather than stacking two modals.
+         */
+        _watchConsentModal() {
+            const modal = document.getElementById('privacy-modal');
+            if (!modal || this._consentObserver) return;
+            this._consentObserver = new MutationObserver(() => {
+                const visible = this._consentVisible();
+                if (this.el) {
+                    this.el.style.display = visible ? 'none' : '';
+                    if (!visible) this._position();
+                } else if (!visible && !this.hasSeen()) {
+                    setTimeout(() => {
+                        if (!this.hasSeen() && !this._consentVisible()) this.start();
+                    }, 400);
+                }
+            });
+            this._consentObserver.observe(modal, {
+                attributes: true, attributeFilter: ['class'],
+            });
         }
     }
 

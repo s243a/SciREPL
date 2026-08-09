@@ -432,6 +432,98 @@ try {
         privacyLink.exists && privacyLink.sameNode && privacyLink.opensPolicy,
         JSON.stringify(privacyLink));
 
+    /* --------------------- recovering from bad CSS ---------------------- */
+    console.log('\n4c. Custom CSS cannot lock the user out');
+
+    // "Reset it from the menu" is no help when the CSS is what hid the menu.
+    const lockout = await page.evaluate(() => {
+        window.appearance.setCustomCss('#menu-btn { display: none !important; }');
+        return {
+            applied: !!document.getElementById('appearance-custom-css'),
+            stored: window.appearance.getCustomCss(),
+            quarantined: window.appearance.getQuarantinedCss(),
+            menuVisible: getComputedStyle(document.getElementById('menu-btn')).display !== 'none',
+        };
+    });
+    check('CSS that hides the menu button is rolled back', lockout.applied === false);
+    check('the menu button is still usable', lockout.menuVisible === true);
+    check('the rolled-back CSS is kept, not discarded — it is the user\'s work',
+        lockout.quarantined.includes('display: none'), lockout.quarantined);
+    check('it is no longer applied on the next load', lockout.stored === '');
+    check('the user is told what happened',
+        await page.evaluate(() => !!document.getElementById('appearance-css-quarantine')));
+
+    // The contract is "the menu stays reachable", not "these particular rules get
+    // rolled back". Some of these do not even take effect — a flex item has
+    // min-width:auto, so width:0 does not shrink it — and rolling back CSS that
+    // was harmless would be its own bug. So assert the invariant, whichever way
+    // it is satisfied.
+    for (const [name, css] of [
+        ['zero-sized', '#menu-btn { width: 0 !important; height: 0 !important; }'],
+        ['click-through', '#menu-btn { pointer-events: none !important; }'],
+        ['invisible', '#menu-btn { opacity: 0 !important; }'],
+        ['off-screen', '#menu-btn { position: fixed !important; left: -9999px !important; }'],
+        ['collapsed header', '#app-header { display: none !important; }'],
+    ]) {
+        const r = await page.evaluate((c) => {
+            window.appearance.clearQuarantinedCss();
+            window.appearance.setCustomCss(c);
+            const el = document.getElementById('menu-btn');
+            const box = el.getBoundingClientRect();
+            const cs = getComputedStyle(el);
+            return {
+                reachable: box.width >= 8 && box.height >= 8
+                    && cs.display !== 'none' && cs.visibility !== 'hidden'
+                    && parseFloat(cs.opacity) >= 0.1 && cs.pointerEvents !== 'none'
+                    && box.right > 0 && box.bottom > 0
+                    && box.left < window.innerWidth && box.top < window.innerHeight,
+                rolledBack: !document.getElementById('appearance-custom-css'),
+            };
+        }, css);
+        check(`the menu survives "${name}" CSS`, r.reachable === true,
+            `rolledBack=${r.rolledBack}`);
+    }
+
+    // Harmless CSS must still work, or the guard is just breaking the feature.
+    const benign = await page.evaluate(() => {
+        window.appearance.clearQuarantinedCss();
+        window.appearance.setCustomCss('#app-header { letter-spacing: 0.5px; }');
+        return {
+            applied: !!document.getElementById('appearance-custom-css'),
+            quarantined: window.appearance.getQuarantinedCss(),
+        };
+    });
+    check('CSS that does not lock anyone out is left alone', benign.applied === true);
+    check('and is not quarantined', benign.quarantined === '');
+    await page.evaluate(() => window.appearance.setCustomCss(''));
+
+    /* ----------------- legal text follows its own review ---------------- */
+    console.log('\n4d. Privacy status controls the legal text');
+
+    const legal = await page.evaluate(async () => {
+        await window.i18n.load('es');
+        await window.i18n.activate('es');
+        const body = window.t('privacy.youUseScireplEntirelyAt');
+        const chrome = window.t('privacy.iUnderstand');
+        const out = {
+            privacyStatus: window.i18n.domainStatusOf('es', 'privacy'),
+            bodyIsEnglish: body === window.i18n.catalogues.en['privacy.youUseScireplEntirelyAt'],
+            chromeTranslated: chrome !== window.i18n.catalogues.en['privacy.iUnderstand'],
+            uiTranslated: window.t('menu.appearance')
+                !== window.i18n.catalogues.en['menu.appearance'],
+            flagged: window.i18n.legalTextIsUntranslated(),
+        };
+        await window.i18n.activate('en');
+        return out;
+    });
+    check('the Spanish privacy catalogue is still a draft', legal.privacyStatus === 'draft');
+    check('an unreviewed policy body falls back to the authoritative English',
+        legal.bodyIsEnglish === true);
+    check('the dialog chrome stays translated, so it can still be dismissed',
+        legal.chromeTranslated === true);
+    check('the rest of the UI is unaffected by the legal gate', legal.uiTranslated === true);
+    check('the state is reported, so the notice can explain it', legal.flagged === true);
+
     /* ------------------------------ dialog ------------------------------ */
     console.log('\n5. Dialog');
 

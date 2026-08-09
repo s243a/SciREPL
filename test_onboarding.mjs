@@ -211,18 +211,86 @@ try {
         await emptyPage.evaluate(() => !!document.getElementById('tour-overlay')));
     await emptyCtx.close();
 
-    console.log('\n7. Consent ordering');
-    const ctx2 = await browser.newContext();          // privacy NOT accepted
+    console.log('\n7. Consent and the tour');
+
+    // Consent is requested lazily, and only for runtimes fetched from a CDN —
+    // on a build with Python bundled it may never be requested at all. Gating
+    // the tour on the accepted flag therefore meant a first-run user never saw
+    // it. What matters is that the tour never covers the consent dialog.
+    const ctx2 = await browser.newContext();
     await ctx2.addInitScript(() => {
         localStorage.removeItem('scirepl_privacy_accepted');
         localStorage.removeItem('scirepl_onboarding_seen');
     });
     const p2 = await ctx2.newPage();
     await p2.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
-    await p2.waitForTimeout(2000);
-    check('the tour waits for the privacy prompt rather than covering it',
-        await p2.evaluate(() => !document.getElementById('tour-overlay')));
+    await p2.waitForTimeout(2200);
+    check('a first-run user sees the tour even before consent has been asked for',
+        await p2.evaluate(() => !!document.getElementById('tour-overlay')));
+
+    // The consent dialog outranks the tour whenever it appears, including
+    // part-way through — which is what happens the first time a user runs a
+    // cell needing a CDN runtime.
+    await p2.evaluate(() => document.getElementById('privacy-modal').classList.remove('hidden'));
+    await p2.waitForTimeout(500);
+    check('the tour hides itself while the consent dialog is up',
+        await p2.evaluate(() => {
+            const t = document.getElementById('tour-overlay');
+            return !t || getComputedStyle(t).display === 'none';
+        }));
+    check('the consent dialog is the thing on screen',
+        await p2.evaluate(() => !document.getElementById('privacy-modal')
+            .classList.contains('hidden')));
+
+    await p2.evaluate(() => document.getElementById('privacy-modal').classList.add('hidden'));
+    await p2.waitForTimeout(900);
+    check('the tour comes back once consent has been dealt with',
+        await p2.evaluate(() => {
+            const t = document.getElementById('tour-overlay');
+            return !!t && getComputedStyle(t).display !== 'none';
+        }));
     await ctx2.close();
+
+    /* ------------------------- keyboard and focus ----------------------- */
+    console.log('\n8. Keyboard and focus');
+
+    const ctx3 = await browser.newContext();
+    await ctx3.addInitScript(() => {
+        localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.removeItem('scirepl_onboarding_seen');
+    });
+    const p3 = await ctx3.newPage();
+    await p3.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await p3.waitForTimeout(2200);
+
+    check('focus moves into the dialog rather than staying behind it',
+        await p3.evaluate(() => {
+            const t = document.getElementById('tour-overlay');
+            return !!t && t.contains(document.activeElement);
+        }));
+
+    // Tab must cycle inside the dialog; escaping it puts focus on controls the
+    // overlay is covering, which a keyboard user cannot see.
+    for (let i = 0; i < 12; i++) await p3.keyboard.press('Tab');
+    check('Tab stays inside the dialog', await p3.evaluate(() => {
+        const t = document.getElementById('tour-overlay');
+        return !!t && t.contains(document.activeElement);
+    }));
+    await p3.keyboard.press('Shift+Tab');
+    check('Shift+Tab also stays inside', await p3.evaluate(() => {
+        const t = document.getElementById('tour-overlay');
+        return !!t && t.contains(document.activeElement);
+    }));
+
+    await p3.keyboard.press('Escape');
+    await p3.waitForTimeout(400);
+    check('Escape closes the tour',
+        await p3.evaluate(() => !document.getElementById('tour-overlay')));
+    check('focus is handed back to the page, not lost on <body>',
+        await p3.evaluate(() => document.activeElement
+            && document.activeElement !== document.body));
+    await ctx3.close();
+
 } catch (err) {
     failures++;
     console.log(`\n  [FAIL] crashed: ${err && err.message}`);

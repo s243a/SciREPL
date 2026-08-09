@@ -19,6 +19,10 @@
         theme: 'scirepl_appearance_theme',
         customTheme: 'scirepl_appearance_custom_theme',
         customCss: 'scirepl_appearance_custom_css',
+        // CSS that was rolled back for hiding the way out of Appearance. Kept
+        // rather than deleted: it is the user's work and may be one typo away
+        // from what they wanted.
+        quarantinedCss: 'scirepl_appearance_quarantined_css',
     };
 
     /**
@@ -238,7 +242,7 @@
             root.style.setProperty('--ui-btn-scale', String(this.getButtonScale()));
 
             // --- theme ---
-            const theme = this.getTheme();
+            const theme = this.safeMode() ? DEFAULT_THEME : this.getTheme();
             const custom = theme === 'custom' ? this.getCustomTheme() : null;
 
             // Clear any previously applied custom variables first, or switching
@@ -273,8 +277,8 @@
          * here grants nothing that was not already reachable.
          */
         _applyCustomCss() {
-            const css = this.getCustomCss();
             let el = document.getElementById('appearance-custom-css');
+            const css = this.safeMode() ? '' : this.getCustomCss();
             if (!css.trim()) {
                 if (el) el.remove();
                 return;
@@ -285,6 +289,69 @@
                 document.head.appendChild(el);
             }
             el.textContent = css;
+
+            // Rules that hide or shrink the menu button take away the only route
+            // back to this setting, and "reset it from the menu" is no help when
+            // the menu is what vanished. Check the way out is still there, and
+            // if it is not, roll back and keep the CSS aside rather than
+            // discarding the user's work.
+            if (!this._escapeHatchIntact()) {
+                el.remove();
+                localStorage.setItem(KEYS.quarantinedCss, css);
+                localStorage.removeItem(KEYS.customCss);
+                this._announceQuarantine();
+            }
+        }
+
+        /**
+         * Can the user still reach the menu? Deliberately narrow: this asks
+         * whether the way back to Appearance survives, not whether the CSS is
+         * good taste.
+         */
+        _escapeHatchIntact() {
+            const btn = document.getElementById('menu-btn');
+            if (!btn) return true;              // nothing rendered yet; not our call
+            const r = btn.getBoundingClientRect();
+            if (r.width < 8 || r.height < 8) return false;
+            const cs = getComputedStyle(btn);
+            if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+            if (parseFloat(cs.opacity) < 0.1) return false;
+            if (cs.pointerEvents === 'none') return false;
+            // Off-screen counts as gone.
+            if (r.bottom < 0 || r.right < 0
+                || r.top > window.innerHeight || r.left > window.innerWidth) return false;
+            return true;
+        }
+
+        /** Whether this load is deliberately ignoring custom appearance. */
+        safeMode() {
+            try {
+                const q = new URLSearchParams(location.search);
+                return q.has('safe') || /(^|[&#])safe(=|$|&)/.test(location.hash);
+            } catch { return false; }
+        }
+
+        /** The CSS that was rolled back, so the editor can offer it back. */
+        getQuarantinedCss() {
+            return localStorage.getItem(KEYS.quarantinedCss) || '';
+        }
+
+        clearQuarantinedCss() {
+            localStorage.removeItem(KEYS.quarantinedCss);
+        }
+
+        _announceQuarantine() {
+            if (this._quarantineAnnounced) return;
+            this._quarantineAnnounced = true;
+            const say = (k, fallback) => (window.t ? window.t(k) : fallback) || fallback;
+            const note = document.createElement('div');
+            note.id = 'appearance-css-quarantine';
+            note.setAttribute('role', 'alert');
+            note.textContent = say('appearance.cssQuarantined',
+                'Your custom CSS hid the menu button, so it has been turned off. '
+                + 'It is kept in Appearance → Advanced so you can edit it.');
+            document.body.appendChild(note);
+            setTimeout(() => note.remove(), 12000);
         }
 
         /** Follow the OS light/dark preference while the theme is `auto`. */

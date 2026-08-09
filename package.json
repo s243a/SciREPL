@@ -21,8 +21,9 @@
     "test:windows": "node desktop/electron/test/run-all.mjs",
     "test:windows:unit": "node desktop/electron/test/run-all.mjs --unit",
     "i18n:manifest": "node scripts/build-i18n-manifest.mjs",
-    "i18n:check": "node scripts/build-i18n-manifest.mjs --check",
-    "i18n:lint": "node scripts/check-translations.mjs"
+    "i18n:check": "node scripts/build-i18n-manifest.mjs --check && node scripts/check-i18n-html-ids.mjs && node scripts/check-translations.mjs",
+    "i18n:lint": "node scripts/check-translations.mjs",
+    "i18n:html-ids": "node scripts/check-i18n-html-ids.mjs"
   },
   "keywords": [
     "python",

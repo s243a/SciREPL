@@ -168,6 +168,31 @@
         return text.replace(LATIN_RUN, (m) => LRI + m + PDI);
     }
 
+    /**
+     * Legal text is gated on its own review status, not the UI's.
+     *
+     * Every privacy.* string is machine translated like the rest of the app, but
+     * a mistranslated button is a papercut and a mistranslated privacy
+     * disclosure is a document that says something the developers did not
+     * agree to. So until someone who reads the language has signed the privacy
+     * catalogue off, the policy *body* is shown in English — the version that is
+     * actually the policy — while the dialog's chrome stays translated so the
+     * user can still navigate and dismiss it, and the notice explains why.
+     *
+     * The domain status was already recorded in the manifest and read by
+     * domainStatusOf(); until now nothing consulted it, which made the whole
+     * separate-review mechanism decorative.
+     */
+    const LEGAL_PREFIX = 'privacy.';
+
+    /** Chrome, not legal prose: safe to translate whatever the review status. */
+    const LEGAL_CHROME = new Set([
+        'privacy.privacyPolicy',
+        'privacy.summary',
+        'privacy.iUnderstand',
+        'privacy.translationNotice',
+    ]);
+
     class I18n {
         constructor() {
             this.catalogues = {};      // code -> { key: string }
@@ -321,7 +346,9 @@
          * `t('appearance.scalePercent', { percent: 150 })`
          */
         t(key, vars) {
-            const cat = this.catalogues[this.current] || {};
+            const cat = this.legalLocaleFor(key) === BASE_LOCALE
+                ? (this.catalogues[BASE_LOCALE] || {})
+                : (this.catalogues[this.current] || {});
             const base = this.catalogues[BASE_LOCALE] || {};
             let out = cat[key];
             if (typeof out !== 'string' || !out) out = base[key];
@@ -331,6 +358,25 @@
                     (Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : m));
             }
             return out;
+        }
+
+        /**
+         * Which locale a given key should be read from. Everything follows the
+         * active locale except unreviewed legal prose, which falls back to the
+         * authoritative English.
+         */
+        legalLocaleFor(key) {
+            if (this.current === BASE_LOCALE) return BASE_LOCALE;
+            if (typeof key !== 'string' || !key.startsWith(LEGAL_PREFIX)) return this.current;
+            if (LEGAL_CHROME.has(key)) return this.current;
+            return this.domainStatusOf(this.current, 'privacy') === REVIEWED
+                ? this.current : BASE_LOCALE;
+        }
+
+        /** True when the policy body is being shown in English on this locale. */
+        legalTextIsUntranslated() {
+            return this.current !== BASE_LOCALE
+                && this.domainStatusOf(this.current, 'privacy') !== REVIEWED;
         }
 
         /* --------------------------- activation -------------------------- */

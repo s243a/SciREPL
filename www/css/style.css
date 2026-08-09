@@ -2520,3 +2520,33 @@ body.force-mobile .vfs-delete-btn {
     font-size: 0.9em;
     line-height: 1.5;
 }
+
+/* Docked tour card: used when the step's target leaves no room above or below
+   for the card at the current viewport height — typically a small phone in
+   landscape, or with the on-screen keyboard up. Better a card pinned to the
+   bottom edge than one positioned off-screen. */
+#tour-card.tour-card-docked {
+    width: auto;
+    right: 8px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Rolled-back-CSS notice. Positioned and coloured inline-ish via !important
+   because the very stylesheet it is reporting on may still be in the document
+   on the next load, and a warning that can itself be hidden is worthless. */
+#appearance-css-quarantine {
+    position: fixed !important;
+    inset-inline: 12px !important;
+    bottom: 12px !important;
+    z-index: 2147483647 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 12px 14px !important;
+    border-radius: 8px !important;
+    background: #d29922 !important;
+    color: #1c1c1c !important;
+    font: 500 14px/1.45 system-ui, sans-serif !important;
+    pointer-events: auto !important;
+}
