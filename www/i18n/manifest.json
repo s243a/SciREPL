@@ -25,7 +25,7 @@
       "endonym": "العربية",
       "dir": "rtl",
       "status": "draft",
-      "completeness": 0.99,
+      "completeness": 1,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -41,7 +41,7 @@
       "endonym": "বাংলা",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.99,
+      "completeness": 1,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -57,7 +57,7 @@
       "endonym": "Deutsch",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.977,
+      "completeness": 1,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -85,7 +85,7 @@
       "endonym": "Español",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.987,
+      "completeness": 1,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -101,7 +101,7 @@
       "endonym": "Français",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.977,
+      "completeness": 1,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -117,7 +117,7 @@
       "endonym": "हिन्दी",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.99,
+      "completeness": 1,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -133,7 +133,7 @@
       "endonym": "Bahasa Indonesia",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.98,
+      "completeness": 1,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -149,7 +149,7 @@
       "endonym": "日本語",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.99,
+      "completeness": 1,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -165,7 +165,7 @@
       "endonym": "한국어",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.99,
+      "completeness": 1,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -181,7 +181,7 @@
       "endonym": "Português (Brasil)",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.983,
+      "completeness": 1,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -197,7 +197,7 @@
       "endonym": "Русский",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.99,
+      "completeness": 1,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -213,7 +213,7 @@
       "endonym": "简体中文",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.99,
+      "completeness": 1,
       "glossary": {
         "defined": 16,
         "total": 16
