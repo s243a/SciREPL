@@ -45,3 +45,7 @@ desktop/electron/dist/
 desktop/electron/out/
 desktop/electron/release/
 desktop/electron/test/results/
+
+# Python bytecode from the locale build scripts
+__pycache__/
+*.pyc

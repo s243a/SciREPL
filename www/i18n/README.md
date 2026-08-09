@@ -237,7 +237,24 @@ one status badge written from JavaScript.
 
 ## Reviewing a draft
 
-You are checking that the language is right, not that it is present:
+Start here:
+
+```bash
+npm run i18n:lint          # all locales
+node scripts/check-translations.mjs de --strict
+```
+
+It reports what a percentage cannot see — dropped sentences, translated file
+extensions and kernel names, mangled placeholders, markup that will be stripped
+at render time. It is advisory: findings are pointers to look at, not proof of a
+defect, and a condensed sentence is sometimes the right call in your language.
+
+The first machine-translated batch landed with real instances of this. One
+German help string went from four sentences to one, and the sentence explaining
+the *Show empty folders* checkbox was simply gone — a reader of the German help
+would never learn that feature exists. The catalogue still scored 97%.
+
+Then check that the language is right, not merely present:
 
 - correct meaning, not just plausible words;
 - consistent terminology across the whole catalogue;

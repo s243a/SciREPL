@@ -122,6 +122,80 @@ try {
         await page.evaluate(() => getComputedStyle(document.documentElement)
             .getPropertyValue('--accent').trim()) === '#58a6ff');
 
+    /* ------------------- dark is the product default -------------------- */
+    console.log('\n3b. Dark is the default, on a light-mode device');
+
+    // Every case below runs on a device reporting prefers-color-scheme: light,
+    // because that is the only configuration where "default to dark" and
+    // "default to auto" give different answers. Testing this on a dark device
+    // would pass either way and prove nothing.
+    const lightDevice = await browser.newContext({ colorScheme: 'light' });
+    await lightDevice.addInitScript(() => {
+        localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.setItem('scirepl_onboarding_seen', '1');
+        localStorage.setItem('scirepl_auto_download', '1');
+    });
+    const lp = await lightDevice.newPage();
+    await lp.goto(URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+    await lp.waitForFunction(() => window.appearance, null, { timeout: 30_000 });
+
+    const themeState = () => lp.evaluate(() => ({
+        resolved: window.appearance.getTheme(),
+        attr: document.documentElement.getAttribute('data-theme'),
+        bg: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim(),
+    }));
+
+    check('the device really does report light, or this section proves nothing',
+        await lp.evaluate(() => matchMedia('(prefers-color-scheme: light)').matches));
+
+    let st = await themeState();
+    check('fresh storage resolves to dark, not the device preference',
+        st.resolved === 'dark' && st.bg === '#0d1117', JSON.stringify(st));
+
+    for (const bad of ['', 'AUTO', 'midnight', 'null', '{}']) {
+        await lp.evaluate((v) => {
+            localStorage.setItem('scirepl_appearance_theme', v);
+            window.appearance.apply();
+        }, bad);
+        st = await themeState();
+        check(`an invalid stored theme (${JSON.stringify(bad)}) falls back to dark`,
+            st.resolved === 'dark' && st.bg === '#0d1117', JSON.stringify(st));
+    }
+
+    // 'custom' with no stored custom theme is the same class of broken value.
+    await lp.evaluate(() => {
+        localStorage.setItem('scirepl_appearance_theme', 'custom');
+        localStorage.removeItem('scirepl_appearance_custom_theme');
+        window.appearance.apply();
+    });
+    st = await themeState();
+    check('theme=custom with no custom theme stored falls back to dark',
+        st.resolved === 'dark' && st.bg === '#0d1117', JSON.stringify(st));
+
+    // The point of the change: 'auto' must remain reachable deliberately.
+    await lp.evaluate(() => window.appearance.setTheme('auto'));
+    st = await themeState();
+    check('"Match system" is still selectable and still follows the device',
+        st.resolved === 'auto' && st.bg === '#ffffff', JSON.stringify(st));
+
+    await lp.evaluate(() => window.appearance.setTheme('light'));
+    check('an explicit light choice is honoured',
+        (await themeState()).bg === '#ffffff');
+
+    await lp.evaluate(() => window.appearance.reset());
+    st = await themeState();
+    check('reset restores dark on a light-mode device, not auto',
+        st.resolved === 'dark' && st.bg === '#0d1117', JSON.stringify(st));
+
+    // Reset must not leave the system listener driving the theme afterwards.
+    await lp.emulateMedia({ colorScheme: 'dark' });
+    await lp.emulateMedia({ colorScheme: 'light' });
+    st = await themeState();
+    check('after reset, a device theme change does not move the app off dark',
+        st.resolved === 'dark' && st.bg === '#0d1117', JSON.stringify(st));
+
+    await lightDevice.close();
+
     /* --------------------------- localization --------------------------- */
     console.log('\n4. Localization');
 

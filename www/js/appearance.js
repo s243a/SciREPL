@@ -46,6 +46,20 @@
 
     const BUILTIN_THEMES = ['auto', 'dark', 'light'];
 
+    /**
+     * Dark is SciREPL's default, and it is a product decision rather than a
+     * fallback value: the app looked dark before this menu existed and must
+     * still look dark after it.
+     *
+     * Defaulting to 'auto' would have quietly handed that decision to the
+     * device — a user on a light-mode phone who never opened Appearance would
+     * have seen the app change appearance on upgrade, having chosen nothing.
+     * 'auto' stays available as an explicit choice; it is just not the one made
+     * on the user's behalf. This also covers a corrupt or hand-edited value in
+     * storage, which must land on the product default rather than the device's.
+     */
+    const DEFAULT_THEME = 'dark';
+
     class Appearance {
         constructor() {
             this._mediaQuery = null;
@@ -72,7 +86,10 @@
         getTheme() {
             const t = localStorage.getItem(KEYS.theme);
             if (t === 'custom' && this.getCustomTheme()) return 'custom';
-            return BUILTIN_THEMES.includes(t) ? t : 'auto';
+            // Absent, unrecognised, or 'custom' with no stored custom theme all
+            // land here, and all resolve to the product default rather than the
+            // device preference. See DEFAULT_THEME.
+            return BUILTIN_THEMES.includes(t) ? t : DEFAULT_THEME;
         }
 
         getCustomTheme() {
