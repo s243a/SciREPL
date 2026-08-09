@@ -118,7 +118,8 @@
     "tour.progress": "Step counter, e.g. '2 of 6'.",
     "menu.showTour": "Replays the first-run introduction. 'Tour' as in a guided walkthrough of the interface.",
     "appearance.showDrafts": "A translation that exists but has not been checked by a native speaker. 'Under review' as in awaiting proofreading.",
-    "appearance.languageDraft": "Shown in the language dropdown next to an unreviewed translation."
+    "appearance.languageDraft": "Shown in the language dropdown next to an unreviewed translation.",
+    "appearance.cssQuarantined": "Shown when custom CSS made the menu unreachable and was rolled back. Reassuring, not accusatory — the CSS is kept, not deleted."
   },
   "__literal": [
     "loading.sciRepl",
@@ -477,6 +478,7 @@
     "help.includesFeatureList": "Includes: Multi-language (Python, R, Prolog, Bash, JavaScript, Lua), editable cells, markdown cells, session persistence with auto-save and crash recovery, Math Mode palette, .ipynb import/export with output preservation, .srwb workbook format, rich export (HTML, Markdown, PDF, DOCX with native equations, LaTeX) with syntax highlighting, virtual filesystem, search paths, URL file fetching, multi-notebook support, package catalog with one-click install, language settings, package format (.zip/.tar.gz)",
     "appearance.showDrafts": "Include translations under review",
     "appearance.showDraftsHelp": "Most translations have not yet been checked by a speaker of the language. They are offered anyway, and labelled, because an interface you can read beats one you cannot. Turn this off to see only reviewed translations.",
-    "appearance.languageDraft": "{language} — under review ({percent}%)"
+    "appearance.languageDraft": "{language} — under review ({percent}%)",
+    "appearance.cssQuarantined": "Your custom CSS hid the menu button, so it has been turned off. It is kept in Appearance → Advanced so you can edit it."
   }
 }

@@ -343,13 +343,16 @@
         _announceQuarantine() {
             if (this._quarantineAnnounced) return;
             this._quarantineAnnounced = true;
-            const say = (k, fallback) => (window.t ? window.t(k) : fallback) || fallback;
             const note = document.createElement('div');
             note.id = 'appearance-css-quarantine';
             note.setAttribute('role', 'alert');
-            note.textContent = say('appearance.cssQuarantined',
-                'Your custom CSS hid the menu button, so it has been turned off. '
-                + 'It is kept in Appearance → Advanced so you can edit it.');
+            // Called with the key spelled out so scripts/check-i18n-keys.mjs can
+            // see it; the fallback covers being called before i18n has loaded.
+            const translated = window.t && window.t('appearance.cssQuarantined');
+            note.textContent = (translated && translated !== 'appearance.cssQuarantined')
+                ? translated
+                : 'Your custom CSS hid the menu button, so it has been turned off. '
+                  + 'It is kept in Appearance → Advanced so you can edit it.';
             document.body.appendChild(note);
             setTimeout(() => note.remove(), 12000);
         }

@@ -65,6 +65,9 @@ jobs:
       - name: Check no element with an id is inside a translated HTML string
         run: node scripts/check-i18n-html-ids.mjs
 
+      - name: Check every key the code asks for exists
+        run: node scripts/check-i18n-keys.mjs
+
       - name: Run cell operations tests
         run: node test_cell_ops.mjs
 
