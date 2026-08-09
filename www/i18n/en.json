@@ -143,7 +143,9 @@
     "help.pythonNbReadNbWrite",
     "help.rNbReadNbWrite",
     "help.luaNbReadNbWrite",
-    "help.prologNbRead3Nb"
+    "help.prologNbRead3Nb",
+    "mathPalette.exp",
+    "mathPalette.lim"
   ],
   "strings": {
     "menu.title": "Menu",
