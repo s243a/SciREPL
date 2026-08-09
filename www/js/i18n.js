@@ -139,6 +139,35 @@
         return tpl.innerHTML;
     }
 
+    /**
+     * Keep Latin identifiers intact inside right-to-left text.
+     *
+     * The bidi algorithm resolves neutral characters — the leading dot of
+     * ".srwb", the slashes in "/shared/" — against the paragraph direction. In
+     * an Arabic sentence that moves them to the wrong end of the run, so
+     * "(مثل .srwb, .ipynb)" renders with the first dot stranded at the far side
+     * and the extension reading as "srwb". Found by screenshotting the menu in
+     * Arabic; it is invisible in the catalogue, where the text is correct.
+     *
+     * Wrapping each run in LRI…PDI tells the algorithm to treat it as one
+     * left-to-right unit. Doing it here rather than in the catalogues means
+     * translators do not have to sprinkle invisible control characters through
+     * their work — the brief tells them the browser handles it, and this is
+     * what makes that true — and Hebrew, Persian and Urdu get it for free.
+     */
+    const LRI = '\u2066';   // LEFT-TO-RIGHT ISOLATE
+    const PDI = '\u2069';   // POP DIRECTIONAL ISOLATE
+
+    // A Latin run, including any leading punctuation and any comma-separated
+    // continuation, so ".srwb, .ipynb, .csv" isolates as a single unit rather
+    // than as five units with reorderable commas between them.
+    const LATIN_RUN = /[.\-_/]*[A-Za-z][A-Za-z0-9.\-_/]*(?:\s*,\s*[.\-_/]*[A-Za-z][A-Za-z0-9.\-_/]*)*/g;
+
+    function isolateLatinRuns(text) {
+        if (!text || text.indexOf(LRI) !== -1) return text;
+        return text.replace(LATIN_RUN, (m) => LRI + m + PDI);
+    }
+
     class I18n {
         constructor() {
             this.catalogues = {};      // code -> { key: string }
@@ -455,10 +484,14 @@
          * needing every string extracted before anything works.
          */
         applyToDom(rootEl = document) {
+            // Read from the document rather than the catalogue: activate() has already
+            // set it, and this also covers the en-x-rtl preview locale.
+            const rtl = document.documentElement.getAttribute('dir') === 'rtl';
             for (const el of rootEl.querySelectorAll('[data-i18n]')) {
                 const key = el.getAttribute('data-i18n');
                 const translated = this.t(key);
-                if (translated !== key) el.textContent = translated;
+                if (translated === key) continue;
+                el.textContent = rtl ? isolateLatinRuns(translated) : translated;
             }
             // Strings whose English contains inline markup — <code>%pip install</code>,
             // a <strong> emphasis, a documentation link. textContent would delete
@@ -469,7 +502,16 @@
             for (const el of rootEl.querySelectorAll('[data-i18n-html]')) {
                 const key = el.getAttribute('data-i18n-html');
                 const translated = this.t(key);
-                if (translated !== key) el.innerHTML = sanitiseInline(translated);
+                if (translated === key) continue;
+                el.innerHTML = sanitiseInline(translated);
+                // Text nodes only: isolating inside a tag would corrupt markup,
+                // and <code> content is already visually separated.
+                if (rtl) {
+                    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+                    const texts = [];
+                    while (walker.nextNode()) texts.push(walker.currentNode);
+                    for (const n of texts) n.nodeValue = isolateLatinRuns(n.nodeValue);
+                }
             }
             const attrs = [
                 ['data-i18n-title', 'title'],

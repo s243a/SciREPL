@@ -148,6 +148,45 @@ try {
         document.documentElement.scrollWidth - document.documentElement.clientWidth);
     check('Arabic does not scroll sideways', arOverflow <= 1, `${arOverflow}px`);
 
+    /* ------------------- identifiers inside rtl text -------------------- */
+    console.log('\n5. Latin identifiers survive inside right-to-left text');
+
+    // The bidi algorithm resolves the leading dot of ".srwb" against the
+    // paragraph direction, which in Arabic strands it at the far end of the run
+    // — the extension renders as "srwb" with a loose dot elsewhere. Caught by
+    // screenshotting the menu; invisible in the catalogue, where the text is fine.
+    const isolated = await page.evaluate(() => {
+        const el = document.getElementById('btn-import-file');
+        return el ? el.textContent : null;
+    });
+    const LRI = '\u2066', PDI = '\u2069';
+    check('the import label exists to inspect', typeof isolated === 'string', isolated);
+    check('Latin runs are wrapped in directional isolates under rtl',
+        isolated.includes(LRI) && isolated.includes(PDI),
+        JSON.stringify(isolated));
+    check('the extension keeps its leading dot attached',
+        /\u2066\.srwb, \.ipynb/.test(isolated), JSON.stringify(isolated));
+    check('the Arabic prose is untouched — this is typography, not translation',
+        /[\u0600-\u06FF]/.test(isolated));
+
+    // Applying it twice would nest isolates and grow the string on every
+    // re-render, which happens whenever the locale is reapplied.
+    const stable = await page.evaluate(() => {
+        const el = document.getElementById('btn-import-file');
+        window.i18n.applyToDom();
+        window.i18n.applyToDom();
+        return el.textContent;
+    });
+    check('re-rendering does not stack isolates', stable === isolated,
+        `${(stable.match(/\u2066/g) || []).length} vs ${(isolated.match(/\u2066/g) || []).length}`);
+
+    await page.evaluate(() => window.i18n.activate('en'));
+    await page.waitForTimeout(300);
+    const ltrLabel = await page.evaluate(() =>
+        document.getElementById('btn-import-file').textContent);
+    check('left-to-right text carries no isolates, which would be pointless there',
+        !ltrLabel.includes(LRI), JSON.stringify(ltrLabel));
+
     await page.evaluate(() => window.i18n.activate('en'));
     check('no uncaught page errors', pageErrors.length === 0, pageErrors.slice(0, 3).join(' | '));
 } catch (err) {
