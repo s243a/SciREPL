@@ -22,6 +22,30 @@
     'use strict';
 
     const STORAGE_KEY = 'scirepl_language';
+
+    /**
+     * Opt-in to seeing unreviewed translations in the picker.
+     *
+     * The review gate keeps drafts away from ordinary users, but it also kept
+     * them away from the people who have to review them: before this, the only
+     * way to see a draft was window.i18n.activate('ar') in a console, which is
+     * no use to the native speaker whose judgement we actually need.
+     *
+     * Drafts are offered and auto-detected, because someone who cannot read
+     * English cannot use the app at all, and a reviewed-only gate would have
+     * handed every one of them an English interface. An unreviewed translation
+     * they can read beats a polished one they cannot.
+     *
+     * Completeness is the gate that remains: below MIN_COMPLETENESS a locale is
+     * still withheld, since a 17%-translated UI is worse than English rather
+     * than better. Drafts are labelled as under review wherever they are shown.
+     *
+     * The privacy policy is the one place this is not enough. It is machine
+     * translated like everything else, so it carries a notice — in the reader's
+     * own language — saying the translation is informational and the English
+     * text is the official policy. See renderTranslationNotice().
+     */
+    const SHOW_DRAFTS_KEY = 'scirepl_i18n_show_drafts';
     const BASE_LOCALE = 'en';
 
     /** Below this, a locale is not offered at all. */
@@ -143,8 +167,11 @@
         resolve(preference = this.getPreference()) {
             // Based on the manifest, so this works before any catalogue is
             // fetched — which is the point of having a manifest.
+            // Complete enough, and either reviewed or explicitly opted into.
             const usable = (code) => (this.completeness[code] ?? 0) >= MIN_COMPLETENESS
-                && this.statusOf(code) === REVIEWED;
+                && LOCALES.some((l) => l.code === code)
+                && (this.statusOf(code) === REVIEWED || this.showDrafts());
+            // showDrafts() is true by default; see SHOW_DRAFTS_KEY.
 
             if (preference !== 'auto') {
                 if (usable(preference)) return preference;
@@ -273,6 +300,64 @@
 
         /* --------------------------- activation -------------------------- */
 
+        /** Whether unreviewed translations are shown in the picker. */
+        /**
+         * Unreviewed translations are shown by default. The setting exists so a
+         * reviewer can turn them *off* to compare against English, not to opt in.
+         */
+        showDrafts() {
+            return localStorage.getItem(SHOW_DRAFTS_KEY) !== '0';
+        }
+
+        setShowDrafts(on) {
+            if (on) localStorage.removeItem(SHOW_DRAFTS_KEY);
+            else localStorage.setItem(SHOW_DRAFTS_KEY, '0');
+        }
+
+        /* ------------------------ domain catalogues ----------------------- */
+
+        /**
+         * Privacy text is a legal document, and every non-English rendering of
+         * it is machine translated. Fetch the notice that says so, in the
+         * reader's language — a warning they cannot read is not a warning.
+         */
+        async loadDomain(code, domain) {
+            this.domains = this.domains || {};
+            const id = `${domain}.${code}`;
+            if (id in this.domains) return this.domains[id];
+            try {
+                const res = await fetch(`i18n/${domain}.${code}.json`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                this.domains[id] = (await res.json()).strings || {};
+            } catch {
+                this.domains[id] = null;
+            }
+            return this.domains[id];
+        }
+
+        /**
+         * Put the "this translation is informational" notice into the privacy
+         * dialog, or take it away again when the reader is back on English.
+         */
+        async renderTranslationNotice(rootEl = document) {
+            const host = rootEl.querySelector
+                ? rootEl.querySelector('#privacy-translation-notice') : null;
+            if (!host) return;
+            if (this.current === BASE_LOCALE) {
+                host.hidden = true;
+                host.textContent = '';
+                return;
+            }
+            const strings = await this.loadDomain(this.current, 'privacy');
+            const notice = (strings && strings['privacy.translationNotice'])
+                // Falling back to English is not ideal, but a notice in the
+                // wrong language still beats a translated policy with none.
+                || 'This translation is provided for information only. '
+                   + 'The English version is the official privacy policy.';
+            host.textContent = notice;
+            host.hidden = false;
+        }
+
         /** Locales worth showing in the picker, with their status. */
         available() {
             return LOCALES
@@ -280,12 +365,15 @@
                     ...l,
                     completeness: this.completeness[l.code] ?? 0,
                 }))
-                // Complete *and* reviewed. A draft stays in the repository and stays
-            // out of the picker until someone who reads it has checked it.
-            .filter((l) => l.code === BASE_LOCALE
-                || (l.completeness >= MIN_COMPLETENESS && this.statusOf(l.code) === REVIEWED))
+                // Complete *and* reviewed. A draft stays in the repository and
+                // stays out of the picker until someone who reads it has checked
+                // it — unless the reviewer has explicitly asked to see drafts.
+                .filter((l) => l.code === BASE_LOCALE
+                    || (l.completeness >= MIN_COMPLETENESS
+                        && (this.statusOf(l.code) === REVIEWED || this.showDrafts())))
                 .map((l) => ({
                     ...l,
+                    draft: l.code !== BASE_LOCALE && this.statusOf(l.code) !== REVIEWED,
                     partial: l.completeness < PARTIAL_THRESHOLD && l.code !== BASE_LOCALE,
                 }));
         }
@@ -343,6 +431,12 @@
             root.setAttribute('dir', info.dir);
 
             this.applyToDom();
+            // The policy's official-language notice follows the locale, and must
+            // not wait for the dialog to be opened — it is part of the text.
+            // Awaited so the DOM is consistent by the time i18n:changed fires;
+            // without this, switching locales twice quickly left the previous
+            // language's notice sitting above the new policy text.
+            await this.renderTranslationNotice();
             document.dispatchEvent(new CustomEvent('i18n:changed', { detail: { code } }));
         }
 

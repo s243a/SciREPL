@@ -181,6 +181,18 @@
         /* ---------------------------- language --------------------------- */
 
         _wireLanguage() {
+            const drafts = $('appearance-show-drafts');
+            if (drafts) {
+                drafts.addEventListener('change', async () => {
+                    window.i18n.setShowDrafts(drafts.checked);
+                    // Turning it off while a draft is active would leave the user
+                    // in a locale the picker no longer lists, so re-resolve.
+                    const pref = window.i18n.getPreference();
+                    await window.i18n.activate(
+                        pref === 'auto' ? window.i18n.resolve() : window.i18n.resolve(pref));
+                    this._refreshLanguage();
+                });
+            }
             $('appearance-language').addEventListener('change', async (e) => {
                 const code = e.target.value;
                 window.i18n.setPreference(code);
@@ -206,14 +218,23 @@
                 opt.value = locale.code;
                 // Partial locales say so, so choosing one is an informed decision
                 // rather than a surprise half-English interface.
-                opt.textContent = locale.partial
-                    ? window.t('appearance.languagePartial', {
-                        language: locale.endonym,
-                        percent: Math.round(locale.completeness * 100),
-                    })
-                    : locale.endonym;
+                const pct = Math.round(locale.completeness * 100);
+                // An unreviewed translation says so in the picker. Someone who
+                // opted in to see drafts still needs to know which ones they are.
+                if (locale.draft) {
+                    opt.textContent = window.t('appearance.languageDraft',
+                        { language: locale.endonym, percent: pct });
+                } else if (locale.partial) {
+                    opt.textContent = window.t('appearance.languagePartial',
+                        { language: locale.endonym, percent: pct });
+                } else {
+                    opt.textContent = locale.endonym;
+                }
                 select.appendChild(opt);
             }
+
+            const drafts = $('appearance-show-drafts');
+            if (drafts) drafts.checked = window.i18n.showDrafts();
 
             select.value = window.i18n.getPreference();
         }

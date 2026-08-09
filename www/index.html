@@ -817,6 +817,14 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             </div>
 
             <div class="appearance-row">
+                <label class="appearance-check">
+                    <input type="checkbox" id="appearance-show-drafts">
+                    <span data-i18n="appearance.showDrafts">Show translations under review</span>
+                </label>
+                <p class="appearance-help" data-i18n="appearance.showDraftsHelp">Lists languages whose translation has not been checked by a speaker yet, so it can be reviewed in the app. Turn this on if you are helping review a translation.</p>
+            </div>
+
+            <div class="appearance-row">
                 <button id="appearance-reset" class="vfs-btn danger" data-i18n="appearance.reset">Reset to defaults</button>
             </div>
         </div>
@@ -962,6 +970,11 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
             <button class="modal-close">&times;</button>
             <h2 data-i18n="privacy.privacyPolicy">Privacy Policy</h2>
             <p data-i18n="privacy.lastUpdatedFebruary162026" style="color: #888; font-size: 0.9em;">Last updated: February 16, 2026</p>
+
+            <!-- Filled by i18n.renderTranslationNotice() in the reader's own
+                 language whenever the policy is being shown translated. Hidden
+                 on English, which is the official text. -->
+            <p id="privacy-translation-notice" class="privacy-translation-notice" hidden></p>
 
             <h3 data-i18n="privacy.summary">Summary</h3>
             <p data-i18n="privacy.scireplDesignedBePrivacyRespecting">SciREPL is designed to be a privacy-respecting application. All code execution happens locally on your device. We do not collect, store, or transmit any personal data to our servers.</p>

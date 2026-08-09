@@ -2509,3 +2509,17 @@ body.force-mobile .vfs-delete-btn {
     color: #fff;
     font-weight: 600;
 }
+
+/* The privacy policy is machine translated in every language but English.
+   This is the sentence that says so, and it should read as a caution rather
+   than as body copy — a reader skimming a translated policy needs to notice it
+   before they rely on the wording. */
+.privacy-translation-notice {
+    margin: 12px 0 16px;
+    padding: 10px 12px;
+    border-inline-start: 3px solid var(--orange, #d29922);
+    background: rgba(210, 153, 34, 0.10);
+    border-radius: 4px;
+    font-size: 0.9em;
+    line-height: 1.5;
+}

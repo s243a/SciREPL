@@ -116,7 +116,9 @@
     "appearance.languagePartial": "Shown in a dropdown: the language name, then how much of the UI is translated.",
     "tour.editCellLanguage.body": "'All→' is a button label on screen; keep the arrow. 'cell' is a notebook cell.",
     "tour.progress": "Step counter, e.g. '2 of 6'.",
-    "menu.showTour": "Replays the first-run introduction. 'Tour' as in a guided walkthrough of the interface."
+    "menu.showTour": "Replays the first-run introduction. 'Tour' as in a guided walkthrough of the interface.",
+    "appearance.showDrafts": "A translation that exists but has not been checked by a native speaker. 'Under review' as in awaiting proofreading.",
+    "appearance.languageDraft": "Shown in the language dropdown next to an unreviewed translation."
   },
   "strings": {
     "menu.title": "Menu",
@@ -445,6 +447,9 @@
     "export.defaultLanguage": "Default language:",
     "export.showEmptyFolders": "Show empty folders",
     "help.runtimeVersions": "<strong>Runtime versions:</strong> Languages loaded from CDN (R, Prolog) have a version field on the Languages page. Leave it blank to use the pinned default (recommended), enter a tag like <code>v0.5.4</code> to use a specific version, or enter <code>latest</code> for the rolling release. The rolling release can occasionally serve mismatched files (e.g. <code>ASM_CONSTS[code] is not a function</code>) — if that happens, switch to the pinned default and clear the SciREPL cache.",
-    "help.includesFeatureList": "Includes: Multi-language (Python, R, Prolog, Bash, JavaScript, Lua), editable cells, markdown cells, session persistence with auto-save and crash recovery, Math Mode palette, .ipynb import/export with output preservation, .srwb workbook format, rich export (HTML, Markdown, PDF, DOCX with native equations, LaTeX) with syntax highlighting, virtual filesystem, search paths, URL file fetching, multi-notebook support, package catalog with one-click install, language settings, package format (.zip/.tar.gz)"
+    "help.includesFeatureList": "Includes: Multi-language (Python, R, Prolog, Bash, JavaScript, Lua), editable cells, markdown cells, session persistence with auto-save and crash recovery, Math Mode palette, .ipynb import/export with output preservation, .srwb workbook format, rich export (HTML, Markdown, PDF, DOCX with native equations, LaTeX) with syntax highlighting, virtual filesystem, search paths, URL file fetching, multi-notebook support, package catalog with one-click install, language settings, package format (.zip/.tar.gz)",
+    "appearance.showDrafts": "Include translations under review",
+    "appearance.showDraftsHelp": "Most translations have not yet been checked by a speaker of the language. They are offered anyway, and labelled, because an interface you can read beats one you cannot. Turn this off to see only reviewed translations.",
+    "appearance.languageDraft": "{language} — under review ({percent}%)"
   }
 }

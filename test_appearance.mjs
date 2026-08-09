@@ -205,12 +205,11 @@ try {
         JSON.stringify(locales));
     check('every offered locale meets the completeness threshold',
         locales.every((l) => l.pct >= 80), JSON.stringify(locales));
-    // es is a real, in-progress draft rather than a fixture: extracting the UI
-    // took the catalogue from 57 strings to 327, so a translation that was
-    // complete against the old surface now covers 17% of the app. It must not be
-    // offered, and this is the check that would catch it being offered anyway.
-    check('a partially translated locale is withheld, not offered half-done',
-        !locales.some((l) => l.code === 'es'), JSON.stringify(locales));
+    // Completeness, not review status, is what withholds a locale now: an
+    // unreviewed translation someone can read beats English they cannot, but a
+    // barely-started one is worse than English rather than better.
+    check('every offered locale is complete enough to be usable',
+        locales.every((l) => l.pct >= 80), JSON.stringify(locales));
 
     // The point of the completeness score: a stub catalogue must not look ready.
     const stubScore = await page.evaluate(() => {
@@ -245,22 +244,25 @@ try {
     check('the document direction is set',
         ['ltr', 'rtl'].includes(await page.evaluate(() => document.documentElement.getAttribute('dir'))));
 
-    // A draft translation may live in the repo but must not be offered until a
-    // human who reads it has signed it off — the completeness score cannot tell
-    // a good translation from a confident wrong one.
+    // A draft is offered, because withholding it hands an unreadable interface
+    // to the people it was translated for. What it must never do is pass itself
+    // off as reviewed — the completeness score cannot tell a good translation
+    // from a confident wrong one, so the label has to carry that.
     const gating = await page.evaluate(() => {
         window.i18n.catalogues.__draft = { 'menu.appearance': 'Apariencia-draft' };
         window.i18n.completeness.__draft = 1;
         window.i18n.LOCALES.push({ code: '__draft', endonym: 'Draft', dir: 'ltr', status: 'draft' });
-        const offered = window.i18n.available().some((l) => l.code === '__draft');
+        const entry = window.i18n.available().find((l) => l.code === '__draft');
         const status = window.i18n.statusOf('__draft');
         window.i18n.LOCALES.pop();
         delete window.i18n.catalogues.__draft;
         delete window.i18n.completeness.__draft;
-        return { offered, status };
+        return { offered: Boolean(entry), flagged: Boolean(entry && entry.draft), status };
     });
-    check('a complete but unreviewed translation is NOT offered',
-        gating.offered === false, `status=${gating.status}`);
+    check('a complete but unreviewed translation IS offered', gating.offered === true,
+        `status=${gating.status}`);
+    check('but it is flagged as a draft rather than passed off as reviewed',
+        gating.flagged === true, `status=${gating.status}`);
 
     // Layout and language are separate reviews; this is how the first is done
     // without a translation existing.
@@ -319,6 +321,86 @@ try {
     });
     check('a translated policy declares itself informational, pointing at English',
         /informativo/i.test(notice) && /ingl/i.test(notice), notice);
+
+    /* ------------- draft translations, and the policy notice ------------ */
+    console.log('\n4b. Drafts are usable; the policy says it is unofficial');
+
+    const draftState = async (showDrafts, deviceLangs) => await page.evaluate(
+        async ({ show, langs }) => {
+            window.i18n.setShowDrafts(show);
+            const orig = Object.getOwnPropertyDescriptor(Navigator.prototype, 'languages');
+            Object.defineProperty(navigator, 'languages', { get: () => langs, configurable: true });
+            const out = {
+                offered: window.i18n.available().map((l) => l.code),
+                resolvedAuto: window.i18n.resolve('auto'),
+                drafts: window.i18n.available().filter((l) => l.draft).map((l) => l.code),
+            };
+            if (orig) Object.defineProperty(Navigator.prototype, 'languages', orig);
+            return out;
+        }, { show: showDrafts, langs: deviceLangs });
+
+    // Someone who cannot read English cannot use the app, so an unreviewed
+    // translation they can read is offered rather than withheld.
+    let d = await draftState(true, ['ar', 'en']);
+    check('an unreviewed locale is offered by default', d.offered.includes('ar'), d.offered.join(','));
+    check('detection follows the device into a draft locale', d.resolvedAuto === 'ar', d.resolvedAuto);
+    check('drafts are labelled as under review, not passed off as finished',
+        d.drafts.includes('ar'), d.drafts.join(','));
+
+    // English whenever the device language has nothing usable behind it.
+    d = await draftState(true, ['is-IS']);
+    check('an unavailable device language falls back to English', d.resolvedAuto === 'en', d.resolvedAuto);
+    d = await draftState(true, ['es-MX']);
+    check('a regional variant falls back to its base language', d.resolvedAuto === 'es', d.resolvedAuto);
+
+    // Completeness is the gate that remains: a barely-started locale is worse
+    // than English, not better.
+    const thin = await page.evaluate(() => {
+        const es = window.i18n.LOCALES.find((l) => l.code === 'es');
+        const keep = { c: window.i18n.completeness.es, s: es.status };
+        window.i18n.completeness.es = 0.17;
+        if (window.i18n.catalogues.es) window.i18n.catalogues.es.__status = 'draft';
+        const offered = window.i18n.available().some((l) => l.code === 'es');
+        window.i18n.completeness.es = keep.c;
+        return offered;
+    });
+    check('a barely-translated locale is still withheld', thin === false);
+
+    // Turning drafts off is for comparing against English, and must work.
+    d = await draftState(false, ['ar', 'en']);
+    check('drafts can be switched off to see only reviewed translations',
+        !d.offered.includes('ar'), d.offered.join(','));
+    check('with drafts off, an unreviewed device language falls back to English',
+        d.resolvedAuto === 'en', d.resolvedAuto);
+    await page.evaluate(() => window.i18n.setShowDrafts(true));
+
+    // The policy is machine translated everywhere but English, and has to say so
+    // in a language the reader actually reads.
+    const policyNotice = await page.evaluate(async () => {
+        const el = document.getElementById('privacy-translation-notice');
+        const out = {};
+        await window.i18n.activate('en');
+        out.enHidden = el.hidden;
+        await window.i18n.activate('ja');
+        out.ja = { hidden: el.hidden, text: el.textContent };
+        await window.i18n.activate('ar');
+        out.ar = { hidden: el.hidden, text: el.textContent };
+        await window.i18n.activate('en');
+        return out;
+    });
+    check('the English policy carries no translation notice — it is the official text',
+        policyNotice.enHidden === true);
+    check('a translated policy declares itself unofficial, in that language',
+        policyNotice.ja.hidden === false && /情報提供|英語/.test(policyNotice.ja.text), policyNotice.ja.text);
+    check('the notice is translated for RTL readers too, not left in English',
+        policyNotice.ar.hidden === false && /[\u0600-\u06FF]/.test(policyNotice.ar.text), policyNotice.ar.text);
+    check('the notice points at English as the official policy',
+        /英語|إنجليز/.test(policyNotice.ja.text + policyNotice.ar.text));
+
+    await page.evaluate(async () => {
+        window.i18n.setPreference('auto');
+        await window.i18n.activate('en');
+    });
 
     /* ------------------------------ dialog ------------------------------ */
     console.log('\n5. Dialog');
