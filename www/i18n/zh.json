@@ -339,6 +339,7 @@
     "appearance.showDrafts": "包含正在审核中的翻译",
     "appearance.showDraftsHelp": "大部分翻译尚未经过母语人士的校对。但由于可读的界面总好过无法理解的界面，因此我们仍提供这些翻译并予以标注。关闭此项可仅查看已审核的翻译。",
     "appearance.languageDraft": "{language} — 审核中 ({percent}%)",
-    "appearance.cssQuarantined": "您的自定义CSS隐藏了菜单按钮，因此已被关闭。它仍保留在“外观 → 高级”中，以便您进行编辑。"
+    "appearance.cssQuarantined": "您的自定义CSS隐藏了菜单按钮，因此已被关闭。它仍保留在“外观 → 高级”中，以便您进行编辑。",
+    "appearance.cssRolledBack": "此CSS因隐藏了菜单已被关闭。请编辑后重新应用。"
   }
 }

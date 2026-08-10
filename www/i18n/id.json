@@ -343,6 +343,7 @@
     "appearance.showDrafts": "Sertakan terjemahan dalam peninjauan",
     "appearance.showDraftsHelp": "Sebagian besar terjemahan belum diperiksa oleh penutur bahasa tersebut. Terjemahan tetap disediakan dan diberi label, karena antarmuka yang dapat dibaca lebih baik daripada yang tidak. Matikan opsi ini untuk hanya melihat terjemahan yang telah ditinjau.",
     "appearance.languageDraft": "{language} — dalam peninjauan ({percent}%)",
-    "appearance.cssQuarantined": "CSS kustom Anda menyembunyikan tombol menu, sehingga telah dinonaktifkan. Pengaturan ini tetap disimpan di Tampilan → Lanjutan agar Anda dapat mengeditnya."
+    "appearance.cssQuarantined": "CSS kustom Anda menyembunyikan tombol menu, sehingga telah dinonaktifkan. Pengaturan ini tetap disimpan di Tampilan → Lanjutan agar Anda dapat mengeditnya.",
+    "appearance.cssRolledBack": "CSS ini dinonaktifkan karena menyembunyikan menu. Edit dan terapkan lagi."
   }
 }

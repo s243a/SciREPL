@@ -346,6 +346,7 @@
     "appearance.showDrafts": "Inclure les traductions en cours de révision",
     "appearance.showDraftsHelp": "La plupart des traductions n'ont pas encore été vérifiées par une personne parlant la langue. Elles sont néanmoins proposées et étiquetées, car une interface lisible vaut mieux qu'une interface incompréhensible. Désactivez cette option pour ne voir que les traductions révisées.",
     "appearance.languageDraft": "{language} — en cours de révision ({percent}%)",
-    "appearance.cssQuarantined": "Votre CSS personnalisé masquait le bouton de menu, il a donc été désactivé. Il est conservé dans Apparence → Avancé afin que vous puissiez le modifier."
+    "appearance.cssQuarantined": "Votre CSS personnalisé masquait le bouton de menu, il a donc été désactivé. Il est conservé dans Apparence → Avancé afin que vous puissiez le modifier.",
+    "appearance.cssRolledBack": "Ce CSS a été désactivé car il masquait le menu. Modifiez-le et appliquez-le à nouveau."
   }
 }

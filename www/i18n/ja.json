@@ -339,6 +339,7 @@
     "appearance.showDrafts": "校閲中の翻訳を含める",
     "appearance.showDraftsHelp": "ほとんどの翻訳はまだ話者による確認が行われていません。読めないインターフェースより読める方が良いため、ラベルを付けた上で提供されています。確認済みの翻訳のみを表示するには、これをオフにしてください。",
     "appearance.languageDraft": "{language} — 校閲中 ({percent}%)",
-    "appearance.cssQuarantined": "カスタムCSSがメニューボタンを非表示にしていたため、無効化されました。編集できるように「外観 → 高度な設定」に保持されています。"
+    "appearance.cssQuarantined": "カスタムCSSがメニューボタンを非表示にしていたため、無効化されました。編集できるように「外観 → 高度な設定」に保持されています。",
+    "appearance.cssRolledBack": "このCSSはメニューを非表示にしていたため無効化されました。編集して再度適用してください。"
   }
 }

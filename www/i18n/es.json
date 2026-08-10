@@ -343,6 +343,7 @@
     "appearance.showDrafts": "Incluir traducciones en revisión",
     "appearance.showDraftsHelp": "La mayoría de las traducciones aún no han sido verificadas por un hablante del idioma. Se ofrecen de todos modos, y señaladas, porque una interfaz que se puede leer es mejor que una que no. Desactive esto para ver solo traducciones revisadas.",
     "appearance.languageDraft": "{language} — en revisión ({percent}%)",
-    "appearance.cssQuarantined": "Tu CSS personalizado ocultó el botón del menú, por lo que se ha desactivado. Se conserva en Aspecto → Avanzado para que puedas editarlo."
+    "appearance.cssQuarantined": "Tu CSS personalizado ocultó el botón del menú, por lo que se ha desactivado. Se conserva en Aspecto → Avanzado para que puedas editarlo.",
+    "appearance.cssRolledBack": "Este CSS se desactivó porque ocultaba el menú. Edítalo y aplícalo de nuevo."
   }
 }
