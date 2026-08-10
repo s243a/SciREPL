@@ -640,6 +640,67 @@ try {
     check('and clears the quarantine', cleared.quarantineGone === true);
     await page.evaluate(() => window.appearance.setCustomCss(''));
 
+    /* --------- custom CSS survives a real reload; delayed attacks -------- */
+    console.log('\n4g. Custom CSS on a real reload, and delayed-animation attacks');
+
+    // The regression Sol caught: apply() runs while #loading-overlay still
+    // covers the menu, so the escape check saw the app's own overlay and
+    // quarantined harmless CSS on every reload. Prove a stored benign rule
+    // survives a genuine navigation.
+    {
+        const rc = await browser.newContext();
+        await rc.addInitScript(() => {
+            localStorage.setItem('scirepl_privacy_accepted', '1');
+            localStorage.setItem('scirepl_onboarding_seen', '1');
+            localStorage.setItem('scirepl_auto_download', '1');
+            localStorage.setItem('scirepl_appearance_custom_css', '#app-header { letter-spacing: .5px; }');
+        });
+        const rp = await rc.newPage();
+        await rp.goto(URL, { waitUntil: 'load', timeout: TIMEOUT });
+        await rp.waitForFunction(() => window.appearance, null, { timeout: 30_000 });
+        await rp.waitForFunction(() => {
+            const o = document.getElementById('loading-overlay');
+            return !o || o.classList.contains('hidden');
+        }, null, { timeout: 60_000 }).catch(() => {});
+        await rp.waitForTimeout(1200);
+        const r = await rp.evaluate(() => ({
+            applied: !!document.getElementById('appearance-custom-css'),
+            stored: window.appearance.getCustomCss() !== '',
+            quarantined: !!window.appearance.getQuarantinedCss(),
+        }));
+        check('benign CSS survives a real reload — applied', r.applied === true);
+        check('benign CSS survives a real reload — still stored', r.stored === true);
+        check('benign CSS is not falsely quarantined by the loading overlay',
+            r.quarantined === false);
+        await rc.close();
+    }
+
+    // A delayed animation that hides the menu button must be caught at apply
+    // time (keyframe inspection), before the delay elapses.
+    const delayedAttack = await page.evaluate(() => {
+        window.appearance.clearQuarantinedCss();
+        window.appearance.setCustomCss(
+            '@keyframes vanish { to { opacity: 0; pointer-events: none; } }'
+            + ' #menu-btn { animation: vanish 1s 2s forwards; }');
+        return {
+            applied: !!document.getElementById('appearance-custom-css'),
+            quarantined: window.appearance.getQuarantinedCss().includes('vanish'),
+        };
+    });
+    check('a delayed hiding animation is quarantined before it fires',
+        delayedAttack.applied === false && delayedAttack.quarantined === true);
+
+    // Control: an animation that does not touch hiding properties is allowed.
+    const benignAnim = await page.evaluate(() => {
+        window.appearance.clearQuarantinedCss();
+        window.appearance.setCustomCss(
+            '@keyframes pulse { 50% { letter-spacing: 1px; } }'
+            + ' #app-header { animation: pulse 2s infinite; }');
+        return { applied: !!document.getElementById('appearance-custom-css') };
+    });
+    check('a benign animation is not rolled back', benignAnim.applied === true);
+    await page.evaluate(() => window.appearance.setCustomCss(''));
+
     /* ----------------- legal text follows its own review ---------------- */
     console.log('\n4d. Privacy status controls the legal text');
 

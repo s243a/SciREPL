@@ -290,17 +290,66 @@
             }
             el.textContent = css;
 
-            // Rules that hide or shrink the menu button take away the only route
-            // back to this setting, and "reset it from the menu" is no help when
-            // the menu is what vanished. Check the way out is still there, and
-            // if it is not, roll back and keep the CSS aside rather than
-            // discarding the user's work.
-            if (!this._escapeHatchIntact()) {
-                el.remove();
-                localStorage.setItem(KEYS.quarantinedCss, css);
-                localStorage.removeItem(KEYS.customCss);
-                this._announceQuarantine();
+            // The CSS is applied above (before first paint, so no flash). But the
+            // escape-path check must NOT run while the app's own loading overlay
+            // still covers the UI: elementFromPoint would see the overlay and
+            // mistake it for a user lockout, quarantining harmless CSS on every
+            // reload. Defer the check until the overlay clears; validate now
+            // otherwise (e.g. an edit from the dialog, when loading is long done).
+            if (this._loadingOverlayActive()) {
+                this._deferEscapeCheck();
+            } else {
+                this._runEscapeCheck(css, el);
             }
+        }
+
+        /**
+         * Roll back custom CSS if it broke the way back to Appearance. Kept
+         * separate from application so it can run later, once the app is in its
+         * normal interactive state rather than mid-load.
+         */
+        _runEscapeCheck(css, el) {
+            el = el || document.getElementById('appearance-custom-css');
+            if (!el) return;
+            if (this._escapeHatchIntact()) {
+                this._scheduleDelayedRecheck();
+                return;
+            }
+            el.remove();
+            localStorage.setItem(KEYS.quarantinedCss, css);
+            localStorage.removeItem(KEYS.customCss);
+            this._announceQuarantine();
+        }
+
+        /** Is the app's loading overlay currently covering the UI? */
+        _loadingOverlayActive() {
+            const o = document.getElementById('loading-overlay');
+            if (!o || o.classList.contains('hidden')) return false;
+            const cs = getComputedStyle(o);
+            return cs.display !== 'none' && cs.visibility !== 'hidden'
+                && parseFloat(cs.opacity) >= 0.1;
+        }
+
+        /** Run the escape check once the loading overlay has gone. */
+        _deferEscapeCheck() {
+            if (this._escapeCheckObserver) return;
+            const finish = () => {
+                if (this._loadingOverlayActive()) return;
+                this._escapeCheckObserver.disconnect();
+                this._escapeCheckObserver = null;
+                clearInterval(this._escapeCheckPoll);
+                const css = this.getCustomCss();
+                const el = document.getElementById('appearance-custom-css');
+                if (css.trim() && el) this._runEscapeCheck(css, el);
+            };
+            this._escapeCheckObserver = new MutationObserver(finish);
+            const o = document.getElementById('loading-overlay');
+            if (o) this._escapeCheckObserver.observe(o, {
+                attributes: true, attributeFilter: ['class', 'style'],
+            });
+            // Fallback for engines/paths where the overlay is removed rather than
+            // class-toggled, or MutationObserver is unavailable.
+            this._escapeCheckPoll = setInterval(finish, 250);
         }
 
         /**
@@ -318,6 +367,12 @@
             const btn = document.getElementById('menu-btn');
             if (!btn) return true;              // nothing rendered yet; not our call
             if (!this._nodeReachable(btn)) return false;
+
+            // A rule that is fine this frame but animates the button away later
+            // (a delayed @keyframes, a transition) would pass a one-frame check
+            // and then lock the user out. Inspect the recovery path's own
+            // animations and fail closed if any keyframe hides it.
+            if (this._pathHasHidingAnimation()) return false;
 
             const menu = document.getElementById('menu-modal');
             const appBtn = document.getElementById('btn-appearance');
@@ -373,6 +428,58 @@
             // pseudo-element covers the point (elementFromPoint returns the host)
             // — means el is painted over.
             return true;
+        }
+
+        /**
+         * Does any animation on the recovery path have a keyframe that would hide
+         * the control — opacity to nothing, visibility/display off,
+         * pointer-events off, or a translate far off-screen? This catches the
+         * delayed-animation attack a single-frame geometry check cannot: the
+         * keyframes are known the instant the rule is applied, before the delay
+         * elapses, so the CSS is quarantined at once and never locks anyone out.
+         */
+        _pathHasHidingAnimation() {
+            const ids = ['menu-btn', 'menu-modal', 'btn-appearance', 'app-header'];
+            for (const id of ids) {
+                const el = document.getElementById(id);
+                if (!el || typeof el.getAnimations !== 'function') continue;
+                let anims;
+                try { anims = el.getAnimations({ subtree: false }); } catch { anims = []; }
+                for (const anim of anims) {
+                    const eff = anim.effect;
+                    let frames = [];
+                    try { frames = eff && eff.getKeyframes ? eff.getKeyframes() : []; } catch { frames = []; }
+                    if (frames.some((f) => this._frameHides(f))) return true;
+                }
+            }
+            return false;
+        }
+
+        _frameHides(f) {
+            if (f.opacity !== undefined && parseFloat(f.opacity) < 0.1) return true;
+            if (f.visibility === 'hidden' || f.visibility === 'collapse') return true;
+            if (f.display === 'none') return true;
+            if (f.pointerEvents === 'none') return true;
+            if (typeof f.transform === 'string' && /translate|matrix/i.test(f.transform)) {
+                const nums = (f.transform.match(/-?\d+(?:\.\d+)?/g) || []).map(Number);
+                if (nums.some((n) => Math.abs(n) > 1500)) return true;
+            }
+            return false;
+        }
+
+        /**
+         * Re-run the escape check a little later. Transitions and computed
+         * changes that a keyframe scan cannot predict still get caught, and
+         * because the quarantine also runs on the next launch, a lockout that
+         * somehow applied cannot persist across a restart.
+         */
+        _scheduleDelayedRecheck() {
+            for (const t of (this._recheckTimers || [])) clearTimeout(t);
+            this._recheckTimers = [900, 3000].map((ms) => setTimeout(() => {
+                const css = this.getCustomCss();
+                const el = document.getElementById('appearance-custom-css');
+                if (css.trim() && el) this._runEscapeCheck(css, el);
+            }, ms));
         }
 
         /** Whether this load is deliberately ignoring custom appearance. */

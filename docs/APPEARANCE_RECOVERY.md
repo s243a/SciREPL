@@ -39,6 +39,25 @@ Safe mode ignores the custom theme and custom CSS for that session without
 deleting them, so you can then open Appearance and Reset to defaults.
 
 On desktop and web this is a URL edit. In an installed Android/PWA build the
-address bar may not be available; there, rely on layers 1 and 2, which do not
-require editing the URL. Because the automatic rollback re-runs on every launch,
-a lockout that was stored cannot survive a restart.
+address bar may not be available.
+
+## What the guard does and does not guarantee
+
+The automatic check (layer 1) catches the hiding techniques it knows about:
+setting the recovery path to `display:none`, `visibility:hidden`, near-zero
+opacity, `pointer-events:none`, zero/off-screen geometry, a covering overlay
+(including an ancestor pseudo-element), and — by inspecting keyframes at apply
+time — animations and transitions that would hide the path after a delay. It
+re-runs on every launch, so a lockout built from those techniques does not
+survive a restart, and it re-checks a short time after applying to catch
+transitions a static scan cannot predict.
+
+It is **not** a proof that arbitrary CSS is recoverable. Raw CSS is
+Turing-adjacent in its ability to reposition and obscure, and a sufficiently
+novel rule could evade the heuristics. This is why custom CSS carries a warning,
+is collapsed behind "Advanced", and is not a supported way to restyle the app so
+much as an escape hatch for people who accept the risk. If you rely on custom
+CSS, keep layer 2 (Reset to defaults) and layer 3 (`?safe`) in mind; on an
+installed Android build where neither the URL nor a broken menu is reachable,
+uninstalling and reinstalling the PWA clears stored preferences as the last
+resort.
