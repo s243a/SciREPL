@@ -187,6 +187,7 @@
             // runtime-download or privacy dialog at z-index 9000.
             this._watchConsentModal();
 
+            this._gen = (this._gen || 0) + 1;
             this.steps = this._resolveSteps();
             this.index = 0;
             this._build();
@@ -348,13 +349,17 @@
             select.value = i18n.getPreference();
 
             select.addEventListener('change', async () => {
+                const gen = this._gen;
                 i18n.setPreference(select.value);
                 await i18n.activate(select.value === 'auto' ? i18n.resolve() : select.value);
-                // Re-render so the tour itself switches language immediately —
-                // the most direct proof to the user that the setting took. The
-                // re-render replaces this <select>, so focus would fall to
-                // <body> and a forward Tab could escape the dialog; move it onto
-                // the replacement.
+                // activate() awaits a catalogue fetch; the user may have pressed
+                // Escape or Skip (destroying this.el) or restarted the tour in
+                // the meantime. Touching this.el then throws. Bail unless this is
+                // still the same, live tour.
+                if (gen !== this._gen || !this.el || !this.el.isConnected) return;
+                // Re-render so the tour switches language immediately; the
+                // re-render replaces this <select>, so move focus onto the
+                // replacement or a forward Tab could escape the dialog.
                 this._render();
                 const fresh = this.el && this.el.querySelector('#tour-language-select');
                 if (fresh) fresh.focus();

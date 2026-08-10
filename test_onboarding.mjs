@@ -587,6 +587,50 @@ try {
         await ctx.close();
     }
 
+    /* ------- closing the tour during locale activation is safe --------- */
+    console.log('\n16. Escape/Skip/restart during a delayed locale activation');
+
+    const ctxR = await browser.newContext();
+    await ctxR.addInitScript(() => {
+        localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.removeItem('scirepl_onboarding_seen');
+    });
+    const pr = await ctxR.newPage();
+    const pageErrs = [];
+    pr.on('pageerror', (e) => pageErrs.push(e.message));
+    await pr.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await pr.waitForFunction(() => window.onboarding && window.i18n, null, { timeout: 30_000 });
+    await pr.waitForTimeout(2200);
+
+    for (const closeVia of ['escape', 'skip', 'restart']) {
+        const threw = await pr.evaluate(async (how) => {
+            const before = window.__err ? window.__err.length : 0;
+            window.__err = window.__err || [];
+            window.addEventListener('error', (e) => window.__err.push(e.message), { once: true });
+
+            window.onboarding.start();
+            const sel = document.getElementById('tour-language-select');
+            // Make activate() slow so the close lands mid-flight.
+            const realActivate = window.i18n.activate.bind(window.i18n);
+            window.i18n.activate = (c) => new Promise((res) => setTimeout(() =>
+                realActivate(c).then(res), 250));
+            sel.value = 'es';
+            const changePromise = sel.dispatchEvent(new Event('change'));
+            // Immediately close/restart, before activate resolves.
+            if (how === 'escape') document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            else if (how === 'skip') window.onboarding.finish();
+            else window.onboarding.start();
+            await new Promise((r) => setTimeout(r, 500));
+            window.i18n.activate = realActivate;
+            return (window.__err.length - before) > 0;
+        }, closeVia);
+        check(`closing the tour via ${closeVia} mid-activation does not throw`, threw === false);
+    }
+    check('no uncaught page errors from the activation race',
+        pageErrs.filter((m) => /querySelector|null/.test(m)).length === 0,
+        pageErrs.slice(0, 2).join(' | '));
+    await ctxR.close();
+
 } catch (err) {
     failures++;
     console.log(`\n  [FAIL] crashed: ${err && err.message}`);
