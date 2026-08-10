@@ -214,12 +214,21 @@
      */
     const LEGAL_PREFIX = 'privacy.';
 
-    /** Chrome, not legal prose: safe to translate whatever the review status. */
+    /**
+     * The only privacy strings translated regardless of review status: the
+     * notice that the translation is unofficial, and its link to the English
+     * text. These MUST be in the reader's language — a warning they cannot read
+     * is useless.
+     *
+     * Everything else, including privacy.iUnderstand, follows the review gate.
+     * That button records consent and unlocks CDN downloads, so it is not
+     * harmless chrome: when the policy body is shown in English because the
+     * translation is unreviewed, the button that accepts it is shown in English
+     * too, and the whole consent act is in one language.
+     */
     const LEGAL_CHROME = new Set([
-        'privacy.privacyPolicy',
-        'privacy.summary',
-        'privacy.iUnderstand',
         'privacy.translationNotice',
+        'privacy.viewOfficial',
     ]);
 
     class I18n {
@@ -375,12 +384,15 @@
          * `t('appearance.scalePercent', { percent: 150 })`
          */
         t(key, vars) {
-            const cat = this.legalLocaleFor(key) === BASE_LOCALE
-                ? (this.catalogues[BASE_LOCALE] || {})
-                : (this.catalogues[this.current] || {});
-            const base = this.catalogues[BASE_LOCALE] || {};
-            let out = cat[key];
-            if (typeof out !== 'string' || !out) out = base[key];
+            let out;
+            if (typeof key === 'string' && key.startsWith(LEGAL_PREFIX)) {
+                out = this._legalString(key);
+            } else {
+                const cat = this.catalogues[this.current] || {};
+                const base = this.catalogues[BASE_LOCALE] || {};
+                out = cat[key];
+                if (typeof out !== 'string' || !out) out = base[key];
+            }
             if (typeof out !== 'string') return key;
             if (vars) {
                 out = out.replace(/\{(\w+)\}/g, (m, name) =>
@@ -390,16 +402,36 @@
         }
 
         /**
-         * Which locale a given key should be read from. Everything follows the
-         * active locale except unreviewed legal prose, which falls back to the
-         * authoritative English.
+         * A privacy string, read from the domain catalogues (privacy.<code>.json)
+         * rather than the general one. The whole 38-string policy now lives in
+         * that catalogue, so its reviewed status gates exactly the text it
+         * authorises — marking privacy.<code> reviewed no longer blesses policy
+         * strings that were never in the reviewed set.
+         *
+         * Reviewed translation, or a chrome exception -> the reader's language.
+         * Otherwise the authoritative English. Always falls back to English if a
+         * key is somehow absent.
          */
+        _legalString(key) {
+            const useCurrent = this.current !== BASE_LOCALE
+                && (LEGAL_CHROME.has(key)
+                    || this.domainStatusOf(this.current, 'privacy') === REVIEWED);
+            const pick = (code) => (this.domains && this.domains[`privacy.${code}`]) || null;
+            const cur = useCurrent ? pick(this.current) : null;
+            const en = pick(BASE_LOCALE) || {};
+            let v = cur && cur[key];
+            if (typeof v !== 'string' || !v) v = en[key];
+            return typeof v === 'string' ? v : undefined;
+        }
+
+        /** True when the policy body is being shown in English on this locale. */
         legalLocaleFor(key) {
-            if (this.current === BASE_LOCALE) return BASE_LOCALE;
+            // Retained for callers/tests: which locale a key resolves to.
             if (typeof key !== 'string' || !key.startsWith(LEGAL_PREFIX)) return this.current;
-            if (LEGAL_CHROME.has(key)) return this.current;
-            return this.domainStatusOf(this.current, 'privacy') === REVIEWED
-                ? this.current : BASE_LOCALE;
+            const useCurrent = this.current !== BASE_LOCALE
+                && (LEGAL_CHROME.has(key)
+                    || this.domainStatusOf(this.current, 'privacy') === REVIEWED);
+            return useCurrent ? this.current : BASE_LOCALE;
         }
 
         /** True when the policy body is being shown in English on this locale. */
@@ -525,16 +557,31 @@
         }
 
         async activate(code) {
+            // Sequence concurrent activations: two quick switches must not let an
+            // older one finish last and leave the DOM (and the policy notice) on
+            // the wrong locale. Only the newest activation applies to the DOM.
+            const token = (this._activateToken = (this._activateToken || 0) + 1);
+
             if (code === RTL_PREVIEW) {
-                // Reuse the base strings; only the direction changes.
                 await this.load(BASE_LOCALE);
                 this.catalogues[RTL_PREVIEW] = this.catalogues[BASE_LOCALE];
                 this.completeness[RTL_PREVIEW] = 1;
             }
             await this.load(code);
             if (!this.catalogues[code]) code = BASE_LOCALE;
-            this.current = code;
 
+            // Policy text is read synchronously by applyToDom, so the domain
+            // catalogues must be in hand first: this locale's and English's.
+            const domainCode = code === RTL_PREVIEW ? BASE_LOCALE : code;
+            await Promise.all([
+                this.loadDomain(BASE_LOCALE, 'privacy'),
+                this.loadDomain(domainCode, 'privacy'),
+            ]);
+
+            // A newer activation started while we were awaiting: let it win.
+            if (token !== this._activateToken) return;
+
+            this.current = code;
             const info = this.localeInfo(code);
             const root = document.documentElement;
             root.setAttribute('lang', code);

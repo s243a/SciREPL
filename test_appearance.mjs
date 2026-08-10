@@ -646,26 +646,59 @@ try {
     const legal = await page.evaluate(async () => {
         await window.i18n.load('es');
         await window.i18n.activate('es');
-        const body = window.t('privacy.youUseScireplEntirelyAt');
-        const chrome = window.t('privacy.iUnderstand');
+        const enDom = window.i18n.domains['privacy.en'];
         const out = {
+            // The policy strings now live in the domain catalogue, so the domain
+            // status gates exactly the text it authorises.
+            policyInDomain: !!(enDom && enDom['privacy.youUseScireplEntirelyAt']),
+            policyNotInGeneral: !('privacy.youUseScireplEntirelyAt' in window.i18n.catalogues.en),
             privacyStatus: window.i18n.domainStatusOf('es', 'privacy'),
-            bodyIsEnglish: body === window.i18n.catalogues.en['privacy.youUseScireplEntirelyAt'],
-            chromeTranslated: chrome !== window.i18n.catalogues.en['privacy.iUnderstand'],
+            bodyIsEnglish: window.t('privacy.youUseScireplEntirelyAt')
+                === enDom['privacy.youUseScireplEntirelyAt'],
+            // The consent button is legal, not chrome: English when unreviewed.
+            consentIsEnglish: window.t('privacy.iUnderstand') === enDom['privacy.iUnderstand'],
+            noticeTranslated: window.t('privacy.translationNotice')
+                !== enDom['privacy.translationNotice'],
             uiTranslated: window.t('menu.appearance')
                 !== window.i18n.catalogues.en['menu.appearance'],
             flagged: window.i18n.legalTextIsUntranslated(),
         };
+        // Flip the domain to reviewed: the body must switch to Spanish.
+        const es = window.i18n.LOCALES.find((l) => l.code === 'es');
+        const saved = es && es.domains;
+        if (es) es.domains = { privacy: { status: 'reviewed' } };
+        out.bodySpanishWhenReviewed = window.t('privacy.youUseScireplEntirelyAt')
+            !== enDom['privacy.youUseScireplEntirelyAt'];
+        if (es) es.domains = saved;
         await window.i18n.activate('en');
         return out;
     });
+    check('the policy text lives in the privacy domain catalogue, not the general one',
+        legal.policyInDomain === true && legal.policyNotInGeneral === true);
     check('the Spanish privacy catalogue is still a draft', legal.privacyStatus === 'draft');
     check('an unreviewed policy body falls back to the authoritative English',
         legal.bodyIsEnglish === true);
-    check('the dialog chrome stays translated, so it can still be dismissed',
-        legal.chromeTranslated === true);
+    check('the consent button is English too when the policy is unreviewed',
+        legal.consentIsEnglish === true);
+    check('the unofficial-translation notice is still translated', legal.noticeTranslated === true);
     check('the rest of the UI is unaffected by the legal gate', legal.uiTranslated === true);
     check('the state is reported, so the notice can explain it', legal.flagged === true);
+    check('marking the privacy domain reviewed switches the body to that language',
+        legal.bodySpanishWhenReviewed === true);
+
+    // Concurrent activations must not leave the DOM on an older locale.
+    const raced = await page.evaluate(async () => {
+        const a = window.i18n.activate('es');
+        const bb = window.i18n.activate('ja');
+        const cc = window.i18n.activate('en');
+        await Promise.all([a, bb, cc]);
+        return {
+            lang: document.documentElement.getAttribute('lang'),
+            current: window.i18n.current,
+        };
+    });
+    check('the last activation wins a race, not whichever resolves last',
+        raced.lang === 'en' && raced.current === 'en', JSON.stringify(raced));
 
     /* ------------------------------ dialog ------------------------------ */
     console.log('\n5. Dialog');

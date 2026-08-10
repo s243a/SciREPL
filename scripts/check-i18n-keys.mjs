@@ -29,6 +29,16 @@ const WWW = path.join(ROOT, 'www');
 const base = JSON.parse(readFileSync(path.join(WWW, 'i18n', 'en.json'), 'utf8'));
 const known = new Set(Object.keys(base.strings || {}));
 
+// Domain catalogues (privacy.en.json) hold their own keys — the policy strings
+// live there now, not in the general catalogue — so include them or every
+// privacy.* reference reads as missing.
+for (const f of readdirSync(path.join(WWW, 'i18n'))) {
+    const m = f.match(/^([a-z]+)\.en\.json$/);
+    if (!m) continue;
+    const dom = JSON.parse(readFileSync(path.join(WWW, 'i18n', f), 'utf8'));
+    for (const k of Object.keys(dom.strings || {})) known.add(k);
+}
+
 /** A key looks like a dotted identifier; anything else is a false positive. */
 const KEYISH = /^[a-z][\w]*(?:\.[\w]+)+$/i;
 

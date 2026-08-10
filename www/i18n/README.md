@@ -162,8 +162,18 @@ So if something looks wrong in Arabic, report it: it is a bug, not a known gap.
 ## Privacy and consent text is separate
 
 Privacy strings live in their own catalogue, `privacy.<code>.json`, with its own
-`status`. A locale can have a fully reviewed UI and a draft policy at the same
-time — the manifest records both — and the two never block each other.
+`status`. **The entire policy is there** — all ~38 strings, not just the notice —
+so that marking `privacy.<code>` reviewed authorises exactly the text it gates
+and nothing else. A locale can have a fully reviewed UI and a draft policy at the
+same time — the manifest records both — and the two never block each other.
+
+While a privacy catalogue is `draft`, the app shows the **English** policy body
+to that locale's users (English is the official text), including the "I
+Understand" consent button — accepting is a legal act, so it is shown in the same
+language as the text being accepted. Only the notice that the translation is
+unofficial (`privacy.translationNotice`) and its link (`privacy.viewOfficial`)
+appear in the reader's language regardless, because a warning they cannot read is
+no warning.
 
 This is deliberate. A mistranslated button is a papercut; a mistranslated
 privacy disclosure is a legal document that says the wrong thing, and Google
