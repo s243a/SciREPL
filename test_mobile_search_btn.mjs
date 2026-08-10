@@ -26,11 +26,17 @@ const TIMEOUT = 180_000;
         const context = browser.contexts()[0];
         await context.addInitScript(() => {
             localStorage.setItem('scirepl_privacy_accepted', '1');
+            localStorage.setItem('scirepl_onboarding_seen', '1');
         });
 
         await page.goto('http://localhost:8085/', { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
 
         console.log('   Waiting for Pyodide...');
+        await page.evaluate(async () => {
+            // Returning the kernel would make Playwright serialise the whole
+            // Pyodide object graph over CDP, which blows Node's string limit.
+            await window.kernelManager.ensureReady('python');
+        });
         await page.waitForFunction(() => {
             const km = window.kernelManager;
             return km && km._instances && km._instances.python && km._instances.python.isReady();

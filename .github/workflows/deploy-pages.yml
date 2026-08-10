@@ -52,6 +52,22 @@ jobs:
       - name: Wait for server
         run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
 
+      # i18n gates. These are cheap and catch classes of bug that no runtime
+      # test will: a catalogue that drifts from the manifest, a locale that is
+      # not precached and so vanishes offline, UI added without a translation
+      # key, and a sense id that does not resolve.
+      - name: Check the locale manifest is current
+        run: node scripts/build-i18n-manifest.mjs --check
+
+      - name: Lint the translation catalogues
+        run: node scripts/check-translations.mjs
+
+      - name: Check no element with an id is inside a translated HTML string
+        run: node scripts/check-i18n-html-ids.mjs
+
+      - name: Check every key the code asks for exists
+        run: node scripts/check-i18n-keys.mjs
+
       - name: Run cell operations tests
         run: node test_cell_ops.mjs
 
@@ -60,6 +76,21 @@ jobs:
 
       - name: Run WASM FFI tests
         run: node test_wasm_ffi.mjs
+
+      - name: Run appearance and localization tests
+        run: node test_appearance.mjs
+
+      - name: Run onboarding tour tests
+        run: node test_onboarding.mjs
+
+      - name: Run right-to-left layout tests
+        run: node test_rtl_layout.mjs
+
+      - name: Run service worker offline tests
+        run: node test_sw_offline.mjs
+
+      - name: Run auto-save and restore tests
+        run: node test_autosave.mjs
 
       - name: Run kernel source-selection tests
         run: npm run test:sources

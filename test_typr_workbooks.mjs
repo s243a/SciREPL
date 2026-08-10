@@ -45,6 +45,7 @@ async function runAllAndCollect(page) {
     await context.addInitScript(() => {
         localStorage.clear();
         localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.setItem('scirepl_onboarding_seen', '1');
         localStorage.setItem('scirepl_auto_download', '1');
         localStorage.removeItem('scirepl_enabled_languages');
     });

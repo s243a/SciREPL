@@ -1,0 +1,105 @@
+name: CI
+
+# The real gate. Runs on every pull request and on pushes to the main and
+# feature branches — not filtered to www/pro/**, so an ordinary Appearance,
+# i18n or service-worker change is actually tested. The release workflow depends
+# on this passing (see build-release.yml), so a red suite blocks publication.
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'feat/**'
+      - 'fix/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Configure build
+        run: npm run configure
+
+      - name: Fetch bundled runtimes
+        run: npm run fetch:bundles
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
+      # Static i18n gates — cheap, and each catches a class of bug no runtime
+      # test does. Run before the server so a catalogue error fails fast.
+      - name: i18n — manifest is current
+        run: node scripts/build-i18n-manifest.mjs --check
+
+      - name: i18n — no id-bearing markup inside a translated string
+        run: node scripts/check-i18n-html-ids.mjs
+
+      - name: i18n — every referenced key exists
+        run: node scripts/check-i18n-keys.mjs
+
+      - name: i18n — catalogue lint
+        run: node scripts/check-translations.mjs
+      - name: Service worker — shell version guard
+        run: node scripts/check-sw-shell.mjs
+
+      - name: Service worker — shell-guard cannot be bypassed
+        run: node test_sw_shell_guard.mjs
+
+      - name: Start dev server
+        run: node server.js &
+
+      - name: Wait for server
+        run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
+
+      # Browser suites. These need the bundled runtimes fetched above.
+      - name: Appearance and localization
+        run: node test_appearance.mjs
+
+      - name: Onboarding tour
+        run: node test_onboarding.mjs
+
+      - name: Right-to-left layout
+        run: node test_rtl_layout.mjs
+
+      - name: Service worker offline and upgrade coherence
+        run: node test_sw_offline.mjs
+
+      - name: Auto-save and crash recovery
+        run: node test_autosave.mjs
+
+      - name: Cell operations
+        run: node test_cell_ops.mjs
+
+      - name: JavaScript kernel
+        run: node test_js_kernel.mjs
+
+      - name: Notebook VFS
+        run: node test_notebook_vfs.mjs
+
+  # test_pwa_release starts its OWN server on :8085, so it cannot share the job
+  # above (port conflict). It runs in a dedicated job with no shared server.
+  pwa-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install
+      - run: npm run configure
+      - run: npm run fetch:bundles
+      - run: npx playwright install chromium
+      - name: PWA offline/release regression
+        run: node test_pwa_release.mjs

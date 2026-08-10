@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Sci REPL</title>
     <meta name="description" content="Multi-language scientific REPL — Python, Prolog, Bash, JavaScript">
 
@@ -44,34 +44,34 @@
         <div class="search-row">
             <input type="text" id="search-input" placeholder="Find in notebook…" autocomplete="off">
             <span id="search-count"></span>
-            <button id="search-prev-btn" title="Previous match (Shift+Enter)">▲</button>
-            <button id="search-next-btn" title="Next match (Enter)">▼</button>
-            <button id="search-replace-toggle" title="Toggle replace">⇄</button>
-            <button id="search-close-btn" title="Close (Escape)">&times;</button>
+            <button data-i18n-title="searchBar.previousMatchShiftEnterTitle" id="search-prev-btn" title="Previous match (Shift+Enter)">▲</button>
+            <button data-i18n-title="searchBar.nextMatchEnterTitle" id="search-next-btn" title="Next match (Enter)">▼</button>
+            <button data-i18n-title="searchBar.toggleReplaceTitle" id="search-replace-toggle" title="Toggle replace">⇄</button>
+            <button data-i18n-title="searchBar.closeEscapeTitle" id="search-close-btn" title="Close (Escape)">&times;</button>
         </div>
         <div id="search-replace-row" class="search-row hidden">
             <input type="text" id="replace-input" placeholder="Replace with…" autocomplete="off">
-            <button id="replace-one-btn">Replace</button>
-            <button id="replace-all-btn">All</button>
+            <button data-i18n="searchReplaceRow.replace" id="replace-one-btn">Replace</button>
+            <button data-i18n="searchReplaceRow.all" id="replace-all-btn">All</button>
         </div>
     </div>
 
     <!-- Loading overlay -->
     <div id="loading-overlay">
         <div class="spinner"></div>
-        <p>Loading Python environment…</p>
-        <p class="loading-sub">Initializing Pyodide + NumPy + SymPy</p>
+        <p data-i18n="loading.loadingPythonEnvironment">Loading Python environment…</p>
+        <p data-i18n="loading.initializingPyodideNumpySympy" class="loading-sub">Initializing Pyodide + NumPy + SymPy</p>
     </div>
 
     <!-- App header -->
     <header id="app-header">
-        <h1>Sci REPL</h1>
+        <h1 data-i18n="loading.sciRepl">Sci REPL</h1>
         <div id="notebook-selector-container" class="notebook-selector-container"></div>
         <div class="header-right">
-            <button id="search-btn" class="icon-btn" title="Find in notebook">🔍</button>
-            <button id="math-mode-btn" class="icon-btn" title="Math Mode">∑</button>
-            <button id="menu-btn" class="icon-btn" title="Menu">☰</button>
-            <button id="help-btn" class="icon-btn" title="Help">?</button>
+            <button data-i18n-title="notebookSelector.findNotebookTitle" id="search-btn" class="icon-btn" title="Find in notebook">🔍</button>
+            <button data-i18n-title="notebookSelector.mathModeTitle" id="math-mode-btn" class="icon-btn" title="Math Mode">∑</button>
+            <button data-i18n-title="menu.title" id="menu-btn" class="icon-btn" title="Menu">☰</button>
+            <button data-i18n-title="tour.help.title" id="help-btn" class="icon-btn" title="Help">?</button>
             <span id="status-badge">loading…</span>
         </div>
     </header>
@@ -91,9 +91,11 @@
     <div id="help-modal" class="modal hidden">
         <div class="modal-content">
             <button class="modal-close">&times;</button>
-            <h2>SciREPL Help</h2>
+            <h2 data-i18n="help.scireplHelp">SciREPL Help</h2>
 
-            <h3>Quick Start — Python</h3>
+            <p><button id="btn-show-tour" class="vfs-btn" data-i18n="help.showTour">Show the tour again</button></p>
+
+            <h3 data-i18n="help.quickStartPython">Quick Start — Python</h3>
             <pre><code># Basic math
 2 + 2
 
@@ -120,27 +122,27 @@ solve(a*x**2 + b*x + c, x)
 # Suppress output with ;
 big_array = np.arange(1000);</code></pre>
 
-            <h3>Installing Packages</h3>
-            <p>Install pure-Python packages from PyPI with <code>%pip install</code>:</p>
+            <h3 data-i18n="help.installingPackages">Installing Packages</h3>
+            <p data-i18n-html="help.installPurePythonPackagesFrom">Install pure-Python packages from PyPI with <code>%pip install</code>:</p>
             <pre><code>%pip install requests
 
 # Then use it
 import requests
 r = requests.get('https://api.github.com')
 print(r.status_code)</code></pre>
-            <p><em>Note: Only pure-Python packages are supported. Packages with C extensions (e.g. psutil) require pre-compiled WASM wheels.</em></p>
+            <p data-i18n-html="help.noteOnlyPurePythonPackages"><em>Note: Only pure-Python packages are supported. Packages with C extensions (e.g. psutil) require pre-compiled WASM wheels.</em></p>
 
-            <p>Install R packages with <code>install.packages()</code> or <code>%install</code>:</p>
+            <p data-i18n-html="help.installRPackagesInstallPackages">Install R packages with <code>install.packages()</code> or <code>%install</code>:</p>
             <pre><code># Standard R syntax (works out of the box)
 install.packages("jsonlite")
 library(jsonlite)
 
 # Or use the %install shortcut
 %install dplyr</code></pre>
-            <p><em>Note: Only R packages compiled to WebAssembly are available. See <a href="https://repo.r-wasm.org/" target="_blank" rel="noopener">repo.r-wasm.org</a> for the package list.</em></p>
+            <p data-i18n-html="help.noteOnlyRPackagesCompiled"><em>Note: Only R packages compiled to WebAssembly are available. See <a href="https://repo.r-wasm.org/" target="_blank" rel="noopener">repo.r-wasm.org</a> for the package list.</em></p>
 
-            <h3>Quick Start — R</h3>
-            <p>Switch to R using the language selector. The webR runtime (~50 MB) downloads on first use and is cached.</p>
+            <h3 data-i18n="help.quickStartR">Quick Start — R</h3>
+            <p data-i18n="help.switchRUsingLanguageSelector">Switch to R using the language selector. The webR runtime (~50 MB) downloads on first use and is cached.</p>
             <pre><code># Basic math
 mean(c(10, 20, 30))
 
@@ -167,8 +169,8 @@ mplotly(
 sharedfs_write("/shared/data/from_r.txt", "Hello from R!")
 sharedfs_list("/shared/data")</code></pre>
 
-            <h3>Quick Start — Prolog</h3>
-            <p>Switch to Prolog using the language selector (Py → PL).</p>
+            <h3 data-i18n="help.quickStartProlog">Quick Start — Prolog</h3>
+            <p data-i18n="help.switchPrologUsingLanguageSelector">Switch to Prolog using the language selector (Py → PL).</p>
             <pre><code>% Assert facts
 assert(parent(tom, bob)).
 assert(parent(bob, ann)).
@@ -181,25 +183,25 @@ assert((grandparent(X,Z) :-
     parent(X,Y), parent(Y,Z))).
 grandparent(tom, Z).</code></pre>
 
-            <h3>Shared Filesystem</h3>
-            <p>SciREPL has a <strong>SharedVFS</strong> (shared virtual filesystem) that lets all kernels read and write to the same files. Files under <code>/shared/</code> and <code>/tmp/</code> are accessible from every language.</p>
+            <h3 data-i18n="help.sharedFilesystem">Shared Filesystem</h3>
+            <p data-i18n-html="help.scireplHasSharedvfsSharedVirtual">SciREPL has a <strong>SharedVFS</strong> (shared virtual filesystem) that lets all kernels read and write to the same files. Files under <code>/shared/</code> and <code>/tmp/</code> are accessible from every language.</p>
 
-            <p><strong>Directory layout:</strong></p>
+            <p data-i18n-html="help.directoryLayout"><strong>Directory layout:</strong></p>
             <ul>
-                <li><code>/shared/data/</code> — Datasets (CSV, JSON, etc.)</li>
-                <li><code>/shared/lib/python/</code> — Python modules (auto-added to <code>sys.path</code>)</li>
-                <li><code>/shared/lib/prolog/</code> — Prolog modules</li>
-                <li><code>/shared/lib/wasm/</code> — WebAssembly modules</li>
-                <li><code>/shared/bin/</code>, <code>/shared/config/</code> — Utilities and config files</li>
-                <li><code>/tmp/</code> — Temporary files (shared, not persisted)</li>
+                <li data-i18n-html="help.sharedDataDatasetsCsvJson"><code>/shared/data/</code> — Datasets (CSV, JSON, etc.)</li>
+                <li data-i18n-html="help.sharedLibPythonPythonModules"><code>/shared/lib/python/</code> — Python modules (auto-added to <code>sys.path</code>)</li>
+                <li data-i18n-html="help.sharedLibPrologPrologModules"><code>/shared/lib/prolog/</code> — Prolog modules</li>
+                <li data-i18n-html="help.sharedLibWasmWebassemblyModules"><code>/shared/lib/wasm/</code> — WebAssembly modules</li>
+                <li data-i18n-html="help.sharedBinSharedConfigUtilities"><code>/shared/bin/</code>, <code>/shared/config/</code> — Utilities and config files</li>
+                <li data-i18n-html="help.tmpTemporaryFilesSharedNot"><code>/tmp/</code> — Temporary files (shared, not persisted)</li>
             </ul>
 
-            <p><strong>Per-kernel behavior:</strong></p>
+            <p data-i18n-html="help.perKernelBehavior"><strong>Per-kernel behavior:</strong></p>
             <ul>
-                <li><strong>Python</strong> — Use standard <code>open()</code> with <code>/shared/</code> paths. Files are synced to SharedVFS automatically after each cell execution.</li>
-                <li><strong>R</strong> — Use <code>sharedfs_write()</code> and <code>sharedfs_read()</code> helpers to access shared files.</li>
-                <li><strong>Prolog</strong> — Consult files from <code>/shared/</code> paths directly.</li>
-                <li><strong>Bash</strong> — The brush-wasm shell has a built-in bridge to SharedVFS.</li>
+                <li data-i18n-html="help.pythonUseStandardOpenShared"><strong>Python</strong> — Use standard <code>open()</code> with <code>/shared/</code> paths. Files are synced to SharedVFS automatically after each cell execution.</li>
+                <li data-i18n-html="help.rUseSharedfsWriteSharedfs"><strong>R</strong> — Use <code>sharedfs_write()</code> and <code>sharedfs_read()</code> helpers to access shared files.</li>
+                <li data-i18n-html="help.prologConsultFilesFromShared"><strong>Prolog</strong> — Consult files from <code>/shared/</code> paths directly.</li>
+                <li data-i18n-html="help.bashBrushWasmShellHas"><strong>Bash</strong> — The brush-wasm shell has a built-in bridge to SharedVFS.</li>
             </ul>
 
             <pre><code># Python — write a CSV to the shared folder
@@ -212,32 +214,32 @@ sharedfs_read("/shared/data/results.csv")
 % Prolog — consult a shared knowledge base
 :- consult('/shared/lib/prolog/kb.pl').</code></pre>
 
-            <p><strong>Packages, bundles &amp; workbooks:</strong> When you install an item from Browse Packages, Bundles &amp; Workbooks, bundle dependencies are installed first and files with <code>/shared/</code> destination paths are written to SharedVFS automatically. Package files targeting a specific kernel (e.g., Prolog modules at <code>/user/</code>) go to that kernel's own filesystem.</p>
+            <p data-i18n-html="help.packagesBundlesAmpWorkbooksWhen"><strong>Packages, bundles &amp; workbooks:</strong> When you install an item from Browse Packages, Bundles &amp; Workbooks, bundle dependencies are installed first and files with <code>/shared/</code> destination paths are written to SharedVFS automatically. Package files targeting a specific kernel (e.g., Prolog modules at <code>/user/</code>) go to that kernel's own filesystem.</p>
 
-            <p><strong>Browsing files:</strong> Open <strong>Menu → Files &amp; Storage</strong> to browse. Select <strong>SharedVFS</strong> from the dropdown to see shared files, or select a kernel (Python, Prolog) to see its internal filesystem. Use the <em>Show empty folders</em> checkbox to toggle visibility of empty directories.</p>
+            <p data-i18n-html="help.browsingFilesOpenMenuFiles"><strong>Browsing files:</strong> Open <strong>Menu → Files &amp; Storage</strong> to browse. Select <strong>SharedVFS</strong> from the dropdown to see shared files, or select a kernel (Python, Prolog) to see its internal filesystem. Use the <em>Show empty folders</em> checkbox to toggle visibility of empty directories.</p>
 
-            <p><strong>Uploading:</strong> Use the "Upload File" button at the top of Files &amp; Storage to upload files directly into SharedVFS. Set the destination path (default: <code>/shared/data/</code>) before uploading.</p>
+            <p data-i18n-html="help.uploadingUseUploadFileButton"><strong>Uploading:</strong> Use the "Upload File" button at the top of Files &amp; Storage to upload files directly into SharedVFS. Set the destination path (default: <code>/shared/data/</code>) before uploading.</p>
 
-            <h3>Export</h3>
-            <p><strong>Export Document</strong> — Choose a document format and image handling:</p>
+            <h3 data-i18n="help.export">Export</h3>
+            <p data-i18n-html="help.exportDocumentChooseDocumentFormat"><strong>Export Document</strong> — Choose a document format and image handling:</p>
             <ul>
-                <li><strong>HTML</strong> — Self-contained file with dark theme, code, and output. Choose "Separate files" for a <code>.html.zip</code> with an images/ folder.</li>
-                <li><strong>Markdown</strong> — Fenced code blocks, LaTeX math, and markdown tables. "Separate files" uses GitHub-compatible <code>![alt](images/X.png)</code> references in a <code>.md.zip</code>.</li>
-                <li><strong>PDF</strong> — Opens the browser print dialog. Choose "Save as PDF" for a light-themed document.</li>
-                <li><strong>DOCX</strong> — Word document with code blocks, tables, images, and native Word equations (LaTeX math converted to editable OOXML formulas). Requires internet (library loaded on demand from CDN).</li>
-                <li><strong>LaTeX</strong> — <code>.tex</code> file for academic papers. Uses <code>listings</code>, <code>amsmath</code>, <code>booktabs</code>, <code>graphicx</code>. Exports as <code>.tex.zip</code> if images are present.</li>
+                <li data-i18n-html="help.htmlSelfContainedFileDark"><strong>HTML</strong> — Self-contained file with dark theme, code, and output. Choose "Separate files" for a <code>.html.zip</code> with an images/ folder.</li>
+                <li data-i18n-html="help.markdownFencedCodeBlocksLatex"><strong>Markdown</strong> — Fenced code blocks, LaTeX math, and markdown tables. "Separate files" uses GitHub-compatible <code>![alt](images/X.png)</code> references in a <code>.md.zip</code>.</li>
+                <li data-i18n-html="help.pdfOpensBrowserPrintDialog"><strong>PDF</strong> — Opens the browser print dialog. Choose "Save as PDF" for a light-themed document.</li>
+                <li data-i18n-html="help.docxWordDocumentCodeBlocks"><strong>DOCX</strong> — Word document with code blocks, tables, images, and native Word equations (LaTeX math converted to editable OOXML formulas). Requires internet (library loaded on demand from CDN).</li>
+                <li data-i18n-html="help.latexTexFileAcademicPapers"><strong>LaTeX</strong> — <code>.tex</code> file for academic papers. Uses <code>listings</code>, <code>amsmath</code>, <code>booktabs</code>, <code>graphicx</code>. Exports as <code>.tex.zip</code> if images are present.</li>
             </ul>
-            <p><strong>Export Workbooks &amp; Packages</strong> — Export notebooks and data:</p>
+            <p data-i18n-html="help.exportWorkbooksAmpPackagesExport"><strong>Export Workbooks &amp; Packages</strong> — Export notebooks and data:</p>
             <ul>
-                <li><strong>.srwb</strong> (SciREPL Workbook) — Native format for saving and restoring your workspace. Can hold multiple tabs in one file (like Excel sheets). Preserves per-cell language, cell IDs, and all SciREPL-specific state. Use this to back up your work or move it between devices. Not readable by Jupyter or other tools.</li>
-                <li><strong>.ipynb</strong> (Jupyter Notebook) — Universal notebook format. One file per tab. Multi-language cells use <code>%%magic</code> commands (e.g. <code>%%r</code>, <code>%%bash</code>). Viewable in Jupyter, Colab, VS Code, and GitHub. Use this to share notebooks with others.</li>
-                <li><strong>Package</strong> — Archive (.zip/.tar/.tar.gz) containing notebooks and data files from SharedVFS. Use this to share an entire project with its datasets.</li>
+                <li data-i18n-html="help.srwbScireplWorkbookNativeFormat"><strong>.srwb</strong> (SciREPL Workbook) — Native format for saving and restoring your workspace. Can hold multiple tabs in one file (like Excel sheets). Preserves per-cell language, cell IDs, and all SciREPL-specific state. Use this to back up your work or move it between devices. Not readable by Jupyter or other tools.</li>
+                <li data-i18n-html="help.ipynbJupyterNotebookUniversalNotebook"><strong>.ipynb</strong> (Jupyter Notebook) — Universal notebook format. One file per tab. Multi-language cells use <code>%%magic</code> commands (e.g. <code>%%r</code>, <code>%%bash</code>). Viewable in Jupyter, Colab, VS Code, and GitHub. Use this to share notebooks with others.</li>
+                <li data-i18n-html="help.packageArchiveZipTarTar"><strong>Package</strong> — Archive (.zip/.tar/.tar.gz) containing notebooks and data files from SharedVFS. Use this to share an entire project with its datasets.</li>
             </ul>
-            <p><strong>Syntax highlighting:</strong> Code cells display with syntax highlighting for Python, JavaScript, R, Bash, Prolog, and Lua. Exports (HTML, DOCX) also include highlighted code.</p>
-            <p><strong>.ipynb import with outputs:</strong> When importing a <code>.ipynb</code> file that already contains outputs, they are displayed directly without re-executing the code. This allows fast viewing of notebooks from Jupyter, Colab, or previous SciREPL exports.</p>
+            <p data-i18n-html="help.syntaxHighlightingCodeCellsDisplay"><strong>Syntax highlighting:</strong> Code cells display with syntax highlighting for Python, JavaScript, R, Bash, Prolog, and Lua. Exports (HTML, DOCX) also include highlighted code.</p>
+            <p data-i18n-html="help.ipynbImportOutputsWhenImporting"><strong>.ipynb import with outputs:</strong> When importing a <code>.ipynb</code> file that already contains outputs, they are displayed directly without re-executing the code. This allows fast viewing of notebooks from Jupyter, Colab, or previous SciREPL exports.</p>
 
-            <h3>Quick Start — Lua</h3>
-            <p>Switch to Lua using the language selector. The Fengari runtime (~200 KB) downloads on first use from CDN.</p>
+            <h3 data-i18n="help.quickStartLua">Quick Start — Lua</h3>
+            <p data-i18n="help.switchLuaUsingLanguageSelector">Switch to Lua using the language selector. The Fengari runtime (~200 KB) downloads on first use from CDN.</p>
             <pre><code>-- Tables (arrays and dictionaries)
 t = {10, 20, 30}
 print(#t, t[1])
@@ -273,16 +275,16 @@ nb.write("results", ".code", "print('updated by Lua!')")
 -- WARNING: overwrites the first cell's code!
 nb.write("In[1]", ".code", "print('overwritten by Lua')")</code></pre>
 
-            <h3>Cross-Cell Communication (Notebook VFS)</h3>
-            <p>Every cell is accessible as a virtual file at <code>/nb/</code>. You can read and write cell code, output, language, and name from any kernel. Cells can be addressed three ways:</p>
+            <h3 data-i18n="help.crossCellCommunicationNotebookVfs">Cross-Cell Communication (Notebook VFS)</h3>
+            <p data-i18n-html="help.everyCellAccessibleAsVirtual">Every cell is accessible as a virtual file at <code>/nb/</code>. You can read and write cell code, output, language, and name from any kernel. Cells can be addressed three ways:</p>
             <ul>
-                <li><strong>By name</strong> — <code>/nb/my_cell/.code</code> (user-assigned cell name)</li>
-                <li><strong>By index</strong> — <code>/nb/In[1]/.code</code> (1-based position)</li>
-                <li><strong>Relative</strong> — <code>/nb/-1/.output</code> (previous cell), <code>/nb/+1/.code</code> (next cell), <code>/nb/./.code</code> (self)</li>
+                <li data-i18n-html="help.byNameNbMyCell"><strong>By name</strong> — <code>/nb/my_cell/.code</code> (user-assigned cell name)</li>
+                <li data-i18n-html="help.byIndexNb1Code"><strong>By index</strong> — <code>/nb/In[1]/.code</code> (1-based position)</li>
+                <li data-i18n-html="help.relativeNb1OutputPrevious"><strong>Relative</strong> — <code>/nb/-1/.output</code> (previous cell), <code>/nb/+1/.code</code> (next cell), <code>/nb/./.code</code> (self)</li>
             </ul>
-            <p><strong>Properties:</strong> <code>.code</code>, <code>.output</code>, <code>.language</code>, <code>.type</code>, <code>.name</code></p>
+            <p data-i18n-html="help.propertiesCodeOutputLanguageType"><strong>Properties:</strong> <code>.code</code>, <code>.output</code>, <code>.language</code>, <code>.type</code>, <code>.name</code></p>
 
-            <p><strong>Bash</strong> — uses filesystem paths directly:</p>
+            <p data-i18n-html="help.bashUsesFilesystemPathsDirectly"><strong>Bash</strong> — uses filesystem paths directly:</p>
             <pre><code># By name
 cat /nb/my_cell/.code
 
@@ -301,7 +303,7 @@ echo "print('hello')" > /nb/In[3]/.code
 # List all cells
 ls /nb/</code></pre>
 
-            <p><strong>Python</strong> — <code>nb_read()</code> / <code>nb_write()</code>:</p>
+            <p data-i18n-html="help.pythonNbReadNbWrite"><strong>Python</strong> — <code>nb_read()</code> / <code>nb_write()</code>:</p>
             <pre><code># By name
 code = nb_read("my_cell", ".code")
 
@@ -317,7 +319,7 @@ nb_write("results", ".code", "print('generated!')")
 # List all cells
 cells = nb_list()</code></pre>
 
-            <p><strong>R</strong> — <code>nb_read()</code> / <code>nb_write()</code>:</p>
+            <p data-i18n-html="help.rNbReadNbWrite"><strong>R</strong> — <code>nb_read()</code> / <code>nb_write()</code>:</p>
             <pre><code># By name
 code <- nb_read("my_cell", ".code")
 
@@ -330,7 +332,7 @@ nb_write("plot_cell", ".code", "plot(1:10)")
 # List cells
 cells <- nb_list()</code></pre>
 
-            <p><strong>Lua</strong> — <code>nb.read()</code> / <code>nb.write()</code>:</p>
+            <p data-i18n-html="help.luaNbReadNbWrite"><strong>Lua</strong> — <code>nb.read()</code> / <code>nb.write()</code>:</p>
             <pre><code>-- By name
 code = nb.read("my_cell", ".code")
 
@@ -346,7 +348,7 @@ nb.write("results", ".code", "print('from Lua')")
 -- List all cells (returns JSON)
 cells = nb.list()</code></pre>
 
-            <p><strong>Prolog</strong> — <code>nb_read/3</code> / <code>nb_write/3</code>:</p>
+            <p data-i18n-html="help.prologNbRead3Nb"><strong>Prolog</strong> — <code>nb_read/3</code> / <code>nb_write/3</code>:</p>
             <pre><code>%% By name
 nb_read('my_cell', '.code', Code).
 
@@ -356,7 +358,7 @@ nb_read('In[2]', '.output', Output).
 %% Write compiler output to another cell
 nb_write('r_factorial', '.code', GeneratedCode).</code></pre>
 
-            <p><strong>JavaScript</strong> — direct <code>window.notebookVFS</code> API:</p>
+            <p data-i18n-html="help.javascriptDirectWindowNotebookvfsApi"><strong>JavaScript</strong> — direct <code>window.notebookVFS</code> API:</p>
             <pre><code>// By name
 const code = window.notebookVFS.readFile("/nb/my_cell/.code");
 
@@ -366,25 +368,25 @@ const out = window.notebookVFS.readFile("/nb/In[1]/.output");
 // Write
 window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pre>
 
-            <p><em>Tip: Give cells a name (click the cell label) so other cells can address them by name instead of fragile index numbers.</em></p>
+            <p data-i18n-html="help.tipGiveCellsNameClick"><em>Tip: Give cells a name (click the cell label) so other cells can address them by name instead of fragile index numbers.</em></p>
 
-            <h3>Cell Language</h3>
-            <p>Each cell remembers its language. To change a cell's language, click ✎ to edit, then use the language dropdown. Click <strong>All→</strong> to apply the language to all code cells in the notebook.</p>
+            <h3 data-i18n="help.cellLanguage">Cell Language</h3>
+            <p data-i18n-html="help.eachCellRemembersItsLanguage">Each cell remembers its language. To change a cell's language, click ✎ to edit, then use the language dropdown. Click <strong>All→</strong> to apply the language to all code cells in the notebook.</p>
 
-            <h3>Source-only Cells and TypR Directives</h3>
-            <p>Put <code>#!source</code> on the first line of a named TypR or Lua cell to keep highlighted code available through the Notebook VFS without executing it. The remaining directives are TypR-specific:</p>
+            <h3 data-i18n="help.sourceOnlyCellsTyprDirectives">Source-only Cells and TypR Directives</h3>
+            <p data-i18n-html="help.putSourceOnFirstLine">Put <code>#!source</code> on the first line of a named TypR or Lua cell to keep highlighted code available through the Notebook VFS without executing it. The remaining directives are TypR-specific:</p>
             <ul>
-                <li><code>#!source</code> — the cell shows <strong>Source only</strong>, intentionally has no <code>Out [n]</code>, and remains readable through the Notebook VFS.</li>
-                <li><code>#!typecheck</code> — type-check the following code without executing it.</li>
-                <li><code>#!transpile</code> — show the transpiled R code.</li>
-                <li><code>#!show-r</code> — toggle generated R display for subsequent TypR executions.</li>
+                <li data-i18n-html="help.sourceCellShowsSourceOnly"><code>#!source</code> — the cell shows <strong>Source only</strong>, intentionally has no <code>Out [n]</code>, and remains readable through the Notebook VFS.</li>
+                <li data-i18n-html="help.typecheckTypeCheckFollowingCode"><code>#!typecheck</code> — type-check the following code without executing it.</li>
+                <li data-i18n-html="help.transpileShowTranspiledRCode"><code>#!transpile</code> — show the transpiled R code.</li>
+                <li data-i18n-html="help.showRToggleGeneratedR"><code>#!show-r</code> — toggle generated R display for subsequent TypR executions.</li>
             </ul>
 
-            <h3>Language Settings</h3>
-            <p>Open <strong>Menu → Languages</strong> to show or hide languages in the cell dropdown. Unchecking a language removes it from the selector but doesn't unload its runtime. All languages are enabled by default. Your preferences are saved across sessions.</p>
-            <p><strong>Runtime versions:</strong> Languages loaded from CDN (R, Prolog) have a version field on the Languages page. Leave it blank to use the pinned default (recommended), enter a tag like <code>v0.5.4</code> to use a specific version, or enter <code>latest</code> for the rolling release. The rolling release can occasionally serve mismatched files (e.g. <code>ASM_CONSTS[code] is not a function</code>) — if that happens, switch to the pinned default and clear the SciREPL cache.</p>
+            <h3 data-i18n="help.languageSettings">Language Settings</h3>
+            <p data-i18n-html="help.openMenuLanguagesShowHide">Open <strong>Menu → Languages</strong> to show or hide languages in the cell dropdown. Unchecking a language removes it from the selector but doesn't unload its runtime. All languages are enabled by default. Your preferences are saved across sessions.</p>
+            <p data-i18n-html="help.runtimeVersions"><strong>Runtime versions:</strong> Languages loaded from CDN (R, Prolog) have a version field on the Languages page. Leave it blank to use the pinned default (recommended), enter a tag like <code>v0.5.4</code> to use a specific version, or enter <code>latest</code> for the rolling release. The rolling release can occasionally serve mismatched files (e.g. <code>ASM_CONSTS[code] is not a function</code>) — if that happens, switch to the pinned default and clear the SciREPL cache.</p>
 
-            <h3>Keyboard Shortcuts</h3>
+            <h3 data-i18n="help.keyboardShortcuts">Keyboard Shortcuts</h3>
             <ul>
                 <li><kbd>Shift+Enter</kbd> or <kbd>Ctrl+Enter</kbd> — Run code</li>
                 <li><kbd>Ctrl+F</kbd> / <kbd>Cmd+F</kbd> or 🔍 button — Find in notebook (with replace)</li>
@@ -392,16 +394,16 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                 <li><kbd>;</kbd> at end of line — Suppress output</li>
             </ul>
 
-            <h3>Documentation</h3>
-            <p>Full documentation: <a href="https://github.com/s243a/SciREPL#readme" target="_blank">GitHub README</a>
+            <h3 data-i18n="help.documentation">Documentation</h3>
+            <p data-i18n-html="help.fullDocumentationGithubReadme">Full documentation: <a href="https://github.com/s243a/SciREPL#readme" target="_blank">GitHub README</a>
             </p>
 
-            <h3>Version</h3>
-            <p><strong>SciREPL v1.0.1</strong></p>
-            <p>Includes: Multi-language (Python, R, Prolog, Bash, JavaScript, Lua), editable cells, markdown cells, session persistence with auto-save and crash recovery, Math Mode palette, .ipynb import/export with output preservation, .srwb workbook format, rich export (HTML, Markdown, PDF, DOCX with native equations, LaTeX) with syntax highlighting, virtual filesystem, search paths, URL file fetching, multi-notebook support, package catalog with one-click install, language settings, package format (.zip/.tar.gz)</p>
+            <h3 data-i18n="help.version">Version</h3>
+            <p data-i18n-html="help.scireplV101"><strong>SciREPL v1.0.1</strong></p>
+            <p data-i18n="help.includesFeatureList">Includes: Multi-language (Python, R, Prolog, Bash, JavaScript, Lua), editable cells, markdown cells, session persistence with auto-save and crash recovery, Math Mode palette, .ipynb import/export with output preservation, .srwb workbook format, rich export (HTML, Markdown, PDF, DOCX with native equations, LaTeX) with syntax highlighting, virtual filesystem, search paths, URL file fetching, multi-notebook support, package catalog with one-click install, language settings, package format (.zip/.tar.gz)</p>
 
-            <h3>Privacy</h3>
-            <p><a href="#" id="help-privacy-link">Privacy Policy</a></p>
+            <h3 data-i18n="help.privacy">Privacy</h3>
+            <p><a href="#" id="help-privacy-link" data-i18n="privacy.privacyPolicy">Privacy Policy</a></p>
 
             <div style="margin-top: 15px;">
                 <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
@@ -418,18 +420,18 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
     <!-- Math Palette -->
     <div id="math-palette" class="math-palette hidden">
         <div class="math-row">
-            <button data-insert="diff(, x)" title="Differentiate">d/dx</button>
-            <button data-insert="integrate(, x)" title="Integrate">∫</button>
-            <button data-insert="solve(, x)" title="Solve">solve</button>
-            <button data-insert="simplify()" title="Simplify">simp</button>
-            <button data-insert="expand()" title="Expand">exp</button>
+            <button data-i18n-title="mathPalette.differentiateTitle" data-insert="diff(, x)" title="Differentiate">d/dx</button>
+            <button data-i18n-title="mathPalette.integrateTitle" data-insert="integrate(, x)" title="Integrate">∫</button>
+            <button data-i18n-title="mathPalette.solveTitle" data-i18n="mathPalette.solve" data-insert="solve(, x)" title="Solve">solve</button>
+            <button data-i18n-title="mathPalette.simplifyTitle" data-i18n="mathPalette.simp" data-insert="simplify()" title="Simplify">simp</button>
+            <button data-i18n-title="mathPalette.expandTitle" data-i18n="mathPalette.exp" data-insert="expand()" title="Expand">exp</button>
         </div>
         <div class="math-row">
-            <button data-insert="Matrix([[]])" title="Matrix">Mat</button>
-            <button data-insert="symbols('')" title="Symbols">sym</button>
-            <button data-insert="limit(, x, oo)" title="Limit">lim</button>
-            <button data-insert="series(, x, 0, 6)" title="Series">ser</button>
-            <button data-insert="factor()" title="Factor">fac</button>
+            <button data-i18n-title="mathPalette.matrixTitle" data-i18n="mathPalette.mat" data-insert="Matrix([[]])" title="Matrix">Mat</button>
+            <button data-i18n-title="mathPalette.symbolsTitle" data-i18n="mathPalette.sym" data-insert="symbols('')" title="Symbols">sym</button>
+            <button data-i18n-title="mathPalette.limitTitle" data-i18n="mathPalette.lim" data-insert="limit(, x, oo)" title="Limit">lim</button>
+            <button data-i18n-title="mathPalette.seriesTitle" data-i18n="mathPalette.ser" data-insert="series(, x, 0, 6)" title="Series">ser</button>
+            <button data-i18n-title="mathPalette.factorTitle" data-i18n="mathPalette.fac" data-insert="factor()" title="Factor">fac</button>
         </div>
     </div>
 
@@ -437,12 +439,12 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
     <div id="rename-cell-modal" class="modal hidden">
         <div class="modal-content" style="max-width:360px">
             <button class="modal-close">&times;</button>
-            <h2>Cell Name</h2>
-            <p style="margin:0 0 12px;font-size:13px;color:var(--text-muted)">Enter a name for this cell (empty to clear):</p>
+            <h2 data-i18n="renameCell.cellName">Cell Name</h2>
+            <p data-i18n="renameCell.enterNameCellEmptyClear" style="margin:0 0 12px;font-size:13px;color:var(--text-muted)">Enter a name for this cell (empty to clear):</p>
             <input type="text" id="rename-cell-input" autocomplete="off" spellcheck="false"
                    style="width:100%;padding:10px;font-size:15px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);box-sizing:border-box">
             <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end">
-                <button id="rename-cell-cancel" style="padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text);cursor:pointer">Cancel</button>
+                <button data-i18n="common.cancel" id="rename-cell-cancel" style="padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text);cursor:pointer">Cancel</button>
                 <button id="rename-cell-ok" style="padding:8px 20px;border:none;border-radius:6px;background:var(--accent);color:#fff;font-weight:600;cursor:pointer">OK</button>
             </div>
         </div>
@@ -452,23 +454,25 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
     <div id="menu-modal" class="modal hidden">
         <div class="modal-content">
             <button class="modal-close">&times;</button>
-            <h2>Menu</h2>
+            <h2 data-i18n="menu.title">Menu</h2>
             <div class="menu-grid">
-                <button id="btn-run-all">▶ Run All Cells</button>
-                <button id="btn-new-notebook">+ New Notebook</button>
-                <button id="btn-save-session">💾 Save Session</button>
-                <button id="btn-export">📤 Export Document</button>
-                <button id="btn-export-workbook">📦 Export Workbooks &amp; Packages</button>
-                <button id="btn-import-file">📂 Import File (e.g. .srwb, .ipynb, .csv, .py, .zip)</button>
-                <button id="btn-import-package">📦 Import Package (.zip / .tar.gz)</button>
-                <button id="btn-browse-packages">📦 Browse Packages, Bundles &amp; Workbooks</button>
-                <button id="btn-prolog-settings">⚙ Files &amp; Storage (VFS / Paths)</button>
-                <button id="btn-memory">📊 Memory &amp; Storage</button>
-                <button id="btn-languages">🔤 Languages</button>
-                <button id="btn-settings">⚙ Settings</button>
-                <button id="btn-clear-session" class="danger">🗑 Clear History</button>
-                <button id="btn-open-browser">🌐 Open in Browser</button>
-                <button id="btn-reload-app">🔄 Reload App</button>
+                <button data-i18n="menu.runAllCells" id="btn-run-all">▶ Run All Cells</button>
+                <button data-i18n="menu.newNotebook2" id="btn-new-notebook">+ New Notebook</button>
+                <button data-i18n="menu.saveSession" id="btn-save-session">💾 Save Session</button>
+                <button data-i18n="menu.exportDocument" id="btn-export">📤 Export Document</button>
+                <button data-i18n="menu.exportWorkbooksAmpPackages" id="btn-export-workbook">📦 Export Workbooks &amp; Packages</button>
+                <button data-i18n="menu.importFileEGSrwb" id="btn-import-file">📂 Import File (e.g. .srwb, .ipynb, .csv, .py, .zip)</button>
+                <button data-i18n="menu.importPackageZipTarGz" id="btn-import-package">📦 Import Package (.zip / .tar.gz)</button>
+                <button data-i18n="menu.browsePackagesBundlesAmpWorkbooks" id="btn-browse-packages">📦 Browse Packages, Bundles &amp; Workbooks</button>
+                <button data-i18n="menu.filesAmpStorageVfsPaths" id="btn-prolog-settings">⚙ Files &amp; Storage (VFS / Paths)</button>
+                <button data-i18n="menu.memoryAmpStorage" id="btn-memory">📊 Memory &amp; Storage</button>
+                <button data-i18n="menu.languages" id="btn-languages">🔤 Languages</button>
+                <button id="btn-appearance" data-i18n="menu.appearance">🎨 Appearance</button>
+                <button id="btn-show-tour-menu" data-i18n="menu.showTour">🧭 Take the Tour</button>
+                <button data-i18n="menu.settings2" id="btn-settings">⚙ Settings</button>
+                <button data-i18n="menu.clearHistory" id="btn-clear-session" class="danger">🗑 Clear History</button>
+                <button data-i18n="menu.openBrowser" id="btn-open-browser">🌐 Open in Browser</button>
+                <button data-i18n="menu.reloadApp" id="btn-reload-app">🔄 Reload App</button>
             </div>
         </div>
     </div>
@@ -477,117 +481,117 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
     <div id="export-modal" class="modal hidden">
         <div class="modal-content">
             <button class="modal-close">&times;</button>
-            <h2>Export Notebook</h2>
+            <h2 data-i18n="export.exportNotebook">Export Notebook</h2>
             <div class="settings-list">
                 <div class="settings-section">Format</div>
                 <label class="settings-item">
-                    <input type="radio" name="export-format" value="html" checked> HTML
-                    <span class="export-format-desc">Self-contained web page</span>
+                    <input type="radio" name="export-format" value="html" checked> <span data-i18n="export.html">HTML</span>
+                    <span class="export-format-desc"><span data-i18n="export.selfContainedWebPage">Self-contained web page</span></span>
                 </label>
                 <label class="settings-item">
-                    <input type="radio" name="export-format" value="markdown"> Markdown
-                    <span class="export-format-desc">GitHub-compatible .md</span>
+                    <input type="radio" name="export-format" value="markdown"> <span data-i18n="export.markdown">Markdown</span>
+                    <span class="export-format-desc"><span data-i18n="export.githubCompatibleMd">GitHub-compatible .md</span></span>
                 </label>
                 <label class="settings-item">
-                    <input type="radio" name="export-format" value="pdf"> PDF (Print)
-                    <span class="export-format-desc">Opens browser print dialog</span>
+                    <input type="radio" name="export-format" value="pdf"> <span data-i18n="export.pdfPrint">PDF (Print)</span>
+                    <span class="export-format-desc"><span data-i18n="export.opensBrowserPrintDialog">Opens browser print dialog</span></span>
                 </label>
                 <label class="settings-item">
-                    <input type="radio" name="export-format" value="docx"> DOCX
-                    <span class="export-format-desc">Word document with equations</span>
+                    <input type="radio" name="export-format" value="docx"> <span data-i18n="export.docx">DOCX</span>
+                    <span class="export-format-desc"><span data-i18n="export.wordDocumentEquations">Word document with equations</span></span>
                 </label>
                 <label class="settings-item">
-                    <input type="radio" name="export-format" value="latex"> LaTeX
-                    <span class="export-format-desc">.tex with listings and amsmath</span>
+                    <input type="radio" name="export-format" value="latex"> <span data-i18n="export.latex">LaTeX</span>
+                    <span class="export-format-desc"><span data-i18n="export.texListingsAmsmath">.tex with listings and amsmath</span></span>
                 </label>
 
                 <div id="export-image-section">
                     <div class="settings-section">Images</div>
                     <label class="settings-item">
-                        <input type="radio" name="export-images" value="embed" checked> Embed in file
-                        <span class="export-format-desc">Base64 inline</span>
+                        <input type="radio" name="export-images" value="embed" checked> <span data-i18n="export.embedFile">Embed in file</span>
+                        <span class="export-format-desc"><span data-i18n="export.base64Inline">Base64 inline</span></span>
                     </label>
                     <label class="settings-item">
-                        <input type="radio" name="export-images" value="separate"> Separate files in archive
-                        <span class="export-format-desc">images/ folder in .zip</span>
+                        <input type="radio" name="export-images" value="separate"> <span data-i18n="export.separateFilesArchive">Separate files in archive</span>
+                        <span class="export-format-desc"><span data-i18n="export.imagesFolderZip">images/ folder in .zip</span></span>
                     </label>
                 </div>
 
                 <div id="export-theme-section">
                     <div class="settings-section">Theme</div>
                     <label class="settings-item">
-                        <input type="radio" name="export-theme" value="keep" checked> Keep as is
-                        <span class="export-format-desc">Dark theme (matches app)</span>
+                        <input type="radio" name="export-theme" value="keep" checked> <span data-i18n="export.keep">Keep as is</span>
+                        <span class="export-format-desc"><span data-i18n="export.darkThemeMatchesApp">Dark theme (matches app)</span></span>
                     </label>
                     <label class="settings-item">
-                        <input type="radio" name="export-theme" value="light"> Light
-                        <span class="export-format-desc">Light cells (print-friendly)</span>
+                        <input type="radio" name="export-theme" value="light"> <span data-i18n="appearance.themeLight">Light</span>
+                        <span class="export-format-desc"><span data-i18n="export.lightCellsPrintFriendly">Light cells (print-friendly)</span></span>
                     </label>
                     <label class="settings-item">
-                        <input type="radio" name="export-theme" value="browser"> Browser default
-                        <span class="export-format-desc">Let browser decide (strips backgrounds on print)</span>
+                        <input type="radio" name="export-theme" value="browser"> <span data-i18n="export.browserDefault">Browser default</span>
+                        <span class="export-format-desc"><span data-i18n="export.letBrowserDecideStripsBackgrounds">Let browser decide (strips backgrounds on print)</span></span>
                     </label>
                 </div>
 
                 <div id="export-pagebg-section">
                     <div class="settings-section">Page Background</div>
                     <label class="settings-item">
-                        <input type="radio" name="export-pagebg" value="white" checked> White
-                        <span class="export-format-desc">Clean contrast with cells</span>
+                        <input type="radio" name="export-pagebg" value="white" checked> <span data-i18n="export.white">White</span>
+                        <span class="export-format-desc"><span data-i18n="export.cleanContrastCells">Clean contrast with cells</span></span>
                     </label>
                     <label class="settings-item">
-                        <input type="radio" name="export-pagebg" value="dark"> Dark
-                        <span class="export-format-desc">Matches app background</span>
+                        <input type="radio" name="export-pagebg" value="dark"> <span data-i18n="appearance.themeDark">Dark</span>
+                        <span class="export-format-desc"><span data-i18n="export.matchesAppBackground">Matches app background</span></span>
                     </label>
                     <label class="settings-item">
-                        <input type="radio" name="export-pagebg" value="browser"> Browser decides
-                        <span class="export-format-desc">No forced background</span>
+                        <input type="radio" name="export-pagebg" value="browser"> <span data-i18n="export.browserDecides">Browser decides</span>
+                        <span class="export-format-desc"><span data-i18n="export.noForcedBackground">No forced background</span></span>
                     </label>
                 </div>
 
                 <div id="export-margins-section" class="hidden">
                     <div class="settings-section">Page Margins</div>
                     <label class="settings-item" style="margin-bottom:8px">
-                        <span style="font-size:12px;color:var(--text-muted)">Type</span>
-                        <select id="export-margin-type" style="margin-left:8px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:13px">
-                            <option value="virtual" selected>Virtual (background fills page)</option>
-                            <option value="print">Print (browser margins)</option>
+                        <span style="font-size:12px;color:var(--text-muted)"><span data-i18n="export.type">Type</span></span>
+                        <select id="export-margin-type" style="margin-inline-start:8px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:13px">
+                            <option value="virtual" selected><span data-i18n="export.virtualBackgroundFillsPage">Virtual (background fills page)</span></option>
+                            <option value="print"><span data-i18n="export.printBrowserMargins">Print (browser margins)</span></option>
                         </select>
                     </label>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 0">
                         <label class="settings-item" style="flex-direction:column;align-items:flex-start;gap:2px">
-                            <span style="font-size:12px;color:var(--text-muted)">Top</span>
+                            <span style="font-size:12px;color:var(--text-muted)"><span data-i18n="export.top">Top</span></span>
                             <input type="number" id="export-margin-top" value="10" min="0" step="1"
                                    style="width:100%;padding:6px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:14px;box-sizing:border-box">
                         </label>
                         <label class="settings-item" style="flex-direction:column;align-items:flex-start;gap:2px">
-                            <span style="font-size:12px;color:var(--text-muted)">Right</span>
+                            <span style="font-size:12px;color:var(--text-muted)"><span data-i18n="export.right">Right</span></span>
                             <input type="number" id="export-margin-right" value="10" min="0" step="1"
                                    style="width:100%;padding:6px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:14px;box-sizing:border-box">
                         </label>
                         <label class="settings-item" style="flex-direction:column;align-items:flex-start;gap:2px">
-                            <span style="font-size:12px;color:var(--text-muted)">Bottom</span>
+                            <span style="font-size:12px;color:var(--text-muted)"><span data-i18n="export.bottom">Bottom</span></span>
                             <input type="number" id="export-margin-bottom" value="10" min="0" step="1"
                                    style="width:100%;padding:6px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:14px;box-sizing:border-box">
                         </label>
                         <label class="settings-item" style="flex-direction:column;align-items:flex-start;gap:2px">
-                            <span style="font-size:12px;color:var(--text-muted)">Left</span>
+                            <span style="font-size:12px;color:var(--text-muted)"><span data-i18n="export.left">Left</span></span>
                             <input type="number" id="export-margin-left" value="10" min="0" step="1"
                                    style="width:100%;padding:6px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:14px;box-sizing:border-box">
                         </label>
                     </div>
                     <label class="settings-item" style="margin-top:4px">
-                        <span style="font-size:12px;color:var(--text-muted)">Unit</span>
-                        <select id="export-margin-unit" style="margin-left:8px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:13px">
+                        <span style="font-size:12px;color:var(--text-muted)"><span data-i18n="export.unit">Unit</span></span>
+                        <select id="export-margin-unit" style="margin-inline-start:8px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:13px">
                             <option value="mm" selected>mm</option>
-                            <option value="in">inches</option>
+                            <option value="in"><span data-i18n="export.inches">inches</span></option>
                             <option value="cm">cm</option>
                         </select>
                     </label>
                 </div>
             </div>
             <div class="export-modal-actions">
-                <button id="btn-do-export" class="export-action-btn">Export</button>
+                <button data-i18n="help.export" id="btn-do-export" class="export-action-btn">Export</button>
             </div>
         </div>
     </div>
@@ -596,52 +600,52 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
     <div id="export-workbook-modal" class="modal hidden">
         <div class="modal-content">
             <button class="modal-close">&times;</button>
-            <h2>Export Workbooks &amp; Packages</h2>
+            <h2 data-i18n="exportWorkbook.exportWorkbooksAmpPackages">Export Workbooks &amp; Packages</h2>
             <div class="settings-list">
                 <div class="settings-section">Format</div>
                 <label class="settings-item">
-                    <input type="radio" name="wb-export-format" value="srwb" checked> Workbook (.srwb)
-                    <span class="export-format-desc">SciREPL native format (JSON)</span>
+                    <input type="radio" name="wb-export-format" value="srwb" checked> <span data-i18n="export.workbookSrwb">Workbook (.srwb)</span>
+                    <span class="export-format-desc"><span data-i18n="export.scireplNativeFormatJson">SciREPL native format (JSON)</span></span>
                 </label>
                 <label class="settings-item">
-                    <input type="radio" name="wb-export-format" value="ipynb"> Jupyter Notebook (.ipynb)
-                    <span class="export-format-desc">One file per tab, %%magic for multi-language</span>
+                    <input type="radio" name="wb-export-format" value="ipynb"> <span data-i18n="export.jupyterNotebookIpynb">Jupyter Notebook (.ipynb)</span>
+                    <span class="export-format-desc"><span data-i18n="export.oneFilePerTabMagic">One file per tab, %%magic for multi-language</span></span>
                 </label>
                 <label class="settings-item">
-                    <input type="radio" name="wb-export-format" value="package"> Package (archive)
-                    <span class="export-format-desc">Notebooks + data files in archive</span>
+                    <input type="radio" name="wb-export-format" value="package"> <span data-i18n="export.packageArchive">Package (archive)</span>
+                    <span class="export-format-desc"><span data-i18n="export.notebooksDataFilesArchive">Notebooks + data files in archive</span></span>
                 </label>
 
                 <div id="wb-scope-section">
                     <div class="settings-section">Scope</div>
                     <label class="settings-item">
-                        <input type="radio" name="wb-export-scope" value="current" checked> Current tab only
-                        <span class="export-format-desc">Export the active notebook</span>
+                        <input type="radio" name="wb-export-scope" value="current" checked> <span data-i18n="export.currentTabOnly">Current tab only</span>
+                        <span class="export-format-desc"><span data-i18n="export.exportActiveNotebook">Export the active notebook</span></span>
                     </label>
                     <label class="settings-item">
-                        <input type="radio" name="wb-export-scope" value="all"> All tabs
-                        <span class="export-format-desc">Export entire workbook</span>
+                        <input type="radio" name="wb-export-scope" value="all"> <span data-i18n="export.allTabs">All tabs</span>
+                        <span class="export-format-desc"><span data-i18n="export.exportEntireWorkbook">Export entire workbook</span></span>
                     </label>
                 </div>
 
                 <div id="wb-kernel-section" class="hidden">
                     <div class="settings-section">Default Kernel</div>
                     <select id="wb-export-kernel" class="settings-select">
-                        <option value="auto">Auto-detect (first cell)</option>
-                        <option value="python">Python</option>
+                        <option data-i18n="wbKernel.autoDetectFirstCell" value="auto">Auto-detect (first cell)</option>
+                        <option data-i18n="wbKernel.python" value="python">Python</option>
                         <option value="r">R</option>
-                        <option value="prolog">Prolog</option>
-                        <option value="javascript">JavaScript</option>
-                        <option value="bash">Bash</option>
+                        <option data-i18n="wbKernel.prolog" value="prolog">Prolog</option>
+                        <option data-i18n="wbKernel.javascript" value="javascript">JavaScript</option>
+                        <option data-i18n="wbKernel.bash" value="bash">Bash</option>
                     </select>
                 </div>
 
                 <div id="wb-archive-section" class="hidden">
                     <div class="settings-section">Archive Format</div>
                     <select id="wb-export-archive" class="settings-select">
-                        <option value="zip">.zip</option>
-                        <option value="tar">.tar</option>
-                        <option value="tar.gz">.tar.gz</option>
+                        <option data-i18n="wbArchive.zip" value="zip">.zip</option>
+                        <option data-i18n="wbArchive.tar" value="tar">.tar</option>
+                        <option data-i18n="wbArchive.tarGz" value="tar.gz">.tar.gz</option>
                     </select>
                 </div>
 
@@ -651,7 +655,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                 </div>
             </div>
             <div class="export-modal-actions">
-                <button id="btn-do-export-workbook" class="export-action-btn">Export</button>
+                <button data-i18n="help.export" id="btn-do-export-workbook" class="export-action-btn">Export</button>
             </div>
         </div>
     </div>
@@ -660,68 +664,169 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
     <div id="settings-modal" class="modal hidden">
         <div class="modal-content">
             <button class="modal-close">&times;</button>
-            <h2>Settings</h2>
+            <h2 data-i18n="menu.settings">Settings</h2>
             <div class="settings-list">
                 <div class="settings-section">Import &amp; Editing</div>
                 <label class="settings-item">
-                    <input type="checkbox" id="setting-auto-execute"> Auto-execute cells on workbook import
+                    <input type="checkbox" id="setting-auto-execute"> <span data-i18n="export.autoExecuteCellsOnWorkbook">Auto-execute cells on workbook import</span>
                 </label>
                 <label class="settings-item">
-                    <input type="checkbox" id="setting-auto-switch" checked> Switch to workbook on install
+                    <input type="checkbox" id="setting-auto-switch" checked> <span data-i18n="export.switchWorkbookOnInstall">Switch to workbook on install</span>
                 </label>
                 <label class="settings-item">
-                    <input type="checkbox" id="setting-confirm-delete" checked> Confirm before deleting files
+                    <input type="checkbox" id="setting-confirm-delete" checked> <span data-i18n="export.confirmBeforeDeletingFiles">Confirm before deleting files</span>
                 </label>
                 <label class="settings-item">
-                    Export format:
+                    <span data-i18n="export.exportFormat">Export format:</span>
                     <select id="setting-export-format" class="settings-select">
-                        <option value="zip">.zip (default)</option>
-                        <option value="tar">.tar</option>
-                        <option value="tar.gz">.tar.gz</option>
+                        <option value="zip"><span data-i18n="export.zipDefault">.zip (default)</span></option>
+                        <option value="tar"><span data-i18n="wbArchive.tar">.tar</span></option>
+                        <option value="tar.gz"><span data-i18n="wbArchive.tarGz">.tar.gz</span></option>
                     </select>
                 </label>
 
                 <div class="settings-section">Runtime Downloads</div>
                 <label class="settings-item">
-                    <input type="checkbox" id="setting-auto-download"> Auto-download runtimes (skip confirmation)
+                    <input type="checkbox" id="setting-auto-download"> <span data-i18n="export.autoDownloadRuntimesSkipConfirmation">Auto-download runtimes (skip confirmation)</span>
                 </label>
                 <label class="settings-item">
-                    <input type="checkbox" id="setting-r-prewarm"> Pre-install R packages (ggplot2, dplyr)
+                    <input type="checkbox" id="setting-r-prewarm"> <span data-i18n="export.preInstallRPackagesGgplot2">Pre-install R packages (ggplot2, dplyr)</span>
                 </label>
-                <button id="btn-reset-privacy" class="settings-btn">Reset Privacy Consent</button>
+                <button data-i18n="settings.resetPrivacyConsent" id="btn-reset-privacy" class="settings-btn">Reset Privacy Consent</button>
 
                 <div class="settings-section">Notebook VFS</div>
                 <label class="settings-item">
-                    <input type="checkbox" id="setting-nbvfs-same-write" checked> Allow cells to modify other cells
+                    <input type="checkbox" id="setting-nbvfs-same-write" checked> <span data-i18n="export.allowCellsModifyOtherCells">Allow cells to modify other cells</span>
                 </label>
                 <label class="settings-item">
-                    <input type="checkbox" id="setting-nbvfs-cross-read"> Allow cross-notebook reads
+                    <input type="checkbox" id="setting-nbvfs-cross-read"> <span data-i18n="export.allowCrossNotebookReads">Allow cross-notebook reads</span>
                 </label>
                 <label class="settings-item">
-                    <input type="checkbox" id="setting-nbvfs-cross-write"> Allow cross-notebook writes
+                    <input type="checkbox" id="setting-nbvfs-cross-write"> <span data-i18n="export.allowCrossNotebookWrites">Allow cross-notebook writes</span>
                 </label>
                 <label class="settings-item">
-                    <input type="checkbox" id="setting-nbvfs-exec"> Allow programmatic execution
+                    <input type="checkbox" id="setting-nbvfs-exec"> <span data-i18n="export.allowProgrammaticExecution">Allow programmatic execution</span>
                 </label>
                 <label class="settings-item">
-                    <input type="checkbox" id="setting-nbvfs-allow-js" checked> Allow JavaScript kernel
+                    <input type="checkbox" id="setting-nbvfs-allow-js" checked> <span data-i18n="export.allowJavascriptKernel">Allow JavaScript kernel</span>
                 </label>
 
                 <div class="settings-section">Display</div>
                 <label class="settings-item">
-                    <input type="checkbox" id="setting-large-touch"> Large touch targets (mobile-style buttons)
+                    <input type="checkbox" id="setting-large-touch"> <span data-i18n="export.largeTouchTargetsMobileStyle">Large touch targets (mobile-style buttons)</span>
                 </label>
                 <label class="settings-item">
-                    Default language:
+                    <span data-i18n="export.defaultLanguage">Default language:</span>
                     <select id="setting-default-language" class="settings-select">
-                        <option value="python">Python</option>
+                        <option value="python"><span data-i18n="wbKernel.python">Python</span></option>
                         <option value="r">R</option>
-                        <option value="prolog">Prolog</option>
-                        <option value="bash">Bash</option>
-                        <option value="javascript">JavaScript</option>
-                        <option value="lua">Lua</option>
+                        <option value="prolog"><span data-i18n="wbKernel.prolog">Prolog</span></option>
+                        <option value="bash"><span data-i18n="wbKernel.bash">Bash</span></option>
+                        <option value="javascript"><span data-i18n="wbKernel.javascript">JavaScript</span></option>
+                        <option value="lua"><span data-i18n="inputControls.lua">Lua</span></option>
                     </select>
                 </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appearance Modal -->
+    <div id="appearance-modal" class="modal hidden">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="appearance-title">
+            <button class="modal-close" aria-label="Close">&times;</button>
+            <h2 id="appearance-title" data-i18n="appearance.title">Appearance</h2>
+
+            <div class="settings-section" data-i18n="appearance.layout">Layout</div>
+            <p class="appearance-note" data-i18n="appearance.topMarginHelp">
+                Space above the header, so the app does not sit under the device status bar.
+                Auto follows the device's reported safe area. Set 0 to remove it entirely.
+            </p>
+            <div class="appearance-row">
+                <label for="appearance-top-margin" data-i18n="appearance.topMargin">Top margin</label>
+                <input type="range" id="appearance-top-margin" min="0" max="96" step="1">
+                <span class="appearance-value" id="appearance-top-margin-value"></span>
+            </div>
+            <div class="appearance-row">
+                <label>
+                    <input type="checkbox" id="appearance-top-margin-auto">
+                    <span data-i18n="appearance.topMarginAuto">Auto</span>
+                </label>
+            </div>
+
+            <div class="settings-section" data-i18n="appearance.buttons">Buttons</div>
+            <p class="appearance-note" data-i18n="appearance.buttonScaleHelp">
+                Scales the header buttons. Larger buttons are easier to hit on a touchscreen.
+            </p>
+            <div class="appearance-row">
+                <label for="appearance-btn-scale" data-i18n="appearance.buttonScale">Button size</label>
+                <input type="range" id="appearance-btn-scale" min="0.75" max="2.5" step="0.05">
+                <span class="appearance-value" id="appearance-btn-scale-value"></span>
+            </div>
+            <div class="appearance-preview">
+                <span data-i18n="appearance.buttonPreview">Preview</span>
+                <button class="icon-btn" type="button" tabindex="-1">☰</button>
+                <button class="icon-btn" type="button" tabindex="-1">🔍</button>
+                <button class="icon-btn" type="button" tabindex="-1">?</button>
+            </div>
+
+            <div class="settings-section" data-i18n="appearance.theme">Theme</div>
+            <div class="appearance-row">
+                <label for="appearance-theme" data-i18n="appearance.theme">Theme</label>
+                <select id="appearance-theme" class="settings-select">
+                    <option value="auto" data-i18n="appearance.themeAuto">Match system</option>
+                    <option value="dark" data-i18n="appearance.themeDark">Dark</option>
+                    <option value="light" data-i18n="appearance.themeLight">Light</option>
+                    <option value="custom" data-i18n="appearance.themeCustom">Custom</option>
+                </select>
+                <button id="appearance-customise" class="vfs-btn" data-i18n="appearance.customise">Customise…</button>
+            </div>
+
+            <div id="appearance-theme-editor" class="hidden">
+                <p class="appearance-note" data-i18n="appearance.themeEditorHelp">
+                    A theme is a set of colour variables. Edit the values below, then apply.
+                    Unknown names and non-colour values are rejected.
+                </p>
+                <textarea id="appearance-theme-json" spellcheck="false" aria-label="Theme JSON"></textarea>
+                <div id="appearance-theme-error" class="appearance-error"></div>
+                <div class="appearance-row">
+                    <button id="appearance-theme-apply" class="vfs-btn" data-i18n="appearance.themeApply">Apply theme</button>
+                    <button id="appearance-theme-revert" class="vfs-btn" data-i18n="appearance.themeRevert">Revert</button>
+                </div>
+
+                <details>
+                    <summary data-i18n="appearance.advancedCss">Advanced: custom CSS</summary>
+                    <p class="appearance-warn" data-i18n="appearance.advancedCssHelp">
+                        Raw CSS, applied last. This can make the app unusable — use
+                        Reset to defaults to recover.
+                    </p>
+                    <p id="appearance-css-error" class="appearance-warn" role="alert" hidden></p>
+                    <textarea id="appearance-custom-css-input" spellcheck="false" aria-label="Custom CSS"></textarea>
+                    <div class="appearance-row">
+                        <button id="appearance-css-apply" class="vfs-btn" data-i18n="common.apply">Apply</button>
+                    </div>
+                </details>
+            </div>
+
+            <div class="settings-section" data-i18n="appearance.language">Language</div>
+            <p class="appearance-note" data-i18n="appearance.languageHelp">
+                Only languages with a usable translation are listed. File extensions and
+                kernel names stay in their original form in every language.
+            </p>
+            <div class="appearance-row">
+                <label for="appearance-language" data-i18n="appearance.language">Language</label>
+                <select id="appearance-language" class="settings-select"></select>
+            </div>
+
+            <div class="appearance-row">
+                <label class="appearance-check">
+                    <input type="checkbox" id="appearance-show-drafts">
+                    <span data-i18n="appearance.showDrafts">Show translations under review</span>
+                </label>
+                <p class="appearance-help" data-i18n="appearance.showDraftsHelp">Lists languages whose translation has not been checked by a speaker yet, so it can be reviewed in the app. Turn this on if you are helping review a translation.</p>
+            </div>
+
+            <div class="appearance-row">
+                <button id="appearance-reset" class="vfs-btn danger" data-i18n="appearance.reset">Reset to defaults</button>
             </div>
         </div>
     </div>
@@ -730,8 +835,8 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
     <div id="languages-modal" class="modal hidden">
         <div class="modal-content">
             <button class="modal-close">&times;</button>
-            <h2>Languages</h2>
-            <p class="modal-desc">Enable or disable languages in the cell dropdown.</p>
+            <h2 data-i18n="languages.languages">Languages</h2>
+            <p data-i18n="languages.enableDisableLanguagesCellDropdown" class="modal-desc">Enable or disable languages in the cell dropdown.</p>
             <div id="languages-list" class="settings-list"></div>
         </div>
     </div>
@@ -740,7 +845,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
     <div id="memory-modal" class="modal hidden">
         <div class="modal-content modal-content-scroll">
             <button class="modal-close">&times;</button>
-            <h2>Memory &amp; Storage</h2>
+            <h2 data-i18n="memory.memoryAmpStorage">Memory &amp; Storage</h2>
 
             <div class="settings-section">Kernel Memory</div>
             <div id="memory-kernel-list" class="memory-kernel-list"></div>
@@ -761,9 +866,9 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                     <div class="memory-storage-row"><span>localStorage</span><span id="memory-ls-size">—</span></div>
                 </div>
                 <div class="memory-actions">
-                    <button id="memory-clear-vfs" class="vfs-btn">Clear VFS</button>
-                    <button id="memory-clear-cache" class="vfs-btn">Clear Cache</button>
-                    <button id="memory-refresh" class="vfs-btn">Refresh</button>
+                    <button data-i18n="memoryBarFill.clearVfs" id="memory-clear-vfs" class="vfs-btn">Clear VFS</button>
+                    <button data-i18n="memoryBarFill.clearCache" id="memory-clear-cache" class="vfs-btn">Clear Cache</button>
+                    <button data-i18n="memoryBarFill.refresh" id="memory-refresh" class="vfs-btn">Refresh</button>
                 </div>
             </div>
         </div>
@@ -773,8 +878,8 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
     <div id="package-catalog-modal" class="modal hidden">
         <div class="modal-content modal-content-scroll">
             <button class="modal-close">&times;</button>
-            <h2>Browse Packages, Bundles &amp; Workbooks</h2>
-            <p>One-click install packages, dependency-aware workbook bundles, and individual workbook templates into SciREPL.</p>
+            <h2 data-i18n="packageCatalog.browsePackagesBundlesAmpWorkbooks">Browse Packages, Bundles &amp; Workbooks</h2>
+            <p data-i18n="packageCatalog.oneClickInstallPackagesDependency">One-click install packages, dependency-aware workbook bundles, and individual workbook templates into SciREPL.</p>
             <div id="package-catalog-list"></div>
         </div>
     </div>
@@ -783,46 +888,46 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
     <div id="prolog-settings-modal" class="modal hidden">
         <div class="modal-content modal-content-scroll">
             <button class="modal-close">&times;</button>
-            <h2>Files &amp; Storage</h2>
+            <h2 data-i18n="prologSettings.filesAmpStorage">Files &amp; Storage</h2>
 
-            <h3>Upload to SharedVFS</h3>
-            <p>Upload any file to the shared filesystem, accessible from all kernels.</p>
+            <h3 data-i18n="prologSettings.uploadSharedvfs">Upload to SharedVFS</h3>
+            <p data-i18n="prologSettings.uploadAnyFileSharedFilesystem">Upload any file to the shared filesystem, accessible from all kernels.</p>
             <div class="vfs-actions">
-                <button id="vfs-upload-shared" class="vfs-btn">Upload File</button>
+                <button data-i18n="prologSettings.uploadFile" id="vfs-upload-shared" class="vfs-btn">Upload File</button>
             </div>
             <div class="shared-upload-dest">
-                <label>Destination:</label>
+                <label data-i18n="prologSettings.destination">Destination:</label>
                 <input type="text" id="shared-upload-path" placeholder="/shared/data/" class="path-input" value="/shared/data/">
             </div>
             <input type="file" id="vfs-shared-input" style="display:none">
 
-            <h3>File Browser</h3>
-            <p>Browse persistent storage and kernel-specific filesystems.</p>
+            <h3 data-i18n="prologSettings.fileBrowser">File Browser</h3>
+            <p data-i18n="prologSettings.browsePersistentStorageKernelSpecific">Browse persistent storage and kernel-specific filesystems.</p>
             <div class="vfs-actions">
-                <select id="vfs-kernel-select" class="vfs-kernel-select" title="Filesystem view">
-                    <option value="unified">All Filesystems</option>
-                    <option value="shared">/ (Persistent Storage)</option>
-                    <option value="prolog">/mnt/prolog</option>
-                    <option value="python">/mnt/pyodide</option>
-                    <option value="r">/mnt/r</option>
+                <select data-i18n-title="prologSettings.filesystemViewTitle" id="vfs-kernel-select" class="vfs-kernel-select" title="Filesystem view">
+                    <option data-i18n="prologSettings.allFilesystems" value="unified">All Filesystems</option>
+                    <option data-i18n="prologSettings.persistentStorage" value="shared">/ (Persistent Storage)</option>
+                    <option data-i18n="prologSettings.mntProlog" value="prolog">/mnt/prolog</option>
+                    <option data-i18n="prologSettings.mntPyodide" value="python">/mnt/pyodide</option>
+                    <option data-i18n="prologSettings.mntR" value="r">/mnt/r</option>
                 </select>
-                <button id="vfs-upload-pl" class="vfs-btn">Upload File</button>
-                <button id="vfs-upload-zip" class="vfs-btn">Upload .zip Archive</button>
-                <button id="vfs-new-folder-btn" class="vfs-btn">New Folder</button>
+                <button data-i18n="prologSettings.uploadFile" id="vfs-upload-pl" class="vfs-btn">Upload File</button>
+                <button data-i18n="prologSettings.uploadZipArchive" id="vfs-upload-zip" class="vfs-btn">Upload .zip Archive</button>
+                <button data-i18n="prologSettings.newFolder" id="vfs-new-folder-btn" class="vfs-btn">New Folder</button>
             </div>
             <input type="file" id="vfs-file-input" style="display:none">
             <input type="file" id="vfs-zip-input" accept=".zip" style="display:none">
-            <label class="vfs-option" id="vfs-show-empty-label"><input type="checkbox" id="vfs-show-empty-dirs"> Show empty folders</label>
+            <label class="vfs-option" id="vfs-show-empty-label"><input type="checkbox" id="vfs-show-empty-dirs"> <span data-i18n="export.showEmptyFolders">Show empty folders</span></label>
             <div id="vfs-file-list" class="vfs-file-list">
                 <div class="vfs-empty">No files mounted.</div>
             </div>
             <div id="vfs-file-preview" class="vfs-file-preview hidden"></div>
 
-            <h3>Search Paths</h3>
-            <p>Configure <code>file_search_path/2</code> for module resolution.</p>
+            <h3 data-i18n="vfsFilePreview.searchPaths">Search Paths</h3>
+            <p data-i18n-html="vfsFilePreview.configureFileSearchPath2">Configure <code>file_search_path/2</code> for module resolution.</p>
             <table class="search-path-table">
                 <thead>
-                    <tr><th>Alias</th><th>Directory</th><th></th></tr>
+                    <tr><th data-i18n="vfsFilePreview.alias">Alias</th><th data-i18n="vfsFilePreview.directory">Directory</th><th></th></tr>
                 </thead>
                 <tbody id="search-path-tbody">
                 </tbody>
@@ -830,20 +935,20 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             <div class="path-add-form">
                 <input type="text" id="path-alias-input" placeholder="Alias (e.g. mylib)" class="path-input">
                 <input type="text" id="path-dir-input" placeholder="Directory (e.g. /user/mylib)" class="path-input" value="/user/">
-                <button id="add-search-path-btn" class="vfs-btn">Add</button>
+                <button data-i18n="vfsFilePreview.add" id="add-search-path-btn" class="vfs-btn">Add</button>
             </div>
 
-            <h3>Fetch from URL</h3>
-            <p>Download a file from a URL into the virtual filesystem.</p>
+            <h3 data-i18n="vfsFilePreview.fetchFromUrl">Fetch from URL</h3>
+            <p data-i18n="vfsFilePreview.downloadFileFromUrlInto">Download a file from a URL into the virtual filesystem.</p>
             <div class="fetch-form">
                 <input type="text" id="fetch-url-input" placeholder="https://example.com/knowledge_base.pl" class="fetch-input">
                 <input type="text" id="fetch-path-input" placeholder="/user/kb.pl (optional)" class="fetch-input fetch-input-short">
-                <button id="fetch-url-btn" class="vfs-btn">Fetch</button>
+                <button data-i18n="vfsFilePreview.fetch" id="fetch-url-btn" class="vfs-btn">Fetch</button>
             </div>
             <div id="fetch-status" class="fetch-status"></div>
 
             <div class="prolog-settings-help">
-                <h3>Usage</h3>
+                <h3 data-i18n="fetchStatus.usage">Usage</h3>
                 <pre><code>% After uploading myfile.pl:
 :- consult('/user/myfile.pl').
 
@@ -864,63 +969,68 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <div id="privacy-modal" class="modal hidden">
         <div class="modal-content modal-content-scroll">
             <button class="modal-close">&times;</button>
-            <h2>Privacy Policy</h2>
-            <p style="color: #888; font-size: 0.9em;">Last updated: February 16, 2026</p>
+            <h2 data-i18n="privacy.privacyPolicy">Privacy Policy</h2>
+            <p data-i18n="privacy.lastUpdatedFebruary162026" style="color: #888; font-size: 0.9em;">Last updated: February 16, 2026</p>
 
-            <h3>Summary</h3>
-            <p>SciREPL is designed to be a privacy-respecting application. All code execution happens locally on your device. We do not collect, store, or transmit any personal data to our servers.</p>
+            <!-- Filled by i18n.renderTranslationNotice() in the reader's own
+                 language whenever the policy is being shown translated. Hidden
+                 on English, which is the official text. -->
+            <p id="privacy-translation-notice" class="privacy-translation-notice" hidden></p>
 
-            <h3>Local Data Storage</h3>
-            <p>SciREPL stores the following data locally on your device using localStorage:</p>
+            <h3 data-i18n="privacy.summary">Summary</h3>
+            <p data-i18n="privacy.scireplDesignedBePrivacyRespecting">SciREPL is designed to be a privacy-respecting application. All code execution happens locally on your device. We do not collect, store, or transmit any personal data to our servers.</p>
+
+            <h3 data-i18n="privacy.localDataStorage">Local Data Storage</h3>
+            <p data-i18n="privacy.scireplStoresFollowingDataLocally">SciREPL stores the following data locally on your device using localStorage:</p>
             <ul>
-                <li>Your session history (code cells and their types)</li>
-                <li>Command history for input recall</li>
-                <li>Preferences (e.g. cell counter state)</li>
+                <li data-i18n="privacy.yourSessionHistoryCodeCells">Your session history (code cells and their types)</li>
+                <li data-i18n="privacy.commandHistoryInputRecall">Command history for input recall</li>
+                <li data-i18n="privacy.preferencesEGCellCounter">Preferences (e.g. cell counter state)</li>
             </ul>
-            <p>This data never leaves your device. You can clear it at any time via Menu &gt; Clear History.</p>
+            <p data-i18n="privacy.dataNeverLeavesYourDevice">This data never leaves your device. You can clear it at any time via Menu &gt; Clear History.</p>
 
-            <h3>Network Requests &amp; Third-Party CDNs</h3>
-            <p>SciREPL bundles most of its rendering libraries (Plotly.js, KaTeX, marked.js) directly in the app to minimize network requests. However, the following resources are loaded from third-party CDNs:</p>
+            <h3 data-i18n="privacy.networkRequestsAmpThirdParty">Network Requests &amp; Third-Party CDNs</h3>
+            <p data-i18n="privacy.scireplBundlesMostItsRendering">SciREPL bundles most of its rendering libraries (Plotly.js, KaTeX, marked.js) directly in the app to minimize network requests. However, the following resources are loaded from third-party CDNs:</p>
             <ul>
-                <li><strong>Pyodide</strong> (Python runtime, ~25MB) — from <code>cdn.jsdelivr.net</code>. Loaded on first launch and cached locally for subsequent use.</li>
-                <li><strong>SWI-Prolog WASM</strong> (Prolog runtime, ~10MB) — from <code>SWI-Prolog.github.io</code>. Loaded only when Prolog is first used, and cached locally.</li>
-                <li><strong>Ko-fi widget</strong> (support button in Help screen) — from <code>storage.ko-fi.com</code></li>
+                <li data-i18n-html="privacy.pyodidePythonRuntime25mbFrom"><strong>Pyodide</strong> (Python runtime, ~25MB) — from <code>cdn.jsdelivr.net</code>. Loaded on first launch and cached locally for subsequent use.</li>
+                <li data-i18n-html="privacy.swiPrologWasmPrologRuntime"><strong>SWI-Prolog WASM</strong> (Prolog runtime, ~10MB) — from <code>SWI-Prolog.github.io</code>. Loaded only when Prolog is first used, and cached locally.</li>
+                <li data-i18n-html="privacy.koFiWidgetSupportButton"><strong>Ko-fi widget</strong> (support button in Help screen) — from <code>storage.ko-fi.com</code></li>
             </ul>
-            <p>When these resources are fetched, the CDN providers may receive:</p>
+            <p data-i18n="privacy.whenTheseResourcesFetchedCdn">When these resources are fetched, the CDN providers may receive:</p>
             <ul>
-                <li>Your IP address</li>
-                <li>Your device's user agent string (browser/OS information)</li>
-                <li>Timestamps of requests</li>
-                <li>URLs of requested resources</li>
+                <li data-i18n="privacy.yourIpAddress">Your IP address</li>
+                <li data-i18n="privacy.yourDeviceSUserAgent">Your device's user agent string (browser/OS information)</li>
+                <li data-i18n="privacy.timestampsRequests">Timestamps of requests</li>
+                <li data-i18n="privacy.urlsRequestedResources">URLs of requested resources</li>
             </ul>
-            <p>Caching is used to minimize connections to CDN networks — after the initial download, Pyodide and its packages are served from the local cache.</p>
-            <p>jsDelivr's privacy policy: <a href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net" target="_blank">jsdelivr.com/terms/privacy-policy-jsdelivr-net</a></p>
-            <p>Your Python code, session data, and exported files are never transmitted to any server.</p>
+            <p data-i18n="privacy.cachingUsedMinimizeConnectionsCdn">Caching is used to minimize connections to CDN networks — after the initial download, Pyodide and its packages are served from the local cache.</p>
+            <p data-i18n-html="privacy.jsdelivrSPrivacyPolicyJsdelivr">jsDelivr's privacy policy: <a href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net" target="_blank">jsdelivr.com/terms/privacy-policy-jsdelivr-net</a></p>
+            <p data-i18n="privacy.yourPythonCodeSessionData">Your Python code, session data, and exported files are never transmitted to any server.</p>
 
-            <h3>User-Initiated Network Requests</h3>
-            <p>SciREPL provides a file-fetching feature that allows notebook code to download files from URLs you specify. When you use this feature (e.g., <code>fetch_file</code> in Prolog, or via the Prolog Settings panel), the request is made directly from your device to the specified URL. The remote server will receive your IP address and standard HTTP headers. SciREPL does not proxy, log, or monitor these requests.</p>
+            <h3 data-i18n="privacy.userInitiatedNetworkRequests">User-Initiated Network Requests</h3>
+            <p data-i18n-html="privacy.scireplProvidesFileFetchingFeature">SciREPL provides a file-fetching feature that allows notebook code to download files from URLs you specify. When you use this feature (e.g., <code>fetch_file</code> in Prolog, or via the Prolog Settings panel), the request is made directly from your device to the specified URL. The remote server will receive your IP address and standard HTTP headers. SciREPL does not proxy, log, or monitor these requests.</p>
 
-            <h3>Code Execution</h3>
-            <p>All Python code you enter is executed locally on your device using Pyodide (Python compiled to WebAssembly). No code is sent to any remote server for execution.</p>
+            <h3 data-i18n="privacy.codeExecution">Code Execution</h3>
+            <p data-i18n="privacy.allPythonCodeYouEnter">All Python code you enter is executed locally on your device using Pyodide (Python compiled to WebAssembly). No code is sent to any remote server for execution.</p>
 
-            <h3>File Export</h3>
-            <p>When you export a notebook (.ipynb), the file is created locally on your device. If you choose to share it (via the system share sheet), the destination is determined by your choice. SciREPL does not control or monitor where you share exported files.</p>
+            <h3 data-i18n="privacy.fileExport">File Export</h3>
+            <p data-i18n="privacy.whenYouExportNotebookIpynb">When you export a notebook (.ipynb), the file is created locally on your device. If you choose to share it (via the system share sheet), the destination is determined by your choice. SciREPL does not control or monitor where you share exported files.</p>
 
-            <h3>Analytics &amp; Tracking</h3>
-            <p>SciREPL does not include any analytics, crash reporting, advertising SDKs, or tracking mechanisms.</p>
+            <h3 data-i18n="privacy.analyticsAmpTracking">Analytics &amp; Tracking</h3>
+            <p data-i18n="privacy.scireplDoesNotIncludeAny">SciREPL does not include any analytics, crash reporting, advertising SDKs, or tracking mechanisms.</p>
 
-            <h3>Children's Privacy</h3>
-            <p>SciREPL does not knowingly collect any information from children. The app does not require account creation or collect personal information of any kind.</p>
+            <h3 data-i18n="privacy.childrenSPrivacy">Children's Privacy</h3>
+            <p data-i18n="privacy.scireplDoesNotKnowinglyCollect">SciREPL does not knowingly collect any information from children. The app does not require account creation or collect personal information of any kind.</p>
 
-            <h3>Future Changes</h3>
-            <p>If additional language runtimes are added (e.g. Prolog, R), they may also be loaded from CDNs and cached locally, subject to the same metadata exposure described above. This policy will be updated to reflect any changes.</p>
+            <h3 data-i18n="privacy.futureChanges">Future Changes</h3>
+            <p data-i18n="privacy.ifAdditionalLanguageRuntimesAdded">If additional language runtimes are added (e.g. Prolog, R), they may also be loaded from CDNs and cached locally, subject to the same metadata exposure described above. This policy will be updated to reflect any changes.</p>
 
-            <h3>Disclaimer</h3>
+            <h3 data-i18n="privacy.disclaimer">Disclaimer</h3>
             <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR PERFORMANCE THEREOF.</p>
-            <p>You use SciREPL entirely at your own risk. Code execution occurs locally on your device and the developers are not responsible for any consequences of code you choose to run.</p>
+            <p data-i18n="privacy.youUseScireplEntirelyAt">You use SciREPL entirely at your own risk. Code execution occurs locally on your device and the developers are not responsible for any consequences of code you choose to run.</p>
 
             <div style="margin-top: 20px; text-align: center;">
-                <button id="privacy-accept-btn" style="padding: 10px 30px; background: #72a4f2; color: #fff; border: none; border-radius: 6px; font-size: 1em; cursor: pointer;">I Understand</button>
+                <button data-i18n="privacy.iUnderstand" id="privacy-accept-btn" style="padding: 10px 30px; background: #72a4f2; color: #fff; border: none; border-radius: 6px; font-size: 1em; cursor: pointer;">I Understand</button>
             </div>
         </div>
     </div>
@@ -929,15 +1039,15 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <div id="runtime-download-modal" class="modal hidden">
         <div class="modal-content webr-download-content">
             <button class="modal-close">&times;</button>
-            <h2 id="runtime-download-title">Runtime Download</h2>
-            <p id="runtime-download-desc">This runtime requires a download. It will be cached by the browser for future use.</p>
+            <h2 data-i18n="runtimeDownload.runtimeDownload" id="runtime-download-title">Runtime Download</h2>
+            <p data-i18n="runtimeDownload.runtimeRequiresDownloadItWill" id="runtime-download-desc">This runtime requires a download. It will be cached by the browser for future use.</p>
             <div id="runtime-progress-wrap" class="hidden">
                 <div class="progress-bar"><div id="runtime-progress-fill" class="progress-fill"></div></div>
-                <p id="runtime-progress-text" class="loading-sub">Downloading...</p>
+                <p data-i18n="runtimeProgressFill.downloading" id="runtime-progress-text" class="loading-sub">Downloading...</p>
             </div>
             <div id="runtime-download-actions">
-                <button id="runtime-download-btn" class="vfs-btn">Download</button>
-                <button id="runtime-cancel-btn" class="vfs-btn">Cancel</button>
+                <button data-i18n="runtimeDownloadActions.download" id="runtime-download-btn" class="vfs-btn">Download</button>
+                <button data-i18n="common.cancel" id="runtime-cancel-btn" class="vfs-btn">Cancel</button>
             </div>
         </div>
     </div>
@@ -949,21 +1059,21 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <!-- Sticky input bar -->
     <footer id="input-bar">
         <div id="input-controls">
-            <select id="lang-selector" title="Language">
+            <select data-i18n-title="appearance.language" id="lang-selector" title="Language">
                 <option value="python" selected>Py</option>
                 <option value="prolog">PL</option>
                 <option value="bash">Sh</option>
                 <option value="javascript">JS</option>
                 <option value="r">R</option>
-                <option value="lua">Lua</option>
-                <option value="typr">TyR</option>
-                <option value="clojurescript">CLJS</option>
+                <option data-i18n="inputControls.lua" value="lua">Lua</option>
+                <option data-i18n="inputControls.tyr" value="typr">TyR</option>
+                <option data-i18n="inputControls.cljs" value="clojurescript">CLJS</option>
             </select>
-            <button id="cell-type-toggle" class="cell-type-btn" title="Toggle cell type">Code</button>
+            <button data-i18n-title="inputControls.toggleCellTypeTitle" data-i18n="inputControls.code" id="cell-type-toggle" class="cell-type-btn" title="Toggle cell type">Code</button>
         </div>
         <textarea id="code-input" rows="3" placeholder="Type Python here…" spellcheck="false" autocapitalize="off"
             autocomplete="off"></textarea>
-        <button id="run-btn" disabled>▶ Run</button>
+        <button data-i18n="inputControls.run" id="run-btn" disabled>▶ Run</button>
     </footer>
 
     <!-- Pyodide loaded dynamically after privacy acceptance — see below -->
@@ -975,6 +1085,10 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <script src="js/file_io.js"></script>
     <script src="js/math_mode.js"></script>
     <script src="js/bridge.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/appearance.js"></script>
+    <script src="js/appearance_ui.js"></script>
+    <script src="js/onboarding.js"></script>
     <script src="js/kernel_config.js"></script>
     <script src="js/kernel_manager.js"></script>
     <script src="js/shared_vfs.js"></script>
@@ -1005,18 +1119,23 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
         var helpLink = document.getElementById('help-privacy-link');
 
         // Help page link opens the privacy modal
-        helpLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('help-modal').classList.add('hidden');
-            modal.classList.remove('hidden');
-        });
+        if (helpLink && modal) {
+            helpLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                var helpModal = document.getElementById('help-modal');
+                if (helpModal) helpModal.classList.add('hidden');
+                modal.classList.remove('hidden');
+            });
+        }
 
         // Close privacy modal via backdrop or X (without accepting)
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal || e.target.classList.contains('modal-close')) {
-                modal.classList.add('hidden');
-            }
-        });
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal || e.target.classList.contains('modal-close')) {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
 
         // Start app immediately — kernels load lazily on first use
         if (window._startApp) window._startApp();

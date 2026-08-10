@@ -28,6 +28,7 @@ const TIMEOUT = 180_000;
             if (!sessionStorage.getItem('catalog_test_seeded')) {
                 sessionStorage.setItem('catalog_test_seeded', '1');
                 localStorage.setItem('scirepl_privacy_accepted', '1');
+                localStorage.setItem('scirepl_onboarding_seen', '1');
                 localStorage.setItem('scirepl_installed_packages', JSON.stringify([{
                     name: 'UnifyWeaver SciREPL',
                     pages_url: 'packages/unifyweaver_scirepl.zip'

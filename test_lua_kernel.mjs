@@ -27,6 +27,7 @@ const BASE = 'http://localhost:8085';
         const keys = await caches.keys();
         for (const k of keys) await caches.delete(k);
         localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.setItem('scirepl_onboarding_seen', '1');
         localStorage.setItem('scirepl_auto_download', '1');
     });
 

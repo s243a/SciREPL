@@ -18,6 +18,19 @@
     --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
     --radius: 10px;
     --card-gap: 12px;
+
+    /* ===== Appearance (Menu -> Appearance) ===== */
+
+    /* Space reserved above the header so the app does not sit under a device
+       status bar. `auto` resolves to the real safe-area inset where the platform
+       reports one, and falls back to the icon-button height on engines with no
+       env() support. Users can override with an explicit value; 0 is valid and
+       distinct from unset. See www/js/appearance.js. */
+    --app-top-margin: env(safe-area-inset-top, 28px);
+
+    /* Multiplier for header icon buttons. 1 keeps the historical 28px. */
+    --ui-btn-scale: 1;
+    --icon-btn-size: 28px;
 }
 
 * {
@@ -96,8 +109,10 @@ html, body {
     animation: progress-pulse 1.8s ease-in-out infinite;
 }
 @keyframes progress-pulse {
-    0%, 100% { width: 15%; margin-left: 0; }
-    50% { width: 40%; margin-left: 30%; }
+    /* Logical, so the bar travels in the reading direction rather than always
+       left-to-right — an RTL user reads progress the other way. */
+    0%, 100% { width: 15%; margin-inline-start: 0; }
+    50% { width: 40%; margin-inline-start: 30%; }
 }
 
 /* webR download modal */
@@ -148,7 +163,10 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 16px;
+    /* The top padding carries the status-bar allowance. Without this the header
+       draws underneath the clock and battery on edge-to-edge Android, which is
+       what testers reported. */
+    padding: calc(10px + var(--app-top-margin)) 16px 10px;
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border);
     backdrop-filter: blur(12px);
@@ -233,8 +251,7 @@ html, body {
 
     .card {
         max-width: var(--cell-max-width);
-        margin-left: auto;
-        margin-right: auto;
+        margin-inline: auto;
         resize: horizontal;
         overflow: auto;
     }
@@ -373,7 +390,7 @@ html, body {
 .card-output table td {
     padding: 5px 8px;
     border: 1px solid var(--border);
-    text-align: right;
+    text-align: end;
 }
 
 .card-output table th {
@@ -472,13 +489,17 @@ html, body {
 /* ===== Help Button ===== */
 
 .icon-btn {
-    width: 28px;
-    height: 28px;
+    width: calc(var(--icon-btn-size) * var(--ui-btn-scale));
+    height: calc(var(--icon-btn-size) * var(--ui-btn-scale));
+    font-size: calc(14px * var(--ui-btn-scale));
+    /* Never shrink. These are flex items in a header that runs out of room, and
+       the default flex-shrink:1 silently compressed them back to their original
+       size — which made the button-size setting appear to do nothing. */
+    flex: 0 0 auto;
     border: 1px solid var(--border);
     border-radius: 50%;
     background: var(--bg-card);
     color: var(--accent);
-    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -512,6 +533,10 @@ html, body {
 .modal.hidden {
     opacity: 0;
     pointer-events: none;
+    /* Focus-order removal is handled with the `inert` attribute (see
+       appearance.js installModalInert), not visibility:hidden — the menu
+       buttons carry `transition: all`, which would animate a visibility change
+       and leave a just-opened modal unfocusable for the transition's duration. */
 }
 
 .modal-content {
@@ -535,7 +560,7 @@ html, body {
 .modal-close {
     position: absolute;
     top: 16px;
-    right: 16px;
+    inset-inline-end: 16px;
     width: 32px;
     height: 32px;
     border: none;
@@ -677,7 +702,7 @@ html, body {
     min-height: 28px;
     appearance: none;
     -webkit-appearance: none;
-    padding-right: 18px;
+    padding-inline-end: 18px;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238b949e'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 6px center;
@@ -839,7 +864,7 @@ html, body {
     border: 1px solid rgba(88, 166, 255, 0.25);
     border-radius: 3px;
     cursor: pointer;
-    margin-left: auto;
+    margin-inline-start: auto;
 }
 
 @media (max-width: 480px) {
@@ -848,7 +873,7 @@ html, body {
     }
 
     .card-input .cell-name-label {
-        margin-left: 0;
+        margin-inline-start: 0;
         max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -981,7 +1006,7 @@ html, body {
 }
 
 .markdown-body ul, .markdown-body ol {
-    padding-left: 24px;
+    padding-inline-start: 24px;
     margin: 8px 0;
 }
 
@@ -990,7 +1015,7 @@ html, body {
 }
 
 .markdown-body blockquote {
-    border-left: 3px solid var(--accent);
+    border-inline-start: 3px solid var(--accent);
     margin: 8px 0;
     padding: 4px 16px;
     color: var(--text-secondary);
@@ -1024,7 +1049,7 @@ html, body {
 .markdown-body table td {
     padding: 6px 10px;
     border: 1px solid var(--border);
-    text-align: left;
+    text-align: start;
 }
 
 .markdown-body table th {
@@ -1035,7 +1060,7 @@ html, body {
 /* ===== Editable Cells ===== */
 
 .cell-edit-btn {
-    margin-left: auto;
+    margin-inline-start: auto;
     background: none;
     border: none;
     color: var(--text-muted);
@@ -1188,8 +1213,7 @@ html, body {
 .math-palette {
     position: fixed;
     bottom: 65px; /* Above input bar */
-    left: 0;
-    right: 0;
+    inset-inline: 0;
     background: var(--bg-secondary);
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
@@ -1247,6 +1271,12 @@ html, body {
     display: flex;
     align-items: center;
     gap: 10px;
+    /* Keep the controls at their chosen size, and let them wrap onto a second
+       row rather than overflow when the buttons are scaled up on a narrow
+       screen. */
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 /* ===== Menu Modal ===== */
@@ -1266,7 +1296,7 @@ html, body {
     font-family: var(--font-sans);
     font-size: 14px;
     cursor: pointer;
-    text-align: left;
+    text-align: start;
     transition: all 0.2s;
     display: flex;
     align-items: center;
@@ -1313,11 +1343,11 @@ html, body {
 .pkg-version, .pkg-size, .pkg-contents, .pkg-kernels {
     font-size: 0.8rem;
     color: var(--fg-secondary);
-    margin-left: 8px;
+    margin-inline-start: 8px;
 }
 
 .pkg-bundle-card {
-    border-left: 3px solid var(--accent);
+    border-inline-start: 3px solid var(--accent);
 }
 
 .pkg-info p {
@@ -1342,7 +1372,7 @@ html, body {
     cursor: pointer;
     font-size: 0.85rem;
     white-space: nowrap;
-    margin-left: 12px;
+    margin-inline-start: 12px;
 }
 
 .pkg-install-btn:hover {
@@ -1550,7 +1580,7 @@ tr:hover .vfs-delete-btn {
 .search-path-table td {
     padding: 6px 10px;
     border: 1px solid var(--border);
-    text-align: left;
+    text-align: start;
     color: var(--text-primary);
 }
 
@@ -1748,19 +1778,19 @@ tr:hover .vfs-delete-btn {
 /* Active file in list */
 .vfs-entry-active {
     background: var(--accent-glow);
-    border-left: 2px solid var(--accent);
+    border-inline-start: 2px solid var(--accent);
 }
 
 /* Selected folder */
 .vfs-dir-selected {
     background: rgba(88, 166, 255, 0.12);
-    border-left: 2px solid var(--accent);
+    border-inline-start: 2px solid var(--accent);
     cursor: pointer;
 }
 
 /* Action button group (download + delete) */
 .vfs-entry-actions {
-    margin-left: auto;
+    margin-inline-start: auto;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1810,7 +1840,7 @@ tr:hover .vfs-delete-btn {
 .export-format-desc {
     font-size: 11px;
     color: var(--text-muted);
-    margin-left: auto;
+    margin-inline-start: auto;
 }
 
 #export-image-section.hidden,
@@ -1883,7 +1913,7 @@ tr:hover .vfs-delete-btn {
     height: 14px;
 }
 .pkg-tree-size {
-    margin-left: auto;
+    margin-inline-start: auto;
     font-size: 11px;
     color: var(--text-muted, #666);
 }
@@ -1893,8 +1923,7 @@ tr:hover .vfs-delete-btn {
 .search-bar {
     position: fixed;
     top: 0;
-    left: 0;
-    right: 0;
+    inset-inline: 0;
     z-index: 3000;
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border);
@@ -2036,7 +2065,7 @@ tr:hover .vfs-delete-btn {
     border-radius: 4px;
     padding: 4px 8px;
     font-size: 13px;
-    margin-left: auto;
+    margin-inline-start: auto;
     color-scheme: dark;
 }
 .settings-select option {
@@ -2116,7 +2145,7 @@ tr:hover .vfs-delete-btn {
     font-size: 12px;
     color: var(--text-secondary);
     white-space: nowrap;
-    margin-right: 8px;
+    margin-inline-end: 8px;
 }
 
 .memory-unload-btn {
@@ -2248,4 +2277,288 @@ body.force-mobile .vfs-delete-btn {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* ===== Themes =====
+ *
+ * Every colour the app uses already comes from a custom property on :root, so a
+ * theme is just a different set of values for those properties — no selector
+ * rewriting, and a custom theme can be expressed as data (see appearance.js).
+ *
+ * `data-theme` on <html> is the switch:
+ *   absent / "dark"  → the values on :root above
+ *   "light"          → the block below
+ *   "auto"           → resolved to dark or light by appearance.js, which follows
+ *                      prefers-color-scheme and re-resolves when it changes.
+ * Custom themes set their properties inline on <html>, which wins over both.
+ */
+
+:root[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f6f8fa;
+    --bg-card: #ffffff;
+    --bg-input: #ffffff;
+    --border: #d0d7de;
+    --text-primary: #1f2328;
+    --text-secondary: #59636e;
+    --text-muted: #818b98;
+    --accent: #0969da;
+    --accent-glow: rgba(9, 105, 218, 0.12);
+    --green: #1a7f37;
+    --orange: #9a6700;
+    --red: #cf222e;
+}
+
+/* The header title is a gradient clipped to the text; on light backgrounds the
+   dark-theme gradient is close to invisible, so it gets its own pairing. */
+:root[data-theme="light"] #app-header h1 {
+    background: linear-gradient(135deg, var(--accent), #8250df);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+/* No direction-specific overrides. Layout uses logical properties
+   (margin-inline-start, inset-inline-end, text-align: start), so right-to-left
+   locales mirror on their own. A [dir="rtl"] block here used to flip text-align
+   by hand; it now has nothing to correct, and would fight the base rules. */
+
+/* ===== Appearance modal ===== */
+
+.appearance-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+}
+
+.appearance-row label {
+    color: var(--text-secondary);
+    flex: 1;
+}
+
+.appearance-value {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    min-width: 4.5em;
+    text-align: end;
+}
+
+.appearance-row input[type="range"] {
+    flex: 1.2;
+    accent-color: var(--accent);
+}
+
+/* A live sample of the button being scaled, so the effect is visible without
+   closing the dialog. */
+.appearance-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    margin-top: 4px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+#appearance-theme-editor textarea {
+    width: 100%;
+    min-height: 160px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 10px;
+    resize: vertical;
+}
+
+.appearance-note {
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 6px 0 2px;
+}
+
+.appearance-error {
+    color: var(--red);
+    font-size: 12px;
+    margin-top: 6px;
+    white-space: pre-wrap;
+}
+
+.appearance-warn {
+    color: var(--orange);
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+/* ===== First-run tour (onboarding.js) ===== */
+
+#tour-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+}
+
+/* The dim is produced by an enormous spread on the spotlight, so the target
+   stays fully lit and un-tinted rather than showing through a translucent
+   layer. */
+#tour-spotlight {
+    position: absolute;
+    border-radius: var(--radius);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.72);
+    border: 2px solid var(--accent);
+    pointer-events: none;
+    transition: all 0.25s ease;
+}
+
+#tour-card {
+    position: absolute;
+    box-sizing: border-box;
+    /* Fit any viewport, including a 320x240 phone in landscape with the
+       keyboard up. Applies to every step — targeted, centred and mock — because
+       it is on the card itself, not on a positioning branch. dvh tracks the
+       dynamic viewport where the URL bar and keyboard change the visible height;
+       _position() additionally caps against visualViewport for older engines. */
+    max-width: min(340px, calc(100vw - 16px));
+    max-height: calc(100dvh - 16px);
+    overflow-y: auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    transition: top 0.25s ease, left 0.25s ease;
+}
+
+#tour-card h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+#tour-body {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+#tour-control:not(:empty) {
+    margin-top: 12px;
+}
+
+.tour-language select {
+    width: 100%;
+}
+
+/* Illustration used when the real control does not exist yet — an empty
+   notebook has no cell to point at. */
+.tour-mock {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    background: var(--bg-input);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+}
+
+.tour-mock-btn,
+.tour-mock-select {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-card);
+    color: var(--accent);
+    font-size: 13px;
+}
+
+#tour-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+#tour-progress {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+#tour-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.tour-btn,
+.tour-btn-quiet {
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bg-input);
+    color: var(--text-secondary);
+}
+
+.tour-btn {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* The privacy policy is machine translated in every language but English.
+   This is the sentence that says so, and it should read as a caution rather
+   than as body copy — a reader skimming a translated policy needs to notice it
+   before they rely on the wording. */
+.privacy-translation-notice {
+    margin: 12px 0 16px;
+    padding: 10px 12px;
+    border-inline-start: 3px solid var(--orange, #d29922);
+    background: rgba(210, 153, 34, 0.10);
+    border-radius: 4px;
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+/* Docked tour card: used when the step's target leaves no room above or below
+   for the card at the current viewport height — typically a small phone in
+   landscape, or with the on-screen keyboard up. Better a card pinned to the
+   bottom edge than one positioned off-screen. */
+#tour-card.tour-card-docked {
+    width: auto;
+    right: 8px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Rolled-back-CSS notice. Positioned and coloured inline-ish via !important
+   because the very stylesheet it is reporting on may still be in the document
+   on the next load, and a warning that can itself be hidden is worthless. */
+#appearance-css-quarantine {
+    position: fixed !important;
+    inset-inline: 12px !important;
+    bottom: 12px !important;
+    z-index: 2147483647 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 12px 14px !important;
+    border-radius: 8px !important;
+    background: #d29922 !important;
+    color: #1c1c1c !important;
+    font: 500 14px/1.45 system-ui, sans-serif !important;
+    pointer-events: auto !important;
 }

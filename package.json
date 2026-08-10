@@ -1,48 +1,55 @@
 {
-    "name": "sci-repl",
-    "version": "1.0.1",
-    "description": "Mobile Scientific REPL — Python + Pyodide + Plotly.js",
-    "main": "index.js",
-    "scripts": {
-        "serve": "node server.js",
-        "configure": "node scripts/configure-build.mjs",
-        "fetch:bundles": "node scripts/fetch-bundles.mjs",
-        "test:sources": "node scripts/test-kernel-sources.mjs",
-        "sync": "npm run configure && npm run fetch:bundles && npx cap sync",
-        "build": "npm run build:debug",
-        "build:debug": "npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew assembleDebug",
-        "build:release:aab": "npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew bundleRelease",
-        "build:release:apk": "npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew assembleRelease",
-        "build:play": "npm run build:release:aab",
-        "windows:install": "npm --prefix desktop/electron install && node desktop/electron/node_modules/electron/install.js",
-        "dev:windows": "node desktop/electron/scripts/dev-windows.mjs",
-        "setup:windows": "node desktop/electron/scripts/dev-windows.mjs --skip-launch",
-        "package:windows": "node desktop/electron/packaging/build-portable.mjs",
-        "test:windows": "node desktop/electron/test/run-all.mjs",
-        "test:windows:unit": "node desktop/electron/test/run-all.mjs --unit"
-    },
-    "keywords": [
-        "python",
-        "pyodide",
-        "repl",
-        "science",
-        "capacitor",
-        "android"
-    ],
-    "engines": {
-        "node": ">=20"
-    },
-    "license": "MIT",
-    "dependencies": {
-        "@capacitor/android": "^8.0.2",
-        "@capacitor/browser": "^8.0.1",
-        "@capacitor/core": "^8.0.2",
-        "@capacitor/filesystem": "^8.1.2",
-        "@capacitor/share": "^8.0.1",
-        "@capgo/capacitor-pdf-generator": "^8.0.19",
-        "playwright": "^1.58.2"
-    },
-    "devDependencies": {
-        "@capacitor/cli": "^7.4.5"
-    }
+  "name": "sci-repl",
+  "version": "1.0.1",
+  "description": "Mobile Scientific REPL \u2014 Python + Pyodide + Plotly.js",
+  "main": "index.js",
+  "scripts": {
+    "serve": "node server.js",
+    "configure": "node scripts/configure-build.mjs",
+    "fetch:bundles": "node scripts/fetch-bundles.mjs",
+    "test:sources": "node scripts/test-kernel-sources.mjs",
+    "sync": "npm run configure && npm run fetch:bundles && npx cap sync",
+    "build": "npm run build:debug",
+    "build:debug": "npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew assembleDebug",
+    "build:release:aab": "npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew bundleRelease",
+    "build:release:apk": "npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew assembleRelease",
+    "build:play": "npm run build:release:aab",
+    "windows:install": "npm --prefix desktop/electron install && node desktop/electron/node_modules/electron/install.js",
+    "dev:windows": "node desktop/electron/scripts/dev-windows.mjs",
+    "setup:windows": "node desktop/electron/scripts/dev-windows.mjs --skip-launch",
+    "package:windows": "node desktop/electron/packaging/build-portable.mjs",
+    "test:windows": "node desktop/electron/test/run-all.mjs",
+    "test:windows:unit": "node desktop/electron/test/run-all.mjs --unit",
+    "i18n:manifest": "node scripts/build-i18n-manifest.mjs",
+    "i18n:check": "node scripts/build-i18n-manifest.mjs --check && node scripts/check-i18n-html-ids.mjs && node scripts/check-i18n-keys.mjs && node scripts/check-translations.mjs",
+    "i18n:lint": "node scripts/check-translations.mjs",
+    "i18n:html-ids": "node scripts/check-i18n-html-ids.mjs",
+    "i18n:keys": "node scripts/check-i18n-keys.mjs",
+    "sw:check": "node scripts/check-sw-shell.mjs",
+    "sw:lock": "node scripts/check-sw-shell.mjs --write"
+  },
+  "keywords": [
+    "python",
+    "pyodide",
+    "repl",
+    "science",
+    "capacitor",
+    "android"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^8.0.2",
+    "@capacitor/browser": "^8.0.1",
+    "@capacitor/core": "^8.0.2",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/share": "^8.0.1",
+    "@capgo/capacitor-pdf-generator": "^8.0.19",
+    "playwright": "^1.58.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.5"
+  }
 }

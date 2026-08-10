@@ -6,7 +6,39 @@ on:
       - 'v*'  # Triggers on version tags like v0.1.0, v1.0.0-beta, etc.
 
 jobs:
+  # Release must not publish an artifact the suites have not passed. This runs
+  # the same gate as ci.yml; build depends on it, so a red suite blocks the
+  # APK/PWA from being built or released.
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install
+      - run: npm run configure
+      - run: npm run fetch:bundles
+      - run: npx playwright install chromium
+      - run: node scripts/build-i18n-manifest.mjs --check
+      - run: node scripts/check-i18n-html-ids.mjs
+      - run: node scripts/check-i18n-keys.mjs
+      - run: node scripts/check-translations.mjs
+      - run: node scripts/check-sw-shell.mjs
+      - run: node test_sw_shell_guard.mjs
+      - run: node server.js &
+      - run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
+      - run: node test_appearance.mjs
+      - run: node test_onboarding.mjs
+      - run: node test_rtl_layout.mjs
+      - run: node test_sw_offline.mjs
+      - run: node test_autosave.mjs
+      - run: node test_cell_ops.mjs
+      - run: node test_js_kernel.mjs
+
   build:
+    needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
