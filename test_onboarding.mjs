@@ -417,6 +417,113 @@ try {
         await pD.evaluate(() => document.querySelectorAll('#tour-overlay').length) === 1);
     await ctxD.close();
 
+    /* --------------- replay stays subordinate to dialogs ---------------- */
+    console.log('\n12. Replayed tours respect blocking dialogs');
+
+    for (const seed of ['seen', 'grandfathered']) {
+        const ctx = await browser.newContext();
+        await ctx.addInitScript((sd) => {
+            localStorage.setItem('scirepl_privacy_accepted', '1');
+            localStorage.setItem('scirepl_auto_download', '1');
+            if (sd === 'seen') localStorage.setItem('scirepl_onboarding_seen', '1');
+            if (sd === 'grandfathered') {
+                localStorage.setItem('scirepl_session_v2', JSON.stringify({
+                    cells: [{ id: 1, language: 'python', code: 'x' }], history: [],
+                }));
+            }
+        }, seed);
+        const pg = await ctx.newPage();
+        await pg.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+        await pg.waitForFunction(() => window.onboarding, null, { timeout: 30_000 });
+        await pg.waitForTimeout(1600);
+        await pg.evaluate(() => window.onboarding.start());
+        await pg.waitForTimeout(200);
+        check(`replay starts for a ${seed} user`,
+            await pg.evaluate(() => {
+                const t = document.getElementById('tour-overlay');
+                return !!t && getComputedStyle(t).display !== 'none';
+            }));
+        await pg.evaluate(() => document.getElementById('runtime-download-modal').classList.remove('hidden'));
+        await pg.waitForTimeout(300);
+        check(`a runtime dialog hides the replayed tour (${seed})`,
+            await pg.evaluate(() => {
+                const t = document.getElementById('tour-overlay');
+                return !t || getComputedStyle(t).display === 'none';
+            }));
+        await ctx.close();
+    }
+
+    /* --------- focus lands on visible controls, not hidden menus -------- */
+    console.log('\n13. Focus never lands inside a hidden menu');
+
+    const ctxF = await browser.newContext();
+    await ctxF.addInitScript(() => {
+        localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.setItem('scirepl_onboarding_seen', '1');
+    });
+    const pf = await ctxF.newPage();
+    await pf.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await pf.waitForFunction(() => window.appearance, null, { timeout: 30_000 });
+    await pf.waitForTimeout(600);
+    // Open Appearance from the menu, then close: focus must not return into the
+    // now-hidden menu (btn-appearance), which is inert.
+    await pf.evaluate(() => document.getElementById('menu-btn').click());
+    await pf.waitForTimeout(120);
+    await pf.evaluate(() => document.getElementById('btn-appearance').click());
+    await pf.waitForTimeout(200);
+    await pf.keyboard.press('Escape');
+    await pf.waitForTimeout(200);
+    const focusAfter = await pf.evaluate(() => {
+        const a = document.activeElement;
+        return {
+            id: a ? a.id : null,
+            inHiddenMenu: !!(a && a.closest && a.closest('#menu-modal.hidden')),
+            isMenuBtn: a === document.getElementById('menu-btn'),
+        };
+    });
+    check('focus does not return into the hidden menu', focusAfter.inHiddenMenu === false,
+        JSON.stringify(focusAfter));
+    check('focus lands on the visible menu button', focusAfter.isMenuBtn === true,
+        JSON.stringify(focusAfter));
+
+    // Hidden modals are inert: their descendants are not focusable.
+    check('a hidden modal is inert',
+        await pf.evaluate(() => document.getElementById('menu-modal').inert === true));
+    await ctxF.close();
+
+    /* --------- language select keeps focus after re-render ------------- */
+    console.log('\n14. Language change keeps focus on the selector');
+
+    const ctxL = await browser.newContext();
+    await ctxL.addInitScript(() => {
+        localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.removeItem('scirepl_onboarding_seen');
+    });
+    const pl = await ctxL.newPage();
+    await pl.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await pl.waitForFunction(() => window.onboarding && window.i18n, null, { timeout: 30_000 });
+    await pl.waitForTimeout(2200);
+    // Make a draft reviewable so the picker offers a second option to switch to.
+    await pl.evaluate(async () => {
+        await window.i18n.load('es');
+        const es = window.i18n.LOCALES.find((l) => l.code === 'es');
+        if (es) { es.status = 'reviewed'; es.completeness = 1; }
+        if (window.i18n.catalogues.es) window.i18n.catalogues.es.__status = 'reviewed';
+        window.i18n.completeness.es = 1;
+        window.onboarding.start();
+    });
+    await pl.waitForTimeout(200);
+    await pl.selectOption('#tour-language-select', 'es');
+    await pl.waitForTimeout(400);
+    const langFocus = await pl.evaluate(() => {
+        const a = document.activeElement;
+        return { isSelect: a && a.id === 'tour-language-select', notBody: a !== document.body };
+    });
+    check('focus stays on the language selector after it re-renders',
+        langFocus.isSelect === true, JSON.stringify(langFocus));
+    check('focus does not fall to <body>', langFocus.notBody === true);
+    await ctxL.close();
+
 } catch (err) {
     failures++;
     console.log(`\n  [FAIL] crashed: ${err && err.message}`);

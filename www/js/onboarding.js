@@ -29,7 +29,12 @@
     /** A control worth handing focus to is attached, displayed and on-screen. */
     function isVisible(el) {
         if (!el || !document.contains(el)) return false;
-        if (el.offsetParent === null && getComputedStyle(el).position !== 'fixed') return false;
+        const cs = getComputedStyle(el);
+        if (cs.visibility === 'hidden' || cs.display === 'none') return false;
+        if (el.offsetParent === null && cs.position !== 'fixed') return false;
+        // Inside a hidden modal (opacity/visibility) counts as not visible even
+        // though the element's own box still has size.
+        if (el.closest && el.closest('.modal.hidden')) return false;
         const r = el.getBoundingClientRect();
         return r.width > 0 && r.height > 0;
     }
@@ -163,10 +168,24 @@
             // global listeners — that was how one ArrowRight advanced two steps.
             this._teardownChrome();
             if (this._pendingStart) { clearTimeout(this._pendingStart); this._pendingStart = null; }
+
+            // Every start must watch for blocking dialogs — not just the first-run
+            // path. A replay (menu/Help) by a seen or grandfathered user reaches
+            // here without maybeStart(), so without this the tour would sit over a
+            // runtime-download or privacy dialog at z-index 9000.
+            this._watchConsentModal();
+
             this.steps = this._resolveSteps();
             this.index = 0;
             this._build();
             this._render();
+
+            // If a blocker is already up when the replay starts, hide immediately
+            // rather than flashing over it for a frame.
+            if (blockingModalVisible()) {
+                this.el.style.display = 'none';
+                this.el.setAttribute('aria-hidden', 'true');
+            }
         }
 
         /** Remove the overlay and every global listener it installed. */
@@ -178,6 +197,7 @@
                 window.visualViewport.removeEventListener('scroll', this._onVV);
             }
             this._onKey = this._onResize = this._onVV = null;
+            if (this._resurfaceTimer) { clearTimeout(this._resurfaceTimer); this._resurfaceTimer = null; }
             if (this.el) { this.el.remove(); this.el = null; }
         }
 
@@ -319,8 +339,13 @@
                 i18n.setPreference(select.value);
                 await i18n.activate(select.value === 'auto' ? i18n.resolve() : select.value);
                 // Re-render so the tour itself switches language immediately —
-                // the most direct proof to the user that the setting took.
+                // the most direct proof to the user that the setting took. The
+                // re-render replaces this <select>, so focus would fall to
+                // <body> and a forward Tab could escape the dialog; move it onto
+                // the replacement.
                 this._render();
+                const fresh = this.el && this.el.querySelector('#tour-language-select');
+                if (fresh) fresh.focus();
             });
 
             wrap.appendChild(select);
@@ -412,10 +437,9 @@
             this.markSeen();
             if (this._pendingStart) { clearTimeout(this._pendingStart); this._pendingStart = null; }
             this._teardownChrome();
-            if (this._consentObserver) {
-                this._consentObserver.disconnect();
-                this._consentObserver = null;
-            }
+            // The blocking-modal observer is deliberately NOT disconnected here:
+            // it is a singleton that must keep gating future replays. finish()
+            // only tears down this run's overlay and listeners.
             // Hand focus back where it was, or somewhere sensible.
             const back = this._returnFocusTo;
             this._returnFocusTo = null;
@@ -463,12 +487,14 @@
             this._consentObserver = new MutationObserver(() => {
                 const blocked = blockingModalVisible();
                 if (this.el) {
-                    // Step aside while a dialog is up; never both on screen.
-                    this.el.style.display = blocked ? 'none' : '';
-                    this.el.setAttribute('aria-hidden', blocked ? 'true' : 'false');
                     if (blocked) {
-                        // Focus must not linger in a display:none subtree. Hand
-                        // it to the dialog that is now on top.
+                        if (this._resurfaceTimer) {
+                            clearTimeout(this._resurfaceTimer); this._resurfaceTimer = null;
+                        }
+                        this.el.style.display = 'none';
+                        this.el.setAttribute('aria-hidden', 'true');
+                        // Focus must not linger in a display:none subtree. Hand it
+                        // to the dialog now on top.
                         if (this.el.contains(document.activeElement)) {
                             const top = BLOCKING_MODALS
                                 .map((id) => document.getElementById(id))
@@ -481,9 +507,21 @@
                             }
                         }
                     } else {
-                        this._position();
-                        const next = this.el.querySelector('#tour-next');
-                        if (next) next.focus();
+                        // Debounce the resurface: a privacy-to-runtime handoff
+                        // hides one dialog a beat before the next appears, and
+                        // flashing the tour (and moving focus into it) in that gap
+                        // is jarring. Re-check after the gap; if a new blocker
+                        // arrived, stay hidden.
+                        if (this._resurfaceTimer) clearTimeout(this._resurfaceTimer);
+                        this._resurfaceTimer = setTimeout(() => {
+                            this._resurfaceTimer = null;
+                            if (!this.el || blockingModalVisible()) return;
+                            this.el.style.display = '';
+                            this.el.setAttribute('aria-hidden', 'false');
+                            this._position();
+                            const next = this.el.querySelector('#tour-next');
+                            if (next) next.focus();
+                        }, 150);
                     }
                 } else if (!blocked && !this.hasSeen()) {
                     if (this._pendingStart) return;   // already scheduled

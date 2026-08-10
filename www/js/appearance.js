@@ -446,7 +446,17 @@
                 let anims;
                 try { anims = el.getAnimations({ subtree: false }); } catch { anims = []; }
                 for (const anim of anims) {
+                    // Transitions are transient and usually the app's own (a modal
+                    // fading in passes through opacity 0). A transition TO a hidden
+                    // state is caught by the delayed re-check instead. Only
+                    // persistent keyframe animations are a standing lockout.
+                    if (anim.constructor && anim.constructor.name === 'CSSTransition') continue;
                     const eff = anim.effect;
+                    let timing = {};
+                    try { timing = eff && eff.getComputedTiming ? eff.getComputedTiming() : {}; } catch { timing = {}; }
+                    const persists = timing.iterations === Infinity
+                        || timing.fill === 'forwards' || timing.fill === 'both';
+                    if (!persists) continue;
                     let frames = [];
                     try { frames = eff && eff.getKeyframes ? eff.getKeyframes() : []; } catch { frames = []; }
                     if (frames.some((f) => this._frameHides(f))) return true;
@@ -551,6 +561,38 @@
     appearance.AUTO_TOP_MARGIN = AUTO_TOP_MARGIN;
 
     window.appearance = appearance;
+
+    /**
+     * Hidden modals keep focusable descendants — a Tab or a restored-focus
+     * target can land inside a menu the user can no longer see. `inert` removes
+     * the whole subtree from focus and the accessibility tree without touching
+     * visibility (the menu buttons carry `transition: all`, so a visibility
+     * change would animate and misbehave). Toggled from the `hidden` class on
+     * every .modal, so no individual show/hide call site has to remember.
+     */
+    function syncModalInert(m) {
+        const hidden = m.classList.contains('hidden');
+        m.inert = hidden;
+        if (hidden) m.setAttribute('aria-hidden', 'true');
+        else m.removeAttribute('aria-hidden');
+    }
+    function installModalInert() {
+        const modals = document.querySelectorAll('.modal');
+        const mo = new MutationObserver((muts) => {
+            for (const mu of muts) {
+                if (mu.attributeName === 'class') syncModalInert(mu.target);
+            }
+        });
+        modals.forEach((m) => {
+            syncModalInert(m);
+            mo.observe(m, { attributes: true, attributeFilter: ['class'] });
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', installModalInert, { once: true });
+    } else {
+        installModalInert();
+    }
 
     // Apply before first paint where possible, so the app does not flash the
     // default theme and then jump to the chosen one.

@@ -24,8 +24,12 @@
             if (openBtn) {
                 openBtn.addEventListener('click', () => {
                     const menu = $('menu-modal');
+                    // Capture where focus should go back to BEFORE hiding the
+                    // menu: the menu button is what stays visible, and the
+                    // Appearance entry that was clicked is about to become inert.
+                    const opener = document.getElementById('menu-btn') || openBtn;
                     if (menu) menu.classList.add('hidden');
-                    this.open();
+                    this.open(opener);
                 });
             }
 
@@ -62,10 +66,17 @@
             });
         }
 
-        open() {
+        open(opener) {
             this.refresh();
-            this._returnFocusTo = document.activeElement;
+            this._returnFocusTo = opener
+                || (document.activeElement && !document.activeElement.closest('.modal.hidden')
+                    ? document.activeElement : document.getElementById('menu-btn'));
             this.modal.classList.remove('hidden');
+            // Clear inert synchronously: the global observer that toggles it runs
+            // on a microtask, after the focus() below would have failed against a
+            // still-inert subtree.
+            this.modal.inert = false;
+            this.modal.removeAttribute('aria-hidden');
             // Move focus into the dialog so keyboard and screen-reader users are
             // actually in it, not still on the menu behind the backdrop.
             const first = this.modal.querySelector(
@@ -79,8 +90,13 @@
             // visible; otherwise to the menu button.
             const back = this._returnFocusTo;
             this._returnFocusTo = null;
-            const visible = (el) => el && document.contains(el)
-                && el.getBoundingClientRect().width > 0;
+            const visible = (el) => {
+                if (!el || !document.contains(el)) return false;
+                const cs = getComputedStyle(el);
+                if (cs.visibility === 'hidden' || cs.display === 'none') return false;
+                if (el.closest && el.closest('.modal.hidden')) return false;
+                return el.getBoundingClientRect().width > 0;
+            };
             if (visible(back) && back.focus) back.focus();
             else {
                 const menu = document.getElementById('menu-btn');

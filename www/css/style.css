@@ -533,6 +533,10 @@ html, body {
 .modal.hidden {
     opacity: 0;
     pointer-events: none;
+    /* Focus-order removal is handled with the `inert` attribute (see
+       appearance.js installModalInert), not visibility:hidden — the menu
+       buttons carry `transition: all`, which would animate a visibility change
+       and leave a just-opened modal unfocusable for the transition's duration. */
 }
 
 .modal-content {
