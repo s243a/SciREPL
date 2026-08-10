@@ -1,7 +1,7 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v137';
+const CACHE_VERSION = 'v140';
 
 // Marker entry recording whether an app cache finished installing. Stored in
 // the cache itself so the answer travels with it and survives a restart.
@@ -267,20 +267,45 @@ async function cacheIsComplete(name) {
 // clientId -> the cache that document was pinned to at navigation. Keeps a
 // single document coherent for its whole session even if a newer version is
 // promoted underneath it; a reload (new navigation) re-pins to the newest.
-const _clientCache = new Map();
+// Client pins live in a durable cache, not process memory: service workers are
+// terminated while idle, and an in-memory Map lost the pin on restart — an open
+// v1 document then received v2 assets. clientId is stable for a document's life,
+// so the durable record survives worker restarts and keeps the session coherent.
+const PIN_CACHE = 'scirepl-pins-v1';
+const PIN_PREFIX = './__pin/';
+
+async function setPin(clientId, name) {
+  if (!clientId) return;
+  const cache = await caches.open(PIN_CACHE);
+  await cache.put(PIN_PREFIX + clientId, new Response(name, {
+    headers: { 'content-type': 'text/plain' },
+  }));
+}
+async function getPin(clientId) {
+  if (!clientId) return null;
+  const cache = await caches.open(PIN_CACHE);
+  const res = await cache.match(PIN_PREFIX + clientId);
+  return res ? res.text() : null;
+}
 
 async function cacheNameForClient(event) {
-  const newest = await servingCacheName();
-  // A navigation establishes (or refreshes) the pin for the resulting document.
+  // A navigation (re)pins the resulting document to the newest complete cache —
+  // this is the only point promotion takes effect, so a live document never
+  // switches versions mid-session.
   if (event.request.mode === 'navigate') {
-    const id = event.resultingClientId || event.clientId;
-    if (id) _clientCache.set(id, newest);
+    const newest = await servingCacheName();
+    const navId = event.resultingClientId || event.clientId;
+    await setPin(navId, newest);
+    // A navigation may have freed the PREVIOUS document's pin; prune in the
+    // background so a superseded cache does not linger until the next activate.
+    // Protect this navigation's own client — it is not yet in clients.matchAll().
+    event.waitUntil(pruneAppCaches({ keepClientId: navId }));
     return newest;
   }
-  // A subresource inherits its document's pin, if we know it.
-  const id = event.clientId;
-  if (id && _clientCache.has(id)) return _clientCache.get(id);
-  return newest;
+  // A subresource is served from its document's pinned cache, read durably.
+  const pinned = await getPin(event.clientId);
+  if (pinned && (await caches.has(pinned))) return pinned;
+  return await servingCacheName();
 }
 
 async function servingCacheName() {
@@ -294,6 +319,40 @@ async function servingCacheName() {
   return serving || APP_CACHE;
 }
 
+/**
+ * Delete superseded app caches, but keep: the serving cache (newest complete),
+ * this worker's own cache (a repair may complete it), and any cache a still-open
+ * client is pinned to. Stale pin records (for gone documents) are dropped, which
+ * is what eventually frees an old cache for deletion. Runs at activate and,
+ * opportunistically, when a navigation re-pins a client — reloads do not re-run
+ * activate, so without the second trigger an unpinned old cache would linger.
+ */
+async function pruneAppCaches({ cdn, keepClientId } = {}) {
+  const serving = await servingCacheName();
+  const liveIds = new Set((await self.clients.matchAll().catch(() => [])).map((c) => c.id));
+  if (keepClientId) liveIds.add(keepClientId);
+  const pinned = new Set();
+  try {
+    const pinCache = await caches.open(PIN_CACHE);
+    for (const req of await pinCache.keys()) {
+      const id = new URL(req.url).pathname.split('/').pop();
+      if (!liveIds.has(id)) { await pinCache.delete(req); continue; }
+      const res = await pinCache.match(req);
+      if (res) pinned.add((await res.text()).trim());
+    }
+  } catch { /* pin cache unavailable; default retention still holds */ }
+
+  for (const key of await caches.keys()) {
+    if (cdn && key.startsWith('scirepl-cdn-') && key !== CDN_CACHE) {
+      await caches.delete(key);
+      continue;
+    }
+    if (!key.startsWith('scirepl-app-')) continue;
+    if (key === serving || key === APP_CACHE || pinned.has(key)) continue;
+    await caches.delete(key);
+  }
+}
+
 // Activate: retain the serving version and the current one; prune the rest.
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
@@ -305,28 +364,7 @@ self.addEventListener('activate', (event) => {
       try { await repairShell(APP_CACHE); } catch { /* stay subordinate */ }
     }
 
-    const serving = await servingCacheName();   // recomputed AFTER any repair
-    const keys = await caches.keys();
-
-    await Promise.all(keys.map(async (key) => {
-      // Stale CDN runtimes are re-fetchable and not the offline lifeline.
-      if (key.startsWith('scirepl-cdn-')) {
-        if (key !== CDN_CACHE) await caches.delete(key);
-        return;
-      }
-      if (!key.startsWith('scirepl-app-')) return;
-      // Keep exactly two things: what we serve (newest complete) and this
-      // version's own cache, which a later repair may yet complete. Everything
-      // else — superseded complete caches and dead partials — goes.
-      if (key === serving || key === APP_CACHE) return;
-      await caches.delete(key);
-    }));
-
-    // Drop pins for documents that no longer exist.
-    try {
-      const live = new Set((await self.clients.matchAll()).map((c) => c.id));
-      for (const id of _clientCache.keys()) if (!live.has(id)) _clientCache.delete(id);
-    } catch { /* clients API unavailable; the map is bounded by SW lifetime */ }
+    await pruneAppCaches({ cdn: true });
 
     await self.clients.claim();
   })());

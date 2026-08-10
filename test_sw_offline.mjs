@@ -210,9 +210,8 @@ try {
             catch { await page.waitForTimeout(1000); }
         }
         if (!after) after = { names: [], marker: null, koServed: false };
-        await context.close();
         rmSync('www/sw-next.js', { force: true });
-        return { before, ...after };
+        return { before, ...after, page, _close: () => context.close() };
     }
 
     const partialUpgrade = await upgradeInPlace({ breakUrl: '**/i18n/ko.json' });
@@ -223,12 +222,24 @@ try {
         partialUpgrade.koServed === true);
     check('the incomplete install is recorded, not assumed good',
         partialUpgrade.marker === 'partial', String(partialUpgrade.marker));
+    await partialUpgrade._close();
 
     const cleanUpgrade = await upgradeInPlace();
-    check('a complete upgrade evicts the previous cache',
-        cleanUpgrade.names.length === 1, cleanUpgrade.names.join(', '));
     check('a complete install is marked complete',
         cleanUpgrade.marker === 'complete', String(cleanUpgrade.marker));
+    // Pruning respects a still-open client: the previous cache is retained while
+    // this document is pinned to it. Further navigations re-pin to the new
+    // version, and the next activate then prunes the old one.
+    let evicted = [];
+    for (let i = 0; i < 3; i++) {
+        await cleanUpgrade.page.reload({ waitUntil: 'load', timeout: TIMEOUT }).catch(() => {});
+        await cleanUpgrade.page.waitForTimeout(2500);
+    }
+    evicted = await cleanUpgrade.page.evaluate(async () =>
+        (await caches.keys()).filter((k) => k.startsWith('scirepl-app-')));
+    check('once no client is pinned to it, the previous cache is evicted',
+        evicted.length === 1, evicted.join(', '));
+    await cleanUpgrade._close();
 
     console.log('\n4. Version coherence across consecutive partial upgrades');
 
@@ -300,9 +311,13 @@ try {
             await install('t-v4');
             check('v4 (complete) finally takes over',
                 (await servedOffline()) === 't-v4');
+            for (let i = 0; i < 3; i++) {
+                await pg.reload({ waitUntil: 'load', timeout: TIMEOUT }).catch(() => {});
+                await pg.waitForTimeout(2500);
+            }
             const remaining = await pg.evaluate(async () =>
                 (await caches.keys()).filter((k) => k.startsWith('scirepl-app-')));
-            check('stale caches are pruned once a complete version wins',
+            check('stale caches are pruned once no client is pinned to them',
                 remaining.length === 1 && remaining[0].endsWith('t-v4'), remaining.join(', '));
         } finally {
             for (const v of ['t-v1', 't-v2', 't-v3', 't-v4']) {
@@ -444,6 +459,75 @@ try {
                     new URL('i18n/ko.json', location.href).href))));
         } finally {
             for (const v of ['c1', 'c2']) rmSync(`www/sw-${v}.js`, { force: true });
+            await ctx.close();
+        }
+    }
+
+    console.log('\n7. The session pin survives a service-worker restart');
+
+    // Service workers are terminated while idle; an in-memory pin was lost on
+    // restart and an open v1 document then received v2 assets. The pin is now
+    // durable, so it survives a real worker restart (driven via CDP).
+    {
+        const ctx = await browser.newContext();
+        await ctx.addInitScript(() => {
+            localStorage.setItem('scirepl_privacy_accepted', '1');
+            localStorage.setItem('scirepl_onboarding_seen', '1');
+            const sw = navigator.serviceWorker, real = sw.register.bind(sw);
+            sw.register = (u, o) => {
+                const t = localStorage.getItem('__swTarget');
+                return t ? real(t, o) : Promise.resolve({ unregister() {}, addEventListener() {} });
+            };
+        });
+        let ver = null, broken = null;
+        await ctx.route('**/i18n/manifest.json', async (route) => {
+            const j = JSON.parse(await (await route.fetch()).text());
+            j._testVersion = ver;
+            await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(j) });
+        });
+        await ctx.route('**/*', (route) =>
+            (broken && route.request().url().includes(broken))
+                ? route.fulfill({ status: 404, body: 'x' }) : route.fallback());
+        const pg = await ctx.newPage();
+        let cdp = null;
+        try { cdp = await ctx.newCDPSession(pg); await cdp.send('ServiceWorker.enable'); }
+        catch { cdp = null; }   // CDP is Chromium-only; skip gracefully elsewhere
+        await pg.goto(`${ORIGIN}/index.html`, { waitUntil: 'load', timeout: TIMEOUT });
+
+        const install = async (v, breakName) => {
+            ver = v; broken = breakName || null;
+            writeFileSync(`www/sw-${v}.js`, readFileSync('www/sw.js', 'utf8').replace(
+                /const CACHE_VERSION = '[^']+'/, `const CACHE_VERSION = '${v}'`));
+            await pg.evaluate((vv) => localStorage.setItem('__swTarget', `./sw-${vv}.js`), v);
+            await pg.reload({ waitUntil: 'load', timeout: TIMEOUT }).catch(() => {});
+            await pg.waitForTimeout(5000);
+            await pg.waitForLoadState('load').catch(() => {});
+        };
+        const servedSub = () => pg.evaluate(async () => {
+            try { return (await (await fetch('./i18n/manifest.json', { cache: 'no-store' })).json())._testVersion; }
+            catch { return 'FETCH-FAILED'; }
+        });
+
+        try {
+            await install('p1');
+            await install('p2', 'ko.json');   // partial, doc re-pins to p1
+            broken = null;
+            for (let i = 0; i < 5; i++) {      // repair -> promote p2 under the open doc
+                await pg.evaluate(() => fetch('./index.html?x=' + Math.random(), { cache: 'no-store' }).catch(() => {}));
+                await pg.waitForTimeout(2500);
+            }
+            check('the open document stays on its version after a mid-session promotion',
+                (await servedSub()) === 'p1');
+            if (cdp) {
+                await cdp.send('ServiceWorker.stopAllWorkers').catch(() => {});
+                await pg.waitForTimeout(1500);
+                check('the pin survives a service-worker restart (still p1)',
+                    (await servedSub()) === 'p1');
+            } else {
+                console.log('  [SKIP] CDP unavailable — cannot force a worker restart here');
+            }
+        } finally {
+            for (const v of ['p1', 'p2']) rmSync(`www/sw-${v}.js`, { force: true });
             await ctx.close();
         }
     }
