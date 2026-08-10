@@ -35,6 +35,16 @@
                 if (e.target === this.modal) this.close();
             });
 
+            // Keyboard: Escape closes, Tab is trapped inside the dialog. Without
+            // this a keyboard user tabs straight out of the modal onto the app
+            // behind it, which the backdrop is meant to be blocking.
+            this._onKey = (e) => {
+                if (this.modal.classList.contains('hidden')) return;
+                if (e.key === 'Escape') { e.preventDefault(); this.close(); }
+                else if (e.key === 'Tab') this._trapFocus(e);
+            };
+            this.modal.addEventListener('keydown', this._onKey);
+
             this._wireLayout();
             this._wireButtons();
             this._wireTheme();
@@ -54,11 +64,44 @@
 
         open() {
             this.refresh();
+            this._returnFocusTo = document.activeElement;
             this.modal.classList.remove('hidden');
+            // Move focus into the dialog so keyboard and screen-reader users are
+            // actually in it, not still on the menu behind the backdrop.
+            const first = this.modal.querySelector(
+                '.modal-close, button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (first) first.focus();
         }
 
         close() {
             this.modal.classList.add('hidden');
+            // Hand focus back to whatever opened the dialog, if it is still
+            // visible; otherwise to the menu button.
+            const back = this._returnFocusTo;
+            this._returnFocusTo = null;
+            const visible = (el) => el && document.contains(el)
+                && el.getBoundingClientRect().width > 0;
+            if (visible(back) && back.focus) back.focus();
+            else {
+                const menu = document.getElementById('menu-btn');
+                if (menu) menu.focus();
+            }
+        }
+
+        /** Keep Tab inside the dialog, cycling at both ends. */
+        _trapFocus(e) {
+            const focusable = [...this.modal.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+                .filter((n) => !n.disabled && n.offsetParent !== null);
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            const active = document.activeElement;
+            if (e.shiftKey && (active === first || !this.modal.contains(active))) {
+                e.preventDefault(); last.focus();
+            } else if (!e.shiftKey && active === last) {
+                e.preventDefault(); first.focus();
+            }
         }
 
         /* ----------------------------- layout ---------------------------- */
@@ -169,13 +212,44 @@
             });
 
             $('appearance-css-apply').addEventListener('click', () => {
-                window.appearance.setCustomCss($('appearance-custom-css-input').value);
+                const value = $('appearance-custom-css-input').value;
+                window.appearance.setCustomCss(value);
+                // If the app rolled it back, it now lives in quarantine and the
+                // box should show it (so the user can fix the offending line);
+                // if it applied cleanly, any earlier quarantine is stale.
+                const quarantined = window.appearance.getQuarantinedCss();
+                if (quarantined && quarantined === value) {
+                    this._showCssError();
+                } else {
+                    window.appearance.clearQuarantinedCss();
+                    this._clearCssError();
+                }
             });
         }
 
         _refreshTheme() {
             $('appearance-theme').value = window.appearance.getTheme();
-            $('appearance-custom-css-input').value = window.appearance.getCustomCss();
+            // The rolled-back CSS, if any, is what the user needs to see and fix.
+            const quarantined = window.appearance.getQuarantinedCss();
+            $('appearance-custom-css-input').value =
+                quarantined || window.appearance.getCustomCss();
+            if (quarantined) this._showCssError(); else this._clearCssError();
+        }
+
+        _showCssError() {
+            const el = $('appearance-css-error');
+            if (!el) return;
+            el.textContent = (window.t && window.t('appearance.cssRolledBack'))
+                || 'This CSS was turned off because it hid the menu. Edit it and apply again.';
+            el.hidden = false;
+            // Open the Advanced section so the message is not buried.
+            const details = el.closest('details');
+            if (details) details.open = true;
+        }
+
+        _clearCssError() {
+            const el = $('appearance-css-error');
+            if (el) { el.textContent = ''; el.hidden = true; }
         }
 
         /* ---------------------------- language --------------------------- */

@@ -558,6 +558,88 @@ try {
         /<code>%pip install<\/code>/.test(kept) && /<strong>now<\/strong>/.test(kept)
         && /href="https:\/\/example\.com"/.test(kept), kept.slice(0, 100));
 
+    /* --------- deeper lockouts, editor recovery, modal a11y ------------- */
+    console.log('\n4f. Deeper CSS lockouts, editor recovery, dialog a11y');
+
+    // The escape route is menu button -> menu -> Appearance button. Hiding any
+    // link in it, or covering the menu button, is a lockout even when the button
+    // itself still has a box.
+    for (const [name, css] of [
+        ['hides the menu modal', '#menu-modal { display: none !important; }'],
+        ['hides the Appearance entry', '#btn-appearance { display: none !important; }'],
+        ['covers the button with a pseudo-overlay',
+            'body::after { content:""; position:fixed; inset:0; z-index:99999; background:#000; }'],
+    ]) {
+        const rolledBack = await page.evaluate((c) => {
+            window.appearance.clearQuarantinedCss();
+            window.appearance.setCustomCss(c);
+            return !document.getElementById('appearance-custom-css');
+        }, css);
+        check(`CSS that ${name} is rolled back`, rolledBack === true);
+    }
+
+    // A stored lockout must be caught at startup, not only at apply time — that
+    // is what makes recovery work on Android without ?safe.
+    const startupRecovery = await page.evaluate(() => {
+        localStorage.setItem('scirepl_appearance_custom_css', '#menu-btn{display:none!important}');
+        window.appearance.clearQuarantinedCss();
+        window.appearance.apply();     // re-runs the guard, as a fresh load would
+        return {
+            applied: !!document.getElementById('appearance-custom-css'),
+            quarantined: window.appearance.getQuarantinedCss().includes('display'),
+            customCleared: window.appearance.getCustomCss() === '',
+        };
+    });
+    check('a stored lockout is neutralised on load', startupRecovery.applied === false);
+    check('the offending CSS is kept for the user to fix', startupRecovery.quarantined === true);
+    check('and is not re-applied next launch', startupRecovery.customCleared === true);
+
+    // The editor shows the quarantined CSS rather than an empty box.
+    await page.evaluate(() => { document.getElementById('menu-btn').click(); });
+    await page.waitForTimeout(150);
+    await page.evaluate(() => document.getElementById('btn-appearance').click());
+    await page.waitForTimeout(200);
+    check('the Appearance dialog has dialog semantics',
+        await page.evaluate(() => {
+            const c = document.querySelector('#appearance-modal .modal-content');
+            return c.getAttribute('role') === 'dialog' && c.getAttribute('aria-modal') === 'true'
+                && !!c.getAttribute('aria-labelledby');
+        }));
+    check('opening the dialog moves focus into it',
+        await page.evaluate(() => document.getElementById('appearance-modal')
+            .contains(document.activeElement)));
+    check('the rolled-back CSS is loaded into the editor, not lost',
+        await page.evaluate(() => document.getElementById('appearance-custom-css-input')
+            .value.includes('display')));
+    check('the editor explains the rollback',
+        await page.evaluate(() => !document.getElementById('appearance-css-error').hidden));
+
+    // Tab stays trapped; Escape closes and restores focus.
+    for (let i = 0; i < 20; i++) await page.keyboard.press('Tab');
+    check('Tab is trapped inside the Appearance dialog',
+        await page.evaluate(() => document.getElementById('appearance-modal')
+            .contains(document.activeElement)));
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+    check('Escape closes the Appearance dialog',
+        await page.evaluate(() => document.getElementById('appearance-modal')
+            .classList.contains('hidden')));
+    check('focus is restored to the page, not left on body',
+        await page.evaluate(() => document.activeElement && document.activeElement !== document.body));
+
+    // A clean edit clears the rollback state.
+    const cleared = await page.evaluate(() => {
+        document.getElementById('appearance-custom-css-input').value = '#app-header{letter-spacing:.2px}';
+        document.getElementById('appearance-css-apply').click();
+        return {
+            applied: !!document.getElementById('appearance-custom-css'),
+            quarantineGone: window.appearance.getQuarantinedCss() === '',
+        };
+    });
+    check('a subsequent clean edit applies', cleared.applied === true);
+    check('and clears the quarantine', cleared.quarantineGone === true);
+    await page.evaluate(() => window.appearance.setCustomCss(''));
+
     /* ----------------- legal text follows its own review ---------------- */
     console.log('\n4d. Privacy status controls the legal text');
 

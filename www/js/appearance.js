@@ -304,22 +304,74 @@
         }
 
         /**
-         * Can the user still reach the menu? Deliberately narrow: this asks
-         * whether the way back to Appearance survives, not whether the CSS is
-         * good taste.
+         * Is the whole way back to this dialog still usable?
+         *
+         * The route is menu button → menu → Appearance button → dialog. Checking
+         * only the menu button missed CSS that hides the menu itself or the
+         * Appearance entry, or drops a full-screen overlay over the button while
+         * leaving the button's own box intact. So this walks the path: the menu
+         * button must be visible AND not covered, and the menu is briefly opened
+         * (invisibly, and restored in the same synchronous frame so nothing
+         * paints) to confirm the Appearance entry still renders.
          */
         _escapeHatchIntact() {
             const btn = document.getElementById('menu-btn');
             if (!btn) return true;              // nothing rendered yet; not our call
-            const r = btn.getBoundingClientRect();
-            if (r.width < 8 || r.height < 8) return false;
-            const cs = getComputedStyle(btn);
-            if (cs.display === 'none' || cs.visibility === 'hidden') return false;
-            if (parseFloat(cs.opacity) < 0.1) return false;
-            if (cs.pointerEvents === 'none') return false;
-            // Off-screen counts as gone.
+            if (!this._nodeReachable(btn)) return false;
+
+            const menu = document.getElementById('menu-modal');
+            const appBtn = document.getElementById('btn-appearance');
+            if (menu && appBtn) {
+                const wasHidden = menu.classList.contains('hidden');
+                const savedStyle = menu.style.cssText;
+                // Opacity 0 (not visibility/display) keeps children laid out and
+                // hit-testable for the coverage check; no frame paints before the
+                // restore below, so it is invisible to the user.
+                menu.classList.remove('hidden');
+                menu.style.opacity = '0';
+                // The Appearance entry just has to render — display, visibility
+                // and size. Coverage is not meaningful here: the open menu is the
+                // top layer, and forcing pointer-events to test it would break
+                // the very hit-test it needs.
+                const reachable = this._hasVisibleBox(appBtn);
+                menu.style.cssText = savedStyle;
+                if (wasHidden) menu.classList.add('hidden');
+                if (!reachable) return false;
+            }
+            return true;
+        }
+
+        /** Rendered, on-screen, interactive, and nothing painted over it. */
+        _nodeReachable(el) {
+            if (!this._hasVisibleBox(el)) return false;
+            const cs = getComputedStyle(el);
+            if (parseFloat(cs.opacity) < 0.1 || cs.pointerEvents === 'none') return false;
+            const r = el.getBoundingClientRect();
             if (r.bottom < 0 || r.right < 0
                 || r.top > window.innerHeight || r.left > window.innerWidth) return false;
+            return !this._coveredByForeign(el, el);
+        }
+
+        _hasVisibleBox(el) {
+            const cs = getComputedStyle(el);
+            if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+            const r = el.getBoundingClientRect();
+            return r.width >= 8 && r.height >= 8;
+        }
+
+        /** Is the element's centre covered by something outside `within`? */
+        _coveredByForeign(el, within) {
+            const r = el.getBoundingClientRect();
+            const cx = Math.round(r.left + r.width / 2);
+            const cy = Math.round(r.top + r.height / 2);
+            if (cx < 0 || cy < 0 || cx > window.innerWidth || cy > window.innerHeight) return false;
+            const top = document.elementFromPoint(cx, cy);
+            if (!top) return false;
+            if (top === el || el.contains(top)) return false;   // el itself or its child on top
+            if (within && within.contains(top)) return false;   // within the allowed subtree
+            // Anything else on top — a sibling overlay, or an ancestor whose
+            // pseudo-element covers the point (elementFromPoint returns the host)
+            // — means el is painted over.
             return true;
         }
 

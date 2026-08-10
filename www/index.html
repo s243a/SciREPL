@@ -732,9 +732,9 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
 
     <!-- Appearance Modal -->
     <div id="appearance-modal" class="modal hidden">
-        <div class="modal-content">
-            <button class="modal-close">&times;</button>
-            <h2 data-i18n="appearance.title">Appearance</h2>
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="appearance-title">
+            <button class="modal-close" aria-label="Close">&times;</button>
+            <h2 id="appearance-title" data-i18n="appearance.title">Appearance</h2>
 
             <div class="settings-section" data-i18n="appearance.layout">Layout</div>
             <p class="appearance-note" data-i18n="appearance.topMarginHelp">
@@ -799,6 +799,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                         Raw CSS, applied last. This can make the app unusable — use
                         Reset to defaults to recover.
                     </p>
+                    <p id="appearance-css-error" class="appearance-warn" role="alert" hidden></p>
                     <textarea id="appearance-custom-css-input" spellcheck="false" aria-label="Custom CSS"></textarea>
                     <div class="appearance-row">
                         <button id="appearance-css-apply" class="vfs-btn" data-i18n="common.apply">Apply</button>

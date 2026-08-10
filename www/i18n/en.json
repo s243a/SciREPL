@@ -119,7 +119,8 @@
     "menu.showTour": "Replays the first-run introduction. 'Tour' as in a guided walkthrough of the interface.",
     "appearance.showDrafts": "A translation that exists but has not been checked by a native speaker. 'Under review' as in awaiting proofreading.",
     "appearance.languageDraft": "Shown in the language dropdown next to an unreviewed translation.",
-    "appearance.cssQuarantined": "Shown when custom CSS made the menu unreachable and was rolled back. Reassuring, not accusatory — the CSS is kept, not deleted."
+    "appearance.cssQuarantined": "Shown when custom CSS made the menu unreachable and was rolled back. Reassuring, not accusatory — the CSS is kept, not deleted.",
+    "appearance.cssRolledBack": "Shown in the Advanced CSS editor when the entered CSS was rolled back for making the menu unreachable."
   },
   "__literal": [
     "loading.sciRepl",
@@ -479,6 +480,7 @@
     "appearance.showDrafts": "Include translations under review",
     "appearance.showDraftsHelp": "Most translations have not yet been checked by a speaker of the language. They are offered anyway, and labelled, because an interface you can read beats one you cannot. Turn this off to see only reviewed translations.",
     "appearance.languageDraft": "{language} — under review ({percent}%)",
-    "appearance.cssQuarantined": "Your custom CSS hid the menu button, so it has been turned off. It is kept in Appearance → Advanced so you can edit it."
+    "appearance.cssQuarantined": "Your custom CSS hid the menu button, so it has been turned off. It is kept in Appearance → Advanced so you can edit it.",
+    "appearance.cssRolledBack": "This CSS was turned off because it hid the menu. Edit it and apply again."
   }
 }
