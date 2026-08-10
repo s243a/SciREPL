@@ -299,7 +299,7 @@
             if (this._loadingOverlayActive()) {
                 this._deferEscapeCheck();
             } else {
-                this._runEscapeCheck(css, el);
+                this._runEscapeCheck(css, el, true);
             }
         }
 
@@ -308,11 +308,14 @@
          * separate from application so it can run later, once the app is in its
          * normal interactive state rather than mid-load.
          */
-        _runEscapeCheck(css, el) {
+        _runEscapeCheck(css, el, followUp) {
             el = el || document.getElementById('appearance-custom-css');
             if (!el) return;
             if (this._escapeHatchIntact()) {
-                this._scheduleDelayedRecheck();
+                // Schedule the two delayed re-checks ONCE, from the initial call
+                // only. A delayed re-check that re-scheduled would loop forever
+                // (~900ms hit-test churn) for perfectly good CSS.
+                if (followUp) this._scheduleDelayedRecheck();
                 return;
             }
             el.remove();
@@ -334,13 +337,14 @@
         _deferEscapeCheck() {
             if (this._escapeCheckObserver) return;
             const finish = () => {
-                if (this._loadingOverlayActive()) return;
+                if (this._loadingOverlayActive() || this._escapeCheckDone) return;
+                this._escapeCheckDone = true;
                 this._escapeCheckObserver.disconnect();
                 this._escapeCheckObserver = null;
                 clearInterval(this._escapeCheckPoll);
                 const css = this.getCustomCss();
                 const el = document.getElementById('appearance-custom-css');
-                if (css.trim() && el) this._runEscapeCheck(css, el);
+                if (css.trim() && el) this._runEscapeCheck(css, el, true);
             };
             this._escapeCheckObserver = new MutationObserver(finish);
             const o = document.getElementById('loading-overlay');
@@ -364,70 +368,107 @@
          * paints) to confirm the Appearance entry still renders.
          */
         _escapeHatchIntact() {
-            const btn = document.getElementById('menu-btn');
-            if (!btn) return true;              // nothing rendered yet; not our call
-            if (!this._nodeReachable(btn)) return false;
-
-            // A rule that is fine this frame but animates the button away later
-            // (a delayed @keyframes, a transition) would pass a one-frame check
-            // and then lock the user out. Inspect the recovery path's own
-            // animations and fail closed if any keyframe hides it.
+            // A rule fine this frame but animating the path away later would pass
+            // a one-frame check and then lock the user out.
             if (this._pathHasHidingAnimation()) return false;
 
+            const btn = document.getElementById('menu-btn');
+            if (!btn) return true;              // nothing rendered yet; not our call
+            // The menu button must be usable AND not painted over by a NON-app
+            // element. The app's own chrome — an open Appearance dialog, the menu
+            // itself, the loading overlay — is dismissible and does not count; a
+            // user's full-screen overlay does. Without this, applying CSS through
+            // the visibly-open dialog quarantined it, because the dialog covers
+            // the header.
+            if (!this._elementUsable(btn, { coverage: true })) return false;
+
+            // The deeper path: the menu must open and show a usable Appearance
+            // entry, and the Appearance dialog must be showable. Each is probed
+            // independently (not stacked), with transitions disabled so the
+            // opacity read is the settled target rather than a mid-fade 0 — while
+            // still catching a user's own opacity:0, which has no transition to 1.
             const menu = document.getElementById('menu-modal');
             const appBtn = document.getElementById('btn-appearance');
+            const dialog = document.getElementById('appearance-modal');
+
             if (menu && appBtn) {
-                const wasHidden = menu.classList.contains('hidden');
-                const savedStyle = menu.style.cssText;
-                // Opacity 0 (not visibility/display) keeps children laid out and
-                // hit-testable for the coverage check; no frame paints before the
-                // restore below, so it is invisible to the user.
-                menu.classList.remove('hidden');
-                menu.style.opacity = '0';
-                // The Appearance entry just has to render — display, visibility
-                // and size. Coverage is not meaningful here: the open menu is the
-                // top layer, and forcing pointer-events to test it would break
-                // the very hit-test it needs.
-                const reachable = this._hasVisibleBox(appBtn);
-                menu.style.cssText = savedStyle;
-                if (wasHidden) menu.classList.add('hidden');
-                if (!reachable) return false;
+                const ok = this._withProbeOpen(menu, () =>
+                    this._elementUsable(menu, {}) && this._elementUsable(appBtn, { coverage: true }));
+                if (!ok) return false;
+            }
+            if (dialog) {
+                const ok = this._withProbeOpen(dialog, () => this._elementUsable(dialog, {}));
+                if (!ok) return false;
             }
             return true;
         }
 
-        /** Rendered, on-screen, interactive, and nothing painted over it. */
-        _nodeReachable(el) {
-            if (!this._hasVisibleBox(el)) return false;
-            const cs = getComputedStyle(el);
-            if (parseFloat(cs.opacity) < 0.1 || cs.pointerEvents === 'none') return false;
-            const r = el.getBoundingClientRect();
-            if (r.bottom < 0 || r.right < 0
-                || r.top > window.innerHeight || r.left > window.innerWidth) return false;
-            return !this._coveredByForeign(el, el);
+        /**
+         * Reveal a modal for measurement and restore it in the same synchronous
+         * frame (no paint). Transitions are disabled so a just-un-hidden modal
+         * reports its settled opacity, not the transition's momentary 0.
+         */
+        _withProbeOpen(modal, measure) {
+            const wasHidden = modal.classList.contains('hidden');
+            const saved = modal.style.cssText;
+            const wasInert = modal.inert;
+            modal.classList.remove('hidden');
+            modal.style.transition = 'none';
+            // A hidden modal is left inert (see installModalInert), and an inert
+            // subtree is not hit-testable — the coverage check would then see
+            // straight through the open menu to whatever is behind it and call
+            // the Appearance entry "covered". Clear it for the measurement.
+            modal.inert = false;
+            let result;
+            try { result = measure(); } finally {
+                modal.style.cssText = saved;
+                modal.inert = wasInert;
+                if (wasHidden) modal.classList.add('hidden');
+            }
+            return result;
         }
 
-        _hasVisibleBox(el) {
+        /**
+         * Is an element genuinely operable: rendered, opaque enough, accepting
+         * pointer events, a real size, on-screen, and (when asked) not painted
+         * over by something outside the app's own chrome.
+         */
+        _elementUsable(el, { coverage } = {}) {
             const cs = getComputedStyle(el);
             if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+            if (parseFloat(cs.opacity) < 0.1 || cs.pointerEvents === 'none') return false;
             const r = el.getBoundingClientRect();
-            return r.width >= 8 && r.height >= 8;
+            if (r.width < 8 || r.height < 8) return false;
+            if (r.bottom < 1 || r.right < 1
+                || r.top > window.innerHeight - 1 || r.left > window.innerWidth - 1) return false;
+            if (coverage && this._coveredByForeign(el)) return false;
+            return true;
         }
 
-        /** Is the element's centre covered by something outside `within`? */
-        _coveredByForeign(el, within) {
+        /** Elements that are the app's own dismissible chrome, not user CSS. */
+        _isAppChrome(node) {
+            return !!(node && node.closest
+                && node.closest('#loading-overlay, .modal, #tour-overlay'));
+        }
+
+        /**
+         * Is the element's centre painted over by a NON-app element? Coverage by
+         * the app's own chrome (an open modal, the loading overlay) does not
+         * count — the user can dismiss it — but a user's overlay does.
+         */
+        _coveredByForeign(el) {
             const r = el.getBoundingClientRect();
             const cx = Math.round(r.left + r.width / 2);
             const cy = Math.round(r.top + r.height / 2);
             if (cx < 0 || cy < 0 || cx > window.innerWidth || cy > window.innerHeight) return false;
             const top = document.elementFromPoint(cx, cy);
             if (!top) return false;
-            if (top === el || el.contains(top)) return false;   // el itself or its child on top
-            if (within && within.contains(top)) return false;   // within the allowed subtree
-            // Anything else on top — a sibling overlay, or an ancestor whose
-            // pseudo-element covers the point (elementFromPoint returns the host)
-            // — means el is painted over.
-            return true;
+            if (top === el || el.contains(top)) return false;   // el or its child on top
+            // NB: an ANCESTOR on top (elementFromPoint returning e.g. body when a
+            // body::after overlay covers the point) means el IS covered — do not
+            // treat top.contains(el) as safe.
+            if (this._isAppChrome(top)) return false;   // dismissible app chrome
+            return true;   // a foreign element (or ancestor pseudo-element host) on top
         }
 
         /**
@@ -488,7 +529,9 @@
             this._recheckTimers = [900, 3000].map((ms) => setTimeout(() => {
                 const css = this.getCustomCss();
                 const el = document.getElementById('appearance-custom-css');
-                if (css.trim() && el) this._runEscapeCheck(css, el);
+                // No followUp: these are the two follow-up checks, they must not
+                // schedule more. Initial + 900ms + 3000ms = exactly three.
+                if (css.trim() && el) this._runEscapeCheck(css, el, false);
             }, ms));
         }
 

@@ -558,6 +558,70 @@ try {
         /<code>%pip install<\/code>/.test(kept) && /<strong>now<\/strong>/.test(kept)
         && /href="https:\/\/example\.com"/.test(kept), kept.slice(0, 100));
 
+    /* --------- applying CSS through the visibly-open dialog ------------- */
+    console.log('\n4h. Apply works through the open dialog; exactly three checks');
+
+    // The real user path: open Appearance, type CSS, click Apply — the dialog is
+    // visibly covering the header. The guard must not mistake the app's own
+    // dialog for a user-created obstruction. (The other CSS tests call the model
+    // directly with the dialog closed, so they never exercised this.)
+    await page.evaluate(() => document.getElementById('menu-btn').click());
+    await page.waitForTimeout(120);
+    await page.evaluate(() => document.getElementById('btn-appearance').click());
+    await page.waitForTimeout(200);
+    const throughDialog = await page.evaluate(() => {
+        window.appearance.clearQuarantinedCss();
+        document.getElementById('appearance-custom-css-input').value = '#app-header { letter-spacing: .5px; }';
+        document.getElementById('appearance-css-apply').click();
+        return {
+            dialogWasOpen: !document.getElementById('appearance-modal').classList.contains('hidden'),
+            applied: !!document.getElementById('appearance-custom-css'),
+            quarantined: !!window.appearance.getQuarantinedCss(),
+        };
+    });
+    check('the Appearance dialog was actually open during Apply', throughDialog.dialogWasOpen);
+    check('benign CSS applied through the open dialog is not quarantined',
+        throughDialog.applied === true && throughDialog.quarantined === false);
+    await page.evaluate(() => {
+        document.getElementById('appearance-modal').classList.add('hidden');
+        window.appearance.setCustomCss('');
+    });
+    await page.waitForTimeout(200);
+
+    // Elementary lockouts the earlier check missed: pointer-events, opacity on
+    // the menu, the dialog hidden, the button pushed off-screen.
+    for (const [name, css] of [
+        ['btn-appearance pointer-events:none', '#btn-appearance { pointer-events: none !important; }'],
+        ['menu-modal opacity:0', '#menu-modal { opacity: 0 !important; }'],
+        ['appearance-modal display:none', '#appearance-modal { display: none !important; }'],
+        ['menu-btn off-screen', '#menu-btn { position: fixed !important; left: 100vw !important; }'],
+        ['menu-btn pointer-events:none', '#menu-btn { pointer-events: none !important; }'],
+    ]) {
+        const rolledBack = await page.evaluate((c) => {
+            window.appearance.clearQuarantinedCss();
+            window.appearance.setCustomCss(c);
+            return !document.getElementById('appearance-custom-css');
+        }, css);
+        check(`lockout via ${name} is rolled back`, rolledBack === true);
+    }
+    await page.evaluate(() => window.appearance.setCustomCss(''));
+
+    // The delayed re-check must run exactly three times (initial + ~900 + ~3000)
+    // and then stop — not loop forever on harmless CSS.
+    const checkCount = await page.evaluate(async () => {
+        let n = 0;
+        const orig = window.appearance._runEscapeCheck.bind(window.appearance);
+        window.appearance._runEscapeCheck = function (...a) { n++; return orig(...a); };
+        window.appearance.clearQuarantinedCss();
+        window.appearance.setCustomCss('#app-header { letter-spacing: .4px; }');
+        await new Promise((r) => setTimeout(r, 5200));
+        window.appearance._runEscapeCheck = orig;
+        return n;
+    });
+    check('the escape check runs exactly three times, not in a loop',
+        checkCount === 3, `ran ${checkCount} times`);
+    await page.evaluate(() => window.appearance.setCustomCss(''));
+
     /* --------- deeper lockouts, editor recovery, modal a11y ------------- */
     console.log('\n4f. Deeper CSS lockouts, editor recovery, dialog a11y');
 
