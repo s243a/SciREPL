@@ -191,22 +191,45 @@ async function cacheIsComplete(name) {
   } catch { return false; }
 }
 
-// Activate: clean up old app + CDN caches, claim clients
+/**
+ * The cache the app actually serves from: the NEWEST complete app cache.
+ *
+ * This is the whole coherence story. An upgrade that only half-installed does
+ * not become the serving version — the app keeps running the last version that
+ * installed completely, as one consistent set, rather than a new index.html
+ * stitched to an old app.js. caches.keys() is in creation order, so the last
+ * complete one is the newest; a plain caches.match() would instead have taken
+ * the OLDEST copy of any file present in several caches.
+ */
+async function servingCacheName() {
+  const keys = (await caches.keys()).filter((k) => k.startsWith('scirepl-app-'));
+  let serving = null;
+  for (const k of keys) {               // oldest -> newest; keep the last complete
+    if (await cacheIsComplete(k)) serving = k;
+  }
+  // No complete cache yet (first run, or a first install that was partial):
+  // fall back to this version's cache so the app is not left with nothing.
+  return serving || APP_CACHE;
+}
+
+// Activate: retain the serving version and the current one; prune the rest.
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
+    const serving = await servingCacheName();
     const keys = await caches.keys();
-    const complete = await cacheIsComplete(APP_CACHE);
 
     await Promise.all(keys.map(async (key) => {
-      // Stale CDN runtimes are safe to drop either way: they are re-fetchable
-      // and not what the user is relying on to work offline.
-      if (key.startsWith('scirepl-cdn-') && key !== CDN_CACHE) return caches.delete(key);
-      if (!key.startsWith('scirepl-app-') || key === APP_CACHE) return;
-      if (complete) return caches.delete(key);
-      // Otherwise keep the previous shell. The fetch handler falls back to it
-      // for anything this version failed to cache, so an upgrade that only
-      // half-installed degrades to the old version rather than to nothing.
-      console.warn(`[sw] keeping ${key}: ${APP_CACHE} did not install completely`);
+      // Stale CDN runtimes are re-fetchable and not the offline lifeline.
+      if (key.startsWith('scirepl-cdn-')) {
+        if (key !== CDN_CACHE) await caches.delete(key);
+        return;
+      }
+      if (!key.startsWith('scirepl-app-')) return;
+      // Keep exactly two things: what we serve (newest complete) and this
+      // version's own cache (APP_CACHE), which a later fetch may yet complete.
+      // Everything else — superseded complete caches and dead partials — goes.
+      if (key === serving || key === APP_CACHE) return;
+      await caches.delete(key);
     }));
 
     await self.clients.claim();
@@ -225,24 +248,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // App shell: cache-first, current version first.
-  //
-  // A previous version's cache is now kept when this one installed only
-  // partially, so an unqualified caches.match() is no longer safe: it searches
-  // caches in creation order and would hand back the OLD copy of a file that
-  // exists in both. Ask this version's cache explicitly, and only fall back to
-  // an older one for entries this version genuinely does not have.
+  // App shell: served entirely from ONE coherent version — the newest cache
+  // that installed completely. A half-installed upgrade therefore does not take
+  // effect until it is whole; the user keeps running the last good version as a
+  // consistent set rather than a mix. Never an unqualified caches.match(): that
+  // searches oldest-first and would splice files across versions.
   if (url.origin === self.location.origin) {
     event.respondWith((async () => {
-      const current = await caches.open(APP_CACHE);
-      const fresh = await current.match(event.request);
-      if (fresh) return fresh;
+      const serving = await caches.open(await servingCacheName());
+      const hit = await serving.match(event.request);
+      if (hit) return hit;
 
-      const stale = await caches.match(event.request);
-      if (stale) return stale;
-
+      // Not in the serving shell (a genuinely new asset, or a cold first run):
+      // fetch it, and populate THIS version's cache so a later completion check
+      // can flip it to the serving version.
       const response = await fetch(event.request);
       if (response.ok && event.request.method === 'GET') {
+        const current = await caches.open(APP_CACHE);
         current.put(event.request, response.clone());
       }
       return response;

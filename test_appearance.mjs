@@ -30,6 +30,10 @@ await context.addInitScript(() => {
 const page = await context.newPage();
 const pageErrors = [];
 page.on('pageerror', (e) => pageErrors.push(e.message));
+const xssFired = [];
+page.on('console', (m) => { if (/XSS-FIRED/.test(m.text())) xssFired.push(m.text()); });
+page.on('dialog', (d) => { xssFired.push('dialog:' + d.message()); d.dismiss().catch(() => {}); });
+page.on('request', (r) => { if (/xss-evil/.test(r.url())) xssFired.push('request:' + r.url()); });
 
 try {
     await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
@@ -496,6 +500,63 @@ try {
     check('CSS that does not lock anyone out is left alone', benign.applied === true);
     check('and is not quarantined', benign.quarantined === '');
     await page.evaluate(() => window.appearance.setCustomCss(''));
+
+    /* ---------------- translated markup cannot execute ------------------ */
+    console.log('\n4e. The inline-markup sanitiser is not an XSS hole');
+
+    // Catalogues are repo assets, but data-i18n-html is the one place translated
+    // text reaches innerHTML, and a translator pasting from a rich-text editor is
+    // an ordinary accident. An unsupported wrapper must be unwrapped only after
+    // its subtree is sanitised, or a nested handler is lifted up intact.
+    const vectors = [
+        ['nested img/onerror', '<div><img src=x onerror="console.log(\'XSS-FIRED-a\')"></div>'],
+        ['svg script', '<span><svg><script>console.log(\'XSS-FIRED-b\')</script></svg>keep</span>'],
+        ['deeply nested', '<foo><bar><img src=x onerror="console.log(\'XSS-FIRED-c\')"></bar></foo>'],
+        ['svg xlink js', '<svg><a xlink:href="javascript:console.log(\'XSS-FIRED-d\')">x</a></svg>'],
+        ['bare script', '<script>console.log(\'XSS-FIRED-e\')</script>text'],
+        ['iframe', '<div><iframe src="//xss-evil.example"></iframe>body</div>'],
+    ];
+    for (const [name, html] of vectors) {
+        const out = await page.evaluate((h) => {
+            const host = document.createElement('div');
+            host.setAttribute('data-i18n-html', '__xssprobe');
+            document.body.appendChild(host);
+            const cat = window.i18n.catalogues[window.i18n.current]
+                = window.i18n.catalogues[window.i18n.current] || {};
+            cat.__xssprobe = h;
+            window.i18n.applyToDom(document.body);
+            const rendered = host.innerHTML;
+            host.remove();
+            delete cat.__xssprobe;
+            return rendered;
+        }, html);
+        check(`sanitiser drops dangerous nodes: ${name}`,
+            !/<img|<script|<iframe|onerror|javascript:|<svg/i.test(out), out.slice(0, 80));
+    }
+    // Wait a beat so any onerror/onload that was going to fire, has.
+    await page.waitForTimeout(400);
+    check('no injected handler executed or fetched',
+        xssFired.length === 0, xssFired.slice(0, 3).join(' | '));
+
+    // Legitimate inline markup must still survive, or the sanitiser is just
+    // breaking the feature it protects.
+    const kept = await page.evaluate(() => {
+        const host = document.createElement('div');
+        host.setAttribute('data-i18n-html', '__keepprobe');
+        document.body.appendChild(host);
+        const cat = window.i18n.catalogues[window.i18n.current]
+            = window.i18n.catalogues[window.i18n.current] || {};
+        cat.__keepprobe = 'Use <code>%pip install</code> or see '
+            + '<a href="https://example.com">docs</a> <strong>now</strong>.';
+        window.i18n.applyToDom(document.body);
+        const rendered = host.innerHTML;
+        host.remove();
+        delete cat.__keepprobe;
+        return rendered;
+    });
+    check('safe inline markup is preserved',
+        /<code>%pip install<\/code>/.test(kept) && /<strong>now<\/strong>/.test(kept)
+        && /href="https:\/\/example\.com"/.test(kept), kept.slice(0, 100));
 
     /* ----------------- legal text follows its own review ---------------- */
     console.log('\n4d. Privacy status controls the legal text');

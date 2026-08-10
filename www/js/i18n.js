@@ -112,23 +112,52 @@
      */
     const INLINE_TAGS = new Set(['CODE', 'STRONG', 'EM', 'B', 'I', 'BR', 'A', 'SPAN']);
 
+    // Elements dropped whole rather than unwrapped: their text content is not
+    // safe display prose (script source, style rules, raw template markup).
+    const DROP_WHOLE = new Set(['SCRIPT', 'STYLE', 'TEMPLATE', 'IFRAME', 'OBJECT',
+        'EMBED', 'NOSCRIPT', 'SVG', 'MATH', 'IMG', 'VIDEO', 'AUDIO', 'SOURCE',
+        'LINK', 'META', 'BASE', 'FORM', 'INPUT', 'BUTTON', 'TEXTAREA', 'SELECT']);
+
     function sanitiseInline(html) {
         const tpl = document.createElement('template');
         tpl.innerHTML = html;
         const walk = (node) => {
             for (const child of Array.from(node.childNodes)) {
                 if (child.nodeType === Node.TEXT_NODE) continue;
-                if (child.nodeType !== Node.ELEMENT_NODE || !INLINE_TAGS.has(child.tagName)) {
-                    // Keep the words, drop the element.
+                // Foreign (SVG/MathML) elements report a lowercase, case-preserved
+                // tagName, so the allow/deny sets — which are uppercase HTML —
+                // must compare against an uppercased copy or a nested <svg> slips
+                // through the unwrap path and leaks its <script> source as text.
+                const tag = child.nodeType === Node.ELEMENT_NODE
+                    ? child.tagName.toUpperCase() : '';
+                if (child.nodeType !== Node.ELEMENT_NODE || !INLINE_TAGS.has(tag)) {
+                    // An unsupported element is unwrapped to keep its words — but
+                    // its subtree must be sanitised FIRST, or a nested attack
+                    // like <div><img onerror=…></div> survives by being lifted up
+                    // intact. Sanitise, then unwrap: the <img> is itself
+                    // unsupported, so the recursion removes it before the <div>
+                    // is dissolved. Comments, <script>, <style>, <template> etc.
+                    // are element-like without safe text, so drop them whole.
+                    if (child.nodeType === Node.COMMENT_NODE
+                        || (child.nodeType === Node.ELEMENT_NODE
+                            && DROP_WHOLE.has(tag))) {
+                        child.remove();
+                        continue;
+                    }
+                    walk(child);
                     child.replaceWith(...Array.from(child.childNodes || []));
                     continue;
                 }
+                // A supported HTML <a> is namespaced XHTML; a foreign <a>
+                // (inside svg) is not, and must not keep href-like attributes.
+                const isHtmlAnchor = tag === 'A'
+                    && child.namespaceURI === 'http://www.w3.org/1999/xhtml';
                 for (const attr of Array.from(child.attributes)) {
-                    const ok = child.tagName === 'A' && attr.name === 'href'
+                    const ok = isHtmlAnchor && attr.name === 'href'
                         && /^(https?:|mailto:|#)/i.test(attr.value.trim());
                     if (!ok) child.removeAttribute(attr.name);
                 }
-                if (child.tagName === 'A') {
+                if (isHtmlAnchor) {
                     child.setAttribute('rel', 'noopener noreferrer');
                     child.setAttribute('target', '_blank');
                 }

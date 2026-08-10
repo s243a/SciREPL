@@ -230,6 +230,84 @@ try {
     check('a complete install is marked complete',
         cleanUpgrade.marker === 'complete', String(cleanUpgrade.marker));
 
+    console.log('\n4. Version coherence across consecutive partial upgrades');
+
+    // Sol's scenario: v1 complete -> v2 partial -> v3 partial -> v4 complete.
+    // The app must serve ONE version's shell throughout, never a mix, and the
+    // fallback must be the newest complete cache, not the oldest. Proven with a
+    // real offline fetch() whose body is stamped per version, not caches.match().
+    {
+        const ctx = await browser.newContext();
+        await ctx.addInitScript(() => {
+            localStorage.setItem('scirepl_privacy_accepted', '1');
+            localStorage.setItem('scirepl_onboarding_seen', '1');
+            const sw = navigator.serviceWorker;
+            const real = sw.register.bind(sw);
+            // Persist in localStorage so it survives the app's controllerchange reload.
+            sw.register = (u, o) => real(localStorage.getItem('__swTarget') || u, o);
+        });
+        let curVer = null, broken = null;
+        await ctx.route('**/i18n/manifest.json', async (route) => {
+            const res = await route.fetch();
+            const j = JSON.parse(await res.text());
+            j._testVersion = curVer;
+            await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(j) });
+        });
+        await ctx.route('**/*', async (route) => {
+            if (broken && route.request().url().includes(broken)) {
+                return route.fulfill({ status: 404, body: 'x' });
+            }
+            return route.fallback();
+        });
+        const pg = await ctx.newPage();
+        await pg.goto(`${ORIGIN}/index.html`, { waitUntil: 'load', timeout: TIMEOUT });
+
+        const install = async (ver, breakName) => {
+            curVer = ver; broken = breakName || null;
+            writeFileSync(`www/sw-${ver}.js`, readFileSync('www/sw.js', 'utf8').replace(
+                /const CACHE_VERSION = '([^']+)'/, `const CACHE_VERSION = '${ver}'`));
+            await pg.evaluate((v) => localStorage.setItem('__swTarget', `./sw-${v}.js`), ver);
+            await pg.reload({ waitUntil: 'load', timeout: TIMEOUT });
+            await pg.waitForTimeout(5000);
+            await pg.waitForLoadState('load').catch(() => {});
+        };
+        const servedOffline = async () => {
+            await ctx.setOffline(true);
+            const v = await pg.evaluate(async () => {
+                try {
+                    const r = await fetch('./i18n/manifest.json', { cache: 'no-store' });
+                    return (await r.json())._testVersion;
+                } catch (e) { return 'FETCH-FAILED'; }
+            });
+            await ctx.setOffline(false);
+            return v;
+        };
+
+        try {
+            await install('t-v1');
+            check('v1 (complete) serves its own shell offline',
+                (await servedOffline()) === 't-v1');
+            await install('t-v2', 'ko.json');
+            check('v2 (partial) does not take effect — v1 still served',
+                (await servedOffline()) === 't-v1');
+            await install('t-v3', 'ru.json');
+            check('v3 (partial) still does not take effect — no mix, still v1',
+                (await servedOffline()) === 't-v1');
+            await install('t-v4');
+            check('v4 (complete) finally takes over',
+                (await servedOffline()) === 't-v4');
+            const remaining = await pg.evaluate(async () =>
+                (await caches.keys()).filter((k) => k.startsWith('scirepl-app-')));
+            check('stale caches are pruned once a complete version wins',
+                remaining.length === 1 && remaining[0].endsWith('t-v4'), remaining.join(', '));
+        } finally {
+            for (const v of ['t-v1', 't-v2', 't-v3', 't-v4']) {
+                rmSync(`www/sw-${v}.js`, { force: true });
+            }
+            await ctx.close();
+        }
+    }
+
 } catch (err) {
     failures++;
     console.log(`\n  [FAIL] test crashed: ${err && err.message}`);
