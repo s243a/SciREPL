@@ -26,6 +26,23 @@
 
     const SEEN_KEY = 'scirepl_onboarding_seen';
 
+    /** A control worth handing focus to is attached, displayed and on-screen. */
+    function isVisible(el) {
+        if (!el || !document.contains(el)) return false;
+        if (el.offsetParent === null && getComputedStyle(el).position !== 'fixed') return false;
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+    }
+
+    /** Any of the app's blocking dialogs currently on screen? */
+    const BLOCKING_MODALS = ['privacy-modal', 'runtime-download-modal'];
+    function blockingModalVisible() {
+        return BLOCKING_MODALS.some((id) => {
+            const m = document.getElementById(id);
+            return m && !m.classList.contains('hidden');
+        });
+    }
+
     /**
      * A step targets a live element by selector. `optional` steps are skipped
      * when the target is absent; `mock` supplies an illustration to show
@@ -141,16 +158,32 @@
         }
 
         start() {
+            // Idempotent: a second start (menu entry, consent-close, a stray
+            // double-invoke) must not stack a second overlay or a second set of
+            // global listeners — that was how one ArrowRight advanced two steps.
+            this._teardownChrome();
+            if (this._pendingStart) { clearTimeout(this._pendingStart); this._pendingStart = null; }
             this.steps = this._resolveSteps();
             this.index = 0;
             this._build();
             this._render();
         }
 
+        /** Remove the overlay and every global listener it installed. */
+        _teardownChrome() {
+            if (this._onKey) document.removeEventListener('keydown', this._onKey);
+            if (this._onResize) window.removeEventListener('resize', this._onResize);
+            if (this._onVV && window.visualViewport) {
+                window.visualViewport.removeEventListener('resize', this._onVV);
+                window.visualViewport.removeEventListener('scroll', this._onVV);
+            }
+            this._onKey = this._onResize = this._onVV = null;
+            if (this.el) { this.el.remove(); this.el = null; }
+        }
+
         /* ------------------------------ chrome ----------------------------- */
 
         _build() {
-            if (this.el) this.el.remove();
             const el = document.createElement('div');
             el.id = 'tour-overlay';
             el.innerHTML = `
@@ -311,7 +344,8 @@
             const margin = 8;
 
             card.classList.remove('tour-card-docked');
-            card.style.maxWidth = '';
+            card.style.maxWidth = `${Math.max(220, vw - margin * 2)}px`;
+            card.style.maxHeight = `${Math.max(160, vh - margin * 2)}px`;
 
             if (!target) {
                 spotlight.style.display = 'none';
@@ -376,13 +410,8 @@
 
         finish() {
             this.markSeen();
-            document.removeEventListener('keydown', this._onKey);
-            window.removeEventListener('resize', this._onResize);
-            if (this._onVV && window.visualViewport) {
-                window.visualViewport.removeEventListener('resize', this._onVV);
-                window.visualViewport.removeEventListener('scroll', this._onVV);
-                this._onVV = null;
-            }
+            if (this._pendingStart) { clearTimeout(this._pendingStart); this._pendingStart = null; }
+            this._teardownChrome();
             if (this._consentObserver) {
                 this._consentObserver.disconnect();
                 this._consentObserver = null;
@@ -390,12 +419,11 @@
             // Hand focus back where it was, or somewhere sensible.
             const back = this._returnFocusTo;
             this._returnFocusTo = null;
-            if (back && document.contains(back) && back.focus) back.focus();
+            if (back && document.contains(back) && isVisible(back) && back.focus) back.focus();
             else {
                 const menu = document.getElementById('menu-btn');
-                if (menu) menu.focus();
+                if (menu && isVisible(menu)) menu.focus();
             }
-            if (this.el) { this.el.remove(); this.el = null; }
         }
 
         /**
@@ -413,14 +441,15 @@
             // avoid is *covering* the consent dialog, which is a question about
             // the modal being on screen, not about the flag.
             this._watchConsentModal();
-            const modal = document.getElementById('privacy-modal');
-            if (modal && !modal.classList.contains('hidden')) return;   // resumes on close
-            setTimeout(() => { if (!this.hasSeen() && !this._consentVisible()) this.start(); }, 600);
+            if (blockingModalVisible()) return;   // the observer resumes on close
+            this._pendingStart = setTimeout(() => {
+                this._pendingStart = null;
+                if (!this.hasSeen() && !blockingModalVisible()) this.start();
+            }, 600);
         }
 
         _consentVisible() {
-            const modal = document.getElementById('privacy-modal');
-            return Boolean(modal) && !modal.classList.contains('hidden');
+            return blockingModalVisible();
         }
 
         /**
@@ -430,22 +459,46 @@
          * bring it back afterwards rather than stacking two modals.
          */
         _watchConsentModal() {
-            const modal = document.getElementById('privacy-modal');
-            if (!modal || this._consentObserver) return;
+            if (this._consentObserver) return;
             this._consentObserver = new MutationObserver(() => {
-                const visible = this._consentVisible();
+                const blocked = blockingModalVisible();
                 if (this.el) {
-                    this.el.style.display = visible ? 'none' : '';
-                    if (!visible) this._position();
-                } else if (!visible && !this.hasSeen()) {
-                    setTimeout(() => {
-                        if (!this.hasSeen() && !this._consentVisible()) this.start();
+                    // Step aside while a dialog is up; never both on screen.
+                    this.el.style.display = blocked ? 'none' : '';
+                    this.el.setAttribute('aria-hidden', blocked ? 'true' : 'false');
+                    if (blocked) {
+                        // Focus must not linger in a display:none subtree. Hand
+                        // it to the dialog that is now on top.
+                        if (this.el.contains(document.activeElement)) {
+                            const top = BLOCKING_MODALS
+                                .map((id) => document.getElementById(id))
+                                .find((m) => m && !m.classList.contains('hidden'));
+                            const target = top && (top.querySelector(
+                                'button, [href], input, select, [tabindex]:not([tabindex="-1"])'));
+                            if (target) target.focus();
+                            else if (document.activeElement && document.activeElement.blur) {
+                                document.activeElement.blur();
+                            }
+                        }
+                    } else {
+                        this._position();
+                        const next = this.el.querySelector('#tour-next');
+                        if (next) next.focus();
+                    }
+                } else if (!blocked && !this.hasSeen()) {
+                    if (this._pendingStart) return;   // already scheduled
+                    this._pendingStart = setTimeout(() => {
+                        this._pendingStart = null;
+                        if (!this.hasSeen() && !blockingModalVisible()) this.start();
                     }, 400);
                 }
             });
-            this._consentObserver.observe(modal, {
-                attributes: true, attributeFilter: ['class'],
-            });
+            for (const id of BLOCKING_MODALS) {
+                const m = document.getElementById(id);
+                if (m) this._consentObserver.observe(m, {
+                    attributes: true, attributeFilter: ['class'],
+                });
+            }
         }
     }
 

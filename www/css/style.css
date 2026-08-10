@@ -2414,7 +2414,15 @@ body.force-mobile .vfs-delete-btn {
 
 #tour-card {
     position: absolute;
-    max-width: min(340px, calc(100vw - 32px));
+    box-sizing: border-box;
+    /* Fit any viewport, including a 320x240 phone in landscape with the
+       keyboard up. Applies to every step — targeted, centred and mock — because
+       it is on the card itself, not on a positioning branch. dvh tracks the
+       dynamic viewport where the URL bar and keyboard change the visible height;
+       _position() additionally caps against visualViewport for older engines. */
+    max-width: min(340px, calc(100vw - 16px));
+    max-height: calc(100dvh - 16px);
+    overflow-y: auto;
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius);

@@ -291,6 +291,132 @@ try {
             && document.activeElement !== document.body));
     await ctx3.close();
 
+    /* ------------------------- start is idempotent ---------------------- */
+    console.log('\n9. Races: double-start, stray keys, runtime dialog');
+
+    const ctx4 = await browser.newContext();
+    await ctx4.addInitScript(() => {
+        localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.removeItem('scirepl_onboarding_seen');
+    });
+    const p4 = await ctx4.newPage();
+    await p4.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await p4.waitForTimeout(2200);
+
+    // Double-start must not stack overlays or listeners.
+    await p4.evaluate(() => { window.onboarding.start(); window.onboarding.start(); });
+    await p4.waitForTimeout(150);
+    check('a second start does not stack a second overlay',
+        await p4.evaluate(() => document.querySelectorAll('#tour-overlay').length) === 1);
+
+    // One ArrowRight advances exactly one step — the accumulated-listener bug
+    // moved it two. Read the progress counter before and after.
+    const step0 = await p4.evaluate(() => window.onboarding.index);
+    await p4.keyboard.press('ArrowRight');
+    await p4.waitForTimeout(120);
+    const step1 = await p4.evaluate(() => window.onboarding.index);
+    check('one ArrowRight advances exactly one step', step1 === step0 + 1, `${step0} -> ${step1}`);
+
+    // Even after several start() calls, a keypress still advances one.
+    await p4.evaluate(() => { window.onboarding.start(); window.onboarding.start(); window.onboarding.start(); });
+    await p4.waitForTimeout(120);
+    const a = await p4.evaluate(() => window.onboarding.index);
+    await p4.keyboard.press('ArrowRight');
+    await p4.waitForTimeout(120);
+    const bb = await p4.evaluate(() => window.onboarding.index);
+    check('still one step per key after repeated starts', bb === a + 1, `${a} -> ${bb}`);
+    await p4.evaluate(() => window.onboarding.finish());
+    await ctx4.close();
+
+    // Runtime-download dialog (first R/Prolog run) must also outrank the tour,
+    // exactly like the privacy dialog.
+    const ctx5 = await browser.newContext();
+    await ctx5.addInitScript(() => {
+        localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.removeItem('scirepl_onboarding_seen');
+    });
+    const p5 = await ctx5.newPage();
+    await p5.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await p5.waitForTimeout(2200);
+    check('tour is up before the runtime dialog appears',
+        await p5.evaluate(() => !!document.getElementById('tour-overlay')));
+    await p5.evaluate(() => document.getElementById('runtime-download-modal').classList.remove('hidden'));
+    await p5.waitForTimeout(400);
+    check('the runtime-download dialog hides the tour',
+        await p5.evaluate(() => {
+            const t = document.getElementById('tour-overlay');
+            return !t || getComputedStyle(t).display === 'none';
+        }));
+    check('focus is not left inside the hidden tour',
+        await p5.evaluate(() => {
+            const t = document.getElementById('tour-overlay');
+            return !t || !t.contains(document.activeElement);
+        }));
+    await p5.evaluate(() => document.getElementById('runtime-download-modal').classList.add('hidden'));
+    await p5.waitForTimeout(700);
+    check('the tour returns after the runtime dialog closes',
+        await p5.evaluate(() => {
+            const t = document.getElementById('tour-overlay');
+            return !!t && getComputedStyle(t).display !== 'none';
+        }));
+    await ctx5.close();
+
+    /* --------------------- tiny viewport containment -------------------- */
+    console.log('\n10. Every card fits a 320x240 viewport');
+
+    const ctxS = await browser.newContext({ viewport: { width: 320, height: 240 } });
+    await ctxS.addInitScript(() => {
+        localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.removeItem('scirepl_onboarding_seen');
+    });
+    const pS = await ctxS.newPage();
+    await pS.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await pS.waitForTimeout(2200);
+    await pS.evaluate(() => window.onboarding.start());
+    await pS.waitForTimeout(200);
+
+    const overflowByStep = [];
+    const total = await pS.evaluate(() => window.onboarding.steps.length);
+    for (let i = 0; i < total; i++) {
+        const r = await pS.evaluate(() => {
+            const card = document.getElementById('tour-card');
+            const b = card.getBoundingClientRect();
+            return {
+                withinX: b.left >= -1 && b.right <= window.innerWidth + 1,
+                withinY: b.top >= -1 && b.bottom <= window.innerHeight + 1,
+                step: window.onboarding.index,
+            };
+        });
+        overflowByStep.push(r);
+        await pS.keyboard.press('ArrowRight');
+        await pS.waitForTimeout(180);
+    }
+    check('no tour card overflows the 320x240 viewport horizontally',
+        overflowByStep.every((r) => r.withinX),
+        JSON.stringify(overflowByStep.filter((r) => !r.withinX)));
+    check('no tour card overflows vertically',
+        overflowByStep.every((r) => r.withinY),
+        JSON.stringify(overflowByStep.filter((r) => !r.withinY)));
+    await ctxS.close();
+
+    /* ---------------- manual start during the 600ms delay --------------- */
+    console.log('\n11. Manual start during the first-run delay');
+
+    const ctxD = await browser.newContext();
+    await ctxD.addInitScript(() => {
+        localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.removeItem('scirepl_onboarding_seen');
+    });
+    const pD = await ctxD.newPage();
+    await pD.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    // Start manually inside the 600ms auto-start window, then let it elapse.
+    await pD.waitForTimeout(150);
+    await pD.evaluate(() => window.onboarding.start());
+    await pD.waitForTimeout(1200);
+    check('a manual start inside the auto-start delay yields one overlay, not two',
+        await pD.evaluate(() => document.querySelectorAll('#tour-overlay').length) === 1);
+    await ctxD.close();
+
 } catch (err) {
     failures++;
     console.log(`\n  [FAIL] crashed: ${err && err.message}`);
