@@ -373,13 +373,77 @@ try {
                 await pg.evaluate(() => fetch('./index.html', { cache: 'no-store' }).catch(() => {}));
                 await pg.waitForTimeout(2500);
             }
-            check('once the missing file returns, the partial cache is repaired and promoted',
+            // The recovered file is now in the cache, and the cache is complete...
+            check('the recovered file is cached and the version marked complete',
+                await pg.evaluate(async () => {
+                    const ko = await caches.match(new URL('i18n/ko.json', location.href).href);
+                    return !!ko;
+                }));
+            // ...but the ALREADY-OPEN document stays pinned to the version it
+            // navigated on — it must not silently swap to v2 assets mid-session.
+            check('an open document is not switched to the promoted version mid-session',
+                (await served()) === 'r-v1');
+            // Promotion takes effect at the next navigation.
+            await pg.reload({ waitUntil: 'load', timeout: TIMEOUT }).catch(() => {});
+            await pg.waitForTimeout(3000);
+            await pg.waitForLoadState('load').catch(() => {});
+            check('after a reload, the promoted version serves',
                 (await served()) === 'r-v2');
-            check('the recovered file is now cached in the promoted version',
+        } finally {
+            for (const v of ['r-v1', 'r-v2']) rmSync(`www/sw-${v}.js`, { force: true });
+            await ctx.close();
+        }
+    }
+
+    console.log('\n6. Concurrent requests trigger a single serialized repair');
+
+    // Thirty simultaneous requests must not launch thirty identical fetches of a
+    // missing asset: the repair is one in-flight promise shared by all of them.
+    {
+        const ctx = await browser.newContext();
+        await ctx.addInitScript(() => {
+            localStorage.setItem('scirepl_privacy_accepted', '1');
+            localStorage.setItem('scirepl_onboarding_seen', '1');
+            const sw = navigator.serviceWorker, real = sw.register.bind(sw);
+            sw.register = (u, o) => {
+                const t = localStorage.getItem('__swTarget');
+                return t ? real(t, o) : Promise.resolve({ unregister() {}, addEventListener() {} });
+            };
+        });
+        let broken = null, koFetches = 0;
+        await ctx.route('**/i18n/ko.json', (r) => {
+            if (broken) return r.fulfill({ status: 404, body: 'x' });
+            koFetches++; return r.fallback();
+        });
+        const pg = await ctx.newPage();
+        await pg.goto(`${ORIGIN}/index.html`, { waitUntil: 'load', timeout: TIMEOUT });
+        const install = async (v) => {
+            writeFileSync(`www/sw-${v}.js`, readFileSync('www/sw.js', 'utf8').replace(
+                /const CACHE_VERSION = '[^']+'/, `const CACHE_VERSION = '${v}'`));
+            await pg.evaluate((vv) => localStorage.setItem('__swTarget', `./sw-${vv}.js`), v);
+            await pg.reload({ waitUntil: 'load', timeout: TIMEOUT }).catch(() => {});
+            await pg.waitForTimeout(5000);
+            await pg.waitForLoadState('load').catch(() => {});
+        };
+        try {
+            await install('c1');
+            broken = 'ko'; await install('c2');    // partial
+            broken = null;                          // network back
+            await pg.waitForTimeout(6000);          // clear the repair cooldown
+            koFetches = 0;
+            await pg.evaluate(async () => {
+                const ps = [];
+                for (let i = 0; i < 30; i++) ps.push(fetch('./index.html?b=' + i, { cache: 'no-store' }).catch(() => {}));
+                await Promise.all(ps);
+            });
+            await pg.waitForTimeout(3000);
+            check('30 concurrent requests cause at most one repair fetch of the missing asset',
+                koFetches <= 1, `${koFetches} fetches`);
+            check('the missing asset is repaired into the cache',
                 await pg.evaluate(async () => !!(await caches.match(
                     new URL('i18n/ko.json', location.href).href))));
         } finally {
-            for (const v of ['r-v1', 'r-v2']) rmSync(`www/sw-${v}.js`, { force: true });
+            for (const v of ['c1', 'c2']) rmSync(`www/sw-${v}.js`, { force: true });
             await ctx.close();
         }
     }

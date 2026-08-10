@@ -1,7 +1,7 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v134';
+const CACHE_VERSION = 'v135';
 
 // Marker entry recording whether an app cache finished installing. Stored in
 // the cache itself so the answer travels with it and survives a restart.
@@ -12,13 +12,25 @@ const COMPLETE_MARKER = './__app-shell-complete';
 // though those files are still served from the older complete cache and so are
 // never re-fetched on their own. On same-origin fetches, if the current cache is
 // incomplete, retry the missing entries — throttled so it is not run per asset.
-let _lastRepairAttempt = 0;
-async function maybeRepairInBackground(event) {
-  const now = Date.now();
-  if (now - _lastRepairAttempt < 5000) return;// throttle: frequent enough to recover, not chatty
-  if (await cacheIsComplete(APP_CACHE)) return;
-  _lastRepairAttempt = now;
-  event.waitUntil(repairShell(APP_CACHE));
+let _repairInFlight = null;
+let _lastRepairDone = 0;
+function maybeRepairInBackground(event) {
+  // Serialize: one repair at a time, shared by every concurrent request. The
+  // promise is assigned SYNCHRONOUSLY, before any await, so N simultaneous
+  // requests all see it set and pass the same promise to waitUntil — the old
+  // code awaited cacheIsComplete before recording anything, so 30 requests
+  // launched 30 identical fetches of the same missing asset.
+  if (_repairInFlight) { event.waitUntil(_repairInFlight); return; }
+  if (Date.now() - _lastRepairDone < 5000) return;   // cooldown between attempts
+  _repairInFlight = (async () => {
+    try {
+      if (!(await cacheIsComplete(APP_CACHE))) await repairShell(APP_CACHE);
+    } finally {
+      _lastRepairDone = Date.now();
+      _repairInFlight = null;
+    }
+  })();
+  event.waitUntil(_repairInFlight);
 }
 const APP_CACHE = 'scirepl-app-' + CACHE_VERSION;
 const CDN_CACHE = 'scirepl-cdn-v2';
@@ -252,6 +264,25 @@ async function cacheIsComplete(name) {
  * complete one is the newest; a plain caches.match() would instead have taken
  * the OLDEST copy of any file present in several caches.
  */
+// clientId -> the cache that document was pinned to at navigation. Keeps a
+// single document coherent for its whole session even if a newer version is
+// promoted underneath it; a reload (new navigation) re-pins to the newest.
+const _clientCache = new Map();
+
+async function cacheNameForClient(event) {
+  const newest = await servingCacheName();
+  // A navigation establishes (or refreshes) the pin for the resulting document.
+  if (event.request.mode === 'navigate') {
+    const id = event.resultingClientId || event.clientId;
+    if (id) _clientCache.set(id, newest);
+    return newest;
+  }
+  // A subresource inherits its document's pin, if we know it.
+  const id = event.clientId;
+  if (id && _clientCache.has(id)) return _clientCache.get(id);
+  return newest;
+}
+
 async function servingCacheName() {
   const keys = (await caches.keys()).filter((k) => k.startsWith('scirepl-app-'));
   let serving = null;
@@ -291,6 +322,12 @@ self.addEventListener('activate', (event) => {
       await caches.delete(key);
     }));
 
+    // Drop pins for documents that no longer exist.
+    try {
+      const live = new Set((await self.clients.matchAll()).map((c) => c.id));
+      for (const id of _clientCache.keys()) if (!live.has(id)) _clientCache.delete(id);
+    } catch { /* clients API unavailable; the map is bounded by SW lifetime */ }
+
     await self.clients.claim();
   })());
 });
@@ -317,7 +354,7 @@ self.addEventListener('fetch', (event) => {
     // response itself still comes from the coherent serving cache below.
     maybeRepairInBackground(event);
     event.respondWith((async () => {
-      const serving = await caches.open(await servingCacheName());
+      const serving = await caches.open(await cacheNameForClient(event));
       const hit = await serving.match(event.request);
       if (hit) return hit;
 
