@@ -204,12 +204,13 @@
         /** Remove the overlay and every global listener it installed. */
         _teardownChrome() {
             if (this._onKey) document.removeEventListener('keydown', this._onKey);
+            if (this._onI18n) document.removeEventListener('i18n:changed', this._onI18n);
             if (this._onResize) window.removeEventListener('resize', this._onResize);
             if (this._onVV && window.visualViewport) {
                 window.visualViewport.removeEventListener('resize', this._onVV);
                 window.visualViewport.removeEventListener('scroll', this._onVV);
             }
-            this._onKey = this._onResize = this._onVV = null;
+            this._onKey = this._onResize = this._onVV = this._onI18n = null;
             if (this._resurfaceTimer) { clearTimeout(this._resurfaceTimer); this._resurfaceTimer = null; }
             if (this.el) { this.el.remove(); this.el = null; }
         }
@@ -256,6 +257,22 @@
                 else if (e.key === 'ArrowLeft') { e.preventDefault(); this.go(-1); }
             };
             document.addEventListener('keydown', this._onKey);
+            // Re-render on a completed locale activation. When the tour is
+            // restarted while an activation is still pending, the fresh overlay
+            // renders in the locale current AT restart; the winning activation
+            // then fires i18n:changed, and this brings the text up to date
+            // without stealing focus.
+            this._onI18n = () => {
+                if (!this.el || !this.el.isConnected) return;
+                const active = document.activeElement;
+                const focusId = active && this.el.contains(active) ? active.id : null;
+                this._render();
+                if (focusId) {
+                    const again = this.el.querySelector('#' + CSS.escape(focusId));
+                    if (again) again.focus();
+                }
+            };
+            document.addEventListener('i18n:changed', this._onI18n);
             this._onResize = () => this._position();
             window.addEventListener('resize', this._onResize);
             // Mobile keyboards and browser chrome resize the visual viewport

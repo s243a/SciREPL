@@ -401,21 +401,32 @@
                     // entry inside the open menu is a hostile pseudo-element on
                     // the menu's own content, which is exactly the attack.
                     && this._revealInScroll(appBtn, () =>
-                        this._elementUsable(appBtn, { coverage: true, allowOffscreen: true })));
+                        this._elementUsable(appBtn, { coverage: true })));
                 if (!ok) return false;
             }
             if (dialog) {
                 const ok = this._withProbeOpen(dialog, () => {
                     if (!this._elementUsable(dialog, {})) return false;
-                    // A dialog that opens but offers no usable recovery control is
-                    // still a lockout — hiding the editor, Apply and Reset leaves
-                    // no way out. At least one must be operable.
-                    const controls = ['appearance-custom-css-input', 'appearance-css-apply',
-                        'appearance-reset']
-                        .map((id) => document.getElementById(id))
-                        .filter(Boolean);
-                    return controls.some((c) =>
-                        this._revealInScroll(c, () => this._elementUsable(c, { allowOffscreen: true })));
+                    // A dialog that opens but offers no usable recovery PATH is
+                    // still a lockout. Recovery is either Reset (one control), or
+                    // editing (the textarea AND Apply together). Any single other
+                    // control — Apply without the textarea, the textarea without
+                    // Apply — is not a way out.
+                    const usable = (id) => {
+                        const el = document.getElementById(id);
+                        return !!el && this._revealInScroll(el, () => this._elementUsable(el, {}));
+                    };
+                    // Reset is always visible in the dialog; the editor and Apply
+                    // live in a collapsed <details>. Expanding Advanced is part of
+                    // the recovery path, so open it for the measurement (restored
+                    // in the same synchronous frame).
+                    const editor = document.getElementById('appearance-custom-css-input');
+                    const details = editor && editor.closest('details');
+                    const wasOpen = details ? details.open : null;
+                    if (details) details.open = true;
+                    const canEdit = usable('appearance-custom-css-input') && usable('appearance-css-apply');
+                    if (details) details.open = wasOpen;
+                    return usable('appearance-reset') || canEdit;
                 });
                 if (!ok) return false;
             }
@@ -479,23 +490,21 @@
          * pointer events, a real size, on-screen, and (when asked) not painted
          * over by something outside the app's own chrome.
          */
-        _elementUsable(el, { coverage, allowOffscreen } = {}) {
+        _elementUsable(el, { coverage } = {}) {
             const cs = getComputedStyle(el);
             if (cs.display === 'none' || cs.visibility === 'hidden') return false;
             if (parseFloat(cs.opacity) < 0.1 || cs.pointerEvents === 'none') return false;
             const r = el.getBoundingClientRect();
             if (r.width < 8 || r.height < 8) return false;
             // On-screen is a TAPPABLE-AREA test, not "any pixel showing": a button
-            // shoved so only one pixel remains in the viewport is not operable.
-            // (Callers that reveal via scrolling pass allowOffscreen — the reveal
-            // already brought it into view.)
-            if (!allowOffscreen) {
-                const vx0 = Math.max(0, r.left), vy0 = Math.max(0, r.top);
-                const vx1 = Math.min(window.innerWidth, r.right);
-                const vy1 = Math.min(window.innerHeight, r.bottom);
-                const vw = vx1 - vx0, vh = vy1 - vy0;
-                if (vw < 8 || vh < 8) return false;
-            }
+            // shoved so only a sliver remains in the viewport is not operable.
+            // Callers that expect scroll-reachable content run this AFTER
+            // scrollIntoView, so a genuinely reachable control has been brought
+            // into view and passes, while a position:fixed off-screen element —
+            // which scrolling cannot move — still fails.
+            const vw = Math.min(window.innerWidth, r.right) - Math.max(0, r.left);
+            const vh = Math.min(window.innerHeight, r.bottom) - Math.max(0, r.top);
+            if (vw < 8 || vh < 8) return false;
             if (coverage && this._coveredByForeign(el)) return false;
             return true;
         }

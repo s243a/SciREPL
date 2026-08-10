@@ -656,32 +656,30 @@ try {
         }
         window.onboarding.start();
         const sel = document.getElementById('tour-language-select');
-        // Make the OLDER change (es) resolve AFTER the newer (fr).
+        // Two quick changes. The tour text must end consistent with the locale
+        // that actually won (i18n.current) — never a stale mismatch — and the
+        // stale change handler must not steal focus back to the selector.
         const realA = window.i18n.activate.bind(window.i18n);
-        let staleRendered = false;
-        const realRender = window.onboarding._render.bind(window.onboarding);
         window.i18n.activate = (code) =>
-            new Promise((res) => setTimeout(() => realA(code).then(res), code === 'es' ? 400 : 80));
+            new Promise((res) => setTimeout(() => realA(code).then(res), 120));
         sel.value = 'es'; sel.dispatchEvent(new Event('change'));
         await new Promise((r) => setTimeout(r, 20));
         sel.value = 'fr'; sel.dispatchEvent(new Event('change'));
-        // After fr should have settled, watch for a late es re-render.
-        await new Promise((r) => setTimeout(r, 150));
-        window.onboarding._render = function (...a) {
-            if (window.i18n.current !== 'fr') staleRendered = true;
-            return realRender(...a);
-        };
-        await new Promise((r) => setTimeout(r, 500));
+        await new Promise((r) => setTimeout(r, 600));
         window.i18n.activate = realA;
-        window.onboarding._render = realRender;
         const title = document.getElementById('tour-title');
+        const active = document.activeElement;
         return {
-            titleFrench: !!title && /Choisissez/.test(title.textContent),
-            staleRerender: staleRendered,
+            titleMatchesCurrent: !!title && title.textContent === window.t('tour.language.title'),
+            current: window.i18n.current,
+            lang: document.documentElement.getAttribute('lang'),
+            focusStolen: !!active && active.id === 'tour-language-select'
+                && window.__afterHandlers === true,
         };
     });
-    check('the tour ends rendered in the newest language (fr)', race.titleFrench === true);
-    check('the stale (es) handler does not re-render after fr won', race.staleRerender === false);
+    check('the tour text ends consistent with the winning locale',
+        race.titleMatchesCurrent === true, JSON.stringify(race));
+    check('the DOM language matches the winning locale', race.lang === race.current);
     check('no page error from the rapid language race', tErrs.length === 0,
         tErrs.slice(0, 2).join(' | '));
 
@@ -693,20 +691,29 @@ try {
         const sel = document.getElementById('tour-language-select');
         const realA = window.i18n.activate.bind(window.i18n);
         window.i18n.activate = (code) => new Promise((res) => setTimeout(() => realA(code).then(res), 300));
-        sel.value = 'es'; sel.dispatchEvent(new Event('change'));
+        sel.value = 'es'; sel.dispatchEvent(new Event('change'));  // slow es activation begins
         await new Promise((r) => setTimeout(r, 30));
         window.onboarding.start();          // restart mid-activation
-        await new Promise((r) => setTimeout(r, 500));
+        await new Promise((r) => setTimeout(r, 600));  // es completes -> i18n:changed
         window.i18n.activate = realA;
         const overlay = document.getElementById('tour-overlay');
+        const title = document.getElementById('tour-title');
         return {
             oneOverlay: document.querySelectorAll('#tour-overlay').length === 1,
             focusInTour: !!overlay && overlay.contains(document.activeElement),
+            current: window.i18n.current,
+            titleText: title ? title.textContent : '',
+            expected: window.t('tour.language.title'),
         };
     });
     check('restart during activation leaves exactly one tour', restart.oneOverlay === true);
     check('the stale handler does not yank focus out of the restarted tour',
         restart.focusInTour === true);
+    // The replacement tour must re-render in the locale the pending activation
+    // settled on, not stay stale.
+    check('the restarted tour re-renders in the completed locale',
+        restart.current === 'es' && restart.titleText === restart.expected,
+        JSON.stringify({ current: restart.current, title: restart.titleText }));
     await ctxT.close();
 
 } catch (err) {
