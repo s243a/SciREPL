@@ -492,10 +492,15 @@
                 host.textContent = '';
                 return;
             }
-            const strings = await this.loadDomain(this.current, 'privacy');
+            // Capture the locale for this call: loadDomain awaits, and a newer
+            // activation could change this.current meanwhile. Bind the write to
+            // the locale we fetched for, and skip it if the app has since moved
+            // on — otherwise a slow es activation could stamp a Spanish notice
+            // over a page that is now ja.
+            const forLocale = this.current;
+            const strings = await this.loadDomain(forLocale, 'privacy');
+            if (this.current !== forLocale) return;
             const notice = (strings && strings['privacy.translationNotice'])
-                // Falling back to English is not ideal, but a notice in the
-                // wrong language still beats a translated policy with none.
                 || 'This translation is provided for information only. '
                    + 'The English version is the official privacy policy.';
             host.textContent = notice;
@@ -590,12 +595,14 @@
             root.setAttribute('dir', info.dir);
 
             this.applyToDom();
-            // The policy's official-language notice follows the locale, and must
-            // not wait for the dialog to be opened — it is part of the text.
-            // Awaited so the DOM is consistent by the time i18n:changed fires;
-            // without this, switching locales twice quickly left the previous
-            // language's notice sitting above the new policy text.
+            // The policy's official-language notice follows the locale and is
+            // part of the text, so it renders here rather than waiting for the
+            // dialog to open. renderTranslationNotice() awaits a domain-catalogue
+            // fetch, so re-check the token afterwards: a newer activation that
+            // resolved during that await must not be overwritten with this
+            // (now stale) locale's notice, nor have this event fire after it.
             await this.renderTranslationNotice();
+            if (token !== this._activateToken) return;
             document.dispatchEvent(new CustomEvent('i18n:changed', { detail: { code } }));
         }
 

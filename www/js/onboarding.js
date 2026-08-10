@@ -145,13 +145,25 @@
                 if (books.length > 1) return true;
                 if (books.some((b) => b && Array.isArray(b.cells) && b.cells.length)) return true;
             }
-            // Settings the user can only have reached through the menu.
-            for (const key of ['scirepl_appearance_theme', 'scirepl_appearance_btn_scale',
-                'scirepl_appearance_top_margin', 'scirepl_language', 'scirepl_enabled_languages']) {
-                if (localStorage.getItem(key) !== null) return true;
+            // Any preference only a real user would have set. Rather than list
+            // them (default programming language, enabled languages, appearance,
+            // export format, VFS/notebook settings, auto-execute…) and fall
+            // behind as new ones appear, treat every scirepl_ key as evidence
+            // EXCEPT the first-run bookkeeping and the (possibly empty) session.
+            const BOOKKEEPING = new Set([
+                'scirepl_privacy_accepted', 'scirepl_onboarding_seen',
+                'scirepl_auto_download', 'scirepl_language',
+                'scirepl_i18n_show_drafts', 'scirepl_draft_input',
+                'scirepl_session_v2', 'scirepl_session_v1',
+                'scirepl_appearance_quarantined_css',
+            ]);
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('scirepl_') && !BOOKKEEPING.has(key)) return true;
             }
             return false;
         }
+
 
         /** Steps whose target exists, plus optional ones shown as illustrations. */
         _resolveSteps() {

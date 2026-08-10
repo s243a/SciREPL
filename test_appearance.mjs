@@ -761,6 +761,31 @@ try {
     check('the last activation wins a race, not whichever resolves last',
         raced.lang === 'en' && raced.current === 'en', JSON.stringify(raced));
 
+    // A stale activation must not stamp its notice over the winning locale.
+    const staleNotice = await page.evaluate(async () => {
+        await window.i18n.load('es');
+        await window.i18n.load('ja');
+        const a = window.i18n.activate('es');   // not awaited first
+        const b2 = window.i18n.activate('ja');
+        await Promise.all([a, b2]);
+        await new Promise((r) => setTimeout(r, 300));
+        const notice = document.getElementById('privacy-translation-notice');
+        const out = {
+            current: window.i18n.current,
+            lang: document.documentElement.getAttribute('lang'),
+            noticeText: notice ? notice.textContent : '',
+            enDom: window.i18n.domains['privacy.en']['privacy.translationNotice'],
+            jaDom: window.i18n.domains['privacy.ja']['privacy.translationNotice'],
+        };
+        await window.i18n.activate('en');
+        return out;
+    });
+    check('a stale activation does not leave the wrong-language notice',
+        staleNotice.current === 'ja' && staleNotice.lang === 'ja'
+        && staleNotice.noticeText === staleNotice.jaDom, JSON.stringify({
+            current: staleNotice.current, lang: staleNotice.lang,
+        }));
+
     /* ------------------------------ dialog ------------------------------ */
     console.log('\n5. Dialog');
 

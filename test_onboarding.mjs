@@ -211,6 +211,27 @@ try {
         await emptyPage.evaluate(() => !!document.getElementById('tour-overlay')));
     await emptyCtx.close();
 
+    // Menu-created preferences (default programming language, installed
+    // packages, notebook-VFS settings) all count as prior use, per Sol.
+    for (const [name, key, val] of [
+        ['a chosen default language', 'scirepl_default_language', 'prolog'],
+        ['installed packages', 'scirepl_installed_packages', '["numpy"]'],
+        ['notebook VFS settings', 'scirepl_nbvfs_settings', '{}'],
+        ['a saved export format', 'scirepl_export_format', 'pdf'],
+    ]) {
+        const ctx = await browser.newContext();
+        await ctx.addInitScript((kv) => {
+            localStorage.setItem('scirepl_privacy_accepted', '1');
+            localStorage.setItem(kv.key, kv.val);
+        }, { key, val });
+        const pg = await ctx.newPage();
+        await pg.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+        await pg.waitForTimeout(1600);
+        check(`${name} grandfathers the user`,
+            await pg.evaluate(() => localStorage.getItem('scirepl_onboarding_seen') === 'grandfathered'));
+        await ctx.close();
+    }
+
     console.log('\n7. Consent and the tour');
 
     // Consent is requested lazily, and only for runtimes fetched from a CDN —
