@@ -765,6 +765,29 @@ try {
     check('a benign animation is not rolled back', benignAnim.applied === true);
     await page.evaluate(() => window.appearance.setCustomCss(''));
 
+    /* ------------- Sol's five recovery gaps, each rolled back ----------- */
+    console.log('\n4i. The subtle CSS lockouts Sol reproduced');
+
+    const gaps = [
+        ['a pseudo-overlay on the menu content blocks the Appearance entry',
+            '#menu-modal .modal-content::after { content:""; position:fixed; inset:0; z-index:99999; }', true],
+        ['hiding the editor, Apply and Reset leaves no recovery control',
+            '#appearance-custom-css-input, #appearance-css-apply, #appearance-reset { display:none !important; }', true],
+        ['the menu button shoved to a single visible pixel',
+            '#menu-btn { position:fixed !important; left:-27px !important; top:0 !important; }', true],
+        ['a persistent animation hides the Appearance dialog after a delay',
+            '@keyframes h { to { opacity:0; pointer-events:none; } } #appearance-modal { animation:h 1s 4s forwards; }', true],
+    ];
+    for (const [name, css, expectRollback] of gaps) {
+        const rolledBack = await page.evaluate((c) => {
+            window.appearance.clearQuarantinedCss();
+            window.appearance.setCustomCss(c);
+            return !document.getElementById('appearance-custom-css');
+        }, css);
+        check(`rolled back: ${name}`, rolledBack === expectRollback, `rolledBack=${rolledBack}`);
+    }
+    await page.evaluate(() => window.appearance.setCustomCss(''));
+
     /* ----------------- legal text follows its own review ---------------- */
     console.log('\n4d. Privacy status controls the legal text');
 
@@ -869,6 +892,77 @@ try {
         await page.evaluate(() => window.appearance.getTopMargin() === null));
 
     check('no uncaught page errors', pageErrors.length === 0, pageErrors.slice(0, 3).join(' | '));
+    /* ------ real pointer recovery, portrait & short landscape ---------- */
+    console.log('\n6. Real pointer path: benign CSS persists across a reload');
+
+    // Everything above drives the model directly. This drives the browser: a
+    // pointer taps the menu, taps Appearance, types benign CSS, taps Apply, then
+    // RELOADS — the scenario Sol reproduced where scroll-reachable menu content
+    // at 844x390 wrongly quarantined harmless stored CSS.
+    for (const [label, vp] of [['portrait 390x844', { width: 390, height: 844 }],
+                               ['short landscape 844x390', { width: 844, height: 390 }]]) {
+        const rc = await browser.newContext({ viewport: vp });
+        await rc.addInitScript(() => {
+            localStorage.setItem('scirepl_privacy_accepted', '1');
+            localStorage.setItem('scirepl_onboarding_seen', '1');
+            localStorage.setItem('scirepl_auto_download', '1');
+        });
+        const rp = await rc.newPage();
+        await rp.goto(URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+        await rp.waitForFunction(() => window.appearance, null, { timeout: 30_000 });
+        await rp.waitForFunction(() => {
+            const o = document.getElementById('loading-overlay');
+            return !o || o.classList.contains('hidden');
+        }, null, { timeout: 60_000 }).catch(() => {});
+        await rp.waitForTimeout(500);
+
+        // Tap the menu, then the Appearance entry — scrolling it into view first,
+        // exactly as a user would on a short viewport.
+        await rp.click('#menu-btn');
+        await rp.waitForTimeout(150);
+        await rp.locator('#btn-appearance').scrollIntoViewIfNeeded().catch(() => {});
+        await rp.click('#btn-appearance');
+        await rp.waitForTimeout(200);
+        check(`[${label}] the Appearance dialog opens from a real tap`,
+            await rp.evaluate(() => !document.getElementById('appearance-modal').classList.contains('hidden')));
+
+        // The custom-CSS box lives in a collapsed <details>; expand it as a user would.
+        await rp.evaluate(() => {
+            const d = document.getElementById('appearance-custom-css-input').closest('details');
+            if (d) d.open = true;
+        });
+        await rp.locator('#appearance-custom-css-input').scrollIntoViewIfNeeded().catch(() => {});
+        await rp.fill('#appearance-custom-css-input', '#app-header { letter-spacing: .5px; }');
+        await rp.click('#appearance-css-apply');
+        await rp.waitForTimeout(300);
+        check(`[${label}] benign CSS applied via pointer is not quarantined`,
+            await rp.evaluate(() => !!document.getElementById('appearance-custom-css')
+                && !window.appearance.getQuarantinedCss()));
+
+        // Persisted reload: the real bug surfaced only on reload, when apply()
+        // runs behind the loading overlay.
+        await rp.reload({ waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+        await rp.waitForFunction(() => window.appearance, null, { timeout: 30_000 });
+        await rp.waitForFunction(() => {
+            const o = document.getElementById('loading-overlay');
+            return !o || o.classList.contains('hidden');
+        }, null, { timeout: 60_000 }).catch(() => {});
+        await rp.waitForTimeout(1200);
+        check(`[${label}] the stored CSS survives a reload — still applied`,
+            await rp.evaluate(() => !!document.getElementById('appearance-custom-css')));
+        check(`[${label}] the stored CSS survives a reload — not quarantined`,
+            await rp.evaluate(() => !window.appearance.getQuarantinedCss()));
+
+        // And a genuine lockout is still caught on this viewport, via the model.
+        const lockedOut = await rp.evaluate(() => {
+            window.appearance.clearQuarantinedCss();
+            window.appearance.setCustomCss('#menu-btn { pointer-events: none !important; }');
+            return !document.getElementById('appearance-custom-css');
+        });
+        check(`[${label}] a real lockout is still rolled back`, lockedOut === true);
+        await rc.close();
+    }
+
 } catch (err) {
     failures++;
     console.log(`\n  [FAIL] test crashed: ${err && err.message}`);

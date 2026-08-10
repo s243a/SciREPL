@@ -393,14 +393,60 @@
 
             if (menu && appBtn) {
                 const ok = this._withProbeOpen(menu, () =>
-                    this._elementUsable(menu, {}) && this._elementUsable(appBtn, { coverage: true }));
+                    this._elementUsable(menu, {})
+                    // The Appearance entry may sit below the fold of a scrollable
+                    // menu — that is reachable, not lost. Scroll it into view for
+                    // the measurement. Coverage here is STRICT (no app-chrome
+                    // exemption): the only thing that can legitimately cover the
+                    // entry inside the open menu is a hostile pseudo-element on
+                    // the menu's own content, which is exactly the attack.
+                    && this._revealInScroll(appBtn, () =>
+                        this._elementUsable(appBtn, { coverage: true, allowOffscreen: true })));
                 if (!ok) return false;
             }
             if (dialog) {
-                const ok = this._withProbeOpen(dialog, () => this._elementUsable(dialog, {}));
+                const ok = this._withProbeOpen(dialog, () => {
+                    if (!this._elementUsable(dialog, {})) return false;
+                    // A dialog that opens but offers no usable recovery control is
+                    // still a lockout — hiding the editor, Apply and Reset leaves
+                    // no way out. At least one must be operable.
+                    const controls = ['appearance-custom-css-input', 'appearance-css-apply',
+                        'appearance-reset']
+                        .map((id) => document.getElementById(id))
+                        .filter(Boolean);
+                    return controls.some((c) =>
+                        this._revealInScroll(c, () => this._elementUsable(c, { allowOffscreen: true })));
+                });
                 if (!ok) return false;
             }
             return true;
+        }
+
+        /**
+         * Scroll `el` into view within any scrollable ancestor, run `measure`,
+         * then restore the scroll positions — all synchronously, so a control
+         * that is reachable only by scrolling is judged reachable rather than
+         * off-screen. Handles the 844x390 landscape case where the Appearance
+         * entry begins below the menu's viewport.
+         */
+        _revealInScroll(el, measure) {
+            const saved = [];
+            let node = el.parentElement;
+            while (node && node !== document.body) {
+                if (node.scrollHeight > node.clientHeight + 1
+                    || node.scrollWidth > node.clientWidth + 1) {
+                    saved.push([node, node.scrollTop, node.scrollLeft]);
+                }
+                node = node.parentElement;
+            }
+            try {
+                if (typeof el.scrollIntoView === 'function') {
+                    el.scrollIntoView({ block: 'center', inline: 'center' });
+                }
+                return measure();
+            } finally {
+                for (const [n, top, left] of saved) { n.scrollTop = top; n.scrollLeft = left; }
+            }
         }
 
         /**
@@ -433,14 +479,23 @@
          * pointer events, a real size, on-screen, and (when asked) not painted
          * over by something outside the app's own chrome.
          */
-        _elementUsable(el, { coverage } = {}) {
+        _elementUsable(el, { coverage, allowOffscreen } = {}) {
             const cs = getComputedStyle(el);
             if (cs.display === 'none' || cs.visibility === 'hidden') return false;
             if (parseFloat(cs.opacity) < 0.1 || cs.pointerEvents === 'none') return false;
             const r = el.getBoundingClientRect();
             if (r.width < 8 || r.height < 8) return false;
-            if (r.bottom < 1 || r.right < 1
-                || r.top > window.innerHeight - 1 || r.left > window.innerWidth - 1) return false;
+            // On-screen is a TAPPABLE-AREA test, not "any pixel showing": a button
+            // shoved so only one pixel remains in the viewport is not operable.
+            // (Callers that reveal via scrolling pass allowOffscreen — the reveal
+            // already brought it into view.)
+            if (!allowOffscreen) {
+                const vx0 = Math.max(0, r.left), vy0 = Math.max(0, r.top);
+                const vx1 = Math.min(window.innerWidth, r.right);
+                const vy1 = Math.min(window.innerHeight, r.bottom);
+                const vw = vx1 - vx0, vh = vy1 - vy0;
+                if (vw < 8 || vh < 8) return false;
+            }
             if (coverage && this._coveredByForeign(el)) return false;
             return true;
         }
@@ -464,11 +519,16 @@
             const top = document.elementFromPoint(cx, cy);
             if (!top) return false;
             if (top === el || el.contains(top)) return false;   // el or its child on top
-            // NB: an ANCESTOR on top (elementFromPoint returning e.g. body when a
-            // body::after overlay covers the point) means el IS covered — do not
-            // treat top.contains(el) as safe.
-            if (this._isAppChrome(top)) return false;   // dismissible app chrome
-            return true;   // a foreign element (or ancestor pseudo-element host) on top
+            // An ANCESTOR is on top: elementFromPoint returns the host of a
+            // covering ::after (e.g. body::after, or #menu-modal .modal-content
+            // ::after over the Appearance entry). A pseudo-element cannot be
+            // dismissed, so this is always a lockout — even though the host is
+            // "app chrome".
+            if (top.contains(el)) return true;
+            // A SEPARATE element is on top. The app's own dismissible chrome (an
+            // open dialog covering the header) is fine; anything else is a
+            // foreign overlay.
+            return !this._isAppChrome(top);
         }
 
         /**
@@ -480,7 +540,9 @@
          * elapses, so the CSS is quarantined at once and never locks anyone out.
          */
         _pathHasHidingAnimation() {
-            const ids = ['menu-btn', 'menu-modal', 'btn-appearance', 'app-header'];
+            const ids = ['menu-btn', 'menu-modal', 'btn-appearance', 'app-header',
+                'appearance-modal', 'appearance-custom-css-input',
+                'appearance-css-apply', 'appearance-reset'];
             for (const id of ids) {
                 const el = document.getElementById(id);
                 if (!el || typeof el.getAnimations !== 'function') continue;
