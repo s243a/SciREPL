@@ -1,21 +1,31 @@
 /**
- * check-sw-shell.mjs — a changed app-shell asset must bump CACHE_VERSION.
+ * check-sw-shell.mjs — a changed worker or app-shell asset must bump CACHE_VERSION.
  *
  *   node scripts/check-sw-shell.mjs           # verify (CI)
- *   node scripts/check-sw-shell.mjs --write   # record the current state
+ *   node scripts/check-sw-shell.mjs --write   # append the current state
  *
- * The service worker keys its cache on CACHE_VERSION. If an app-shell file
- * changes but the version does not, browsers never see a new worker (the sw.js
- * bytes are unchanged), so clients keep serving the old asset — a silent
- * staleness bug. And within one version, a same-name cache is where a partial
- * install could otherwise mix old and new files.
+ * The service worker keys its cache on CACHE_VERSION. If the worker logic or any
+ * app-shell file changes but the version does not, browsers never see a new
+ * worker (unchanged sw.js bytes / same cache name), so clients keep serving the
+ * old assets and — worse — a re-install under the same cache name can wipe a
+ * complete cache and leave a partial one. So a content change MUST bump the
+ * version.
  *
- * This records a hash of every APP_SHELL file against the version that shipped
- * it. If the hash changes while the version does not, the build fails: bump
- * CACHE_VERSION (and re-run with --write) whenever a shell asset changes.
+ * Enforcement is an APPEND-ONLY history: www/sw-shell.lock.json maps each
+ * version to the content hash that shipped it. The rules the history enforces:
+ *
+ *   - the current CACHE_VERSION must be present in the history;
+ *   - the current content hash must equal what the history recorded for it;
+ *   - a version already in the history can NEVER be re-assigned a different hash
+ *     (so `--write` cannot paper over a same-version content change — the exact
+ *     bypass this replaces);
+ *   - the hash covers sw.js (the worker logic) as well as every app-shell asset.
+ *
+ * `--write` only ever ADDS a new version, or is a no-op when the current version
+ * already records the current hash. It refuses to overwrite an existing version.
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -34,7 +44,6 @@ if (!versionMatch) {
 }
 const version = versionMatch[1];
 
-// Pull the APP_SHELL entries (quoted './...' paths in the array literal).
 const shellBlock = sw.match(/const APP_SHELL = \[([\s\S]*?)\];/);
 if (!shellBlock) {
     console.error('[sw] could not find APP_SHELL in sw.js');
@@ -42,14 +51,22 @@ if (!shellBlock) {
 }
 const shell = [...shellBlock[1].matchAll(/'(\.\/[^']+)'/g)].map((m) => m[1]).sort();
 
+// Hash the worker logic AND every app-shell asset. sw.js's CACHE_VERSION line is
+// excluded, or the version bump itself would change the hash and defeat the
+// "same content, must bump" check (the bump is the intended, hash-neutral edit).
+const swForHash = sw.replace(/const CACHE_VERSION = '[^']+'/, "const CACHE_VERSION = '<version>'");
 const hash = createHash('sha256');
-hash.update(`v=${shell.length}\n`);
+hash.update(`entries=${shell.length}\n`);
+hash.update('sw.js\0');
+hash.update(swForHash);
+hash.update('\0');
 const missing = [];
 for (const rel of shell) {
     const file = path.join(WWW, rel.replace(/^\.\//, ''));
-    if (!existsSync(file)) { missing.push(rel); continue; }
+    let bytes;
+    try { bytes = readFileSync(file); } catch { missing.push(rel); continue; }
     hash.update(rel + '\0');
-    hash.update(readFileSync(file));
+    hash.update(bytes);
     hash.update('\0');
 }
 if (missing.length) {
@@ -58,38 +75,43 @@ if (missing.length) {
 }
 const digest = hash.digest('hex');
 
+let lock = { history: {} };
+try {
+    const parsed = JSON.parse(readFileSync(LOCK, 'utf8'));
+    if (parsed && parsed.history && typeof parsed.history === 'object') lock = parsed;
+} catch { /* missing or legacy; treated as empty history */ }
+
+const recorded = lock.history[version];
+
 if (process.argv.includes('--write')) {
-    writeFileSync(LOCK, JSON.stringify({ version, shellHash: digest }, null, 2) + '\n');
-    console.log(`[sw] recorded shell hash for ${version} (${shell.length} files).`);
+    if (recorded && recorded !== digest) {
+        console.error(`[sw] refusing to change the recorded hash for ${version}.\n` +
+            '     A version, once shipped, is immutable. The worker logic or an\n' +
+            '     app-shell asset changed — bump CACHE_VERSION in www/sw.js and\n' +
+            '     re-run --write to append the new version.');
+        process.exit(1);
+    }
+    if (recorded === digest) {
+        console.log(`[sw] ${version} already recorded and unchanged; nothing to write.`);
+        process.exit(0);
+    }
+    lock.history[version] = digest;
+    writeFileSync(LOCK, JSON.stringify(lock, null, 2) + '\n');
+    console.log(`[sw] appended ${version} to the shell history (${shell.length} assets + worker).`);
     process.exit(0);
 }
 
-let lock = null;
-try { lock = JSON.parse(readFileSync(LOCK, 'utf8')); } catch { /* missing */ }
-
-if (!lock) {
-    console.error('[sw] www/sw-shell.lock.json is missing. Run: node scripts/check-sw-shell.mjs --write');
+// Verify.
+if (!recorded) {
+    console.error(`[sw] CACHE_VERSION '${version}' is not in the shell history.\n` +
+        '     If you bumped the version, record it: node scripts/check-sw-shell.mjs --write');
     process.exit(1);
 }
-
-if (lock.shellHash === digest) {
-    // Assets unchanged since the lock. Version may legitimately differ (a bump
-    // with no asset change), so that alone is fine.
-    console.log(`[sw] app shell unchanged since ${lock.version}; current ${version}. OK.`);
-    process.exit(0);
-}
-
-// Assets changed. The version MUST have changed too, and the lock re-written.
-if (lock.version === version) {
-    console.error('[sw] an app-shell asset changed but CACHE_VERSION is still ' +
-        `'${version}'.\n` +
-        '     Bump CACHE_VERSION in www/sw.js, then run:\n' +
-        '       node scripts/check-sw-shell.mjs --write\n' +
-        '     Without a new version, browsers keep serving the old asset.');
+if (recorded !== digest) {
+    console.error(`[sw] the worker or an app-shell asset changed but CACHE_VERSION ` +
+        `is still '${version}'.\n` +
+        '     Bump CACHE_VERSION in www/sw.js, then: node scripts/check-sw-shell.mjs --write\n' +
+        '     (--write will NOT overwrite an existing version — that is the point.)');
     process.exit(1);
 }
-
-console.error('[sw] app-shell assets changed and CACHE_VERSION moved to ' +
-    `'${version}', but the lock still records '${lock.version}'.\n` +
-    '     Run: node scripts/check-sw-shell.mjs --write');
-process.exit(1);
+console.log(`[sw] ${version} matches the recorded shell hash (${Object.keys(lock.history).length} in history). OK.`);

@@ -26,6 +26,7 @@ jobs:
       - run: node scripts/check-i18n-keys.mjs
       - run: node scripts/check-translations.mjs
       - run: node scripts/check-sw-shell.mjs
+      - run: node test_sw_shell_guard.mjs
       - run: node server.js &
       - run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
       - run: node test_appearance.mjs
