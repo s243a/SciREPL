@@ -187,7 +187,7 @@ try {
                 String(url).includes('sw-next') ? url : './sw-next.js', opts);
         });
 
-        await page.reload({ waitUntil: 'load', timeout: TIMEOUT });
+        await page.reload({ waitUntil: 'load', timeout: TIMEOUT }).catch(() => {});
         // The app reloads itself on controllerchange, so allow for that landing
         // mid-wait rather than assuming a single stable load.
         await page.waitForTimeout(7000);
@@ -267,8 +267,12 @@ try {
             writeFileSync(`www/sw-${ver}.js`, readFileSync('www/sw.js', 'utf8').replace(
                 /const CACHE_VERSION = '([^']+)'/, `const CACHE_VERSION = '${ver}'`));
             await pg.evaluate((v) => localStorage.setItem('__swTarget', `./sw-${v}.js`), ver);
-            await pg.reload({ waitUntil: 'load', timeout: TIMEOUT });
+            // The app reloads itself on controllerchange (a new worker taking
+            // over), which can abort this explicit reload. Tolerate that and let
+            // the page settle either way.
+            await pg.reload({ waitUntil: 'load', timeout: TIMEOUT }).catch(() => {});
             await pg.waitForTimeout(5000);
+            await pg.waitForLoadState('load').catch(() => {});
             await pg.waitForLoadState('load').catch(() => {});
         };
         const servedOffline = async () => {
@@ -304,6 +308,78 @@ try {
             for (const v of ['t-v1', 't-v2', 't-v3', 't-v4']) {
                 rmSync(`www/sw-${v}.js`, { force: true });
             }
+            await ctx.close();
+        }
+    }
+
+    console.log('\n5. Partial install recovers and promotes once files return');
+
+    // A version that installed partially serves the previous complete shell
+    // (coherent, no mix). When its missing file becomes reachable again, the
+    // opportunistic repair fills the gap and the cache is promoted — WITHOUT a
+    // fresh deploy. Sol's edge case 2.
+    {
+        const ctx = await browser.newContext();
+        await ctx.addInitScript(() => {
+            localStorage.setItem('scirepl_privacy_accepted', '1');
+            localStorage.setItem('scirepl_onboarding_seen', '1');
+            const sw = navigator.serviceWorker, real = sw.register.bind(sw);
+            // No-op until a target is set, so the app's own sw.js does not create
+            // a parallel lineage on the first load.
+            sw.register = (u, o) => {
+                const t = localStorage.getItem('__swTarget');
+                return t ? real(t, o) : Promise.resolve({ unregister() {}, addEventListener() {} });
+            };
+        });
+        let ver = null, broken = null;
+        await ctx.route('**/i18n/manifest.json', async (route) => {
+            const j = JSON.parse(await (await route.fetch()).text());
+            j._testVersion = ver;
+            await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(j) });
+        });
+        await ctx.route('**/*', (route) =>
+            (broken && route.request().url().includes(broken))
+                ? route.fulfill({ status: 404, body: 'x' }) : route.fallback());
+        const pg = await ctx.newPage();
+        await pg.goto(`${ORIGIN}/index.html`, { waitUntil: 'load', timeout: TIMEOUT });
+
+        const install = async (v, breakName) => {
+            ver = v; broken = breakName || null;
+            writeFileSync(`www/sw-${v}.js`, readFileSync('www/sw.js', 'utf8').replace(
+                /const CACHE_VERSION = '[^']+'/, `const CACHE_VERSION = '${v}'`));
+            await pg.evaluate((vv) => localStorage.setItem('__swTarget', `./sw-${vv}.js`), v);
+            await pg.reload({ waitUntil: 'load', timeout: TIMEOUT }).catch(() => {});
+            await pg.waitForTimeout(5000);
+            await pg.waitForLoadState('load').catch(() => {});
+        };
+        const served = async () => {
+            await ctx.setOffline(true);
+            const v = await pg.evaluate(async () => {
+                try { return (await (await fetch('./i18n/manifest.json', { cache: 'no-store' })).json())._testVersion; }
+                catch { return 'FETCH-FAILED'; }
+            });
+            await ctx.setOffline(false);
+            return v;
+        };
+
+        try {
+            await install('r-v1');
+            await install('r-v2', 'ko.json');   // partial: ko 404
+            check('while partial, the previous complete shell is served',
+                (await served()) === 'r-v1');
+            // Network recovers; drive some fetches to trigger the throttled repair.
+            broken = null;
+            for (let i = 0; i < 6; i++) {
+                await pg.evaluate(() => fetch('./index.html', { cache: 'no-store' }).catch(() => {}));
+                await pg.waitForTimeout(2500);
+            }
+            check('once the missing file returns, the partial cache is repaired and promoted',
+                (await served()) === 'r-v2');
+            check('the recovered file is now cached in the promoted version',
+                await pg.evaluate(async () => !!(await caches.match(
+                    new URL('i18n/ko.json', location.href).href))));
+        } finally {
+            for (const v of ['r-v1', 'r-v2']) rmSync(`www/sw-${v}.js`, { force: true });
             await ctx.close();
         }
     }

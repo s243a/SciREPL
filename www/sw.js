@@ -1,11 +1,25 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v130';
+const CACHE_VERSION = 'v131';
 
 // Marker entry recording whether an app cache finished installing. Stored in
 // the cache itself so the answer travels with it and survives a restart.
 const COMPLETE_MARKER = './__app-shell-complete';
+
+// Opportunistic repair throttle. A partial current cache whose missing files
+// become reachable again (the user comes back online) must fill its gaps even
+// though those files are still served from the older complete cache and so are
+// never re-fetched on their own. On same-origin fetches, if the current cache is
+// incomplete, retry the missing entries — throttled so it is not run per asset.
+let _lastRepairAttempt = 0;
+async function maybeRepairInBackground(event) {
+  const now = Date.now();
+  if (now - _lastRepairAttempt < 5000) return;// throttle: frequent enough to recover, not chatty
+  if (await cacheIsComplete(APP_CACHE)) return;
+  _lastRepairAttempt = now;
+  event.waitUntil(repairShell(APP_CACHE));
+}
 const APP_CACHE = 'scirepl-app-' + CACHE_VERSION;
 const CDN_CACHE = 'scirepl-cdn-v2';
 
@@ -142,14 +156,20 @@ function isCDNRequest(url) {
 // partial install is a silent total one.
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
+    // Start from an empty cache under this version's name. If CACHE_VERSION was
+    // reused while an app-shell asset changed, the old entries would otherwise
+    // linger and a failed new fetch would leave the STALE response present —
+    // shellIsComplete() would then see the file and mark a mixed cache complete.
+    // Deleting first means a failed fetch leaves the file ABSENT, so presence is
+    // a truthful completeness signal.
+    await caches.delete(APP_CACHE);
     const cache = await caches.open(APP_CACHE);
+
     try {
       await cache.addAll(APP_SHELL);
     } catch (err) {
       console.warn('[sw] atomic precache failed, falling back to per-entry:', err);
-      const results = await Promise.allSettled(
-        APP_SHELL.map(url => cache.add(url))
-      );
+      const results = await Promise.allSettled(APP_SHELL.map((url) => cache.add(url)));
       const failed = APP_SHELL.filter((_, i) => results[i].status === 'rejected');
       if (failed.length) {
         console.error(`[sw] ${failed.length} of ${APP_SHELL.length} app-shell entries ` +
@@ -157,20 +177,51 @@ self.addEventListener('install', (event) => {
       }
     }
 
-    // Record whether this version's shell is actually complete. A partial
-    // install must not be allowed to replace a working previous version:
-    // deleting the old cache in that state is how a user ends up worse off
-    // offline after an upgrade than before it.
-    const complete = await shellIsComplete(cache);
-    await cache.put(COMPLETE_MARKER, new Response(complete ? 'complete' : 'partial', {
-      headers: { 'content-type': 'text/plain' },
-    }));
+    const complete = await markCompleteness(cache);
+    // Activate regardless, but note: activating the WORKER is not the same as
+    // serving its shell. The fetch handler always serves from the newest
+    // COMPLETE cache (servingCacheName), so an incomplete update does not take
+    // effect — the user keeps getting the last complete shell as one coherent
+    // set. Activating anyway is what lets this worker's own fetch handler run
+    // and repair its cache once the missing files are reachable again; a worker
+    // that stayed subordinate could never fill its gaps.
     if (!complete) {
-      console.warn('[sw] app shell incomplete; the previous cache will be kept as a fallback');
+      console.warn('[sw] shell incomplete; serving the last complete version until repaired');
     }
     await self.skipWaiting();
   })());
 });
+
+/** Write the completeness marker for a cache from its current contents. */
+async function markCompleteness(cache) {
+  const complete = await shellIsComplete(cache);
+  await cache.put(COMPLETE_MARKER, new Response(complete ? 'complete' : 'partial', {
+    headers: { 'content-type': 'text/plain' },
+  }));
+  return complete;
+}
+
+/**
+ * Try to finish a partial current-version cache: fetch the entries it is
+ * missing, AWAIT each write, then recompute the marker. Returns true if the
+ * cache is complete afterwards. This is the repair half of repair-and-promote;
+ * activate() calls it and then recomputes the serving cache, so a cache that
+ * fills its gaps becomes the served version without waiting for a fresh install.
+ */
+async function repairShell(cacheName) {
+  const cache = await caches.open(cacheName);
+  const missing = [];
+  for (const url of APP_SHELL) {
+    if (!(await cache.match(url))) missing.push(url);
+  }
+  for (const url of missing) {
+    try {
+      const res = await fetch(url, { cache: 'reload' });
+      if (res && res.ok) await cache.put(url, res.clone());
+    } catch { /* still offline for this one; leave it missing */ }
+  }
+  return markCompleteness(cache);
+}
 
 /** Every app-shell entry present in this cache? */
 async function shellIsComplete(cache) {
@@ -215,7 +266,15 @@ async function servingCacheName() {
 // Activate: retain the serving version and the current one; prune the rest.
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
-    const serving = await servingCacheName();
+    // Repair-and-promote: if this version's cache is partial, try to fetch its
+    // missing entries now (awaited), so a transient failure during install does
+    // not strand the update forever. If it completes here, it becomes the
+    // serving version; if not, the previous complete cache keeps serving.
+    if (!(await cacheIsComplete(APP_CACHE))) {
+      try { await repairShell(APP_CACHE); } catch { /* stay subordinate */ }
+    }
+
+    const serving = await servingCacheName();   // recomputed AFTER any repair
     const keys = await caches.keys();
 
     await Promise.all(keys.map(async (key) => {
@@ -226,8 +285,8 @@ self.addEventListener('activate', (event) => {
       }
       if (!key.startsWith('scirepl-app-')) return;
       // Keep exactly two things: what we serve (newest complete) and this
-      // version's own cache (APP_CACHE), which a later fetch may yet complete.
-      // Everything else — superseded complete caches and dead partials — goes.
+      // version's own cache, which a later repair may yet complete. Everything
+      // else — superseded complete caches and dead partials — goes.
       if (key === serving || key === APP_CACHE) return;
       await caches.delete(key);
     }));
@@ -254,6 +313,9 @@ self.addEventListener('fetch', (event) => {
   // consistent set rather than a mix. Never an unqualified caches.match(): that
   // searches oldest-first and would splice files across versions.
   if (url.origin === self.location.origin) {
+    // Kick a background repair if this version installed only partially; the
+    // response itself still comes from the coherent serving cache below.
+    maybeRepairInBackground(event);
     event.respondWith((async () => {
       const serving = await caches.open(await servingCacheName());
       const hit = await serving.match(event.request);
@@ -265,7 +327,14 @@ self.addEventListener('fetch', (event) => {
       const response = await fetch(event.request);
       if (response.ok && event.request.method === 'GET') {
         const current = await caches.open(APP_CACHE);
-        current.put(event.request, response.clone());
+        await current.put(event.request, response.clone());
+        // A shell entry just landed — if it was the last one missing, mark the
+        // cache complete so the next request (and the next activate) can promote
+        // it. Cheap: only recompute when the URL is actually part of the shell.
+        const path = url.pathname.slice(new URL(self.registration.scope).pathname.length);
+        if (APP_SHELL.some((u) => u.replace(/^\.\//, '') === path)) {
+          await markCompleteness(current);
+        }
       }
       return response;
     })());

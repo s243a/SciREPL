@@ -24,7 +24,9 @@
     "i18n:check": "node scripts/build-i18n-manifest.mjs --check && node scripts/check-i18n-html-ids.mjs && node scripts/check-i18n-keys.mjs && node scripts/check-translations.mjs",
     "i18n:lint": "node scripts/check-translations.mjs",
     "i18n:html-ids": "node scripts/check-i18n-html-ids.mjs",
-    "i18n:keys": "node scripts/check-i18n-keys.mjs"
+    "i18n:keys": "node scripts/check-i18n-keys.mjs",
+    "sw:check": "node scripts/check-sw-shell.mjs",
+    "sw:lock": "node scripts/check-sw-shell.mjs --write"
   },
   "keywords": [
     "python",

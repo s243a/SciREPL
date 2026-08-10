@@ -50,6 +50,8 @@ jobs:
 
       - name: i18n — catalogue lint
         run: node scripts/check-translations.mjs
+      - name: Service worker — shell version guard
+        run: node scripts/check-sw-shell.mjs
 
       - name: Start dev server
         run: node server.js &
