@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Privacy policy for the SciREPL Pro Android application.">
+    <meta name="description" content="Privacy policy for SciREPL Pro on Android and Windows/Electron.">
     <link rel="canonical" href="https://s243a.github.io/SciREPL/pro/privacy.html">
     <title>SciREPL Pro — Privacy Policy</title>
     <style>
@@ -53,10 +53,10 @@
 <body>
 <main>
     <h1>SciREPL Pro Privacy Policy</h1>
-    <p class="updated">Last updated: July 26, 2026</p>
+    <p class="updated">Last updated: August 10, 2026</p>
 
     <h2>Who this policy covers</h2>
-    <p>This policy applies to <strong>SciREPL Pro</strong>, the Android scientific notebook application developed by <a href="https://github.com/s243a" target="_blank" rel="noopener noreferrer">s243a</a>. The free SciREPL application has a <a href="../privacy.html">separate privacy policy</a>.</p>
+    <p>This policy applies to <strong>SciREPL Pro</strong> on Android and in the Windows/Electron desktop container, developed by <a href="https://github.com/s243a" target="_blank" rel="noopener noreferrer">s243a</a>. The free SciREPL application has a <a href="../privacy.html">separate privacy policy</a>.</p>
 
     <h2>Summary</h2>
     <div class="summary">
@@ -74,23 +74,23 @@
         <li>AI settings, including the selected provider, model, custom endpoint, permissions, and an API key when you save one.</li>
         <li>Remote-connection settings, including broker URLs, pairing tokens, profile names, and auto-connect preferences.</li>
     </ul>
-    <p>This information is stored using browser-style localStorage, sessionStorage, IndexedDB, and Cache Storage inside the Android app's WebView. Exported files are written to the destination you select through Android.</p>
+    <p>This information is stored using browser-style localStorage, sessionStorage, IndexedDB, and Cache Storage. Android stores it inside the app's WebView data. The Electron container stores it in its Chromium profile, normally under <code>%APPDATA%\SciREPL-Pro-Electron</code> on Windows. Exported files are written to the destination you select through the operating system.</p>
     <div class="warning">
         <p><strong>Credential warning:</strong> API keys and broker tokens are stored locally using browser storage. SciREPL Pro does not add application-level encryption to those values. Notebook code—especially JavaScript cells—runs in the app's web environment and may be able to access browser-accessible app data or make network requests. Only run code, packages, and workbooks you trust, and remove credentials when they are not needed.</p>
     </div>
 
     <h2>Retention and deletion</h2>
-    <p>Local data remains on the device until you remove it, clear SciREPL Pro's Android app data, or uninstall the app.</p>
+    <p>Local data remains on the device until you remove it or clear the platform-specific application profile.</p>
     <ul>
         <li><strong>Menu &gt; Clear History</strong> clears saved notebook/session history, the installed-package record, and virtual-filesystem data. It does <strong>not</strong> clear every preference, cache, AI API key, or remote broker credential.</li>
         <li><strong>AI panel &gt; Clear</strong> clears the current in-memory AI conversation. If conversation mirroring was enabled, mirrored cells remain in the workbook until you delete them.</li>
         <li><strong>AI Settings &gt; Advanced &gt; Reset All</strong> removes locally saved Direct AI settings, including the saved AI API key.</li>
-        <li>Saved remote profiles can be deleted in Remote bridge settings. Deleting the active profile also removes its live broker URL, pairing token, and auto-connect setting. To ensure every remaining local value is removed, clear SciREPL Pro's Android app storage.</li>
+        <li>Saved remote profiles can be deleted in Remote bridge settings. Deleting the active profile also removes its live broker URL, pairing token, and auto-connect setting.</li>
     </ul>
-    <p>To guarantee removal of all SciREPL Pro local data, credentials, and caches, clear the app's storage in Android settings or uninstall the app. Data already sent to an AI provider, broker, remote agent, download host, backup provider, or sharing destination is governed by that third party's retention and deletion practices; SciREPL's developer cannot delete it for you.</p>
+    <p>On Android, clear the app's storage in Android settings or uninstall the app to remove its local profile. On Windows, quit SciREPL Pro and delete <code>%APPDATA%\SciREPL-Pro-Electron</code>; deleting the portable application directory or uninstalling a future packaged build may leave this separate profile behind. Data already sent to an AI provider, broker, remote agent, download host, backup provider, or sharing destination is governed by that third party's retention and deletion practices; SciREPL's developer cannot delete it for you.</p>
 
-    <h2>Android backups</h2>
-    <p>The Android build requests that cloud backup be disabled and declares exclusions for app data in both cloud-backup and device-transfer rules. Android notes that device-to-device behavior can still vary on some manufacturers' devices. Those platform services are controlled by you and their providers, not by SciREPL's developer.</p>
+    <h2>Platform backups</h2>
+    <p>The Android build requests that cloud backup be disabled and declares exclusions for app data in both cloud-backup and device-transfer rules. Android notes that device-to-device behavior can still vary on some manufacturers' devices. The Electron container does not configure Windows Backup or third-party backup tools; those tools may include the Chromium profile if you configure them to back up that location. Platform and backup services are controlled by you and their providers, not by SciREPL's developer.</p>
 
     <h2>Local notebook execution</h2>
     <p>Python, R, Prolog, ClojureScript, Bash, JavaScript, Lua, and TypR notebook code runs on your device through WebAssembly or browser-based runtimes. Local execution does not mean that executed code is unable to use the network or read locally available data. Code you run can make requests to destinations chosen by that code. Remote AI inference, remote-agent sessions, and broker-host terminal sessions are not local notebook execution and are covered separately below.</p>
@@ -106,8 +106,21 @@
         <li>Results of tools that the model is permitted to use. These results can include full cell source, cell names and types, textual or structured cell output, namespace metadata, execution results, and files from permitted virtual-filesystem locations.</li>
     </ul>
     <p>The 500-character cell preview is added before tool permissions are evaluated. Review mode and other tool permissions govern later tool calls; they do not remove the automatic previews from a new Direct AI message.</p>
-    <p>Your saved API key is sent in an authentication header to the selected endpoint. That endpoint also receives ordinary network metadata such as your IP address, request time, and WebView headers. OpenRouter may pass request content to the downstream model provider selected for the request. A custom or Ollama-compatible endpoint may be on your device, on your network, or operated by another party. SciREPL Pro requires non-loopback AI endpoints to use <code>https://</code>; unencrypted <code>http://</code> is accepted only for loopback hosts, such as localhost, 127.0.0.1, or ::1.</p>
+    <p>Your saved API key is sent in an authentication header to the selected endpoint. That endpoint also receives ordinary network metadata such as your IP address, request time, and WebView or Electron/Chromium headers. OpenRouter may pass request content to the downstream model provider selected for the request. A custom or Ollama-compatible endpoint may be on your device, on your network, or operated by another party. SciREPL Pro requires non-loopback AI endpoints to use <code>https://</code>; unencrypted <code>http://</code> is accepted only for loopback hosts, such as localhost, 127.0.0.1, or ::1.</p>
     <p>The endpoint operator processes the data to authenticate the request, generate responses, and perform requested tool interactions. Its logging, training, retention, account, billing, and deletion rules are governed by its own terms and privacy policy. See the policies for <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener noreferrer">Anthropic</a>, <a href="https://openai.com/policies/privacy-policy/" target="_blank" rel="noopener noreferrer">OpenAI</a>, and <a href="https://openrouter.ai/privacy" target="_blank" rel="noopener noreferrer">OpenRouter</a>. Do not send personal, confidential, regulated, or secret information unless you have reviewed and accepted the selected provider's practices.</p>
+
+    <h2 id="ai-permission-controls">AI permission controls and limitations</h2>
+    <p>SciREPL Pro applies its AI tool and kernel settings to requests handled by the in-app agent and the remote MCP bridge. These settings control what the app agrees to do; they do not control data after it has been sent to an AI provider, broker, remote agent, or other third party.</p>
+    <ul>
+        <li><strong>Full control</strong> allows permitted AI tools, project-source browsing, notebook writes, and language-kernel execution without routine prompts. While selected, it overrides the separate source-browsing and Agent writes scope settings. It does not override Review mode, remote-data consent, the global JavaScript-kernel disable, explicit per-tool or per-kernel <strong>Ask</strong> or <strong>Deny</strong> rules, or the app's virtual-filesystem path and sensitive-data protections.</li>
+        <li><strong>Open</strong> allows ordinary notebook tools and kernel execution without routine prompts, but it continues to respect the separate source-browsing and Agent writes scope settings, as well as explicit tool and kernel rules.</li>
+        <li><strong>Per-kernel execution rules</strong> are available through <strong>Menu &gt; Languages &gt; AI Kernel Access</strong> and <strong>AI Settings &gt; Kernels</strong>. <strong>Default</strong> inherits the overall security level; <strong>Allow</strong> runs without a kernel prompt; <strong>Ask</strong> requests confirmation; and <strong>Deny</strong> blocks AI-initiated execution. TypR compiles to and executes R, so a TypR run requires permission for both the TypR and R kernels; the more restrictive result applies.</li>
+        <li><strong>Review mode remains authoritative</strong> even when Full control is selected: it blocks kernel execution and ordinary edits or deletion. The separately enabled option to append review notes writes only to the dedicated AI Review worksheet.</li>
+        <li><strong>Remote-data consent is separate</strong> from the security level. The app requires it when opening or restoring a broker connection and again before handling a remote tool request. Selecting Full control does not grant remote consent. Direct AI consent and the automatic notebook previews described above are also separate from tool permissions.</li>
+    </ul>
+    <div class="warning">
+        <p><strong>Browser-context limitation:</strong> JavaScript cells execute natively in SciREPL's browser context rather than in a separate language sandbox. Python and ClojureScript code can also use their runtime bridges to reach browser JavaScript APIs. The global JavaScript setting applies to the JavaScript kernel; it does not remove browser access exposed by another allowed kernel. AI kernel rules can block or ask before normal app-controlled execution begins, but code that is allowed to run may be able to access app-held data or make network requests outside later app-level checks. These settings are execution permissions, not capability isolation, and their restrictions are best-effort once such code starts. Android WebView and Electron renderer sandboxing limit the application relative to the wider device or computer; Electron does not expose Node.js, filesystem, shell, or generic native IPC to the page. SciREPL does not guarantee that allowed notebook code is isolated from other browser-accessible data held by the app.</p>
+    </div>
 
     <h2 id="remote-mcp-bridge-and-remote-agents">Remote MCP bridge and remote agents</h2>
     <p>The Remote bridge is optional. You choose the broker URL and pairing token. SciREPL's developer does not provide or operate a default broker service.</p>
@@ -120,7 +133,7 @@
     <p>Terminal mode is an optional remote feature. When enabled on the broker, all terminal keystrokes, commands, terminal output, and session-control messages travel between the app and the broker host. The terminal can expose an interactive coding agent or a real shell on that host. Treat the pairing token like a password, use only a broker you trust, and understand that terminal commands can access data and systems outside the notebook. The broker controls terminal-session retention and any shell or agent history.</p>
 
     <h2>Runtime, library, package, and workbook downloads</h2>
-    <p>The Pro Android build normally includes Python, R, Prolog, and ClojureScript runtimes, as well as its local JavaScript, Bash, and TypR components. Lua is normally downloaded when first used. If a bundled runtime is missing, fails to load, is overridden in settings, or requires additional packages, the app may try a configured content-delivery network or package repository.</p>
+    <p>The Pro Android and Electron builds normally include Python, R, Prolog, and ClojureScript runtimes, as well as their local JavaScript, Bash, and TypR components. Lua is normally downloaded when first used. If a bundled runtime is missing, fails to load, is overridden in settings, or requires additional packages, the app may try a configured content-delivery network or package repository.</p>
     <p>Other network requests can include:</p>
     <ul>
         <li>Lua runtime files from jsDelivr or unpkg.</li>
@@ -133,7 +146,7 @@
     <p>These services receive ordinary request metadata, including your IP address, request time, device or browser headers, and the requested URL. Runtime and library requests do not intentionally contain notebook content, but URLs or requests created by notebook code may contain whatever information that code supplies.</p>
 
     <h2>Exports and sharing</h2>
-    <p>Notebook and workbook exports are created on your device. If you use the browser download interface, Android share sheet, email, cloud drive, or another destination, the receiving application or service receives the file you selected. SciREPL's developer does not choose or monitor that destination.</p>
+    <p>Notebook and workbook exports are created on your device. If you use the browser download interface, Android share sheet, Windows file handling, email, cloud drive, or another destination, the receiving application or service receives the file you selected. SciREPL's developer does not choose or monitor that destination.</p>
 
     <h2>Analytics, advertising, and developer access</h2>
     <p>The current version of SciREPL Pro does not include developer-operated analytics, advertising, crash reporting, or behavioral-tracking SDKs. It does not require a SciREPL account. The developer does not receive your notebooks, AI API keys, broker tokens, or AI conversations through a SciREPL-operated server. Third-party services described above may independently log requests made to them.</p>
