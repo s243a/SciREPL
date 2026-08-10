@@ -360,23 +360,39 @@
             const card = this.el.querySelector('#tour-card');
             const target = step.target ? document.querySelector(step.target) : null;
 
-            // Use the visual viewport where it exists: on mobile the layout
-            // viewport does not shrink for the on-screen keyboard or the URL
-            // bar, and positioning against it puts the card off-screen.
+            // Position against the VISUAL viewport for every step, centred ones
+            // included. The layout viewport does not shrink for the on-screen
+            // keyboard or the URL bar, so 50%/50% (which is the layout viewport)
+            // lands the card off the visible area. offsetLeft/offsetTop give the
+            // visible region's origin in the same coordinate space the overlay
+            // (position:fixed inset:0) and getBoundingClientRect use.
             const vv = window.visualViewport;
+            const ox = vv ? vv.offsetLeft : 0;
+            const oy = vv ? vv.offsetTop : 0;
             const vw = vv ? vv.width : window.innerWidth;
             const vh = vv ? vv.height : window.innerHeight;
             const margin = 8;
 
             card.classList.remove('tour-card-docked');
-            card.style.maxWidth = `${Math.max(220, vw - margin * 2)}px`;
-            card.style.maxHeight = `${Math.max(160, vh - margin * 2)}px`;
+            // No floor above the viewport: on a 320x120 visual viewport the card
+            // must be at most ~104px tall (and scroll inside), never 160.
+            card.style.maxWidth = `${Math.max(120, vw - margin * 2)}px`;
+            card.style.maxHeight = `${Math.max(80, vh - margin * 2)}px`;
+            card.style.transform = 'none';
+
+            const place = (left, top) => {
+                const cr = card.getBoundingClientRect();
+                left = Math.max(ox + margin, Math.min(left, ox + vw - cr.width - margin));
+                top = Math.max(oy + margin, Math.min(top, oy + vh - cr.height - margin));
+                card.style.left = `${left}px`;
+                card.style.top = `${top}px`;
+            };
 
             if (!target) {
                 spotlight.style.display = 'none';
-                card.style.left = '50%';
-                card.style.top = '50%';
-                card.style.transform = 'translate(-50%, -50%)';
+                // Centre within the visible region, not the layout viewport.
+                const cr = card.getBoundingClientRect();
+                place(ox + (vw - cr.width) / 2, oy + (vh - cr.height) / 2);
                 return;
             }
 
@@ -388,31 +404,22 @@
             spotlight.style.width = `${r.width + pad * 2}px`;
             spotlight.style.height = `${r.height + pad * 2}px`;
 
-            card.style.transform = 'none';
-            // Never let the card be wider than the viewport it must fit inside.
-            card.style.maxWidth = `${Math.max(220, vw - margin * 2)}px`;
             const cardRect = card.getBoundingClientRect();
-
-            // If the card cannot fit above or below the target, dock it to the
-            // bottom of the viewport rather than pushing it off-screen. The
-            // spotlight still marks the control, so the association survives.
             const gap = 14;
-            const below = vh - r.bottom - gap;
-            const above = r.top - gap;
+            const below = (oy + vh) - r.bottom - gap;
+            const above = r.top - (oy + gap);
+
+            // No room above or below within the visible region: dock to the
+            // bottom edge of the VISIBLE area rather than pushing off-screen.
             if (cardRect.height > Math.max(below, above)) {
                 card.classList.add('tour-card-docked');
-                card.style.left = `${margin}px`;
-                card.style.top = `${Math.max(margin, vh - cardRect.height - margin)}px`;
                 card.style.maxWidth = `${vw - margin * 2}px`;
+                place(ox + margin, oy + vh - cardRect.height - margin);
                 return;
             }
 
-            let top = below >= cardRect.height ? r.bottom + gap : r.top - cardRect.height - gap;
-            top = Math.max(margin, Math.min(top, vh - cardRect.height - margin));
-            let left = r.left + r.width / 2 - cardRect.width / 2;
-            left = Math.max(margin, Math.min(left, vw - cardRect.width - margin));
-            card.style.top = `${top}px`;
-            card.style.left = `${left}px`;
+            const top = below >= cardRect.height ? r.bottom + gap : r.top - cardRect.height - gap;
+            place(r.left + r.width / 2 - cardRect.width / 2, top);
         }
 
         /* ------------------------------ finish ----------------------------- */

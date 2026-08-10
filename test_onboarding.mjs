@@ -524,6 +524,48 @@ try {
     check('focus does not fall to <body>', langFocus.notBody === true);
     await ctxL.close();
 
+    /* ---------- cards fit a keyboard-shrunken visual viewport ---------- */
+    console.log('\n15. Cards fit the visual viewport, not just the layout one');
+
+    for (const dims of [{ w: 320, h: 180, off: 0 }, { w: 320, h: 120, off: 0 },
+                        { w: 360, h: 200, off: 120 }]) {
+        const ctx = await browser.newContext({ viewport: { width: 400, height: 640 } });
+        await ctx.addInitScript((d) => {
+            localStorage.setItem('scirepl_privacy_accepted', '1');
+            localStorage.removeItem('scirepl_onboarding_seen');
+            // Emulate the on-screen keyboard shrinking the visual viewport below
+            // the layout viewport — which window.innerHeight does not reflect.
+            const fake = {
+                width: d.w, height: d.h, offsetLeft: 0, offsetTop: d.off,
+                addEventListener() {}, removeEventListener() {},
+            };
+            Object.defineProperty(window, 'visualViewport', { get: () => fake, configurable: true });
+        }, dims);
+        const pg = await ctx.newPage();
+        await pg.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+        await pg.waitForFunction(() => window.onboarding, null, { timeout: 30_000 });
+        await pg.waitForTimeout(1800);
+        await pg.evaluate(() => window.onboarding.start());
+        await pg.waitForTimeout(200);
+        const total = await pg.evaluate(() => window.onboarding.steps.length);
+        const overflow = [];
+        for (let i = 0; i < total; i++) {
+            const rr = await pg.evaluate((d) => {
+                const c = document.getElementById('tour-card').getBoundingClientRect();
+                // Bounds are checked against the VISUAL viewport region, per Sol.
+                const within = c.left >= -1 && c.top >= d.off - 1
+                    && c.right <= d.w + 1 && c.bottom <= d.off + d.h + 1;
+                return { step: window.onboarding.index, within };
+            }, dims);
+            if (!rr.within) overflow.push(rr);
+            await pg.keyboard.press('ArrowRight');
+            await pg.waitForTimeout(150);
+        }
+        check(`every card fits a ${dims.w}x${dims.h} visual viewport (offset ${dims.off})`,
+            overflow.length === 0, JSON.stringify(overflow));
+        await ctx.close();
+    }
+
 } catch (err) {
     failures++;
     console.log(`\n  [FAIL] crashed: ${err && err.message}`);
