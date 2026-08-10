@@ -5,8 +5,16 @@
  */
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { extname, resolve, sep } from 'node:path';
 import { chromium } from 'playwright';
+
+// Derived from sw.js, not hardcoded — the cache version bumps whenever an
+// app-shell asset changes (enforced by scripts/check-sw-shell.mjs), and this
+// test must track it rather than pinning a number that goes stale each release.
+const CACHE_VERSION = (readFileSync(new URL('./www/sw.js', import.meta.url), 'utf8')
+    .match(/const CACHE_VERSION = '([^']+)'/) || [])[1];
+const APP_CACHE_NAME = `scirepl-app-${CACHE_VERSION}`;
 
 const HOST = '127.0.0.1';
 const PORT = Number(process.env.PORT || 8086);
@@ -207,17 +215,17 @@ try {
     assert(await page.evaluate(() => !!navigator.serviceWorker.controller), 'reload is service-worker controlled');
 
     console.log('2. Verifying every local catalog payload is pre-cached...');
-    const cacheState = await page.evaluate(async () => {
+    const cacheState = await page.evaluate(async (appCacheName) => {
         const names = await caches.keys();
-        const appCache = names.find(name => name === 'scirepl-app-v130');
+        const appCache = names.find(name => name === appCacheName);
         if (!appCache) return { names, paths: [] };
         const keys = await (await caches.open(appCache)).keys();
         return {
             names,
             paths: keys.map(request => new URL(request.url).pathname),
         };
-    });
-    assert(cacheState.names.includes('scirepl-app-v130'), 'release cache v130 is active', cacheState.names.join(', '));
+    }, APP_CACHE_NAME);
+    assert(cacheState.names.includes(APP_CACHE_NAME), `release cache ${APP_CACHE_NAME} is active`, cacheState.names.join(', '));
     for (const relative of requiredCatalogPaths) {
         assert(cacheState.paths.includes(PREFIX + relative), `pre-cache contains ${relative}`);
     }
