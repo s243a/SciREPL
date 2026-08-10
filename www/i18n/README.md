@@ -19,11 +19,20 @@ that has to be redone.
 5. Run `npm run i18n:manifest`. No code change is needed — the app discovers
    locales from the generated manifest.
 
-A draft catalogue can be committed and reviewed but **is not offered to users**
-until someone who reads the language changes `status` to `reviewed`. That gate
-exists because a translation can be 100% complete and still be wrong — register,
-terminology, or plain inaccuracy — and the completeness score cannot see any of
-that.
+A draft catalogue **is offered to users** — labelled "under review" in the
+picker — and is auto-detected from the device language, because someone who
+cannot read English cannot use the app at all, and an unreviewed translation
+they can read beats a polished one they cannot. `reviewed` status still matters
+in two places: it removes the "under review" label, and — for the privacy
+catalogue only — it switches that locale's users from the English policy body to
+the translated one. The completeness threshold below is the gate that actually
+withholds a locale: a barely-started UI is worse than English, a mostly-complete
+one is not.
+
+Reviewing is still worth doing: a translation can be 100% complete and still be
+wrong — register, terminology, or plain inaccuracy — and the completeness score
+cannot see any of that. But review improves a translation users already have; it
+is not the switch that turns it on.
 
 ## What must NOT be translated
 
@@ -229,6 +238,14 @@ await window.i18n.activate('ar')  // switch, including direction
 
 A catalogue that merely copies the English values scores as **untranslated** —
 that check exists so a stub cannot look finished.
+
+### Coverage is the static shell, not the whole app
+
+The 93% figure counts the **static** interface. Roughly 90 strings are
+generated in JavaScript (Files & storage, Prolog settings, export dialogs,
+some placeholders) and are still English in every language. See
+`docs/I18N_SCOPE.md` for the exact list. Do not read "93% wired" as "the app
+is 93% translated".
 
 ### What the completeness score does *not* tell you
 

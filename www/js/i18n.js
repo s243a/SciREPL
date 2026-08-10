@@ -4,11 +4,12 @@
  * Two decisions worth stating up front, because both came from a specific
  * concern: that a user picks their language and gets a mostly-English UI.
  *
- * 1. A locale is only offered once it is actually translated. Every catalogue
- *    is scored against English, and anything below MIN_COMPLETENESS is hidden
- *    from the picker rather than listed and disappointing. Partial locales
- *    between the thresholds are listed with their percentage, so the choice is
- *    informed rather than a surprise.
+ * 1. A locale is offered once it is translated ENOUGH — at or above
+ *    MIN_COMPLETENESS. Drafts are offered too (labelled "under review") and
+ *    auto-detected, because an interface a user can read beats an English one
+ *    they cannot; review polishes a translation rather than switching it on.
+ *    Only a barely-started catalogue, below the threshold, is withheld, since
+ *    that is worse than English rather than better.
  *
  * 2. Some things must NOT be translated, and the catalogues reflect that. File
  *    extensions (.srwb, .ipynb, .py) and kernel names (Python, Bash, Prolog)
@@ -79,16 +80,17 @@
     ];
 
     /**
-     * A locale is only offered once a human who reads it has signed it off.
+     * What review status changes — which is NOT whether a locale is offered.
      *
      * A machine translation can be complete and still be wrong in ways the
-     * completeness score cannot see — register, terminology, or simply being
-     * inaccurate. So a catalogue may declare `"status": "draft"` in its
-     * __meta, land in the repository, and be reviewable, without being
-     * offered to users until the status changes to "reviewed".
+     * completeness score cannot see — register, terminology, inaccuracy. Marking
+     * a catalogue `reviewed` records that a human who reads the language has
+     * checked it. That does two things: it drops the "under review" label in the
+     * picker, and — for the privacy domain only — it switches that locale's users
+     * from the English policy body to the translated one (see _legalString).
      *
-     * Draft locales remain selectable through the RTL/preview mechanism below,
-     * which is how a reviewer looks at one in situ.
+     * A draft is still offered and auto-detected. Review improves a translation
+     * users already have; it is not the switch that turns it on.
      */
     const REVIEWED = 'reviewed';
 
