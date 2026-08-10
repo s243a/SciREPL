@@ -631,6 +631,84 @@ try {
         pageErrs.slice(0, 2).join(' | '));
     await ctxR.close();
 
+    /* ------- two quick language changes: only the newest wins ---------- */
+    console.log('\n17. Rapid language changes do not fight over focus');
+
+    const ctxT = await browser.newContext();
+    await ctxT.addInitScript(() => {
+        localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.removeItem('scirepl_onboarding_seen');
+    });
+    const pt = await ctxT.newPage();
+    const tErrs = [];
+    pt.on('pageerror', (e) => tErrs.push(e.message));
+    await pt.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await pt.waitForFunction(() => window.onboarding && window.i18n, null, { timeout: 30_000 });
+    await pt.waitForTimeout(2200);
+
+    const race = await pt.evaluate(async () => {
+        for (const code of ['es', 'fr']) {
+            await window.i18n.load(code);
+            const l = window.i18n.LOCALES.find((x) => x.code === code);
+            if (l) { l.status = 'reviewed'; l.completeness = 1; }
+            if (window.i18n.catalogues[code]) window.i18n.catalogues[code].__status = 'reviewed';
+            window.i18n.completeness[code] = 1;
+        }
+        window.onboarding.start();
+        const sel = document.getElementById('tour-language-select');
+        // Make the OLDER change (es) resolve AFTER the newer (fr).
+        const realA = window.i18n.activate.bind(window.i18n);
+        let staleRendered = false;
+        const realRender = window.onboarding._render.bind(window.onboarding);
+        window.i18n.activate = (code) =>
+            new Promise((res) => setTimeout(() => realA(code).then(res), code === 'es' ? 400 : 80));
+        sel.value = 'es'; sel.dispatchEvent(new Event('change'));
+        await new Promise((r) => setTimeout(r, 20));
+        sel.value = 'fr'; sel.dispatchEvent(new Event('change'));
+        // After fr should have settled, watch for a late es re-render.
+        await new Promise((r) => setTimeout(r, 150));
+        window.onboarding._render = function (...a) {
+            if (window.i18n.current !== 'fr') staleRendered = true;
+            return realRender(...a);
+        };
+        await new Promise((r) => setTimeout(r, 500));
+        window.i18n.activate = realA;
+        window.onboarding._render = realRender;
+        const title = document.getElementById('tour-title');
+        return {
+            titleFrench: !!title && /Choisissez/.test(title.textContent),
+            staleRerender: staleRendered,
+        };
+    });
+    check('the tour ends rendered in the newest language (fr)', race.titleFrench === true);
+    check('the stale (es) handler does not re-render after fr won', race.staleRerender === false);
+    check('no page error from the rapid language race', tErrs.length === 0,
+        tErrs.slice(0, 2).join(' | '));
+
+    // Restarting the tour during a slow activation must re-render the fresh tour
+    // in the active locale and not have the stale handler steal its focus.
+    const restart = await pt.evaluate(async () => {
+        window.onboarding.finish();
+        window.onboarding.start();
+        const sel = document.getElementById('tour-language-select');
+        const realA = window.i18n.activate.bind(window.i18n);
+        window.i18n.activate = (code) => new Promise((res) => setTimeout(() => realA(code).then(res), 300));
+        sel.value = 'es'; sel.dispatchEvent(new Event('change'));
+        await new Promise((r) => setTimeout(r, 30));
+        window.onboarding.start();          // restart mid-activation
+        await new Promise((r) => setTimeout(r, 500));
+        window.i18n.activate = realA;
+        const overlay = document.getElementById('tour-overlay');
+        return {
+            oneOverlay: document.querySelectorAll('#tour-overlay').length === 1,
+            focusInTour: !!overlay && overlay.contains(document.activeElement),
+        };
+    });
+    check('restart during activation leaves exactly one tour', restart.oneOverlay === true);
+    check('the stale handler does not yank focus out of the restarted tour',
+        restart.focusInTour === true);
+    await ctxT.close();
+
 } catch (err) {
     failures++;
     console.log(`\n  [FAIL] crashed: ${err && err.message}`);

@@ -48,7 +48,7 @@ try {
     check('--write refuses to overwrite the current version', run(['--write']).code === 1);
 
     // Bumping the version and appending is the sanctioned path.
-    bumpVersion('v-test-2');
+    bumpVersion('v900');
     check('bumping the version lets --write append', run(['--write']).code === 0);
     check('after appending, the check passes', run().code === 0);
 
@@ -63,6 +63,18 @@ try {
     bumpVersion('v134');   // an already-recorded version
     check('reusing a recorded version with different content fails', run().code === 1);
     check('--write will not rewrite a recorded version', run(['--write']).code === 1);
+
+    // Rollback to a previously-DEPLOYED id that predates the history (v129, the
+    // released version) must be rejected by both check and --write — the exact
+    // bypass Sol reproduced, where --write appended v129 and CI then passed.
+    bumpVersion('v129');
+    check('rolling the worker back to a released id (v129) fails the check',
+        run().code === 1);
+    check('--write refuses to append a reserved/rolled-back id', run(['--write']).code === 1);
+
+    // Any id at or below the monotonic floor is refused, recorded or not.
+    bumpVersion('v100');
+    check('a version below the floor is refused', run().code === 1 && run(['--write']).code === 1);
 } finally {
     rmSync(sandbox, { recursive: true, force: true });
 }

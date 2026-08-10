@@ -350,12 +350,16 @@
 
             select.addEventListener('change', async () => {
                 const gen = this._gen;
+                // Per-change token: two quick changes (es then fr) must not both
+                // re-render and fight over focus. Only the LATEST change's handler
+                // finishes; an older one, even within the same live tour, bails.
+                const seq = (this._langSeq = (this._langSeq || 0) + 1);
                 i18n.setPreference(select.value);
                 await i18n.activate(select.value === 'auto' ? i18n.resolve() : select.value);
-                // activate() awaits a catalogue fetch; the user may have pressed
-                // Escape or Skip (destroying this.el) or restarted the tour in
-                // the meantime. Touching this.el then throws. Bail unless this is
-                // still the same, live tour.
+                // Bail if this is no longer the newest change, the tour was closed
+                // or restarted (Escape/Skip/replay), or the overlay is gone —
+                // touching this.el then throws or steals focus from the winner.
+                if (seq !== this._langSeq) return;
                 if (gen !== this._gen || !this.el || !this.el.isConnected) return;
                 // Re-render so the tour switches language immediately; the
                 // re-render replaces this <select>, so move focus onto the
