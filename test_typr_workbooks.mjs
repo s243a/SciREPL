@@ -1,7 +1,7 @@
 /** End-to-end regression test for both TypR catalog workbooks. */
 import { chromium } from 'playwright';
 
-const BASE = 'http://localhost:8085';
+const BASE = process.env.BASE_URL || 'http://localhost:8085';
 const TIMEOUT = 300_000;
 
 function assert(condition, message, detail = '') {
