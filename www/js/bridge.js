@@ -151,6 +151,7 @@ window.renderText = function (text, isError) {
 
     const pre = document.createElement('pre');
     pre.className = isError ? 'error-result' : 'text-result';
+    pre.dir = 'ltr';
     pre.textContent = text;
     container.querySelector('.card-body').appendChild(pre);
 };

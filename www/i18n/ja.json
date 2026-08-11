@@ -27,6 +27,7 @@
   "strings": {
     "__literal": [
       "app.search.position",
+      "common.ok",
       "export.docx",
       "export.html",
       "export.latex",
@@ -184,6 +185,13 @@
     "help.languageSettings": "言語設定",
     "help.openMenuLanguagesShowHide": "<strong>メニュー → 言語</strong> を開いて、セルのドロップダウンに表示する言語を設定できます。チェックを外すとセレクターから非表示になりますが、ランタイムはアンロードされません。すべての言語がデフォルトで有効になっています。設定はセッションをまたいで保存されます。",
     "help.keyboardShortcuts": "キーボードショートカット",
+    "help.shortcutOr": "または",
+    "help.shortcutButton": "ボタン",
+    "help.shortcutRunCode": "コードを実行",
+    "help.shortcutFindWithReplace": "ノートブック内を検索（置換あり）",
+    "help.shortcutInsertFourSpaces": "スペースを4つ挿入",
+    "help.shortcutAtEndOfLine": "行末",
+    "help.shortcutSuppressOutput": "出力を抑制",
     "help.documentation": "ドキュメント",
     "help.fullDocumentationGithubReadme": "完全なドキュメント: <a href=\"https://github.com/s243a/SciREPL#readme\" target=\"_blank\">GitHub README</a>",
     "help.version": "バージョン",

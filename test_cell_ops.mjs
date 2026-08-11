@@ -2,6 +2,8 @@
 import { chromium } from 'playwright';
 
 const TIMEOUT = 120_000;
+const PORT = process.env.PORT || 8085;
+const URL = `http://localhost:${PORT}/`;
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -30,7 +32,7 @@ const TIMEOUT = 120_000;
       localStorage.setItem('scirepl_auto_download', '1');
     });
 
-    await page.goto('http://localhost:8085/', { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+    await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
 
     // Wait for app to be ready (kernels are lazy-loaded, no need to wait for Pyodide)
     console.log('   Waiting for app...');

@@ -122,6 +122,38 @@ try {
     check('an open generated catalog retranslates in place',
         state.description === state.want && state.install === state.installWant, JSON.stringify(state));
 
+    await openFromMenu('#btn-export', '#export-modal');
+    state = await page.evaluate(() => {
+        const content = document.querySelector('#export-modal .modal-content')?.getBoundingClientRect();
+        const action = document.getElementById('btn-do-export')?.getBoundingClientRect();
+        return content && action ? {
+            contentTop: content.top,
+            contentBottom: content.bottom,
+            actionTop: action.top,
+            actionBottom: action.bottom,
+        } : null;
+    });
+    check('the primary Export action is fully visible without initial scrolling',
+        state && state.actionTop >= state.contentTop && state.actionBottom <= state.contentBottom + 0.5,
+    JSON.stringify(state));
+
+    await openFromMenu('#btn-export-workbook', '#export-workbook-modal');
+    state = await page.evaluate(() => {
+        const title = document.querySelector('#export-workbook-modal h2');
+        const close = document.querySelector('#export-workbook-modal .modal-close')?.getBoundingClientRect();
+        if (!title || !close) return null;
+        const range = document.createRange();
+        range.selectNodeContents(title);
+        const textRects = [...range.getClientRects()].map((rect) => ({
+            left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom,
+        }));
+        const overlap = textRects.some((rect) => rect.right > close.left
+            && rect.left < close.right && rect.bottom > close.top && rect.top < close.bottom);
+        return { overlap, textRects, close: { left: close.left, right: close.right } };
+    });
+    check('a long localized modal title stays clear of the close button',
+        state && !state.overlap, JSON.stringify(state));
+
     await openFromMenu('#btn-memory', '#memory-modal');
     await page.locator('#memory-kernel-list .memory-kernel-status').first()
         .waitFor({ state: 'visible', timeout: TIMEOUT });
@@ -153,20 +185,144 @@ try {
         && !state.englishLeaked && !state.suffixGluedToPath && !state.doubledSeparator,
     JSON.stringify(state));
 
+    // Long notebook/file names must shrink inside the mobile tree rather than
+    // pushing the 44 px download/delete touch targets beyond the viewport.
+    await page.evaluate(() => {
+        window.sharedVFS.mkdirTree('/shared/data');
+        for (const name of [
+            'call_graph_analysis_17718279.srwb',
+            'family_tree_tutorial_17718279.srwb',
+            'advanced_recursion_patterns_17718279.srwb',
+        ]) {
+            window.sharedVFS.writeFile(`/shared/data/${name}`, 'test', 'user');
+        }
+        window.prologSettings._refreshUnifiedView();
+    });
+    state = await page.evaluate(() => {
+        const viewportRight = document.documentElement.clientWidth;
+        const actions = [...document.querySelectorAll('#vfs-file-list .vfs-entry-actions')]
+            .map((element) => {
+                const rect = element.getBoundingClientRect();
+                return { left: rect.left, right: rect.right, width: rect.width };
+            });
+        return { viewportRight, actions };
+    });
+    check('mobile VFS action targets stay fully inside the viewport',
+        state.actions.length >= 3
+        && state.actions.every((rect) => rect.left >= 0 && rect.right <= state.viewportRight + 0.5),
+    JSON.stringify(state));
+
     await dismissModals();
+    await page.evaluate(() => document.documentElement.style.setProperty('--app-top-margin', '37px'));
     await page.click('#search-btn');
     await page.fill('#search-input', '__definitely_absent__');
     await page.locator('#search-input').dispatchEvent('input');
+    await page.waitForTimeout(250);
     state = await page.evaluate(() => ({
         count: document.getElementById('search-count')?.textContent,
         want: window.t('app.search.zeroResults'),
+        top: document.getElementById('search-bar')?.getBoundingClientRect().top,
+        safeTop: parseFloat(getComputedStyle(document.documentElement)
+            .getPropertyValue('--app-top-margin')) || 0,
     }));
     check('generated search result count is localized', state.count === state.want, JSON.stringify(state));
+    check('mobile search stays below the configured status-bar allowance',
+        state.top >= state.safeTop - 0.5, JSON.stringify(state));
 
     console.log('\n3. RTL and authoritative privacy copy');
     await activate('ar');
     await dismissModals();
+
+    state = await page.evaluate(() => ({
+        attr: document.getElementById('code-input')?.dir,
+        computed: getComputedStyle(document.getElementById('code-input')).direction,
+    }));
+    check('the main code editor remains LTR under an RTL interface',
+        state.attr === 'ltr' && state.computed === 'ltr', JSON.stringify(state));
+    await page.click('#cell-type-toggle');
+    state = await page.evaluate(() => ({
+        attr: document.getElementById('code-input')?.dir,
+        placeholder: document.getElementById('code-input')?.placeholder,
+        want: window.t('app.input.markdownPlaceholder'),
+    }));
+    check('the main Markdown editor derives direction from its own content',
+        state.attr === 'auto'
+        && state.placeholder.replace(/[\u2066-\u2069]/g, '') === state.want,
+    JSON.stringify(state));
+    await page.click('#cell-type-toggle');
+
+    await page.locator('.card-input .cell-edit-btn').first().click();
+    state = await page.evaluate(() => {
+        const card = document.querySelector('.card-input');
+        const editor = card?.querySelector('.cell-editor');
+        return {
+            editorDir: editor?.dir,
+            editorComputedDir: editor ? getComputedStyle(editor).direction : null,
+        };
+    });
+    check('program source remains LTR while editing under an RTL interface',
+        state.editorDir === 'ltr' && state.editorComputedDir === 'ltr', JSON.stringify(state));
+    await page.locator('.card-input .cell-cancel-btn').first().click();
+    state = await page.evaluate(() => {
+        const pre = document.querySelector('.card-input pre');
+        const output = document.querySelector('.card-output:not(.card-markdown-output) .card-body');
+        return {
+            sourceDir: pre?.dir,
+            sourceComputedDir: pre ? getComputedStyle(pre).direction : null,
+            outputComputedDir: output ? getComputedStyle(output).direction : null,
+        };
+    });
+    check('rendered program source and kernel output remain LTR under RTL',
+        state.sourceDir === 'ltr' && state.sourceComputedDir === 'ltr'
+        && state.outputComputedDir === 'ltr', JSON.stringify(state));
+
+    state = await page.evaluate(() => {
+        const card = window._appInternals.createOutputCard(999999, 'markdown');
+        const body = card.querySelector('.markdown-body');
+        body.textContent = 'Summary: English workbook content.';
+        const english = { attr: body.dir, computed: getComputedStyle(body).direction };
+        body.textContent = 'ملخص: محتوى عربي.';
+        const arabic = { attr: body.dir, computed: getComputedStyle(body).direction };
+        card.remove();
+        return { english, arabic };
+    });
+    check('Markdown cells choose direction from their own content, not the UI locale',
+        state.english.attr === 'auto' && state.english.computed === 'ltr'
+        && state.arabic.attr === 'auto' && state.arabic.computed === 'rtl',
+    JSON.stringify(state));
+
     await page.click('#help-btn');
+    await page.locator('#help-modal').waitFor({ state: 'visible', timeout: TIMEOUT });
+    state = await page.evaluate(() => {
+        const keys = [
+            'help.shortcutOr',
+            'help.shortcutButton',
+            'help.shortcutRunCode',
+            'help.shortcutFindWithReplace',
+            'help.shortcutInsertFourSpaces',
+            'help.shortcutAtEndOfLine',
+            'help.shortcutSuppressOutput',
+        ];
+        const values = keys.map((key) => ({
+            key,
+            want: window.t(key),
+            shown: [...document.querySelectorAll(`[data-i18n="${key}"]`)]
+                .map((element) => element.textContent),
+        }));
+        const technical = [...document.querySelectorAll('#help-modal kbd, #help-modal code')];
+        return {
+            values,
+            technicalDirections: technical.map((element) => getComputedStyle(element).direction),
+        };
+    });
+    check('Help shortcut prose is translated in Arabic',
+        state.values.every((item) => item.shown.length > 0
+            && item.shown.every((shown) => shown === item.want)), JSON.stringify(state.values));
+    check('Help keyboard and code fragments remain LTR in Arabic',
+        state.technicalDirections.length > 0
+            && state.technicalDirections.every((direction) => direction === 'ltr'),
+    JSON.stringify(state.technicalDirections));
+
     await page.click('#help-privacy-link');
     await page.locator('#privacy-modal').waitFor({ state: 'visible', timeout: TIMEOUT });
     state = await page.evaluate(() => {

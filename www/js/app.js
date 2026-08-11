@@ -71,6 +71,11 @@
     // Current input bar cell type: 'code' or 'markdown'
     let currentCellType = 'code';
 
+    function syncInputDirection() {
+        if (input) input.dir = currentCellType === 'markdown' ? 'auto' : 'ltr';
+    }
+    syncInputDirection();
+
     // Track all cells for export and re-evaluation
     // Each entry: { id, code, type: 'code'|'markdown', language: 'python'|'prolog', inputCard, outputCard }
     if (!window._cells) window._cells = [];
@@ -100,6 +105,7 @@
     }
 
     function refreshInputBarLocalization() {
+        syncInputDirection();
         if (currentCellType === 'markdown') {
             // Md is the literal Markdown abbreviation used by the cell format.
             cellTypeToggle.textContent = 'Md';
@@ -141,6 +147,7 @@
             cellTypeToggle.classList.remove('markdown-active');
             setCodePlaceholder(getCurrentLanguage());
         }
+        syncInputDirection();
     });
 
     // ---- App startup (no kernel init — kernels load lazily) ----
@@ -290,7 +297,7 @@
                 <button class="cell-edit-btn">✎</button>
                 <button class="cell-delete-btn">✕</button>
             </div>
-            <pre${isMarkdown ? ' class="md-source"' : ''}>${isMarkdown ? escapeHtml(code) : '<code>' + highlightCode(code, language) + '</code>'}</pre>
+            <pre dir="${isMarkdown ? 'auto' : 'ltr'}"${isMarkdown ? ' class="md-source"' : ''}>${isMarkdown ? escapeHtml(code) : '<code>' + highlightCode(code, language) + '</code>'}</pre>
         `;
         setUiAttr(card.querySelector('.cell-drag-handle'), 'title', 'app.cell.actions.dragTitle');
         setUiAttr(card.querySelector('.cell-move-up'), 'title', 'app.cell.actions.moveUpTitle');
@@ -405,7 +412,7 @@
         card.dataset.cellId = cellId;
 
         if (isMarkdown) {
-            card.innerHTML = `<div class="card-body markdown-body"></div>`;
+            card.innerHTML = `<div class="card-body markdown-body" dir="auto"></div>`;
         } else {
             card.innerHTML = `
                 <div class="card-label">
@@ -464,6 +471,7 @@
 
         const textarea = document.createElement('textarea');
         textarea.className = 'cell-editor';
+        textarea.dir = cellType === 'markdown' ? 'auto' : 'ltr';
         textarea.value = currentCode;
         textarea.spellcheck = cellType === 'markdown';
         textarea.setAttribute('autocapitalize', 'off');
@@ -562,6 +570,7 @@
                 }
                 typeSwitch.classList.toggle('markdown-active', cell.type === 'markdown');
                 textarea.spellcheck = cell.type === 'markdown';
+                textarea.dir = cell.type === 'markdown' ? 'auto' : 'ltr';
                 updateSourceOnlyIndicator(inputCard, textarea.value, cell.type, langSwitch.value);
             }
         });
@@ -615,6 +624,7 @@
 
         const textarea = inputCard.querySelector('.cell-editor');
         const pre = document.createElement('pre');
+        pre.dir = cellType === 'markdown' ? 'auto' : 'ltr';
         if (cellType === 'markdown') pre.className = 'md-source';
         const language = cell ? cell.language : (inputCard.dataset.language || 'python');
         setPreHighlighted(pre, code, language, cellType === 'markdown');
@@ -1077,6 +1087,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         const body = outputCard.querySelector('.card-body');
         if (!body) return;
         body.className = 'card-body markdown-body';
+        body.dir = 'auto';
         body.innerHTML = renderMarkdown(cell.code);
 
         const pre = cell.inputCard.querySelector('pre');
