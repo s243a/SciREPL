@@ -32,10 +32,12 @@ jobs:
       - run: node test_appearance.mjs
       - run: node test_onboarding.mjs
       - run: node test_rtl_layout.mjs
+      - run: node test_i18n_dynamic.mjs
       - run: node test_sw_offline.mjs
       - run: node test_autosave.mjs
       - run: node test_cell_ops.mjs
       - run: node test_js_kernel.mjs
+      - run: node test_notebook_vfs.mjs
 
   build:
     needs: test

@@ -72,6 +72,9 @@ jobs:
       - name: Right-to-left layout
         run: node test_rtl_layout.mjs
 
+      - name: Generated and dynamic localization
+        run: node test_i18n_dynamic.mjs
+
       - name: Service worker offline and upgrade coherence
         run: node test_sw_offline.mjs
 

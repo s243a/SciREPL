@@ -74,6 +74,9 @@ jobs:
       - name: Run JavaScript kernel tests
         run: node test_js_kernel.mjs
 
+      - name: Run notebook VFS tests
+        run: node test_notebook_vfs.mjs
+
       - name: Run WASM FFI tests
         run: node test_wasm_ffi.mjs
 
@@ -85,6 +88,9 @@ jobs:
 
       - name: Run right-to-left layout tests
         run: node test_rtl_layout.mjs
+
+      - name: Run generated and dynamic localization tests
+        run: node test_i18n_dynamic.mjs
 
       - name: Run service worker offline tests
         run: node test_sw_offline.mjs
