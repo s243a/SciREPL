@@ -24,6 +24,7 @@ const { applyWebContentsPolicy } = require('./security');
 const { registerIpcHandlers } = require('./ipc');
 const { installRuntimeCache } = require('./runtime-cache');
 const { installApplicationMenu } = require('./menu');
+const { createNativeI18n, SUPPORTED_LOCALES } = require('./native-i18n');
 
 const { resolveWwwRoot, resolveBuildInfoPath, resolveRepoRoot } = require('./paths');
 
@@ -151,6 +152,26 @@ if (!gotLock) {
 
 let mainWindow = null;
 let runtimeCache = null;
+const nativeI18n = createNativeI18n({ catalogDir: path.join(WWW_ROOT, 'i18n') });
+
+function nativeMenuDeps() {
+  return {
+    getCache: () => runtimeCache,
+    getBuildInfo: readBuildInfo,
+    getWindow: () => mainWindow,
+    appVersion: readAppVersion(),
+    t: (key, values) => nativeI18n.t(key, values),
+    getLocale: () => nativeI18n.locale,
+    literal: (value) => nativeI18n.literal(value),
+  };
+}
+
+/** Apply a validated bundled locale and rebuild all native labels atomically. */
+function setNativeLocale(locale) {
+  nativeI18n.setLocale(locale);
+  installApplicationMenu(nativeMenuDeps());
+  return nativeI18n.locale;
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -297,6 +318,8 @@ app.whenReady().then(() => {
     appVersion: readAppVersion(),
     profile: readProfile(),
     buildInfo: readBuildInfo(),
+    supportedLocales: SUPPORTED_LOCALES,
+    setLocale: setNativeLocale,
   });
 
   createWindow();
@@ -305,12 +328,7 @@ app.whenReady().then(() => {
   // the runtime cache can be inspected or cleared: the application's own
   // Memory & Storage panel works through the Cache API, which is always empty
   // under app://, so it neither sees nor clears this cache. See menu.js.
-  installApplicationMenu({
-    getCache: () => runtimeCache,
-    getBuildInfo: readBuildInfo,
-    getWindow: () => mainWindow,
-    appVersion: readAppVersion(),
-  });
+  installApplicationMenu(nativeMenuDeps());
 
   if (process.env.SCIREPL_SMOKE_EXIT === '1') runSmokeCheck(mainWindow);
 

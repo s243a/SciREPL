@@ -156,8 +156,10 @@ drifting. The proper fix is a shared change — replace the widget with a plain
 | `main.js` | lifecycle, window creation, single-instance lock, storage flush on quit |
 | `protocol.js` | the `app://` scheme, MIME types, path containment, CSP |
 | `security.js` | navigation / window-open / permission policy |
-| `preload.js` | the entire renderer-visible surface (two read-only calls) |
+| `preload.js` | the entire renderer-visible surface (two read-only calls plus a bundled-locale selector) |
 | `ipc.js` | the canonical IPC allowlist, owned by the main process |
+| `native-i18n.js` | host-side plain-text catalogue allowlist, English fallback, placeholder and RTL handling |
+| `menu.js` | localized native menu plus runtime-cache and About dialogs |
 | `runtime-cache.js` | persistent on-disk cache for CDN runtimes, in `userData` — replaces the service worker's `CDN_CACHE`, which cannot work under `app://` |
 | `paths.js` | resolves `www/` and build metadata in **both** layouts (development and packaged) |
 | `scripts/dev-windows.mjs` | the one-command setup + launch |
@@ -169,6 +171,7 @@ drifting. The proper fix is a shared change — replace the widget with a plain
 | Suite | Needs Electron? | Covers |
 | --- | --- | --- |
 | `policy.unit.test.mjs` | no | path containment, external-URL policy, IPC allowlist, CSP shape |
+| `native-i18n.test.mjs` | no | native catalogue completeness/safety, menu/dialog localization, RTL literals |
 | `shell-launch.test.mjs` | yes | origin, secure context, relative assets, WASM MIME + streaming, reload |
 | `security.test.mjs` | yes | Node unreachable from notebook code, preload surface, navigation policy, webPreferences |
 | `artifact-boundary.test.mjs` | yes | Free-only content; no bundled R, no entitlement code |

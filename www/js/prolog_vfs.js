@@ -255,7 +255,7 @@ class PrologVFS {
         baseDir = baseDir || '/user';
 
         if (typeof JSZip === 'undefined') {
-            throw new Error('JSZip not loaded. Cannot extract .zip archives.');
+            throw new Error(window.t('vfs.jsZipCannotExtract'));
         }
 
         const zip = await JSZip.loadAsync(zipBuffer);
@@ -367,7 +367,10 @@ class PrologVFS {
 
         const response = await fetch(url);
         if (!response.ok) {
-            throw new Error(`Fetch failed: ${response.status} ${response.statusText}`);
+            throw new Error(window.t('vfs.fetchFailed', {
+                status: response.status,
+                statusText: response.statusText,
+            }));
         }
 
         const contentType = response.headers.get('content-type') || '';

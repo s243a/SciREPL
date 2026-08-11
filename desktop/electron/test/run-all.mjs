@@ -19,6 +19,7 @@ const RESULTS_DIR = fileURLToPath(new URL('./results', import.meta.url));
 /** `unit: true` means it needs neither a display nor the Electron binary. */
 const SUITES = [
   { name: 'policy-unit', file: './policy.unit.test.mjs', unit: true },
+  { name: 'native-i18n', file: './native-i18n.test.mjs', unit: true },
   { name: 'shell-launch', file: './shell-launch.test.mjs', unit: false },
   { name: 'security', file: './security.test.mjs', unit: false },
   { name: 'artifact-boundary', file: './artifact-boundary.test.mjs', unit: false },

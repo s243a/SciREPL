@@ -33,7 +33,7 @@ class ClojureScriptKernel {
         if (!window.scittle) {
             const km = window.kernelManager;
             if (km) {
-                km.updateProgress('Downloading Scittle (ClojureScript) runtime…');
+                km.updateProgress(window.t('runtime.clojurescriptDownloading'));
             }
             const primary = 'https://cdn.jsdelivr.net/npm/scittle@0.6.22/dist/scittle.js';
             if (km && km.loadKernelSource) {
@@ -43,18 +43,18 @@ class ClojureScriptKernel {
                     const script = document.createElement('script');
                     script.src = primary;
                     script.onload = resolve;
-                    script.onerror = () => reject(new Error('Failed to load Scittle from CDN'));
+                    script.onerror = () => reject(new Error(window.t('runtime.scittleCdnFailed')));
                     document.head.appendChild(script);
                 });
             }
         }
 
         if (window.kernelManager) {
-            window.kernelManager.updateProgress('Initializing ClojureScript…');
+            window.kernelManager.updateProgress(window.t('runtime.clojurescriptInitializing'));
         }
 
         if (!window.scittle || !window.scittle.core || !window.scittle.core.eval_string) {
-            throw new Error('Scittle loaded but scittle.core.eval_string is unavailable');
+            throw new Error(window.t('runtime.scittleApiUnavailable'));
         }
 
         this._ready = true;
@@ -78,7 +78,7 @@ class ClojureScriptKernel {
 
     async execute(code) {
         if (!this._ready) {
-            throw new Error('ClojureScript kernel not initialized');
+            throw new Error(window.t('kernel.clojurescriptNotInitialized'));
         }
 
         const trimmed = (code || '').trim();

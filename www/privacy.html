@@ -23,25 +23,30 @@
 </head>
 <body>
     <h1>SciREPL Privacy Policy</h1>
-    <p class="updated">Last updated: February 24, 2026</p>
+    <p class="updated">Last updated: August 10, 2026</p>
 
     <h2>Summary</h2>
     <p>SciREPL is designed to be a privacy-respecting application. All code execution happens locally on your device. We do not collect, store, or transmit any personal data to our servers.</p>
 
     <h2>Local Data Storage</h2>
-    <p>SciREPL stores the following data locally on your device using your browser's localStorage:</p>
+    <p>SciREPL stores data locally on your device using browser or app storage, including localStorage, IndexedDB, and caches:</p>
     <ul>
         <li>Your session history (code cells and their types)</li>
         <li>Command history for input recall</li>
         <li>Preferences (e.g. cell counter state)</li>
+        <li>SharedVFS files, uploaded files, installed package files, and search paths</li>
+        <li>Downloaded runtimes, packages, and app resources kept in local caches</li>
     </ul>
-    <p>This data never leaves your device. You can clear it at any time via Menu > Clear History.</p>
+    <p>SciREPL does not send this local data to its servers. You can clear session and VFS data via Menu &gt; Clear History, and downloaded caches via Menu &gt; Memory &amp; Storage.</p>
 
     <h2>Network Requests &amp; Third-Party CDNs</h2>
-    <p>SciREPL bundles most of its rendering libraries (Plotly.js, KaTeX, marked.js) directly in the app to minimize network requests. However, the following resources are loaded from third-party CDNs:</p>
+    <p>SciREPL bundles its core interface and most language runtimes directly in the app. The following items describe what is bundled and what may be downloaded from third-party services:</p>
     <ul>
-        <li><strong>Pyodide</strong> (Python runtime, ~25MB) — from <code>cdn.jsdelivr.net</code>. Loaded on first launch and cached locally by the app for subsequent use.</li>
-        <li><strong>SWI-Prolog WASM</strong> (Prolog runtime, ~10MB) — from <code>SWI-Prolog.github.io</code>. Loaded only when Prolog is first used, and cached locally.</li>
+        <li><strong>Bundled language runtimes:</strong> Python (Pyodide), Prolog (SWI-Prolog WASM), ClojureScript (Scittle), Bash (brush-wasm), TypR, and JavaScript are included with the Free app and do not require a runtime download.</li>
+        <li><strong>R (webR)</strong> — about 50 MB from <code>webr.r-wasm.org</code>, downloaded when R is first used and cached locally.</li>
+        <li><strong>Lua (Fengari)</strong> — from <code>cdn.jsdelivr.net</code> or <code>unpkg.com</code>, downloaded when Lua is first used and cached locally.</li>
+        <li><strong>DOCX export library</strong> — <code>docx@9.6.0</code> from <code>cdn.jsdelivr.net</code>, downloaded when DOCX export is first used.</li>
+        <li><strong>Optional catalog packages</strong> are downloaded from GitHub when you install them. Other packages and user-requested data may be fetched from package repositories or URLs when you request them, for example with <code>install.packages()</code>, <code>%pip</code>, or file-fetching commands.</li>
         <li><strong>Ko-fi widget</strong> (support button in Help screen) — from <code>storage.ko-fi.com</code></li>
     </ul>
     <p>When these resources are fetched, the CDN providers may receive:</p>
@@ -51,9 +56,9 @@
         <li>Timestamps of requests</li>
         <li>URLs of requested resources</li>
     </ul>
-    <p>This is standard HTTP behavior and is not under our control. Caching is used to minimize connections to CDN networks — after the initial download, Pyodide and its packages are served from the local cache.</p>
+    <p>This is standard HTTP behavior and is not under our control. Caching is used to minimize repeat connections. After a runtime or package has been downloaded successfully, SciREPL uses the local cached copy when available.</p>
     <p>jsDelivr's privacy policy is available at <a href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net" target="_blank">jsdelivr.com/terms/privacy-policy-jsdelivr-net</a>.</p>
-    <p>Your Python code, session data, and exported files are never transmitted to any server.</p>
+    <p>Your code, session data, and exported files are not transmitted to a SciREPL server. Network requests occur only for the resources described above or when your code explicitly requests them.</p>
 
     <h2>Package Downloads</h2>
     <p>SciREPL includes a package catalog that allows you to download optional content packages from GitHub. When you choose to install a package, the app downloads the package file directly from GitHub's servers. GitHub may receive your IP address and standard HTTP headers during this download. SciREPL does not proxy, log, or monitor these requests. Package downloads are user-initiated and optional.</p>
@@ -62,7 +67,7 @@
     <p>SciREPL provides a file-fetching feature that allows notebook code to download files from URLs you specify. When you use this feature (e.g., <code>fetch_file</code> in Prolog, or via the Prolog Settings panel), the request is made directly from your device to the specified URL. The remote server will receive your IP address and standard HTTP headers. SciREPL does not proxy, log, or monitor these requests.</p>
 
     <h2>Code Execution</h2>
-    <p>All Python, Bash, and Prolog code you enter is executed locally on your device using WebAssembly runtimes (Pyodide for Python, brush-wasm for Bash, SWI-Prolog WASM for Prolog). No code is sent to any remote server for execution.</p>
+    <p>Code you enter in the included Python, Prolog, Bash, JavaScript, R, Lua, TypR, and ClojureScript kernels is executed locally on your device. No code is sent to a SciREPL server for execution.</p>
 
     <h2>File Export</h2>
     <p>When you export a notebook (.ipynb), the file is created locally on your device. If you choose to share it (via the system share sheet), the destination is determined by your choice (e.g. local storage, email, cloud services). SciREPL does not control or monitor where you share exported files.</p>
@@ -74,7 +79,7 @@
     <p>SciREPL does not knowingly collect any information from children. The app does not require account creation or collect personal information of any kind.</p>
 
     <h2>Future Changes</h2>
-    <p>If additional language runtimes are added (e.g. Prolog, R), they may also be loaded from CDNs and cached locally, subject to the same metadata exposure described above. This policy will be updated to reflect any changes.</p>
+    <p>If a future release changes which runtimes or packages are bundled or downloaded, this policy will be updated to describe the resulting network requests and metadata exposure.</p>
 
     <h2>Disclaimer</h2>
     <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR PERFORMANCE THEREOF.</p>

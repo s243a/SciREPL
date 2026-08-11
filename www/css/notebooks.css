@@ -101,7 +101,7 @@
 .sidebar-notebook-item.active {
     background: rgba(88, 166, 255, 0.08);
     color: var(--text-primary);
-    border-left-color: var(--accent);
+    border-inline-start-color: var(--accent);
 }
 
 .sidebar-nb-name {

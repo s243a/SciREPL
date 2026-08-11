@@ -169,6 +169,40 @@ try {
     check('the Arabic prose is untouched — this is typography, not translation',
         /[\u0600-\u06FF]/.test(isolated));
 
+    const literalDirection = await page.evaluate(() => {
+        const el = document.createElement('span');
+        window.setI18nText(el, 'loading.sciRepl');
+        return {
+            text: el.textContent,
+            dir: el.getAttribute('dir'),
+            autoDir: el.getAttribute('data-i18n-auto-dir'),
+        };
+    });
+    check('a catalogue-declared literal is one whole left-to-right element in RTL',
+        literalDirection.dir === 'ltr' && literalDirection.autoDir === 'ltr'
+            && literalDirection.text === 'Sci REPL',
+        JSON.stringify(literalDirection));
+
+    const nativeMessages = await page.evaluate(() => ({
+        latin: window.tNative('notebookManager.confirm.deleteNamed', {
+            name: 'Q4 \u202Eevil.srwb',
+        }),
+        arabic: window.tNative('notebookManager.confirm.deleteNamed', {
+            name: 'تحليل Claude.srwb',
+        }),
+        scrubbed: window.i18n.nativeMessage('Path: /nb/Q4 \u202Eevil.srwb'),
+    }));
+    check('native confirmations isolate a Latin interpolation as one unit',
+        nativeMessages.latin.includes(`${LRI}Q4 evil.srwb${PDI}`),
+        JSON.stringify(nativeMessages.latin));
+    check('native confirmations preserve an RTL value and its inner Latin extension',
+        nativeMessages.arabic.includes('\u2067')
+            && nativeMessages.arabic.includes(`${LRI}Claude.srwb${PDI}`),
+        JSON.stringify(nativeMessages.arabic));
+    check('native-dialog formatting removes caller-supplied bidi overrides',
+        !nativeMessages.latin.includes('\u202E') && !nativeMessages.scrubbed.includes('\u202E'),
+        JSON.stringify(nativeMessages));
+
     // Applying it twice would nest isolates and grow the string on every
     // re-render, which happens whenever the locale is reapplied.
     const stable = await page.evaluate(() => {

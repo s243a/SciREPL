@@ -153,37 +153,51 @@
             try {
                 parsed = typeof json === 'string' ? JSON.parse(json) : json;
             } catch (e) {
-                return { ok: false, error: `Not valid JSON: ${e.message}` };
+                const errorKey = 'appearance.invalidJson';
+                const errorVars = { error: e.message };
+                return { ok: false, errorKey, errorVars, error: window.t(errorKey, errorVars) };
             }
             if (!parsed || typeof parsed !== 'object') {
-                return { ok: false, error: 'Expected a JSON object.' };
+                const errorKey = 'appearance.expectedJsonObject';
+                return { ok: false, errorKey, error: window.t(errorKey) };
             }
 
             const vars = parsed.vars || parsed;
             if (!vars || typeof vars !== 'object') {
-                return { ok: false, error: 'Expected a "vars" object of CSS variables.' };
+                const errorKey = 'appearance.expectedVarsObject';
+                return { ok: false, errorKey, error: window.t(errorKey) };
             }
 
             const unknown = Object.keys(vars).filter((k) => !THEMEABLE.includes(k));
             if (unknown.length) {
+                const errorKey = 'appearance.unknownVariables';
+                const errorVars = {
+                    variables: unknown.join(', '),
+                    allowed: THEMEABLE.join('\n  '),
+                };
                 return {
                     ok: false,
-                    error: `Unknown variable(s): ${unknown.join(', ')}\n\n` +
-                        `Allowed:\n  ${THEMEABLE.join('\n  ')}`,
+                    errorKey,
+                    errorVars,
+                    error: window.t(errorKey, errorVars),
                 };
             }
 
             const bad = Object.entries(vars).filter(([, v]) => !this._isColour(v));
             if (bad.length) {
+                const errorKey = 'appearance.invalidColour';
+                const errorVars = { values: bad.map(([k, v]) => `${k}: ${v}`).join(', ') };
                 return {
                     ok: false,
-                    error: `Not a valid colour: ${bad.map(([k, v]) => `${k}: ${v}`).join(', ')}`,
+                    errorKey,
+                    errorVars,
+                    error: window.t(errorKey, errorVars),
                 };
             }
 
             return {
                 ok: true,
-                theme: { name: typeof parsed.name === 'string' ? parsed.name : 'Custom', vars },
+                theme: { name: typeof parsed.name === 'string' ? parsed.name : window.t('appearance.customThemeName'), vars },
             };
         }
 
@@ -216,7 +230,7 @@
                 const v = computed.getPropertyValue(key).trim();
                 if (v) vars[key] = v;
             }
-            return JSON.stringify({ name: 'My theme', vars }, null, 2);
+            return JSON.stringify({ name: window.t('appearance.myThemeName'), vars }, null, 2);
         }
 
         /* ---------------------------- applying ---------------------------- */
@@ -556,7 +570,15 @@
                 const el = document.getElementById(id);
                 if (!el || typeof el.getAnimations !== 'function') continue;
                 let anims;
-                try { anims = el.getAnimations({ subtree: false }); } catch { anims = []; }
+                try {
+                    // A truly hidden modal is no longer rendered, so the browser
+                    // quite correctly exposes no active CSS animation for it.
+                    // Probe it open for one synchronous frame so hostile delayed
+                    // keyframes are still visible to the recovery guard.
+                    anims = el.classList.contains('modal') && el.classList.contains('hidden')
+                        ? this._withProbeOpen(el, () => [...el.getAnimations({ subtree: false })])
+                        : [...el.getAnimations({ subtree: false })];
+                } catch { anims = []; }
                 for (const anim of anims) {
                     // Transitions are transient and usually the app's own (a modal
                     // fading in passes through opacity 0). A transition TO a hidden
@@ -631,11 +653,7 @@
             note.setAttribute('role', 'alert');
             // Called with the key spelled out so scripts/check-i18n-keys.mjs can
             // see it; the fallback covers being called before i18n has loaded.
-            const translated = window.t && window.t('appearance.cssQuarantined');
-            note.textContent = (translated && translated !== 'appearance.cssQuarantined')
-                ? translated
-                : 'Your custom CSS hid the menu button, so it has been turned off. '
-                  + 'It is kept in Appearance → Advanced so you can edit it.';
+            window.setI18nText(note, 'appearance.cssQuarantined');
             document.body.appendChild(note);
             setTimeout(() => note.remove(), 12000);
         }
@@ -677,12 +695,10 @@
     window.appearance = appearance;
 
     /**
-     * Hidden modals keep focusable descendants — a Tab or a restored-focus
-     * target can land inside a menu the user can no longer see. `inert` removes
-     * the whole subtree from focus and the accessibility tree without touching
-     * visibility (the menu buttons carry `transition: all`, so a visibility
-     * change would animate and misbehave). Toggled from the `hidden` class on
-     * every .modal, so no individual show/hide call site has to remember.
+     * Hidden modals are removed from layout/painting by the shared `.hidden`
+     * rule. `inert` additionally removes their descendants from focus and the
+     * accessibility tree. Toggled from the class on every modal so no
+     * individual show/hide call site has to remember the accessibility state.
      */
     function syncModalInert(m) {
         const hidden = m.classList.contains('hidden');

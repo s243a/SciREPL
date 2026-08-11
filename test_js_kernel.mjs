@@ -4,6 +4,8 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 const TIMEOUT = 120_000;
+const PORT = process.env.PORT || 8085;
+const URL = `http://localhost:${PORT}/`;
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -33,7 +35,7 @@ const TIMEOUT = 120_000;
       localStorage.setItem('scirepl_auto_download', '1');
     });
 
-    await page.goto('http://localhost:8085/', { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+    await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
     await page.waitForTimeout(2000);
 
     // --- Test: JS kernel is registered ---

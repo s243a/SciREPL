@@ -261,9 +261,13 @@ export default async function run() {
   /* ---------------- IPC allowlist ---------------- */
 
   const channels = ipc.listRegisteredChannels();
-  r.log('IPC allowlist is exactly the two read-only operations',
+  r.log('IPC allowlist is exactly the two read-only operations plus locale selection',
     JSON.stringify([...channels].sort()) ===
-      JSON.stringify(['scirepl:get-app-info', 'scirepl:get-distribution-info']),
+      JSON.stringify([
+        'scirepl:get-app-info',
+        'scirepl:get-distribution-info',
+        'scirepl:set-locale',
+      ]),
     JSON.stringify(channels));
 
   let threw = false;
@@ -273,6 +277,15 @@ export default async function run() {
   let threwEmpty = false;
   try { ipc.assertNullary('test', []); } catch { threwEmpty = true; }
   r.log('assertNullary accepts no arguments', threwEmpty === false);
+
+  const localeIds = new Set(['en', 'fr']);
+  r.log('locale IPC accepts one bundled locale id',
+    ipc.assertLocaleArgument('test', ['fr'], localeIds) === 'fr');
+  for (const args of [[], ['fr', 'en'], [42], ['../../evil'], ['en-US']]) {
+    let rejected = false;
+    try { ipc.assertLocaleArgument('test', args, localeIds); } catch { rejected = true; }
+    r.log(`locale IPC rejects ${JSON.stringify(args)}`, rejected === true);
+  }
 
   /* ---------------- CSP shape ---------------- */
 

@@ -96,7 +96,7 @@ export async function probeExposedSurface(page) {
   });
 }
 
-/** The two allowlisted read-only operations. */
+/** The two read-only calls plus the narrowly validated native-locale call. */
 export async function probePlatformApi(page) {
   return page.evaluate(async () => {
     const appInfo = await window.sciREPLPlatform.getAppInfo();
@@ -104,7 +104,17 @@ export async function probePlatformApi(page) {
     // Renderer-supplied arguments must be inert: the preload wrapper is nullary
     // and forwards nothing.
     const withArgs = await window.sciREPLPlatform.getAppInfo('extra', { evil: true }, 42);
-    return { appInfo, dist, argsInert: JSON.stringify(appInfo) === JSON.stringify(withArgs) };
+    const locale = await window.sciREPLPlatform.setLocale('en');
+    let invalidLocaleRejected = false;
+    try { await window.sciREPLPlatform.setLocale('../../etc/passwd'); }
+    catch { invalidLocaleRejected = true; }
+    return {
+      appInfo,
+      dist,
+      argsInert: JSON.stringify(appInfo) === JSON.stringify(withArgs),
+      locale,
+      invalidLocaleRejected,
+    };
   });
 }
 
@@ -167,8 +177,9 @@ export async function assertBoundary(r, page, electronApp, label = '') {
     reachableCapabilities(escapes).length === 0, JSON.stringify(escapes));
 
   const surface = await probeExposedSurface(page);
-  r.log(`${p}the exposed surface is exactly [getAppInfo, getDistributionInfo]`,
-    surface && JSON.stringify(surface.keys) === JSON.stringify(['getAppInfo', 'getDistributionInfo']),
+  r.log(`${p}the exposed surface is exactly [getAppInfo, getDistributionInfo, setLocale]`,
+    surface && JSON.stringify(surface.keys) ===
+      JSON.stringify(['getAppInfo', 'getDistributionInfo', 'setLocale']),
     surface && JSON.stringify(surface.keys));
   r.log(`${p}the exposed API object is frozen`, surface?.frozen === true);
   r.log(`${p}no generic invoke/send/fs/shell escape hatch is exposed`,
@@ -180,6 +191,9 @@ export async function assertBoundary(r, page, electronApp, label = '') {
       && !('cwd' in api.appInfo) && !('env' in api.appInfo),
     JSON.stringify(api.appInfo));
   r.log(`${p}renderer-supplied arguments to the platform API are inert`, api.argsInert === true);
+  r.log(`${p}the native locale bridge accepts only a bundled locale id`,
+    api.locale?.locale === 'en' && api.invalidLocaleRejected === true,
+    JSON.stringify(api.locale));
   r.log(`${p}no entitlement/licence value is fabricated`, api.dist.store === null,
     JSON.stringify(api.dist.store));
 

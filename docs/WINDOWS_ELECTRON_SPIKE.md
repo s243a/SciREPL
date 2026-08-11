@@ -73,18 +73,21 @@ surfaced the service-worker limitation in §5.
 
 ## 2. What was built
 
-A thin shell under `desktop/electron/`, ~126 kB of source, five files:
+A thin shell under `desktop/electron/`:
 
 | File | Role |
 | --- | --- |
 | `main.js` | lifecycle, window creation, single-instance lock, storage flush on quit |
 | `protocol.js` | the `app://scirepl` scheme, MIME map, path containment, CSP |
 | `security.js` | navigation / window-open / permission policy |
-| `preload.js` | the entire renderer-visible surface — two read-only calls |
+| `preload.js` | the entire renderer-visible surface — two read-only calls plus a bundled-locale selector |
 | `ipc.js` | the canonical IPC allowlist, owned by the main process |
+| `native-i18n.js` | host-side plain-text catalogue allowlist and fallback |
+| `menu.js` | localized native menu and cache/About dialogs |
 
-It loads the **unmodified** prepared `www/` tree. No file under `www/`,
-`android/`, `scripts/`, or `capacitor.config.json` was changed (§7).
+It loads the same prepared `www/` tree as the other containers. The shared i18n
+layer optionally sends only its winning locale id to the Electron preload;
+Android and the PWA expose no such method and keep the same behavior.
 
 Electron lives in `desktop/electron/package.json`, **not** the root
 `package.json`, so a root `npm install` — what the Android build and existing CI
@@ -1079,8 +1082,13 @@ DevTools open in the packaged app:
 
 ```
 require = undefined   process = undefined   new Function('return process') = blocked
-window.sciREPLPlatform = [getAppInfo, getDistributionInfo]
+window.sciREPLPlatform = [getAppInfo, getDistributionInfo, setLocale]
 ```
+
+`setLocale` accepts exactly one id from the host's fixed bundled-locale
+allowlist. It cannot send translated text or acquire a file, shell, network, or
+process capability; it only rebuilds Electron's native menu from packaged
+plain-text catalogue entries.
 
 The boundary is `contextIsolation` + `sandbox` + `nodeIntegration: false`, and
 those apply to whoever is typing. A user at the DevTools console has exactly what

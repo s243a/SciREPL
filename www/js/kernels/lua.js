@@ -20,7 +20,7 @@ class LuaKernel {
         if (!window.fengari) {
             const km = window.kernelManager;
             if (km) {
-                km.updateProgress('Downloading Fengari Lua runtime…');
+                km.updateProgress(window.t('runtime.luaDownloading'));
             }
             const primary = 'https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js';
             if (km && km.loadKernelSource) {
@@ -30,14 +30,14 @@ class LuaKernel {
                     const script = document.createElement('script');
                     script.src = primary;
                     script.onload = resolve;
-                    script.onerror = () => reject(new Error('Failed to load Fengari from CDN'));
+                    script.onerror = () => reject(new Error(window.t('runtime.fengariCdnFailed')));
                     document.head.appendChild(script);
                 });
             }
         }
 
         if (window.kernelManager) {
-            window.kernelManager.updateProgress('Initializing Lua…');
+            window.kernelManager.updateProgress(window.t('runtime.luaInitializing'));
         }
 
         const f = window.fengari;
@@ -450,7 +450,7 @@ class LuaKernel {
 
     async execute(code) {
         if (!this._ready) {
-            throw new Error('Lua kernel not initialized');
+            throw new Error(window.t('kernel.luaNotInitialized'));
         }
 
         const trimmed = code.trim();

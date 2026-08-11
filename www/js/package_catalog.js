@@ -12,6 +12,35 @@ class PackageCatalog {
         this._init();
     }
 
+    _t(key, fallback, vars = {}) {
+        const translated = typeof window.t === 'function' ? window.t(key, vars) : key;
+        if (translated !== key) return translated;
+        return String(fallback).replace(/\{(\w+)\}/g, (match, name) =>
+            Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : match);
+    }
+
+    _displayName(pkg) {
+        return pkg.displayNameKey
+            ? this._t(pkg.displayNameKey, pkg.name)
+            : pkg.name;
+    }
+
+    _description(pkg) {
+        return pkg.descriptionKey
+            ? this._t(pkg.descriptionKey, pkg.description)
+            : pkg.description;
+    }
+
+    _setTranslatedText(el, key, fallback, vars = {}) {
+        if (!el) return;
+        el.textContent = this._t(key, fallback, vars);
+        if (typeof window.setI18nText === 'function') window.setI18nText(el, key, vars);
+    }
+
+    _setButtonLabel(btn, key, fallback, vars = {}) {
+        this._setTranslatedText(btn, key, fallback, vars);
+    }
+
     /**
      * The catalog.  Add entries here to make them available to users.
      * Each entry needs: id, name, description, and a type-specific source.
@@ -23,7 +52,9 @@ class PackageCatalog {
             {
                 id: 'unifyweaver-scirepl',
                 name: 'UnifyWeaver SciREPL',
+                displayNameKey: 'packageCatalog.item.unifyweaverScirepl.name',
                 description: 'Physics knowledge-base notebooks with Prolog inference, embedding search, and mindmap tools.',
+                descriptionKey: 'packageCatalog.item.unifyweaverScirepl.description',
                 type: 'package',
                 version: 'v0.11.0',
                 url: 'https://github.com/s243a/SciREPL/releases/download/v0.11.0/unifyweaver_scirepl.zip',
@@ -34,10 +65,14 @@ class PackageCatalog {
             {
                 id: 'unifyweaver-workbooks',
                 name: 'UnifyWeaver Tutorials & Compiler Demos',
+                displayNameKey: 'packageCatalog.item.unifyweaverWorkbooks.name',
                 description: 'The four workbooks declared by UnifyWeaver\'s SciREPL package builder: three tutorials and the Prolog-to-R compiler demo.',
+                descriptionKey: 'packageCatalog.item.unifyweaverWorkbooks.description',
                 type: 'bundle',
                 size: '~50 KB',
                 contents: '4 workbooks',
+                contentsKey: 'packageCatalog.contentsWorkbooks',
+                contentsVars: { count: 4 },
                 kernels: ['prolog', 'r', 'bash'],
                 requires: ['unifyweaver-scirepl'],
                 items: [
@@ -50,8 +85,10 @@ class PackageCatalog {
             {
                 id: 'unifyweaver-family-tree',
                 name: 'Family Tree Tutorial with UnifyWeaver',
+                displayNameKey: 'packageCatalog.item.unifyweaverFamilyTree.name',
                 notebookName: 'Family Tree Tutorial with UnifyWeaver',
                 description: 'Build and query a family-tree knowledge base while learning UnifyWeaver and Prolog fundamentals.',
+                descriptionKey: 'packageCatalog.item.unifyweaverFamilyTree.description',
                 type: 'workbook',
                 revision: 2,
                 pages_url: 'workbooks/01_family_tree_tutorial.ipynb',
@@ -62,8 +99,10 @@ class PackageCatalog {
             {
                 id: 'unifyweaver-recursion-patterns',
                 name: 'Advanced Recursion Patterns in UnifyWeaver',
+                displayNameKey: 'packageCatalog.item.unifyweaverRecursionPatterns.name',
                 notebookName: 'Advanced Recursion Patterns in UnifyWeaver',
                 description: 'Explore recursive predicates and the compilation patterns UnifyWeaver recognizes.',
+                descriptionKey: 'packageCatalog.item.unifyweaverRecursionPatterns.description',
                 type: 'workbook',
                 revision: 2,
                 pages_url: 'workbooks/02_recursion_patterns.ipynb',
@@ -74,8 +113,10 @@ class PackageCatalog {
             {
                 id: 'unifyweaver-call-graph',
                 name: 'Call Graph Analysis and SCC Detection',
+                displayNameKey: 'packageCatalog.item.unifyweaverCallGraph.name',
                 notebookName: 'Call Graph Analysis and SCC Detection',
                 description: 'Analyze predicate call graphs and strongly connected components with UnifyWeaver.',
+                descriptionKey: 'packageCatalog.item.unifyweaverCallGraph.description',
                 type: 'workbook',
                 revision: 3,
                 pages_url: 'workbooks/03_call_graph_analysis.ipynb',
@@ -86,8 +127,10 @@ class PackageCatalog {
             {
                 id: 'prolog-generates-r',
                 name: 'Prolog Generates R',
+                displayNameKey: 'packageCatalog.item.prologGeneratesR.name',
                 notebookName: 'Prolog Generates R: Compiler Demo',
                 description: 'Compile recursive Prolog predicates into executable R and inspect the generated program through notebook cells.',
+                descriptionKey: 'packageCatalog.item.prologGeneratesR.description',
                 type: 'workbook',
                 revision: 1,
                 format: 'srwb',
@@ -99,8 +142,10 @@ class PackageCatalog {
             {
                 id: 'prolog-generates-lua',
                 name: 'Prolog Generates Lua',
+                displayNameKey: 'packageCatalog.item.prologGeneratesLua.name',
                 notebookName: 'Prolog Generates Lua: Compiler Demo',
                 description: 'Compile a Prolog transitive closure to Lua using a named query source cell, embedded or notebook-VFS facts, and direct Lua cell I/O.',
+                descriptionKey: 'packageCatalog.item.prologGeneratesLua.description',
                 type: 'workbook',
                 revision: 2,
                 format: 'srwb',
@@ -112,8 +157,10 @@ class PackageCatalog {
             {
                 id: 'prolog-generates-clojurescript',
                 name: 'Prolog Generates ClojureScript',
+                displayNameKey: 'packageCatalog.item.prologGeneratesClojureScript.name',
                 notebookName: 'Prolog Generates ClojureScript: Compiler Demo',
                 description: 'Compile a Prolog transitive closure to browser-runnable ClojureScript, then query the generated definitions in Scittle.',
+                descriptionKey: 'packageCatalog.item.prologGeneratesClojureScript.description',
                 type: 'workbook',
                 revision: 1,
                 format: 'srwb',
@@ -125,7 +172,9 @@ class PackageCatalog {
             {
                 id: 'life-expectancy-analysis',
                 name: 'Life Expectancy Analysis',
+                displayNameKey: 'packageCatalog.item.lifeExpectancyAnalysis.name',
                 description: 'Mixed Python/R workbook: Gapminder & WHO datasets with pandas, plotly, and R base graphics.',
+                descriptionKey: 'packageCatalog.item.lifeExpectancyAnalysis.description',
                 type: 'workbook',
                 revision: 1,
                 url: 'https://github.com/s243a/SciREPL/releases/download/v0.7.0/life_expectancy_csv_demo.ipynb',
@@ -136,8 +185,10 @@ class PackageCatalog {
             {
                 id: 'compute-pi-archimedean',
                 name: 'Compute Pi with Archimedean Bounds',
+                displayNameKey: 'packageCatalog.item.computePiArchimedean.name',
                 notebookName: 'Compute Pi: Archimedean Bounds',
                 description: 'Squeeze pi between inscribed and circumscribed polygon bounds using a stable, non-circular side-doubling recurrence.',
+                descriptionKey: 'packageCatalog.item.computePiArchimedean.description',
                 type: 'workbook',
                 revision: 1,
                 format: 'srwb',
@@ -148,7 +199,9 @@ class PackageCatalog {
             {
                 id: 'ggplot2-showcase',
                 name: 'ggplot2 Showcase',
+                displayNameKey: 'packageCatalog.item.ggplot2Showcase.name',
                 description: 'Scatter, bar, density, box, and heatmap charts with ggplot2 dark theme. Uses built-in R datasets.',
+                descriptionKey: 'packageCatalog.item.ggplot2Showcase.description',
                 type: 'workbook',
                 url: 'https://github.com/s243a/SciREPL/releases/download/v0.8.0/r_ggplot2_showcase.ipynb',
                 pages_url: 'workbooks/r_ggplot2_showcase.ipynb',
@@ -158,7 +211,9 @@ class PackageCatalog {
             {
                 id: 'tidyverse-data-wrangling',
                 name: 'Tidyverse Data Wrangling',
+                displayNameKey: 'packageCatalog.item.tidyverseDataWrangling.name',
                 description: 'dplyr/tidyr pipelines with cross-language CSV sharing: Python downloads, R processes, Python visualizes.',
+                descriptionKey: 'packageCatalog.item.tidyverseDataWrangling.description',
                 type: 'workbook',
                 revision: 1,
                 url: 'https://github.com/s243a/SciREPL/releases/download/v0.8.0/r_tidyverse_wrangling.ipynb',
@@ -169,7 +224,9 @@ class PackageCatalog {
             {
                 id: 'statistics-with-r',
                 name: 'Statistics with R',
+                displayNameKey: 'packageCatalog.item.statisticsWithR.name',
                 description: 'Hypothesis testing (t-test, chi-squared, ANOVA), regression, confidence intervals, and diagnostic plots.',
+                descriptionKey: 'packageCatalog.item.statisticsWithR.description',
                 type: 'workbook',
                 revision: 1,
                 url: 'https://github.com/s243a/SciREPL/releases/download/v0.8.0/r_statistics.ipynb',
@@ -180,7 +237,9 @@ class PackageCatalog {
             {
                 id: 'lua-tables-coroutines',
                 name: 'Lua: Tables, Coroutines & Closures',
+                displayNameKey: 'packageCatalog.item.luaTablesCoroutines.name',
                 description: 'Tour of Lua\'s core features — tables as universal data structure, coroutines for cooperative multitasking, closures, custom iterators, and a lazy Stream library.',
+                descriptionKey: 'packageCatalog.item.luaTablesCoroutines.description',
                 type: 'workbook',
                 format: 'srwb',
                 pages_url: 'workbooks/lua-tables-coroutines.srwb',
@@ -190,7 +249,9 @@ class PackageCatalog {
             {
                 id: 'lua-parsing-coroutines',
                 name: 'Lua: Parsing with Coroutines',
+                displayNameKey: 'packageCatalog.item.luaParsingCoroutines.name',
                 description: 'Build a calculator from scratch — coroutine lexer, recursive descent parser, AST evaluator, parser combinators, and a CSV parser. No external libraries.',
+                descriptionKey: 'packageCatalog.item.luaParsingCoroutines.description',
                 type: 'workbook',
                 revision: 1,
                 format: 'srwb',
@@ -201,8 +262,10 @@ class PackageCatalog {
             {
                 id: 'typr-introduction',
                 name: 'TypR Introduction',
+                displayNameKey: 'packageCatalog.item.typrIntroduction.name',
                 notebookName: 'TypR Introduction',
                 description: 'Typed R superset — variable binding, functions, type annotations, variadic calls, and source/type-check/transpiler directives. Compiles to R via WASM.',
+                descriptionKey: 'packageCatalog.item.typrIntroduction.description',
                 type: 'workbook',
                 revision: 1,
                 format: 'srwb',
@@ -214,8 +277,10 @@ class PackageCatalog {
             {
                 id: 'prolog-generates-typr',
                 name: 'Prolog Generates TypR',
+                displayNameKey: 'packageCatalog.item.prologGeneratesTypr.name',
                 notebookName: 'Prolog Generates TypR: Compiler Demo',
                 description: 'Compile a Prolog transitive-closure predicate to typed TypR, then execute the generated code with native variadic output calls.',
+                descriptionKey: 'packageCatalog.item.prologGeneratesTypr.description',
                 type: 'workbook',
                 format: 'srwb',
                 revision: 4,
@@ -246,6 +311,8 @@ class PackageCatalog {
                 }
             });
         }
+
+        document.addEventListener('i18n:changed', () => this._translateVisibleCatalog());
     }
 
     _render() {
@@ -253,7 +320,9 @@ class PackageCatalog {
         const all = this.packages;
 
         if (all.length === 0) {
-            this.listEl.innerHTML = '<p>No items available.</p>';
+            this.listEl.innerHTML = '<p class="catalog-empty"></p>';
+            this._setTranslatedText(this.listEl.querySelector('.catalog-empty'),
+                'packageCatalog.noItems', 'No items available.');
             return;
         }
 
@@ -263,19 +332,21 @@ class PackageCatalog {
 
         let html = '';
         if (packages.length > 0) {
-            html += '<h3 class="catalog-section-header">Packages</h3>';
+            html += `<h3 class="catalog-section-header" data-i18n="packageCatalog.sectionPackages">${this._esc(this._t('packageCatalog.sectionPackages', 'Packages'))}</h3>`;
             html += packages.map((pkg) => this._renderCard(pkg, all.indexOf(pkg))).join('');
         }
         if (bundles.length > 0) {
-            html += '<h3 class="catalog-section-header">Bundles</h3>';
+            html += `<h3 class="catalog-section-header" data-i18n="packageCatalog.sectionBundles">${this._esc(this._t('packageCatalog.sectionBundles', 'Bundles'))}</h3>`;
             html += bundles.map((pkg) => this._renderCard(pkg, all.indexOf(pkg))).join('');
         }
         if (workbooks.length > 0) {
-            html += '<h3 class="catalog-section-header">Workbooks</h3>';
+            html += `<h3 class="catalog-section-header" data-i18n="packageCatalog.sectionWorkbooks">${this._esc(this._t('packageCatalog.sectionWorkbooks', 'Workbooks'))}</h3>`;
             html += workbooks.map((pkg) => this._renderCard(pkg, all.indexOf(pkg))).join('');
         }
 
         this.listEl.innerHTML = html;
+        this._wireCatalogTranslations();
+        this._syncInstallButtons();
 
         // Attach install handlers
         this.listEl.querySelectorAll('.pkg-install-btn').forEach(btn => {
@@ -286,22 +357,66 @@ class PackageCatalog {
     _renderCard(pkg, idx) {
         const installed = this._isInstalled(pkg);
         const dependencyNames = (pkg.requires || [])
-            .map(ref => this._findEntry(ref)?.name || ref)
+            .map(ref => {
+                const dependency = this._findEntry(ref);
+                return dependency ? this._displayName(dependency) : ref;
+            })
             .join(', ');
+        const contents = pkg.contentsKey
+            ? this._t(pkg.contentsKey, pkg.contents, pkg.contentsVars)
+            : pkg.contents;
         return `
-            <div class="pkg-card ${pkg.type === 'bundle' ? 'pkg-bundle-card' : ''}">
+            <div class="pkg-card ${pkg.type === 'bundle' ? 'pkg-bundle-card' : ''}" data-catalog-id="${this._esc(pkg.id)}">
                 <div class="pkg-info">
-                    <strong>${this._esc(pkg.name)}</strong>
+                    <strong class="pkg-display-name">${this._esc(this._displayName(pkg))}</strong>
                     ${pkg.version ? `<span class="pkg-version">${this._esc(pkg.version)}</span>` : ''}
                     ${pkg.size ? `<span class="pkg-size">${this._esc(pkg.size)}</span>` : ''}
-                    ${pkg.contents ? `<span class="pkg-contents">${this._esc(pkg.contents)}</span>` : ''}
+                    ${contents ? `<span class="pkg-contents">${this._esc(contents)}</span>` : ''}
                     ${pkg.kernels ? `<span class="pkg-kernels">${pkg.kernels.map(k => this._esc(k)).join(', ')}</span>` : ''}
-                    <p>${this._esc(pkg.description)}</p>
-                    ${dependencyNames ? `<small class="pkg-requires">Requires: ${this._esc(dependencyNames)}</small>` : ''}
+                    <p class="pkg-description">${this._esc(this._description(pkg))}</p>
+                    ${dependencyNames ? `<small class="pkg-requires">${this._esc(this._t('packageCatalog.requires', 'Requires: {dependencies}', { dependencies: dependencyNames }))}</small>` : ''}
                 </div>
-                <button class="pkg-install-btn${installed ? ' pkg-installed' : ''}" data-idx="${idx}"${installed ? ' disabled' : ''}>${installed ? 'Installed' : 'Install'}</button>
+                <button class="pkg-install-btn${installed ? ' pkg-installed' : ''}" data-idx="${idx}"${installed ? ' disabled' : ''}></button>
             </div>
         `;
+    }
+
+    _wireCatalogTranslations() {
+        if (!this.listEl) return;
+        const all = this.packages;
+        for (const card of this.listEl.querySelectorAll('.pkg-card')) {
+            const pkg = all.find(item => item.id === card.dataset.catalogId);
+            if (!pkg) continue;
+            if (pkg.displayNameKey) {
+                this._setTranslatedText(card.querySelector('.pkg-display-name'),
+                    pkg.displayNameKey, pkg.name);
+            }
+            if (pkg.descriptionKey) {
+                this._setTranslatedText(card.querySelector('.pkg-description'),
+                    pkg.descriptionKey, pkg.description);
+            }
+            if (pkg.contentsKey) {
+                this._setTranslatedText(card.querySelector('.pkg-contents'),
+                    pkg.contentsKey, pkg.contents, pkg.contentsVars);
+            }
+            const requires = card.querySelector('.pkg-requires');
+            if (requires) {
+                const dependencies = (pkg.requires || []).map(ref => {
+                    const dependency = this._findEntry(ref);
+                    return dependency ? this._displayName(dependency) : ref;
+                }).join(', ');
+                this._setTranslatedText(requires, 'packageCatalog.requires',
+                    'Requires: {dependencies}', { dependencies });
+            }
+        }
+    }
+
+    _translateVisibleCatalog() {
+        if (!this.listEl || !this.listEl.children.length) return;
+        this._wireCatalogTranslations();
+        if (window.i18n && typeof window.i18n.applyToDom === 'function') {
+            window.i18n.applyToDom(this.listEl);
+        }
     }
 
     _findEntry(ref) {
@@ -361,7 +476,13 @@ class PackageCatalog {
         this.listEl.querySelectorAll('.pkg-install-btn').forEach(btn => {
             const pkg = all[parseInt(btn.dataset.idx, 10)];
             const state = this._installState(pkg);
-            btn.textContent = state === 'current' ? 'Installed' : (state === 'outdated' ? 'Update' : 'Install');
+            if (state === 'current') {
+                this._setButtonLabel(btn, 'packageCatalog.installed', 'Installed');
+            } else if (state === 'outdated') {
+                this._setButtonLabel(btn, 'packageCatalog.update', 'Update');
+            } else {
+                this._setButtonLabel(btn, 'packageCatalog.install', 'Install');
+            }
             btn.disabled = state === 'current';
             btn.classList.toggle('pkg-installed', state === 'current');
         });
@@ -388,7 +509,8 @@ class PackageCatalog {
             }
         }
         if (!blob) {
-            throw lastError || new Error('No download source for ' + pkg.name);
+            throw lastError || new Error(this._t('packageCatalog.noDownloadSource',
+                'No download source for {name}', { name: this._displayName(pkg) }));
         }
         return blob;
     }
@@ -407,7 +529,11 @@ class PackageCatalog {
         }
 
         btn.disabled = true;
-        btn.textContent = pkg.type === 'bundle' ? 'Preparing...' : 'Downloading...';
+        if (pkg.type === 'bundle') {
+            this._setButtonLabel(btn, 'packageCatalog.preparing', 'Preparing...');
+        } else {
+            this._setButtonLabel(btn, 'packageCatalog.downloading', 'Downloading...');
+        }
 
         // 1. Download (concurrent — multiple downloads can run at once)
         //    Prefer the locally-bundled copy (reliable + offline, and on the
@@ -418,15 +544,20 @@ class PackageCatalog {
             blob = await this._fetchCatalogItem(pkg);
         } catch (err) {
             console.error('[PackageCatalog] Download failed:', err);
-            btn.textContent = 'Failed';
+            this._setButtonLabel(btn, 'packageCatalog.failed', 'Failed');
             btn.disabled = false;
-            setTimeout(() => { btn.textContent = 'Install'; }, 3000);
+            setTimeout(() => this._setButtonLabel(
+                btn, 'packageCatalog.install', 'Install'), 3000);
             return;
         }
 
         // 2. Queue the import (sequential — avoids notebook state races)
         this._importQueue = this._importQueue || [];
-        btn.textContent = this._importRunning ? 'Queued...' : 'Importing...';
+        if (this._importRunning) {
+            this._setButtonLabel(btn, 'packageCatalog.queued', 'Queued...');
+        } else {
+            this._setButtonLabel(btn, 'packageCatalog.importing', 'Importing...');
+        }
         this._importQueue.push({ btn, pkg, blob });
 
         if (this._importRunning) return; // will be processed in order
@@ -434,7 +565,7 @@ class PackageCatalog {
 
         while (this._importQueue.length > 0) {
             const job = this._importQueue.shift();
-            job.btn.textContent = 'Importing...';
+            this._setButtonLabel(job.btn, 'packageCatalog.importing', 'Importing...');
             try {
                 await this._ensureDependencies(job.pkg);
                 await this._doImport(job.pkg, job.blob);
@@ -442,7 +573,7 @@ class PackageCatalog {
                 this._syncInstallButtons();
             } catch (err) {
                 console.error('[PackageCatalog] Import failed:', err);
-                job.btn.textContent = 'Failed';
+                this._setButtonLabel(job.btn, 'packageCatalog.failed', 'Failed');
                 job.btn.disabled = false;
                 setTimeout(() => this._syncInstallButtons(), 3000);
             }
@@ -489,7 +620,8 @@ class PackageCatalog {
         for (const ref of pkg.requires) {
             const dependency = this._findEntry(ref);
             if (!dependency || (dependency.type || 'package') !== 'package') {
-                throw new Error('Unknown package dependency: ' + ref);
+                throw new Error(this._t('packageCatalog.unknownDependency',
+                    'Unknown package dependency: {reference}', { reference: ref }));
             }
             if (this._isInstalled(dependency)) continue;
 
@@ -556,7 +688,8 @@ class PackageCatalog {
             for (const ref of pkg.items || []) {
                 const item = this._findEntry(ref);
                 if (!item || item.type !== 'workbook') {
-                    throw new Error('Unknown workbook in bundle: ' + ref);
+                    throw new Error(this._t('packageCatalog.unknownWorkbook',
+                        'Unknown workbook in bundle: {reference}', { reference: ref }));
                 }
                 if (this._isInstalled(item)) continue;
 
@@ -567,11 +700,13 @@ class PackageCatalog {
             }
         } else if (pkg.type === 'workbook' && pkg.format === 'srwb') {
             const text = await blob.text();
-            if (!window.fileIO) throw new Error('File IO not available');
+            if (!window.fileIO) throw new Error(this._t(
+                'packageCatalog.fileIoUnavailable', 'File IO not available'));
             await this._importWorkbook(pkg, () => window.fileIO.importSrwb(text));
         } else if (pkg.type === 'workbook') {
             const text = await blob.text();
-            if (!window.fileIO) throw new Error('File IO not available');
+            if (!window.fileIO) throw new Error(this._t(
+                'packageCatalog.fileIoUnavailable', 'File IO not available'));
             // importIpynb now returns a promise (resolves when importCells finishes)
             await this._importWorkbook(pkg, () => window.fileIO.importIpynb(text));
         } else {
@@ -579,7 +714,8 @@ class PackageCatalog {
             const urlParts = sourceUrl.split('/');
             const filename = urlParts[urlParts.length - 1] || 'package.zip';
             const file = new File([blob], filename, { type: blob.type });
-            if (!window.packageLoader) throw new Error('Package loader not available');
+            if (!window.packageLoader) throw new Error(this._t(
+                'packageCatalog.packageLoaderUnavailable', 'Package loader not available'));
             await window.packageLoader.loadFromFile(file);
         }
     }
@@ -591,7 +727,8 @@ class PackageCatalog {
      */
     async _importWorkbook(pkg, importer) {
         const nm = window.notebookManager;
-        if (!nm) throw new Error('NotebookManager not available');
+        if (!nm) throw new Error(this._t(
+            'packageCatalog.notebookManagerUnavailable', 'NotebookManager not available'));
 
         const expectedName = pkg.notebookName || pkg.name;
         const previous = nm.getNotebooks().filter(nb => nb && nb.name === expectedName);
@@ -599,7 +736,8 @@ class PackageCatalog {
 
         const matches = nm.getNotebooks().filter(nb => nb && nb.name === expectedName);
         const imported = [...matches].reverse().find(nb => !previous.includes(nb));
-        if (!imported) throw new Error('Imported workbook was not created: ' + expectedName);
+        if (!imported) throw new Error(this._t('packageCatalog.workbookNotCreated',
+            'Imported workbook was not created: {name}', { name: expectedName }));
 
         imported.catalogId = pkg.id;
         imported.catalogRevision = pkg.revision ?? null;
@@ -612,9 +750,12 @@ class PackageCatalog {
         for (const oldNotebook of previous) {
             if (oldNotebook === imported) continue;
             const revision = oldNotebook.catalogRevision == null
-                ? 'unversioned'
-                : 'revision ' + oldNotebook.catalogRevision;
-            const baseName = expectedName + ' (backup of ' + revision + ')';
+                ? this._t('packageCatalog.unversioned', 'unversioned')
+                : this._t('packageCatalog.revision', 'revision {revision}', {
+                    revision: oldNotebook.catalogRevision,
+                });
+            const baseName = this._t('packageCatalog.backupName',
+                '{name} (backup of {revision})', { name: expectedName, revision });
             let backupName = baseName;
             let suffix = 2;
             while (existingNames.has(backupName)) {
@@ -647,7 +788,8 @@ class PackageCatalog {
         if (!_isAbsolute || (typeof location !== 'undefined' && url.startsWith(location.origin))) {
             const response = await fetch(url);
             if (response.ok) return await response.blob();
-            throw new Error('Failed to fetch ' + url + ' (HTTP ' + response.status + ')');
+            throw new Error(this._t('packageCatalog.fetchFailed',
+                'Failed to fetch {url} (HTTP {status})', { url, status: response.status }));
         }
 
         // Capacitor native path (cross-origin absolute URLs) — download via native HTTP
@@ -703,8 +845,9 @@ class PackageCatalog {
         }
 
         throw new Error(
-            'Download failed. If running locally, use `npm run serve` for proxy support. ' +
-            'Otherwise, download the package manually and use Menu > Import Package.'
+            this._t('packageCatalog.manualDownloadHelp',
+                'Download failed. If running locally, use `npm run serve` for proxy support. ' +
+                'Otherwise, download the package manually and use Menu > Import Package.')
         );
     }
 

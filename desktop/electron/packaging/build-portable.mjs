@@ -17,7 +17,7 @@
  *   SciREPL-win32-x64/
  *     SciREPL.exe
  *     resources/
- *       app.asar          ← the shell itself (main, protocol, security, preload, ipc)
+ *       app.asar          ← the shell itself (main, protocol, security, preload, ipc, native i18n)
  *       www/              ← the prepared application tree, OUTSIDE the asar
  *       build-info.json   ← version / profile / commit, read by main.js
  *

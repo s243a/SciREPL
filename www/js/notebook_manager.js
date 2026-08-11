@@ -9,7 +9,17 @@ class Notebook {
     constructor(opts) {
         opts = opts || {};
         this.id = opts.id || ('nb-' + Date.now() + '-' + Math.random().toString(36).substr(2, 6));
-        this.name = opts.name || 'Notebook 1';
+        this.autoNameNumber = Number.isInteger(opts.autoNameNumber) ? opts.autoNameNumber : null;
+        if (this.autoNameNumber) {
+            // Generated names follow the current display locale on every load;
+            // the serialized name is only a compatibility snapshot.
+            this.name = window.t('notebookManager.defaultName', { number: this.autoNameNumber });
+        } else if (opts.name) {
+            this.name = opts.name;
+        } else {
+            this.autoNameNumber = 1;
+            this.name = window.t('notebookManager.defaultName', { number: 1 });
+        }
         this.description = opts.description || '';
         this.kernelLanguage = opts.kernelLanguage || null; // null = infer from cells
         this.catalogId = opts.catalogId || null;
@@ -38,6 +48,7 @@ class Notebook {
         return {
             id: this.id,
             name: this.name,
+            autoNameNumber: this.autoNameNumber,
             description: this.description,
             kernelLanguage: this.kernelLanguage,
             catalogId: this.catalogId,
@@ -55,9 +66,20 @@ class Notebook {
     }
 
     static fromJSON(data) {
+        // Releases before localized generated names did not persist their
+        // sequence number.  Recover it for the exact old default shape so an
+        // existing "Notebook 1" does not remain English forever after the user
+        // changes the display language.  User-supplied names otherwise remain
+        // untouched.
+        const legacyAutoName = data.autoNameNumber == null
+            && typeof data.name === 'string'
+            ? data.name.match(/^Notebook (\d+)$/)
+            : null;
         return new Notebook({
             id: data.id,
             name: data.name,
+            autoNameNumber: data.autoNameNumber
+                ?? (legacyAutoName ? Number(legacyAutoName[1]) : null),
             description: data.description,
             kernelLanguage: data.kernelLanguage,
             catalogId: data.catalogId,
@@ -97,7 +119,7 @@ class NotebookManager {
         // No saved notebooks — create a default wrapping current state
         const defaultNb = new Notebook({
             id: 'default',
-            name: 'Notebook 1',
+            autoNameNumber: 1,
             cells: [],
             cellCounter: window._cellCounter || 0
         });
@@ -163,8 +185,17 @@ class NotebookManager {
         const nb = this._notebooks.find(n => n.id === id);
         if (!nb || !newName || !newName.trim()) return;
         nb.name = newName.trim();
+        nb.autoNameNumber = null;
         this.renderSelector();
         this.saveState();
+    }
+
+    _nextAutoNameNumber() {
+        const highestGenerated = this._notebooks.reduce(
+            (highest, nb) => Math.max(highest, nb.autoNameNumber || 0),
+            0
+        );
+        return Math.max(this._notebooks.length + 1, highestGenerated + 1);
     }
 
     getNotebook(id) {
@@ -187,6 +218,17 @@ class NotebookManager {
      */
     hasMultipleNotebooks() {
         return this._notebooks.length > 1;
+    }
+
+    refreshLocalization() {
+        for (const nb of this._notebooks) {
+            if (nb.autoNameNumber) {
+                nb.name = window.t('notebookManager.defaultName', {
+                    number: nb.autoNameNumber
+                });
+            }
+        }
+        this.renderSelector();
     }
 
     // ---- Switching ----
@@ -554,27 +596,27 @@ class NotebookManager {
         const renameBtn = document.createElement('button');
         renameBtn.className = 'notebook-add-btn';
         renameBtn.textContent = '\u270E';
-        renameBtn.title = 'Rename Notebook';
+        window.setI18nAttr(renameBtn, 'title', 'notebookManager.actions.renameTitle');
         renameBtn.addEventListener('click', () => {
             const active = this.getActiveNotebook();
             if (!active) return;
-            const newName = prompt('Rename notebook:', active.name);
+            const newName = prompt((window.tNative || window.t)('notebookManager.prompts.rename'), active.name);
             if (newName) this.renameNotebook(active.id, newName);
         });
 
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'notebook-add-btn';
         deleteBtn.textContent = '\u00D7';
-        deleteBtn.title = 'Delete Notebook';
+        window.setI18nAttr(deleteBtn, 'title', 'notebookManager.actions.deleteTitle');
         deleteBtn.style.color = 'var(--red, #f85149)';
         deleteBtn.addEventListener('click', () => {
             const active = this.getActiveNotebook();
             if (!active) return;
             if (this._notebooks.length <= 1) {
-                alert('Cannot delete the last notebook.');
+                alert((window.tNative || window.t)('notebookManager.errors.cannotDeleteLast'));
                 return;
             }
-            if (confirm('Delete "' + active.name + '"?')) {
+            if (confirm((window.tNative || window.t)('notebookManager.confirm.deleteNamed', { name: active.name }))) {
                 this.removeNotebook(active.id);
             }
         });
@@ -582,10 +624,10 @@ class NotebookManager {
         const addBtn = document.createElement('button');
         addBtn.className = 'notebook-add-btn';
         addBtn.textContent = '+';
-        addBtn.title = 'New Notebook';
+        window.setI18nAttr(addBtn, 'title', 'notebookManager.actions.newTitle');
         addBtn.addEventListener('click', () => {
             const nb = this.createNotebook({
-                name: 'Notebook ' + (this._notebooks.length + 1)
+                autoNameNumber: this._nextAutoNameNumber()
             });
             this.switchTo(nb.id);
         });
@@ -659,10 +701,10 @@ class NotebookManager {
                 const closeBtn = document.createElement('button');
                 closeBtn.className = 'sidebar-nb-close';
                 closeBtn.textContent = '\u00D7';
-                closeBtn.title = 'Close notebook';
+                window.setI18nAttr(closeBtn, 'title', 'notebookManager.actions.closeTitle');
                 closeBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (confirm('Close "' + nb.name + '"?')) {
+                    if (confirm((window.tNative || window.t)('notebookManager.confirm.closeNamed', { name: nb.name }))) {
                         this.removeNotebook(nb.id);
                     }
                 });
@@ -675,10 +717,10 @@ class NotebookManager {
         // Add button at the bottom
         const addBtn = document.createElement('button');
         addBtn.className = 'sidebar-add-btn';
-        addBtn.textContent = '+ New Notebook';
+        window.setI18nText(addBtn, 'menu.newNotebook2');
         addBtn.addEventListener('click', () => {
             const nb = this.createNotebook({
-                name: 'Notebook ' + (this._notebooks.length + 1)
+                autoNameNumber: this._nextAutoNameNumber()
             });
             this.switchTo(nb.id);
         });
@@ -715,9 +757,10 @@ class NotebookManager {
                 const closeBtn = document.createElement('button');
                 closeBtn.className = 'tab-close';
                 closeBtn.textContent = '\u00D7';
+                window.setI18nAttr(closeBtn, 'title', 'notebookManager.actions.closeTitle');
                 closeBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (confirm('Close "' + nb.name + '"?')) {
+                    if (confirm((window.tNative || window.t)('notebookManager.confirm.closeNamed', { name: nb.name }))) {
                         this.removeNotebook(nb.id);
                     }
                 });
@@ -731,10 +774,10 @@ class NotebookManager {
         const addTab = document.createElement('div');
         addTab.className = 'notebook-tab notebook-tab-add';
         addTab.textContent = '+';
-        addTab.title = 'New Notebook';
+        window.setI18nAttr(addTab, 'title', 'notebookManager.actions.newTitle');
         addTab.addEventListener('click', () => {
             const nb = this.createNotebook({
-                name: 'Notebook ' + (this._notebooks.length + 1)
+                autoNameNumber: this._nextAutoNameNumber()
             });
             this.switchTo(nb.id);
         });
@@ -756,3 +799,6 @@ window.addEventListener('load', () => {
 
 // Export singleton
 window.notebookManager = new NotebookManager();
+document.addEventListener('i18n:changed', () => {
+    if (window.notebookManager) window.notebookManager.refreshLocalization();
+});

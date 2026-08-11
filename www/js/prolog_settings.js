@@ -16,6 +16,59 @@ class PrologSettings {
 
         if (!this.modal) return;
         this._initEvents();
+        window.addEventListener('i18n:changed', () => this._refreshKernelSelect());
+    }
+
+    /** Translate with an English fallback while catalogues are being upgraded. */
+    _t(key, fallback, vars = {}) {
+        let value = (typeof window.t === 'function') ? window.t(key, vars) : key;
+        if (!value || value === key) value = fallback;
+        return String(value).replace(/\{(\w+)\}/g, (match, name) =>
+            Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : match);
+    }
+
+    /** Translate text destined for alert(), confirm(), or prompt(). */
+    _nativeT(key, fallback, vars = {}) {
+        if (typeof window.tNative === 'function') {
+            const value = window.tNative(key, vars);
+            if (value && value !== key) return value;
+        }
+        return this._t(key, fallback, vars);
+    }
+
+    /** Bind persistent dynamic text/attributes so a locale change updates them. */
+    _bindI18n(element, property, key, fallback, vars = {}) {
+        if (!element) return;
+        if (property === 'textContent' && typeof window.setI18nText === 'function') {
+            window.setI18nText(element, key, vars);
+            if (element.textContent === '' || element.textContent === key) {
+                element.textContent = this._t(key, fallback, vars);
+            }
+            return;
+        }
+        if (property === 'title' && typeof window.setI18nAttr === 'function') {
+            window.setI18nAttr(element, 'title', key, vars);
+            if (!element.title || element.title === key) {
+                element.title = this._t(key, fallback, vars);
+            }
+            return;
+        }
+        element[property] = this._t(key, fallback, vars);
+    }
+
+    _setText(element, key, fallback, vars = {}) {
+        this._bindI18n(element, 'textContent', key, fallback, vars);
+    }
+
+    _setTitle(element, key, fallback, vars = {}) {
+        this._bindI18n(element, 'title', key, fallback, vars);
+    }
+
+    _emptyMessage(key, fallback, vars = {}) {
+        const div = document.createElement('div');
+        div.className = 'vfs-empty';
+        this._setText(div, key, fallback, vars);
+        return div;
     }
 
     _initEvents() {
@@ -115,8 +168,8 @@ class PrologSettings {
         if (!km) return;
 
         const labels = {
-            unified: 'All Filesystems',
-            shared: '/ (Persistent Storage)'
+            unified: this._t('prologSettings.allFilesystems', 'All Filesystems'),
+            shared: this._t('prologSettings.persistentStorage', '/ (Persistent Storage)')
         };
         const mntLabels = { prolog: '/mnt/prolog', python: '/mnt/pyodide', r: '/mnt/r' };
 
@@ -124,12 +177,18 @@ class PrologSettings {
             const lang = option.value;
             if (labels[lang]) {
                 option.classList.remove('kernel-not-loaded');
-                option.textContent = labels[lang];
+                const key = lang === 'unified'
+                    ? 'prologSettings.allFilesystems'
+                    : 'prologSettings.persistentStorage';
+                this._setText(option, key, labels[lang]);
                 continue;
             }
             const ready = km.isReady(lang);
             option.classList.toggle('kernel-not-loaded', !ready);
-            option.textContent = (mntLabels[lang] || lang) + (ready ? '' : ' (not loaded)');
+            const mount = mntLabels[lang] || lang;
+            option.textContent = ready
+                ? mount
+                : mount + ' ' + this._t('vfs.notLoadedSuffix', '(not loaded)');
         }
     }
 
@@ -143,17 +202,20 @@ class PrologSettings {
 
         const kernelsWithVFS = ['prolog', 'python'];
         if (!['shared', 'unified'].includes(lang) && !km.isReady(lang) && kernelsWithVFS.includes(lang)) {
-            const load = confirm(
-                lang.charAt(0).toUpperCase() + lang.slice(1) +
-                ' kernel is not loaded. Download and initialize it now?'
-            );
+            const load = confirm(this._nativeT(
+                'prologSettings.kernelNotLoadedConfirm',
+                '{language} kernel is not loaded. Download and initialize it now?',
+                { language: lang.charAt(0).toUpperCase() + lang.slice(1) }
+            ));
             if (load) {
                 try {
                     this.kernelSelect.disabled = true;
                     await km.ensureReady(lang);
                     this._refreshKernelSelect();
                 } catch (err) {
-                    alert('Failed to load ' + lang + ': ' + err.message);
+                    alert(this._t('prologSettings.failedToLoadKernel',
+                        'Failed to load {language}: {error}',
+                        { language: lang, error: err.message }));
                 } finally {
                     this.kernelSelect.disabled = false;
                 }
@@ -193,7 +255,7 @@ class PrologSettings {
     _handleSharedUpload(file) {
         if (!file) return;
         if (!window.sharedVFS) {
-            alert('SharedVFS not available.');
+            alert(this._t('prologSettings.sharedVfsUnavailable', 'SharedVFS not available.'));
             return;
         }
 
@@ -203,10 +265,11 @@ class PrologSettings {
 
         // ZIP files: offer to extract or upload as whole file
         if (file.name.toLowerCase().endsWith('.zip')) {
-            const choice = confirm(
-                'Extract "' + file.name + '" into ' + destDir + '?\n\n' +
-                'OK = Extract contents\nCancel = Upload as .zip file'
-            );
+            const choice = confirm(this._nativeT(
+                'prologSettings.extractZipConfirm',
+                'Extract "{filename}" into {destination}?\n\nOK = Extract contents\nCancel = Upload as .zip file',
+                { filename: file.name, destination: destDir }
+            ));
             if (choice) {
                 this._extractZipToSharedVFS(file, destDir);
                 return;
@@ -227,7 +290,8 @@ class PrologSettings {
                 }
                 this._refreshFileList();
             } catch (err) {
-                alert('Upload failed: ' + err.message);
+                alert(this._t('prologSettings.uploadFailed', 'Upload failed: {error}',
+                    { error: err.message }));
             }
         };
         if (isText) {
@@ -239,7 +303,7 @@ class PrologSettings {
 
     async _extractZipToSharedVFS(file, destDir) {
         if (typeof JSZip === 'undefined') {
-            alert('JSZip not loaded.');
+            alert(this._t('prologSettings.jsZipNotLoaded', 'JSZip not loaded.'));
             return;
         }
         try {
@@ -262,9 +326,12 @@ class PrologSettings {
                 count++;
             }
             this._refreshFileList();
-            alert('Extracted ' + count + ' file(s) from ' + file.name);
+            alert(this._t('prologSettings.extractedFilesFrom',
+                'Extracted {count} file(s) from {filename}',
+                { count, filename: file.name }));
         } catch (err) {
-            alert('ZIP extraction failed: ' + err.message);
+            alert(this._t('prologSettings.zipExtractionFailed',
+                'ZIP extraction failed: {error}', { error: err.message }));
         }
     }
 
@@ -274,7 +341,8 @@ class PrologSettings {
         const lang = this.kernelSelect ? this.kernelSelect.value : 'prolog';
         const vfs = this._getVFS();
         if (!vfs) {
-            alert('For ' + lang + ' use SharedVFS instead (see above).');
+            alert(this._t('prologSettings.useSharedVfsInstead',
+                'For {language} use SharedVFS instead (see above).', { language: lang }));
             return;
         }
 
@@ -299,10 +367,11 @@ class PrologSettings {
             let destDir = destInput ? destInput.value.trim() : '/shared/data/';
             if (!destDir.endsWith('/')) destDir += '/';
 
-            const choice = confirm(
-                'Extract "' + file.name + '" into ' + destDir + '?\n\n' +
-                'OK = Extract contents\nCancel = Upload as .zip file'
-            );
+            const choice = confirm(this._nativeT(
+                'prologSettings.extractZipConfirm',
+                'Extract "{filename}" into {destination}?\n\nOK = Extract contents\nCancel = Upload as .zip file',
+                { filename: file.name, destination: destDir }
+            ));
             if (choice) {
                 this._extractZipToSharedVFS(file, destDir);
             } else {
@@ -316,7 +385,8 @@ class PrologSettings {
 
         const vfs = this._getVFS();
         if (!vfs) {
-            alert('For ' + lang + ' use SharedVFS instead (see above).');
+            alert(this._t('prologSettings.useSharedVfsInstead',
+                'For {language} use SharedVFS instead (see above).', { language: lang }));
             return;
         }
 
@@ -325,12 +395,16 @@ class PrologSettings {
                 const buffer = await file.arrayBuffer();
                 const paths = await vfs.mountZip(buffer);
                 this._refreshFileList();
-                alert('Extracted ' + paths.length + ' files from ' + file.name);
+                alert(this._t('prologSettings.extractedFilesFrom',
+                    'Extracted {count} file(s) from {filename}',
+                    { count: paths.length, filename: file.name }));
             } catch (err) {
-                alert('ZIP extraction failed: ' + err.message);
+                alert(this._t('prologSettings.zipExtractionFailed',
+                    'ZIP extraction failed: {error}', { error: err.message }));
             }
         } else {
-            alert('This filesystem does not support ZIP extraction. Switch to SharedVFS.');
+            alert(this._t('prologSettings.zipUnsupported',
+                'This filesystem does not support ZIP extraction. Switch to SharedVFS.'));
         }
     }
 
@@ -353,12 +427,16 @@ class PrologSettings {
         }
 
         if (!isLoaded) {
-            this.fileList.innerHTML = '<div class="vfs-empty">' + lang + ' kernel is not loaded.</div>';
+            this.fileList.replaceChildren(this._emptyMessage(
+                'prologSettings.kernelNotLoaded', '{language} kernel is not loaded.',
+                { language: lang }));
             return;
         }
 
         if (!vfs) {
-            this.fileList.innerHTML = '<div class="vfs-empty">No VFS available for ' + lang + '.</div>';
+            this.fileList.replaceChildren(this._emptyMessage(
+                'prologSettings.noVfsForLanguage', 'No VFS available for {language}.',
+                { language: lang }));
             return;
         }
 
@@ -503,7 +581,8 @@ class PrologSettings {
      */
     _renderTree(tree, defaultVFS) {
         if (tree.length === 0) {
-            this.fileList.innerHTML = '<div class="vfs-empty">No files mounted.</div>';
+            this.fileList.replaceChildren(this._emptyMessage(
+                'prologSettings.noFilesMounted', 'No files mounted.'));
             return;
         }
 
@@ -525,11 +604,17 @@ class PrologSettings {
             const size = entry.type === 'file' ? ` <span class="vfs-size">(${this._formatSize(entry.size)})</span>` : '';
 
             div.innerHTML = `<span class="vfs-icon">${icon}</span> <span class="vfs-name">${entry.name}</span>${size}`;
+            if (entry.notLoaded) {
+                const suffix = document.createElement('span');
+                suffix.className = 'vfs-not-loaded-suffix';
+                this._setText(suffix, 'vfs.notLoadedSuffix', ' (not loaded)');
+                div.querySelector('.vfs-name')?.after(suffix);
+            }
 
             // Make directories clickable for selection
             if (entry.type === 'dir') {
                 div.style.cursor = 'pointer';
-                div.title = 'Click to select folder';
+                this._setTitle(div, 'prologSettings.selectFolderTitle', 'Click to select folder');
                 div.addEventListener('click', (e) => {
                     if (e.target.closest('.vfs-entry-actions')) return;
                     this._selectFolder(entry.path, entry.source);
@@ -539,7 +624,7 @@ class PrologSettings {
             // Make files clickable to preview
             if (entry.type === 'file') {
                 div.style.cursor = 'pointer';
-                div.title = 'Click to view contents';
+                this._setTitle(div, 'prologSettings.viewContentsTitle', 'Click to view contents');
                 div.addEventListener('click', (e) => {
                     if (e.target.closest('.vfs-entry-actions')) return;
                     const vfs = defaultVFS || this._resolveVFS(entry.source);
@@ -556,7 +641,11 @@ class PrologSettings {
                 const dlBtn = document.createElement('button');
                 dlBtn.className = 'vfs-download-btn';
                 dlBtn.innerHTML = '&#8681;';
-                dlBtn.title = entry.type === 'dir' ? 'Download folder as .zip' : 'Download file';
+                this._setTitle(dlBtn,
+                    entry.type === 'dir'
+                        ? 'prologSettings.downloadFolderZipTitle'
+                        : 'prologSettings.downloadFileTitle',
+                    entry.type === 'dir' ? 'Download folder as .zip' : 'Download file');
                 dlBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (entry.type === 'dir') {
@@ -566,12 +655,16 @@ class PrologSettings {
                         if (!vfs) return;
                         try {
                             const content = vfs.readFile(entry.path);
-                            if (content == null) { alert('Cannot read file.'); return; }
+                            if (content == null) {
+                                alert(this._t('prologSettings.cannotReadFile', 'Cannot read file.'));
+                                return;
+                            }
                             const filename = entry.path.split('/').pop();
                             const mimeType = content instanceof Uint8Array ? 'application/octet-stream' : 'text/plain';
                             if (window.fileIO) window.fileIO.downloadFile(filename, content, mimeType);
                         } catch (err) {
-                            alert('Download failed: ' + err.message);
+                            alert(this._t('prologSettings.downloadFailed',
+                                'Download failed: {error}', { error: err.message }));
                         }
                     }
                 });
@@ -582,14 +675,19 @@ class PrologSettings {
                     const delBtn = document.createElement('button');
                     delBtn.className = 'vfs-delete-btn';
                     delBtn.textContent = '\u00D7';
-                    delBtn.title = 'Remove';
+                    this._setTitle(delBtn, 'prologSettings.removeTitle', 'Remove');
                     delBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const confirmDelete = localStorage.getItem('scirepl_confirm_delete') !== '0';
                         if (confirmDelete) {
                             const name = entry.path.split('/').pop();
-                            const what = entry.type === 'dir' ? `folder "${name}" and its contents` : `"${name}"`;
-                            if (!confirm(`Delete ${what}?`)) return;
+                            const key = entry.type === 'dir'
+                                ? 'prologSettings.deleteFolderConfirm'
+                                : 'prologSettings.deleteFileConfirm';
+                            const fallback = entry.type === 'dir'
+                                ? 'Delete folder "{name}" and its contents?'
+                                : 'Delete "{name}"?';
+                            if (!confirm(this._nativeT(key, fallback, { name }))) return;
                         }
                         const vfs = defaultVFS || this._resolveVFS(entry.source);
                         if (vfs) {
@@ -648,18 +746,18 @@ class PrologSettings {
 
             const saveBtn = document.createElement('button');
             saveBtn.className = 'vfs-preview-save hidden';
-            saveBtn.textContent = 'Save';
-            saveBtn.title = 'Save changes';
+            this._setText(saveBtn, 'prologSettings.save', 'Save');
+            this._setTitle(saveBtn, 'prologSettings.saveChangesTitle', 'Save changes');
 
             const editBtn = document.createElement('button');
             editBtn.className = 'vfs-preview-edit';
-            editBtn.textContent = 'Edit';
-            editBtn.title = 'Edit file';
+            this._setText(editBtn, 'prologSettings.edit', 'Edit');
+            this._setTitle(editBtn, 'prologSettings.editFileTitle', 'Edit file');
 
             const closeBtn = document.createElement('button');
             closeBtn.className = 'vfs-preview-close';
             closeBtn.textContent = '\u00D7';
-            closeBtn.title = 'Close preview';
+            this._setTitle(closeBtn, 'prologSettings.closePreviewTitle', 'Close preview');
 
             actions.appendChild(saveBtn);
             actions.appendChild(editBtn);
@@ -736,7 +834,9 @@ class PrologSettings {
             });
 
         } catch (e) {
-            this.filePreview.innerHTML = '<div class="vfs-empty">Cannot read file (binary or inaccessible)</div>';
+            this.filePreview.replaceChildren(this._emptyMessage(
+                'prologSettings.cannotReadBinaryFile',
+                'Cannot read file (binary or inaccessible)'));
             this.filePreview.classList.remove('hidden');
         }
 
@@ -770,11 +870,11 @@ class PrologSettings {
 
     _createNewFolder() {
         if (!window.sharedVFS) {
-            alert('SharedVFS not available.');
+            alert(this._t('prologSettings.sharedVfsUnavailable', 'SharedVFS not available.'));
             return;
         }
         const base = this._selectedFolder || '/shared';
-        const name = prompt('New folder name:', '');
+        const name = prompt(this._nativeT('prologSettings.newFolderPrompt', 'New folder name:'), '');
         if (!name || !name.trim()) return;
         const path = base + '/' + name.trim();
         try {
@@ -786,7 +886,8 @@ class PrologSettings {
             if (destInput) destInput.value = path + '/';
             this._refreshFileList();
         } catch (err) {
-            alert('Failed to create folder: ' + err.message);
+            alert(this._t('prologSettings.createFolderFailed',
+                'Failed to create folder: {error}', { error: err.message }));
         }
     }
 
@@ -795,7 +896,7 @@ class PrologSettings {
     async _downloadFolder(folderPath, source, defaultVFS) {
         const vfs = defaultVFS || this._resolveVFS(source);
         if (!vfs) {
-            alert('Cannot access filesystem.');
+            alert(this._t('prologSettings.cannotAccessFilesystem', 'Cannot access filesystem.'));
             return;
         }
 
@@ -803,7 +904,7 @@ class PrologSettings {
         const files = [];
         this._collectFolderFiles(vfs, folderPath, folderPath, files);
         if (files.length === 0) {
-            alert('Folder is empty.');
+            alert(this._t('prologSettings.folderEmpty', 'Folder is empty.'));
             return;
         }
 
@@ -823,7 +924,10 @@ class PrologSettings {
             const blob = new Blob([data], { type: 'application/octet-stream' });
             if (fio) fio._downloadBlob(blob, folderName + ext);
         } else {
-            if (typeof JSZip === 'undefined') { alert('JSZip not loaded.'); return; }
+            if (typeof JSZip === 'undefined') {
+                alert(this._t('prologSettings.jsZipNotLoaded', 'JSZip not loaded.'));
+                return;
+            }
             const zip = new JSZip();
             for (const f of files) {
                 zip.file(f.path, f.content, { binary: f.content instanceof Uint8Array });
@@ -860,7 +964,14 @@ class PrologSettings {
         const vfs = this._getVFS();
 
         if (!vfs || typeof vfs.getSearchPaths !== 'function') {
-            this.pathTable.innerHTML = '<tr><td colspan="3" class="vfs-empty">Search paths are only available for the Prolog kernel.</td></tr>';
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.colSpan = 3;
+            cell.className = 'vfs-empty';
+            this._setText(cell, 'prologSettings.searchPathsPrologOnly',
+                'Search paths are only available for the Prolog kernel.');
+            row.appendChild(cell);
+            this.pathTable.replaceChildren(row);
             return;
         }
 
@@ -868,7 +979,13 @@ class PrologSettings {
         this.pathTable.innerHTML = '';
 
         if (paths.length === 0) {
-            this.pathTable.innerHTML = '<tr><td colspan="3" class="vfs-empty">No user search paths.</td></tr>';
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.colSpan = 3;
+            cell.className = 'vfs-empty';
+            this._setText(cell, 'prologSettings.noUserSearchPaths', 'No user search paths.');
+            row.appendChild(cell);
+            this.pathTable.replaceChildren(row);
             return;
         }
 
@@ -881,7 +998,7 @@ class PrologSettings {
                 const delBtn = document.createElement('button');
                 delBtn.className = 'vfs-delete-btn';
                 delBtn.textContent = '\u00D7';
-                delBtn.title = 'Remove path';
+                this._setTitle(delBtn, 'prologSettings.removePathTitle', 'Remove path');
                 delBtn.addEventListener('click', () => {
                     vfs.removeSearchPath(p.alias, p.dir);
                     this._refreshPathTable();
@@ -902,13 +1019,15 @@ class PrologSettings {
         const dir = dirInput.value.trim();
 
         if (!alias || !dir) {
-            alert('Both alias and directory are required.');
+            alert(this._t('prologSettings.aliasAndDirectoryRequired',
+                'Both alias and directory are required.'));
             return;
         }
 
         const vfs = this._getVFS();
         if (!vfs) {
-            alert('Kernel not loaded or has no VFS.');
+            alert(this._t('prologSettings.kernelUnavailable',
+                'Kernel not loaded or has no VFS.'));
             return;
         }
 
@@ -929,26 +1048,31 @@ class PrologSettings {
         const localPath = pathInput ? pathInput.value.trim() : '';
 
         if (!url) {
-            alert('URL is required.');
+            alert(this._t('prologSettings.urlRequired', 'URL is required.'));
             return;
         }
 
         const vfs = this._getVFS();
         if (!vfs) {
-            alert('Kernel not loaded or has no VFS.');
+            alert(this._t('prologSettings.kernelUnavailable',
+                'Kernel not loaded or has no VFS.'));
             return;
         }
 
-        if (this.fetchStatus) this.fetchStatus.textContent = 'Fetching...';
+        if (this.fetchStatus) this._setText(
+            this.fetchStatus, 'prologSettings.fetching', 'Fetching...');
 
         try {
             const path = await vfs.fetchFile(url, localPath || undefined);
-            if (this.fetchStatus) this.fetchStatus.textContent = 'Fetched: ' + path;
+            if (this.fetchStatus) this._setText(
+                this.fetchStatus, 'prologSettings.fetchedPath', 'Fetched: {path}', { path });
             urlInput.value = '';
             if (pathInput) pathInput.value = '';
             this._refreshFileList();
         } catch (err) {
-            if (this.fetchStatus) this.fetchStatus.textContent = 'Error: ' + err.message;
+            if (this.fetchStatus) this._setText(
+                this.fetchStatus, 'prologSettings.errorStatus', 'Error: {error}',
+                { error: err.message });
         }
     }
 }

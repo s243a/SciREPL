@@ -215,16 +215,25 @@
                 const err = $('appearance-theme-error');
                 const result = window.appearance.saveCustomTheme($('appearance-theme-json').value);
                 if (!result.ok) {
-                    err.textContent = result.error;
+                    if (result.errorKey) {
+                        window.setI18nText(err, result.errorKey, result.errorVars);
+                    } else {
+                        err.textContent = result.error;
+                    }
                     return;
                 }
+                err.removeAttribute('data-i18n');
+                err.removeAttribute('data-i18n-vars');
                 err.textContent = '';
                 this.refresh();
             });
 
             $('appearance-theme-revert').addEventListener('click', () => {
                 $('appearance-theme-json').value = window.appearance.exportCurrentTheme();
-                $('appearance-theme-error').textContent = '';
+                const err = $('appearance-theme-error');
+                err.removeAttribute('data-i18n');
+                err.removeAttribute('data-i18n-vars');
+                err.textContent = '';
             });
 
             $('appearance-css-apply').addEventListener('click', () => {
@@ -255,8 +264,7 @@
         _showCssError() {
             const el = $('appearance-css-error');
             if (!el) return;
-            el.textContent = (window.t && window.t('appearance.cssRolledBack'))
-                || 'This CSS was turned off because it hid the menu. Edit it and apply again.';
+            window.setI18nText(el, 'appearance.cssRolledBack');
             el.hidden = false;
             // Open the Advanced section so the message is not buried.
             const details = el.closest('details');
@@ -265,7 +273,12 @@
 
         _clearCssError() {
             const el = $('appearance-css-error');
-            if (el) { el.textContent = ''; el.hidden = true; }
+            if (el) {
+                el.removeAttribute('data-i18n');
+                el.removeAttribute('data-i18n-vars');
+                el.textContent = '';
+                el.hidden = true;
+            }
         }
 
         /* ---------------------------- language --------------------------- */

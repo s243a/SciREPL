@@ -23,7 +23,7 @@ class PythonKernel {
         const primary = 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.js';
         let pyodideJsUrl = primary;
         if (typeof loadPyodide === 'undefined') {
-            if (km) km.updateProgress('Downloading Python runtime…');
+            if (km) km.updateProgress(window.t('runtime.pythonDownloading'));
             if (km && km.loadKernelSource) {
                 await km.loadKernelSource('python', primary, (url) =>
                     km._loadScript(url).then(() => { pyodideJsUrl = url; }));
@@ -32,13 +32,13 @@ class PythonKernel {
                     const script = document.createElement('script');
                     script.src = primary;
                     script.onload = resolve;
-                    script.onerror = () => reject(new Error('Failed to load Pyodide from CDN'));
+                    script.onerror = () => reject(new Error(window.t('runtime.pyodideCdnFailed')));
                     document.body.appendChild(script);
                 });
             }
         }
 
-        if (km) km.updateProgress('Initializing Pyodide + NumPy + SymPy…');
+        if (km) km.updateProgress(window.t('runtime.pythonInitializing'));
         // indexURL = directory containing pyodide.js, so package wheels load from
         // the same source (local vendor dir or CDN) that served the loader.
         const indexURL = pyodideJsUrl.replace(/[^/]*$/, '');
@@ -46,7 +46,7 @@ class PythonKernel {
         await this._pyodide.loadPackage(['numpy', 'sympy']);
         await this._pyodide.loadPackage('micropip');
 
-        if (km) km.updateProgress('Loading helpers…');
+        if (km) km.updateProgress(window.t('runtime.loadingHelpers'));
 
         // Load the prelude
         const preludeResp = await fetch('js/prelude.py');
@@ -204,7 +204,7 @@ del _pkg_dir
      */
     async execute(code) {
         if (!this._ready) {
-            throw new Error('Python kernel not initialized');
+            throw new Error(window.t('kernel.pythonNotInitialized'));
         }
 
         const pyodide = this._pyodide;

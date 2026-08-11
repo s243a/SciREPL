@@ -8,7 +8,9 @@
  * reach Node or unrestricted Electron capability.
  */
 
-import { launchShell, createReporter, waitForAppReady, attachLogs } from './harness.mjs';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { launchShell, createReporter, waitForAppReady, attachLogs, WWW_ROOT } from './harness.mjs';
 import { assertBoundary, runNotebookCell } from './probes/security.mjs';
 
 export default async function run() {
@@ -90,6 +92,25 @@ export default async function run() {
     r.log('Edit still provides cut/copy/paste',
       !!edit && ['Cut', 'Copy', 'Paste'].every((l) => edit.items.includes(l)),
       edit && edit.items.join(' | '));
+
+    // The app's selected locale, rather than the operating-system locale,
+    // drives native labels. The renderer sends only "fr"; the expected text is
+    // read independently from the bundled catalogue by this test.
+    const frenchCatalogue = JSON.parse(
+      readFileSync(path.join(WWW_ROOT, 'i18n', 'fr.json'), 'utf8')
+    ).strings;
+    const localeResult = await page.evaluate(() => window.sciREPLPlatform.setLocale('fr'));
+    const frenchMenu = await shell.electronApp.evaluate(({ Menu }) => {
+      const m = Menu.getApplicationMenu();
+      return m.items.map((item) => item.label.replace(/&/g, ''));
+    });
+    r.log('changing the SciREPL locale rebuilds the native Electron menu',
+      localeResult?.locale === 'fr'
+        && frenchMenu.includes(frenchCatalogue['electron.menu.runtimes']),
+      frenchMenu.join(', '));
+
+    // Leave later checks and screenshots deterministic regardless of host OS.
+    await page.evaluate(() => window.sciREPLPlatform.setLocale('en'));
 
     /* ---------------- no remote module ---------------- */
 

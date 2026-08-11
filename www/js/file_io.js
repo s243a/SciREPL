@@ -12,6 +12,39 @@ class FileIO {
         this.init();
     }
 
+    /** Translate with an English fallback while catalogues are being upgraded. */
+    _t(key, fallback, vars = {}) {
+        let value = (typeof window.t === 'function') ? window.t(key, vars) : key;
+        if (!value || value === key) value = fallback;
+        return String(value).replace(/\{(\w+)\}/g, (match, name) =>
+            Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : match);
+    }
+
+    /** Bind generated DOM so the central i18n retranslation pass can update it. */
+    _setText(element, key, fallback, vars = {}) {
+        if (!element) return;
+        if (typeof window.setI18nText === 'function') {
+            window.setI18nText(element, key, vars);
+            if (element.textContent === '' || element.textContent === key) {
+                element.textContent = this._t(key, fallback, vars);
+            }
+        } else {
+            element.textContent = this._t(key, fallback, vars);
+        }
+    }
+
+    _setTitle(element, key, fallback, vars = {}) {
+        if (!element) return;
+        if (typeof window.setI18nAttr === 'function') {
+            window.setI18nAttr(element, 'title', key, vars);
+            if (!element.title || element.title === key) {
+                element.title = this._t(key, fallback, vars);
+            }
+        } else {
+            element.title = this._t(key, fallback, vars);
+        }
+    }
+
     init() {
         // Toggle Menu
         this.menuBtn.addEventListener('click', () => {
@@ -29,7 +62,7 @@ class FileIO {
         document.getElementById('btn-save-session').addEventListener('click', () => {
             if (window.sessionManager) {
                 window.sessionManager.saveCells(window._cells || []);
-                alert('Session saved to local storage.');
+                alert(this._t('fileIo.sessionSaved', 'Session saved to local storage.'));
                 this.menuModal.classList.add('hidden');
             }
         });
@@ -42,18 +75,18 @@ class FileIO {
             if (!clearPending) {
                 // First click: show confirmation state
                 clearPending = true;
-                clearBtn.textContent = '⚠ Click again to confirm clear';
+                this._setText(clearBtn, 'fileIo.confirmClearAgain', '⚠ Click again to confirm clear');
                 clearBtn.style.background = 'rgba(248, 81, 73, 0.2)';
                 clearTimer = setTimeout(() => {
                     clearPending = false;
-                    clearBtn.textContent = '🗑 Clear History';
+                    this._setText(clearBtn, 'fileIo.clearHistory', '🗑 Clear History');
                     clearBtn.style.background = '';
                 }, 3000);
                 return;
             }
             // Second click: actually clear
             clearTimeout(clearTimer);
-            clearBtn.textContent = 'Clearing...';
+            this._setText(clearBtn, 'fileIo.clearing', 'Clearing...');
             window._clearingSession = true; // Prevent beforeunload from re-saving
             localStorage.removeItem('scirepl_session_v2');
             localStorage.removeItem('scirepl_session_v1');
@@ -96,7 +129,7 @@ class FileIO {
         const reloadBtn = document.getElementById('btn-reload-app');
         if (reloadBtn) {
             reloadBtn.addEventListener('click', async () => {
-                reloadBtn.textContent = 'Reloading...';
+                this._setText(reloadBtn, 'fileIo.reloading', 'Reloading...');
                 reloadBtn.disabled = true;
                 try {
                     // Clear app caches but preserve CDN cache (Pyodide, swipl-wasm, etc.)
@@ -188,8 +221,10 @@ class FileIO {
             if (resetPrivacy) {
                 resetPrivacy.addEventListener('click', () => {
                     localStorage.removeItem('scirepl_privacy_accepted');
-                    resetPrivacy.textContent = 'Privacy consent reset';
-                    setTimeout(() => { resetPrivacy.textContent = 'Reset Privacy Consent'; }, 2000);
+                    this._setText(resetPrivacy, 'fileIo.privacyConsentReset', 'Privacy consent reset');
+                    setTimeout(() => {
+                        this._setText(resetPrivacy, 'fileIo.resetPrivacyConsent', 'Reset Privacy Consent');
+                    }, 2000);
                 });
             }
             // Close modal
@@ -244,7 +279,7 @@ class FileIO {
             const clearVfsBtn = document.getElementById('memory-clear-vfs');
             if (clearVfsBtn) {
                 clearVfsBtn.addEventListener('click', async () => {
-                    clearVfsBtn.textContent = 'Clearing...';
+                    this._setText(clearVfsBtn, 'fileIo.clearing', 'Clearing...');
                     try {
                         if (window.vfsStore && window.vfsStore.isReady()) {
                             await window.vfsStore.clearSharedFiles();
@@ -252,7 +287,7 @@ class FileIO {
                     } catch (e) {
                         console.warn('Failed to clear VFS:', e);
                     }
-                    clearVfsBtn.textContent = 'Clear VFS';
+                    this._setText(clearVfsBtn, 'fileIo.clearVfs', 'Clear VFS');
                     this._refreshMemoryModal();
                 });
             }
@@ -260,14 +295,14 @@ class FileIO {
             const clearCacheBtn = document.getElementById('memory-clear-cache');
             if (clearCacheBtn) {
                 clearCacheBtn.addEventListener('click', async () => {
-                    clearCacheBtn.textContent = 'Clearing...';
+                    this._setText(clearCacheBtn, 'fileIo.clearing', 'Clearing...');
                     try {
                         const names = await caches.keys();
                         await Promise.all(names.map(n => caches.delete(n)));
                     } catch (e) {
                         console.warn('Failed to clear caches:', e);
                     }
-                    clearCacheBtn.textContent = 'Clear Cache';
+                    this._setText(clearCacheBtn, 'fileIo.clearCache', 'Clear Cache');
                     this._refreshMemoryModal();
                 });
             }
@@ -307,7 +342,8 @@ class FileIO {
                 if (window.prologSettings) {
                     window.prologSettings.open();
                 } else {
-                    alert('Files & Storage panel not available.');
+                    alert(this._t('fileIo.filesPanelUnavailable',
+                        'Files & Storage panel not available.'));
                 }
             });
         }
@@ -320,7 +356,8 @@ class FileIO {
                 if (window.notebookManager) {
                     const nm = window.notebookManager;
                     const nb = nm.createNotebook({
-                        name: 'Notebook ' + (nm.getNotebooks().length + 1)
+                        name: this._t('fileIo.defaultNotebookName', 'Notebook {number}',
+                            { number: nm.getNotebooks().length + 1 })
                     });
                     nm.switchTo(nb.id);
                 }
@@ -349,7 +386,8 @@ class FileIO {
                 if (keepRadio) keepRadio.checked = true;
                 const whiteRadio = exportModal.querySelector('input[name="export-pagebg"][value="white"]');
                 if (whiteRadio) whiteRadio.checked = true;
-                this._updateExportSections(exportModal, exportImageSection, exportThemeSection, exportPageBgSection);
+                this._updateExportSections(exportModal, exportImageSection, exportThemeSection,
+                    exportPageBgSection, exportMarginsSection);
                 exportModal.classList.remove('hidden');
             });
 
@@ -429,10 +467,12 @@ class FileIO {
             try {
                 await window.packageLoader.loadFromFile(file);
             } catch (err) {
-                alert('Package import failed: ' + err.message);
+                alert(this._t('fileIo.packageImportFailed',
+                    'Package import failed: {error}', { error: err.message }));
             }
         } else {
-            alert('Package loading is not yet available.');
+            alert(this._t('fileIo.packageLoadingUnavailable',
+                'Package loading is not yet available.'));
         }
     }
 
@@ -442,7 +482,7 @@ class FileIO {
     async exportNotebook() {
         const cells = window._cells || [];
         if (cells.length === 0) {
-            alert('No cells to export.');
+            alert(this._t('fileIo.noCellsToExport', 'No cells to export.'));
             return;
         }
 
@@ -532,7 +572,7 @@ class FileIO {
         const notebooks = nm ? nm.getNotebooks() : [];
 
         if (notebooks.length === 0) {
-            alert('No notebooks to export.');
+            alert(this._t('fileIo.noNotebooksToExport', 'No notebooks to export.'));
             return null;
         }
 
@@ -661,7 +701,7 @@ class FileIO {
         }
 
         if (collected.files.length === 0) {
-            alert('No files selected for export.');
+            alert(this._t('fileIo.noFilesSelected', 'No files selected for export.'));
             return;
         }
 
@@ -679,7 +719,7 @@ class FileIO {
      */
     async _exportAsZip(collected) {
         if (typeof JSZip === 'undefined') {
-            alert('JSZip not loaded.');
+            alert(this._t('fileIo.jsZipNotLoaded', 'JSZip not loaded.'));
             return;
         }
         const zip = new JSZip();
@@ -698,7 +738,7 @@ class FileIO {
      */
     async _exportAsTar(collected, gzip) {
         if (typeof TarWriter === 'undefined') {
-            alert('TarWriter not available.');
+            alert(this._t('fileIo.tarWriterUnavailable', 'TarWriter not available.'));
             return;
         }
         const tar = new TarWriter();
@@ -764,7 +804,8 @@ class FileIO {
                     await Share.share({
                         title: filename,
                         url: writeResult.uri,
-                        dialogTitle: 'Download ' + filename
+                        dialogTitle: this._t('fileIo.downloadDialogTitle',
+                            'Download {filename}', { filename })
                     });
                     return;
                 }
@@ -858,7 +899,8 @@ class FileIO {
                 if (em) await em.exportLatex();
                 break;
             default:
-                alert('Unknown export format: ' + format);
+                alert(this._t('fileIo.unknownExportFormat',
+                    'Unknown export format: {format}', { format }));
         }
     }
 
@@ -964,7 +1006,10 @@ class FileIO {
 
         const collected = this._collectPackageFiles();
         if (!collected) {
-            container.innerHTML = '<div style="color:var(--text-muted);padding:8px">No files to export.</div>';
+            const empty = document.createElement('div');
+            empty.style.cssText = 'color:var(--text-muted);padding:8px';
+            this._setText(empty, 'fileIo.noFilesToExport', 'No files to export.');
+            container.replaceChildren(empty);
             return;
         }
 
@@ -1119,11 +1164,17 @@ class FileIO {
      */
     async _exportSrwb(scope) {
         const nm = window.notebookManager;
-        if (!nm) { alert('No notebooks available.'); return; }
+        if (!nm) {
+            alert(this._t('fileIo.noNotebooksAvailable', 'No notebooks available.'));
+            return;
+        }
 
         if (scope === 'current') {
             const active = nm.getActiveNotebook();
-            if (!active) { alert('No active notebook.'); return; }
+            if (!active) {
+                alert(this._t('fileIo.noActiveNotebook', 'No active notebook.'));
+                return;
+            }
             // Grab live cells for the active notebook
             active.cells = window._cells ? [...window._cells] : [];
             active.cellCounter = window._cellCounter || 0;
@@ -1163,7 +1214,10 @@ class FileIO {
      */
     async _exportIpynb(scope, kernelOverride, archiveFormat) {
         const nm = window.notebookManager;
-        if (!nm) { alert('No notebooks available.'); return; }
+        if (!nm) {
+            alert(this._t('fileIo.noNotebooksAvailable', 'No notebooks available.'));
+            return;
+        }
 
         const exportOne = (nb) => {
             const cells = nb.isActive ? (window._cells || []) : (nb.cells || []);
@@ -1240,7 +1294,8 @@ class FileIO {
                 }
             }
             if (files.length === 0) {
-                alert('No notebooks with cells to export.');
+                alert(this._t('fileIo.noNotebooksWithCells',
+                    'No notebooks with cells to export.'));
                 return;
             }
             if (files.length === 1) {
@@ -1252,7 +1307,8 @@ class FileIO {
 
                 if (fmt === 'tar' || fmt === 'tar.gz') {
                     if (typeof TarWriter === 'undefined') {
-                        alert('TarWriter not available. Cannot create tar archive.');
+                        alert(this._t('fileIo.tarWriterArchiveUnavailable',
+                            'TarWriter not available. Cannot create tar archive.'));
                         return;
                     }
                     const tar = new TarWriter();
@@ -1270,7 +1326,8 @@ class FileIO {
                 } else {
                     // Default: zip
                     if (typeof JSZip === 'undefined') {
-                        alert('JSZip not loaded. Cannot create archive.');
+                        alert(this._t('fileIo.jsZipArchiveUnavailable',
+                            'JSZip not loaded. Cannot create archive.'));
                         return;
                     }
                     const zip = new JSZip();
@@ -1359,7 +1416,8 @@ class FileIO {
                     await Share.share({
                         title: filename,
                         url: writeResult.uri,
-                        dialogTitle: 'Export ' + filename
+                        dialogTitle: this._t('fileIo.exportDialogTitle',
+                            'Export {filename}', { filename })
                     });
                     return;
                 }
@@ -1461,11 +1519,11 @@ class FileIO {
             statusEl.className = 'memory-kernel-status';
             const isBundled = !KernelManager.CDN_KERNELS.has(k.language);
             if (isBundled) {
-                statusEl.textContent = 'Bundled';
+                this._setText(statusEl, 'fileIo.memoryBundled', 'Bundled');
             } else if (k.ready) {
-                statusEl.textContent = 'Ready';
+                this._setText(statusEl, 'fileIo.memoryReady', 'Ready');
             } else {
-                statusEl.textContent = 'Not loaded';
+                this._setText(statusEl, 'fileIo.memoryNotLoaded', 'Not loaded');
             }
             info.appendChild(statusEl);
             card.appendChild(info);
@@ -1484,15 +1542,15 @@ class FileIO {
                 if (k.loaded && k.ready) {
                     const btn = document.createElement('button');
                     btn.className = 'memory-unload-btn';
-                    btn.textContent = 'Unload';
+                    this._setText(btn, 'fileIo.unload', 'Unload');
                     btn.addEventListener('click', async () => {
-                        btn.textContent = 'Unloading...';
+                        this._setText(btn, 'fileIo.unloading', 'Unloading...');
                         btn.disabled = true;
                         await km.destroyKernel(k.language);
                         if (km.currentLanguage === k.language) {
                             const badge = document.getElementById('status-badge');
                             if (badge) {
-                                badge.textContent = 'ready';
+                                this._setText(badge, 'fileIo.ready', 'ready');
                                 badge.className = 'ready';
                             }
                         }
@@ -1502,9 +1560,9 @@ class FileIO {
                 } else {
                     const btn = document.createElement('button');
                     btn.className = 'memory-load-btn';
-                    btn.textContent = 'Load';
+                    this._setText(btn, 'fileIo.load', 'Load');
                     btn.addEventListener('click', async () => {
-                        btn.textContent = 'Loading...';
+                        this._setText(btn, 'fileIo.loading', 'Loading...');
                         btn.disabled = true;
                         try {
                             await km.ensureReady(k.language);
@@ -1524,9 +1582,9 @@ class FileIO {
                             if (hasCached) {
                                 const clearBtn = document.createElement('button');
                                 clearBtn.className = 'memory-unload-btn';
-                                clearBtn.textContent = 'Clear Cache';
+                                this._setText(clearBtn, 'fileIo.clearCache', 'Clear Cache');
                                 clearBtn.addEventListener('click', async () => {
-                                    clearBtn.textContent = 'Clearing...';
+                                    this._setText(clearBtn, 'fileIo.clearing', 'Clearing...');
                                     clearBtn.disabled = true;
                                     try {
                                         const cache = await caches.open(KernelManager.CDN_CACHE);
@@ -1704,12 +1762,13 @@ class FileIO {
                     } else {
                         window.sharedVFS.writeFile(destPath, new Uint8Array(e.target.result), 'user');
                     }
-                    alert('Uploaded to ' + destPath);
+                    alert(this._t('fileIo.uploadedTo', 'Uploaded to {path}', { path: destPath }));
                 } else {
-                    alert('SharedVFS not available.');
+                    alert(this._t('fileIo.sharedVfsUnavailable', 'SharedVFS not available.'));
                 }
             } catch (err) {
-                alert('Upload failed: ' + err.message);
+                alert(this._t('fileIo.uploadFailed',
+                    'Upload failed: {error}', { error: err.message }));
             }
         };
         if (isText) {
@@ -1725,7 +1784,7 @@ class FileIO {
     async _handleZipForVFS(file) {
         const km = window.kernelManager;
         if (!km) {
-            alert('Kernel manager not loaded.');
+            alert(this._t('fileIo.kernelManagerUnavailable', 'Kernel manager not loaded.'));
             return;
         }
 
@@ -1736,23 +1795,27 @@ class FileIO {
             try {
                 await km.ensureReady('prolog');
             } catch (err) {
-                alert('Failed to load Prolog kernel: ' + err.message);
+                alert(this._t('fileIo.failedToLoadProlog',
+                    'Failed to load Prolog kernel: {error}', { error: err.message }));
                 return;
             }
         }
 
         const vfs = km.getKernel('prolog').getVFS();
         if (!vfs) {
-            alert('Prolog VFS not available.');
+            alert(this._t('fileIo.prologVfsUnavailable', 'Prolog VFS not available.'));
             return;
         }
 
         try {
             const buffer = await file.arrayBuffer();
             const paths = await vfs.mountZip(buffer);
-            alert('Extracted ' + paths.length + ' files from ' + file.name + ' into /user/');
+            alert(this._t('fileIo.extractedFilesIntoUser',
+                'Extracted {count} files from {filename} into /user/',
+                { count: paths.length, filename: file.name }));
         } catch (err) {
-            alert('ZIP extraction failed: ' + err.message);
+            alert(this._t('fileIo.zipExtractionFailed',
+                'ZIP extraction failed: {error}', { error: err.message }));
         }
     }
 
@@ -1792,12 +1855,16 @@ class FileIO {
         try {
             const srwb = JSON.parse(jsonContent);
             if (srwb.format !== 'srwb') {
-                alert('Not a valid .srwb file.');
+                alert(this._t('fileIo.invalidSrwb', 'Not a valid .srwb file.'));
                 return;
             }
 
             const nm = window.notebookManager;
-            if (!nm) { alert('NotebookManager not available.'); return; }
+            if (!nm) {
+                alert(this._t('fileIo.notebookManagerUnavailable',
+                    'NotebookManager not available.'));
+                return;
+            }
 
             const autoExec = localStorage.getItem('scirepl_auto_execute') === '1';
             const autoSwitch = localStorage.getItem('scirepl_auto_switch_workbook') !== '0';
@@ -1805,7 +1872,8 @@ class FileIO {
             const app = window._appInternals;
             if (!app || !app.createInputCard || !app.createOutputCard) {
                 console.error('[importSrwb] window._appInternals not available');
-                alert('App not fully initialized. Please try again.');
+                alert(this._t('fileIo.appNotReady',
+                    'App not fully initialized. Please try again.'));
                 return;
             }
 
@@ -1858,7 +1926,8 @@ class FileIO {
 
             const loadNotebook = (nbData) => {
                 const nb = nm.createNotebook({
-                    name: nbData.name || 'Imported Notebook',
+                    name: nbData.name || this._t(
+                        'fileIo.importedNotebookName', 'Imported Notebook'),
                     description: nbData.description || '',
                     kernelLanguage: nbData.kernelLanguage || null
                 });
@@ -1891,7 +1960,8 @@ class FileIO {
             nm.saveState();
         } catch (e) {
             console.error('[importSrwb] Error:', e.message, e.stack);
-            alert('Failed to import .srwb file: ' + e.message);
+            alert(this._t('fileIo.srwbImportFailed',
+                'Failed to import .srwb file: {error}', { error: e.message }));
         }
     }
 
@@ -1947,7 +2017,7 @@ class FileIO {
             }
 
             if (extractedCells.length === 0) {
-                alert('No cells found in notebook.');
+                alert(this._t('fileIo.noCellsInNotebook', 'No cells found in notebook.'));
                 return;
             }
 
@@ -1962,7 +2032,7 @@ class FileIO {
             let prevNbId = null;
             if (nm && nm.createNotebook) {
                 // Extract name from first markdown heading, or fall back
-                let wbName = 'Imported Workbook';
+                let wbName = this._t('fileIo.importedWorkbookName', 'Imported Workbook');
                 const firstMd = extractedCells.find(c => c.type === 'markdown');
                 if (firstMd) {
                     const headingMatch = firstMd.code.match(/^#\s+(.+)/m);
@@ -1997,7 +2067,7 @@ class FileIO {
             }
         } catch (e) {
             console.error(e);
-            alert('Failed to parse .ipynb file.');
+            alert(this._t('fileIo.ipynbParseFailed', 'Failed to parse .ipynb file.'));
         }
     }
 
@@ -2153,7 +2223,9 @@ class FileIO {
                 input.dataset.lang = lang.id;
                 input.dataset.settingKey = versionMeta.settingKey;
                 input.placeholder = versionMeta.defaultVersion;
-                input.title = `Version (default: ${versionMeta.defaultVersion}). Use "latest" for the rolling release. Reload page after changing.`;
+                this._setTitle(input, 'fileIo.versionInputTitle',
+                    'Version (default: {defaultVersion}). Use "latest" for the rolling release. Reload page after changing.',
+                    { defaultVersion: versionMeta.defaultVersion });
                 input.style.width = '8em';
                 input.value = (typeof localStorage !== 'undefined'
                     && localStorage.getItem(versionMeta.settingKey)) || '';
@@ -2176,7 +2248,8 @@ class FileIO {
         const note = document.createElement('p');
         note.className = 'export-format-desc';
         note.style.marginTop = '0.75em';
-        note.textContent = 'Version changes apply on next page reload. Leave blank to use the default. Use "latest" for the rolling release (may break unexpectedly).';
+        this._setText(note, 'fileIo.versionChangesNote',
+            'Version changes apply on next page reload. Leave blank to use the default. Use "latest" for the rolling release (may break unexpectedly).');
         list.appendChild(note);
     }
 

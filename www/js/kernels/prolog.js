@@ -67,7 +67,7 @@ class PrologKernel {
         try {
             const cdnUrl = PrologKernel.cdnUrl();
             console.log(`[PrologKernel] Loading swipl-wasm from ${cdnUrl}`);
-            if (km) km.updateProgress('Downloading Prolog runtime...');
+            if (km) km.updateProgress(window.t('runtime.prologDownloading'));
             // Load with source fallback + per-attempt timeout (so a stalled CDN
             // fails fast instead of hanging the WASM thread). Falls back to a
             // plain import() if the manager helper isn't available.
@@ -82,7 +82,7 @@ class PrologKernel {
             const SWIPL = module.SWIPL || module.default;
             const self = this;
 
-            if (km) km.updateProgress('Initializing Prolog...');
+            if (km) km.updateProgress(window.t('runtime.prologInitializing'));
             this._swipl = await SWIPL({
                 arguments: ['-q'],
                 print: (text) => { self._stdoutBuffer.push(text); },
@@ -185,7 +185,7 @@ class PrologKernel {
      */
     async execute(code) {
         if (!this._ready) {
-            throw new Error('Prolog kernel not initialized');
+            throw new Error(window.t('kernel.prologNotInitialized'));
         }
 
         const trimmed = code.trim();
@@ -413,7 +413,7 @@ class PrologKernel {
                     const result = this._handleWasmCall(wasmMatch.module, wasmMatch.func, wasmMatch.args);
                     output.push(JSON.stringify(result));
                 } catch (err) {
-                    errorMsg = 'wasm_call error: ' + (err.message || String(err));
+                    errorMsg = window.t('prolog.wasmCallError', { error: err.message || String(err) });
                     break;
                 }
                 continue;
@@ -424,9 +424,9 @@ class PrologKernel {
             if (fetchMatch) {
                 try {
                     const localPath = await this._handleFetchFile(fetchMatch.url, fetchMatch.path);
-                    output.push('Fetched: ' + localPath);
+                    output.push(window.t('vfs.fetched', { path: localPath }));
                 } catch (err) {
-                    errorMsg = 'fetch_file error: ' + (err.message || String(err));
+                    errorMsg = window.t('prolog.fetchFileError', { error: err.message || String(err) });
                     break;
                 }
                 continue;
@@ -446,7 +446,7 @@ class PrologKernel {
                             break;
                         }
                     } else {
-                        errorMsg = `Cannot find file: ${filePath}`;
+                        errorMsg = window.t('vfs.cannotFindFile', { path: filePath });
                         break;
                     }
                 }
@@ -461,9 +461,9 @@ class PrologKernel {
                     const localPath = await this._handleFetchFile(loadMatch.url, loadMatch.path);
                     const consultQuery = `consult('${localPath}').`;
                     prolog.query(consultQuery).once();
-                    output.push('Loaded: ' + localPath);
+                    output.push(window.t('vfs.loaded', { path: localPath }));
                 } catch (err) {
-                    errorMsg = 'load_url error: ' + (err.message || String(err));
+                    errorMsg = window.t('prolog.loadUrlError', { error: err.message || String(err) });
                     break;
                 }
                 continue;
@@ -520,7 +520,7 @@ class PrologKernel {
                         if (val && val.success !== false) {
                             count++;
                             if (count > MAX_SOLUTIONS) {
-                                solutions.push('... (limited to ' + MAX_SOLUTIONS + ' solutions)');
+                                solutions.push(window.t('prolog.solutionLimit', { count: MAX_SOLUTIONS }));
                                 break;
                             }
                             const bindings = this._formatBindings(val);
@@ -781,11 +781,11 @@ class PrologKernel {
      */
     _handleWasmCall(moduleName, funcName, args) {
         if (!window.wasmModules || !window.wasmModules[moduleName]) {
-            throw new Error(`WASM module '${moduleName}' not loaded`);
+            throw new Error(window.t('kernel.wasmModuleNotLoaded', { module: moduleName }));
         }
         const mod = window.wasmModules[moduleName];
         if (!mod.call) {
-            throw new Error(`WASM module '${moduleName}' does not support JSON FFI`);
+            throw new Error(window.t('kernel.jsonFfiUnsupported', { module: moduleName }));
         }
         return mod.call(funcName, args);
     }
@@ -882,7 +882,10 @@ class PrologKernel {
         // Fallback without VFS
         const response = await fetch(url);
         if (!response.ok) {
-            throw new Error(`Fetch failed: ${response.status} ${response.statusText}`);
+            throw new Error(window.t('vfs.fetchFailed', {
+                status: response.status,
+                statusText: response.statusText,
+            }));
         }
         const text = await response.text();
 

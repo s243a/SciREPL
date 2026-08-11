@@ -45,7 +45,7 @@ class RKernel {
                 || RKernel.DEFAULT_WEBR_VERSION;
             const webrUrl = `https://webr.r-wasm.org/${version}/webr.mjs`;
             console.log(`[RKernel] Loading webR ${version}`);
-            if (km) km.updateProgress(`Loading R runtime (webR ${version})...`);
+            if (km) km.updateProgress(window.t('runtime.rLoading', { version }));
             // loadKernelSource may resolve to a bundled copy (vendor/webr/webr.mjs)
             // when the build bundles R. Capture whichever URL actually loaded so we
             // can point webR's worker assets (R.wasm + the VFS) at the same base —
@@ -63,7 +63,7 @@ class RKernel {
                 : await import(webrUrl);
             const { WebR } = mod;
 
-            if (km) km.updateProgress('Initializing R environment...');
+            if (km) km.updateProgress(window.t('runtime.rInitializing'));
             const baseUrl = resolvedUrl.replace(/[^/]*$/, ''); // dir holding webr.mjs
             console.log(`[RKernel] webR baseUrl: ${baseUrl}`);
             this._webr = new WebR({ baseUrl });
@@ -75,7 +75,7 @@ class RKernel {
             await this._mkdirSafe('/shared/lib');
             await this._mkdirSafe('/tmp');
 
-            if (km) km.updateProgress('Configuring packages...');
+            if (km) km.updateProgress(window.t('runtime.configuringPackages'));
             // Enable install.packages() to work with webR's WASM repo
             await this._webr.evalRVoid('webr::shim_install()');
             console.log('[RKernel] install.packages() shimmed');
@@ -85,7 +85,7 @@ class RKernel {
             await this._webr.evalRVoid('interactive <- function() TRUE');
             console.log('[RKernel] interactive() defined as TRUE');
 
-            if (km) km.updateProgress('Loading helpers...');
+            if (km) km.updateProgress(window.t('runtime.loadingHelpers'));
             // Load SharedVFS helper functions
             await this._loadSharedFSHelpers();
 
@@ -351,19 +351,19 @@ class RKernel {
         const messages = [];
         for (const pkg of packageNames) {
             try {
-                messages.push(`Installing ${pkg}...`);
+                messages.push(window.t('rPackages.installing', { package: pkg }));
                 await this._webr.installPackages([pkg]);
-                messages.push(`  Installed ${pkg}`);
+                messages.push(window.t('rPackages.installed', { package: pkg }));
                 // Auto-apply dark theme when ggplot2 is installed
                 if (pkg === 'ggplot2') {
                     try {
                         await this._webr.evalRVoid('.scirepl_setup_ggplot2()');
                         await this._webr.evalRVoid('assign(".scirepl_ggplot2_themed", TRUE, envir=globalenv())');
-                        messages.push('  SciREPL dark theme applied');
+                        messages.push(window.t('rPackages.themeApplied'));
                     } catch (e) { /* theme setup is best-effort */ }
                 }
             } catch (e) {
-                messages.push(`  Failed to install ${pkg}: ${e.message || e}`);
+                messages.push(window.t('rPackages.failed', { package: pkg, error: e.message || e }));
             }
         }
         return messages.join('\n');
@@ -551,19 +551,29 @@ class RKernel {
 
         const card = document.createElement('div');
         card.className = 'card card-output';
-        card.innerHTML = `
-            <div class="card-body" style="text-align:center; padding:12px;">
-                <p style="margin:0 0 10px; color:var(--text-secondary); font-size:13px;">
-                    Install recommended R packages? <strong>ggplot2</strong> and <strong>dplyr</strong>
-                    enable visualization and data wrangling.
-                </p>
-                <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-                    <button class="vfs-btn" data-action="install" style="background:var(--accent);color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;">Install</button>
-                    <button class="vfs-btn" data-action="skip" style="padding:6px 16px;border-radius:6px;cursor:pointer;">Skip</button>
-                    <button class="vfs-btn" data-action="never" style="padding:6px 16px;border-radius:6px;cursor:pointer;font-size:11px;">Don't ask again</button>
-                </div>
-            </div>
-        `;
+        const body = document.createElement('div');
+        body.className = 'card-body';
+        body.style.cssText = 'text-align:center; padding:12px;';
+        const prompt = document.createElement('p');
+        prompt.style.cssText = 'margin:0 0 10px; color:var(--text-secondary); font-size:13px;';
+        window.setI18nHtml(prompt, 'rPackages.prompt');
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display:flex; gap:8px; justify-content:center; flex-wrap:wrap;';
+        const makeButton = (action, key, style) => {
+            const button = document.createElement('button');
+            button.className = 'vfs-btn';
+            button.dataset.action = action;
+            button.style.cssText = style;
+            window.setI18nText(button, key);
+            return button;
+        };
+        actions.append(
+            makeButton('install', 'rPackages.install', 'background:var(--accent);color:#fff;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;'),
+            makeButton('skip', 'rPackages.skip', 'padding:6px 16px;border-radius:6px;cursor:pointer;'),
+            makeButton('never', 'rPackages.neverAsk', 'padding:6px 16px;border-radius:6px;cursor:pointer;font-size:11px;'),
+        );
+        body.append(prompt, actions);
+        card.appendChild(body);
 
         repl.appendChild(card);
         card.scrollIntoView({ behavior: 'smooth' });
@@ -588,7 +598,7 @@ class RKernel {
     async _doPrewarm() {
         const badge = document.getElementById('status-badge');
         if (badge) {
-            badge.textContent = 'installing R packages...';
+            window.setI18nText(badge, 'status.installingRPackages');
             badge.className = 'running';
         }
         try {
@@ -598,7 +608,7 @@ class RKernel {
             console.warn('[RKernel] Pre-warm failed:', e);
         }
         if (badge) {
-            badge.textContent = 'ready';
+            window.setI18nText(badge, 'status.ready');
             badge.className = 'ready';
         }
     }

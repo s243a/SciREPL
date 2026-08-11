@@ -3,7 +3,8 @@
  */
 import { chromium } from 'playwright';
 
-const BASE = 'http://localhost:8085';
+const PORT = process.env.PORT || 8085;
+const BASE = `http://localhost:${PORT}`;
 
 (async () => {
     const browser = await chromium.launch({ headless: true });
