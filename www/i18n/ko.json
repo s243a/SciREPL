@@ -455,7 +455,7 @@
     "app.cell.actions.languageTitle": "셀 언어",
     "app.cell.actions.applyLanguageAllShort": "전체→",
     "app.cell.actions.applyLanguageAllTitle": "모든 코드 셀에 언어 적용",
-    "app.cell.actions.runAllBelow": "▶▶ 아래 모든 셀 실행",
+    "app.cell.actions.runAllBelow": "아래 모든 셀 실행",
     "app.errors.kernelManagerUnavailable": "커널 관리자를 사용할 수 없습니다.",
     "app.errors.pythonKernelNotReady": "Python 커널이 준비되지 않았습니다.",
     "app.errors.failedToLoadLanguage": "{language} 로드 실패: {message}",

@@ -592,7 +592,7 @@
     "app.cell.actions.languageTitle": "Cell language",
     "app.cell.actions.applyLanguageAllShort": "All→",
     "app.cell.actions.applyLanguageAllTitle": "Apply language to all code cells",
-    "app.cell.actions.runAllBelow": "▶▶ Run All Below",
+    "app.cell.actions.runAllBelow": "Run All Below",
     "app.errors.kernelManagerUnavailable": "Kernel manager is not available.",
     "app.errors.pythonKernelNotReady": "Python kernel is not ready.",
     "app.errors.failedToLoadLanguage": "Failed to load {language}: {message}",

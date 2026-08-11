@@ -29,6 +29,42 @@
         return el;
     }
 
+    let editActionLayoutFrame = 0;
+
+    function editActionRowCount(actions) {
+        const rows = [];
+        for (const control of actions.querySelectorAll(':scope > button, :scope > select')) {
+            const top = control.getBoundingClientRect().top;
+            if (!rows.some((known) => Math.abs(known - top) < 1)) rows.push(top);
+        }
+        return rows.length;
+    }
+
+    /**
+     * Keep the full translated "Run all below" wording whenever two compact
+     * toolbar rows are enough. If a narrow viewport plus the current locale
+     * would require a third row, substitute the documented ▶↓ glyph. The
+     * button keeps its complete translated aria-label and title.
+     */
+    function updateEditActionCompaction() {
+        cancelAnimationFrame(editActionLayoutFrame);
+        for (const button of document.querySelectorAll('.cell-run-below-btn')) {
+            button.classList.remove('cell-action-icon-only');
+        }
+        if (window.innerWidth > 480) return;
+        editActionLayoutFrame = requestAnimationFrame(() => {
+            for (const actions of document.querySelectorAll('.cell-edit-actions')) {
+                if (editActionRowCount(actions) > 2) {
+                    actions.querySelector('.cell-run-below-btn')
+                        ?.classList.add('cell-action-icon-only');
+                }
+            }
+        });
+    }
+
+    window.addEventListener('resize', updateEditActionCompaction);
+    document.addEventListener('i18n:changed', updateEditActionCompaction);
+
     function setStatus(key, vars, className) {
         setUiText(badge, key, vars);
         if (className) badge.className = className;
@@ -505,7 +541,11 @@
             <select class="cell-lang-switch">${_langOpts}</select>
             <button class="cell-lang-apply-all"></button>
             <button class="cell-run-btn"></button>
-            <button class="cell-run-below-btn"></button>
+            <button class="cell-run-below-btn">
+                <span class="cell-run-below-icon-full" aria-hidden="true">▶▶</span>
+                <span class="cell-run-below-icon-compact" aria-hidden="true">▶↓</span>
+                <span class="cell-run-below-label"></span>
+            </button>
             <button class="cell-cancel-btn"></button>
         `;
         inputCard.appendChild(actions);
@@ -521,8 +561,12 @@
         setUiText(actions.querySelector('.cell-lang-apply-all'), 'app.cell.actions.applyLanguageAllShort');
         setUiAttr(actions.querySelector('.cell-lang-apply-all'), 'title', 'app.cell.actions.applyLanguageAllTitle');
         setUiText(actions.querySelector('.cell-run-btn'), 'inputControls.run');
-        setUiText(actions.querySelector('.cell-run-below-btn'), 'app.cell.actions.runAllBelow');
+        const runBelowButton = actions.querySelector('.cell-run-below-btn');
+        setUiText(runBelowButton.querySelector('.cell-run-below-label'), 'app.cell.actions.runAllBelow');
+        setUiAttr(runBelowButton, 'aria-label', 'app.cell.actions.runAllBelow');
+        setUiAttr(runBelowButton, 'title', 'app.cell.actions.runAllBelow');
         setUiText(actions.querySelector('.cell-cancel-btn'), 'common.cancel');
+        updateEditActionCompaction();
 
         // Cell language switch
         const langSwitch = actions.querySelector('.cell-lang-switch');

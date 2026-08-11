@@ -455,7 +455,7 @@
     "app.cell.actions.languageTitle": "لغة الخلية",
     "app.cell.actions.applyLanguageAllShort": "الكل→",
     "app.cell.actions.applyLanguageAllTitle": "تطبيق اللغة على جميع خلايا الكود",
-    "app.cell.actions.runAllBelow": "▶▶ تشغيل الكل أدناه",
+    "app.cell.actions.runAllBelow": "تشغيل الباقي",
     "app.errors.kernelManagerUnavailable": "مدير النواة غير متوفر.",
     "app.errors.pythonKernelNotReady": "نواة Python ليست جاهزة.",
     "app.errors.failedToLoadLanguage": "فشل تحميل {language}: {message}",

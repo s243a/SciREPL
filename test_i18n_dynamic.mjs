@@ -50,6 +50,54 @@ async function openFromMenu(button, modal) {
     await page.locator(modal).waitFor({ state: 'visible', timeout: TIMEOUT });
 }
 
+async function radioOptionGeometry(modalSelector) {
+    return page.evaluate((selector) => {
+        const viewportWidth = document.documentElement.clientWidth;
+        return [...document.querySelectorAll(`${selector} .settings-radio-item`)]
+            .filter((label) => !label.closest('.hidden'))
+            .map((label) => {
+                const input = label.querySelector('input[type="radio"]')?.getBoundingClientRect();
+                const name = label.querySelector(':scope > span:not(.export-format-desc)')?.getBoundingClientRect();
+                const description = label.querySelector(':scope > .export-format-desc')?.getBoundingClientRect();
+                const box = label.getBoundingClientRect();
+                const direction = getComputedStyle(label).direction;
+                return input && name && description ? {
+                    name: label.querySelector(':scope > span:not(.export-format-desc)')?.textContent,
+                    layout: getComputedStyle(label).display,
+                    inlineStartCorrect: direction === 'rtl'
+                        ? input.left >= name.right - 0.5
+                        : input.right <= name.left + 0.5,
+                    inlineGap: direction === 'rtl'
+                        ? input.left - name.right
+                        : name.left - input.right,
+                    verticallySeparated: description.top >= name.bottom - 0.5,
+                    contained: [input, name, description].every((rect) => rect.left >= box.left - 0.5
+                        && rect.right <= box.right + 0.5
+                        && rect.left >= -0.5 && rect.right <= viewportWidth + 0.5),
+                } : null;
+            });
+    }, modalSelector);
+}
+
+async function chooseRadio(name, value) {
+    await page.evaluate(({ radioName, radioValue }) => {
+        const input = document.querySelector(`input[name="${radioName}"][value="${radioValue}"]`);
+        if (!input) throw new Error(`missing radio ${radioName}=${radioValue}`);
+        input.checked = true;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    }, { radioName: name, radioValue: value });
+}
+
+async function renderedSectionState(ids) {
+    return page.evaluate((sectionIds) => Object.fromEntries(sectionIds.map((id) => {
+        const element = document.getElementById(id);
+        const rect = element?.getBoundingClientRect();
+        const rendered = !!(element && getComputedStyle(element).display !== 'none'
+            && rect.width > 0 && rect.height > 0);
+        return [id, rendered];
+    })), ids);
+}
+
 try {
     await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
     await page.waitForFunction(() => window.i18n && window.fileIO && window.notebookManager
@@ -57,9 +105,31 @@ try {
     null, { timeout: TIMEOUT });
     await page.waitForTimeout(500);
 
+    let state = await page.evaluate(() => ({
+        hiddenDisplays: [...document.querySelectorAll('.hidden')]
+            .filter((element) => [
+                'loading-overlay', 'notebook-sidebar', 'appearance-theme-editor',
+                'runtime-progress-wrap',
+            ].includes(element.id) || element.classList.contains('modal'))
+            .map((element) => ({ id: element.id, display: getComputedStyle(element).display })),
+        hiddenRunningAnimations: document.getAnimations()
+            .filter((animation) => animation.playState === 'running'
+                && animation.effect?.target?.closest?.('.hidden'))
+            .map((animation) => animation.effect.target.id || animation.effect.target.className),
+        headerBackdrop: getComputedStyle(document.getElementById('app-header')).backdropFilter,
+    }));
+    check('hidden shell subtrees are removed from layout and painting',
+        state.hiddenDisplays.length >= 10
+        && state.hiddenDisplays.every((item) => item.display === 'none'),
+    JSON.stringify(state));
+    check('hidden UI has no running animation and the opaque header has no backdrop filter',
+        state.hiddenRunningAnimations.length === 0
+        && (!state.headerBackdrop || state.headerBackdrop === 'none'),
+    JSON.stringify(state));
+
     console.log('\n1. Generated editor and notebook UI');
     await activate('es');
-    let state = await page.evaluate(() => ({
+    state = await page.evaluate(() => ({
         lang: document.documentElement.lang,
         dir: document.documentElement.dir,
         notebook: window.notebookManager.getActiveNotebook()?.name,
@@ -137,6 +207,114 @@ try {
         state && state.actionTop >= state.contentTop && state.actionBottom <= state.contentBottom + 0.5,
     JSON.stringify(state));
 
+    let radioGeometry = await radioOptionGeometry('#export-modal');
+    check('localized Export radio names and descriptions use separate contained rows',
+        radioGeometry.length >= 5 && radioGeometry.every((item) => item?.layout === 'grid'
+            && item?.inlineStartCorrect && item?.verticallySeparated && item?.contained),
+    JSON.stringify(radioGeometry));
+
+    await page.locator('input[name="export-format"][value="markdown"]')
+        .locator('xpath=following-sibling::span[contains(@class,"export-format-desc")]').click();
+    state = await page.evaluate(() => document.querySelector(
+        'input[name="export-format"][value="markdown"]')?.checked);
+    check('clicking a radio description selects that export option', state === true, String(state));
+    await page.locator('input[name="export-format"][value="html"] + span').click();
+    state = await page.evaluate(() => document.querySelector(
+        'input[name="export-format"][value="html"]')?.checked);
+    check('clicking a radio name selects that export option', state === true, String(state));
+
+    let sectionState = await renderedSectionState([
+        'export-image-section', 'export-theme-section', 'export-pagebg-section',
+        'export-margins-section',
+    ]);
+    check('HTML export shows only its applicable option sections',
+        sectionState['export-image-section'] && sectionState['export-theme-section']
+        && sectionState['export-pagebg-section'] && !sectionState['export-margins-section'],
+    JSON.stringify(sectionState));
+
+    await chooseRadio('export-format', 'markdown');
+    sectionState = await renderedSectionState([
+        'export-image-section', 'export-theme-section', 'export-pagebg-section',
+        'export-margins-section',
+    ]);
+    check('Markdown export hides styled-page and margin options',
+        sectionState['export-image-section'] && !sectionState['export-theme-section']
+        && !sectionState['export-pagebg-section'] && !sectionState['export-margins-section'],
+    JSON.stringify(sectionState));
+
+    await chooseRadio('export-format', 'pdf');
+    sectionState = await renderedSectionState([
+        'export-image-section', 'export-theme-section', 'export-pagebg-section',
+        'export-margins-section',
+    ]);
+    check('PDF export shows styled-page and margin options but not image packaging',
+        !sectionState['export-image-section'] && sectionState['export-theme-section']
+        && sectionState['export-pagebg-section'] && sectionState['export-margins-section'],
+    JSON.stringify(sectionState));
+
+    await chooseRadio('export-format', 'docx');
+    sectionState = await renderedSectionState([
+        'export-image-section', 'export-theme-section', 'export-pagebg-section',
+        'export-margins-section',
+    ]);
+    check('DOCX export hides all unrelated option sections',
+        Object.values(sectionState).every((rendered) => !rendered), JSON.stringify(sectionState));
+
+    await chooseRadio('export-format', 'pdf');
+    await page.locator('#export-modal .modal-close').click();
+    await openFromMenu('#btn-export', '#export-modal');
+    sectionState = await renderedSectionState([
+        'export-image-section', 'export-theme-section', 'export-pagebg-section',
+        'export-margins-section',
+    ]);
+    check('reopening Export resets PDF-only margins back to the HTML state',
+        sectionState['export-image-section'] && sectionState['export-theme-section']
+        && sectionState['export-pagebg-section'] && !sectionState['export-margins-section'],
+    JSON.stringify(sectionState));
+
+    const compactLayouts = [];
+    for (const viewport of [{ width: 360, height: 780 }, { width: 640, height: 360 }]) {
+        await page.setViewportSize(viewport);
+        await page.waitForTimeout(100);
+        compactLayouts.push(await page.evaluate((size) => {
+            const modal = document.querySelector('#export-modal .modal-content');
+            const action = document.getElementById('btn-do-export');
+            const contentRect = modal.getBoundingClientRect();
+            const actionRect = action.getBoundingClientRect();
+            const visible = (element) => getComputedStyle(element).display !== 'none'
+                && element.getBoundingClientRect().height > 0;
+            const headings = [...document.querySelectorAll('#export-modal .settings-section')]
+                .filter(visible)
+                .map((heading) => {
+                    const next = heading.nextElementSibling;
+                    if (!next || !visible(next)) return null;
+                    const h = heading.getBoundingClientRect();
+                    const n = next.getBoundingClientRect();
+                    return n.top - h.bottom;
+                }).filter((gap) => gap != null);
+            const adjacentRows = [...document.querySelectorAll('#export-modal .settings-radio-item')]
+                .filter(visible)
+                .map((row) => {
+                    const previous = row.previousElementSibling;
+                    if (!previous?.classList.contains('settings-radio-item') || !visible(previous)) return null;
+                    return row.getBoundingClientRect().top - previous.getBoundingClientRect().bottom;
+                }).filter((gap) => gap != null);
+            return {
+                size,
+                actionContained: actionRect.top >= contentRect.top - 0.5
+                    && actionRect.bottom <= contentRect.bottom + 0.5,
+                headingGaps: headings,
+                rowGaps: adjacentRows,
+            };
+        }, viewport));
+    }
+    check('short portrait and landscape keep Export reachable with positive row spacing',
+        compactLayouts.every((layout) => layout.actionContained
+            && layout.headingGaps.length > 0 && layout.headingGaps.every((gap) => gap >= 0)
+            && layout.rowGaps.length > 0 && layout.rowGaps.every((gap) => gap > 0)),
+    JSON.stringify(compactLayouts));
+    await page.setViewportSize({ width: 411, height: 891 });
+
     await openFromMenu('#btn-export-workbook', '#export-workbook-modal');
     state = await page.evaluate(() => {
         const title = document.querySelector('#export-workbook-modal h2');
@@ -153,6 +331,47 @@ try {
     });
     check('a long localized modal title stays clear of the close button',
         state && !state.overlap, JSON.stringify(state));
+
+    radioGeometry = await radioOptionGeometry('#export-workbook-modal');
+    check('localized workbook-export radio rows do not overlap',
+        radioGeometry.length >= 5 && radioGeometry.every((item) => item?.layout === 'grid'
+            && item?.inlineStartCorrect && item?.verticallySeparated && item?.contained),
+    JSON.stringify(radioGeometry));
+
+    sectionState = await renderedSectionState([
+        'wb-scope-section', 'wb-kernel-section', 'wb-archive-section', 'wb-filetree-section',
+    ]);
+    check('native workbook export shows scope only',
+        sectionState['wb-scope-section'] && !sectionState['wb-kernel-section']
+        && !sectionState['wb-archive-section'] && !sectionState['wb-filetree-section'],
+    JSON.stringify(sectionState));
+
+    await chooseRadio('wb-export-format', 'ipynb');
+    sectionState = await renderedSectionState([
+        'wb-scope-section', 'wb-kernel-section', 'wb-archive-section', 'wb-filetree-section',
+    ]);
+    check('single-notebook Jupyter export shows scope and kernel only',
+        sectionState['wb-scope-section'] && sectionState['wb-kernel-section']
+        && !sectionState['wb-archive-section'] && !sectionState['wb-filetree-section'],
+    JSON.stringify(sectionState));
+
+    await chooseRadio('wb-export-scope', 'all');
+    sectionState = await renderedSectionState([
+        'wb-scope-section', 'wb-kernel-section', 'wb-archive-section', 'wb-filetree-section',
+    ]);
+    check('all-tab Jupyter export also shows its archive choice',
+        sectionState['wb-scope-section'] && sectionState['wb-kernel-section']
+        && sectionState['wb-archive-section'] && !sectionState['wb-filetree-section'],
+    JSON.stringify(sectionState));
+
+    await chooseRadio('wb-export-format', 'package');
+    sectionState = await renderedSectionState([
+        'wb-scope-section', 'wb-kernel-section', 'wb-archive-section', 'wb-filetree-section',
+    ]);
+    check('package export shows archive and contents without notebook-only controls',
+        !sectionState['wb-scope-section'] && !sectionState['wb-kernel-section']
+        && sectionState['wb-archive-section'] && sectionState['wb-filetree-section'],
+    JSON.stringify(sectionState));
 
     await openFromMenu('#btn-memory', '#memory-modal');
     await page.locator('#memory-kernel-list .memory-kernel-status').first()
@@ -229,8 +448,53 @@ try {
     check('mobile search stays below the configured status-bar allowance',
         state.top >= state.safeTop - 0.5, JSON.stringify(state));
 
-    console.log('\n3. RTL and authoritative privacy copy');
+    console.log('\n3. Compact translated Appearance controls');
+    const appearanceDraftLayouts = [];
+    for (const locale of ['ko', 'zh']) {
+        await activate(locale);
+        await openFromMenu('#btn-appearance', '#appearance-modal');
+        appearanceDraftLayouts.push(await page.evaluate((code) => {
+            const row = document.querySelector('.appearance-drafts-row');
+            const label = row?.querySelector('.appearance-check');
+            const labelText = label?.querySelector('span');
+            const help = row?.querySelector('.appearance-help');
+            const modal = document.getElementById('appearance-modal');
+            const rect = (element) => {
+                const r = element?.getBoundingClientRect();
+                return r ? { left: r.left, right: r.right, top: r.top, bottom: r.bottom,
+                    width: r.width, height: r.height } : null;
+            };
+            return {
+                locale: code,
+                direction: row ? getComputedStyle(row).flexDirection : null,
+                label: rect(label),
+                labelText: rect(labelText),
+                help: rect(help),
+                backdropFilter: modal ? getComputedStyle(modal).backdropFilter : null,
+            };
+        }, locale));
+    }
+    check('Korean and Chinese draft-translation labels remain readable horizontal blocks',
+        appearanceDraftLayouts.every((layout) => layout.direction === 'column'
+            && layout.labelText?.width > layout.labelText?.height * 2
+            && layout.labelText?.height < 80
+            && layout.help?.top >= layout.label?.bottom - 0.5),
+    JSON.stringify(appearanceDraftLayouts));
+    check('mobile modals avoid the costly full-screen backdrop blur',
+        appearanceDraftLayouts.every((layout) => !layout.backdropFilter
+            || layout.backdropFilter === 'none'), JSON.stringify(appearanceDraftLayouts));
+
+    console.log('\n4. RTL and authoritative privacy copy');
     await activate('ar');
+    await dismissModals();
+
+    await openFromMenu('#btn-export', '#export-modal');
+    radioGeometry = await radioOptionGeometry('#export-modal');
+    check('RTL Export radio rows stay separated and inside their labels',
+        radioGeometry.length >= 5 && radioGeometry.every((item) => item?.layout === 'grid'
+            && item?.inlineStartCorrect && item?.inlineGap <= 16
+            && item?.verticallySeparated && item?.contained),
+    JSON.stringify(radioGeometry));
     await dismissModals();
 
     state = await page.evaluate(() => ({
@@ -255,13 +519,73 @@ try {
     state = await page.evaluate(() => {
         const card = document.querySelector('.card-input');
         const editor = card?.querySelector('.cell-editor');
+        const actionBar = card?.querySelector('.cell-edit-actions');
+        const controls = [...(actionBar?.querySelectorAll('button, select') || [])].map((control) => {
+            const rect = control.getBoundingClientRect();
+            return {
+                text: control.textContent,
+                top: Math.round(rect.top),
+                height: Math.round(rect.height),
+                clipped: rect.left < -0.5 || rect.right > document.documentElement.clientWidth + 0.5,
+            };
+        });
         return {
             editorDir: editor?.dir,
             editorComputedDir: editor ? getComputedStyle(editor).direction : null,
+            actionFlexWrap: actionBar ? getComputedStyle(actionBar).flexWrap : null,
+            actionRows: new Set(controls.map((control) => control.top)).size,
+            actionControls: controls,
         };
     });
     check('program source remains LTR while editing under an RTL interface',
         state.editorDir === 'ltr' && state.editorComputedDir === 'ltr', JSON.stringify(state));
+    check('Arabic mobile edit actions use compact controls instead of tall wrapped buttons',
+        state.actionFlexWrap === 'wrap' && state.actionRows <= 2
+        && state.actionControls.length === 6
+        && state.actionControls.every((control) => control.height <= 36 && !control.clipped),
+    JSON.stringify(state));
+
+    const editorLayoutFailures = [];
+    for (const width of [320, 360, 411]) {
+        await page.setViewportSize({ width, height: 800 });
+        for (const locale of ['en', 'ar', 'bn', 'de', 'es', 'fr', 'hi', 'id', 'ja', 'ko', 'pt-BR', 'ru', 'zh']) {
+            await activate(locale);
+            await page.waitForTimeout(25);
+            const layout = await page.evaluate(() => {
+                const bar = document.querySelector('.card-input .cell-edit-actions');
+                const runBelow = bar?.querySelector('.cell-run-below-btn');
+                const barRect = bar?.getBoundingClientRect();
+                const controls = [...(bar?.querySelectorAll('button, select') || [])].map((control) => {
+                    const rect = control.getBoundingClientRect();
+                    return { top: Math.round(rect.top), height: rect.height,
+                        left: rect.left, right: rect.right };
+                });
+                return {
+                    rows: new Set(controls.map((control) => control.top)).size,
+                    controls,
+                    barLeft: barRect?.left,
+                    barRight: barRect?.right,
+                    compact: runBelow?.classList.contains('cell-action-icon-only'),
+                    accessibleLabel: runBelow?.getAttribute('aria-label'),
+                    expectedLabel: window.t('app.cell.actions.runAllBelow'),
+                    compactIconVisible: runBelow
+                        ? getComputedStyle(runBelow.querySelector('.cell-run-below-icon-compact')).display !== 'none'
+                        : false,
+                };
+            });
+            if (layout.rows > 2 || layout.controls.length !== 6
+                || layout.accessibleLabel !== layout.expectedLabel
+                || (layout.compact && !layout.compactIconVisible)
+                || layout.controls.some((control) => control.height > 36
+                    || control.left < layout.barLeft - 0.5 || control.right > layout.barRight + 0.5)) {
+                editorLayoutFailures.push({ width, locale, ...layout });
+            }
+        }
+    }
+    check('mobile edit controls stay compact and contained in every locale at 320/360/411px',
+        editorLayoutFailures.length === 0, JSON.stringify(editorLayoutFailures));
+    await page.setViewportSize({ width: 411, height: 891 });
+    await activate('ar');
     await page.locator('.card-input .cell-cancel-btn').first().click();
     state = await page.evaluate(() => {
         const pre = document.querySelector('.card-input pre');
@@ -313,6 +637,9 @@ try {
         return {
             values,
             technicalDirections: technical.map((element) => getComputedStyle(element).direction),
+            runRemainingLegend: document.querySelector('.help-action-legend [data-i18n="app.cell.actions.runAllBelow"]')?.textContent,
+            runRemainingWant: window.t('app.cell.actions.runAllBelow'),
+            runRemainingIcon: document.querySelector('.help-action-legend code')?.textContent,
         };
     });
     check('Help shortcut prose is translated in Arabic',
@@ -322,12 +649,20 @@ try {
         state.technicalDirections.length > 0
             && state.technicalDirections.every((direction) => direction === 'ltr'),
     JSON.stringify(state.technicalDirections));
+    check('Help documents the adaptive run-remaining icon using the existing translation',
+        state.runRemainingIcon === '▶↓' && state.runRemainingLegend === state.runRemainingWant,
+    JSON.stringify(state));
 
     await page.click('#help-privacy-link');
     await page.locator('#privacy-modal').waitFor({ state: 'visible', timeout: TIMEOUT });
     state = await page.evaluate(() => {
         const body = document.querySelector('[data-i18n="privacy.scireplDesignedBePrivacyRespecting"]');
         const notice = document.getElementById('privacy-translation-notice');
+        const title = document.querySelector('#privacy-modal h2');
+        const close = document.querySelector('#privacy-modal .modal-close')?.getBoundingClientRect();
+        const range = document.createRange();
+        if (title) range.selectNodeContents(title);
+        const titleRects = title ? [...range.getClientRects()] : [];
         return {
             dir: document.documentElement.dir,
             bodyDir: body?.getAttribute('dir'),
@@ -338,6 +673,10 @@ try {
             noticeHidden: notice?.hidden,
             notice: notice?.textContent,
             noticeWant: `${window.t('privacy.translationNotice')} ${window.t('privacy.viewOfficial')}`,
+            titleText: title?.textContent,
+            titleWant: window.t('privacy.privacyPolicy'),
+            titleCloseOverlap: close ? titleRects.some((rect) => rect.right > close.left
+                && rect.left < close.right && rect.bottom > close.top && rect.top < close.bottom) : true,
         };
     });
     check('Arabic switches the application to RTL', state.dir === 'rtl', JSON.stringify(state));
@@ -346,6 +685,27 @@ try {
     JSON.stringify(state));
     check('privacy translation notice remains readable in Arabic',
         state.noticeHidden === false && state.notice === state.noticeWant,
+    JSON.stringify(state));
+    check('the authoritative English privacy title remains clear of the mirrored RTL close button',
+        state.titleText === state.titleWant && !state.titleCloseOverlap,
+    JSON.stringify(state));
+
+    await activate('zh');
+    await dismissModals();
+    await page.click('#help-btn');
+    await page.locator('#help-modal').waitFor({ state: 'visible', timeout: TIMEOUT });
+    state = await page.evaluate(() => {
+        const content = document.querySelector('#help-modal .modal-content');
+        const codeBlocks = [...document.querySelectorAll('#help-modal pre')];
+        return {
+            clientWidth: content?.clientWidth,
+            scrollWidth: content?.scrollWidth,
+            independentlyScrollableExamples: codeBlocks.filter((pre) => pre.scrollWidth > pre.clientWidth + 1).length,
+        };
+    });
+    check('Chinese Help prose does not make the whole dialog scroll sideways',
+        state.clientWidth > 0 && state.scrollWidth <= state.clientWidth + 1
+        && state.independentlyScrollableExamples > 0,
     JSON.stringify(state));
 
     check('no browser errors occurred', pageErrors.length === 0, pageErrors.join(' | '));

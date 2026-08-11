@@ -462,7 +462,7 @@
     "app.cell.actions.languageTitle": "Linguagem da célula",
     "app.cell.actions.applyLanguageAllShort": "Todas→",
     "app.cell.actions.applyLanguageAllTitle": "Aplicar linguagem a todas as células de código",
-    "app.cell.actions.runAllBelow": "▶▶ Executar todas as células abaixo",
+    "app.cell.actions.runAllBelow": "Executar todas as células abaixo",
     "app.errors.kernelManagerUnavailable": "O gerenciador de kernel não está disponível.",
     "app.errors.pythonKernelNotReady": "O kernel Python não está pronto.",
     "app.errors.failedToLoadLanguage": "Falha ao carregar {language}: {message}",

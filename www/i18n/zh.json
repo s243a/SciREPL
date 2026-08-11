@@ -455,7 +455,7 @@
     "app.cell.actions.languageTitle": "单元格语言",
     "app.cell.actions.applyLanguageAllShort": "全部→",
     "app.cell.actions.applyLanguageAllTitle": "将语言应用到所有代码单元格",
-    "app.cell.actions.runAllBelow": "▶▶ 运行下方所有单元格",
+    "app.cell.actions.runAllBelow": "运行下方所有单元格",
     "app.errors.kernelManagerUnavailable": "内核管理器不可用。",
     "app.errors.pythonKernelNotReady": "Python 内核尚未就绪。",
     "app.errors.failedToLoadLanguage": "无法加载 {language}：{message}",

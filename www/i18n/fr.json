@@ -467,7 +467,7 @@
     "app.cell.actions.languageTitle": "Langage de la cellule",
     "app.cell.actions.applyLanguageAllShort": "Toutes→",
     "app.cell.actions.applyLanguageAllTitle": "Appliquer le langage à toutes les cellules de code",
-    "app.cell.actions.runAllBelow": "▶▶ Exécuter toutes les cellules suivantes",
+    "app.cell.actions.runAllBelow": "Exécuter toutes les cellules suivantes",
     "app.errors.kernelManagerUnavailable": "Le gestionnaire de noyau n'est pas disponible.",
     "app.errors.pythonKernelNotReady": "Le noyau Python n'est pas prêt.",
     "app.errors.failedToLoadLanguage": "Échec du chargement de {language} : {message}",

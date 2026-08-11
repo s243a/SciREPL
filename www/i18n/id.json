@@ -463,7 +463,7 @@
     "app.cell.actions.languageTitle": "Bahasa sel",
     "app.cell.actions.applyLanguageAllShort": "Semua→",
     "app.cell.actions.applyLanguageAllTitle": "Terapkan bahasa ke semua sel kode",
-    "app.cell.actions.runAllBelow": "▶▶ Jalankan Semua di Bawah",
+    "app.cell.actions.runAllBelow": "Jalankan Semua di Bawah",
     "app.errors.kernelManagerUnavailable": "Manajer kernel tidak tersedia.",
     "app.errors.pythonKernelNotReady": "Kernel Python belum siap.",
     "app.errors.failedToLoadLanguage": "Gagal memuat {language}: {message}",

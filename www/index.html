@@ -372,6 +372,10 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
 
             <h3 data-i18n="help.cellLanguage">Cell Language</h3>
             <p data-i18n-html="help.eachCellRemembersItsLanguage">Each cell remembers its language. To change a cell's language, click ✎ to edit, then use the language dropdown. Click <strong>All→</strong> to apply the language to all code cells in the notebook.</p>
+            <div class="help-action-legend">
+                <code dir="ltr">▶↓</code>
+                <span data-i18n="app.cell.actions.runAllBelow">Run All Below</span>
+            </div>
 
             <h3 data-i18n="help.sourceOnlyCellsTyprDirectives">Source-only Cells and TypR Directives</h3>
             <p data-i18n-html="help.putSourceOnFirstLine">Put <code>#!source</code> on the first line of a named TypR or Lua cell to keep highlighted code available through the Notebook VFS without executing it. The remaining directives are TypR-specific:</p>
@@ -484,34 +488,34 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             <h2 data-i18n="export.exportNotebook">Export Notebook</h2>
             <div class="settings-list">
                 <div class="settings-section" data-i18n="export.sectionFormat">Format</div>
-                <label class="settings-item">
+                <label class="settings-item settings-radio-item">
                     <input type="radio" name="export-format" value="html" checked> <span data-i18n="export.html">HTML</span>
                     <span class="export-format-desc"><span data-i18n="export.selfContainedWebPage">Self-contained web page</span></span>
                 </label>
-                <label class="settings-item">
+                <label class="settings-item settings-radio-item">
                     <input type="radio" name="export-format" value="markdown"> <span data-i18n="export.markdown">Markdown</span>
                     <span class="export-format-desc"><span data-i18n="export.githubCompatibleMd">GitHub-compatible .md</span></span>
                 </label>
-                <label class="settings-item">
+                <label class="settings-item settings-radio-item">
                     <input type="radio" name="export-format" value="pdf"> <span data-i18n="export.pdfPrint">PDF (Print)</span>
                     <span class="export-format-desc"><span data-i18n="export.opensBrowserPrintDialog">Opens browser print dialog</span></span>
                 </label>
-                <label class="settings-item">
+                <label class="settings-item settings-radio-item">
                     <input type="radio" name="export-format" value="docx"> <span data-i18n="export.docx">DOCX</span>
                     <span class="export-format-desc"><span data-i18n="export.wordDocumentEquations">Word document with equations</span></span>
                 </label>
-                <label class="settings-item">
+                <label class="settings-item settings-radio-item">
                     <input type="radio" name="export-format" value="latex"> <span data-i18n="export.latex">LaTeX</span>
                     <span class="export-format-desc"><span data-i18n="export.texListingsAmsmath">.tex with listings and amsmath</span></span>
                 </label>
 
                 <div id="export-image-section">
                     <div class="settings-section" data-i18n="export.sectionImages">Images</div>
-                    <label class="settings-item">
+                    <label class="settings-item settings-radio-item">
                         <input type="radio" name="export-images" value="embed" checked> <span data-i18n="export.embedFile">Embed in file</span>
                         <span class="export-format-desc"><span data-i18n="export.base64Inline">Base64 inline</span></span>
                     </label>
-                    <label class="settings-item">
+                    <label class="settings-item settings-radio-item">
                         <input type="radio" name="export-images" value="separate"> <span data-i18n="export.separateFilesArchive">Separate files in archive</span>
                         <span class="export-format-desc"><span data-i18n="export.imagesFolderZip">images/ folder in .zip</span></span>
                     </label>
@@ -519,15 +523,15 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
 
                 <div id="export-theme-section">
                     <div class="settings-section" data-i18n="appearance.theme">Theme</div>
-                    <label class="settings-item">
+                    <label class="settings-item settings-radio-item">
                         <input type="radio" name="export-theme" value="keep" checked> <span data-i18n="export.keep">Keep as is</span>
                         <span class="export-format-desc"><span data-i18n="export.darkThemeMatchesApp">Dark theme (matches app)</span></span>
                     </label>
-                    <label class="settings-item">
+                    <label class="settings-item settings-radio-item">
                         <input type="radio" name="export-theme" value="light"> <span data-i18n="appearance.themeLight">Light</span>
                         <span class="export-format-desc"><span data-i18n="export.lightCellsPrintFriendly">Light cells (print-friendly)</span></span>
                     </label>
-                    <label class="settings-item">
+                    <label class="settings-item settings-radio-item">
                         <input type="radio" name="export-theme" value="browser"> <span data-i18n="export.browserDefault">Browser default</span>
                         <span class="export-format-desc"><span data-i18n="export.letBrowserDecideStripsBackgrounds">Let browser decide (strips backgrounds on print)</span></span>
                     </label>
@@ -535,15 +539,15 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
 
                 <div id="export-pagebg-section">
                     <div class="settings-section" data-i18n="export.sectionPageBackground">Page Background</div>
-                    <label class="settings-item">
+                    <label class="settings-item settings-radio-item">
                         <input type="radio" name="export-pagebg" value="white" checked> <span data-i18n="export.white">White</span>
                         <span class="export-format-desc"><span data-i18n="export.cleanContrastCells">Clean contrast with cells</span></span>
                     </label>
-                    <label class="settings-item">
+                    <label class="settings-item settings-radio-item">
                         <input type="radio" name="export-pagebg" value="dark"> <span data-i18n="appearance.themeDark">Dark</span>
                         <span class="export-format-desc"><span data-i18n="export.matchesAppBackground">Matches app background</span></span>
                     </label>
-                    <label class="settings-item">
+                    <label class="settings-item settings-radio-item">
                         <input type="radio" name="export-pagebg" value="browser"> <span data-i18n="export.browserDecides">Browser decides</span>
                         <span class="export-format-desc"><span data-i18n="export.noForcedBackground">No forced background</span></span>
                     </label>
@@ -603,26 +607,26 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             <h2 data-i18n="exportWorkbook.exportWorkbooksAmpPackages">Export Workbooks &amp; Packages</h2>
             <div class="settings-list">
                 <div class="settings-section" data-i18n="export.sectionFormat">Format</div>
-                <label class="settings-item">
+                <label class="settings-item settings-radio-item">
                     <input type="radio" name="wb-export-format" value="srwb" checked> <span data-i18n="export.workbookSrwb">Workbook (.srwb)</span>
                     <span class="export-format-desc"><span data-i18n="export.scireplNativeFormatJson">SciREPL native format (JSON)</span></span>
                 </label>
-                <label class="settings-item">
+                <label class="settings-item settings-radio-item">
                     <input type="radio" name="wb-export-format" value="ipynb"> <span data-i18n="export.jupyterNotebookIpynb">Jupyter Notebook (.ipynb)</span>
                     <span class="export-format-desc"><span data-i18n="export.oneFilePerTabMagic">One file per tab, %%magic for multi-language</span></span>
                 </label>
-                <label class="settings-item">
+                <label class="settings-item settings-radio-item">
                     <input type="radio" name="wb-export-format" value="package"> <span data-i18n="export.packageArchive">Package (archive)</span>
                     <span class="export-format-desc"><span data-i18n="export.notebooksDataFilesArchive">Notebooks + data files in archive</span></span>
                 </label>
 
                 <div id="wb-scope-section">
                     <div class="settings-section" data-i18n="export.sectionScope">Scope</div>
-                    <label class="settings-item">
+                    <label class="settings-item settings-radio-item">
                         <input type="radio" name="wb-export-scope" value="current" checked> <span data-i18n="export.currentTabOnly">Current tab only</span>
                         <span class="export-format-desc"><span data-i18n="export.exportActiveNotebook">Export the active notebook</span></span>
                     </label>
-                    <label class="settings-item">
+                    <label class="settings-item settings-radio-item">
                         <input type="radio" name="wb-export-scope" value="all"> <span data-i18n="export.allTabs">All tabs</span>
                         <span class="export-format-desc"><span data-i18n="export.exportEntireWorkbook">Export entire workbook</span></span>
                     </label>
@@ -817,7 +821,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                 <select id="appearance-language" class="settings-select"></select>
             </div>
 
-            <div class="appearance-row">
+            <div class="appearance-row appearance-drafts-row">
                 <label class="appearance-check">
                     <input type="checkbox" id="appearance-show-drafts">
                     <span data-i18n="appearance.showDrafts">Show translations under review</span>

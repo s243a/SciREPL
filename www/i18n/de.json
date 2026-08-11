@@ -470,7 +470,7 @@
     "app.cell.actions.languageTitle": "Programmiersprache der Zelle",
     "app.cell.actions.applyLanguageAllShort": "Alle→",
     "app.cell.actions.applyLanguageAllTitle": "Programmiersprache auf alle Codezellen anwenden",
-    "app.cell.actions.runAllBelow": "▶▶ Alle folgenden ausführen",
+    "app.cell.actions.runAllBelow": "Alle folgenden ausführen",
     "app.errors.kernelManagerUnavailable": "Der Kernel-Manager ist nicht verfügbar.",
     "app.errors.pythonKernelNotReady": "Der Python-Kernel ist nicht bereit.",
     "app.errors.failedToLoadLanguage": "{language} konnte nicht geladen werden: {message}",

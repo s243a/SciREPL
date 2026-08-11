@@ -570,7 +570,15 @@
                 const el = document.getElementById(id);
                 if (!el || typeof el.getAnimations !== 'function') continue;
                 let anims;
-                try { anims = el.getAnimations({ subtree: false }); } catch { anims = []; }
+                try {
+                    // A truly hidden modal is no longer rendered, so the browser
+                    // quite correctly exposes no active CSS animation for it.
+                    // Probe it open for one synchronous frame so hostile delayed
+                    // keyframes are still visible to the recovery guard.
+                    anims = el.classList.contains('modal') && el.classList.contains('hidden')
+                        ? this._withProbeOpen(el, () => [...el.getAnimations({ subtree: false })])
+                        : [...el.getAnimations({ subtree: false })];
+                } catch { anims = []; }
                 for (const anim of anims) {
                     // Transitions are transient and usually the app's own (a modal
                     // fading in passes through opacity 0). A transition TO a hidden
@@ -687,12 +695,10 @@
     window.appearance = appearance;
 
     /**
-     * Hidden modals keep focusable descendants — a Tab or a restored-focus
-     * target can land inside a menu the user can no longer see. `inert` removes
-     * the whole subtree from focus and the accessibility tree without touching
-     * visibility (the menu buttons carry `transition: all`, so a visibility
-     * change would animate and misbehave). Toggled from the `hidden` class on
-     * every .modal, so no individual show/hide call site has to remember.
+     * Hidden modals are removed from layout/painting by the shared `.hidden`
+     * rule. `inert` additionally removes their descendants from focus and the
+     * accessibility tree. Toggled from the class on every modal so no
+     * individual show/hide call site has to remember the accessibility state.
      */
     function syncModalInert(m) {
         const hidden = m.classList.contains('hidden');

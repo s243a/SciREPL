@@ -456,7 +456,7 @@
     "app.cell.actions.languageTitle": "セルの言語",
     "app.cell.actions.applyLanguageAllShort": "すべて→",
     "app.cell.actions.applyLanguageAllTitle": "すべてのコード セルに言語を適用",
-    "app.cell.actions.runAllBelow": "▶▶ これ以降をすべて実行",
+    "app.cell.actions.runAllBelow": "これ以降をすべて実行",
     "app.errors.kernelManagerUnavailable": "カーネル マネージャーが利用できません。",
     "app.errors.pythonKernelNotReady": "Python カーネルの準備ができていません。",
     "app.errors.failedToLoadLanguage": "{language} の読み込みに失敗しました: {message}",

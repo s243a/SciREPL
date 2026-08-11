@@ -455,7 +455,7 @@
     "app.cell.actions.languageTitle": "সেলের ভাষা",
     "app.cell.actions.applyLanguageAllShort": "সব→",
     "app.cell.actions.applyLanguageAllTitle": "সমস্ত কোড সেলে ভাষা প্রয়োগ করুন",
-    "app.cell.actions.runAllBelow": "▶▶ নিচের সব সেল রান করুন",
+    "app.cell.actions.runAllBelow": "নিচের সব সেল রান করুন",
     "app.errors.kernelManagerUnavailable": "কার্নেল ম্যানেজার উপলব্ধ নেই।",
     "app.errors.pythonKernelNotReady": "Python কার্নেল প্রস্তুত নয়।",
     "app.errors.failedToLoadLanguage": "{language} লোড করতে ব্যর্থ: {message}",

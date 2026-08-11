@@ -455,7 +455,7 @@
     "app.cell.actions.languageTitle": "Язык ячейки",
     "app.cell.actions.applyLanguageAllShort": "Все→",
     "app.cell.actions.applyLanguageAllTitle": "Применить язык ко всем ячейкам с кодом",
-    "app.cell.actions.runAllBelow": "▶▶ Выполнить все ниже",
+    "app.cell.actions.runAllBelow": "Выполнить все ниже",
     "app.errors.kernelManagerUnavailable": "Менеджер ядер недоступен.",
     "app.errors.pythonKernelNotReady": "Ядро Python не готово.",
     "app.errors.failedToLoadLanguage": "Не удалось загрузить {language}: {message}",

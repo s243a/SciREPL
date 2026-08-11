@@ -942,7 +942,11 @@ try {
         check(`[${label}] the Appearance dialog opens from a real tap`,
             await rp.evaluate(() => !document.getElementById('appearance-modal').classList.contains('hidden')));
 
-        // The custom-CSS box lives in a collapsed <details>; expand it as a user would.
+        // Custom controls are intentionally absent from layout until the user
+        // opens Customise; the CSS box then lives in a collapsed <details>.
+        await rp.locator('#appearance-customise').scrollIntoViewIfNeeded().catch(() => {});
+        await rp.click('#appearance-customise');
+        await rp.locator('#appearance-theme-editor').waitFor({ state: 'visible', timeout: TIMEOUT });
         await rp.evaluate(() => {
             const d = document.getElementById('appearance-custom-css-input').closest('details');
             if (d) d.open = true;

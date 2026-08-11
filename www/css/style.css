@@ -39,6 +39,14 @@
     box-sizing: border-box;
 }
 
+/* `hidden` is the shared state used throughout the static shell and generated
+   UI.  It must remove the subtree from layout and painting: opacity alone left
+   full-screen blurred modals, editors, sidebars and infinite animations alive
+   behind the app. */
+.hidden {
+    display: none !important;
+}
+
 html, body {
     height: 100%;
     background: var(--bg-primary);
@@ -64,8 +72,7 @@ html, body {
 }
 
 #loading-overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
+    display: none;
 }
 
 .spinner {
@@ -169,7 +176,6 @@ html, body {
     padding: calc(10px + var(--app-top-margin)) 16px 10px;
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(12px);
 }
 
 #app-header h1 {
@@ -524,19 +530,13 @@ html, body {
     align-items: center;
     justify-content: center;
     background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
     padding: 20px;
     opacity: 1;
     transition: opacity 0.3s ease;
 }
 
 .modal.hidden {
-    opacity: 0;
-    pointer-events: none;
-    /* Focus-order removal is handled with the `inert` attribute (see
-       appearance.js installModalInert), not visibility:hidden — the menu
-       buttons carry `transition: all`, which would animate a visibility change
-       and leave a just-opened modal unfocusable for the transition's duration. */
+    display: none;
 }
 
 .modal-content {
@@ -585,10 +585,16 @@ html, body {
 .modal-content h2 {
     font-size: 22px;
     margin-bottom: 20px;
-    /* Keep long translated titles clear of the absolutely positioned close
-       button. Logical padding reserves the mirrored side under RTL. */
-    padding-inline-end: 48px;
+    /* Reserve close-control space independent of a title's own bidi direction. */
+    padding-inline: 48px;
     color: var(--accent);
+}
+
+/* A draft policy deliberately keeps its authoritative title in English. Its
+   `dir=ltr` provenance must not move the reserved side away from the shell's
+   mirrored close button; the letters still form an LTR bidi run naturally. */
+#privacy-modal .modal-content h2 {
+    direction: inherit;
 }
 
 .modal-content h3 {
@@ -641,6 +647,42 @@ html, body {
     padding: 6px 0;
     font-size: 14px;
     color: var(--text-secondary);
+}
+
+/* Inline technical tokens in translated Help prose can be wider than the
+   remaining line (for example the VFS attribute list in Chinese).  The code
+   examples have their own horizontal scroller; prose should wrap locally
+   instead of making the entire dialog scroll sideways. */
+#help-modal p,
+#help-modal li {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+#help-modal p code,
+#help-modal li code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.help-action-legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.help-action-legend code {
+    flex: 0 0 auto;
+    min-width: 44px;
+    padding: 5px 8px;
+    text-align: center;
+    color: var(--accent);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
 }
 
 .modal-content kbd {
@@ -1184,6 +1226,23 @@ html, body {
     background: var(--bg-card);
 }
 
+/* A translated edit toolbar can be wider than a phone card. Let complete
+   controls move to a second row instead of squeezing every label into a tall,
+   narrow column (especially visible with Arabic action text). */
+@media (max-width: 480px) {
+    .cell-edit-actions {
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .cell-edit-actions > button,
+    .cell-edit-actions > select {
+        flex: 0 0 auto;
+        min-height: 32px;
+        white-space: nowrap;
+    }
+}
+
 .cell-run-btn {
     padding: 4px 14px;
     border: none;
@@ -1218,6 +1277,35 @@ html, body {
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.cell-run-below-icon-full,
+.cell-run-below-icon-compact {
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+.cell-run-below-icon-compact {
+    display: none;
+}
+
+.cell-run-below-btn.cell-action-icon-only {
+    min-width: 44px;
+    padding-inline: 8px;
+}
+
+.cell-run-below-btn.cell-action-icon-only .cell-run-below-icon-full,
+.cell-run-below-btn.cell-action-icon-only .cell-run-below-label {
+    display: none;
+}
+
+.cell-run-below-btn.cell-action-icon-only .cell-run-below-icon-compact {
+    display: inline;
+    font-size: 16px;
 }
 
 .cell-run-below-btn:hover {
@@ -1869,7 +1957,55 @@ tr:hover .vfs-delete-btn {
 .export-format-desc {
     font-size: 11px;
     color: var(--text-muted);
-    margin-inline-start: auto;
+}
+
+/* Export option names and their explanatory text cannot reliably share one
+   row once translated. Stack the description under the label so both wrap in
+   the space beside the radio control, in LTR and RTL layouts alike. */
+.settings-item.settings-radio-item {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    column-gap: 10px;
+    row-gap: 2px;
+    align-items: start;
+}
+
+/* Nested option groups are not direct children of .settings-list, so they do
+   not inherit its row gap. Give their heading and radio rows explicit space;
+   the old negative heading margin visibly crossed the first translated row. */
+#export-image-section,
+#export-theme-section,
+#export-pagebg-section,
+#wb-scope-section {
+    display: grid;
+    gap: 8px;
+}
+
+#export-modal .settings-section,
+#export-workbook-modal .settings-section {
+    margin-bottom: 0;
+}
+
+.settings-radio-item > input[type="radio"] {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    margin-top: 1px;
+}
+
+.settings-radio-item > span:not(.export-format-desc) {
+    grid-column: 2;
+    min-width: 0;
+    max-width: 100%;
+    justify-self: start;
+    overflow-wrap: anywhere;
+}
+
+.settings-radio-item > .export-format-desc {
+    grid-column: 2;
+    min-width: 0;
+    max-width: 100%;
+    justify-self: start;
+    overflow-wrap: anywhere;
 }
 
 #export-image-section.hidden,
@@ -1892,9 +2028,28 @@ tr:hover .vfs-delete-btn {
 }
 
 .export-modal-actions {
-    margin-top: 20px;
+    flex: 0 0 auto;
+    margin-top: 12px;
     display: flex;
     justify-content: flex-end;
+}
+
+/* Keep the title and primary action reachable on short phones and landscape.
+   Only the option list scrolls; a translated two-line radio label no longer
+   pushes the Export button below the dialog's scrollport. */
+#export-modal .modal-content,
+#export-workbook-modal .modal-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#export-modal .settings-list,
+#export-workbook-modal .settings-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-inline-end: 4px;
 }
 
 .export-action-btn {
@@ -2380,6 +2535,35 @@ body.force-mobile .vfs-delete-btn {
 .appearance-row label {
     color: var(--text-secondary);
     flex: 1;
+}
+
+/* The review opt-in has both a checkbox label and explanatory prose. Keeping
+   them as competing items in one flex row could squeeze Korean and Chinese to
+   a one-character column. Stack the two readable blocks instead. */
+.appearance-drafts-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+}
+
+.appearance-drafts-row .appearance-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    flex: none;
+    min-width: 0;
+}
+
+.appearance-drafts-row .appearance-check span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.appearance-drafts-row .appearance-help {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.5;
 }
 
 .appearance-value {

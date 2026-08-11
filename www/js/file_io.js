@@ -386,7 +386,8 @@ class FileIO {
                 if (keepRadio) keepRadio.checked = true;
                 const whiteRadio = exportModal.querySelector('input[name="export-pagebg"][value="white"]');
                 if (whiteRadio) whiteRadio.checked = true;
-                this._updateExportSections(exportModal, exportImageSection, exportThemeSection, exportPageBgSection);
+                this._updateExportSections(exportModal, exportImageSection, exportThemeSection,
+                    exportPageBgSection, exportMarginsSection);
                 exportModal.classList.remove('hidden');
             });
 

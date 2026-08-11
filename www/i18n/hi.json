@@ -455,7 +455,7 @@
     "app.cell.actions.languageTitle": "सेल की भाषा",
     "app.cell.actions.applyLanguageAllShort": "सभी→",
     "app.cell.actions.applyLanguageAllTitle": "सभी कोड सेल पर भाषा लागू करें",
-    "app.cell.actions.runAllBelow": "▶▶ नीचे के सभी सेल चलाएं",
+    "app.cell.actions.runAllBelow": "नीचे के सभी सेल चलाएं",
     "app.errors.kernelManagerUnavailable": "कर्नेल प्रबंधक उपलब्ध नहीं है।",
     "app.errors.pythonKernelNotReady": "Python कर्नेल तैयार नहीं है।",
     "app.errors.failedToLoadLanguage": "{language} लोड करने में विफल: {message}",
