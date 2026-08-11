@@ -163,7 +163,7 @@
   },
   "__literal": [
     "loading.sciRepl",
-    "help.scireplV101",
+      "help.scireplVersion",
     "wbKernel.python",
     "wbKernel.prolog",
     "wbKernel.javascript",
@@ -331,7 +331,7 @@
     "help.documentation": "Documentation",
     "help.fullDocumentationGithubReadme": "Full documentation: <a href=\"https://github.com/s243a/SciREPL#readme\" target=\"_blank\">GitHub README</a>",
     "help.version": "Version",
-    "help.scireplV101": "<strong>SciREPL v1.0.1</strong>",
+    "help.scireplVersion": "<strong>SciREPL v1.1.0</strong>",
     "help.privacy": "Privacy",
     "help.privacyPolicy": "<a href=\"#\" id=\"help-privacy-link\">Privacy Policy</a>",
     "mathPalette.solve": "solve",
