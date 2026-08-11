@@ -201,7 +201,8 @@ export default async function run() {
         && withDevtools.viaCtor !== 'object' && withDevtools.viaCtor !== 'function',
       JSON.stringify(withDevtools));
     r.log('packaged: DevTools does not widen the platform API',
-      JSON.stringify(withDevtools.api) === JSON.stringify(['getAppInfo', 'getDistributionInfo']));
+      JSON.stringify(withDevtools.api) ===
+        JSON.stringify(['getAppInfo', 'getDistributionInfo', 'setLocale']));
 
     await shell.electronApp.evaluate(({ BrowserWindow }) => {
       BrowserWindow.getAllWindows()[0].webContents.closeDevTools();

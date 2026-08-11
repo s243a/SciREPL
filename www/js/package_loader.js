@@ -123,7 +123,7 @@ class PackageLoader {
     async _loadWithManifest(manifest, fileMap) {
         const baseDir = manifest._baseDir || '';
         const nm = window.notebookManager;
-        if (!nm) throw new Error('NotebookManager not available');
+        if (!nm) throw new Error(window.t('packageLoader.notebookManagerUnavailable'));
 
         // 1. Mount supporting files to VFS
         if (manifest.files && manifest.files.length > 0) {
@@ -174,7 +174,7 @@ class PackageLoader {
         }
 
         return {
-            name: manifest.name || 'Package',
+            name: manifest.name || window.t('packageLoader.defaultPackageName'),
             notebooks: notebooks ? notebooks.length : 0,
             files: manifest.files ? manifest.files.length : 0,
             wasm_modules: manifest.wasm_modules ? manifest.wasm_modules.length : 0
@@ -186,7 +186,7 @@ class PackageLoader {
      */
     async _loadWithoutManifest(fileMap, archiveName) {
         const nm = window.notebookManager;
-        if (!nm) throw new Error('NotebookManager not available');
+        if (!nm) throw new Error(window.t('packageLoader.notebookManagerUnavailable'));
 
         // Find .ipynb files
         const ipynbFiles = [];

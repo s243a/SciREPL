@@ -226,7 +226,7 @@ class BashKernel {
      */
     async execute(code) {
         if (!this._ready || !this._shell) {
-            throw new Error('Bash kernel not initialized');
+            throw new Error(window.t('kernel.bashNotInitialized'));
         }
 
         const trimmed = code.trim();
@@ -248,14 +248,13 @@ class BashKernel {
 
         try {
             const executionPromise = this._shell.execute(resolved);
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error(
-                    `Bash execution timed out after ${timeoutMs}ms. ` +
-                    `The shell may have hit an unsupported feature (e.g. tee >(...), ` +
-                    `complex process substitution, or missing external command). ` +
-                    `Shell state may be unusable — consider calling reset().`
-                )), timeoutMs)
-            );
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => {
+                const timeoutError = new Error(window.t('bash.timeout', {
+                    milliseconds: timeoutMs,
+                }));
+                timeoutError.code = 'SCIREPL_BASH_TIMEOUT';
+                reject(timeoutError);
+            }, timeoutMs));
             const result = await Promise.race([executionPromise, timeoutPromise]);
 
             const stdout = result.stdout || '';
@@ -272,7 +271,7 @@ class BashKernel {
                 return {
                     stdout: output,
                     result: null,
-                    error: `Exit code: ${exitCode}`
+                    error: window.t('bash.exitCode', { code: exitCode })
                 };
             }
 
@@ -292,7 +291,7 @@ class BashKernel {
         } catch (err) {
             // After a timeout, the shell may still have an in-flight execute promise
             // and be in a bad state. Auto-reset so subsequent cells don't also hang.
-            const isTimeout = err.message && err.message.includes('timed out');
+            const isTimeout = err && err.code === 'SCIREPL_BASH_TIMEOUT';
             if (isTimeout) {
                 try {
                     await this.reset();

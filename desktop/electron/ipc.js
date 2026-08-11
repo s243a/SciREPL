@@ -5,9 +5,9 @@
  * no `invoke(name, ...args)` router, and no channel derived from renderer
  * input — those patterns collapse the allowlist into a single generic hole.
  *
- * Each handler validates that it received no arguments. Both Phase 0
- * operations are nullary, so any argument at all means the caller is not the
- * preload API and the call is rejected rather than tolerated.
+ * The two information operations are nullary. The only state-changing call is
+ * SET_LOCALE: it accepts exactly one locale id from a fixed bundled allowlist
+ * and delegates menu rebuilding to the host. No translated text crosses IPC.
  */
 
 const { ipcMain, app } = require('electron');
@@ -15,6 +15,7 @@ const { ipcMain, app } = require('electron');
 const CHANNELS = Object.freeze({
   APP_INFO: 'scirepl:get-app-info',
   DISTRIBUTION_INFO: 'scirepl:get-distribution-info',
+  SET_LOCALE: 'scirepl:set-locale',
 });
 
 /** Reject any call that carries arguments. */
@@ -24,15 +25,30 @@ function assertNullary(channel, args) {
   }
 }
 
+/** Validate the one narrow renderer -> host value used by native i18n. */
+function assertLocaleArgument(channel, args, supportedLocales) {
+  if (args.length !== 1 || typeof args[0] !== 'string') {
+    throw new TypeError(`${channel}: expected exactly one locale id string`);
+  }
+  if (!supportedLocales || !supportedLocales.has(args[0])) {
+    throw new RangeError(`${channel}: unsupported locale id ${JSON.stringify(args[0])}`);
+  }
+  return args[0];
+}
+
 /**
  * @param {object} options
  * @param {string} options.appVersion  version read from the repo package.json
  * @param {string} options.profile     build profile the www/ tree was configured with
+ * @param {Iterable<string>} options.supportedLocales fixed bundled locale ids
+ * @param {(locale:string) => string} options.setLocale host-side locale adapter
  */
 function registerIpcHandlers(options = {}) {
   const appVersion = options.appVersion || '0.0.0';
   const profile = options.profile || 'unknown';
   const buildInfo = options.buildInfo || null;
+  const supportedLocales = new Set(options.supportedLocales || []);
+  const setLocale = typeof options.setLocale === 'function' ? options.setLocale : null;
 
   ipcMain.handle(CHANNELS.APP_INFO, (_event, ...args) => {
     assertNullary(CHANNELS.APP_INFO, args);
@@ -69,6 +85,12 @@ function registerIpcHandlers(options = {}) {
       channel: (buildInfo && buildInfo.channel) || 'development',
     };
   });
+
+  ipcMain.handle(CHANNELS.SET_LOCALE, (_event, ...args) => {
+    const locale = assertLocaleArgument(CHANNELS.SET_LOCALE, args, supportedLocales);
+    if (!setLocale) throw new Error(`${CHANNELS.SET_LOCALE}: host locale adapter unavailable`);
+    return { locale: setLocale(locale) };
+  });
 }
 
 /** Used by tests to assert the surface has not silently grown. */
@@ -76,4 +98,10 @@ function listRegisteredChannels() {
   return Object.values(CHANNELS);
 }
 
-module.exports = { CHANNELS, registerIpcHandlers, listRegisteredChannels, assertNullary };
+module.exports = {
+  CHANNELS,
+  registerIpcHandlers,
+  listRegisteredChannels,
+  assertNullary,
+  assertLocaleArgument,
+};

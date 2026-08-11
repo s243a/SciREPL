@@ -254,6 +254,18 @@ try {
     check('the document direction is set',
         ['ltr', 'rtl'].includes(await page.evaluate(() => document.documentElement.getAttribute('dir'))));
 
+    const literalSources = await page.evaluate(() => ({
+        sharedFromEnglish: window.i18n.sharedLiteral.includes('loading.sciRepl'),
+        localeSpecific: window.i18n.literalKeys.es instanceof Set
+            && window.i18n.literalKeys.es.has('app.status.error'),
+        localeSpecificIsIndependent: !window.i18n.sharedLiteral.includes('app.status.error'),
+    }));
+    check('shared literal keys are loaded from English catalogue metadata',
+        literalSources.sharedFromEnglish, JSON.stringify(literalSources));
+    check('locale-specific literal keys are loaded from strings.__literal',
+        literalSources.localeSpecific && literalSources.localeSpecificIsIndependent,
+        JSON.stringify(literalSources));
+
     // A draft is offered, because withholding it hands an unreadable interface
     // to the people it was translated for. What it must never do is pass itself
     // off as reviewed — the completeness score cannot tell a good translation
@@ -860,18 +872,22 @@ try {
         const out = {
             current: window.i18n.current,
             lang: document.documentElement.getAttribute('lang'),
-            noticeText: notice ? notice.textContent : '',
-            enDom: window.i18n.domains['privacy.en']['privacy.translationNotice'],
+            // The host contains both the explanatory sentence and the link to
+            // the official policy. Check each translated node independently;
+            // comparing the host's combined text with only the sentence would
+            // report a false race failure whenever the link has text.
+            noticeText: notice?.querySelector('span')?.textContent || '',
+            linkText: notice?.querySelector('a')?.textContent || '',
             jaDom: window.i18n.domains['privacy.ja']['privacy.translationNotice'],
+            jaLink: window.i18n.domains['privacy.ja']['privacy.viewOfficial'],
         };
         await window.i18n.activate('en');
         return out;
     });
     check('a stale activation does not leave the wrong-language notice',
         staleNotice.current === 'ja' && staleNotice.lang === 'ja'
-        && staleNotice.noticeText === staleNotice.jaDom, JSON.stringify({
-            current: staleNotice.current, lang: staleNotice.lang,
-        }));
+        && staleNotice.noticeText === staleNotice.jaDom
+        && staleNotice.linkText === staleNotice.jaLink, JSON.stringify(staleNotice));
 
     /* ------------------------------ dialog ------------------------------ */
     console.log('\n5. Dialog');

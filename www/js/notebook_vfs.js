@@ -263,7 +263,9 @@ class NotebookVFS {
                     if (cardLabel) cardLabel.appendChild(label);
                 }
                 label.textContent = cell.name;
-                label.title = 'Cell name: ' + cell.name;
+                window.setI18nAttr(label, 'title', 'notebookVfs.cellNameTitle', {
+                    name: cell.name
+                });
             } else if (label) {
                 label.remove();
             }

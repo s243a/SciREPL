@@ -187,6 +187,7 @@
      * what makes that true — and Hebrew, Persian and Urdu get it for free.
      */
     const LRI = '\u2066';   // LEFT-TO-RIGHT ISOLATE
+    const RLI = '\u2067';   // RIGHT-TO-LEFT ISOLATE
     const PDI = '\u2069';   // POP DIRECTIONAL ISOLATE
 
     // A Latin run, including any leading punctuation and any comma-separated
@@ -197,6 +198,43 @@
     function isolateLatinRuns(text) {
         if (!text || text.indexOf(LRI) !== -1) return text;
         return text.replace(LATIN_RUN, (m) => LRI + m + PDI);
+    }
+
+    // Native alert/confirm/prompt dialogs do not inherit document.dir, and an
+    // interpolated notebook name or path is not a DOM node that the normal
+    // translation pass can isolate. Remove directional controls from dynamic
+    // values before adding our own bounded isolate; otherwise an imported name
+    // could visually spoof the remainder of a destructive confirmation.
+    const BIDI_CONTROLS = /[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g;
+    const RTL_STRONG = /[\u05D0-\u05EA\u05F0-\u05F2\u0620-\u063F\u0641-\u064A\u066E-\u066F\u0671-\u06D3\u06D5\u06EE-\u06EF\u06FA-\u06FC\u0750-\u077F\u08A0-\u08C9]/;
+
+    function stripBidiControls(value) {
+        return String(value).replace(BIDI_CONTROLS, '');
+    }
+
+    function isolateDynamicValue(value) {
+        const clean = stripBidiControls(value);
+        // Follow the first strong letter. Numeric/path-like values default to
+        // LTR; an RTL value may still contain a Latin extension, so protect its
+        // inner Latin runs before enclosing the whole value in RLI.
+        for (const char of clean) {
+            if (/[A-Za-z]/.test(char)) return LRI + clean + PDI;
+            if (RTL_STRONG.test(char)) return RLI + isolateLatinRuns(clean) + PDI;
+        }
+        return LRI + clean + PDI;
+    }
+
+    function interpolateForNative(template, vars = {}) {
+        const values = [];
+        // Private-use sentinels keep placeholder names out of the visible Latin
+        // run detector until the isolated values are restored.
+        let prepared = stripBidiControls(template).replace(/\{(\w+)\}/g, (match, name) => {
+            if (!Object.prototype.hasOwnProperty.call(vars, name)) return match;
+            const index = values.push(isolateDynamicValue(vars[name])) - 1;
+            return `\uE000${index}\uE001`;
+        });
+        prepared = isolateLatinRuns(prepared);
+        return prepared.replace(/\uE000(\d+)\uE001/g, (_match, index) => values[Number(index)]);
     }
 
     /**
@@ -236,6 +274,7 @@
     class I18n {
         constructor() {
             this.catalogues = {};      // code -> { key: string }
+            this.literalKeys = {};     // code -> Set<string>
             this.completeness = {};    // code -> 0..1
             this.current = BASE_LOCALE;
             this._ready = null;
@@ -331,6 +370,14 @@
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 this.catalogues[code] = data.strings || {};
+                // English declares literals shared by every locale at the
+                // catalogue top level. A locale's own exceptions live beside
+                // its strings as strings.__literal (the format used by the
+                // manifest builder and translation checker).
+                this.literalKeys[code] = new Set(
+                    Array.isArray(data.strings && data.strings.__literal)
+                        ? data.strings.__literal : []
+                );
                 // Carried on the catalogue so statusOf() can see it.
                 this.catalogues[code].__status = (data.__meta || {}).status;
                 // Identifiers that stay English everywhere are declared once, in
@@ -364,7 +411,10 @@
             if (!base || !target) { this.completeness[code] = 0; return; }
             if (code === BASE_LOCALE) { this.completeness[code] = 1; return; }
 
-            const literal = new Set([...(this.sharedLiteral || []), ...(target.__literal || [])]);
+            const literal = new Set([
+                ...(this.sharedLiteral || []),
+                ...(this.literalKeys[code] || []),
+            ]);
             const keys = Object.keys(base).filter((k) => !k.startsWith('__') && !literal.has(k));
             if (!keys.length) { this.completeness[code] = 1; return; }
 
@@ -401,6 +451,51 @@
                     (Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : m));
             }
             return out;
+        }
+
+        _isLiteralKey(key) {
+            return (this.sharedLiteral || []).includes(key)
+                || Boolean(this.literalKeys[this.current] && this.literalKeys[this.current].has(key));
+        }
+
+        /**
+         * Translate text for a browser-native dialog.
+         *
+         * DOM translations are directionally repaired when attached to an
+         * element. alert(), confirm(), and prompt() have no element, so they
+         * need the same protection here. Dynamic values are isolated as units
+         * and stripped of caller-supplied bidi controls.
+         */
+        nativeText(key, vars) {
+            let template;
+            if (typeof key === 'string' && key.startsWith(LEGAL_PREFIX)) {
+                template = this._legalString(key);
+            } else {
+                const cat = this.catalogues[this.current] || {};
+                const base = this.catalogues[BASE_LOCALE] || {};
+                template = cat[key];
+                if (typeof template !== 'string' || !template) template = base[key];
+            }
+            if (typeof template !== 'string') template = key;
+
+            if (document.documentElement.getAttribute('dir') !== 'rtl') {
+                return stripBidiControls(template).replace(/\{(\w+)\}/g, (match, name) =>
+                    Object.prototype.hasOwnProperty.call(vars || {}, name)
+                        ? stripBidiControls(vars[name]) : match);
+            }
+            const rendered = interpolateForNative(template, vars);
+            return this._isLiteralKey(key) ? LRI + stripBidiControls(
+                String(template).replace(/\{(\w+)\}/g, (match, name) =>
+                    Object.prototype.hasOwnProperty.call(vars || {}, name)
+                        ? stripBidiControls(vars[name]) : match)
+            ) + PDI : rendered;
+        }
+
+        /** Directionally format an already-rendered native-dialog message. */
+        nativeMessage(value) {
+            const clean = stripBidiControls(value);
+            return document.documentElement.getAttribute('dir') === 'rtl'
+                ? isolateLatinRuns(clean) : clean;
         }
 
         /**
@@ -440,6 +535,128 @@
         legalTextIsUntranslated() {
             return this.current !== BASE_LOCALE
                 && this.domainStatusOf(this.current, 'privacy') !== REVIEWED;
+        }
+
+        /**
+         * Variables used by generated UI are stored beside their translation
+         * key.  This lets applyToDom() translate an already-open panel after a
+         * locale change instead of leaving behind the language that happened to
+         * be active when the node was created.
+         */
+        _varsFromElement(el) {
+            const raw = el && el.getAttribute && el.getAttribute('data-i18n-vars');
+            if (!raw) return undefined;
+            try {
+                const value = JSON.parse(raw);
+                return value && typeof value === 'object' ? value : undefined;
+            } catch {
+                return undefined;
+            }
+        }
+
+        _storeVars(el, vars) {
+            if (!el || !el.setAttribute) return;
+            if (vars && Object.keys(vars).length) {
+                el.setAttribute('data-i18n-vars', JSON.stringify(vars));
+            } else {
+                el.removeAttribute('data-i18n-vars');
+            }
+        }
+
+        /**
+         * Apply direction to a translated unit, not to each English word.
+         *
+         * This is load-bearing for draft Arabic privacy: the authoritative
+         * English policy must remain one left-to-right paragraph while the
+         * surrounding dialog and translated notice remain right-to-left.  It
+         * also gives product names such as "Sci REPL" an explicit whole-unit
+         * escape hatch via data-i18n-dir="ltr".
+         */
+        _applyElementDirection(el, key) {
+            if (!el || !el.setAttribute) return false;
+            const rtl = document.documentElement.getAttribute('dir') === 'rtl';
+            const requested = el.getAttribute('data-i18n-dir');
+            const officialEnglish = rtl
+                && typeof key === 'string'
+                && key.startsWith(LEGAL_PREFIX)
+                && !LEGAL_CHROME.has(key)
+                && this.legalLocaleFor(key) === BASE_LOCALE;
+            const literalKey = rtl && this._isLiteralKey(key);
+            const forceLtr = requested === 'ltr' || officialEnglish || literalKey;
+
+            if (forceLtr) {
+                el.setAttribute('dir', 'ltr');
+                el.setAttribute('data-i18n-auto-dir', 'ltr');
+                if (officialEnglish) {
+                    el.setAttribute('lang', BASE_LOCALE);
+                    el.setAttribute('data-i18n-auto-lang', BASE_LOCALE);
+                } else if (el.hasAttribute('data-i18n-auto-lang')) {
+                    el.removeAttribute('lang');
+                    el.removeAttribute('data-i18n-auto-lang');
+                }
+                return true;
+            }
+
+            if (el.hasAttribute('data-i18n-auto-dir')) {
+                el.removeAttribute('dir');
+                el.removeAttribute('data-i18n-auto-dir');
+            }
+            if (el.hasAttribute('data-i18n-auto-lang')) {
+                el.removeAttribute('lang');
+                el.removeAttribute('data-i18n-auto-lang');
+            }
+            return false;
+        }
+
+        _translatedText(el, key, vars) {
+            const translated = this.t(key, vars);
+            if (translated === key) return null;
+            const wholeLtr = this._applyElementDirection(el, key);
+            const rtl = document.documentElement.getAttribute('dir') === 'rtl';
+            return rtl && !wholeLtr ? isolateLatinRuns(translated) : translated;
+        }
+
+        /** Create or update generated UI while retaining enough provenance to
+         * retranslate it on the next i18n:changed event. */
+        setText(el, key, vars) {
+            if (!el) return el;
+            el.setAttribute('data-i18n', key);
+            this._storeVars(el, vars);
+            const translated = this._translatedText(el, key, vars);
+            if (translated !== null) el.textContent = translated;
+            return el;
+        }
+
+        setHtml(el, key, vars) {
+            if (!el) return el;
+            el.setAttribute('data-i18n-html', key);
+            this._storeVars(el, vars);
+            const translated = this.t(key, vars);
+            if (translated === key) return el;
+            const wholeLtr = this._applyElementDirection(el, key);
+            el.innerHTML = sanitiseInline(translated);
+            if (document.documentElement.getAttribute('dir') === 'rtl' && !wholeLtr) {
+                const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+                const texts = [];
+                while (walker.nextNode()) texts.push(walker.currentNode);
+                for (const node of texts) node.nodeValue = isolateLatinRuns(node.nodeValue);
+            }
+            return el;
+        }
+
+        setAttr(el, attribute, key, vars) {
+            if (!el) return el;
+            const supported = new Set(['title', 'placeholder', 'aria-label']);
+            if (!supported.has(attribute)) throw new Error(`Unsupported i18n attribute: ${attribute}`);
+            el.setAttribute(`data-i18n-${attribute}`, key);
+            if (vars && Object.keys(vars).length) {
+                el.setAttribute(`data-i18n-${attribute}-vars`, JSON.stringify(vars));
+            } else {
+                el.removeAttribute(`data-i18n-${attribute}-vars`);
+            }
+            const translated = this._translatedText(el, key, vars);
+            if (translated !== null) el.setAttribute(attribute, translated);
+            return el;
         }
 
         /* --------------------------- activation -------------------------- */
@@ -489,7 +706,7 @@
             if (!host) return;
             if (this.current === BASE_LOCALE) {
                 host.hidden = true;
-                host.textContent = '';
+                host.replaceChildren();
                 return;
             }
             // Capture the locale for this call: loadDomain awaits, and a newer
@@ -498,12 +715,17 @@
             // on — otherwise a slow es activation could stamp a Spanish notice
             // over a page that is now ja.
             const forLocale = this.current;
-            const strings = await this.loadDomain(forLocale, 'privacy');
+            await this.loadDomain(forLocale, 'privacy');
             if (this.current !== forLocale) return;
-            const notice = (strings && strings['privacy.translationNotice'])
-                || 'This translation is provided for information only. '
-                   + 'The English version is the official privacy policy.';
-            host.textContent = notice;
+            const notice = document.createElement('span');
+            this.setText(notice, 'privacy.translationNotice');
+            const spacer = document.createTextNode(' ');
+            const link = document.createElement('a');
+            link.href = 'privacy.html';
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            this.setText(link, 'privacy.viewOfficial');
+            host.replaceChildren(notice, spacer, link);
             host.hidden = false;
         }
 
@@ -604,6 +826,11 @@
             await this.renderTranslationNotice();
             if (token !== this._activateToken) return;
             document.dispatchEvent(new CustomEvent('i18n:changed', { detail: { code } }));
+            // Electron owns its native application menu in the main process.
+            // Send only the selected bundled locale id across the narrow bridge;
+            // Android and the PWA simply do not expose this optional method.
+            const hostLocale = code === RTL_PREVIEW ? BASE_LOCALE : code;
+            window.sciREPLPlatform?.setLocale?.(hostLocale).catch(() => {});
         }
 
         /**
@@ -620,9 +847,8 @@
             const rtl = document.documentElement.getAttribute('dir') === 'rtl';
             for (const el of rootEl.querySelectorAll('[data-i18n]')) {
                 const key = el.getAttribute('data-i18n');
-                const translated = this.t(key);
-                if (translated === key) continue;
-                el.textContent = rtl ? isolateLatinRuns(translated) : translated;
+                const translated = this._translatedText(el, key, this._varsFromElement(el));
+                if (translated !== null) el.textContent = translated;
             }
             // Strings whose English contains inline markup — <code>%pip install</code>,
             // a <strong> emphasis, a documentation link. textContent would delete
@@ -632,12 +858,14 @@
             // and this is the one place translated data reaches innerHTML.
             for (const el of rootEl.querySelectorAll('[data-i18n-html]')) {
                 const key = el.getAttribute('data-i18n-html');
-                const translated = this.t(key);
+                const vars = this._varsFromElement(el);
+                const translated = this.t(key, vars);
                 if (translated === key) continue;
+                const wholeLtr = this._applyElementDirection(el, key);
                 el.innerHTML = sanitiseInline(translated);
                 // Text nodes only: isolating inside a tag would corrupt markup,
                 // and <code> content is already visually separated.
-                if (rtl) {
+                if (rtl && !wholeLtr) {
                     const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
                     const texts = [];
                     while (walker.nextNode()) texts.push(walker.currentNode);
@@ -652,8 +880,13 @@
             for (const [dataAttr, target] of attrs) {
                 for (const el of rootEl.querySelectorAll(`[${dataAttr}]`)) {
                     const key = el.getAttribute(dataAttr);
-                    const translated = this.t(key);
-                    if (translated !== key) el.setAttribute(target, translated);
+                    let vars;
+                    const raw = el.getAttribute(`${dataAttr}-vars`);
+                    if (raw) {
+                        try { vars = JSON.parse(raw); } catch { vars = undefined; }
+                    }
+                    const translated = this._translatedText(el, key, vars);
+                    if (translated !== null) el.setAttribute(target, translated);
                 }
             }
         }
@@ -668,6 +901,10 @@
 
     window.i18n = i18n;
     window.t = (key, vars) => i18n.t(key, vars);
+    window.tNative = (key, vars) => i18n.nativeText(key, vars);
+    window.setI18nText = (el, key, vars) => i18n.setText(el, key, vars);
+    window.setI18nHtml = (el, key, vars) => i18n.setHtml(el, key, vars);
+    window.setI18nAttr = (el, attribute, key, vars) => i18n.setAttr(el, attribute, key, vars);
 
     i18n.init().catch((e) => console.warn('[i18n] init failed:', e));
 })();

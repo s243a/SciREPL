@@ -29,7 +29,7 @@ class JavaScriptKernel {
 
     async execute(code) {
         if (!this._ready) {
-            throw new Error('JavaScript kernel not initialized');
+            throw new Error(window.t('kernel.javascriptNotInitialized'));
         }
 
         const trimmed = code.trim();

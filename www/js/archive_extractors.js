@@ -171,7 +171,7 @@ class ArchiveExtractors {
             case 'zip': return ArchiveExtractors._extractZip(file);
             case 'targz': return ArchiveExtractors._extractTarGz(file);
             case 'rar': return ArchiveExtractors._extractRar(file);
-            default: throw new Error('Unsupported archive format: ' + file.name);
+            default: throw new Error(window.t('archive.unsupportedFormat', { filename: file.name }));
         }
     }
 
@@ -180,7 +180,7 @@ class ArchiveExtractors {
      */
     static async _extractZip(file) {
         if (typeof JSZip === 'undefined') {
-            throw new Error('JSZip not loaded');
+            throw new Error(window.t('archive.jsZipNotLoaded'));
         }
         const buffer = await file.arrayBuffer();
         const zip = await JSZip.loadAsync(buffer);
@@ -209,7 +209,7 @@ class ArchiveExtractors {
      */
     static async _extractTarGz(file) {
         if (typeof pako === 'undefined') {
-            throw new Error('pako not loaded. Cannot decompress .tar.gz files.');
+            throw new Error(window.t('archive.pakoNotLoaded'));
         }
 
         const compressed = new Uint8Array(await file.arrayBuffer());
@@ -236,10 +236,10 @@ class ArchiveExtractors {
     static async _extractRar(file) {
         // Lazy-load unrar.js WASM if not already loaded
         if (typeof unrar === 'undefined' && typeof Unrar === 'undefined') {
-            throw new Error('RAR support is not yet available. Please use .zip or .tar.gz.');
+            throw new Error(window.t('archive.rarUnavailable'));
         }
 
-        throw new Error('RAR extraction not yet implemented.');
+        throw new Error(window.t('archive.rarNotImplemented'));
     }
 }
 

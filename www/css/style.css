@@ -1442,8 +1442,14 @@ html, body {
 
 .vfs-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin: 8px 0;
+}
+
+.vfs-actions > * {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .vfs-btn {
@@ -1533,13 +1539,6 @@ html, body {
     font-style: italic;
 }
 
-.vfs-not-loaded .vfs-name::after {
-    content: ' (not loaded)';
-    color: var(--text-muted);
-    font-size: 10px;
-    font-weight: 400;
-}
-
 .vfs-empty {
     color: var(--text-muted);
     font-style: italic;
@@ -1598,6 +1597,7 @@ tr:hover .vfs-delete-btn {
 
 .path-add-form {
     display: flex;
+    flex-wrap: wrap;
     gap: 6px;
     margin: 8px 0;
     align-items: center;
@@ -1605,6 +1605,8 @@ tr:hover .vfs-delete-btn {
 
 .path-input {
     flex: 1;
+    min-width: min(150px, 100%);
+    max-width: 100%;
     padding: 6px 10px;
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -1849,6 +1851,19 @@ tr:hover .vfs-delete-btn {
     display: none;
 }
 
+/* Long translated option labels must shrink inside the narrow Android modal.
+   A select's intrinsic width otherwise pushes it beyond the right edge at
+   320 CSS pixels (notably Spanish, French, Indonesian, Portuguese and Russian). */
+#export-margins-section > .settings-item {
+    min-width: 0;
+}
+
+#export-margin-type {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 100%;
+}
+
 .export-modal-actions {
     margin-top: 20px;
     display: flex;
@@ -2066,6 +2081,8 @@ tr:hover .vfs-delete-btn {
     padding: 4px 8px;
     font-size: 13px;
     margin-inline-start: auto;
+    min-width: 0;
+    max-width: 100%;
     color-scheme: dark;
 }
 .settings-select option {

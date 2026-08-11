@@ -6,10 +6,11 @@
  * safe when invoked by hostile notebook code. Operations that are not safe
  * under that assumption are simply not exposed.
  *
- * That leaves two read-only, side-effect-free operations. They carry no
- * authority: they return static build/platform facts that the application uses
- * for display and for adapter selection. Nothing here can read a file, write a
- * file, spawn a process, or reach an arbitrary IPC channel.
+ * That leaves two read-only operations plus one narrowly validated locale
+ * notification. They carry no ambient authority: the first two return static
+ * build/platform facts, and the third can only select a bundled locale for the
+ * native menu. Nothing here can read a file, write a file, spawn a process, or
+ * reach an arbitrary IPC channel.
  *
  * Deliberately NOT exposed in Phase 0, and why:
  *   - a generic `invoke`/`send` escape hatch — it would export the whole main
@@ -33,19 +34,20 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 /**
  * The complete IPC allowlist. Adding a channel here is the only way to widen
- * the surface, and each entry is invoked with no renderer-supplied arguments.
+ * the surface. The information calls are nullary; SET_LOCALE forwards only the
+ * locale id, which the main process validates against its bundled allowlist.
  */
 const CHANNELS = Object.freeze({
   APP_INFO: 'scirepl:get-app-info',
   DISTRIBUTION_INFO: 'scirepl:get-distribution-info',
+  SET_LOCALE: 'scirepl:set-locale',
 });
 
 /**
- * Both operations take zero arguments by design. There is no argument to
- * validate and therefore no argument-shaped attack surface. If a future
- * operation needs arguments, validation belongs in the main process
- * (ipc.js), never here — the preload runs in the renderer process and a
- * compromised renderer could bypass any check made on this side.
+ * Validation belongs in the main process (ipc.js), never here — the preload
+ * runs in the renderer process and a compromised renderer could bypass any
+ * check made on this side. The wrapper still deliberately drops arguments to
+ * the two read-only calls; SET_LOCALE forwards exactly its one declared value.
  */
 const api = {
   /** Static application/build identity. */
@@ -53,6 +55,9 @@ const api = {
 
   /** Which container/edition this is, for adapter selection. */
   getDistributionInfo: () => ipcRenderer.invoke(CHANNELS.DISTRIBUTION_INFO),
+
+  /** Select the matching bundled locale for Electron-native menu/dialog UI. */
+  setLocale: (localeId) => ipcRenderer.invoke(CHANNELS.SET_LOCALE, localeId),
 };
 
 contextBridge.exposeInMainWorld('sciREPLPlatform', Object.freeze(api));

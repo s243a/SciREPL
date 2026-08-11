@@ -34,6 +34,29 @@ class KernelManager {
         });
     }
 
+    _t(key, fallback, vars = {}) {
+        const translated = typeof window.t === 'function' ? window.t(key, vars) : key;
+        if (translated !== key) return translated;
+        return String(fallback).replace(/\{(\w+)\}/g, (match, name) =>
+            Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : match);
+    }
+
+    _setTranslatedText(el, key, fallback, vars = {}) {
+        if (!el) return;
+        el.textContent = this._t(key, fallback, vars);
+        if (typeof window.setI18nText === 'function') window.setI18nText(el, key, vars);
+    }
+
+    _setTranslatedHtml(el, key, fallback, vars = {}) {
+        if (!el) return;
+        // This node has a generic static data-i18n fallback in index.html; once
+        // runtime-specific markup is installed, one authoritative HTML key must
+        // own it so locale changes do not briefly apply two competing strings.
+        el.removeAttribute('data-i18n');
+        el.innerHTML = this._t(key, fallback, vars);
+        if (typeof window.setI18nHtml === 'function') window.setI18nHtml(el, key, vars);
+    }
+
     /**
      * Register a kernel class for a language.
      * @param {string} language - language id (e.g. "python", "prolog")
@@ -71,7 +94,8 @@ class KernelManager {
      */
     getKernel(language) {
         if (!this._registry[language]) {
-            throw new Error('No kernel registered for: ' + language);
+            throw new Error(this._t('kernelManager.notRegistered',
+                'No kernel registered for: {language}', { language }));
         }
         if (!this._instances[language]) {
             this._instances[language] = new this._registry[language]();
@@ -150,7 +174,8 @@ class KernelManager {
                 if (e.target === modal || e.target.classList.contains('modal-close')) {
                     cleanup();
                     modal.classList.add('hidden');
-                    reject(new Error('Privacy policy must be accepted to download runtimes from CDN'));
+                    reject(new Error(this._t('kernelManager.privacyRequired',
+                        'Privacy policy must be accepted to download runtimes from CDN')));
                 }
             };
             const cleanup = () => {
@@ -184,8 +209,11 @@ class KernelManager {
         const progressWrap = document.getElementById('runtime-progress-wrap');
         const progressText = document.getElementById('runtime-progress-text');
 
-        if (title) title.textContent = 'Download ' + info.name;
-        if (desc) desc.innerHTML = 'The <strong>' + info.name + '</strong> runtime requires a <strong>' + info.size + '</strong> download from CDN. It will be cached locally for future use.';
+        this._setTranslatedText(title, 'kernelManager.downloadTitle',
+            'Download {runtime}', { runtime: info.name });
+        this._setTranslatedHtml(desc, 'kernelManager.downloadDescription',
+            'The <strong>{runtime}</strong> runtime requires a <strong>{size}</strong> download from CDN. It will be cached locally for future use.',
+            { runtime: info.name, size: info.size });
 
         // Check if runtime is actually in the CDN cache
         let cached = false;
@@ -202,8 +230,17 @@ class KernelManager {
         if (cached || localStorage.getItem('scirepl_auto_download') === '1') {
             if (actions) actions.classList.add('hidden');
             if (progressWrap) progressWrap.classList.remove('hidden');
-            if (progressText) progressText.textContent = (cached ? 'Loading ' : 'Downloading ') + info.name + '…';
-            if (title) title.textContent = (cached ? 'Loading ' : 'Downloading ') + info.name;
+            if (cached) {
+                this._setTranslatedText(progressText, 'kernelManager.loadingRuntime',
+                    'Loading {runtime}…', { runtime: info.name });
+                this._setTranslatedText(title, 'kernelManager.loadingTitle',
+                    'Loading {runtime}', { runtime: info.name });
+            } else {
+                this._setTranslatedText(progressText, 'kernelManager.downloadingRuntime',
+                    'Downloading {runtime}…', { runtime: info.name });
+                this._setTranslatedText(title, 'kernelManager.downloadingTitle',
+                    'Downloading {runtime}', { runtime: info.name });
+            }
             // Delay showing modal — hideDownloadModal() cancels if load finishes first
             this._autoDownloadTimer = setTimeout(() => {
                 modal.classList.remove('hidden');
@@ -225,13 +262,17 @@ class KernelManager {
                 cleanup();
                 if (actions) actions.classList.add('hidden');
                 if (progressWrap) progressWrap.classList.remove('hidden');
-                if (progressText) progressText.textContent = 'Downloading ' + info.name + '...';
+                this._setTranslatedText(progressText, 'kernelManager.downloadingRuntime',
+                    'Downloading {runtime}…', { runtime: info.name });
+                this._setTranslatedText(title, 'kernelManager.downloadingTitle',
+                    'Downloading {runtime}', { runtime: info.name });
                 resolve();
             };
             const onCancel = () => {
                 cleanup();
                 modal.classList.add('hidden');
-                reject(new Error(info.name + ' download cancelled by user'));
+                reject(new Error(this._t('kernelManager.downloadCancelled',
+                    '{runtime} download cancelled by user', { runtime: info.name })));
             };
             const onDismiss = (e) => {
                 if (e.target === modal || e.target.classList.contains('modal-close')) {
@@ -255,7 +296,17 @@ class KernelManager {
      */
     updateProgress(text) {
         const el = document.getElementById('runtime-progress-text');
-        if (el) el.textContent = text;
+        if (!el) return;
+        // Kernel implementations may pass { key, fallback, vars } so the
+        // already-open modal follows a later locale change. Raw strings remain
+        // supported while older kernels migrate to that contract.
+        if (text && typeof text === 'object' && text.key) {
+            this._setTranslatedText(el, text.key, text.fallback || text.key, text.vars || {});
+        } else {
+            el.removeAttribute('data-i18n');
+            el.removeAttribute('data-i18n-vars');
+            el.textContent = String(text ?? '');
+        }
     }
 
     /**
@@ -315,7 +366,8 @@ class KernelManager {
         // Mirrors / remaining (incl. local as a last resort) from config.
         for (const s of (cfg.sources || [])) { if (s && s.url) add(s.url); }
 
-        if (!candidates.length) throw new Error('No sources configured for ' + language);
+        if (!candidates.length) throw new Error(this._t('kernelManager.noSources',
+            'No sources configured for {language}', { language }));
 
         let lastErr;
         let externalFallbackApproved = !this._prefersBundledSource(language);
@@ -334,7 +386,10 @@ class KernelManager {
                 console.warn('[KernelSource] ' + language + ' source failed: ' + url + ' — ' + (e && e.message || e));
             }
         }
-        throw new Error('All sources failed for ' + language + ': ' + (lastErr ? (lastErr.message || lastErr) : 'unknown'));
+        const error = lastErr ? (lastErr.message || lastErr) : this._t(
+            'kernelManager.unknownError', 'unknown');
+        throw new Error(this._t('kernelManager.allSourcesFailed',
+            'All sources failed for {language}: {error}', { language, error }));
     }
 
     /**
@@ -345,7 +400,10 @@ class KernelManager {
     _withTimeout(promise, ms, url) {
         let timer;
         const timeout = new Promise((_, reject) => {
-            timer = setTimeout(() => reject(new Error('source timed out after ' + ms + 'ms: ' + url)), ms);
+            timer = setTimeout(() => reject(new Error(this._t(
+                'kernelManager.sourceTimeout',
+                'Source timed out after {milliseconds}ms: {url}',
+                { milliseconds: ms, url }))), ms);
         });
         return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
     }
@@ -359,7 +417,9 @@ class KernelManager {
             const script = document.createElement('script');
             script.src = url;
             script.onload = () => resolve();
-            script.onerror = () => reject(new Error('script failed to load: ' + url));
+            script.onerror = () => reject(new Error(this._t(
+                'kernelManager.scriptLoadFailed',
+                'Script failed to load: {url}', { url })));
             document.head.appendChild(script);
         });
     }
@@ -397,7 +457,8 @@ class KernelManager {
      */
     setLanguage(language) {
         if (!this._registry[language]) {
-            throw new Error('No kernel registered for: ' + language);
+            throw new Error(this._t('kernelManager.notRegistered',
+                'No kernel registered for: {language}', { language }));
         }
         this.currentLanguage = language;
     }

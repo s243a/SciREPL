@@ -8,6 +8,27 @@ class ExportManager {
         this._docxLoaded = false;
     }
 
+    _t(key, fallback, vars = {}) {
+        const translated = typeof window.t === 'function' ? window.t(key, vars) : key;
+        if (translated !== key) return translated;
+        return String(fallback).replace(/\{(\w+)\}/g, (match, name) =>
+            Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : match);
+    }
+
+    _alert(key, fallback, vars = {}) {
+        alert(this._t(key, fallback, vars));
+    }
+
+    _exportLocale() {
+        const current = window.i18n && window.i18n.current;
+        if (current === 'en-x-rtl') return 'en';
+        return current || document.documentElement.lang || 'en';
+    }
+
+    _exportDirection() {
+        return document.documentElement.getAttribute('dir') === 'rtl' ? 'rtl' : 'ltr';
+    }
+
     /**
      * Syntax-highlight code using highlight.js if available.
      * Returns highlighted HTML string, or falls back to escaped HTML.
@@ -99,6 +120,10 @@ class ExportManager {
             .replace(/"/g, '&quot;');
     }
 
+    _escapeMarkdownAlt(str) {
+        return String(str).replace(/\\/g, '\\\\').replace(/\]/g, '\\]');
+    }
+
     _getNotebookName() {
         if (window.notebookManager) {
             try {
@@ -106,11 +131,15 @@ class ExportManager {
                 if (nb && nb.name) return nb.name;
             } catch (e) { /* ignore */ }
         }
-        return 'SciREPL Notebook';
+        return this._t('exportRuntime.defaultNotebookTitle', 'SciREPL Notebook');
     }
 
     _getTimestamp() {
-        return new Date().toLocaleString();
+        try {
+            return new Date().toLocaleString(this._exportLocale());
+        } catch (_) {
+            return new Date().toLocaleString();
+        }
     }
 
     // ── Image Helpers ──
@@ -838,6 +867,12 @@ ${theme === 'light' ? `
         const options = { theme: opts.theme || 'keep', ...opts };
         const cells = this._scrapeCells();
         const name = this._getNotebookName();
+        const outputImageAlt = this._escapeHtml(this._t(
+            'exportRuntime.outputImageAlt', 'Output image'));
+        const plotAlt = this._escapeHtml(this._t('exportRuntime.plotAlt', 'Plot'));
+        const plotUnavailable = this._escapeHtml(this._t(
+            'exportRuntime.plotScreenshotUnavailable',
+            '[Plotly chart — screenshot unavailable]'));
         const images = []; // for zip mode
         let imageCounter = 0;
 
@@ -879,11 +914,11 @@ ${theme === 'light' ? `
                             case 'image': {
                                 if (embedImages) {
                                     const imgSrc = await this._srcToDataURL(out.src);
-                                    cellsHtml += `<img src="${imgSrc}" alt="Output image">\n`;
+                                    cellsHtml += `<img src="${imgSrc}" alt="${outputImageAlt}">\n`;
                                 } else {
                                     imageCounter++;
                                     const imgName = `image_${imageCounter}.png`;
-                                    cellsHtml += `<img src="images/${imgName}" alt="Output image">\n`;
+                                    cellsHtml += `<img src="images/${imgName}" alt="${outputImageAlt}">\n`;
                                     const bytes = await this._srcToBytes(out.src);
                                     if (bytes) images.push({ name: imgName, data: bytes });
                                 }
@@ -893,11 +928,11 @@ ${theme === 'light' ? `
                                 const dataUrl = await this._plotToImage(out.element);
                                 if (dataUrl) {
                                     if (embedImages) {
-                                        cellsHtml += `<img src="${dataUrl}" alt="Plot">\n`;
+                                        cellsHtml += `<img src="${dataUrl}" alt="${plotAlt}">\n`;
                                     } else {
                                         imageCounter++;
                                         const imgName = `plot_${imageCounter}.png`;
-                                        cellsHtml += `<img src="images/${imgName}" alt="Plot">\n`;
+                                        cellsHtml += `<img src="images/${imgName}" alt="${plotAlt}">\n`;
                                         const base64 = dataUrl.split(',')[1];
                                         const binary = atob(base64);
                                         const bytes = new Uint8Array(binary.length);
@@ -905,7 +940,7 @@ ${theme === 'light' ? `
                                         images.push({ name: imgName, data: bytes });
                                     }
                                 } else {
-                                    cellsHtml += '<p style="color:var(--text-muted);font-style:italic;">[Plotly chart — screenshot unavailable]</p>\n';
+                                    cellsHtml += `<p style="color:var(--text-muted);font-style:italic;">${plotUnavailable}</p>\n`;
                                 }
                                 break;
                             }
@@ -940,8 +975,11 @@ ${theme === 'light' ? `
             // CORS or other issue reading stylesheets
         }
 
+        const timestamp = this._getTimestamp();
+        const exportedOn = this._escapeHtml(this._t('exportRuntime.exportedOn',
+            'Exported from SciREPL on {timestamp}', { timestamp }));
         const html = `<!DOCTYPE html>
-<html lang="en">
+<html lang="${this._escapeHtml(this._exportLocale())}" dir="${this._exportDirection()}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -952,7 +990,7 @@ ${katexCSS ? '<style>' + katexCSS + '</style>' : ''}
 <body>
 <header class="export-header">
 <h1>${this._escapeHtml(name)}</h1>
-<p class="export-meta">Exported from SciREPL on ${this._getTimestamp()}</p>
+<p class="export-meta">${exportedOn}</p>
 </header>
 <main class="export-cells">
 ${cellsHtml}
@@ -968,7 +1006,7 @@ ${cellsHtml}
     async exportHTML(opts = {}) {
         const cells = this._scrapeCells();
         if (cells.length === 0) {
-            alert('No cells to export.');
+            this._alert('exportRuntime.noCells', 'No cells to export.');
             return;
         }
 
@@ -986,7 +1024,8 @@ ${cellsHtml}
             const { html, images } = await this._buildHTMLString({ embedImages: false, theme, pageBg });
 
             if (typeof JSZip === 'undefined') {
-                alert('JSZip not loaded. Cannot create zip archive.');
+                this._alert('exportRuntime.jszipCannotArchive',
+                    'JSZip not loaded. Cannot create zip archive.');
                 return;
             }
 
@@ -1010,7 +1049,7 @@ ${cellsHtml}
     async exportMarkdown(opts = {}) {
         const cells = this._scrapeCells();
         if (cells.length === 0) {
-            alert('No cells to export.');
+            this._alert('exportRuntime.noCells', 'No cells to export.');
             return;
         }
 
@@ -1020,7 +1059,15 @@ ${cellsHtml}
 
         const name = this._getNotebookName();
         let md = `# ${name}\n\n`;
-        md += `*Exported from SciREPL on ${this._getTimestamp()}*\n\n---\n\n`;
+        md += `*${this._t('exportRuntime.exportedOn',
+            'Exported from SciREPL on {timestamp}', { timestamp: this._getTimestamp() })}*\n\n---\n\n`;
+        const outputHeading = this._t('exportRuntime.outputHeading', 'Output:');
+        const errorHeading = this._t('exportRuntime.errorHeading', 'Error:');
+        const outputImageAlt = this._escapeMarkdownAlt(this._t(
+            'exportRuntime.outputImageAlt', 'Output image'));
+        const plotAlt = this._escapeMarkdownAlt(this._t('exportRuntime.plotAlt', 'Plot'));
+        const interactivePlot = this._t('exportRuntime.interactivePlotlyChart',
+            '[Interactive Plotly chart]');
 
         for (const cell of cells) {
             if (cell.type === 'markdown') {
@@ -1036,10 +1083,10 @@ ${cellsHtml}
             for (const out of cell.outputs) {
                 switch (out.kind) {
                     case 'text':
-                        md += '**Output:**\n\n```\n' + out.content + '\n```\n\n';
+                        md += `**${outputHeading}**\n\n\`\`\`\n` + out.content + '\n```\n\n';
                         break;
                     case 'error':
-                        md += '**Error:**\n\n```\n' + out.content + '\n```\n\n';
+                        md += `**${errorHeading}**\n\n\`\`\`\n` + out.content + '\n```\n\n';
                         break;
                     case 'latex': {
                         const tex = this._extractTexFromKaTeX(out.element || this._parseHtmlFragment(out.html));
@@ -1057,11 +1104,11 @@ ${cellsHtml}
                     case 'image':
                         if (embedImages) {
                             const imgSrc = await this._srcToDataURL(out.src);
-                            md += `![Output image](${imgSrc})\n\n`;
+                            md += `![${outputImageAlt}](${imgSrc})\n\n`;
                         } else {
                             imageCounter++;
                             const imgName = `image_${imageCounter}.png`;
-                            md += `![Output image](images/${imgName})\n\n`;
+                            md += `![${outputImageAlt}](images/${imgName})\n\n`;
                             const bytes = await this._srcToBytes(out.src);
                             if (bytes) images.push({ name: imgName, data: bytes });
                         }
@@ -1072,17 +1119,17 @@ ${cellsHtml}
                                 const dataUrl = await Plotly.toImage(out.element, { format: 'png', width: 800, height: 500 });
                                 imageCounter++;
                                 const imgName = `plot_${imageCounter}.png`;
-                                md += `![Plot](images/${imgName})\n\n`;
+                                md += `![${plotAlt}](images/${imgName})\n\n`;
                                 const base64 = dataUrl.split(',')[1];
                                 const binary = atob(base64);
                                 const bytes = new Uint8Array(binary.length);
                                 for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
                                 images.push({ name: imgName, data: bytes });
                             } catch (_) {
-                                md += '*[Interactive Plotly chart]*\n\n';
+                                md += `*${interactivePlot}*\n\n`;
                             }
                         } else {
-                            md += '*[Interactive Plotly chart]*\n\n';
+                            md += `*${interactivePlot}*\n\n`;
                         }
                         break;
                     case 'markdown':
@@ -1099,7 +1146,8 @@ ${cellsHtml}
         if (!embedImages) {
             // Always zip when user chose "Separate files" mode
             if (typeof JSZip === 'undefined') {
-                alert('JSZip not loaded. Cannot create zip archive.');
+                this._alert('exportRuntime.jszipCannotArchive',
+                    'JSZip not loaded. Cannot create zip archive.');
                 return;
             }
             const zip = new JSZip();
@@ -1129,7 +1177,7 @@ ${cellsHtml}
     async exportPDF(opts = {}) {
         const cells = this._scrapeCells();
         if (cells.length === 0) {
-            alert('No cells to export.');
+            this._alert('exportRuntime.noCells', 'No cells to export.');
             return;
         }
 
@@ -1159,7 +1207,7 @@ ${cellsHtml}
                     await Share.share({
                         title: baseName + '.pdf',
                         url: writeResult.uri,
-                        dialogTitle: 'Save PDF'
+                        dialogTitle: this._t('exportRuntime.savePdf', 'Save PDF')
                     });
                 }
                 return;
@@ -1204,7 +1252,9 @@ ${cellsHtml}
                 this._docxLoaded = true;
                 resolve();
             };
-            script.onerror = () => reject(new Error('Failed to load docx library from CDN'));
+            script.onerror = () => reject(new Error(this._t(
+                'exportRuntime.docxLoadFailed',
+                'Failed to load DOCX library from CDN')));
             document.head.appendChild(script);
         });
     }
@@ -1212,7 +1262,7 @@ ${cellsHtml}
     async exportDOCX() {
         const cells = this._scrapeCells();
         if (cells.length === 0) {
-            alert('No cells to export.');
+            this._alert('exportRuntime.noCells', 'No cells to export.');
             return;
         }
 
@@ -1220,7 +1270,8 @@ ${cellsHtml}
         try {
             await this._loadDocxLibrary();
         } catch (e) {
-            alert('Could not load DOCX library. Check your internet connection.');
+            this._alert('exportRuntime.docxLoadHelp',
+                'Could not load DOCX library. Check your internet connection.');
             return;
         }
 
@@ -1247,7 +1298,11 @@ ${cellsHtml}
 
         // Timestamp
         children.push(new Paragraph({
-            children: [new TextRun({ text: 'Exported from SciREPL on ' + this._getTimestamp(), italics: true, size: 20, color: '656D76' })],
+            children: [new TextRun({
+                text: this._t('exportRuntime.exportedOn',
+                    'Exported from SciREPL on {timestamp}', { timestamp: this._getTimestamp() }),
+                italics: true, size: 20, color: '656D76'
+            })],
             spacing: { after: 400 }
         }));
 
@@ -1415,7 +1470,11 @@ ${cellsHtml}
                             }
                         } else {
                             children.push(new Paragraph({
-                                children: [new TextRun({ text: '[Plotly chart — screenshot unavailable]', italics: true, color: '656D76' })],
+                                children: [new TextRun({
+                                    text: this._t('exportRuntime.plotScreenshotUnavailable',
+                                        '[Plotly chart — screenshot unavailable]'),
+                                    italics: true, color: '656D76'
+                                })],
                                 spacing: { before: 100, after: 100 }
                             }));
                         }
@@ -1726,7 +1785,9 @@ ${cellsHtml}
                             const plotBytes = await this._srcToBytes(dataUrl);
                             if (plotBytes) images.push({ name: imgName, data: plotBytes });
                         } else {
-                            body += '\\textit{[Plotly chart --- screenshot unavailable]}\n\n';
+                            body += '\\textit{' + this._escapeLatex(this._t(
+                                'exportRuntime.plotScreenshotUnavailable',
+                                '[Plotly chart — screenshot unavailable]')) + '}\n\n';
                         }
                         break;
                     }
@@ -1777,7 +1838,7 @@ ${body}
     async exportLatex() {
         const cells = this._scrapeCells();
         if (cells.length === 0) {
-            alert('No cells to export.');
+            this._alert('exportRuntime.noCells', 'No cells to export.');
             return;
         }
 
@@ -1790,7 +1851,8 @@ ${body}
         } else {
             // Has images — export as .tex.zip
             if (typeof JSZip === 'undefined') {
-                alert('JSZip not loaded. Cannot create zip archive.');
+                this._alert('exportRuntime.jszipCannotArchive',
+                    'JSZip not loaded. Cannot create zip archive.');
                 return;
             }
 
@@ -1914,7 +1976,12 @@ ${body}
                         data: base64,
                         directory: 'CACHE'
                     });
-                    await Share.share({ title: filename, url: writeResult.uri, dialogTitle: 'Export ' + filename });
+                    await Share.share({
+                        title: filename,
+                        url: writeResult.uri,
+                        dialogTitle: this._t('exportRuntime.exportFile',
+                            'Export {filename}', { filename })
+                    });
                 } catch (e) {
                     console.warn('Capacitor share failed:', e);
                     this._webDownloadBlob(filename, blob);

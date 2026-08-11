@@ -16,6 +16,31 @@
     const cellTypeToggle = document.getElementById('cell-type-toggle');
     const langSelector = document.getElementById('lang-selector');
 
+    // Generated UI keeps its translation provenance on the element so an
+    // already-open editor/card is updated by i18n.applyToDom() when the user
+    // changes display language.
+    function setUiText(el, key, vars) {
+        if (el) window.setI18nText(el, key, vars);
+        return el;
+    }
+
+    function setUiAttr(el, attribute, key, vars) {
+        if (el) window.setI18nAttr(el, attribute, key, vars);
+        return el;
+    }
+
+    function setStatus(key, vars, className) {
+        setUiText(badge, key, vars);
+        if (className) badge.className = className;
+    }
+
+    function clearUiText(el) {
+        if (!el) return;
+        el.textContent = '';
+        el.removeAttribute('data-i18n');
+        el.removeAttribute('data-i18n-vars');
+    }
+
     // Cell counter on window for notebook switching
     if (window._cellCounter === undefined) {
         window._cellCounter = window.sessionManager ? window.sessionManager.session.cellCounter : 0;
@@ -68,8 +93,22 @@
         return meta ? meta.label : null;
     }
 
-    function codePlaceholder(lang) {
-        return 'Type ' + (langLabel(lang) || 'Python') + ' here…';
+    function setCodePlaceholder(lang) {
+        setUiAttr(input, 'placeholder', 'app.input.codePlaceholder', {
+            language: langLabel(lang) || 'Python'
+        });
+    }
+
+    function refreshInputBarLocalization() {
+        if (currentCellType === 'markdown') {
+            // Md is the literal Markdown abbreviation used by the cell format.
+            cellTypeToggle.textContent = 'Md';
+            cellTypeToggle.removeAttribute('data-i18n');
+            setUiAttr(input, 'placeholder', 'app.input.markdownPlaceholder');
+        } else {
+            setUiText(cellTypeToggle, 'inputControls.code');
+            setCodePlaceholder(getCurrentLanguage());
+        }
     }
 
     if (langSelector) {
@@ -82,7 +121,7 @@
             langSelector.className = lang === 'python' ? '' : lang + '-active';
             // Update placeholder
             if (currentCellType === 'code') {
-                input.placeholder = codePlaceholder(lang);
+                setCodePlaceholder(lang);
             }
         });
     }
@@ -93,13 +132,14 @@
         if (currentCellType === 'code') {
             currentCellType = 'markdown';
             cellTypeToggle.textContent = 'Md';
+            cellTypeToggle.removeAttribute('data-i18n');
             cellTypeToggle.classList.add('markdown-active');
-            input.placeholder = 'Type Markdown here… (supports $LaTeX$)';
+            setUiAttr(input, 'placeholder', 'app.input.markdownPlaceholder');
         } else {
             currentCellType = 'code';
-            cellTypeToggle.textContent = 'Code';
+            setUiText(cellTypeToggle, 'inputControls.code');
             cellTypeToggle.classList.remove('markdown-active');
-            input.placeholder = codePlaceholder(getCurrentLanguage());
+            setCodePlaceholder(getCurrentLanguage());
         }
     });
 
@@ -132,8 +172,8 @@
         }
 
         overlay.classList.add('hidden');
-        badge.textContent = 'ready';
-        badge.className = 'ready';
+        refreshInputBarLocalization();
+        setStatus('status.ready', undefined, 'ready');
         runBtn.disabled = false;
 
         // Restore saved cells
@@ -211,10 +251,10 @@
         if (sourceOnly && !indicator) {
             indicator = document.createElement('span');
             indicator.className = 'cell-mode-badge source-only-badge';
-            indicator.textContent = 'source only';
+            setUiText(indicator, 'app.cell.sourceOnly.label');
             indicator.setAttribute('role', 'note');
-            indicator.title = 'Stored for use by other cells; not executed; no output is expected.';
-            indicator.setAttribute('aria-label', indicator.title);
+            setUiAttr(indicator, 'title', 'app.cell.sourceOnly.description');
+            setUiAttr(indicator, 'aria-label', 'app.cell.sourceOnly.description');
 
             const languageBadge = inputCard.querySelector('.lang-badge');
             const promptIcon = inputCard.querySelector('.prompt-icon');
@@ -243,15 +283,20 @@
         card.draggable = true;
         card.innerHTML = `
             <div class="card-label">
-                <span class="cell-drag-handle" title="Drag to reorder">⠿</span>
+                <span class="cell-drag-handle">⠿</span>
                 <span class="prompt-icon">${typeLabel} [${cellId}]</span>${langBadge}
-                <button class="cell-move-btn cell-move-up" title="Move up">▲</button>
-                <button class="cell-move-btn cell-move-down" title="Move down">▼</button>
-                <button class="cell-edit-btn" title="Edit & re-run">✎</button>
-                <button class="cell-delete-btn" title="Delete cell">✕</button>
+                <button class="cell-move-btn cell-move-up">▲</button>
+                <button class="cell-move-btn cell-move-down">▼</button>
+                <button class="cell-edit-btn">✎</button>
+                <button class="cell-delete-btn">✕</button>
             </div>
             <pre${isMarkdown ? ' class="md-source"' : ''}>${isMarkdown ? escapeHtml(code) : '<code>' + highlightCode(code, language) + '</code>'}</pre>
         `;
+        setUiAttr(card.querySelector('.cell-drag-handle'), 'title', 'app.cell.actions.dragTitle');
+        setUiAttr(card.querySelector('.cell-move-up'), 'title', 'app.cell.actions.moveUpTitle');
+        setUiAttr(card.querySelector('.cell-move-down'), 'title', 'app.cell.actions.moveDownTitle');
+        setUiAttr(card.querySelector('.cell-edit-btn'), 'title', 'app.cell.actions.editTitle');
+        setUiAttr(card.querySelector('.cell-delete-btn'), 'title', 'app.cell.actions.deleteTitle');
         updateSourceOnlyIndicator(card, code, cellType, language || 'python');
         card.querySelector('.cell-edit-btn').addEventListener('click', (e) => {
             e.stopPropagation();
@@ -346,7 +391,7 @@
                 renameCellPrompt();
             });
 
-            promptIcon.title = 'Double-click to name this cell';
+            setUiAttr(promptIcon, 'title', 'app.cell.actions.nameTitle');
         }
 
         getRepl().appendChild(card);
@@ -448,14 +493,28 @@
             .map(l => `<option value="${l.id}"${cellLang === l.id ? ' selected' : ''}>${l.abbrev}</option>`)
             .join('');
         actions.innerHTML = `
-            <button class="cell-type-switch-btn">${cellType === 'markdown' ? 'Md' : 'Code'}</button>
-            <select class="cell-lang-switch" title="Cell language">${_langOpts}</select>
-            <button class="cell-lang-apply-all" title="Apply language to all code cells">All→</button>
-            <button class="cell-run-btn">▶ Run</button>
-            <button class="cell-run-below-btn">▶▶ Run All Below</button>
-            <button class="cell-cancel-btn">Cancel</button>
+            <button class="cell-type-switch-btn"></button>
+            <select class="cell-lang-switch">${_langOpts}</select>
+            <button class="cell-lang-apply-all"></button>
+            <button class="cell-run-btn"></button>
+            <button class="cell-run-below-btn"></button>
+            <button class="cell-cancel-btn"></button>
         `;
         inputCard.appendChild(actions);
+
+        const typeSwitch = actions.querySelector('.cell-type-switch-btn');
+        if (cellType === 'markdown') {
+            // Md is the literal Markdown abbreviation used by the cell format.
+            typeSwitch.textContent = 'Md';
+        } else {
+            setUiText(typeSwitch, 'inputControls.code');
+        }
+        setUiAttr(actions.querySelector('.cell-lang-switch'), 'title', 'app.cell.actions.languageTitle');
+        setUiText(actions.querySelector('.cell-lang-apply-all'), 'app.cell.actions.applyLanguageAllShort');
+        setUiAttr(actions.querySelector('.cell-lang-apply-all'), 'title', 'app.cell.actions.applyLanguageAllTitle');
+        setUiText(actions.querySelector('.cell-run-btn'), 'inputControls.run');
+        setUiText(actions.querySelector('.cell-run-below-btn'), 'app.cell.actions.runAllBelow');
+        setUiText(actions.querySelector('.cell-cancel-btn'), 'common.cancel');
 
         // Cell language switch
         const langSwitch = actions.querySelector('.cell-lang-switch');
@@ -492,11 +551,15 @@
         });
 
         // Type switch button
-        const typeSwitch = actions.querySelector('.cell-type-switch-btn');
         typeSwitch.addEventListener('click', () => {
             if (cell) {
                 cell.type = cell.type === 'markdown' ? 'code' : 'markdown';
-                typeSwitch.textContent = cell.type === 'markdown' ? 'Md' : 'Code';
+                if (cell.type === 'markdown') {
+                    typeSwitch.textContent = 'Md';
+                    typeSwitch.removeAttribute('data-i18n');
+                } else {
+                    setUiText(typeSwitch, 'inputControls.code');
+                }
                 typeSwitch.classList.toggle('markdown-active', cell.type === 'markdown');
                 textarea.spellcheck = cell.type === 'markdown';
                 updateSourceOnlyIndicator(inputCard, textarea.value, cell.type, langSwitch.value);
@@ -699,7 +762,7 @@
         language = language || 'python';
         const km = window.kernelManager;
 
-        if (!km) throw new Error('KernelManager not available');
+        if (!km) throw new Error(window.t('app.errors.kernelManagerUnavailable'));
 
         // Handle %pip install magic (Jupyter-compatible)
         // Run pip installs directly via pyodide first, then execute remaining code
@@ -828,7 +891,7 @@ if 'matplotlib' in sys.modules or importlib.util.find_spec('matplotlib'):
         const kernel = km.getKernel('python');
         const pyodide = kernel.getPyodide();
 
-        if (!pyodide) throw new Error('Python kernel not ready');
+        if (!pyodide) throw new Error(window.t('app.errors.pythonKernelNotReady'));
 
         // Sync SharedVFS → Pyodide before execution
         if (kernel._syncToPyodide) kernel._syncToPyodide();
@@ -881,7 +944,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                     const MAX_OUTPUT = 10000;
                     if (resultStr.length > MAX_OUTPUT) {
                         resultStr = resultStr.substring(0, MAX_OUTPUT) +
-                            '\n... (output truncated, ' + resultStr.length + ' chars total)';
+                            window.t('app.output.truncated', { length: resultStr.length });
                     }
                     if (resultStr !== 'None' && resultStr !== '') {
                         window.renderText(resultStr, false);
@@ -929,13 +992,16 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         if (!km || !km.isReady(language)) {
             // Try to init the kernel on demand
             try {
-                badge.textContent = 'loading ' + language + '…';
-                badge.className = 'running';
+                setStatus('app.status.loadingLanguage', {
+                    language: langLabel(language) || language
+                }, 'running');
                 await km.ensureReady(language);
             } catch (err) {
-                window.renderText('Failed to load ' + language + ': ' + err.message, true);
-                badge.textContent = 'ready';
-                badge.className = 'ready';
+                window.renderText(window.t('app.errors.failedToLoadLanguage', {
+                    language: langLabel(language) || language,
+                    message: err.message
+                }), true);
+                setStatus('status.ready', undefined, 'ready');
                 return;
             }
         }
@@ -955,8 +1021,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         }
 
         runBtn.disabled = true;
-        badge.textContent = 'running…';
-        badge.className = 'running';
+        setStatus('app.status.running', undefined, 'running');
         window._currentOutputCard = outputCard;
 
         // Set NotebookVFS context to this cell
@@ -991,8 +1056,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         } finally {
             // Always re-enable the cell, even if error rendering itself threw
             window._currentOutputCard = null;
-            badge.textContent = 'ready';
-            badge.className = 'ready';
+            setStatus('status.ready', undefined, 'ready');
             runBtn.disabled = false;
         }
         saveCellsToSession();
@@ -1058,8 +1122,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
             const nm = window.notebookManager;
             const activeCells = nm.restoreState();
             if (activeCells && activeCells.length > 0) {
-                badge.textContent = 'restoring…';
-                badge.className = 'running';
+                setStatus('app.status.restoring', undefined, 'running');
 
                 // Render cells for ALL notebooks (not just the active one)
                 const activeNb = nm.getActiveNotebook();
@@ -1129,8 +1192,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 // Prolog VFS restore is deferred to first Prolog cell execution
                 // (ensureReady triggers a download prompt — don't do that on reload)
 
-                badge.textContent = 'ready';
-                badge.className = 'ready';
+                setStatus('status.ready', undefined, 'ready');
                 getRepl().scrollTop = getRepl().scrollHeight;
                 return;
             }
@@ -1139,8 +1201,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         const savedCells = window.sessionManager.getSavedCells();
         if (savedCells.length === 0) return;
 
-        badge.textContent = 'restoring…';
-        badge.className = 'running';
+        setStatus('app.status.restoring', undefined, 'running');
 
         for (const saved of savedCells) {
             window._cellCounter++;
@@ -1185,8 +1246,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         window.sessionManager.session.cellCounter = window._cellCounter;
         window.sessionManager.save();
 
-        badge.textContent = 'ready';
-        badge.className = 'ready';
+        setStatus('status.ready', undefined, 'ready');
         getRepl().scrollTop = getRepl().scrollHeight;
     }
 
@@ -1262,7 +1322,9 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                     const text = Array.isArray(out.text) ? out.text.join('') : (out.text || '');
                     window.renderText(text, out.name === 'stderr');
                 } else if (otype === 'error') {
-                    const tb = Array.isArray(out.traceback) ? out.traceback.join('\n') : (out.evalue || 'Error');
+                    const tb = Array.isArray(out.traceback)
+                        ? out.traceback.join('\n')
+                        : (out.evalue || window.t('app.output.errorFallback'));
                     window.renderText(tb, true);
                 } else if (otype === 'execute_result' || otype === 'display_data') {
                     const data = out.data || {};
@@ -1346,8 +1408,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         const targetNb = nm && nm.getActiveNotebook();
         const targetId = targetNb ? targetNb.id : null;
 
-        badge.textContent = 'importing…';
-        badge.className = 'running';
+        setStatus('app.status.importing', undefined, 'running');
         runBtn.disabled = true;
 
         for (const def of cellDefs) {
@@ -1390,7 +1451,10 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                     await km.ensureReady(language);
                 } catch (err) {
                     window._currentOutputCard = outputCard;
-                    window.renderText('Failed to load ' + language + ': ' + err.message, true);
+                    window.renderText(window.t('app.errors.failedToLoadLanguage', {
+                        language: langLabel(language) || language,
+                        message: err.message
+                    }), true);
                     window._currentOutputCard = null;
                     continue;
                 }
@@ -1431,8 +1495,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
         saveCellsToSession();
         if (window.notebookManager) window.notebookManager.saveState();
-        badge.textContent = 'ready';
-        badge.className = 'ready';
+        setStatus('status.ready', undefined, 'ready');
         runBtn.disabled = false;
         getRepl().scrollTop = getRepl().scrollHeight;
     };
@@ -1452,16 +1515,18 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 // Try to init on demand
                 try {
                     runBtn.disabled = true;
-                    badge.textContent = 'loading ' + language + '…';
-                    badge.className = 'running';
+                    setStatus('app.status.loadingLanguage', {
+                        language: langLabel(language) || language
+                    }, 'running');
                     await km.ensureReady(language);
                 } catch (err) {
-                    badge.textContent = 'error';
-                    badge.className = 'error';
-                    alert('Failed to load ' + language + ': ' + err.message);
+                    setStatus('app.status.error', undefined, 'error');
+                    alert(window.t('app.errors.failedToLoadLanguage', {
+                        language: langLabel(language) || language,
+                        message: err.message
+                    }));
                     runBtn.disabled = false;
-                    badge.textContent = 'ready';
-                    badge.className = 'ready';
+                    setStatus('status.ready', undefined, 'ready');
                     return;
                 }
             }
@@ -1501,8 +1566,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
             saveCellsToSession();
         } else {
-            badge.textContent = 'running…';
-            badge.className = 'running';
+            setStatus('app.status.running', undefined, 'running');
             window._currentOutputCard = outputCard;
 
             try {
@@ -1537,8 +1601,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
             } finally {
                 // Always re-enable the input bar, even if error rendering itself threw
                 window._currentOutputCard = null;
-                badge.textContent = 'ready';
-                badge.className = 'ready';
+                setStatus('status.ready', undefined, 'ready');
                 runBtn.disabled = false;
             }
         }
@@ -1654,7 +1717,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         _searchMatches = [];
         _searchFlatMatches = [];
         _searchCurrentIdx = -1;
-        searchCount.textContent = '';
+        clearUiText(searchCount);
     }
 
     function runSearch() {
@@ -1665,7 +1728,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         _searchCurrentIdx = -1;
 
         if (!query) {
-            searchCount.textContent = '';
+            clearUiText(searchCount);
             return;
         }
 
@@ -1699,9 +1762,13 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
     function updateSearchCount() {
         if (_searchFlatMatches.length === 0) {
-            searchCount.textContent = searchInput.value ? '0 results' : '';
+            if (searchInput.value) setUiText(searchCount, 'app.search.zeroResults');
+            else clearUiText(searchCount);
         } else {
-            searchCount.textContent = `${_searchCurrentIdx + 1}/${_searchFlatMatches.length}`;
+            setUiText(searchCount, 'app.search.position', {
+                current: _searchCurrentIdx + 1,
+                total: _searchFlatMatches.length
+            });
         }
     }
 
