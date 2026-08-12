@@ -16,11 +16,12 @@
             'whatsNew.highlightOffline',
             'whatsNew.highlightDesktop',
         ]),
-        unreleased: Object.freeze([
+        '1.2.0': Object.freeze([
             'whatsNew.highlightLicenses',
             'whatsNew.highlightWhatsNew',
             'whatsNew.highlightShortcuts',
             'whatsNew.highlightRuntimeMetadata',
         ]),
+        unreleased: Object.freeze([]),
     });
 })();

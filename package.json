@@ -1,9 +1,9 @@
 {
   "name": "sci-repl",
-  "version": "1.1.0",
-  "releaseChannel": "development",
+  "version": "1.2.0",
+  "releaseChannel": "release",
   "android": {
-    "versionCode": 11
+    "versionCode": 12
   },
   "description": "Mobile Scientific REPL \u2014 Python + Pyodide + Plotly.js",
   "main": "index.js",
