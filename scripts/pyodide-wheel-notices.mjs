@@ -9,24 +9,36 @@ function sha256(buffer) {
   return createHash('sha256').update(buffer).digest('hex');
 }
 
+/**
+ * Read one entry out of a zip, closing the file descriptor before resolving.
+ *
+ * yauzl's `autoClose` only fires once every entry has been read, and this lookup
+ * deliberately stops at the entry it wants — so relying on it leaks a descriptor
+ * per wheel. POSIX lets a directory be renamed while descriptors inside it are
+ * still open, but Windows refuses with EPERM, and the staged runtime is renamed
+ * into place immediately after this validation runs.
+ */
 function readZipEntry(zipPath, wanted) {
   return new Promise((resolve, reject) => {
-    yauzl.open(zipPath, { lazyEntries: true, autoClose: true }, (openError, zip) => {
+    yauzl.open(zipPath, { lazyEntries: true, autoClose: false }, (openError, zip) => {
       if (openError) return reject(openError);
-      let found = false;
-      zip.on('error', reject);
-      zip.on('end', () => {
-        if (!found) reject(new Error(`${path.basename(zipPath)} is missing ${wanted}`));
-      });
+      let settled = false;
+      const finish = (error, value) => {
+        if (settled) return;
+        settled = true;
+        try { zip.close(); } catch { /* already closed */ }
+        if (error) reject(error); else resolve(value);
+      };
+      zip.on('error', (error) => finish(error));
+      zip.on('end', () => finish(new Error(`${path.basename(zipPath)} is missing ${wanted}`)));
       zip.on('entry', (entry) => {
         if (entry.fileName !== wanted) return zip.readEntry();
-        found = true;
         zip.openReadStream(entry, (streamError, stream) => {
-          if (streamError) return reject(streamError);
+          if (streamError) return finish(streamError);
           const chunks = [];
-          stream.on('error', reject);
+          stream.on('error', (error) => finish(error));
           stream.on('data', (chunk) => chunks.push(chunk));
-          stream.on('end', () => resolve(Buffer.concat(chunks)));
+          stream.on('end', () => finish(null, Buffer.concat(chunks)));
         });
       });
       zip.readEntry();
