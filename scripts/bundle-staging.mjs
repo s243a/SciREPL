@@ -3,8 +3,35 @@ import {
 } from 'node:fs';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
+import { setTimeout as sleep } from 'node:timers/promises';
 
 export const RUNTIME_RECEIPT = 'SCIREPL_RUNTIME_PROVENANCE.json';
+
+/**
+ * Windows refuses to rename a directory while any process still holds a handle
+ * on a file inside it, reporting EPERM/EACCES/EBUSY. On CI that is routinely
+ * the virus scanner reading the tens of megabytes of runtime we just wrote, and
+ * it clears in well under a second. POSIX has no such restriction, so this only
+ * ever bites on Windows.
+ *
+ * Retrying is the fix rather than falling back to a recursive copy: the swap has
+ * to stay atomic. A half-copied directory that already carried its completion
+ * receipt would advertise itself as a finished runtime.
+ */
+const TRANSIENT_RENAME_CODES = new Set(['EPERM', 'EACCES', 'EBUSY']);
+
+export async function renameWithRetry(from, to, options = {}) {
+  const { attempts = 12, rename = renameSync, delay = (ms) => sleep(ms) } = options;
+  for (let attempt = 0; ; attempt++) {
+    try {
+      rename(from, to);
+      return attempt + 1;
+    } catch (error) {
+      if (attempt >= attempts - 1 || !TRANSIENT_RENAME_CODES.has(error.code)) throw error;
+      await delay(Math.min(50 * 2 ** attempt, 500));
+    }
+  }
+}
 
 function sha256(file) {
   return createHash('sha256').update(readFileSync(file)).digest('hex');
@@ -103,7 +130,7 @@ export async function installStagedBundle({ dir, component, bundleSpec, build, v
 
   const stage = `${dir}.scirepl-stage`;
   const backup = `${dir}.scirepl-backup`;
-  if (!existsSync(dir) && existsSync(backup)) renameSync(backup, dir);
+  if (!existsSync(dir) && existsSync(backup)) await renameWithRetry(backup, dir);
   rmSync(stage, { recursive: true, force: true });
   rmSync(backup, { recursive: true, force: true });
   mkdirSync(stage, { recursive: true });
@@ -125,11 +152,11 @@ export async function installStagedBundle({ dir, component, bundleSpec, build, v
     // Completion receipt is intentionally the final write in the staging tree.
     writeFileSync(path.join(stage, RUNTIME_RECEIPT), JSON.stringify(receipt, null, 2) + '\n');
 
-    if (existsSync(dir)) renameSync(dir, backup);
+    if (existsSync(dir)) await renameWithRetry(dir, backup);
     try {
-      renameSync(stage, dir);
+      await renameWithRetry(stage, dir);
     } catch (error) {
-      if (!existsSync(dir) && existsSync(backup)) renameSync(backup, dir);
+      if (!existsSync(dir) && existsSync(backup)) await renameWithRetry(backup, dir);
       throw error;
     }
     try {

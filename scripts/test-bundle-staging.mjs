@@ -2,7 +2,7 @@
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { inspectCompletedBundle, installStagedBundle } from './bundle-staging.mjs';
+import { inspectCompletedBundle, installStagedBundle, renameWithRetry } from './bundle-staging.mjs';
 
 const root = mkdtempSync(path.join(tmpdir(), 'scirepl-bundle-staging-'));
 const dir = path.join(root, 'runtime');
@@ -74,6 +74,43 @@ try {
 
   writeFileSync(path.join(dir, 'runtime.js'), 'tampered');
   assert(!inspectCompletedBundle(dir, v2, recipeA).current, 'inventory hash detects stale or tampered files');
+
+  // Windows reports EPERM/EACCES/EBUSY when a scanner still holds a handle on a
+  // file inside the directory being renamed, which broke promotion on CI. The
+  // retry has to outlast that without masking a genuine failure.
+  const transient = (code, failures) => {
+    let calls = 0;
+    return {
+      rename: () => {
+        calls++;
+        if (calls <= failures) { const e = new Error(code); e.code = code; throw e; }
+      },
+      calls: () => calls,
+    };
+  };
+
+  for (const code of ['EPERM', 'EACCES', 'EBUSY']) {
+    const fake = transient(code, 2);
+    const tries = await renameWithRetry('from', 'to', { rename: fake.rename, delay: () => {} });
+    assert(tries === 3 && fake.calls() === 3, `a transient ${code} rename is retried until it succeeds`);
+  }
+
+  const persistent = transient('EPERM', Infinity);
+  let gaveUp = null;
+  try {
+    await renameWithRetry('from', 'to', { rename: persistent.rename, attempts: 4, delay: () => {} });
+  } catch (error) { gaveUp = error; }
+  assert(gaveUp?.code === 'EPERM' && persistent.calls() === 4,
+    'a rename that never succeeds still fails, after the bounded number of attempts');
+
+  const fatal = transient('ENOENT', Infinity);
+  let surfaced = null;
+  try {
+    await renameWithRetry('from', 'to', { rename: fatal.rename, delay: () => {} });
+  } catch (error) { surfaced = error; }
+  assert(surfaced?.code === 'ENOENT' && fatal.calls() === 1,
+    'a non-transient rename error surfaces immediately rather than being retried');
+
   console.log(`bundle staging: ${passed} assertions passed`);
 } finally {
   rmSync(root, { recursive: true, force: true });
