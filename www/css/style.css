@@ -2322,6 +2322,21 @@ tr:hover .vfs-delete-btn {
     max-width: 100%;
 }
 
+.kernel-version-input,
+.kernel-source-input {
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 8px;
+    color-scheme: dark;
+}
+
+.kernel-runtime-status-line {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
 .kernel-version-controls .vfs-btn,
 .kernel-latest-actions .vfs-btn {
     flex: 0 1 auto;
@@ -2629,6 +2644,11 @@ body.force-mobile .vfs-delete-btn {
     --green: #1a7f37;
     --orange: #9a6700;
     --red: #cf222e;
+}
+
+:root[data-theme="light"] .kernel-version-input,
+:root[data-theme="light"] .kernel-source-input {
+    color-scheme: light;
 }
 
 /* The header title is a gradient clipped to the text; on light backgrounds the

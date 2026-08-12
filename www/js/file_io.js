@@ -2295,8 +2295,11 @@ class FileIO {
             this._setText(loadedSourceNode, 'fileIo.runtimeLoadedSource',
                 'Loaded source: {source}', { source: loaded.source });
         } else {
-            this._setText(loadedVersionNode, 'fileIo.runtimeNotLoaded', 'Not loaded this session');
-            this._setText(loadedSourceNode, 'fileIo.runtimeNotLoaded', 'Not loaded this session');
+            const notLoaded = this._t('fileIo.runtimeNotLoaded', 'Not loaded this session');
+            this._setText(loadedVersionNode, 'fileIo.runtimeLoadedVersion',
+                'Loaded version: {version}', { version: notLoaded });
+            this._setText(loadedSourceNode, 'fileIo.runtimeLoadedSource',
+                'Loaded source: {source}', { source: notLoaded });
         }
 
         const reset = wrap.querySelector('[data-runtime-use-tested]');

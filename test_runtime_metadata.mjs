@@ -82,9 +82,9 @@ try {
     assert(await page.evaluate(() => !window.kernelManager._instances.r
         && !window.kernelManager._instances.prolog),
         'metadata lookup must not download or initialize either runtime');
-    assert((await page.textContent(`${r} [data-runtime-loaded-version]`)).includes('Not loaded')
-        && (await page.textContent(`${r} [data-runtime-loaded-source]`)).includes('Not loaded'),
-        'fresh session must not claim a runtime version or source was loaded');
+    assert((await page.textContent(`${r} [data-runtime-loaded-version]`)).includes('Loaded version: Not loaded')
+        && (await page.textContent(`${r} [data-runtime-loaded-source]`)).includes('Loaded source: Not loaded'),
+        'fresh session must label version and source separately without claiming either was loaded');
 
     const failedInitState = await page.evaluate(async () => {
         const language = '__runtime_init_failure__';
