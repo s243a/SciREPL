@@ -223,6 +223,11 @@
         await restoreSession();
 
         input.focus();
+        // Startup consumers such as What's New must wait until restoration and
+        // the app's own focus hand-off are complete, or a modal opened on a
+        // timer can have focus stolen back into the editor behind it.
+        window.__SCIREPL_APP_READY = true;
+        document.dispatchEvent(new CustomEvent('scirepl:app-ready'));
     }
 
     // ---- Markdown rendering ----

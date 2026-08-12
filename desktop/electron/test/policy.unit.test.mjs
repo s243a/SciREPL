@@ -301,20 +301,17 @@ export default async function run() {
   }
   r.log('CSP does not allow plaintext http: origins', !/\bhttp:\/\//.test(csp));
 
-  /* ---------------- known, deliberate PWA divergence ---------------- */
+  /* ---------------- ordinary support links stay external ------------- */
 
-  // www/index.html:407 loads the Ko-fi widget from storage.ko-fi.com. It is
-  // excluded from the allowlist on purpose (a third-party script would get
-  // arbitrary execution in the realm that runs notebooks). These assertions
-  // exist so the omission stays a decision: allowing the origin, or dropping
-  // the documented exclusion, fails here and forces the choice to be re-made.
-  const kofi = protocol.KOFI_EXCLUSION;
-  r.log('the Ko-fi divergence is documented in the shell',
-    !!kofi && kofi.origin === 'https://storage.ko-fi.com', JSON.stringify(kofi));
-  r.log('storage.ko-fi.com is not in the remote allowlist',
+  // Help uses a plain HTTPS link to Ko-fi. It needs no renderer request
+  // origin or script-src exception: security.js sends target=_blank links to
+  // the system browser. Keep the retired widget origin out of both policies.
+  r.log('the retired Ko-fi widget origin is not in the remote allowlist',
     !protocol.REMOTE_ORIGINS.includes('https://storage.ko-fi.com'));
-  r.log('the CSP does not permit the Ko-fi widget origin',
-    !csp.includes('ko-fi.com'));
+  r.log('the CSP does not permit the retired Ko-fi widget origin',
+    !csp.includes('storage.ko-fi.com'));
+  r.log('HTTPS support links are allowed to open in the system browser',
+    security.isAllowedExternal('https://ko-fi.com/V7V51TYA76'));
   // Documented, deliberate relaxations — asserted so that removing them later
   // is a conscious decision rather than an accident.
   r.log("CSP allows 'unsafe-eval' (required by the JS/Scittle/Pyodide kernels)",

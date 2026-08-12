@@ -47,6 +47,8 @@ async function installWorker(routeOverride, opts = {}) {
     await context.addInitScript(() => {
         localStorage.setItem('scirepl_privacy_accepted', '1');
         localStorage.setItem('scirepl_onboarding_seen', '1');
+        addEventListener('DOMContentLoaded', () => localStorage.setItem(
+            'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
         localStorage.setItem('scirepl_auto_download', '1');
     });
     const page = await context.newPage();
@@ -149,6 +151,8 @@ try {
         await context.addInitScript(() => {
             localStorage.setItem('scirepl_privacy_accepted', '1');
             localStorage.setItem('scirepl_onboarding_seen', '1');
+            addEventListener('DOMContentLoaded', () => localStorage.setItem(
+                'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
             localStorage.setItem('scirepl_auto_download', '1');
         });
         const page = await context.newPage();
@@ -252,6 +256,8 @@ try {
         await ctx.addInitScript(() => {
             localStorage.setItem('scirepl_privacy_accepted', '1');
             localStorage.setItem('scirepl_onboarding_seen', '1');
+            addEventListener('DOMContentLoaded', () => localStorage.setItem(
+                'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
             const sw = navigator.serviceWorker;
             const real = sw.register.bind(sw);
             // Persist in localStorage so it survives the app's controllerchange reload.
@@ -338,6 +344,8 @@ try {
         await ctx.addInitScript(() => {
             localStorage.setItem('scirepl_privacy_accepted', '1');
             localStorage.setItem('scirepl_onboarding_seen', '1');
+            addEventListener('DOMContentLoaded', () => localStorage.setItem(
+                'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
             const sw = navigator.serviceWorker, real = sw.register.bind(sw);
             // No-op until a target is set, so the app's own sw.js does not create
             // a parallel lineage on the first load.
@@ -419,6 +427,8 @@ try {
         await ctx.addInitScript(() => {
             localStorage.setItem('scirepl_privacy_accepted', '1');
             localStorage.setItem('scirepl_onboarding_seen', '1');
+            addEventListener('DOMContentLoaded', () => localStorage.setItem(
+                'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
             const sw = navigator.serviceWorker, real = sw.register.bind(sw);
             sw.register = (u, o) => {
                 const t = localStorage.getItem('__swTarget');
@@ -473,6 +483,8 @@ try {
         await ctx.addInitScript(() => {
             localStorage.setItem('scirepl_privacy_accepted', '1');
             localStorage.setItem('scirepl_onboarding_seen', '1');
+            addEventListener('DOMContentLoaded', () => localStorage.setItem(
+                'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
             const sw = navigator.serviceWorker, real = sw.register.bind(sw);
             sw.register = (u, o) => {
                 const t = localStorage.getItem('__swTarget');
@@ -528,6 +540,173 @@ try {
             }
         } finally {
             for (const v of ['p1', 'p2']) rmSync(`www/sw-${v}.js`, { force: true });
+            await ctx.close();
+        }
+    }
+
+    console.log('\n8. Runtime CDN cache keeps only immutable exact versions');
+
+    {
+        const ctx = await browser.newContext();
+        await ctx.addInitScript(() => {
+            localStorage.setItem('scirepl_privacy_accepted', '1');
+            localStorage.setItem('scirepl_privacy_accepted_revision',
+                '2026-08-runtime-metadata-v1');
+            localStorage.setItem('scirepl_onboarding_seen', '1');
+            addEventListener('DOMContentLoaded', () => localStorage.setItem(
+                'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
+        });
+        const urls = {
+            swiplPinned: 'https://swi-prolog.github.io/npm-swipl-wasm/3/8/2/dynamic-import.js',
+            swiplLatest: 'https://swi-prolog.github.io/npm-swipl-wasm/3/latest/dynamic-import.js',
+            webrPinned: 'https://webr.r-wasm.org/v0.6.0/webr.mjs',
+            webrLatest: 'https://webr.r-wasm.org/latest/webr.mjs',
+            npmPinned: 'https://cdn.jsdelivr.net/npm/webr@0.6.0/dist/webr.mjs',
+            npmQuery: 'https://cdn.jsdelivr.net/npm/webr@0.6.0/dist/webr.mjs?mutable=1',
+            unpkgPinned: 'https://unpkg.com/fengari-web@0.1.4/dist/fengari-web.js',
+            malformedPinned: 'https://webr.r-wasm.org/v0.6.0/%ZZ-runtime',
+            packagesIndex: 'https://webr.r-wasm.org/v0.6.0/R/wasm32-unknown-emscripten/contrib/4.5/PACKAGES.gz',
+            optionalHead200: 'https://webr.r-wasm.org/v0.6.0/vfs/optional-present',
+            optionalHead404: 'https://webr.r-wasm.org/v0.6.0/vfs/optional-missing',
+            optionalGet404: 'https://webr.r-wasm.org/v0.6.0/vfs/get-missing',
+        };
+        const networkCounts = new Map();
+        const handler = async (route) => {
+            const request = route.request();
+            const url = request.url();
+            networkCounts.set(`${request.method()} ${url}`,
+                (networkCounts.get(`${request.method()} ${url}`) || 0) + 1);
+            const missing = url === urls.optionalHead404 || url === urls.optionalGet404;
+            const luaFixture = url === urls.unpkgPinned;
+            await route.fulfill({
+                status: missing ? 404 : 200,
+                headers: {
+                    'access-control-allow-origin': '*',
+                    'content-type': luaFixture ? 'application/javascript' : 'text/plain',
+                },
+                body: request.method() === 'HEAD' ? '' : luaFixture
+                    ? 'window.__scireplLuaFixtureLoads = (window.__scireplLuaFixtureLoads || 0) + 1;'
+                    : `network:${url}`,
+            });
+        };
+        await ctx.route('https://swi-prolog.github.io/**', handler);
+        await ctx.route('https://webr.r-wasm.org/**', handler);
+        await ctx.route('https://cdn.jsdelivr.net/**', handler);
+        await ctx.route('https://unpkg.com/**', handler);
+        const pg = await ctx.newPage();
+        try {
+            await pg.goto(`${ORIGIN}/index.html`, { waitUntil: 'load', timeout: TIMEOUT });
+            await pg.evaluate(() => navigator.serviceWorker.ready);
+            if (!(await pg.evaluate(() => !!navigator.serviceWorker.controller))) {
+                await pg.reload({ waitUntil: 'load', timeout: TIMEOUT });
+            }
+            await pg.waitForFunction(() => !!navigator.serviceWorker.controller);
+
+            const online = await pg.evaluate(async (u) => {
+                const result = {};
+                for (const key of ['swiplPinned', 'swiplLatest', 'webrPinned', 'webrLatest',
+                    'npmPinned', 'npmQuery', 'malformedPinned', 'packagesIndex',
+                    'optionalGet404']) {
+                    result[key] = (await fetch(u[key])).status;
+                }
+                result.optionalHead200 = (await fetch(u.optionalHead200, { method: 'HEAD' })).status;
+                result.optionalHead404 = (await fetch(u.optionalHead404, { method: 'HEAD' })).status;
+                const cache = await caches.open('scirepl-cdn-v3');
+                await cache.delete(u.unpkgPinned);
+                result.luaCachedBeforeScript = Boolean(await cache.match(u.unpkgPinned));
+                const nativeCreateElement = document.createElement;
+                document.createElement = (tag, options) => {
+                    const node = nativeCreateElement.call(document, tag, options);
+                    if (String(tag).toLowerCase() === 'script') {
+                        const originalSetAttribute = node.setAttribute.bind(node);
+                        node.setAttribute = (name, value) => originalSetAttribute(name, value);
+                        window.__scireplLastRuntimeScript = node;
+                    }
+                    return node;
+                };
+                await window.kernelManager.loadKernelSource('lua', u.unpkgPinned,
+                    (url) => window.kernelManager._loadScript(url));
+                document.createElement = nativeCreateElement;
+                result.luaCrossOrigin = window.__scireplLastRuntimeScript?.crossOrigin || '';
+                result.luaScriptLoads = window.__scireplLuaFixtureLoads || 0;
+                result.luaCachedAfterScript = Boolean(await cache.match(u.unpkgPinned));
+                result.luaReceipt = await window.kernelManager.markRuntimeCacheComplete('lua');
+                result.luaComplete = await window.kernelManager._hasCompleteCachedRuntime('lua');
+                window.kernelManager._commitRuntimeSource('lua');
+                return result;
+            }, urls);
+            check('online immutable/mutable fixture requests completed',
+                online.swiplPinned === 200 && online.optionalGet404 === 404
+                && online.optionalHead404 === 404, JSON.stringify(online));
+            check('Lua uses a CORS-visible classic-script request',
+                online.luaCrossOrigin === 'anonymous'
+                && online.luaCachedBeforeScript === false
+                && online.luaCachedAfterScript === true,
+                JSON.stringify({ crossOrigin: online.luaCrossOrigin,
+                    before: online.luaCachedBeforeScript, after: online.luaCachedAfterScript }));
+            check('Lua script load writes and validates an exact-version completion receipt',
+                online.luaScriptLoads === 1
+                && online.luaReceipt === true && online.luaComplete === true,
+                JSON.stringify({ loads: online.luaScriptLoads,
+                    receipt: online.luaReceipt, complete: online.luaComplete }));
+
+            const cached = await pg.evaluate(async () => {
+                const cache = await caches.open('scirepl-cdn-v3');
+                return (await cache.keys()).map((request) => request.url);
+            });
+            for (const key of ['swiplPinned', 'webrPinned', 'npmPinned', 'unpkgPinned',
+                'malformedPinned', 'optionalGet404']) {
+                check(`exact-version runtime is cached: ${key}`, cached.includes(urls[key]));
+            }
+            for (const key of ['swiplLatest', 'webrLatest', 'npmQuery', 'packagesIndex']) {
+                check(`mutable runtime request is not cached: ${key}`, !cached.includes(urls[key]));
+            }
+            check('immutable HEAD probes are represented by method-specific markers',
+                cached.filter((url) => url.includes('/__scirepl_runtime_probes__/')).length === 2,
+                cached.filter((url) => url.includes('/__scirepl_runtime_probes__/')).join(', '));
+
+            const luaNetworkBeforeOffline = networkCounts.get(`GET ${urls.unpkgPinned}`) || 0;
+            await ctx.setOffline(true);
+            const offline = await pg.evaluate(async (u) => {
+                const result = {};
+                for (const [key, init] of [
+                    ['swiplPinned', {}],
+                    ['optionalGet404', {}],
+                    ['optionalHead200', { method: 'HEAD' }],
+                    ['optionalHead404', { method: 'HEAD' }],
+                ]) {
+                    try { result[key] = (await fetch(u[key], init)).status; }
+                    catch (_) { result[key] = 'failed'; }
+                }
+                try {
+                    await window.kernelManager._loadScript(u.unpkgPinned);
+                    result.luaScript = 'loaded';
+                    result.luaLoads = window.__scireplLuaFixtureLoads;
+                    result.luaComplete = await window.kernelManager._hasCompleteCachedRuntime('lua');
+                } catch (_) {
+                    result.luaScript = 'failed';
+                }
+                return result;
+            }, urls);
+            check('pinned GET runtime asset is served offline', offline.swiplPinned === 200,
+                JSON.stringify(offline));
+            check('pinned GET 404 remains an honest offline 404', offline.optionalGet404 === 404,
+                JSON.stringify(offline));
+            check('webR immutable HEAD 200 probe is served offline', offline.optionalHead200 === 200,
+                JSON.stringify(offline));
+            check('webR immutable HEAD 404 probe is served offline', offline.optionalHead404 === 404,
+                JSON.stringify(offline));
+            check('cached Lua classic script executes offline with its receipt intact',
+                offline.luaScript === 'loaded'
+                && offline.luaLoads === online.luaScriptLoads + 1
+                && offline.luaComplete === true,
+                JSON.stringify({ onlineLoads: online.luaScriptLoads, ...offline }));
+            check('offline Lua script load makes no second network handoff',
+                (networkCounts.get(`GET ${urls.unpkgPinned}`) || 0) === luaNetworkBeforeOffline,
+                `${luaNetworkBeforeOffline} -> ${networkCounts.get(`GET ${urls.unpkgPinned}`) || 0}`);
+            await ctx.setOffline(false);
+        } finally {
+            await ctx.setOffline(false).catch(() => {});
             await ctx.close();
         }
     }

@@ -4,12 +4,11 @@
  *
  * Picks a profile (BUILD_PROFILE env var, or first CLI arg, or the file's
  * "default"), then emits the runtime config the app reads at load time:
- *   window.KERNEL_CONFIG = { profile, languages: { <lang>: {enabled, runtime, timeoutMs, sources} } }
+ *   window.KERNEL_CONFIG = { app, profile, languages: { <lang>: {enabled, runtime, timeoutMs, sources} } }
  *
- * `enabled` reflects the chosen profile's language set; `timeoutMs`/`sources`
- * come from the stable per-language metadata. Bundling of swipl/pyodide is
- * deferred — a profile's `bundle` list is reported but not yet acted on (no
- * vendor copy / SW precache injection happens here yet).
+ * `enabled`/timeouts come from the chosen profile; component versions and
+ * sources come from third-party-components.json. fetch-bundles.mjs acts on a
+ * profile's `bundle` list after this configuration step.
  *
  * Usage:
  *   node scripts/configure-build.mjs            # uses default profile
@@ -20,10 +19,12 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { loadComponentManifest, resolvedRuntime } from './component-manifest.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const PROFILES_PATH = join(ROOT, 'build-profiles.json');
+const PACKAGE_PATH = join(ROOT, 'package.json');
 const OUTPUT_PATH = join(ROOT, 'www', 'js', 'kernel_config.js');
 
 function fail(msg) {
@@ -32,6 +33,8 @@ function fail(msg) {
 }
 
 const spec = JSON.parse(readFileSync(PROFILES_PATH, 'utf8'));
+const pkg = JSON.parse(readFileSync(PACKAGE_PATH, 'utf8'));
+const { manifest: components, byId: componentsById } = loadComponentManifest(ROOT);
 const profileName = process.env.BUILD_PROFILE || process.argv[2] || spec.default;
 
 const profile = spec.profiles && spec.profiles[profileName];
@@ -45,12 +48,31 @@ const bundleSet = new Set(profile.bundle || []);
 // Build the languages map: every known language, with enabled set by the profile.
 const langs = {};
 for (const [name, meta] of Object.entries(spec.languages)) {
+  const expectedComponent = components.runtimeComponents?.[name];
+  const componentId = meta.component || expectedComponent;
+  if (meta.component && expectedComponent && meta.component !== expectedComponent) {
+    fail(`language '${name}' maps to '${meta.component}' in build-profiles.json but ` +
+      `third-party-components.json maps it to '${expectedComponent}'`);
+  }
+  const component = componentId ? componentsById.get(componentId) : null;
+  if (componentId && !component) fail(`language '${name}' references unknown component '${componentId}'`);
+  const resolved = component ? resolvedRuntime(component, pkg) : { sources: [] };
   const entry = {
     enabled: enabledSet.has(name),
     runtime: meta.runtime || 'cdn',
     timeoutMs: meta.timeoutMs || 0,
-    sources: (meta.sources || []).slice(),
+    sources: [...resolved.sources, ...(meta.sources || [])],
   };
+  if (component) {
+    entry.component = component.id;
+    entry.version = resolved.version;
+    if (resolved.versionTag) entry.versionTag = resolved.versionTag;
+    if (resolved.versionSelector) entry.versionSelector = resolved.versionSelector;
+    if (resolved.underlyingVersion) entry.underlyingVersion = resolved.underlyingVersion;
+    if (resolved.baseUrl) entry.baseUrl = resolved.baseUrl;
+    if (resolved.overrideUrlTemplate) entry.overrideUrlTemplate = resolved.overrideUrlTemplate;
+    if (resolved.versionMetadata) entry.versionMetadata = resolved.versionMetadata;
+  }
   // If this profile bundles the language, prepend a local source and mark it
   // preferred so the runtime tries the bundled copy first (offline-capable,
   // CDN as fallback). The asset is fetched by scripts/fetch-bundles.mjs.
@@ -66,13 +88,44 @@ for (const name of enabledSet) {
   if (!spec.languages[name]) fail(`profile '${profileName}' enables unknown language '${name}'`);
 }
 
-const config = { profile: profileName, languages: langs };
+// Browser UI, Capacitor and Electron all consume this generated metadata. The
+// package version is therefore the single release-version source rather than
+// being copied into each modal and release URL by hand.
+const appVersion = String(pkg.version || '0.0.0');
+const releaseChannel = String(pkg.releaseChannel || 'development');
+if (!['development', 'release'].includes(releaseChannel)) {
+  fail(`package.json releaseChannel must be 'development' or 'release', got '${releaseChannel}'`);
+}
+const config = {
+  app: {
+    name: components.app.name,
+    version: appVersion,
+    releaseChannel,
+    // The releases index remains valid while a draft tag is being prepared and
+    // if a platform build briefly gets ahead of the public GitHub release.
+    releaseUrl: components.app.releasesUrl,
+    repository: components.app.repository,
+    releasesUrl: components.app.releasesUrl,
+  },
+  profile: profileName,
+  components: Object.fromEntries(components.components.map((component) => {
+    const resolved = resolvedRuntime(component, pkg);
+    return [component.id, {
+      version: resolved.version,
+      licenseExpression: component.licenseExpression,
+      sourceUrl: component.sourceUrl,
+      delivery: component.delivery,
+      sources: resolved.sources,
+    }];
+  })),
+  languages: langs,
+};
 
 const banner =
 `/**
  * kernel_config.js — AUTO-GENERATED by scripts/configure-build.mjs.
  *
- * Do NOT edit by hand. Edit build-profiles.json and re-run:
+ * Do NOT edit by hand. Edit build-profiles.json or third-party-components.json and re-run:
  *   node scripts/configure-build.mjs [profile]
  *   BUILD_PROFILE=mini node scripts/configure-build.mjs
  *

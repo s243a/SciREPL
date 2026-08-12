@@ -19,6 +19,8 @@
         theme: 'scirepl_appearance_theme',
         customTheme: 'scirepl_appearance_custom_theme',
         customCss: 'scirepl_appearance_custom_css',
+        showTourShortcut: 'scirepl_appearance_show_tour_shortcut',
+        showFormulaShortcut: 'scirepl_appearance_show_formula_shortcut',
         // CSS that was rolled back for hiding the way out of Appearance. Kept
         // rather than deleted: it is the user's work and may be one typo away
         // from what they wanted.
@@ -109,6 +111,15 @@
             return localStorage.getItem(KEYS.customCss) || '';
         }
 
+        /** Header shortcuts are opt-out: existing and new installs see both. */
+        getShowTourShortcut() {
+            return localStorage.getItem(KEYS.showTourShortcut) !== '0';
+        }
+
+        getShowFormulaShortcut() {
+            return localStorage.getItem(KEYS.showFormulaShortcut) !== '0';
+        }
+
         /* ---------------------------- writing ---------------------------- */
 
         /** @param {number|null} px null (or '') restores auto. */
@@ -132,6 +143,16 @@
 
         setCustomCss(css) {
             localStorage.setItem(KEYS.customCss, css || '');
+            this.apply();
+        }
+
+        setShowTourShortcut(show) {
+            localStorage.setItem(KEYS.showTourShortcut, show ? '1' : '0');
+            this.apply();
+        }
+
+        setShowFormulaShortcut(show) {
+            localStorage.setItem(KEYS.showFormulaShortcut, show ? '1' : '0');
             this.apply();
         }
 
@@ -255,6 +276,10 @@
             // --- button scale ---
             root.style.setProperty('--ui-btn-scale', String(this.getButtonScale()));
 
+            // --- optional header shortcuts ---
+            this._showHeaderShortcut('tour-shortcut-btn', this.getShowTourShortcut());
+            this._showHeaderShortcut('math-mode-btn', this.getShowFormulaShortcut());
+
             // --- theme ---
             const theme = this.safeMode() ? DEFAULT_THEME : this.getTheme();
             const custom = theme === 'custom' ? this.getCustomTheme() : null;
@@ -279,6 +304,22 @@
 
             this._applyCustomCss();
             this._watchSystemTheme(theme === 'auto');
+        }
+
+        _showHeaderShortcut(id, show) {
+            const button = document.getElementById(id);
+            if (!button) return;
+            button.classList.toggle('header-shortcut-hidden', !show);
+            button.setAttribute('aria-hidden', show ? 'false' : 'true');
+            button.tabIndex = show ? 0 : -1;
+            // Formula's header button is also the palette's toggle/close
+            // control. If it is hidden while the palette is open, close the
+            // palette first so no floating UI is left without its control.
+            if (id === 'math-mode-btn' && !show) {
+                button.classList.remove('active');
+                const palette = document.getElementById('math-palette');
+                if (palette) palette.classList.add('hidden');
+            }
         }
 
         /**

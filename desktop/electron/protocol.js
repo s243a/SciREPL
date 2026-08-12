@@ -85,13 +85,9 @@ const MIME = {
  * These cover the runtime/package supply chain — the kernel CDNs in
  * build-profiles.json and the release/package hosts in www/js/package_catalog.js.
  *
- * This is an ALLOWLIST, not an inventory of everything www/index.html happens to
- * reference. One origin present in the PWA is deliberately absent:
- *
- *   https://storage.ko-fi.com  — the Ko-fi support widget (www/index.html:407)
- *
- * See KOFI_EXCLUSION below for why, and desktop/electron/test/security.test.mjs
- * for the test that keeps the omission deliberate rather than accidental.
+ * This is an ALLOWLIST for network requests, not for ordinary external links.
+ * Links such as the Ko-fi support link do not load inside the renderer: the
+ * navigation policy hands approved HTTPS links to the system browser.
  */
 const REMOTE_ORIGINS = [
   'https://cdn.jsdelivr.net',      // Pyodide, Scittle, swipl-wasm
@@ -106,40 +102,6 @@ const REMOTE_ORIGINS = [
   'https://pypi.org',              // micropip
   'https://files.pythonhosted.org',// micropip wheels
 ];
-
-/**
- * A known, deliberate divergence from the PWA.
- *
- * `www/index.html:407` loads the Ko-fi support widget as a third-party script
- * from `https://storage.ko-fi.com`. It is NOT in REMOTE_ORIGINS, so the CSP
- * blocks it and the support button does not appear in the shell. The widget is
- * already guarded by `if (typeof kofiwidget2 !== 'undefined')`, so blocking it
- * degrades silently: nothing throws and no other Help content is affected.
- *
- * Why it is excluded rather than allowed:
- *
- *   - It is a third-party script with no role in running notebooks. Adding it to
- *     `script-src` grants an external host arbitrary script execution inside the
- *     same realm that runs user notebooks and holds all IndexedDB state. The
- *     supply-chain cost is out of proportion to a donate button.
- *   - The CSP's whole value here is being restrictive about origins; widening it
- *     for a non-functional widget spends exactly the property worth keeping.
- *
- * This is a divergence, not a fix. The right resolution is a shared change —
- * replace the widget with a plain `target="_blank"` link to the Ko-fi page,
- * which works identically in the PWA, on Android and here, and needs no CSP
- * exception at all. That belongs in a follow-up because it touches `www/`,
- * which this Phase 0 spike deliberately does not modify.
- *
- * Exported so the test suite can assert the exclusion stays intentional.
- */
-const KOFI_EXCLUSION = Object.freeze({
-  origin: 'https://storage.ko-fi.com',
-  site: 'www/index.html:407',
-  effect: 'the Ko-fi support button does not render in the Electron shell',
-  degradesSilently: true,
-  resolution: 'replace the widget with a plain external link in a shared follow-up change',
-});
 
 /**
  * Content-Security-Policy for the application origin.
@@ -298,7 +260,6 @@ module.exports = {
   START_URL,
   MIME,
   REMOTE_ORIGINS,
-  KOFI_EXCLUSION,
   buildCsp,
   registerScheme,
   registerProtocolHandler,

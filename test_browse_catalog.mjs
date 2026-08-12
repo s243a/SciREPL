@@ -2,6 +2,7 @@
 import { chromium } from 'playwright';
 
 const TIMEOUT = 180_000;
+const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
 
 (async () => {
     const browser = await chromium.launch({ headless: true });
@@ -29,6 +30,8 @@ const TIMEOUT = 180_000;
                 sessionStorage.setItem('catalog_test_seeded', '1');
                 localStorage.setItem('scirepl_privacy_accepted', '1');
                 localStorage.setItem('scirepl_onboarding_seen', '1');
+                addEventListener('DOMContentLoaded', () => localStorage.setItem(
+                    'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
                 localStorage.setItem('scirepl_installed_packages', JSON.stringify([{
                     name: 'UnifyWeaver SciREPL',
                     pages_url: 'packages/unifyweaver_scirepl.zip'
@@ -36,7 +39,7 @@ const TIMEOUT = 180_000;
             }
         });
 
-        await page.goto('http://localhost:8085/', { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+        await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
 
 
         // ── Test: Menu button text ──

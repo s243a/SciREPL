@@ -28,11 +28,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Component licences and release metadata
+        run: npm run licenses:check && npm run release:check
+
       - name: Configure build
         run: npm run configure
 
       - name: Fetch bundled runtimes
         run: npm run fetch:bundles
+
+      - name: Verify completed bundle inventories and wheel notices
+        run: npm run verify:bundles
 
       - name: Install Playwright browsers
         run: npx playwright install chromium
@@ -50,6 +56,10 @@ jobs:
 
       - name: i18n — catalogue lint
         run: node scripts/check-translations.mjs
+
+      - name: Privacy policy — public and in-app disclosures agree
+        run: npm run privacy:check
+
       - name: Service worker — shell version guard
         run: node scripts/check-sw-shell.mjs
 
@@ -69,11 +79,17 @@ jobs:
       - name: Onboarding tour
         run: node test_onboarding.mjs
 
+      - name: What's New and header shortcuts
+        run: node test_whats_new.mjs
+
       - name: Right-to-left layout
         run: node test_rtl_layout.mjs
 
       - name: Generated and dynamic localization
         run: node test_i18n_dynamic.mjs
+
+      - name: Runtime provenance and version controls
+        run: npm run test:runtime-metadata
 
       - name: Service worker offline and upgrade coherence
         run: node test_sw_offline.mjs
@@ -101,8 +117,10 @@ jobs:
         with:
           node-version: '22'
       - run: npm install
+      - run: npm run licenses:check && npm run release:check
       - run: npm run configure
       - run: npm run fetch:bundles
+      - run: npm run verify:bundles
       - run: npx playwright install chromium
       - name: PWA offline/release regression
         run: node test_pwa_release.mjs

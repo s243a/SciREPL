@@ -1245,18 +1245,35 @@ ${cellsHtml}
     async _loadDocxLibrary() {
         if (this._docxLoaded && window.docx) return;
 
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/docx@9.6.0/dist/index.iife.js';
-            script.onload = () => {
-                this._docxLoaded = true;
-                resolve();
-            };
-            script.onerror = () => reject(new Error(this._t(
+        const sources = window.KERNEL_CONFIG?.components?.docx?.sources || [];
+        const candidates = sources.filter((item) => item?.type === 'cdn' && item.url);
+        if (!candidates.length) {
+            throw new Error(this._t(
                 'exportRuntime.docxLoadFailed',
-                'Failed to load DOCX library from CDN')));
-            document.head.appendChild(script);
-        });
+                'Failed to load DOCX library from CDN'));
+        }
+
+        for (const source of candidates) {
+            try {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = source.url;
+                    script.onload = resolve;
+                    script.onerror = () => {
+                        script.remove();
+                        reject(new Error('DOCX source failed: ' + source.url));
+                    };
+                    document.head.appendChild(script);
+                });
+                this._docxLoaded = true;
+                return;
+            } catch (error) {
+                console.warn('[Export] ' + error.message);
+            }
+        }
+        throw new Error(this._t(
+            'exportRuntime.docxLoadFailed',
+            'Failed to load DOCX library from CDN'));
     }
 
     async exportDOCX() {

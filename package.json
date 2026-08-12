@@ -1,32 +1,42 @@
 {
   "name": "sci-repl",
   "version": "1.1.0",
+  "releaseChannel": "development",
+  "android": {
+    "versionCode": 11
+  },
   "description": "Mobile Scientific REPL \u2014 Python + Pyodide + Plotly.js",
   "main": "index.js",
   "scripts": {
     "serve": "node server.js",
     "configure": "node scripts/configure-build.mjs",
     "fetch:bundles": "node scripts/fetch-bundles.mjs",
-    "test:sources": "node scripts/test-kernel-sources.mjs",
-    "sync": "npm run configure && npm run fetch:bundles && npx cap sync",
+    "test:sources": "node scripts/test-kernel-sources.mjs && node scripts/test-bundle-staging.mjs",
+    "verify:bundles": "node scripts/verify-bundled-runtimes.mjs",
+    "test:runtime-metadata": "node test_runtime_metadata.mjs",
+    "sync": "npm run licenses:check && npm run configure && npm run fetch:bundles && npx cap sync",
     "build": "npm run build:debug",
-    "build:debug": "npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew assembleDebug",
-    "build:release:aab": "npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew bundleRelease",
-    "build:release:apk": "npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew assembleRelease",
+    "build:debug": "npm run licenses:check && npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew assembleDebug",
+    "build:release:aab": "npm run licenses:check && npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew bundleRelease",
+    "build:release:apk": "npm run licenses:check && npm run configure && npm run fetch:bundles && npx cap sync && cd android && ./gradlew assembleRelease",
     "build:play": "npm run build:release:aab",
     "windows:install": "npm --prefix desktop/electron install && node desktop/electron/node_modules/electron/install.js",
-    "dev:windows": "node desktop/electron/scripts/dev-windows.mjs",
-    "setup:windows": "node desktop/electron/scripts/dev-windows.mjs --skip-launch",
-    "package:windows": "node desktop/electron/packaging/build-portable.mjs",
+    "dev:windows": "npm run licenses:check && node desktop/electron/scripts/dev-windows.mjs",
+    "setup:windows": "npm run licenses:check && node desktop/electron/scripts/dev-windows.mjs --skip-launch",
+    "package:windows": "npm run licenses:check && npm run configure && node desktop/electron/packaging/build-portable.mjs",
     "test:windows": "node desktop/electron/test/run-all.mjs",
     "test:windows:unit": "node desktop/electron/test/run-all.mjs --unit",
     "i18n:manifest": "node scripts/build-i18n-manifest.mjs",
-    "i18n:check": "node scripts/build-i18n-manifest.mjs --check && node scripts/check-i18n-html-ids.mjs && node scripts/check-i18n-keys.mjs && node scripts/check-translations.mjs",
+    "i18n:check": "node scripts/build-i18n-manifest.mjs --check && node scripts/check-i18n-html-ids.mjs && node scripts/check-i18n-keys.mjs && node scripts/check-translations.mjs && npm run privacy:check",
     "i18n:lint": "node scripts/check-translations.mjs",
     "i18n:html-ids": "node scripts/check-i18n-html-ids.mjs",
     "i18n:keys": "node scripts/check-i18n-keys.mjs",
+    "privacy:check": "node scripts/check-privacy-policy-sync.mjs",
     "sw:check": "node scripts/check-sw-shell.mjs",
-    "sw:lock": "node scripts/check-sw-shell.mjs --write"
+    "sw:lock": "node scripts/check-sw-shell.mjs --write",
+    "licenses:generate": "node scripts/generate-third-party-notices.mjs",
+    "licenses:check": "node scripts/generate-third-party-notices.mjs --check",
+    "release:check": "node scripts/check-release-version.mjs"
   },
   "keywords": [
     "python",
@@ -50,6 +60,7 @@
     "playwright": "^1.58.2"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.4.5"
+    "@capacitor/cli": "^7.4.5",
+    "yauzl": "2.10.0"
   }
 }

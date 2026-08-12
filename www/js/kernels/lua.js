@@ -13,6 +13,13 @@ class LuaKernel {
 
     static displayName = 'Lua';
 
+    static primaryUrl() {
+        const sources = window.KERNEL_CONFIG?.languages?.lua?.sources || [];
+        const source = sources.find((item) => item?.type === 'cdn' && item.url);
+        if (!source) throw new Error('Lua runtime source is missing from generated kernel_config.js');
+        return source.url;
+    }
+
     async init() {
         if (this._ready) return;
 
@@ -22,7 +29,7 @@ class LuaKernel {
             if (km) {
                 km.updateProgress(window.t('runtime.luaDownloading'));
             }
-            const primary = 'https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js';
+            const primary = LuaKernel.primaryUrl();
             if (km && km.loadKernelSource) {
                 await km.loadKernelSource('lua', primary, (url) => km._loadScript(url));
             } else {
@@ -73,6 +80,9 @@ class LuaKernel {
         this._ready = true;
 
         if (window.kernelManager) {
+            if (window.kernelManager.markRuntimeCacheComplete) {
+                await window.kernelManager.markRuntimeCacheComplete('lua');
+            }
             window.kernelManager.hideDownloadModal();
         }
     }

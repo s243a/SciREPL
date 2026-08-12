@@ -1,0 +1,5 @@
+# Preserve upstream licence/notice bytes verbatim, including historically
+# significant trailing spaces. The generated offline page embeds those exact
+# texts, so exempt it from source-code whitespace diagnostics as well.
+third_party/licenses/** -whitespace
+www/open-source-licenses.html -whitespace

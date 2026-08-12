@@ -1,6 +1,6 @@
 # SciREPL — Mobile Multi-Language Scientific REPL
 
-A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, with Jupyter-style notebook features. Supports **Python** (Pyodide), **R** (webR), **Prolog** (swipl-wasm), **Bash** (brush-wasm), and **JavaScript** (native).
+A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, with Jupyter-style notebook features. Supports **Python** (Pyodide), **R** (webR), **Prolog** (swipl-wasm), **Bash** (brush-wasm), **JavaScript** (native), **Lua** (Fengari), **TypR**, and **ClojureScript** (Scittle).
 
 ![Status](https://img.shields.io/badge/status-beta-green) ![License](https://img.shields.io/badge/license-MIT-blue)
 
@@ -8,7 +8,7 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 
 - **Multi-language notebooks** — Python, R, Prolog, Bash, and JavaScript in the same notebook, with per-cell language tracking
 - **Offline Python** via Pyodide (WASM) — NumPy + SymPy preloaded, `%pip install` for PyPI packages
-- **SWI-Prolog kernel** — Full SWI-Prolog via swipl-wasm, loaded on demand from CDN
+- **SWI-Prolog kernel** — Full SWI-Prolog via bundled swipl-wasm, available offline in the standard Free release
 - **Bash kernel** — Unix shell via brush-wasm with coreutils, findutils, grep (all Rust reimplementations)
 - **JavaScript kernel** — Native browser JS execution with zero download. Direct access to WASM modules, SharedVFS, and browser APIs
 - **Lua kernel** — Lua via Fengari, with `nb.read()`, `nb.write()`, `nb.list()`, and `nb.name()` access to notebook cells
@@ -236,12 +236,17 @@ KernelManager (kernel_manager.js)
 ├── BashKernel       (kernels/bash.js)         — brush-wasm (coreutils + findutils + grep)
 ├── JavaScriptKernel (kernels/javascript.js)   — native browser JS (zero download)
 ├── RKernel          (kernels/r.js)            — webR (lazy-loaded ~50MB, plotting, SharedVFS, install.packages)
+├── LuaKernel        (kernels/lua.js)          — Fengari + notebook cell access
+├── ClojureScriptKernel (kernels/clojurescript.js) — bundled Scittle
 └── TypRKernel       (kernels/typr.js)         — typr-wasm (2.5MB) → R transpilation → webR execution
 ```
 
 Each kernel implements: `init()`, `execute(code)`, `isReady()`, `getName()`, `getLanguage()`, `destroy()`
 
-Kernels are **lazy-loaded** — only downloaded when first used. Privacy consent and download confirmation are shown before any CDN download. JavaScript and Bash are instant (no CDN required).
+Kernels are **lazy-initialized** when first used. The standard Free profile
+loads its bundled runtimes locally; R and Lua require the network on first use.
+Privacy consent and download confirmation are shown before a runtime CDN
+download. JavaScript and Bash initialize without a CDN request.
 
 ### SharedVFS + Package System
 
@@ -298,13 +303,22 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - `@capacitor/filesystem` — Write export files to device storage
 - `@capacitor/share` — Native share sheet for file export
 
-### CDN Dependencies (loaded at runtime)
+### Optional network-loaded components
 
-| Runtime | CDN | Size | When loaded |
-|---------|-----|------|-------------|
-| Pyodide | cdn.jsdelivr.net | ~25MB | First Python cell execution |
-| swipl-wasm | SWI-Prolog.github.io | ~10MB | First Prolog cell execution |
-| webR | webr.r-wasm.org | ~50MB | First R cell execution |
+The standard Free release bundles Python/Pyodide, SWI-Prolog, ClojureScript,
+Bash, TypR, JavaScript, and the application interface. These components may
+still use the network when notebook code explicitly installs packages or fetches
+data. The following optional components are downloaded only when requested:
+
+| Component | Source | Approximate size | When loaded |
+|-----------|--------|------------------|-------------|
+| webR | webr.r-wasm.org (with exact-version mirrors where configured) | ~50MB | First R cell execution |
+| Fengari | cdn.jsdelivr.net or unpkg.com | ~200KB | First Lua cell execution |
+| DOCX export library | cdn.jsdelivr.net | varies | First DOCX export |
+
+Runtime-version metadata is checked separately through jsDelivr only after the
+current network privacy policy has been accepted. A version check does not
+download or activate the runtime.
 
 ## Roadmap
 
@@ -386,12 +400,14 @@ node test_help_vfs_examples.mjs
 
 #### WSL2 Memory Requirements
 
-CDN kernels (Python/Pyodide, R/webR, Prolog/SWI-WASM) compile large WebAssembly modules in-browser. This requires significant memory:
+Large WebAssembly kernels (Python/Pyodide, R/webR, Prolog/SWI-WASM) compile
+inside the browser regardless of whether their assets came from the app bundle
+or a CDN. This requires significant memory:
 
 | Component | Memory Usage |
 |-----------|-------------|
 | Chromium (headless) | ~200–400 MB resident |
-| Pyodide WASM compilation | ~3–4 GB peak (50 MB download → JIT compile) |
+| Pyodide WASM compilation | ~3–4 GB peak (bundled runtime and standard library → JIT compile) |
 | webR WASM compilation | ~1–2 GB peak |
 | SWI-Prolog WASM compilation | ~500 MB–1 GB peak |
 | Node.js (Playwright host) | ~100–200 MB |
@@ -437,6 +453,13 @@ This pattern is used in `test_help_vfs_examples.mjs` for all CDN kernel interact
 ## License
 
 MIT License — see [LICENSE](LICENSE)
+
+Third-party components retain their own licences. See
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the generated direct/grouped
+inventory, exact tested runtime versions, sources, and local licence-text links.
+The same notices are available offline from **Help → Open-source licences** in
+the app. This inventory is intentionally not described as a complete transitive
+SBOM; packages installed later by a user retain their own licences.
 
 ## Credits
 

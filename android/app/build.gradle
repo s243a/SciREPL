@@ -1,6 +1,18 @@
 import java.util.Properties
+import groovy.json.JsonSlurper
 
 apply plugin: 'com.android.application'
+
+// package.json is the release identity shared by the PWA, Capacitor/Android
+// and Electron. Keeping Android's monotonically increasing Play version code
+// beside it means a release bump has one source rather than two files that can
+// silently disagree.
+def packageMetadata = new JsonSlurper().parse(rootProject.file('../package.json'))
+def appVersionName = packageMetadata.version?.toString()
+def appVersionCode = packageMetadata.android?.versionCode
+if (!appVersionName || !(appVersionCode instanceof Number) || appVersionCode.intValue() < 1) {
+    throw new GradleException('package.json must define version and android.versionCode')
+}
 
 def releaseSigningPropertiesFile = rootProject.file("release-signing.properties")
 def releaseSigningProperties = new Properties()
@@ -54,8 +66,8 @@ android {
         applicationId "com.unifyweaver.scirepl"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 11
-        versionName "1.1.0"
+        versionCode appVersionCode.intValue()
+        versionName appVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -76,7 +88,8 @@ android {
 
 configurations.all {
     exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
-    // Force older androidx.browser to stay compatible with compileSdk 35 / AGP 8.7
+    // Force older androidx.browser to stay compatible with the project's
+    // pinned Android Gradle plugin while compiling against API 36.
     resolutionStrategy {
         force 'androidx.browser:browser:1.8.0'
     }

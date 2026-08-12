@@ -520,6 +520,13 @@ html, body {
     transform: scale(1.1);
 }
 
+/* Appearance can hide optional shortcuts without deleting their feature or
+   preference; either shortcut can be restored from Appearance. `!important`
+   wins over `.icon-btn`'s flex display and user-agent handling of `hidden`. */
+.header-shortcut-hidden {
+    display: none !important;
+}
+
 /* ===== Modal ===== */
 
 .modal {
@@ -1378,7 +1385,12 @@ html, body {
     /* Keep the controls at their chosen size, and let them wrap onto a second
        row rather than overflow when the buttons are scaled up on a narrow
        screen. */
-    flex-shrink: 0;
+    /* The group itself may shrink so flex-wrap gets a real line width on a
+       narrow phone. Individual icon buttons remain flex:0 0 auto above, so
+       shrinking the group wraps them instead of crushing their touch targets. */
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: calc(100% - 64px);
     flex-wrap: wrap;
     justify-content: flex-end;
 }
@@ -2256,6 +2268,116 @@ tr:hover .vfs-delete-btn {
     width: 18px;
     height: 18px;
 }
+
+/* Runtime controls in Languages must remain usable on a 320px phone and in
+   RTL. The toggle keeps readable space while version controls wrap below it;
+   generated status values may be long custom URLs, so every layer can shrink
+   and wrap instead of widening the dialog. */
+#languages-list,
+#languages-list .settings-item {
+    min-width: 0;
+}
+
+#languages-list .settings-item {
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.language-toggle-label {
+    display: flex;
+    flex: 1 1 9rem;
+    align-items: center;
+    min-width: 8rem;
+    gap: 6px;
+}
+
+.language-toggle-label > input {
+    flex: 0 0 auto;
+}
+
+.kernel-version-wrap {
+    display: flex;
+    flex: 1 1 20rem;
+    flex-direction: column;
+    gap: 0.35em;
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.kernel-version-controls,
+.kernel-latest-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35em;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.kernel-version-input {
+    box-sizing: border-box;
+    flex: 1 1 8em;
+    width: 8em;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.kernel-version-controls .vfs-btn,
+.kernel-latest-actions .vfs-btn {
+    flex: 0 1 auto;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.kernel-source-details,
+.kernel-source-label,
+.kernel-source-input,
+.kernel-runtime-status-line,
+.kernel-source-warning {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.kernel-source-details > summary,
+.kernel-runtime-status-line,
+.kernel-source-warning {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.kernel-source-details > summary {
+    cursor: pointer;
+}
+
+.kernel-source-details.is-disabled > summary {
+  cursor: default;
+}
+
+.kernel-source-warning {
+    display: block;
+    margin-block: 0.25em;
+}
+
+.kernel-source-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+    margin-block-start: 0.35em;
+}
+
+.kernel-source-input {
+    width: 100%;
+}
+
+@media (max-width: 480px) {
+    .language-runtime-item .language-toggle-label,
+    .language-runtime-item .kernel-version-wrap {
+        flex-basis: 100%;
+    }
+}
+
 .settings-select {
     background: var(--bg-card);
     color: var(--text-primary);
@@ -2566,6 +2688,16 @@ body.force-mobile .vfs-delete-btn {
     line-height: 1.5;
 }
 
+.appearance-shortcut-row {
+    padding-block: 6px;
+}
+
+.appearance-shortcut-row .appearance-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .appearance-value {
     color: var(--text-muted);
     font-family: var(--font-mono);
@@ -2682,6 +2814,88 @@ body.force-mobile .vfs-delete-btn {
 
 .tour-language select {
     width: 100%;
+}
+
+.tour-language-shortcut {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 10px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* ===== What's new ===== */
+
+.whats-new-content {
+    width: min(520px, 100%);
+}
+
+.whats-new-language {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 2px 36px 14px 0;
+}
+
+[dir="rtl"] .whats-new-language {
+    margin: 2px 0 14px 36px;
+}
+
+.whats-new-language label {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.whats-new-language select {
+    min-width: min(220px, 55%);
+}
+
+.whats-new-version {
+    color: var(--accent);
+    font-size: 12px !important;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 5px !important;
+}
+
+.whats-new-highlights {
+    display: grid;
+    gap: 9px;
+    margin-block: 14px 18px !important;
+}
+
+.whats-new-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.whats-new-actions a.vfs-btn {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+@media (max-width: 420px) {
+    .whats-new-language {
+        align-items: stretch;
+        flex-direction: column;
+        margin-inline-end: 36px;
+    }
+    .whats-new-language select {
+        min-width: 0;
+        width: 100%;
+    }
+    .whats-new-actions > * {
+        justify-content: center;
+        width: 100%;
+    }
 }
 
 /* Illustration used when the real control does not exist yet — an empty

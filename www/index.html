@@ -70,6 +70,7 @@
         <div class="header-right">
             <button data-i18n-title="notebookSelector.findNotebookTitle" id="search-btn" class="icon-btn" title="Find in notebook">🔍</button>
             <button data-i18n-title="notebookSelector.mathModeTitle" id="math-mode-btn" class="icon-btn" title="Math Mode">∑</button>
+            <button data-i18n-title="header.takeTourTitle" id="tour-shortcut-btn" class="icon-btn" title="Take the tour">🧭</button>
             <button data-i18n-title="menu.title" id="menu-btn" class="icon-btn" title="Menu">☰</button>
             <button data-i18n-title="tour.help.title" id="help-btn" class="icon-btn" title="Help">?</button>
             <span id="status-badge" data-i18n="status.loading">loading…</span>
@@ -94,6 +95,9 @@
             <h2 data-i18n="help.scireplHelp">SciREPL Help</h2>
 
             <p><button id="btn-show-tour" class="vfs-btn" data-i18n="help.showTour">Show the tour again</button></p>
+            <p><button id="btn-show-whats-new" class="vfs-btn" data-i18n="help.showWhatsNew">What’s new in this version</button></p>
+            <p data-i18n="help.headerShortcuts">Header shortcuts: the 🧭 Tour and ∑ Formula buttons are shown by default. Hide or restore either under Appearance → Header shortcuts.</p>
+            <p><a class="vfs-btn" href="open-source-licenses.html" data-i18n="help.openSourceLicenses">Open-source licences</a></p>
 
             <h3 data-i18n="help.quickStartPython">Quick Start — Python</h3>
             <pre><code># Basic math
@@ -388,7 +392,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
 
             <h3 data-i18n="help.languageSettings">Language Settings</h3>
             <p data-i18n-html="help.openMenuLanguagesShowHide">Open <strong>Menu → Languages</strong> to show or hide languages in the cell dropdown. Unchecking a language removes it from the selector but doesn't unload its runtime. All languages are enabled by default. Your preferences are saved across sessions.</p>
-            <p data-i18n-html="help.runtimeVersions"><strong>Runtime versions:</strong> Languages loaded from CDN (R, Prolog) have a version field on the Languages page. Leave it blank to use the pinned default (recommended), enter a tag like <code>v0.5.4</code> to use a specific version, or enter <code>latest</code> for the rolling release. The rolling release can occasionally serve mismatched files (e.g. <code>ASM_CONSTS[code] is not a function</code>) — if that happens, switch to the pinned default and clear the SciREPL cache.</p>
+            <p data-i18n-html="help.runtimeVersions"><strong>Runtime versions:</strong> R and Prolog show the tested default, latest available, current selection, and successfully loaded session source separately. Leave the version and source fields blank to use the exact tested default. R accepts a webR tag such as <code>v0.5.4</code>; <code>latest</code> is rolling and unverified. Prolog accepts a compatible npm-swipl-wasm selector such as <code>3/8/2</code>; its global <code>latest</code> is an incompatible package line and is rejected, so use <strong>Check latest</strong> for the newest compatible 3.x release. Changes require a reload.</p>
 
             <h3 data-i18n="help.keyboardShortcuts">Keyboard Shortcuts</h3>
             <ul>
@@ -403,20 +407,34 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             </p>
 
             <h3 data-i18n="help.version">Version</h3>
-            <p data-i18n-html="help.scireplVersion"><strong>SciREPL v1.1.0</strong></p>
+            <p id="help-app-version" data-i18n-html="help.scireplVersion"><strong>SciREPL</strong></p>
             <p data-i18n="help.includesFeatureList">Includes: Multi-language (Python, R, Prolog, Bash, JavaScript, Lua), editable cells, markdown cells, session persistence with auto-save and crash recovery, Math Mode palette, .ipynb import/export with output preservation, .srwb workbook format, rich export (HTML, Markdown, PDF, DOCX with native equations, LaTeX) with syntax highlighting, virtual filesystem, search paths, URL file fetching, multi-notebook support, package catalog with one-click install, language settings, package format (.zip/.tar.gz)</p>
 
             <h3 data-i18n="help.privacy">Privacy</h3>
             <p><a href="#" id="help-privacy-link" data-i18n="privacy.privacyPolicy">Privacy Policy</a></p>
 
-            <div style="margin-top: 15px;">
-                <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
-                <script type='text/javascript'>
-                    if (typeof kofiwidget2 !== 'undefined') {
-                        kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'V7V51TYA76');
-                        kofiwidget2.draw();
-                    }
-                </script>
+            <div class="vfs-actions" style="margin-top: 15px;">
+                <a class="vfs-btn" href="https://ko-fi.com/V7V51TYA76" target="_blank"
+                    rel="noopener noreferrer" data-i18n="help.supportOnKoFi">Support me on Ko-fi</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- What's New Modal -->
+    <div id="whats-new-modal" class="modal hidden">
+        <div class="modal-content whats-new-content" role="dialog" aria-modal="true" aria-labelledby="whats-new-title">
+            <button class="modal-close" data-i18n-aria-label="common.close" data-i18n-title="common.close" aria-label="Close" title="Close">&times;</button>
+            <div class="whats-new-language">
+                <label for="whats-new-language" data-i18n="whatsNew.displayLanguage">Display language</label>
+                <select id="whats-new-language" class="settings-select"></select>
+            </div>
+            <p id="whats-new-version" class="whats-new-version"></p>
+            <h2 id="whats-new-title" data-i18n="whatsNew.title">What’s new in SciREPL</h2>
+            <p data-i18n="whatsNew.intro">This release makes SciREPL easier to learn, personalise and trust.</p>
+            <ul id="whats-new-highlights" class="whats-new-highlights"></ul>
+            <div class="whats-new-actions">
+                <a id="whats-new-release-link" class="vfs-btn" href="https://github.com/s243a/SciREPL/releases" target="_blank" rel="noopener noreferrer" data-i18n="whatsNew.releaseNotes">Read the full release notes</a>
+                <button id="whats-new-done" class="vfs-btn" data-i18n="tour.done">Done</button>
             </div>
         </div>
     </div>
@@ -773,6 +791,23 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                 <button class="icon-btn" type="button" tabindex="-1">?</button>
             </div>
 
+            <div class="settings-section" data-i18n="appearance.headerShortcuts">Header shortcuts</div>
+            <p class="appearance-note" data-i18n="appearance.headerShortcutsHelp">
+                Keep frequently used tools in the header. Hidden shortcuts can be re-enabled here at any time.
+            </p>
+            <div class="appearance-row appearance-shortcut-row">
+                <label class="appearance-check">
+                    <input type="checkbox" id="appearance-show-tour-shortcut">
+                    <span data-i18n="appearance.showTourShortcut">Show Tour shortcut</span>
+                </label>
+            </div>
+            <div class="appearance-row appearance-shortcut-row">
+                <label class="appearance-check">
+                    <input type="checkbox" id="appearance-show-formula-shortcut">
+                    <span data-i18n="appearance.showFormulaShortcut">Show Formula shortcut</span>
+                </label>
+            </div>
+
             <div class="settings-section" data-i18n="appearance.theme">Theme</div>
             <div class="appearance-row">
                 <label for="appearance-theme" data-i18n="appearance.theme">Theme</label>
@@ -974,7 +1009,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
         <div class="modal-content modal-content-scroll">
             <button class="modal-close" data-i18n-aria-label="common.close" data-i18n-title="common.close" aria-label="Close" title="Close">&times;</button>
             <h2 data-i18n="privacy.privacyPolicy">Privacy Policy</h2>
-            <p data-i18n="privacy.lastUpdated" style="color: #888; font-size: 0.9em;">Last updated: August 10, 2026</p>
+            <p data-i18n="privacy.lastUpdated" style="color: #888; font-size: 0.9em;">Last updated: August 11, 2026</p>
 
             <!-- Filled by i18n.renderTranslationNotice() in the reader's own
                  language whenever the policy is being shown translated. Hidden
@@ -1002,8 +1037,9 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
                 <li data-i18n-html="privacy.webrRRuntimeFrom"><strong>R (webR)</strong> — about 50 MB from <code>webr.r-wasm.org</code>, downloaded when R is first used and cached locally.</li>
                 <li data-i18n-html="privacy.fengariLuaRuntimeFrom"><strong>Lua (Fengari)</strong> — from <code>cdn.jsdelivr.net</code> or <code>unpkg.com</code>, downloaded when Lua is first used and cached locally.</li>
                 <li data-i18n-html="privacy.docxLibraryFrom"><strong>DOCX export library</strong> — <code>docx@9.6.0</code> from <code>cdn.jsdelivr.net</code>, downloaded when DOCX export is first used.</li>
+                <li data-i18n="privacy.policyRuntimeVersionChecks">Runtime version checks — after network consent, opening Languages may query data.jsdelivr.com for package version metadata. If consent has not yet been given, tapping Check latest opens the consent dialog; no metadata request is sent unless you accept. It does not download or activate the runtime.</li>
                 <li data-i18n-html="privacy.additionalPackagesFromNetwork"><strong>Optional catalog packages</strong> are downloaded from GitHub when you install them. Other packages and user-requested data may be fetched from package repositories or URLs when you request them, for example with <code>install.packages()</code>, <code>%pip</code>, or file-fetching commands.</li>
-                <li data-i18n-html="privacy.koFiWidgetSupportButton"><strong>Ko-fi widget</strong> (support button in Help screen) — from <code>storage.ko-fi.com</code></li>
+                <li data-i18n-html="privacy.koFiSupportLink"><strong>Ko-fi support link</strong> — Help includes a normal link to <code>ko-fi.com</code>. No Ko-fi request is made unless you choose to open it.</li>
             </ul>
             <p data-i18n="privacy.whenTheseResourcesFetchedCdn">When these resources are fetched, the CDN providers may receive:</p>
             <ul>
@@ -1089,6 +1125,9 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
 
     <!-- App scripts -->
     <!-- prelude.py is loaded by app.js via fetch, not as a script tag -->
+    <!-- Generated app/runtime metadata is loaded first: several later modules
+         use pinned component versions while constructing their controls. -->
+    <script src="js/kernel_config.js"></script>
     <script src="js/indexeddb_store.js"></script>
     <script src="js/persistence.js"></script>
     <script src="js/file_io.js"></script>
@@ -1097,8 +1136,9 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <script src="js/i18n.js"></script>
     <script src="js/appearance.js"></script>
     <script src="js/appearance_ui.js"></script>
+    <script src="js/release_highlights.js"></script>
+    <script src="js/whats_new.js"></script>
     <script src="js/onboarding.js"></script>
-    <script src="js/kernel_config.js"></script>
     <script src="js/kernel_manager.js"></script>
     <script src="js/shared_vfs.js"></script>
     <script src="js/notebook_vfs.js"></script>

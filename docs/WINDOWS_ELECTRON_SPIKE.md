@@ -10,10 +10,10 @@ SciREPL running as a packaged Electron application. Every enabled kernel behaves
 identically to the browser baseline, and notebook/SharedVFS state survives a
 real restart — both now measured on Windows as well as Linux.
 
-Three findings change the *shape* of the Phase 1 plan rather than blocking it:
-the renderer realm boundary (§4), the service worker cache being inert under a
-custom scheme (§5), and the Ko-fi widget divergence (§5). All three are
-described below and reflected in §11.
+Two findings change the *shape* of the Phase 1 plan rather than blocking it:
+the renderer realm boundary (§4) and the service worker cache being inert under
+a custom scheme (§5). The Ko-fi widget divergence originally measured by the
+spike has since been resolved with a shared plain-link implementation (§5).
 
 ---
 
@@ -445,7 +445,7 @@ Android, the PWA and the shell**:
 
 | Prompt | Where the decision is stored | How to stop being asked |
 | --- | --- | --- |
-| Privacy notice | `scirepl_privacy_accepted` | Accepted once, then never shown again (`kernel_manager.js:134`). Revocable from Settings. |
+| Privacy notice | `scirepl_privacy_accepted` plus `scirepl_privacy_accepted_revision` | The boolean preserves prior runtime-download consent; newly disclosed automatic network behavior requires the current policy revision. Revocable from Settings. |
 | Runtime download | `scirepl_auto_download` | Settings → **Runtime Downloads** → *Auto-download runtimes (skip confirmation)* (`www/index.html`, handled at `file_io.js:163`). |
 
 With auto-download enabled, `kernel_manager.js:202` skips the confirmation
@@ -467,39 +467,15 @@ see §11. Lua is ~200 kB and could simply be bundled; R is the profile differenc
 that distinguishes Free from Pro, so bundling it in a Free build is a product
 decision, not a technical one.
 
-### Known divergence from the PWA: the Ko-fi support widget
+### Resolved follow-up: one support link on every platform
 
-`www/index.html:407` loads the Ko-fi support widget as a third-party script from
-`https://storage.ko-fi.com`. That origin is **deliberately absent** from the
-shell's CSP allowlist, so the widget is blocked and the support button does not
-render in the Electron build **[verified]**:
-
-```
-securitypolicyviolation  script-src-elem  https://storage.ko-fi.com/cdn/widget/Widget_2.js
-typeof window.kofiwidget2 === "undefined"
-```
-
-The widget is already guarded by `if (typeof kofiwidget2 !== 'undefined')`, so
-blocking it **degrades silently** — nothing throws, and the rest of the Help
-panel is intact **[verified]**.
-
-It is excluded rather than allowed because adding a third-party host to
-`script-src` grants it arbitrary script execution in the same realm that runs
-user notebooks and holds all IndexedDB state (§4). That supply-chain exposure is
-out of proportion to a donate button, and the CSP's entire value here is being
-restrictive about origins.
-
-**This is a divergence, not a fix.** The right resolution is a *shared* change:
-replace the widget with a plain `target="_blank"` link to the Ko-fi page, which
-behaves identically in the PWA, on Android and in the shell, and needs no CSP
-exception anywhere. That touches `www/`, which this spike deliberately does not
-modify, so it is proposed as a Phase 1 follow-up (§11).
-
-Until then the exclusion is pinned by tests — `policy.unit.test.mjs` asserts the
-origin is absent from the allowlist and from the CSP, and `security.test.mjs`
-asserts the live block and its silent degradation — so allowing the origin, or
-dropping the documented exclusion, fails the build and forces the choice to be
-re-made rather than drifting.
+The Phase 0 build exposed a PWA/Electron difference because Help used a remote
+Ko-fi widget script and the shell correctly refused to execute it. That
+divergence is now resolved in shared `www/` code: Help renders an ordinary
+`target="_blank"` HTTPS link. The PWA, Android and Electron builds show the same
+entry; no Ko-fi script runs in the renderer, and Electron hands the link to the
+system browser under its existing external-navigation policy. No CSP or runtime
+origin exception is required.
 
 ### One behaviour worth calling out for product review
 
@@ -731,7 +707,7 @@ Risks, in the order they should be addressed:
 | 6 | **Electron/Chromium upgrade treadmill.** | Low-Medium | Pinned to 43.3.0. Needs a standing update policy, not a one-off. |
 | 7 | **CDN download-consent modal on a packaged app.** | Low | Product decision (§5). |
 | 8 | **TypR output gap.** | Low | Pre-existing, reproduces in browser, unrelated to Windows. |
-| 9 | **Ko-fi widget blocked in the shell** (§5). | Low | Deliberate; degrades silently; pinned by tests. Resolve with a shared plain-link change (§11.5), not a CSP exception. |
+| 9 | ~~Ko-fi widget blocked in the shell~~ — **resolved** (§5). | Resolved | Shared Help now uses a plain external link; no third-party script or CSP exception. |
 | 10 | ~~Service worker cache inert under `app://`~~ — **resolved** (§5). The shell keeps its own cache in `userData`; Lua and R both work offline after one online use. | Resolved | Guarded by `runtime-cache.test.mjs`. |
 
 ---
@@ -799,12 +775,10 @@ the Electron adapter can write a file through a normal Save dialog — aligning
 desktop with what Android already does via the Capacitor `PdfGenerator` plugin
 (`export.js:1143`). This is now the best-evidenced of the platform operations.
 
-**5. Replace the Ko-fi widget with a plain external link** (§5). A one-line
-change in `www/index.html`: swap the third-party `<script>` for a
-`target="_blank"` anchor to the Ko-fi page. It restores the support button in
-the shell, removes a third-party script from the PWA and Android builds too, and
-needs no CSP exception on any platform. Listed here rather than done in this PR
-because it touches shared `www/` code, which the spike deliberately leaves alone.
+**5. ~~Replace the Ko-fi widget with a plain external link~~ — done** (§5).
+Shared Help now uses a `target="_blank"` anchor to the Ko-fi page. It works in
+the shell, removes the third-party script from the PWA and Android builds too,
+and needs no CSP exception on any platform.
 
 **6. ~~Bundle runtimes to work around the inert cache~~ — done differently, and
 already resolved.** The shell now keeps its own cache in `userData`
@@ -1074,8 +1048,7 @@ Developer Tools** (or F12). On Android, inspecting the same application means
 against the identical `www/` code.
 
 That makes the desktop build the most convenient place to debug notebooks,
-inspect SharedVFS and IndexedDB, and see CSP violations — the Ko-fi block in §5
-is visible in the console exactly as it would be in a browser.
+inspect SharedVFS and IndexedDB, and see CSP violations directly in the console.
 
 It costs nothing in security, which is asserted rather than assumed. With
 DevTools open in the packaged app:

@@ -133,21 +133,12 @@ is unaffected.
 the JavaScript kernel, Scittle and Pyodide all require them. The CSP is
 restrictive about *origins*, which is the part that protects a packaged app.
 
-### Known divergence: the Ko-fi widget
+### External support link
 
-`www/index.html:407` loads the Ko-fi support widget from
-`https://storage.ko-fi.com`. That origin is **deliberately not** on the
-allowlist, so the widget is blocked and the support button does not appear in
-the shell. It degrades silently — the widget is already guarded by
-`if (typeof kofiwidget2 !== 'undefined')` — and the rest of the Help panel is
-unaffected.
-
-Allowing it would grant a third-party host arbitrary script execution in the
-same realm that runs user notebooks, which is not a trade worth making for a
-donate button. See `KOFI_EXCLUSION` in `protocol.js`; the exclusion is pinned by
-`policy.unit.test.mjs` and `security.test.mjs` so it stays a decision rather than
-drifting. The proper fix is a shared change — replace the widget with a plain
-`target="_blank"` link — which is proposed as Phase 1 follow-up work.
+Help uses an ordinary `target="_blank"` HTTPS link to Ko-fi. No Ko-fi script is
+loaded in the renderer and no Ko-fi origin is added to the CSP or runtime
+allowlist. The Electron navigation policy opens the link in the user's system
+browser, matching the other external documentation links.
 
 ## Files
 

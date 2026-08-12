@@ -11,6 +11,17 @@ class PythonKernel {
         this._syncedToPyodide = new Map(); // path → modified timestamp
     }
 
+    static runtimeConfig() {
+        return window.KERNEL_CONFIG?.languages?.python || {};
+    }
+
+    static primaryUrl() {
+        const source = (PythonKernel.runtimeConfig().sources || [])
+            .find((item) => item?.type === 'cdn' && item.url);
+        if (!source) throw new Error('Python runtime source is missing from generated kernel_config.js');
+        return source.url;
+    }
+
     async init() {
         if (this._ready) return;
 
@@ -20,7 +31,7 @@ class PythonKernel {
         // Track which source actually loaded so loadPyodide() resolves its
         // package files (numpy/sympy/stdlib) from the SAME location — the
         // bundled copy when offline, the CDN otherwise.
-        const primary = 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full/pyodide.js';
+        const primary = PythonKernel.primaryUrl();
         let pyodideJsUrl = primary;
         if (typeof loadPyodide === 'undefined') {
             if (km) km.updateProgress(window.t('runtime.pythonDownloading'));
@@ -78,6 +89,9 @@ del _pkg_dir
 `);
 
         this._ready = true;
+        if (km?.markRuntimeCacheComplete) {
+            await km.markRuntimeCacheComplete('python');
+        }
         if (km) km.hideDownloadModal();
     }
 

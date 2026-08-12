@@ -4,6 +4,7 @@ import { chromium } from 'playwright';
 
 const PORT = process.env.PORT || 8085;
 const URL = `http://localhost:${PORT}/index.html`;
+const PRIVACY_REVISION = '2026-08-runtime-metadata-v1';
 let failures = 0;
 const check = (name, ok, detail = '') => {
     if (!ok) failures++;
@@ -15,11 +16,12 @@ const browser = await chromium.launch({ headless: true });
 /** A page that has accepted privacy but never seen the tour. */
 async function firstRunPage() {
     const ctx = await browser.newContext();
-    await ctx.addInitScript(() => {
+    await ctx.addInitScript((revision) => {
         localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.setItem('scirepl_privacy_accepted_revision', revision);
         localStorage.setItem('scirepl_auto_download', '1');
         localStorage.removeItem('scirepl_onboarding_seen');
-    });
+    }, PRIVACY_REVISION);
     const p = await ctx.newPage();
     const errs = [];
     p.on('pageerror', (e) => errs.push(e.message));
@@ -127,6 +129,8 @@ try {
     await seenCtx.addInitScript(() => {
         localStorage.setItem('scirepl_privacy_accepted', '1');
         localStorage.setItem('scirepl_onboarding_seen', '1');
+        addEventListener('DOMContentLoaded', () => localStorage.setItem(
+            'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
     });
     const seenPage = await seenCtx.newPage();
     await seenPage.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
@@ -146,6 +150,8 @@ try {
     // for exactly the user who needs it. The main menu carries one too.
     const menuReplay = await page.evaluate(async () => {
         localStorage.setItem('scirepl_onboarding_seen', '1');
+        addEventListener('DOMContentLoaded', () => localStorage.setItem(
+            'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
         document.getElementById('menu-btn').click();
         await new Promise((r) => setTimeout(r, 200));
         const btn = document.getElementById('btn-show-tour-menu');
@@ -198,12 +204,13 @@ try {
     // Consent alone must not count as "established" — a brand-new user accepts
     // the privacy prompt too, so it cannot tell the two populations apart.
     const emptyCtx = await browser.newContext();
-    await emptyCtx.addInitScript(() => {
+    await emptyCtx.addInitScript((revision) => {
         localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.setItem('scirepl_privacy_accepted_revision', revision);
         localStorage.setItem('scirepl_auto_download', '1');
         localStorage.setItem('scirepl_session_v2', JSON.stringify({ cells: [], history: [] }));
         localStorage.removeItem('scirepl_onboarding_seen');
-    });
+    }, PRIVACY_REVISION);
     const emptyPage = await emptyCtx.newPage();
     await emptyPage.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
     await emptyPage.waitForTimeout(2000);
@@ -234,27 +241,30 @@ try {
 
     console.log('\n7. Consent and the tour');
 
-    // Consent is requested lazily, and only for runtimes fetched from a CDN —
-    // on a build with Python bundled it may never be requested at all. Gating
-    // the tour on the accepted flag therefore meant a first-run user never saw
-    // it. What matters is that the tour never covers the consent dialog.
+    // A legacy boolean records consent to the old policy, but it does not
+    // authorise the newly disclosed runtime-metadata request. Re-consent must
+    // outrank the tour just like the original privacy dialog.
     const ctx2 = await browser.newContext();
     await ctx2.addInitScript(() => {
-        localStorage.removeItem('scirepl_privacy_accepted');
+        localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.removeItem('scirepl_privacy_accepted_revision');
         localStorage.removeItem('scirepl_onboarding_seen');
     });
     const p2 = await ctx2.newPage();
     await p2.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });
     await p2.waitForTimeout(2200);
-    check('a first-run user sees the tour even before consent has been asked for',
+    check('a first-run user sees the tour with only legacy consent',
         await p2.evaluate(() => !!document.getElementById('tour-overlay')));
+    check('legacy consent is not current consent for runtime metadata',
+        await p2.evaluate(() => window.kernelManager.hasCurrentPrivacyConsent() === false));
 
-    // The consent dialog outranks the tour whenever it appears, including
-    // part-way through — which is what happens the first time a user runs a
-    // cell needing a CDN runtime.
-    await p2.evaluate(() => document.getElementById('privacy-modal').classList.remove('hidden'));
-    await p2.waitForTimeout(500);
-    check('the tour hides itself while the consent dialog is up',
+    await p2.evaluate(() => {
+        window.__reconsent = window.kernelManager._ensurePrivacyConsent({
+            requireCurrentRevision: true,
+        });
+    });
+    await p2.waitForSelector('#privacy-modal:not(.hidden)');
+    check('the tour hides itself while revised consent is up',
         await p2.evaluate(() => {
             const t = document.getElementById('tour-overlay');
             return !t || getComputedStyle(t).display === 'none';
@@ -263,9 +273,14 @@ try {
         await p2.evaluate(() => !document.getElementById('privacy-modal')
             .classList.contains('hidden')));
 
-    await p2.evaluate(() => document.getElementById('privacy-modal').classList.add('hidden'));
+    await p2.click('#privacy-accept-btn');
+    await p2.evaluate(() => window.__reconsent);
+    check('accepting revised consent stores the exact policy revision',
+        await p2.evaluate((revision) =>
+            localStorage.getItem('scirepl_privacy_accepted_revision') === revision,
+        PRIVACY_REVISION));
     await p2.waitForTimeout(900);
-    check('the tour comes back once consent has been dealt with',
+    check('the tour comes back once revised consent has been dealt with',
         await p2.evaluate(() => {
             const t = document.getElementById('tour-overlay');
             return !!t && getComputedStyle(t).display !== 'none';
@@ -447,6 +462,8 @@ try {
             localStorage.setItem('scirepl_privacy_accepted', '1');
             localStorage.setItem('scirepl_auto_download', '1');
             if (sd === 'seen') localStorage.setItem('scirepl_onboarding_seen', '1');
+            addEventListener('DOMContentLoaded', () => localStorage.setItem(
+                'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
             if (sd === 'grandfathered') {
                 localStorage.setItem('scirepl_session_v2', JSON.stringify({
                     cells: [{ id: 1, language: 'python', code: 'x' }], history: [],
@@ -481,6 +498,8 @@ try {
     await ctxF.addInitScript(() => {
         localStorage.setItem('scirepl_privacy_accepted', '1');
         localStorage.setItem('scirepl_onboarding_seen', '1');
+        addEventListener('DOMContentLoaded', () => localStorage.setItem(
+            'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
     });
     const pf = await ctxF.newPage();
     await pf.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60_000 });

@@ -178,12 +178,29 @@
                 window.appearance.setButtonScale(Number(slider.value));
                 this._refreshButtonScale();
             });
+
+            const tour = $('appearance-show-tour-shortcut');
+            const formula = $('appearance-show-formula-shortcut');
+            if (tour) {
+                tour.addEventListener('change', () => {
+                    window.appearance.setShowTourShortcut(tour.checked);
+                });
+            }
+            if (formula) {
+                formula.addEventListener('change', () => {
+                    window.appearance.setShowFormulaShortcut(formula.checked);
+                });
+            }
         }
 
         _refreshButtonScale() {
             const scale = window.appearance.getButtonScale();
             $('appearance-btn-scale').value = String(scale);
             $('appearance-btn-scale-value').textContent = `${Math.round(scale * 100)}%`;
+            const tour = $('appearance-show-tour-shortcut');
+            const formula = $('appearance-show-formula-shortcut');
+            if (tour) tour.checked = window.appearance.getShowTourShortcut();
+            if (formula) formula.checked = window.appearance.getShowFormulaShortcut();
         }
 
         /* ------------------------------ theme ---------------------------- */

@@ -1,22 +1,15 @@
 {
-  "$comment": "Source of truth for build profiles + kernel sources. The build (scripts/configure-build.mjs) reads this and generates www/js/kernel_config.js. 'languages' holds stable per-language metadata (runtime type, per-attempt timeout, optional localUrl for offline bundling, and FALLBACK mirror sources beyond each kernel's hardcoded primary URL). 'profiles' select which languages are enabled and which are 'bundle'd offline; scripts/fetch-bundles.mjs downloads each bundled runtime into www/vendor/<lang>/ so cap sync copies it into the APK. This file is identical across the Free and Pro repos; the only tier difference is which profile each repo's 'default' points at (Free: full = R via CDN; Pro: pro = R bundled offline, ~+50 MB).",
+  "$comment": "Build-profile source of truth. Per-language component IDs point into third-party-components.json, which owns exact runtime versions and pinned source/mirror URLs. configure-build.mjs combines the two files into www/js/kernel_config.js. Profiles select which languages are enabled and bundled offline; fetch-bundles.mjs downloads bundled runtimes into www/vendor/<lang>/ for Capacitor/Electron/PWA packaging. Free defaults to full (R downloaded on first use); Pro defaults to pro (R bundled offline).",
   "default": "full",
   "languages": {
-    "javascript": { "runtime": "native", "timeoutMs": 0, "sources": [] },
-    "bash":       { "runtime": "local", "timeoutMs": 0, "sources": [{ "type": "local", "url": "vendor/brush/brush_wasm.js" }] },
-    "typr":       { "runtime": "local", "timeoutMs": 0, "sources": [{ "type": "local", "url": "vendor/typr/typr_wasm.js" }] },
-    "lua":        { "runtime": "cdn", "timeoutMs": 30000, "sources": [
-                     { "type": "cdn", "url": "https://unpkg.com/fengari-web@0.1.4/dist/fengari-web.js" }
-                   ] },
-    "clojurescript": { "runtime": "cdn", "timeoutMs": 30000, "localUrl": "vendor/scittle/scittle.js", "sources": [
-                     { "type": "cdn", "url": "https://cdn.jsdelivr.net/npm/scittle@0.6.22/dist/scittle.js" }
-                   ] },
-    "prolog":     { "runtime": "cdn", "timeoutMs": 60000, "localUrl": "vendor/swipl/dynamic-import.js", "sources": [] },
-    "python":     { "runtime": "cdn", "timeoutMs": 120000, "localUrl": "vendor/pyodide/pyodide.js", "sources": [
-                     { "type": "cdn", "url": "https://cdn.jsdelivr.net/npm/pyodide@0.27.4/pyodide.js" },
-                     { "type": "cdn", "url": "https://unpkg.com/pyodide@0.27.4/pyodide.js" }
-                   ] },
-    "r":          { "runtime": "cdn", "timeoutMs": 180000, "localUrl": "vendor/webr/webr.mjs", "sources": [] }
+    "javascript": { "runtime": "native", "timeoutMs": 0 },
+    "bash":       { "component": "brush", "runtime": "local", "timeoutMs": 0 },
+    "typr":       { "component": "typr", "runtime": "local", "timeoutMs": 0 },
+    "lua":        { "component": "fengari", "runtime": "cdn", "timeoutMs": 30000 },
+    "clojurescript": { "component": "scittle", "runtime": "cdn", "timeoutMs": 30000, "localUrl": "vendor/scittle/scittle.js" },
+    "prolog":     { "component": "swipl-wasm", "runtime": "cdn", "timeoutMs": 60000, "localUrl": "vendor/swipl/dynamic-import.js" },
+    "python":     { "component": "pyodide", "runtime": "cdn", "timeoutMs": 120000, "localUrl": "vendor/pyodide/pyodide.js" },
+    "r":          { "component": "webr-support", "runtime": "cdn", "timeoutMs": 180000, "localUrl": "vendor/webr/webr.mjs" }
   },
   "profiles": {
     "mini":  { "enabled": ["javascript", "bash", "typr", "lua"] },

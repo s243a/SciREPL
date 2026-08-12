@@ -18,15 +18,36 @@ class RKernel {
 
     static displayName = 'R';
 
-    /**
-     * Pinned webR version. Used unless the user overrides via the
-     * `scirepl_webr_version` localStorage setting (e.g. set to "latest"
-     * or another tag like "v0.5.3" to opt into a different release).
-     *
-     * Bump this together with CDN_CACHE in sw.js when upgrading, so
-     * stale cached webR assets get evicted.
-     */
-    static DEFAULT_WEBR_VERSION = 'v0.5.4';
+    static runtimeConfig() {
+        return window.KERNEL_CONFIG?.languages?.r || {};
+    }
+
+    static defaultVersionTag() {
+        const cfg = RKernel.runtimeConfig();
+        if (cfg.versionTag) return cfg.versionTag;
+        if (cfg.version) return 'v' + cfg.version;
+        throw new Error('R runtime version is missing from generated kernel_config.js');
+    }
+
+    static normalizeVersionTag(value) {
+        const version = String(value || '').trim();
+        if (version === 'latest') return version;
+        if (/^v?\d+\.\d+\.\d+$/.test(version)) {
+            return version.startsWith('v') ? version : 'v' + version;
+        }
+        throw new Error('Invalid webR version. Use a version such as v0.5.4 or "latest"; use the separate source override for a custom URL.');
+    }
+
+    static cdnUrl(versionTag) {
+        const cfg = RKernel.runtimeConfig();
+        versionTag = RKernel.normalizeVersionTag(versionTag);
+        if (cfg.overrideUrlTemplate) {
+            return cfg.overrideUrlTemplate.replace('{versionTag}', versionTag);
+        }
+        const source = (cfg.sources || []).find((item) => item?.type === 'cdn' && item.url);
+        if (!source) throw new Error('R runtime source is missing from generated kernel_config.js');
+        return source.url;
+    }
 
     async init() {
         if (this._ready) return;
@@ -40,10 +61,10 @@ class RKernel {
         const km = window.kernelManager;
         this._loading = true;
         try {
-            const version = (typeof localStorage !== 'undefined'
+            const version = RKernel.normalizeVersionTag((typeof localStorage !== 'undefined'
                 && localStorage.getItem('scirepl_webr_version'))
-                || RKernel.DEFAULT_WEBR_VERSION;
-            const webrUrl = `https://webr.r-wasm.org/${version}/webr.mjs`;
+                || RKernel.defaultVersionTag());
+            const webrUrl = RKernel.cdnUrl(version);
             console.log(`[RKernel] Loading webR ${version}`);
             if (km) km.updateProgress(window.t('runtime.rLoading', { version }));
             // loadKernelSource may resolve to a bundled copy (vendor/webr/webr.mjs)
@@ -68,6 +89,9 @@ class RKernel {
             console.log(`[RKernel] webR baseUrl: ${baseUrl}`);
             this._webr = new WebR({ baseUrl });
             await this._webr.init();
+            if (km?.recordRuntimeLoadedVersion) {
+                km.recordRuntimeLoadedVersion('r', this._webr.version || version);
+            }
 
             // Create shared directories in webR's filesystem
             await this._mkdirSafe('/shared');
@@ -90,6 +114,9 @@ class RKernel {
             await this._loadSharedFSHelpers();
 
             this._ready = true;
+            if (km?.markRuntimeCacheComplete) {
+                await km.markRuntimeCacheComplete('r');
+            }
             if (km) km.hideDownloadModal();
             console.log('[RKernel] Ready (webR)');
 
