@@ -18,8 +18,16 @@ class KernelManager {
         this._instances = {};
         // In-flight init promises: language id → Promise (guards concurrent init)
         this._initPromises = {};
+        // Successful runtime source for this page session.  This is deliberately
+        // not persisted: the Languages screen must report what actually loaded
+        // now, rather than implying that a previous session's fallback is live.
+        this._runtimeSessionSources = {};
         // Currently selected language
         this.currentLanguage = 'python';
+        // A loader URL succeeding is not the same thing as a usable runtime.
+        // Keep that source provisional until the kernel's complete init()
+        // succeeds; otherwise Languages could claim a failed runtime is loaded.
+        this._pendingRuntimeSources = {};
 
         // Backdrop / × click hides the download modal at any phase.
         // During the Download/Cancel confirmation, _confirmDownload attaches its
@@ -89,6 +97,23 @@ class KernelManager {
     }
 
     /**
+     * Whether a language can load executable runtime code from the network.
+     * The generated profile is authoritative: bundled profiles still have CDN
+     * fallbacks, while native/local-only kernels do not need a consent gate.
+     * The static set is only a compatibility fallback for tests/older configs.
+     */
+    isNetworkRuntime(language) {
+        const languages = (typeof window !== 'undefined' && window.KERNEL_CONFIG)
+            ? window.KERNEL_CONFIG.languages : null;
+        const cfg = languages && languages[language];
+        if (cfg && typeof cfg === 'object') {
+            return cfg.runtime === 'cdn' || (cfg.sources || []).some((source) =>
+                source && source.type === 'cdn' && source.url);
+        }
+        return KernelManager.CDN_KERNELS.has(language);
+    }
+
+    /**
      * Get or create a kernel instance for a language.
      * Does NOT initialize it — call ensureReady() for that.
      */
@@ -117,13 +142,15 @@ class KernelManager {
         if (!this._initPromises[language]) {
             this._initPromises[language] = (async () => {
                 try {
-                    if (KernelManager.CDN_KERNELS.has(language) &&
+                    if (this.isNetworkRuntime(language) &&
                         !this._prefersBundledSource(language)) {
                         await this._ensurePrivacyConsent();
                         await this._confirmDownload(language);
                     }
                     await kernel.init();
+                    this._commitRuntimeSource(language);
                 } catch (err) {
+                    this._discardPendingRuntimeSource(language);
                     this.hideDownloadModal();
                     throw err;
                 } finally {
@@ -135,9 +162,126 @@ class KernelManager {
         return kernel;
     }
 
+    _runtimeVersionSelection(language, cfg = {}) {
+        let storageKey = null;
+        let selected = null;
+        let tested = null;
+        let fields = null;
+
+        if (language === 'r') {
+            storageKey = 'scirepl_webr_version';
+            const normalize = (value) => {
+                const text = String(value || '').trim();
+                if (text === 'latest') return 'latest';
+                const match = text.match(/^v?(\d+\.\d+\.\d+)$/);
+                return match ? match[1] : null;
+            };
+            const raw = (typeof localStorage !== 'undefined')
+                ? localStorage.getItem(storageKey) : null;
+            selected = normalize(raw);
+            tested = normalize(cfg.versionTag || cfg.version);
+            if (selected) {
+                fields = {
+                    version: selected,
+                    versionTag: selected === 'latest' ? 'latest' : 'v' + selected,
+                };
+            }
+            return {
+                explicit: !!String(raw || '').trim(),
+                selected,
+                tested,
+                sameAsTested: !!selected && selected === tested,
+                fields,
+            };
+        }
+
+        if (language === 'prolog') {
+            storageKey = 'scirepl_swipl_version';
+            const normalize = (value) => {
+                const text = String(value || '').trim();
+                if (/^3\.\d+\.\d+$/.test(text)) return text.replaceAll('.', '/');
+                if (/^\d+\/\d+$/.test(text)) return '3/' + text;
+                if (/^3\/\d+\/\d+$/.test(text)) return text;
+                return null;
+            };
+            const raw = (typeof localStorage !== 'undefined')
+                ? localStorage.getItem(storageKey) : null;
+            selected = normalize(raw);
+            tested = normalize(cfg.versionSelector || cfg.version);
+            if (selected) {
+                fields = {
+                    versionSelector: selected,
+                    version: selected.replaceAll('/', '.'),
+                };
+            }
+            return {
+                explicit: !!String(raw || '').trim(),
+                selected,
+                tested,
+                sameAsTested: !!selected && selected === tested,
+                fields,
+            };
+        }
+
+        return { explicit: false, selected: null, tested: null, sameAsTested: false, fields: null };
+    }
+
+    _expandRuntimeSourceTemplate(template, fields) {
+        if (!template || !fields) return null;
+        return String(template).replace(/\{(version|versionTag|versionSelector)\}/g,
+            (match, key) => Object.prototype.hasOwnProperty.call(fields, key)
+                ? fields[key] : match);
+    }
+
+    validateRuntimeSourceOverride(language, value) {
+        const source = String(value || '').trim();
+        if (!source) return '';
+        const cfg = (typeof window !== 'undefined' && window.KERNEL_CONFIG
+            && window.KERNEL_CONFIG.languages && window.KERNEL_CONFIG.languages[language]) || {};
+        const localAvailable = (cfg.sources || []).some(item =>
+            item?.type === 'local' && item.url);
+        if (source === 'local') {
+            if (!localAvailable) throw new Error(this._t('kernelManager.localSourceUnavailable',
+                'No bundled local source is configured for {language}.', { language }));
+            return source;
+        }
+
+        let parsed;
+        try { parsed = new URL(source); } catch (_) {
+            throw new Error(this._t('kernelManager.runtimeSourceInvalidHttps',
+                'Custom runtime source must be a valid HTTPS URL.'));
+        }
+        if (parsed.username || parsed.password) {
+            throw new Error(this._t('kernelManager.runtimeSourceCredentials',
+                'Custom runtime source URLs must not contain a username or password.'));
+        }
+        const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname);
+        const devLoopback = parsed.protocol === 'http:' && loopback
+            && window.KERNEL_CONFIG?.development?.allowLoopbackRuntimeSources === true;
+        if (parsed.protocol !== 'https:' && !devLoopback) {
+            throw new Error(this._t('kernelManager.runtimeSourceHttpsRequired',
+                'Custom runtime sources must use HTTPS. Loopback HTTP is available only in explicit development mode.'));
+        }
+
+        // Electron deliberately keeps a fixed CSP. Arbitrary renderer URLs
+        // cannot widen it. A future host may expose a deeply frozen exact-URL
+        // allowlist; absent that capability, custom sources stay disabled.
+        if (typeof window !== 'undefined' && window.sciREPLPlatform) {
+            const allowlist = window.sciREPLPlatform.runtimeSourceAllowlist;
+            if (!Array.isArray(allowlist) || !Object.isFrozen(allowlist)
+                || !allowlist.includes(parsed.href)) {
+                throw new Error(this._t('kernelManager.runtimeSourceElectronBlocked',
+                    'Custom runtime sources are disabled by the Electron host policy.'));
+            }
+        }
+        return parsed.href;
+    }
+
     /**
      * Whether this build will try a declared same-origin runtime before any
-     * network source. An explicit URL override remains a network choice.
+     * network source. An explicit URL override remains a network choice, and
+     * an explicit non-tested version must not silently load the bundled tested
+     * runtime merely because this profile normally prefers local assets.
      */
     _prefersBundledSource(language) {
         const cfg = (typeof window !== 'undefined' && window.KERNEL_CONFIG
@@ -147,19 +291,34 @@ class KernelManager {
         if (override && override !== 'local') return false;
         const hasLocal = (cfg.sources || []).some(source =>
             source && source.type === 'local' && source.url);
-        return hasLocal && (cfg.preferLocal || override === 'local');
+        if (!hasLocal) return false;
+        const version = this._runtimeVersionSelection(language, cfg);
+        if (version.explicit && !version.sameAsTested) return false;
+        return cfg.preferLocal || override === 'local';
+    }
+
+    hasCurrentPrivacyConsent() {
+        return localStorage.getItem('scirepl_privacy_accepted') === '1'
+            && localStorage.getItem(KernelManager.PRIVACY_POLICY_REVISION_KEY)
+                === KernelManager.PRIVACY_POLICY_REVISION;
     }
 
     /**
-     * Show privacy modal if user hasn't accepted yet.
-     * Resolves when accepted, rejects if dismissed.
+     * Show the privacy modal if consent is absent. Existing boolean consent is
+     * still sufficient for the network operations described by the old policy,
+     * but new automatic package-metadata requests require acceptance of the
+     * current policy revision. Accepting the visible policy always records both.
      */
-    async _ensurePrivacyConsent() {
-        if (localStorage.getItem('scirepl_privacy_accepted')) return;
+    async _ensurePrivacyConsent({ requireCurrentRevision = false } = {}) {
+        if (localStorage.getItem('scirepl_privacy_accepted') === '1'
+            && (!requireCurrentRevision || this.hasCurrentPrivacyConsent())) return;
 
         const modal = document.getElementById('privacy-modal');
         const acceptBtn = document.getElementById('privacy-accept-btn');
-        if (!modal || !acceptBtn) return;
+        if (!modal || !acceptBtn) {
+            throw new Error(this._t('kernelManager.privacyRequired',
+                'Privacy policy must be accepted before this network request'));
+        }
 
         return new Promise((resolve, reject) => {
             modal.classList.remove('hidden');
@@ -167,6 +326,8 @@ class KernelManager {
             const onAccept = () => {
                 cleanup();
                 localStorage.setItem('scirepl_privacy_accepted', '1');
+                localStorage.setItem(KernelManager.PRIVACY_POLICY_REVISION_KEY,
+                    KernelManager.PRIVACY_POLICY_REVISION);
                 modal.classList.add('hidden');
                 resolve();
             };
@@ -186,6 +347,232 @@ class KernelManager {
             acceptBtn.addEventListener('click', onAccept);
             modal.addEventListener('click', onDismiss);
         });
+    }
+
+    _normalizeRuntimeCacheVersion(language, value) {
+        const text = String(value || '').trim();
+        if (!text || text === 'latest') return null;
+        if (language === 'prolog') {
+            if (/^\d+\.\d+\.\d+$/.test(text)) return text.replaceAll('.', '/');
+            return /^\d+\/\d+\/\d+$/.test(text) ? text : null;
+        }
+        const match = text.match(/^v?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)$/);
+        return match ? match[1] : null;
+    }
+
+    _expectedRuntimeCacheVersion(language) {
+        const cfg = (typeof window !== 'undefined' && window.KERNEL_CONFIG
+            && window.KERNEL_CONFIG.languages && window.KERNEL_CONFIG.languages[language]) || {};
+        const sourceOverride = (typeof localStorage !== 'undefined')
+            && localStorage.getItem('scirepl_' + language + '_source');
+        // A custom executable URL is its own trust decision, not a tested
+        // runtime/version selection. Never let a receipt for it suppress a
+        // future confirmation.
+        if (sourceOverride && sourceOverride !== 'local') return null;
+        if (language === 'r' || language === 'prolog') {
+            const selected = this._runtimeVersionSelection(language, cfg);
+            return this._normalizeRuntimeCacheVersion(language,
+                selected.explicit ? selected.selected : selected.tested);
+        }
+        return this._normalizeRuntimeCacheVersion(language,
+            cfg.versionSelector || cfg.versionTag || cfg.version);
+    }
+
+    _runtimeCacheMarkerUrl(language, version) {
+        const base = (typeof window !== 'undefined' && window.location?.href)
+            || (typeof document !== 'undefined' && document.baseURI)
+            || 'https://scirepl.invalid/';
+        const safeVersion = String(version).replace(/[^0-9A-Za-z.+-]/g, '_');
+        return new URL(`__scirepl_runtime_cache__/${language}/${safeVersion}.json`, base).href;
+    }
+
+    _runtimeProbeMarkerPrefix() {
+        const base = (typeof window !== 'undefined' && window.location?.href)
+            || (typeof document !== 'undefined' && document.baseURI)
+            || 'https://scirepl.invalid/';
+        return new URL('__scirepl_runtime_probes__/', base).href;
+    }
+
+    _runtimeCacheUrlMatches(language, version, candidate) {
+        let url;
+        try { url = new URL(candidate); } catch (_) { return false; }
+        if (!['https:', 'http:'].includes(url.protocol) || url.search) return false;
+        let pathname;
+        try { pathname = decodeURIComponent(url.pathname).toLowerCase(); }
+        catch (_) { pathname = url.pathname.toLowerCase(); }
+        const escaped = String(version).toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        if (language === 'prolog') {
+            return new RegExp('/npm-swipl-wasm/' + escaped + '/').test(pathname);
+        }
+        if (language === 'python') {
+            return new RegExp('(?:/pyodide/v|/pyodide@)' + escaped + '(?:/|$)').test(pathname);
+        }
+        if (language === 'r') {
+            return new RegExp('(?:/v|/webr@)' + escaped + '(?:/|$)').test(pathname);
+        }
+        if (language === 'lua') {
+            return new RegExp('/fengari-web@' + escaped + '(?:/|$)').test(pathname);
+        }
+        return false;
+    }
+
+    /** Match an immutable CDN entry to its runtime family, independent of version. */
+    _runtimeCacheUrlBelongsTo(language, candidate) {
+        let url;
+        try { url = new URL(candidate); } catch (_) { return false; }
+        if (!['https:', 'http:'].includes(url.protocol) || url.search) return false;
+        let pathname;
+        try { pathname = decodeURIComponent(url.pathname).toLowerCase(); }
+        catch (_) { pathname = url.pathname.toLowerCase(); }
+        const host = url.hostname.toLowerCase();
+        if (language === 'prolog') return pathname.includes('/npm-swipl-wasm/');
+        if (language === 'python') return /\/pyodide(?:\/v|@)[^/]+\//.test(pathname);
+        if (language === 'r') {
+            return pathname.includes('/webr@')
+                || (host === 'webr.r-wasm.org' && /\/v\d+\.\d+\.\d+(?:[-+][^/]*)?\//.test(pathname));
+        }
+        if (language === 'lua') return pathname.includes('/fengari-web@');
+        if (language === 'clojurescript') return pathname.includes('/scittle@');
+        return false;
+    }
+
+    /**
+     * Return only cache records owned by one runtime. Hosts are deliberately
+     * insufficient: Python, Lua and ClojureScript can all share jsDelivr.
+     */
+    async runtimeCacheEntries(language) {
+        if (typeof caches === 'undefined') return [];
+        const cache = await caches.open(KernelManager.CDN_CACHE);
+        const requests = await cache.keys();
+        const receiptNeedle = `/__scirepl_runtime_cache__/${encodeURIComponent(language)}/`;
+        const probePrefix = this._runtimeProbeMarkerPrefix();
+        const matches = [];
+        for (const request of requests) {
+            let pathname = '';
+            try { pathname = decodeURIComponent(new URL(request.url).pathname); }
+            catch (_) { /* malformed URL cannot belong to a runtime */ }
+            if (pathname.includes(receiptNeedle)
+                || this._runtimeCacheUrlBelongsTo(language, request.url)) {
+                matches.push(request);
+                continue;
+            }
+            if (!request.url.startsWith(probePrefix)) continue;
+            try {
+                const marker = await cache.match(request);
+                const probe = marker && await marker.json();
+                if (probe?.schemaVersion === 1 && probe.method === 'HEAD'
+                    && this._runtimeCacheUrlBelongsTo(language, probe.url)) {
+                    matches.push(request);
+                }
+            } catch (_) { /* corrupt marker stays for the global cache reset */ }
+        }
+        return matches;
+    }
+
+    async hasRuntimeCacheEntries(language) {
+        try { return (await this.runtimeCacheEntries(language)).length > 0; }
+        catch (_) { return false; }
+    }
+
+    async clearRuntimeCache(language) {
+        if (typeof caches === 'undefined') return 0;
+        const cache = await caches.open(KernelManager.CDN_CACHE);
+        const requests = await this.runtimeCacheEntries(language);
+        const removed = await Promise.all(requests.map(request => cache.delete(request)));
+        return removed.filter(Boolean).length;
+    }
+
+    /**
+     * Write a completion receipt only after a runtime has initialized. The
+     * receipt inventories the exact-version responses present at that moment;
+     * it is written last, so an interrupted or partial download cannot be
+     * mistaken for a complete cached runtime on the next launch.
+     */
+    async markRuntimeCacheComplete(language) {
+        if (typeof caches === 'undefined' || typeof Response === 'undefined') return false;
+        const entry = this._pendingRuntimeSources[language]
+            || this._runtimeSessionSources[language];
+        const expected = this._expectedRuntimeCacheVersion(language);
+        const loaded = this._normalizeRuntimeCacheVersion(language, entry?.version);
+        if (!entry || entry.sourceType === 'local' || !expected || loaded !== expected) return false;
+
+        let source;
+        try {
+            const base = (typeof document !== 'undefined' && document.baseURI) || undefined;
+            source = new URL(entry.source, base).href;
+        } catch (_) { return false; }
+        if (!this._runtimeCacheUrlMatches(language, expected, source)) return false;
+
+        try {
+            const cache = await caches.open(KernelManager.CDN_CACHE);
+            const requests = await cache.keys();
+            const inventory = requests.map((request) => request.url)
+                .filter((url) => this._runtimeCacheUrlMatches(language, expected, url))
+                .sort();
+            if (!inventory.includes(source)) return false;
+            const probeInventory = [];
+            const probePrefix = this._runtimeProbeMarkerPrefix();
+            for (const request of requests) {
+                if (!request.url.startsWith(probePrefix)) continue;
+                try {
+                    const marker = await cache.match(request);
+                    const probe = marker && await marker.json();
+                    if (probe?.schemaVersion === 1 && probe.method === 'HEAD'
+                        && [200, 404].includes(probe.status)
+                        && this._runtimeCacheUrlMatches(language, expected, probe.url)) {
+                        probeInventory.push(request.url);
+                    }
+                } catch (_) { /* corrupt probe marker is not part of the receipt */ }
+            }
+            const receipt = {
+                schemaVersion: 1,
+                complete: true,
+                language,
+                version: expected,
+                source,
+                inventory,
+                probeInventory: probeInventory.sort(),
+                completedAt: new Date().toISOString(),
+            };
+            await cache.put(this._runtimeCacheMarkerUrl(language, expected), new Response(
+                JSON.stringify(receipt), { headers: { 'content-type': 'application/json' } }));
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    async _hasCompleteCachedRuntime(language) {
+        if (typeof caches === 'undefined') return false;
+        const version = this._expectedRuntimeCacheVersion(language);
+        if (!version) return false;
+        try {
+            const cache = await caches.open(KernelManager.CDN_CACHE);
+            const response = await cache.match(this._runtimeCacheMarkerUrl(language, version));
+            if (!response) return false;
+            const receipt = await response.json();
+            if (receipt?.schemaVersion !== 1 || receipt.complete !== true
+                || receipt.language !== language || receipt.version !== version
+                || !Array.isArray(receipt.inventory) || receipt.inventory.length === 0
+                || !receipt.inventory.includes(receipt.source)
+                || !Array.isArray(receipt.probeInventory)) return false;
+            for (const url of receipt.inventory) {
+                if (!this._runtimeCacheUrlMatches(language, version, url)
+                    || !(await cache.match(url))) return false;
+            }
+            for (const markerUrl of receipt.probeInventory) {
+                if (!markerUrl.startsWith(this._runtimeProbeMarkerPrefix())) return false;
+                const marker = await cache.match(markerUrl);
+                if (!marker) return false;
+                const probe = await marker.json();
+                if (probe?.schemaVersion !== 1 || probe.method !== 'HEAD'
+                    || ![200, 404].includes(probe.status)
+                    || !this._runtimeCacheUrlMatches(language, version, probe.url)) return false;
+            }
+            return true;
+        } catch (_) {
+            return false;
+        }
     }
 
     /**
@@ -215,15 +602,10 @@ class KernelManager {
             'The <strong>{runtime}</strong> runtime requires a <strong>{size}</strong> download from CDN. It will be cached locally for future use.',
             { runtime: info.name, size: info.size });
 
-        // Check if runtime is actually in the CDN cache
-        let cached = false;
-        if (info.cdnHost) {
-            try {
-                const cdnCache = await caches.open(KernelManager.CDN_CACHE);
-                const keys = await cdnCache.keys();
-                cached = keys.some(r => new URL(r.url).hostname === info.cdnHost);
-            } catch (_) { }
-        }
+        // Suppress the prompt only after this exact runtime/version completed
+        // successfully and every response recorded in its receipt is still
+        // present. A lone file from the same host is not a cached runtime.
+        const cached = await this._hasCompleteCachedRuntime(language);
 
         // Auto-download or cached: skip confirmation, show progress after a delay
         // so fast loads don't flash the modal
@@ -325,11 +707,15 @@ class KernelManager {
     /**
      * Load a kernel runtime with source fallback + per-attempt timeout.
      *
-     * Candidate order: a per-kernel override (localStorage scirepl_<lang>_source,
-     * a URL), then the kernel's own primaryUrl (which still honors version
-     * overrides), then any mirror/local sources from window.KERNEL_CONFIG. Each
-     * attempt is bounded by timeoutMs so a slow/dead source fails fast and falls
-     * through instead of hanging the WASM thread (which would crash the WebView).
+     * Candidate selection has three deliberately strict modes:
+     *   1. no override: bundled local first (when preferred), then the pinned
+     *      tested source and its pinned mirrors;
+     *   2. explicit version: only sources expanded for that exact version;
+     *      bundled local is eligible only when it is the same tested version;
+     *   3. explicit source: only that source. `local` is a strict request for a
+     *      declared bundled source, never a hint followed by a silent CDN swap.
+     *
+     * Each attempt is bounded by timeoutMs so a slow/dead source fails fast.
      *
      * @param {string} language
      * @param {string} primaryUrl  the kernel's computed primary source URL
@@ -346,25 +732,59 @@ class KernelManager {
 
         const candidates = [];
         const seen = new Set();
-        const localUrls = new Set(
-            (cfg.sources || [])
-                .filter(source => source && source.type === 'local' && source.url)
-                .map(source => source.url)
-        );
+        const localSources = (cfg.sources || [])
+            .filter(source => source && source.type === 'local' && source.url);
+        const localUrls = new Set(localSources.map(source => source.url));
         const add = (url) => { if (url && !seen.has(url)) { seen.add(url); candidates.push(url); } };
 
-        // Per-kernel override (a URL); 'local' means "prefer the bundled source".
-        const override = (typeof localStorage !== 'undefined') && localStorage.getItem('scirepl_' + language + '_source');
-        if (override && override !== 'local') add(override);
-        // Local-first when the build bundled this kernel (cfg.preferLocal) or the
-        // user override asked for 'local': try the bundled copy before the CDN.
-        if (cfg.preferLocal || override === 'local') {
-            for (const s of (cfg.sources || [])) { if (s && s.type === 'local' && s.url) add(s.url); }
+        // Per-kernel override (a URL); 'local' means "strictly use the bundled source".
+        const storedOverride = (typeof localStorage !== 'undefined')
+            && localStorage.getItem('scirepl_' + language + '_source');
+        const override = storedOverride
+            ? this.validateRuntimeSourceOverride(language, storedOverride)
+            : storedOverride;
+        if (override === 'local' && localUrls.size === 0) {
+            throw new Error(this._t('kernelManager.localSourceUnavailable',
+                'No bundled local source is configured for {language}.', { language }));
         }
-        // Kernel's own primary (honors version override).
-        add(primaryUrl);
-        // Mirrors / remaining (incl. local as a last resort) from config.
-        for (const s of (cfg.sources || [])) { if (s && s.url) add(s.url); }
+        const version = this._runtimeVersionSelection(language, cfg);
+
+        if (override && override !== 'local') {
+            // A custom executable source is an explicit trust decision. If it
+            // fails, surface that failure rather than running different code.
+            add(override);
+        } else if (override === 'local') {
+            if (version.explicit && !version.sameAsTested) {
+                throw new Error(this._t('kernelManager.localVersionMismatch',
+                    'The bundled {language} runtime is the tested version and cannot satisfy the selected version.',
+                    { language }));
+            }
+            for (const source of localSources) add(source.url);
+        } else if (version.explicit) {
+            // An explicitly selected version must remain version-coherent across
+            // fallback. Never append pinned-default URLs for another version.
+            if (version.sameAsTested && cfg.preferLocal) {
+                for (const source of localSources) add(source.url);
+            }
+            add(primaryUrl);
+            if (cfg.overrideUrlTemplate) {
+                add(this._expandRuntimeSourceTemplate(cfg.overrideUrlTemplate, version.fields));
+            }
+            for (const source of (cfg.sources || [])) {
+                if (!source || source.type === 'local') continue;
+                if (source.urlTemplate) {
+                    add(this._expandRuntimeSourceTemplate(source.urlTemplate, version.fields));
+                } else if (version.sameAsTested) {
+                    add(source.url);
+                }
+            }
+        } else {
+            if (cfg.preferLocal) {
+                for (const source of localSources) add(source.url);
+            }
+            add(primaryUrl);
+            for (const source of (cfg.sources || [])) add(source?.url);
+        }
 
         if (!candidates.length) throw new Error(this._t('kernelManager.noSources',
             'No sources configured for {language}', { language }));
@@ -374,13 +794,15 @@ class KernelManager {
         for (const url of candidates) {
             try {
                 if (!localUrls.has(url) && !externalFallbackApproved &&
-                    KernelManager.CDN_KERNELS.has(language)) {
+                    this.isNetworkRuntime(language)) {
                     await this._ensurePrivacyConsent();
                     await this._confirmDownload(language);
                     externalFallbackApproved = true;
                 }
                 console.log('[KernelSource] ' + language + ': loading ' + url);
-                return await this._withTimeout(loadFn(url), timeoutMs, url);
+                const result = await this._withTimeout(loadFn(url), timeoutMs, url);
+                this._stageRuntimeSource(language, url);
+                return result;
             } catch (e) {
                 lastErr = e;
                 console.warn('[KernelSource] ' + language + ' source failed: ' + url + ' — ' + (e && e.message || e));
@@ -390,6 +812,107 @@ class KernelManager {
             'kernelManager.unknownError', 'unknown');
         throw new Error(this._t('kernelManager.allSourcesFailed',
             'All sources failed for {language}: {error}', { language, error }));
+    }
+
+    /**
+     * Record the exact source that completed successfully, then notify an open
+     * Languages modal so it can refresh without polling.  The URL/path is the
+     * authoritative session fact; `tested` says whether it is one of the
+     * generated, release-pinned sources rather than a user override.
+     */
+    _runtimeSourceEntry(language, url) {
+        const cfg = (typeof window !== 'undefined' && window.KERNEL_CONFIG
+            && window.KERNEL_CONFIG.languages && window.KERNEL_CONFIG.languages[language]) || {};
+        const configuredSource = (cfg.sources || []).find(source => source && source.url === url);
+        return {
+            language,
+            source: url,
+            tested: !!configuredSource,
+            sourceType: configuredSource?.type || 'override',
+            version: this._inferRuntimeVersion(language, url, cfg, configuredSource),
+        };
+    }
+
+    _stageRuntimeSource(language, url) {
+        this._pendingRuntimeSources[language] = this._runtimeSourceEntry(language, url);
+    }
+
+    _commitRuntimeSource(language) {
+        const pending = this._pendingRuntimeSources[language];
+        if (!pending) return null;
+        delete this._pendingRuntimeSources[language];
+        const entry = { ...pending, loadedAt: Date.now() };
+        this._runtimeSessionSources[language] = entry;
+        this._dispatchRuntimeSourceLoaded(entry);
+        return entry;
+    }
+
+    _discardPendingRuntimeSource(language) {
+        delete this._pendingRuntimeSources[language];
+    }
+
+    /**
+     * Test/support helper for a source known to have completed initialization.
+     * Runtime loaders themselves must stage via loadKernelSource() and let
+     * ensureReady() commit only after init() returns successfully.
+     */
+    _recordRuntimeSource(language, url) {
+        this._stageRuntimeSource(language, url);
+        return this._commitRuntimeSource(language);
+    }
+
+    _inferRuntimeVersion(language, url, cfg, configuredSource) {
+        if (language === 'prolog') {
+            const match = String(url).match(/npm-swipl-wasm\/(\d+\/\d+\/\d+)\/dynamic-import\.js/i);
+            if (match) return match[1];
+            if (configuredSource) return cfg.versionSelector || cfg.version || null;
+            const selected = typeof localStorage !== 'undefined'
+                && localStorage.getItem('scirepl_swipl_version');
+            if (/^\d+\.\d+\.\d+$/.test(selected || '')) return selected.replaceAll('.', '/');
+            if (/^\d+\/\d+$/.test(selected || '')) return '3/' + selected;
+            if (/^\d+\/\d+\/\d+$/.test(selected || '')) return selected;
+            return null;
+        }
+        if (language === 'r') {
+            if (configuredSource) return cfg.versionTag || cfg.version || null;
+            const official = String(url).match(/(?:webr@|\/v)(\d+\.\d+\.\d+)(?:\/|$)/i);
+            if (official) return official[1];
+            const sourceOverride = typeof localStorage !== 'undefined'
+                && localStorage.getItem('scirepl_r_source');
+            if (sourceOverride && sourceOverride !== 'local') return null;
+            const selected = typeof localStorage !== 'undefined'
+                && localStorage.getItem('scirepl_webr_version');
+            return selected && selected !== 'latest' ? selected : null;
+        }
+        return configuredSource ? (cfg.versionTag || cfg.versionSelector || cfg.version || null) : null;
+    }
+
+    _dispatchRuntimeSourceLoaded(entry) {
+        if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+            const EventClass = (typeof CustomEvent === 'function' && CustomEvent)
+                || (typeof window.CustomEvent === 'function' && window.CustomEvent);
+            if (EventClass) {
+                window.dispatchEvent(new EventClass('scirepl:runtime-source-loaded', {
+                    detail: { ...entry },
+                }));
+            }
+        }
+    }
+
+    /** Refine a source record with the version reported by the initialized runtime. */
+    recordRuntimeLoadedVersion(language, version) {
+        const pending = this._pendingRuntimeSources[language];
+        const entry = pending || this._runtimeSessionSources[language];
+        if (!entry || version === undefined || version === null || version === '') return;
+        entry.version = String(version);
+        // A provisional source must remain invisible until init() finishes.
+        if (!pending) this._dispatchRuntimeSourceLoaded(entry);
+    }
+
+    /** Return a copy so callers cannot mutate the manager's session record. */
+    getRuntimeSessionSource(language) {
+        const entry = this._runtimeSessionSources[language];
+        return entry ? { ...entry } : null;
     }
 
     /**
@@ -415,6 +938,10 @@ class KernelManager {
     _loadScript(url) {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
+            // Anonymous CORS keeps the response visible to the service worker.
+            // Without this, a cross-origin classic script is an opaque status-0
+            // response, which the immutable runtime cache deliberately rejects.
+            script.crossOrigin = 'anonymous';
             script.src = url;
             script.onload = () => resolve();
             script.onerror = () => reject(new Error(this._t(
@@ -495,8 +1022,10 @@ class KernelManager {
 }
 
 // Kernels that require CDN downloads
-KernelManager.CDN_KERNELS = new Set(['python', 'prolog', 'r', 'lua']);
-KernelManager.CDN_CACHE = 'scirepl-cdn-v2';
+KernelManager.CDN_KERNELS = new Set(['python', 'prolog', 'r', 'lua', 'clojurescript']);
+KernelManager.CDN_CACHE = 'scirepl-cdn-v3';
+KernelManager.PRIVACY_POLICY_REVISION_KEY = 'scirepl_privacy_accepted_revision';
+KernelManager.PRIVACY_POLICY_REVISION = '2026-08-runtime-metadata-v1';
 
 // Runtime display info for download confirmation modal
 KernelManager.RUNTIME_INFO = {
@@ -504,6 +1033,7 @@ KernelManager.RUNTIME_INFO = {
     r:      { name: 'R (webR)',         size: '~50 MB', cdnHost: 'webr.r-wasm.org' },
     prolog: { name: 'Prolog (SWI)',     size: '~10 MB', cdnHost: 'swi-prolog.github.io' },
     lua:    { name: 'Lua (Fengari)',    size: '~200 KB', cdnHost: 'cdn.jsdelivr.net' },
+    clojurescript: { name: 'ClojureScript (Scittle)', size: '~900 KB', cdnHost: 'cdn.jsdelivr.net' },
 };
 
 // Export singleton

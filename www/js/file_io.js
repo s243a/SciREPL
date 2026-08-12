@@ -8,6 +8,18 @@ class FileIO {
         this.menuModal = document.getElementById('menu-modal');
         this.menuBtn = document.getElementById('menu-btn');
         this.fileInput = document.getElementById('file-input');
+        this._latestRuntimeMetadata = new Map();
+        this._latestRuntimeRequests = new Map();
+
+        // A runtime may finish loading while the Languages modal is open.
+        // Refresh its factual session source immediately, and rebuild translated
+        // dynamic labels when the UI locale changes.
+        this._onRuntimeSourceLoaded = (event) => {
+            if (event?.detail?.language) this._refreshRuntimeVersionStatus(event.detail.language);
+        };
+        this._onRuntimeLocaleChanged = () => this._refreshRuntimeVersionStatuses();
+        window.addEventListener('scirepl:runtime-source-loaded', this._onRuntimeSourceLoaded);
+        window.addEventListener('i18n:changed', this._onRuntimeLocaleChanged);
 
         this.init();
     }
@@ -221,6 +233,7 @@ class FileIO {
             if (resetPrivacy) {
                 resetPrivacy.addEventListener('click', () => {
                     localStorage.removeItem('scirepl_privacy_accepted');
+                    localStorage.removeItem('scirepl_privacy_accepted_revision');
                     this._setText(resetPrivacy, 'fileIo.privacyConsentReset', 'Privacy consent reset');
                     setTimeout(() => {
                         this._setText(resetPrivacy, 'fileIo.resetPrivacyConsent', 'Reset Privacy Consent');
@@ -1505,7 +1518,7 @@ class FileIO {
             card.className = 'memory-kernel-card';
 
             const dot = document.createElement('span');
-            const isCDN = KernelManager.CDN_KERNELS.has(k.language);
+            const isCDN = km.isNetworkRuntime(k.language);
             dot.className = 'memory-dot' + (!isCDN || (k.loaded && k.ready) ? ' loaded' : '');
             card.appendChild(dot);
 
@@ -1517,7 +1530,7 @@ class FileIO {
             info.appendChild(nameEl);
             const statusEl = document.createElement('div');
             statusEl.className = 'memory-kernel-status';
-            const isBundled = !KernelManager.CDN_KERNELS.has(k.language);
+            const isBundled = !isCDN;
             if (isBundled) {
                 this._setText(statusEl, 'fileIo.memoryBundled', 'Bundled');
             } else if (k.ready) {
@@ -1534,7 +1547,7 @@ class FileIO {
             card.appendChild(sizeEl);
 
             // Load/Unload buttons for CDN kernels (not JavaScript/Bash)
-            if (KernelManager.CDN_KERNELS.has(k.language)) {
+            if (isCDN) {
                 const runtimeInfo = KernelManager.RUNTIME_INFO[k.language];
                 const btnWrap = document.createElement('div');
                 btnWrap.className = 'memory-btn-wrap';
@@ -1573,12 +1586,12 @@ class FileIO {
                     });
                     btnWrap.appendChild(btn);
 
-                    // Show "Clear Cache" if CDN cache has entries for this runtime
-                    if (runtimeInfo && runtimeInfo.cdnHost) {
+                    // Show "Clear Cache" only for entries belonging to this
+                    // runtime. Several runtimes share jsDelivr, so clearing by
+                    // hostname would silently erase unrelated downloads.
+                    if (runtimeInfo) {
                         try {
-                            const cdnCache = await caches.open(KernelManager.CDN_CACHE);
-                            const keys = await cdnCache.keys();
-                            const hasCached = keys.some(r => new URL(r.url).hostname === runtimeInfo.cdnHost);
+                            const hasCached = await km.hasRuntimeCacheEntries(k.language);
                             if (hasCached) {
                                 const clearBtn = document.createElement('button');
                                 clearBtn.className = 'memory-unload-btn';
@@ -1587,13 +1600,7 @@ class FileIO {
                                     this._setText(clearBtn, 'fileIo.clearing', 'Clearing...');
                                     clearBtn.disabled = true;
                                     try {
-                                        const cache = await caches.open(KernelManager.CDN_CACHE);
-                                        const allKeys = await cache.keys();
-                                        await Promise.all(
-                                            allKeys
-                                                .filter(r => new URL(r.url).hostname === runtimeInfo.cdnHost)
-                                                .map(r => cache.delete(r))
-                                        );
+                                        await km.clearRuntimeCache(k.language);
                                     } catch (e) {
                                         console.warn('Failed to clear cache for ' + k.language + ':', e);
                                     }
@@ -2119,13 +2126,199 @@ class FileIO {
     /**
      * Per-kernel version override metadata for the Languages modal.
      * Each entry's settingKey is read by the kernel at init time;
-     * leaving the input blank uses the kernel's pinned default.
-     * Use "latest" to opt into the rolling release.
+     * leaving the input blank uses the kernel's pinned default.  Version values
+     * are validated separately from the custom source URL setting.
      */
     static KERNEL_VERSION_META = {
-        r:      { settingKey: 'scirepl_webr_version',     defaultVersion: 'v0.5.4' },
-        prolog: { settingKey: 'scirepl_swipl_version',    defaultVersion: 'latest' },
+        r: {
+            settingKey: 'scirepl_webr_version',
+            example: 'v0.5.4',
+        },
+        prolog: {
+            settingKey: 'scirepl_swipl_version',
+            example: '3/8/2',
+        },
     };
+
+    _testedRuntimeVersion(langId) {
+        const cfg = window.KERNEL_CONFIG?.languages?.[langId] || {};
+        return String(cfg.versionTag || cfg.versionSelector || cfg.version || '');
+    }
+
+    _normalizeRuntimeVersion(langId, value) {
+        const version = String(value || '').trim();
+        if (!version) return version;
+        if (langId === 'r') {
+            if (version === 'latest') return version;
+            if (/^v?\d+\.\d+\.\d+$/.test(version)) {
+                return version.startsWith('v') ? version : 'v' + version;
+            }
+        }
+        if (langId === 'prolog') {
+            if (/^3\.\d+\.\d+$/.test(version)) return version.replaceAll('.', '/');
+            if (/^\d+\/\d+$/.test(version)) return '3/' + version;
+            if (/^3\/\d+\/\d+$/.test(version)) return version;
+        }
+        const example = FileIO.KERNEL_VERSION_META[langId]?.example || '1.2.3';
+        const key = langId === 'prolog'
+            ? 'fileIo.runtimeInvalidPrologVersion'
+            : 'fileIo.runtimeInvalidVersion';
+        const fallback = langId === 'prolog'
+            ? 'Invalid version. Use a selector such as {example}; use Check latest for the newest compatible 3.x release, or the separate source override for a custom URL.'
+            : 'Invalid version. Use {example} or "latest"; use the separate source override for a custom URL.';
+        throw new Error(this._t(key, fallback,
+            { example }));
+    }
+
+    _latestRuntimeSpec(langId) {
+        return window.KERNEL_CONFIG?.languages?.[langId]?.versionMetadata || null;
+    }
+
+    _versionFromMetadata(langId, spec, data) {
+        if (spec.strategy === 'dist-tag-latest') {
+            const version = String(data?.tags?.latest || '');
+            if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error('latest tag is not a stable semantic version');
+            return this._normalizeRuntimeVersion(langId, version);
+        }
+        if (spec.strategy === 'highest-stable-compatible-major') {
+            const major = Number(spec.compatibleMajor);
+            const versions = (Array.isArray(data?.versions) ? data.versions : [])
+                .filter(version => /^\d+\.\d+\.\d+$/.test(version))
+                .map(version => ({
+                    version,
+                    parts: version.split('.').map(Number),
+                }))
+                .filter(item => item.parts[0] === major)
+                .sort((a, b) => b.parts[0] - a.parts[0]
+                    || b.parts[1] - a.parts[1]
+                    || b.parts[2] - a.parts[2]);
+            if (!versions.length) throw new Error(`no stable compatible ${major}.x release`);
+            return this._normalizeRuntimeVersion(langId, versions[0].version);
+        }
+        throw new Error(`unknown metadata strategy: ${spec.strategy || '<missing>'}`);
+    }
+
+    async _checkLatestRuntime(langId, { requestConsent = false, force = false } = {}) {
+        const spec = this._latestRuntimeSpec(langId);
+        if (!spec?.url) return;
+
+        if (!window.kernelManager?.hasCurrentPrivacyConsent?.()) {
+            if (!requestConsent) return;
+            try {
+                if (!window.kernelManager?._ensurePrivacyConsent) return;
+                await window.kernelManager._ensurePrivacyConsent({ requireCurrentRevision: true });
+            } catch (_) {
+                return; // Dismissing consent must not make a registry request.
+            }
+        }
+
+        if (this._latestRuntimeRequests.has(langId)) {
+            return this._latestRuntimeRequests.get(langId);
+        }
+        const existing = this._latestRuntimeMetadata.get(langId);
+        if (!force && (existing?.status === 'available' || existing?.status === 'unavailable')) return;
+
+        this._latestRuntimeMetadata.set(langId, { status: 'checking' });
+        this._refreshRuntimeVersionStatus(langId);
+        const request = (async () => {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 8000);
+            try {
+                const response = await fetch(spec.url, {
+                    signal: controller.signal,
+                    cache: 'no-store',
+                    credentials: 'omit',
+                    referrerPolicy: 'no-referrer',
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const version = this._versionFromMetadata(langId, spec, await response.json());
+                this._latestRuntimeMetadata.set(langId, { status: 'available', version });
+            } catch (error) {
+                console.warn(`[RuntimeMetadata] ${langId}: latest lookup failed`, error);
+                this._latestRuntimeMetadata.set(langId, { status: 'unavailable' });
+            } finally {
+                clearTimeout(timer);
+                this._latestRuntimeRequests.delete(langId);
+                this._refreshRuntimeVersionStatus(langId);
+            }
+        })();
+        this._latestRuntimeRequests.set(langId, request);
+        return request;
+    }
+
+    _refreshRuntimeVersionStatuses() {
+        for (const langId of Object.keys(FileIO.KERNEL_VERSION_META)) {
+            this._refreshRuntimeVersionStatus(langId);
+        }
+    }
+
+    _refreshRuntimeVersionStatus(langId) {
+        const wrap = document.querySelector(`[data-runtime-status="${langId}"]`);
+        if (!wrap) return;
+
+        const versionMeta = FileIO.KERNEL_VERSION_META[langId];
+        const testedVersion = this._testedRuntimeVersion(langId);
+        const sourceOverride = localStorage.getItem(`scirepl_${langId}_source`);
+        const versionOverride = localStorage.getItem(versionMeta.settingKey);
+        let selected = sourceOverride || versionOverride || testedVersion;
+        if (selected === 'latest') {
+            selected = this._t('fileIo.runtimeRollingUnverified',
+                '{version} (rolling/unverified)', { version: selected });
+        }
+
+        this._setText(wrap.querySelector('[data-runtime-tested]'),
+            'fileIo.runtimeTestedVersion', 'Tested: {version}', { version: testedVersion });
+        this._setText(wrap.querySelector('[data-runtime-selected]'),
+            'fileIo.runtimeSelectedVersion', 'Selected: {version}', { version: selected });
+
+        const latest = this._latestRuntimeMetadata.get(langId) || { status: 'not-checked' };
+        const latestNode = wrap.querySelector('[data-runtime-latest]');
+        if (latest.status === 'available') {
+            this._setText(latestNode, 'fileIo.runtimeLatestAvailable',
+                'Latest available: {version}', { version: latest.version });
+        } else if (latest.status === 'checking') {
+            this._setText(latestNode, 'fileIo.runtimeLatestChecking', 'Latest available: checking…');
+        } else if (latest.status === 'unavailable') {
+            this._setText(latestNode, 'fileIo.runtimeLatestUnavailable', 'Latest available: unavailable');
+        } else {
+            this._setText(latestNode, 'fileIo.runtimeLatestNotChecked', 'Latest available: not checked');
+        }
+
+        const loaded = window.kernelManager?.getRuntimeSessionSource?.(langId);
+        const loadedVersionNode = wrap.querySelector('[data-runtime-loaded-version]');
+        const loadedSourceNode = wrap.querySelector('[data-runtime-loaded-source]');
+        if (loaded) {
+            const loadedVersion = loaded.version || this._t(
+                'fileIo.runtimeVersionUnknown', 'Unknown');
+            this._setText(loadedVersionNode, 'fileIo.runtimeLoadedVersion',
+                'Loaded version: {version}', { version: loadedVersion });
+            this._setText(loadedSourceNode, 'fileIo.runtimeLoadedSource',
+                'Loaded source: {source}', { source: loaded.source });
+        } else {
+            const notLoaded = this._t('fileIo.runtimeNotLoaded', 'Not loaded this session');
+            this._setText(loadedVersionNode, 'fileIo.runtimeLoadedVersion',
+                'Loaded version: {version}', { version: notLoaded });
+            this._setText(loadedSourceNode, 'fileIo.runtimeLoadedSource',
+                'Loaded source: {source}', { source: notLoaded });
+        }
+
+        const reset = wrap.querySelector('[data-runtime-use-tested]');
+        if (reset) reset.disabled = !sourceOverride && !versionOverride;
+        const check = wrap.querySelector('[data-runtime-check-latest]');
+        if (check) {
+            check.hidden = latest.status === 'available';
+            check.disabled = latest.status === 'checking';
+        }
+        const useLatest = wrap.querySelector('[data-runtime-use-latest]');
+        if (useLatest) {
+            useLatest.hidden = latest.status !== 'available';
+            useLatest.disabled = latest.status !== 'available';
+        }
+        const latestRisk = wrap.querySelector('[data-runtime-latest-risk]');
+        if (latestRisk) {
+            latestRisk.hidden = latest.status !== 'available' || latest.version === testedVersion;
+        }
+    }
 
     /**
      * Whether a language is enabled BY DEFAULT in the active build profile.
@@ -2190,14 +2383,14 @@ class FileIO {
             row.className = 'settings-item';
 
             const label = document.createElement('label');
-            label.style.flex = '1';
+            label.className = 'language-toggle-label';
             const cb = document.createElement('input');
             cb.type = 'checkbox';
             cb.className = 'lang-toggle';
             cb.dataset.lang = lang.id;
             cb.checked = enabled.has(lang.id);
             label.appendChild(cb);
-            label.appendChild(document.createTextNode(' ' + lang.label));
+            label.appendChild(document.createTextNode(lang.label));
 
             // Show runtime size hint for CDN kernels
             const info = KernelManager.RUNTIME_INFO[lang.id];
@@ -2213,35 +2406,211 @@ class FileIO {
             // Setting key + default version per kernel.
             const versionMeta = FileIO.KERNEL_VERSION_META[lang.id];
             if (versionMeta) {
+                row.classList.add('language-runtime-item');
                 const versionWrap = document.createElement('span');
                 versionWrap.className = 'kernel-version-wrap';
-                versionWrap.style.marginLeft = '0.5em';
+                versionWrap.dataset.runtimeStatus = lang.id;
+
+                const testedVersion = this._testedRuntimeVersion(lang.id);
+                const controls = document.createElement('span');
+                controls.className = 'kernel-version-controls';
 
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'kernel-version-input';
                 input.dataset.lang = lang.id;
                 input.dataset.settingKey = versionMeta.settingKey;
-                input.placeholder = versionMeta.defaultVersion;
-                this._setTitle(input, 'fileIo.versionInputTitle',
-                    'Version (default: {defaultVersion}). Use "latest" for the rolling release. Reload page after changing.',
-                    { defaultVersion: versionMeta.defaultVersion });
-                input.style.width = '8em';
+                input.placeholder = testedVersion;
+                const inputTitleKey = lang.id === 'prolog'
+                    ? 'fileIo.prologVersionInputTitle'
+                    : 'fileIo.versionInputTitle';
+                const inputTitleFallback = lang.id === 'prolog'
+                    ? 'Package selector (tested: {defaultVersion}). Use Check latest for the newest compatible 3.x release. Reload after changing.'
+                    : 'Version (default: {defaultVersion}). Use "latest" for the rolling release. Reload page after changing.';
+                this._setTitle(input, inputTitleKey, inputTitleFallback,
+                    { defaultVersion: testedVersion });
                 input.value = (typeof localStorage !== 'undefined'
                     && localStorage.getItem(versionMeta.settingKey)) || '';
                 input.addEventListener('change', (e) => {
-                    const v = e.target.value.trim();
-                    if (v) {
-                        localStorage.setItem(versionMeta.settingKey, v);
-                    } else {
-                        localStorage.removeItem(versionMeta.settingKey);
+                    const previous = localStorage.getItem(versionMeta.settingKey) || '';
+                    try {
+                        const v = this._normalizeRuntimeVersion(lang.id, e.target.value);
+                        e.target.setCustomValidity('');
+                        e.target.value = v;
+                        if (v) localStorage.setItem(versionMeta.settingKey, v);
+                        else localStorage.removeItem(versionMeta.settingKey);
+                    } catch (error) {
+                        e.target.value = previous;
+                        e.target.setCustomValidity(error.message);
+                        e.target.reportValidity();
                     }
+                    this._refreshRuntimeVersionStatus(lang.id);
                 });
-                versionWrap.appendChild(input);
+
+                const useTested = document.createElement('button');
+                useTested.type = 'button';
+                useTested.className = 'vfs-btn';
+                useTested.dataset.runtimeUseTested = '';
+                this._setText(useTested, 'fileIo.runtimeUseTestedVersion', 'Use tested version');
+                useTested.addEventListener('click', () => {
+                    localStorage.removeItem(versionMeta.settingKey);
+                    localStorage.removeItem(`scirepl_${lang.id}_source`);
+                    input.value = '';
+                    input.setCustomValidity('');
+                    sourceInput.value = '';
+                    sourceInput.setCustomValidity('');
+                    this._refreshRuntimeVersionStatus(lang.id);
+                    const message = versionWrap.querySelector('[data-runtime-reset-message]');
+                    this._setText(message, 'fileIo.runtimeUseTestedVersionReload',
+                        'Tested version selected. Reload the app to apply it.');
+                });
+
+                controls.appendChild(input);
+                controls.appendChild(useTested);
+                versionWrap.appendChild(controls);
+
+                const sourceDetails = document.createElement('details');
+                sourceDetails.className = 'kernel-source-details';
+                sourceDetails.dataset.runtimeSourceDetails = '';
+                const sourceSummary = document.createElement('summary');
+                this._setText(sourceSummary, 'fileIo.runtimeAdvancedSourceOverride',
+                    'Advanced source override');
+                sourceDetails.appendChild(sourceSummary);
+                const sourceWarning = document.createElement('small');
+                sourceWarning.className = 'export-format-desc kernel-source-warning';
+                sourceWarning.style.display = 'block';
+                this._setText(sourceWarning, 'fileIo.runtimeCustomSourceWarning',
+                    'A custom runtime is executable code with access to notebook data. Use only sources you trust.');
+                sourceDetails.appendChild(sourceWarning);
+
+                const sourceLabel = document.createElement('label');
+                sourceLabel.className = 'export-format-desc kernel-source-label';
+                const sourceLabelText = document.createElement('span');
+                this._setText(sourceLabelText, 'fileIo.runtimeSourceOverride', 'Custom source');
+                sourceLabel.appendChild(sourceLabelText);
+
+                const sourceInput = document.createElement('input');
+                sourceInput.type = 'text';
+                sourceInput.className = 'kernel-source-input';
+                sourceInput.dataset.lang = lang.id;
+                sourceInput.dataset.settingKey = `scirepl_${lang.id}_source`;
+                const hasLocalSource = (window.KERNEL_CONFIG?.languages?.[lang.id]?.sources || [])
+                    .some(source => source?.type === 'local' && source.url);
+                const sourcePlaceholderKey = hasLocalSource
+                    ? 'fileIo.runtimeSourceInputPlaceholder'
+                    : 'fileIo.runtimeSourceInputPlaceholderUrl';
+                const sourcePlaceholderFallback = hasLocalSource
+                    ? 'Custom source URL or local'
+                    : 'Custom source URL';
+                sourceInput.placeholder = this._t(sourcePlaceholderKey, sourcePlaceholderFallback);
+                sourceInput.dataset.i18nPlaceholder = sourcePlaceholderKey;
+                const sourceTitleKey = hasLocalSource
+                    ? 'fileIo.runtimeSourceInputTitle'
+                    : 'fileIo.runtimeSourceInputTitleUrl';
+                const sourceTitleFallback = hasLocalSource
+                    ? 'Custom runtime source URL or "local". Leave blank to use the selected version. Reload after changing.'
+                    : 'Custom runtime source URL. Leave blank to use the selected version. Reload after changing.';
+                this._setTitle(sourceInput, sourceTitleKey, sourceTitleFallback);
+                sourceInput.value = localStorage.getItem(sourceInput.dataset.settingKey) || '';
+                const electronCustomSourceAllowlist = window.sciREPLPlatform?.runtimeSourceAllowlist;
+                const customSourceUiAllowed = !window.sciREPLPlatform
+                    || (Array.isArray(electronCustomSourceAllowlist)
+                        && Object.isFrozen(electronCustomSourceAllowlist));
+                sourceInput.disabled = !customSourceUiAllowed;
+                if (!customSourceUiAllowed) {
+                    sourceDetails.open = true;
+                    sourceDetails.classList.add('is-disabled');
+                    sourceDetails.dataset.runtimeSourcePolicyNotice = '';
+                    sourceSummary.setAttribute('aria-disabled', 'true');
+                    sourceSummary.addEventListener('click', (event) => event.preventDefault());
+                    this._setText(sourceWarning, 'kernelManager.runtimeSourceElectronBlocked',
+                        'Custom runtime sources are disabled by the Electron host policy.');
+                }
+                sourceInput.addEventListener('change', (event) => {
+                    const previous = localStorage.getItem(sourceInput.dataset.settingKey) || '';
+                    const value = event.target.value.trim();
+                    try {
+                        const normalized = window.kernelManager.validateRuntimeSourceOverride(
+                            lang.id, value);
+                        event.target.setCustomValidity('');
+                        event.target.value = normalized;
+                        if (normalized) localStorage.setItem(
+                            sourceInput.dataset.settingKey, normalized);
+                        else localStorage.removeItem(sourceInput.dataset.settingKey);
+                    } catch (error) {
+                        event.target.value = previous;
+                        event.target.setCustomValidity(error.message
+                            || this._t(sourceTitleKey, sourceTitleFallback));
+                        event.target.reportValidity();
+                    }
+                    this._refreshRuntimeVersionStatus(lang.id);
+                });
+                sourceLabel.appendChild(sourceInput);
+                if (customSourceUiAllowed) sourceDetails.appendChild(sourceLabel);
+                versionWrap.appendChild(sourceDetails);
+
+                for (const attribute of ['tested', 'latest', 'selected', 'loadedVersion', 'loadedSource']) {
+                    const status = document.createElement('small');
+                    status.className = 'export-format-desc kernel-runtime-status-line';
+                    status.dataset[`runtime${attribute[0].toUpperCase()}${attribute.slice(1)}`] = '';
+                    versionWrap.appendChild(status);
+                }
+
+                const latestActions = document.createElement('span');
+                latestActions.className = 'kernel-latest-actions';
+                const checkLatest = document.createElement('button');
+                checkLatest.type = 'button';
+                checkLatest.className = 'vfs-btn';
+                checkLatest.dataset.runtimeCheckLatest = '';
+                this._setText(checkLatest, 'fileIo.runtimeCheckLatest', 'Check latest');
+                checkLatest.addEventListener('click', () => {
+                    void this._checkLatestRuntime(lang.id, { requestConsent: true, force: true });
+                });
+                const useLatest = document.createElement('button');
+                useLatest.type = 'button';
+                useLatest.className = 'vfs-btn';
+                useLatest.dataset.runtimeUseLatest = '';
+                useLatest.hidden = true;
+                this._setText(useLatest, 'fileIo.runtimeUseLatestAvailable', 'Use latest available');
+                useLatest.addEventListener('click', () => {
+                    const latest = this._latestRuntimeMetadata.get(lang.id);
+                    if (latest?.status !== 'available') return;
+                    localStorage.setItem(versionMeta.settingKey, latest.version);
+                    localStorage.removeItem(`scirepl_${lang.id}_source`);
+                    input.value = latest.version;
+                    input.setCustomValidity('');
+                    sourceInput.value = '';
+                    sourceInput.setCustomValidity('');
+                    this._refreshRuntimeVersionStatus(lang.id);
+                    const message = versionWrap.querySelector('[data-runtime-reset-message]');
+                    this._setText(message, 'fileIo.runtimeUseLatestReload',
+                        'Latest available version selected. Reload the app to apply it.');
+                });
+                latestActions.appendChild(checkLatest);
+                latestActions.appendChild(useLatest);
+                versionWrap.appendChild(latestActions);
+
+                const latestRisk = document.createElement('small');
+                latestRisk.className = 'export-format-desc kernel-runtime-status-line';
+                latestRisk.dataset.runtimeLatestRisk = '';
+                this._setText(latestRisk, 'fileIo.runtimeLatestRisk',
+                    'Latest available is not tested with this SciREPL release and may break runtimes, packages, or workbooks.');
+                versionWrap.appendChild(latestRisk);
+
+                const resetMessage = document.createElement('small');
+                resetMessage.className = 'export-format-desc kernel-runtime-status-line';
+                resetMessage.dataset.runtimeResetMessage = '';
+                versionWrap.appendChild(resetMessage);
                 row.appendChild(versionWrap);
             }
 
             list.appendChild(row);
+            if (versionMeta) {
+                this._refreshRuntimeVersionStatus(lang.id);
+                if (window.kernelManager?.hasCurrentPrivacyConsent?.()) {
+                    void this._checkLatestRuntime(lang.id);
+                }
+            }
         }
 
         // Hint about reloading
@@ -2249,7 +2618,7 @@ class FileIO {
         note.className = 'export-format-desc';
         note.style.marginTop = '0.75em';
         this._setText(note, 'fileIo.versionChangesNote',
-            'Version changes apply on next page reload. Leave blank to use the default. Use "latest" for the rolling release (may break unexpectedly).');
+            'Version changes apply on next page reload. Leave blank to use the tested default. For R, "latest" selects a rolling unverified release; for Prolog, use Check latest to select the newest compatible 3.x release.');
         list.appendChild(note);
     }
 

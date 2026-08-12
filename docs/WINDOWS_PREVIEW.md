@@ -79,11 +79,9 @@ cache, which is empty here. That one checkbox is the whole difference; see
 The privacy notice is separate and is shown **once** — accepting it is
 remembered, and it can be revoked from Settings.
 
-Also absent by design:
-
-- the **Ko-fi support button** in Help. The widget is a third-party script and
-  the shell's Content-Security-Policy does not allow it; the rest of Help is
-  unaffected. See `KOFI_EXCLUSION` in `desktop/electron/protocol.js`.
+The Ko-fi support entry in Help is a plain external HTTPS link. It loads no
+third-party script in the app and opens in the system browser under the same
+external-navigation policy as documentation links.
 
 Not present at all: any Pro content, Microsoft Store integration, licence or
 entitlement checking, or in-app purchase.

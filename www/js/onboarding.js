@@ -151,11 +151,14 @@
             // behind as new ones appear, treat every scirepl_ key as evidence
             // EXCEPT the first-run bookkeeping and the (possibly empty) session.
             const BOOKKEEPING = new Set([
-                'scirepl_privacy_accepted', 'scirepl_onboarding_seen',
+                'scirepl_privacy_accepted', 'scirepl_privacy_accepted_revision',
+                'scirepl_onboarding_seen',
                 'scirepl_auto_download', 'scirepl_language',
                 'scirepl_i18n_show_drafts', 'scirepl_draft_input',
                 'scirepl_session_v2', 'scirepl_session_v1',
                 'scirepl_appearance_quarantined_css',
+                'scirepl_appearance_show_tour_shortcut',
+                'scirepl_whats_new_seen_version',
             ]);
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
@@ -175,6 +178,7 @@
         }
 
         start() {
+            this._wasFirstRun = !this.hasSeen();
             // Idempotent: a second start (menu entry, consent-close, a stray
             // double-invoke) must not stack a second overlay or a second set of
             // global listeners — that was how one ArrowRight advanced two steps.
@@ -294,7 +298,7 @@
         go(delta) {
             const next = this.index + delta;
             if (next < 0) return;
-            if (next >= this.steps.length) return this.finish();
+            if (next >= this.steps.length) return this.finish({ completed: true });
             this.index = next;
             this._render();
         }
@@ -387,6 +391,26 @@
             });
 
             wrap.appendChild(select);
+
+            // The Tour shortcut is useful while learning, but it costs scarce
+            // header space on a phone. Put the choice in the very first tour
+            // panel so a newcomer can decide before the shortcut is introduced;
+            // Appearance offers the same setting later.
+            if (window.appearance) {
+                const label = document.createElement('label');
+                label.className = 'tour-language-shortcut';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = 'tour-show-shortcut';
+                checkbox.checked = window.appearance.getShowTourShortcut();
+                checkbox.addEventListener('change', () => {
+                    window.appearance.setShowTourShortcut(checkbox.checked);
+                });
+                const text = document.createElement('span');
+                text.textContent = (window.t || ((k) => k))('tour.language.showTourShortcut');
+                label.append(checkbox, text);
+                wrap.appendChild(label);
+            }
             return wrap;
         }
 
@@ -478,7 +502,7 @@
             }
         }
 
-        finish() {
+        finish({ completed = false } = {}) {
             this.markSeen();
             if (this._pendingStart) { clearTimeout(this._pendingStart); this._pendingStart = null; }
             this._teardownChrome();
@@ -493,6 +517,20 @@
                 const menu = document.getElementById('menu-btn');
                 if (menu && isVisible(menu)) menu.focus();
             }
+
+            // A first-run user who reaches Done has now seen the orientation;
+            // continue naturally into the release highlights. Skip/Escape and
+            // replayed tours do not open another dialog unexpectedly.
+            if (this._wasFirstRun && window.whatsNew) {
+                if (completed) {
+                    window.whatsNew.requestOpen({ source: 'tour-complete' });
+                } else {
+                    // Skip/Escape means "not now" for the orientation and must
+                    // not become a surprise What's New prompt on the next load.
+                    // Suppress only this app version; the next upgrade can ask.
+                    window.whatsNew.suppressCurrent();
+                }
+            }
         }
 
         /**
@@ -501,7 +539,13 @@
          */
         maybeStart() {
             if (this.hasSeen()) return;
-            if (this._isEstablished()) return this.markSeen('grandfathered');
+            if (this._isEstablished()) {
+                this.markSeen('grandfathered');
+                // Existing installs should not be walked through first-run UI,
+                // but they should still receive this version's one-time update.
+                if (window.whatsNew) window.whatsNew.requestAuto('grandfathered');
+                return;
+            }
 
             // Consent is requested lazily, and only for runtimes fetched from a
             // CDN. On a build with Python bundled it may never be requested at
@@ -594,7 +638,7 @@
      * *about* where Help is — so an entry only inside Help is circular for the
      * user who most needs it. The main menu carries one too.
      */
-    const REPLAY_TRIGGERS = ['btn-show-tour', 'btn-show-tour-menu'];
+    const REPLAY_TRIGGERS = ['btn-show-tour', 'btn-show-tour-menu', 'tour-shortcut-btn'];
 
     const ready = () => {
         for (const id of REPLAY_TRIGGERS) {

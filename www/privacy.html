@@ -22,8 +22,9 @@
     </style>
 </head>
 <body>
+    <!-- POLICY-CONTENT:START — keep synchronized with docs/privacy.html. -->
     <h1>SciREPL Privacy Policy</h1>
-    <p class="updated">Last updated: August 10, 2026</p>
+    <p class="updated">Last updated: August 11, 2026</p>
 
     <h2>Summary</h2>
     <p>SciREPL is designed to be a privacy-respecting application. All code execution happens locally on your device. We do not collect, store, or transmit any personal data to our servers.</p>
@@ -46,8 +47,9 @@
         <li><strong>R (webR)</strong> — about 50 MB from <code>webr.r-wasm.org</code>, downloaded when R is first used and cached locally.</li>
         <li><strong>Lua (Fengari)</strong> — from <code>cdn.jsdelivr.net</code> or <code>unpkg.com</code>, downloaded when Lua is first used and cached locally.</li>
         <li><strong>DOCX export library</strong> — <code>docx@9.6.0</code> from <code>cdn.jsdelivr.net</code>, downloaded when DOCX export is first used.</li>
+        <li>Runtime version checks — after network consent, opening Languages may query data.jsdelivr.com for package version metadata. If consent has not yet been given, tapping Check latest opens the consent dialog; no metadata request is sent unless you accept. It does not download or activate the runtime.</li>
         <li><strong>Optional catalog packages</strong> are downloaded from GitHub when you install them. Other packages and user-requested data may be fetched from package repositories or URLs when you request them, for example with <code>install.packages()</code>, <code>%pip</code>, or file-fetching commands.</li>
-        <li><strong>Ko-fi widget</strong> (support button in Help screen) — from <code>storage.ko-fi.com</code></li>
+        <li><strong>Ko-fi support link</strong> — Help includes a normal link to <code>ko-fi.com</code>. No Ko-fi request is made unless you choose to open it.</li>
     </ul>
     <p>When these resources are fetched, the CDN providers may receive:</p>
     <ul>
@@ -87,5 +89,6 @@
 
     <h2>Contact</h2>
     <p>If you have questions about this privacy policy, please open an issue on our <a href="https://github.com/s243a/SciREPL" target="_blank">GitHub repository</a>.</p>
+    <!-- POLICY-CONTENT:END -->
 </body>
 </html>

@@ -25,15 +25,21 @@ const context = await browser.newContext();
 await context.addInitScript(() => {
     localStorage.setItem('scirepl_privacy_accepted', '1');
     localStorage.setItem('scirepl_onboarding_seen', '1');
+    addEventListener('DOMContentLoaded', () => localStorage.setItem(
+        'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
     localStorage.setItem('scirepl_auto_download', '1');
 });
 const page = await context.newPage();
 const pageErrors = [];
 page.on('pageerror', (e) => pageErrors.push(e.message));
 const xssFired = [];
+const kofiRequests = [];
 page.on('console', (m) => { if (/XSS-FIRED/.test(m.text())) xssFired.push(m.text()); });
 page.on('dialog', (d) => { xssFired.push('dialog:' + d.message()); d.dismiss().catch(() => {}); });
-page.on('request', (r) => { if (/xss-evil/.test(r.url())) xssFired.push('request:' + r.url()); });
+page.on('request', (r) => {
+    if (/xss-evil/.test(r.url())) xssFired.push('request:' + r.url());
+    if (/ko-fi\.com/i.test(r.url())) kofiRequests.push(r.url());
+});
 
 try {
     await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
@@ -137,6 +143,8 @@ try {
     await lightDevice.addInitScript(() => {
         localStorage.setItem('scirepl_privacy_accepted', '1');
         localStorage.setItem('scirepl_onboarding_seen', '1');
+        addEventListener('DOMContentLoaded', () => localStorage.setItem(
+            'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
         localStorage.setItem('scirepl_auto_download', '1');
     });
     const lp = await lightDevice.newPage();
@@ -728,6 +736,8 @@ try {
         await rc.addInitScript(() => {
             localStorage.setItem('scirepl_privacy_accepted', '1');
             localStorage.setItem('scirepl_onboarding_seen', '1');
+            addEventListener('DOMContentLoaded', () => localStorage.setItem(
+                'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
             localStorage.setItem('scirepl_auto_download', '1');
             localStorage.setItem('scirepl_appearance_custom_css', '#app-header { letter-spacing: .5px; }');
         });
@@ -807,11 +817,37 @@ try {
         await window.i18n.load('es');
         await window.i18n.activate('es');
         const enDom = window.i18n.domains['privacy.en'];
+        const publicPolicy = await (await fetch('privacy.html')).text();
+        const runtimeDisclosure = enDom['privacy.policyRuntimeVersionChecks'];
+        const kofiDisclosure = enDom['privacy.koFiSupportLink'];
+        const kofiLink = document.querySelector('a[href="https://ko-fi.com/V7V51TYA76"]');
         const out = {
             // The policy strings now live in the domain catalogue, so the domain
             // status gates exactly the text it authorises.
             policyInDomain: !!(enDom && enDom['privacy.youUseScireplEntirelyAt']),
             policyNotInGeneral: !('privacy.youUseScireplEntirelyAt' in window.i18n.catalogues.en),
+            runtimeDisclosureInDomain: typeof runtimeDisclosure === 'string'
+                && runtimeDisclosure.includes('data.jsdelivr.com'),
+            runtimeDisclosureNotInGeneral:
+                !('privacy.policyRuntimeVersionChecks' in window.i18n.catalogues.en),
+            runtimeDisclosureAuthoritative: window.t('privacy.policyRuntimeVersionChecks')
+                === runtimeDisclosure,
+            runtimeDisclosureInModal: document.querySelector(
+                '[data-i18n="privacy.policyRuntimeVersionChecks"]')?.textContent
+                === runtimeDisclosure,
+            runtimeDisclosureInPublicPolicy: publicPolicy.includes(runtimeDisclosure),
+            noKofiWidgetScript: !document.querySelector(
+                'script[src*="ko-fi"], script[src*="Widget_2.js"]'),
+            kofiLinkIsExternal: !!kofiLink
+                && kofiLink.target === '_blank'
+                && kofiLink.rel.split(/\s+/).includes('noopener')
+                && kofiLink.rel.split(/\s+/).includes('noreferrer'),
+            kofiDisclosureAuthoritative: typeof kofiDisclosure === 'string'
+                && kofiDisclosure.includes('No Ko-fi request is made unless you choose to open it.'),
+            kofiDisclosureInModal: document.querySelector(
+                '[data-i18n-html="privacy.koFiSupportLink"]')?.textContent
+                === new DOMParser().parseFromString(kofiDisclosure, 'text/html').body.textContent,
+            kofiDisclosureInPublicPolicy: publicPolicy.includes(kofiDisclosure),
             privacyStatus: window.i18n.domainStatusOf('es', 'privacy'),
             bodyIsEnglish: window.t('privacy.youUseScireplEntirelyAt')
                 === enDom['privacy.youUseScireplEntirelyAt'],
@@ -835,6 +871,23 @@ try {
     });
     check('the policy text lives in the privacy domain catalogue, not the general one',
         legal.policyInDomain === true && legal.policyNotInGeneral === true);
+    check('runtime metadata network disclosure is authoritative and present in both policies',
+        legal.runtimeDisclosureInDomain === true
+        && legal.runtimeDisclosureNotInGeneral === true
+        && legal.runtimeDisclosureAuthoritative === true
+        && legal.runtimeDisclosureInModal === true
+        && legal.runtimeDisclosureInPublicPolicy === true,
+        JSON.stringify(legal));
+    check('Help uses a plain external Ko-fi link with no remote widget script',
+        legal.noKofiWidgetScript === true && legal.kofiLinkIsExternal === true,
+        JSON.stringify(legal));
+    check('Ko-fi makes no request before the user opens the support link',
+        kofiRequests.length === 0, kofiRequests.join(' | '));
+    check('both privacy-policy surfaces explain the user-initiated Ko-fi link',
+        legal.kofiDisclosureAuthoritative === true
+        && legal.kofiDisclosureInModal === true
+        && legal.kofiDisclosureInPublicPolicy === true,
+        JSON.stringify(legal));
     check('the Spanish privacy catalogue is still a draft', legal.privacyStatus === 'draft');
     check('an unreviewed policy body falls back to the authoritative English',
         legal.bodyIsEnglish === true);
@@ -921,6 +974,8 @@ try {
         await rc.addInitScript(() => {
             localStorage.setItem('scirepl_privacy_accepted', '1');
             localStorage.setItem('scirepl_onboarding_seen', '1');
+            addEventListener('DOMContentLoaded', () => localStorage.setItem(
+                'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
             localStorage.setItem('scirepl_auto_download', '1');
         });
         const rp = await rc.newPage();

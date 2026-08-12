@@ -1,0 +1,17 @@
+# Preserve upstream licence/notice bytes verbatim, including historically
+# significant trailing spaces. The generated offline page embeds those exact
+# texts, so exempt it from source-code whitespace diagnostics as well.
+third_party/licenses/** -whitespace
+www/open-source-licenses.html -whitespace
+
+# Keep every byte-exact licence input and output verbatim on all platforms.
+# Windows runners default to core.autocrlf=true, which rewrites LF to CRLF on
+# checkout. That changes the bytes of files whose exact content is verified:
+# third-party-components.json pins a sha256 per vendored artifact, the licence
+# texts are embedded verbatim into the generated page, and the two generated
+# files are compared byte for byte against a fresh render. Without -text the
+# licence gate fails on Windows for files that are in fact unmodified.
+www/vendor/** -text
+third_party/licenses/** -text
+www/open-source-licenses.html -text
+THIRD_PARTY_NOTICES.md -text

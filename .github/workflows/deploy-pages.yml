@@ -37,11 +37,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Check component licences and release metadata
+        run: npm run licenses:check && npm run release:check
+
       - name: Configure release build
         run: npm run configure
 
       - name: Fetch bundled runtimes
         run: npm run fetch:bundles
+
+      - name: Verify completed bundle inventories and wheel notices
+        run: npm run verify:bundles
 
       - name: Install Playwright browsers
         run: npx playwright install chromium
@@ -68,6 +74,9 @@ jobs:
       - name: Check every key the code asks for exists
         run: node scripts/check-i18n-keys.mjs
 
+      - name: Check public and in-app privacy disclosures agree
+        run: npm run privacy:check
+
       - name: Run cell operations tests
         run: node test_cell_ops.mjs
 
@@ -86,11 +95,17 @@ jobs:
       - name: Run onboarding tour tests
         run: node test_onboarding.mjs
 
+      - name: Run What's New and header-shortcut tests
+        run: node test_whats_new.mjs
+
       - name: Run right-to-left layout tests
         run: node test_rtl_layout.mjs
 
       - name: Run generated and dynamic localization tests
         run: node test_i18n_dynamic.mjs
+
+      - name: Run runtime provenance and version-control tests
+        run: npm run test:runtime-metadata
 
       - name: Run service worker offline tests
         run: node test_sw_offline.mjs

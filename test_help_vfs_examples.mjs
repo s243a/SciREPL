@@ -113,6 +113,8 @@ async function kernelExec(page, kernel, code, { timeout = 30000 } = {}) {
     await page.addInitScript(() => {
         localStorage.setItem('scirepl_privacy_accepted', '1');
         localStorage.setItem('scirepl_onboarding_seen', '1');
+        addEventListener('DOMContentLoaded', () => localStorage.setItem(
+            'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
         localStorage.setItem('scirepl_auto_download', '1');
     });
     await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 30000 });

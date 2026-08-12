@@ -32,24 +32,35 @@ class PrologKernel {
         }
     }
 
-    /**
-     * Pinned swipl-wasm version. Used unless the user overrides via the
-     * `scirepl_swipl_version` localStorage setting (e.g. set to "latest"
-     * or another tag like "9.3.32" to opt into a different release).
-     *
-     * Bump this together with CDN_CACHE in sw.js when upgrading, so
-     * stale cached swipl-wasm assets get evicted.
-     *
-     * Format: a path segment under https://SWI-Prolog.github.io/npm-swipl-wasm/3/
-     * e.g. "latest" or a numeric version like "9.3.32".
-     */
-    static DEFAULT_SWIPL_VERSION = 'latest';
+    static runtimeConfig() {
+        return window.KERNEL_CONFIG?.languages?.prolog || {};
+    }
+
+    static normalizeSelector(value) {
+        const selector = String(value || '').trim();
+        if (!selector) return selector;
+        if (selector === 'latest') {
+            throw new Error('The global SWI-Prolog "latest" package is an incompatible release line. Use Check latest to select the newest compatible 3.x version.');
+        }
+        if (/^3\.\d+\.\d+$/.test(selector)) return selector.replaceAll('.', '/');
+        if (/^\d+\/\d+$/.test(selector)) return '3/' + selector;
+        if (/^3\/\d+\/\d+$/.test(selector)) return selector;
+        throw new Error('Invalid SWI-Prolog package selector. Use a selector such as 3/8/2; use Check latest for the newest compatible 3.x release, or the separate source override for a custom URL.');
+    }
 
     static cdnUrl() {
-        const version = (typeof localStorage !== 'undefined'
-            && localStorage.getItem('scirepl_swipl_version'))
-            || PrologKernel.DEFAULT_SWIPL_VERSION;
-        return `https://SWI-Prolog.github.io/npm-swipl-wasm/3/${version}/dynamic-import.js`;
+        const cfg = PrologKernel.runtimeConfig();
+        const override = typeof localStorage !== 'undefined'
+            && localStorage.getItem('scirepl_swipl_version');
+        if (!override) {
+            const source = (cfg.sources || []).find((item) => item?.type === 'cdn' && item.url);
+            if (!source) throw new Error('Prolog runtime source is missing from generated kernel_config.js');
+            return source.url;
+        }
+        const selector = PrologKernel.normalizeSelector(override);
+        const template = cfg.overrideUrlTemplate;
+        if (!template) throw new Error('Prolog override URL template is missing from generated kernel_config.js');
+        return template.replace('{versionSelector}', selector);
     }
 
     async init() {
@@ -100,6 +111,9 @@ class PrologKernel {
             await this._loadPrelude();
 
             this._ready = true;
+            if (km?.markRuntimeCacheComplete) {
+                await km.markRuntimeCacheComplete('prolog');
+            }
             if (km) km.hideDownloadModal();
 
             // Restore Prolog VFS state from IndexedDB (deferred from session restore)

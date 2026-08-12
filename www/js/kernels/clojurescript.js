@@ -25,6 +25,13 @@ class ClojureScriptKernel {
 
     static displayName = 'ClojureScript';
 
+    static primaryUrl() {
+        const sources = window.KERNEL_CONFIG?.languages?.clojurescript?.sources || [];
+        const source = sources.find((item) => item?.type === 'cdn' && item.url);
+        if (!source) throw new Error('ClojureScript runtime source is missing from generated kernel_config.js');
+        return source.url;
+    }
+
     async init() {
         if (this._ready) return;
 
@@ -35,7 +42,7 @@ class ClojureScriptKernel {
             if (km) {
                 km.updateProgress(window.t('runtime.clojurescriptDownloading'));
             }
-            const primary = 'https://cdn.jsdelivr.net/npm/scittle@0.6.22/dist/scittle.js';
+            const primary = ClojureScriptKernel.primaryUrl();
             if (km && km.loadKernelSource) {
                 await km.loadKernelSource('clojurescript', primary, (url) => km._loadScript(url));
             } else {

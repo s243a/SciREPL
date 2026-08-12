@@ -1,7 +1,7 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v150';
+const CACHE_VERSION = 'v155';
 
 // Marker entry recording whether an app cache finished installing. Stored in
 // the cache itself so the answer travels with it and survives a restart.
@@ -33,13 +33,14 @@ function maybeRepairInBackground(event) {
   event.waitUntil(_repairInFlight);
 }
 const APP_CACHE = 'scirepl-app-' + CACHE_VERSION;
-const CDN_CACHE = 'scirepl-cdn-v2';
+const CDN_CACHE = 'scirepl-cdn-v3';
 
 // App shell: local assets to pre-cache on install
 const APP_SHELL = [
   './',
   './index.html',
   './privacy.html',
+  './open-source-licenses.html',
   './manifest.json',
   './css/style.css',
   './css/notebooks.css',
@@ -53,6 +54,8 @@ const APP_SHELL = [
   './js/appearance.js',
   './js/appearance_ui.js',
   './js/onboarding.js',
+  './js/release_highlights.js',
+  './js/whats_new.js',
   // Every shipped locale is precached. A catalogue fetched on demand fails
   // offline and silently falls back to English, which defeats the point of
   // translating for users who may have no connection at all. Kept in sync by
@@ -149,10 +152,79 @@ const CDN_DOMAINS = [
   'cdn.jsdelivr.net',
   'swi-prolog.github.io',
   'webr.r-wasm.org',
+  'unpkg.com',
 ];
 
 function isCDNRequest(url) {
-  return CDN_DOMAINS.some(domain => url.hostname.toLowerCase().includes(domain));
+  return CDN_DOMAINS.includes(url.hostname.toLowerCase());
+}
+
+function safelyDecodedPathname(url) {
+  try { return decodeURIComponent(url.pathname).toLowerCase(); }
+  catch (_) { return url.pathname.toLowerCase(); }
+}
+
+/**
+ * Runtime responses may live indefinitely only when their URL names an exact,
+ * immutable version. Rolling aliases and repository indexes must always go to
+ * the network: caching either under a cache-first policy silently freezes what
+ * "latest" means and can make package discovery stale for years.
+ */
+function isImmutableRuntimeRequest(request, url) {
+  if (!['GET', 'HEAD'].includes(request.method) || !isCDNRequest(url) || url.search) return false;
+  const pathname = safelyDecodedPathname(url);
+  if (/(?:^|\/)latest(?:\/|$)/.test(pathname) || /@latest(?:\/|$)/.test(pathname)) {
+    return false;
+  }
+  if (/(?:^|\/)packages(?:\.(?:gz|rds|json))?$/.test(pathname)
+      || /(?:^|\/)(?:index|repodata)(?:\.[^/]*)?\.json$/.test(pathname)) {
+    return false;
+  }
+
+  // npm-swipl-wasm uses a slash-separated package selector rather than semver
+  // in one segment. `3/8/2` is pinned; `3/latest` is excluded above.
+  if (url.hostname.toLowerCase() === 'swi-prolog.github.io') {
+    return /\/npm-swipl-wasm\/\d+\/\d+\/\d+\//.test(pathname);
+  }
+
+  // Pyodide and webR use /vX.Y.Z/; jsDelivr/unpkg npm assets use
+  // package@X.Y.Z. Pre-release/build suffixes remain exact versions.
+  const semver = '\\d+\\.\\d+\\.\\d+(?:-[0-9a-z.-]+)?(?:\\+[0-9a-z.-]+)?';
+  return new RegExp('/v' + semver + '/').test(pathname)
+    || new RegExp('@v?' + semver + '(?:/|$)').test(pathname);
+}
+
+function runtimeProbeMarkerUrl(url) {
+  return new URL('./__scirepl_runtime_probes__/' + encodeURIComponent(url.href),
+    self.registration.scope).href;
+}
+
+async function responseFromRuntimeProbe(cache, request, url) {
+  // CacheStorage cannot store a HEAD Request. If the same immutable GET was
+  // cached, synthesize the bodyless HEAD response from its status/headers.
+  const cachedGet = await cache.match(url.href);
+  if (cachedGet) {
+    return new Response(null, {
+      status: cachedGet.status,
+      statusText: cachedGet.statusText,
+      headers: cachedGet.headers,
+    });
+  }
+
+  // webR also probes optional paths that legitimately return 404 and may never
+  // issue a GET. Store that method-specific fact under a synthetic GET key;
+  // this is safe only because isImmutableRuntimeRequest already proved the
+  // probed URL names an exact version.
+  const marker = await cache.match(runtimeProbeMarkerUrl(url));
+  if (!marker) return null;
+  try {
+    const record = await marker.json();
+    if (record.url !== url.href || record.method !== 'HEAD'
+        || ![200, 404].includes(record.status)) return null;
+    return new Response(null, { status: record.status, headers: record.headers || {} });
+  } catch (_) {
+    return null;
+  }
 }
 
 // Install: pre-cache app shell
@@ -416,22 +488,47 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // CDN runtimes (Pyodide, swipl-wasm): cache-first
+  // Runtime CDN assets: cache-first only for immutable, exact-version URLs.
+  // Mutable aliases, indexes, and query-bearing requests deliberately fall
+  // through to the browser's normal network handling and are never inserted
+  // into our long-lived runtime cache.
   if (isCDNRequest(url)) {
-    event.respondWith(
-      caches.match(event.request).then(cached => {
-        if (cached) return cached;
-        return fetch(event.request).then(response => {
-          if (response.ok && event.request.method === 'GET') {
-            const clone = response.clone();
-            caches.open(CDN_CACHE).then(cache => cache.put(event.request, clone));
+    if (!isImmutableRuntimeRequest(event.request, url)) return;
+    event.respondWith((async () => {
+      const cache = await caches.open(CDN_CACHE);
+      if (event.request.method === 'HEAD') {
+        const cachedProbe = await responseFromRuntimeProbe(cache, event.request, url);
+        if (cachedProbe) return cachedProbe;
+        const response = await fetch(event.request);
+        if (response.status === 200 || response.status === 404) {
+          const headers = {};
+          for (const name of ['content-type', 'content-encoding', 'access-control-allow-origin']) {
+            const value = response.headers.get(name);
+            if (value) headers[name] = value;
           }
-          return response;
-        });
-      })
-    );
+          await cache.put(runtimeProbeMarkerUrl(url), new Response(JSON.stringify({
+            schemaVersion: 1,
+            method: 'HEAD',
+            url: url.href,
+            status: response.status,
+            headers,
+          }), { headers: { 'content-type': 'application/json' } }));
+        }
+        return response;
+      }
+      const cached = await cache.match(event.request);
+      if (cached) return cached;
+      const response = await fetch(event.request);
+      // A 404 is immutable for an exact-version path and is therefore safe to
+      // remember; it is often an optional webR file probe. Mutable paths never
+      // reach this branch.
+      if (response.status === 200 || response.status === 404) {
+        await cache.put(event.request, response.clone());
+      }
+      return response;
+    })());
     return;
   }
 
-  // Everything else: network only (ko-fi, GitHub releases, etc.)
+  // Everything else: network only (GitHub releases, user-requested URLs, etc.)
 });

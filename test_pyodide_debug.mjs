@@ -23,6 +23,7 @@ const BASE = 'http://localhost:8085';
     await page.evaluate(() => {
         localStorage.setItem('scirepl_privacy_accepted', '1');
         localStorage.setItem('scirepl_onboarding_seen', '1');
+        localStorage.setItem('scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version);
         localStorage.setItem('scirepl_auto_download', '1');
     });
     await page.reload({ waitUntil: 'networkidle', timeout: 15000 });

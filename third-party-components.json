@@ -1,0 +1,464 @@
+{
+  "schemaVersion": 1,
+  "scope": "Direct browser libraries, language runtimes, named bundled Pyodide wheels, major command suites embedded in brush, and platform containers distributed by SciREPL Free. User-installed Python, R, Prolog, or other packages are not shipped-component entries and retain their own licences. This is not yet a complete crate-by-crate or Android transitive SBOM.",
+  "app": {
+    "name": "SciREPL",
+    "repository": "https://github.com/s243a/SciREPL",
+    "releasesUrl": "https://github.com/s243a/SciREPL/releases"
+  },
+  "licenseDocuments": {
+    "Apache-2.0": { "path": "third_party/licenses/Apache-2.0.txt", "url": "https://www.apache.org/licenses/LICENSE-2.0.txt" },
+    "BSD-2-Clause": { "path": "third_party/licenses/BSD-2-Clause.txt", "url": "https://spdx.org/licenses/BSD-2-Clause.html" },
+    "BSD-3-Clause": { "path": "third_party/licenses/BSD-3-Clause.txt", "url": "https://spdx.org/licenses/BSD-3-Clause.html" },
+    "EPL-1.0": { "path": "third_party/licenses/EPL-1.0.txt", "url": "https://www.eclipse.org/legal/epl-v10.html" },
+    "GPL-3.0-only": { "path": "third_party/licenses/GPL-3.0-only.txt", "url": "https://www.gnu.org/licenses/gpl-3.0.txt" },
+    "GPL-2.0-only": { "path": "third_party/licenses/GPL-2.0-only.txt", "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt" },
+    "MIT": { "path": "third_party/licenses/MIT.txt", "url": "https://spdx.org/licenses/MIT.html" },
+    "MPL-2.0": { "path": "third_party/licenses/MPL-2.0.txt", "url": "https://www.mozilla.org/MPL/2.0/" },
+    "Unlicense": { "path": "third_party/licenses/Unlicense.txt", "url": "https://unlicense.org/" },
+    "Python-2.0": { "path": "third_party/licenses/CPython-3.12.7.txt", "url": "https://docs.python.org/3.12/license.html" },
+    "wheel-micropip-LICENSE": { "path": "third_party/licenses/pyodide-wheels/micropip-LICENSE.txt", "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5" },
+    "wheel-mpmath-LICENSE": { "path": "third_party/licenses/pyodide-wheels/mpmath-LICENSE.txt", "sha256": "c26cae81da4508e5e249985777a33821f183223ebb74d7f8cfbf90fe7eef2fb7" },
+    "wheel-narwhals-LICENSE": { "path": "third_party/licenses/pyodide-wheels/narwhals-LICENSE.md", "sha256": "85e303ea1b5ae91cde06e729a71e7d0140a0affba4458d00063d1b72b37798ab" },
+    "wheel-numpy-LICENSE": { "path": "third_party/licenses/pyodide-wheels/numpy-LICENSE.txt", "sha256": "01fb016849aa427edb1bbbbd55f91c26ca6cadb32a5b20e7f000655dd05b0760" },
+    "wheel-numpy-random-c-api-LICENSE": { "path": "third_party/licenses/pyodide-wheels/numpy-random-c-api-LICENSE.txt", "sha256": "fbc539f47d0cf83bc61378080fb873d5c14630126cacbfe754035c3926daa5ec" },
+    "wheel-numpy-ma-LICENSE": { "path": "third_party/licenses/pyodide-wheels/numpy-ma-LICENSE.txt", "sha256": "05f3b88351988ecfad10abe92c0c50e5875c6452d5009a0084cc291551ffcca6" },
+    "wheel-numpy-random-LICENSE": { "path": "third_party/licenses/pyodide-wheels/numpy-random-LICENSE.md", "sha256": "103166b62b80443afb9eb3488e052ea06be0cff566b908f199e561fde49af19f" },
+    "wheel-packaging-LICENSE": { "path": "third_party/licenses/pyodide-wheels/packaging-LICENSE.txt", "sha256": "cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48" },
+    "wheel-packaging-APACHE": { "path": "third_party/licenses/pyodide-wheels/packaging-LICENSE.APACHE.txt", "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594" },
+    "wheel-packaging-BSD": { "path": "third_party/licenses/pyodide-wheels/packaging-LICENSE.BSD.txt", "sha256": "b70e7e9b742f1cc6f948b34c16aa39ffece94196364bc88ff0d2180f0028fac5" },
+    "wheel-pandas-LICENSE": { "path": "third_party/licenses/pyodide-wheels/pandas-LICENSE.txt", "sha256": "533eb6d0b98e5be3ddd12dce97be35dd11282f5c47cdf8d08c81756fd5d70a26" },
+    "wheel-python-dateutil-LICENSE": { "path": "third_party/licenses/pyodide-wheels/python-dateutil-LICENSE.txt", "sha256": "ba00f51a0d92823b5a1cde27d8b5b9d2321e67ed8da9bc163eff96d5e17e577e" },
+    "wheel-pytz-LICENSE": { "path": "third_party/licenses/pyodide-wheels/pytz-LICENSE.txt", "sha256": "be8b1a37ebe26c592a90f6c0eb33103a7f383ce2f4d7498c0af9a526990a07b8" },
+    "wheel-six-LICENSE": { "path": "third_party/licenses/pyodide-wheels/six-LICENSE.txt", "sha256": "8bb850c565aa389fdc16f3a46965ad23d82adff60f2393fc2762b63185e8e6c9" },
+    "wheel-sympy-AUTHORS": { "path": "third_party/licenses/pyodide-wheels/sympy-AUTHORS.txt", "sha256": "2d4eff597bfe2d8c28764510313fd773b9fd05591ca036d17dea17be7dc7aef4" },
+    "wheel-sympy-LICENSE": { "path": "third_party/licenses/pyodide-wheels/sympy-LICENSE.txt", "sha256": "07a5e9819f727b4986ad2829c7a29a6320d42575f720eb24d71b7fef573a0286" },
+    "wheel-sympy-latex-LICENSE": { "path": "third_party/licenses/pyodide-wheels/sympy-latex-LICENSE.txt", "sha256": "007bc30a58fa40a996e772047120de4eaf31f5110e4f9c3b5f93fcdfbe2eaca1" },
+    "Plotly-basic-third-party-notices": { "path": "www/vendor/plotly/plotly-basic.min.js.LICENSE.txt", "url": "https://cdn.jsdelivr.net/npm/plotly.js@2.35.2/dist/plotly-basic.min.js.LICENSE.txt" },
+    "webR-0.5.4": { "path": "third_party/licenses/webR-0.5.4-LICENSE.md", "url": "https://github.com/r-wasm/webr/blob/v0.5.4/LICENSE.md" },
+    "Zlib": { "path": "third_party/licenses/Zlib.txt", "url": "https://spdx.org/licenses/Zlib.html" }
+  },
+  "runtimeComponents": {
+    "bash": "brush",
+    "typr": "typr",
+    "lua": "fengari",
+    "clojurescript": "scittle",
+    "prolog": "swipl-wasm",
+    "python": "pyodide",
+    "r": "webr-support"
+  },
+  "components": [
+    {
+      "id": "scirepl",
+      "name": "SciREPL",
+      "versionFrom": "package.json",
+      "licenseExpression": "MIT",
+      "licenseDocuments": ["MIT"],
+      "copyright": "Copyright (c) 2026 UnifyWeaver Project",
+      "sourceUrl": "https://github.com/s243a/SciREPL",
+      "delivery": { "kind": "first-party" },
+      "notes": "The application itself. Third-party components below retain their own licences."
+    },
+    {
+      "id": "plotly",
+      "name": "Plotly.js basic distribution",
+      "version": "2.35.2",
+      "licenseExpression": "MIT",
+      "licenseDocuments": ["MIT", "Plotly-basic-third-party-notices"],
+      "copyright": "Copyright (c) 2012-2024 Plotly, Inc.",
+      "sourceUrl": "https://github.com/plotly/plotly.js/tree/v2.35.2",
+      "delivery": { "kind": "bundled" },
+      "provenance": { "modified": false, "basis": "Upstream release distribution" },
+      "vendorRoots": ["plotly"],
+      "artifacts": [{
+        "path": "www/vendor/plotly/plotly-basic.min.js",
+        "sha256": "138c2e81014b979dc00867a93da55b7605a17495ee78dd7afb433b7f021dfcfa",
+        "size": 1071091,
+        "sourceUrl": "https://cdn.jsdelivr.net/npm/plotly.js@2.35.2/dist/plotly-basic.min.js"
+      }, {
+        "path": "www/vendor/plotly/plotly-basic.min.js.LICENSE.txt",
+        "sha256": "11adbe52e395f779a3bb359b3c33a1095161a9ca9fe0d811e27cbac412c7f0e5",
+        "size": 305,
+        "sourceUrl": "https://cdn.jsdelivr.net/npm/plotly.js@2.35.2/dist/plotly-basic.min.js.LICENSE.txt"
+      }],
+      "notes": "The generated third-party licence sidecar referenced by plotly-basic.min.js is bundled alongside it."
+    },
+    {
+      "id": "katex",
+      "name": "KaTeX",
+      "version": "0.16.11",
+      "licenseExpression": "MIT",
+      "licenseDocuments": ["MIT"],
+      "copyright": "Copyright (c) 2013-2020 Khan Academy and other contributors",
+      "sourceUrl": "https://github.com/KaTeX/KaTeX/tree/v0.16.11",
+      "delivery": { "kind": "bundled" },
+      "provenance": { "modified": false, "basis": "Upstream release distribution" },
+      "vendorRoots": ["katex"],
+      "artifacts": [
+        { "path": "www/vendor/katex/katex.min.js", "sha256": "e6bfe5deebd4c7ccd272055bab63bd3ab2c73b907b6e6a22d352740a81381fd4", "size": 275414 },
+        { "path": "www/vendor/katex/katex.min.css", "sha256": "717bc9ae7853b61f0f76455dddf0ecd4f527a783f42de2ac24684899c1c46258", "size": 23335 }
+      ]
+    },
+    {
+      "id": "marked",
+      "name": "marked",
+      "version": "15.0.7",
+      "licenseExpression": "MIT AND BSD-3-Clause",
+      "licenseDocuments": ["MIT", "BSD-3-Clause"],
+      "copyright": "Copyright (c) 2018+ MarkedJS; Copyright (c) 2011-2018 Christopher Jeffrey; Markdown portions Copyright (c) 2004 John Gruber",
+      "sourceUrl": "https://github.com/markedjs/marked/tree/v15.0.7",
+      "delivery": { "kind": "bundled" },
+      "provenance": { "modified": false, "basis": "Upstream release distribution" },
+      "vendorRoots": ["marked"],
+      "artifacts": [{ "path": "www/vendor/marked/marked.min.js", "sha256": "934e3e36e9e2da0afb1a6e75075bb0f09af05293a844e84a7477ef40911c349a", "size": 39589 }]
+    },
+    {
+      "id": "highlightjs",
+      "name": "highlight.js",
+      "version": "11.11.1",
+      "licenseExpression": "BSD-3-Clause",
+      "licenseDocuments": ["BSD-3-Clause"],
+      "copyright": "Copyright (c) 2006, Ivan Sagalaev",
+      "sourceUrl": "https://github.com/highlightjs/highlight.js/tree/11.11.1",
+      "delivery": { "kind": "bundled" },
+      "provenance": { "modified": false, "basis": "Upstream release distribution" },
+      "vendorRoots": ["hljs"],
+      "artifacts": [
+        { "path": "www/vendor/hljs/highlight.min.js", "sha256": "bc65163a3782ddf9af1bf8e26b899453bee678c815000b3e57acb937e8d1ee57", "size": 37308 },
+        { "path": "www/vendor/hljs/lua.min.js", "sha256": "b41ceebc59ebfa4ca2c40202af6fbbdca951dc3664beeb958205123594133070", "size": 1983 },
+        { "path": "www/vendor/hljs/LICENSE", "sha256": "6c081431591d9df696c82dc598fe1423765b8a299b200ed00b281afd0f64c490", "size": 1514 }
+      ]
+    },
+    {
+      "id": "jszip",
+      "name": "JSZip",
+      "version": "3.10.1",
+      "licenseExpression": "MIT OR GPL-3.0-or-later",
+      "distributedUnder": "MIT",
+      "licenseDocuments": ["MIT"],
+      "copyright": "Copyright (c) 2009-2016 Stuart Knightley",
+      "sourceUrl": "https://github.com/Stuk/jszip/tree/v3.10.1",
+      "delivery": { "kind": "bundled" },
+      "provenance": { "modified": false, "basis": "Upstream release distribution, selected under its MIT option" },
+      "vendorRoots": ["jszip"],
+      "artifacts": [{ "path": "www/vendor/jszip/jszip.min.js", "sha256": "acc7e41455a80765b5fd9c7ee1b8078a6d160bbbca455aeae854de65c947d59e", "size": 97630 }]
+    },
+    {
+      "id": "pako",
+      "name": "pako",
+      "version": "2.1.0",
+      "licenseExpression": "MIT AND Zlib",
+      "licenseDocuments": ["MIT", "Zlib"],
+      "copyright": "Copyright (c) 2014-2017 Vitaly Puzrin and Andrei Tuputcyn; zlib portions retain their upstream notices",
+      "sourceUrl": "https://github.com/nodeca/pako/tree/2.1.0",
+      "delivery": { "kind": "bundled" },
+      "provenance": { "modified": false, "basis": "Upstream release distribution" },
+      "vendorRoots": ["pako"],
+      "artifacts": [{ "path": "www/vendor/pako/pako_inflate.min.js", "sha256": "fa226c8e1e3556993260e6a5c1fe94e225da59b3418a06811fdc51d308f8bb43", "size": 21479 }]
+    },
+    {
+      "id": "brush",
+      "name": "brush shell",
+      "version": "0.3.0-163-g409b2cc",
+      "revision": "409b2cce4c2957499cdab783b705b70f62708ef7",
+      "licenseExpression": "MIT",
+      "licenseDocuments": ["MIT"],
+      "copyright": "Copyright (c) 2024 reuben olinsky and contributors",
+      "sourceUrl": "https://github.com/s243a/brush/tree/409b2cce4c2957499cdab783b705b70f62708ef7",
+      "upstreamUrl": "https://github.com/reubeno/brush",
+      "delivery": { "kind": "bundled" },
+      "provenance": { "modified": true, "basis": "SciREPL fork revision; WASM build includes project-specific shell/builtin changes" },
+      "vendorRoots": ["brush"],
+      "artifacts": [
+        { "path": "www/vendor/brush/brush_wasm.js", "sha256": "9e31a8a86f8ef0405f0b5aa5ef04269fecf08c806730e08cada17da117d3792e" },
+        { "path": "www/vendor/brush/brush_wasm_bg.wasm", "sha256": "6fa92fe8bbdbaf517f68a158c2032359a24778d1a8d21ef5dfc336f5a4621d09" }
+      ],
+      "runtime": { "sources": [{ "type": "local", "url": "vendor/brush/brush_wasm.js" }] }
+    },
+    {
+      "id": "uutils-coreutils",
+      "name": "uutils coreutils command crates",
+      "version": "0.6.0",
+      "licenseExpression": "MIT",
+      "licenseDocuments": ["MIT"],
+      "copyright": "Copyright uutils contributors",
+      "sourceUrl": "https://github.com/uutils/coreutils",
+      "delivery": { "kind": "embedded", "via": "brush" },
+      "notes": "Selected command crates are compiled into SciREPL's brush WASM build."
+    },
+    {
+      "id": "uutils-findutils",
+      "name": "uutils findutils",
+      "version": "0.8.0",
+      "licenseExpression": "MIT",
+      "licenseDocuments": ["MIT"],
+      "copyright": "Copyright Google Inc. and contributors",
+      "sourceUrl": "https://github.com/uutils/findutils",
+      "delivery": { "kind": "embedded", "via": "brush" }
+    },
+    {
+      "id": "ripgrep-grep-crates",
+      "name": "ripgrep grep crates",
+      "version": "grep-matcher 0.1.8; grep-regex 0.1.14; grep-searcher 0.1.16",
+      "licenseExpression": "MIT OR Unlicense",
+      "distributedUnder": "MIT",
+      "licenseDocuments": ["MIT"],
+      "copyright": "Copyright Andrew Gallant and contributors",
+      "sourceUrl": "https://github.com/BurntSushi/ripgrep",
+      "delivery": { "kind": "embedded", "via": "brush" },
+      "notes": "The grep implementation uses ripgrep's library crates; SciREPL does not ship the standalone ripgrep executable."
+    },
+    {
+      "id": "typr",
+      "name": "TypR",
+      "version": "0.5.6-39-g670fc38",
+      "revision": "670fc38402d80e2a01ee1789870c8731e0c014f8",
+      "licenseExpression": "Apache-2.0",
+      "licenseDocuments": ["Apache-2.0"],
+      "copyright": "Copyright TypR contributors",
+      "sourceUrl": "https://github.com/s243a/typr/tree/670fc38402d80e2a01ee1789870c8731e0c014f8",
+      "upstreamUrl": "https://github.com/we-data-ch/typr",
+      "delivery": { "kind": "bundled" },
+      "provenance": { "modified": true, "basis": "SciREPL fork revision; includes variadic typing and standard-library changes" },
+      "vendorRoots": ["typr"],
+      "artifacts": [
+        { "path": "www/vendor/typr/typr_wasm.js", "sha256": "0033740b8707813a37ae75e65846893ac308719c28e79b265587cd959c3ada49" },
+        { "path": "www/vendor/typr/typr_wasm_bg.wasm", "sha256": "88d07fb3dc4c6f54f815b56489fbcccc97efccba89addebeee93dde46f160d00" }
+      ],
+      "runtime": { "sources": [{ "type": "local", "url": "vendor/typr/typr_wasm.js" }] },
+      "notes": "SciREPL uses the linked fork, including variadic standard-library typing changes."
+    },
+    {
+      "id": "fengari",
+      "name": "Fengari / Lua 5.3 VM",
+      "version": "0.1.4",
+      "licenseExpression": "MIT",
+      "licenseDocuments": ["MIT"],
+      "copyright": "Copyright (c) 2017 Benoit Giannangeli; Copyright (c) 2017-2018 Daurnimator",
+      "sourceUrl": "https://github.com/fengari-lua/fengari-web/tree/v0.1.4",
+      "delivery": { "kind": "runtime", "language": "lua" },
+      "provenance": { "modified": false, "basis": "Upstream CDN release" },
+      "runtime": { "sources": [
+        { "type": "cdn", "url": "https://cdn.jsdelivr.net/npm/fengari-web@{version}/dist/fengari-web.js" },
+        { "type": "cdn", "url": "https://unpkg.com/fengari-web@{version}/dist/fengari-web.js" }
+      ] }
+    },
+    {
+      "id": "scittle",
+      "name": "Scittle",
+      "version": "0.6.22",
+      "revision": "6c3b5f56880142b6cf6f45e81ccd6da7749b71f6",
+      "licenseExpression": "EPL-1.0 AND Apache-2.0",
+      "licenseDocuments": ["EPL-1.0", "Apache-2.0"],
+      "copyright": "Copyright Scittle and SCI contributors; bundled Google Closure Library portions Copyright 2009 The Closure Library Authors",
+      "sourceUrl": "https://github.com/babashka/scittle/tree/v0.6.22",
+      "delivery": { "kind": "runtime", "language": "clojurescript" },
+      "provenance": { "modified": false, "basis": "Upstream CDN release" },
+      "vendorRoots": ["scittle"],
+      "runtime": { "sources": [
+        { "type": "cdn", "url": "https://cdn.jsdelivr.net/npm/scittle@{version}/dist/scittle.js" },
+        { "type": "cdn", "url": "https://unpkg.com/scittle@{version}/dist/scittle.js" }
+      ] },
+      "artifacts": [{
+        "path": "www/vendor/scittle/scittle.js",
+        "sha256": "9ffcf57c4ba9002dcc90c4f2048f166dda19d3d24dfb43f47befae223fb9fe25",
+        "size": 888214,
+        "resolvedAt": "2026-08-11",
+        "optionalGenerated": true
+      }],
+      "notes": "The compiled distribution includes Google Closure Library code carrying an Apache-2.0 SPDX notice in the shipped header."
+    },
+    {
+      "id": "swipl-wasm",
+      "name": "npm-swipl-wasm / SWI-Prolog",
+      "version": "3.8.2",
+      "revision": "457bce3a6db00874f53a49e69c61e77444658e6e",
+      "underlyingVersion": "SWI-Prolog 9.3.8",
+      "licenseExpression": "BSD-2-Clause AND Zlib AND BSD-3-Clause",
+      "licenseDocuments": ["BSD-2-Clause", "Zlib", "BSD-3-Clause"],
+      "copyright": "Copyright SWI-Prolog and npm-swipl-wasm contributors; zlib Copyright 1995-2024 Jean-loup Gailly and Mark Adler; PCRE2 copyright the University of Cambridge and PCRE2 contributors",
+      "sourceUrl": "https://github.com/SWI-Prolog/npm-swipl-wasm/tree/v3.8.2",
+      "delivery": { "kind": "runtime", "language": "prolog" },
+      "provenance": { "modified": false, "basis": "Exact upstream v3.8.2 bundle" },
+      "vendorRoots": ["swipl"],
+      "runtime": {
+        "versionSelector": "3/8/2",
+        "overrideUrlTemplate": "https://SWI-Prolog.github.io/npm-swipl-wasm/{versionSelector}/dynamic-import.js",
+        "versionMetadata": {
+          "url": "https://data.jsdelivr.com/v1/package/npm/swipl-wasm",
+          "strategy": "highest-stable-compatible-major",
+          "compatibleMajor": 3
+        },
+        "sources": [{ "type": "cdn", "url": "https://SWI-Prolog.github.io/npm-swipl-wasm/{versionSelector}/dynamic-import.js" }]
+      },
+      "artifacts": [{ "path": "www/vendor/swipl/dynamic-import.js", "sha256": "133688ef8c1876d3ad8b9de2b2649d3768384d531fb123e53876b7189bdb5ba0", "size": 10995394, "resolvedAt": "2026-08-11", "optionalGenerated": true }],
+      "packages": [
+        { "name": "zlib", "version": "1.3.1", "licenseExpression": "Zlib", "sourceUrl": "https://github.com/madler/zlib/tree/v1.3.1" },
+        { "name": "PCRE2", "version": "10.44", "licenseExpression": "BSD-3-Clause", "sourceUrl": "https://github.com/PCRE2Project/pcre2/tree/pcre2-10.44" }
+      ],
+      "notes": "This stays on the package's 3.x API. The similarly named current 8.x package line is not a drop-in upgrade. The v3.8.2 build recipe compiles zlib 1.3.1 and PCRE2 10.44 into the delivered runtime, so their licences are reproduced here. Individual SWI add-on packages can carry additional licences."
+    },
+    {
+      "id": "pyodide",
+      "name": "Pyodide",
+      "version": "0.27.4",
+      "underlyingVersion": "CPython 3.12.7; Emscripten 3.1.58",
+      "licenseExpression": "MPL-2.0",
+      "licenseDocuments": ["MPL-2.0"],
+      "copyright": "Copyright Pyodide contributors",
+      "sourceUrl": "https://github.com/pyodide/pyodide/tree/0.27.4",
+      "delivery": { "kind": "runtime", "language": "python" },
+      "provenance": { "modified": false, "basis": "Exact upstream Pyodide release assets" },
+      "vendorRoots": ["pyodide"],
+      "runtime": {
+        "baseUrl": "https://cdn.jsdelivr.net/pyodide/v{version}/full",
+        "sources": [
+          { "type": "cdn", "url": "https://cdn.jsdelivr.net/pyodide/v{version}/full/pyodide.js" },
+          { "type": "cdn", "url": "https://unpkg.com/pyodide@{version}/pyodide.js" }
+        ]
+      }
+    },
+    {
+      "id": "cpython",
+      "name": "CPython (inside Pyodide)",
+      "version": "3.12.7",
+      "licenseExpression": "Python-2.0",
+      "licenseDocuments": ["Python-2.0"],
+      "copyright": "Copyright Python Software Foundation and contributors",
+      "sourceUrl": "https://github.com/python/cpython/tree/v3.12.7",
+      "licenseUrl": "https://docs.python.org/3.12/license.html",
+      "delivery": { "kind": "runtime", "language": "python" },
+      "notes": "SciREPL records CPython's upstream licence text. Additional notices carried inside the Pyodide distribution remain governed by their upstream terms."
+    },
+    {
+      "id": "pyodide-wheels",
+      "name": "Bundled Pyodide wheels",
+      "version": "numpy 2.0.2; sympy 1.13.3; mpmath 1.3.0; micropip 0.8.0; pandas 2.2.3; narwhals 1.24.1; packaging 24.2; python-dateutil 2.9.0.post0; pytz 2024.1; six 1.16.0",
+      "licenseExpression": "Multiple (BSD/MIT/MPL/Apache); see upstream wheel metadata",
+      "licenseDocuments": [
+        "wheel-micropip-LICENSE", "wheel-mpmath-LICENSE", "wheel-narwhals-LICENSE",
+        "wheel-numpy-LICENSE", "wheel-packaging-LICENSE", "wheel-packaging-APACHE",
+        "wheel-packaging-BSD", "wheel-pandas-LICENSE", "wheel-python-dateutil-LICENSE",
+        "wheel-pytz-LICENSE", "wheel-six-LICENSE", "wheel-sympy-AUTHORS",
+        "wheel-sympy-LICENSE", "wheel-numpy-random-c-api-LICENSE",
+        "wheel-numpy-ma-LICENSE", "wheel-numpy-random-LICENSE",
+        "wheel-sympy-latex-LICENSE"
+      ],
+      "copyright": "Copyright the respective package authors and contributors",
+      "sourceUrl": "https://github.com/pyodide/pyodide/tree/0.27.4/packages",
+      "delivery": { "kind": "runtime", "language": "python" },
+      "packages": [
+        { "name": "numpy", "version": "2.0.2", "licenseExpression": "BSD-3-Clause", "sourceUrl": "https://github.com/numpy/numpy/tree/v2.0.2", "wheelNotices": [{ "document": "wheel-numpy-LICENSE", "entry": "numpy-2.0.2.dist-info/LICENSE.txt" }, { "document": "wheel-numpy-random-c-api-LICENSE", "entry": "numpy/_core/include/numpy/random/LICENSE.txt" }, { "document": "wheel-numpy-ma-LICENSE", "entry": "numpy/ma/LICENSE" }, { "document": "wheel-numpy-random-LICENSE", "entry": "numpy/random/LICENSE.md" }] },
+        { "name": "sympy", "version": "1.13.3", "licenseExpression": "BSD-3-Clause", "sourceUrl": "https://github.com/sympy/sympy/tree/1.13.3", "wheelNotices": [{ "document": "wheel-sympy-AUTHORS", "entry": "sympy-1.13.3.dist-info/AUTHORS" }, { "document": "wheel-sympy-LICENSE", "entry": "sympy-1.13.3.dist-info/LICENSE" }, { "document": "wheel-sympy-latex-LICENSE", "entry": "sympy/parsing/latex/LICENSE.txt" }] },
+        { "name": "mpmath", "version": "1.3.0", "licenseExpression": "BSD-3-Clause", "sourceUrl": "https://github.com/mpmath/mpmath/tree/1.3.0", "wheelNotices": [{ "document": "wheel-mpmath-LICENSE", "entry": "mpmath-1.3.0.dist-info/LICENSE" }] },
+        { "name": "micropip", "version": "0.8.0", "licenseExpression": "MPL-2.0", "sourceUrl": "https://github.com/pyodide/micropip/tree/0.8.0", "wheelNotices": [{ "document": "wheel-micropip-LICENSE", "entry": "micropip-0.8.0.dist-info/LICENSE" }] },
+        { "name": "pandas", "version": "2.2.3", "licenseExpression": "BSD-3-Clause", "sourceUrl": "https://github.com/pandas-dev/pandas/tree/v2.2.3", "wheelNotices": [{ "document": "wheel-pandas-LICENSE", "entry": "pandas-2.2.3.dist-info/LICENSE" }] },
+        { "name": "narwhals", "version": "1.24.1", "licenseExpression": "MIT", "sourceUrl": "https://github.com/narwhals-dev/narwhals/tree/v1.24.1", "wheelNotices": [{ "document": "wheel-narwhals-LICENSE", "entry": "narwhals-1.24.1.dist-info/licenses/LICENSE.md" }] },
+        { "name": "packaging", "version": "24.2", "licenseExpression": "Apache-2.0 OR BSD-2-Clause", "sourceUrl": "https://github.com/pypa/packaging/tree/24.2", "wheelNotices": [{ "document": "wheel-packaging-LICENSE", "entry": "packaging-24.2.dist-info/licenses/LICENSE" }, { "document": "wheel-packaging-APACHE", "entry": "packaging-24.2.dist-info/licenses/LICENSE.APACHE" }, { "document": "wheel-packaging-BSD", "entry": "packaging-24.2.dist-info/licenses/LICENSE.BSD" }] },
+        { "name": "python-dateutil", "version": "2.9.0.post0", "licenseExpression": "Apache-2.0 OR BSD-3-Clause", "sourceUrl": "https://github.com/dateutil/dateutil/tree/2.9.0.post0", "wheelNotices": [{ "document": "wheel-python-dateutil-LICENSE", "entry": "python_dateutil-2.9.0.post0.dist-info/LICENSE" }] },
+        { "name": "pytz", "version": "2024.1", "licenseExpression": "MIT", "sourceUrl": "https://github.com/stub42/pytz/tree/release_2024.1", "wheelNotices": [{ "document": "wheel-pytz-LICENSE", "entry": "pytz-2024.1.dist-info/LICENSE.txt" }] },
+        { "name": "six", "version": "1.16.0", "licenseExpression": "MIT", "sourceUrl": "https://github.com/benjaminp/six/tree/1.16.0", "wheelNotices": [{ "document": "wheel-six-LICENSE", "entry": "six-1.16.0.dist-info/LICENSE" }] }
+      ],
+      "notes": "Resolved from Pyodide 0.27.4's lock. The Python kernel preloads numpy, sympy, and micropip; pandas and narwhals plus the listed transitive wheels are bundled for catalog workbooks and offline dependency resolution."
+    },
+    {
+      "id": "webr-support",
+      "name": "webR JavaScript and support code",
+      "version": "0.5.4",
+      "versionTag": "v0.5.4",
+      "licenseExpression": "MIT",
+      "licenseDocuments": ["MIT"],
+      "copyright": "Copyright webR contributors",
+      "sourceUrl": "https://github.com/r-wasm/webr/tree/v0.5.4",
+      "delivery": { "kind": "runtime", "language": "r" },
+      "provenance": { "modified": true, "basis": "Upstream webR v0.5.4 support files; when bundled, SciREPL gunzips .data.gz payloads, removes those gzip wrappers, and sets the matching .js.metadata gzip flag to false so Android WebView can serve them. Executable contents are otherwise unchanged." },
+      "vendorRoots": ["webr"],
+      "runtime": {
+        "baseUrl": "https://cdn.jsdelivr.net/npm/webr@{version}/dist",
+        "overrideUrlTemplate": "https://webr.r-wasm.org/{versionTag}/webr.mjs",
+        "versionMetadata": {
+          "url": "https://data.jsdelivr.com/v1/package/npm/webr",
+          "strategy": "dist-tag-latest"
+        },
+        "sources": [
+          { "type": "cdn", "url": "https://webr.r-wasm.org/{versionTag}/webr.mjs" },
+          { "type": "cdn", "url": "https://cdn.jsdelivr.net/npm/webr@{version}/dist/webr.mjs" }
+        ]
+      },
+      "notes": "This entry covers webR's JavaScript/support layer only. The distributed R/WebAssembly binaries are listed separately because webR's own licence file applies GPLv3 to those binaries. The deterministic Android packaging transform is implemented by scripts/fetch-bundles.mjs and declared in scripts/bundle-recipes.mjs."
+    },
+    {
+      "id": "webr-r-runtime",
+      "name": "webR binary distribution / R runtime",
+      "version": "webR 0.5.4",
+      "underlyingVersion": "R 4.5.1",
+      "licenseExpression": "GPL-3.0-only (distributed webR binaries); R is GPL-2.0-or-later",
+      "licenseDocuments": ["webR-0.5.4", "GPL-3.0-only", "GPL-2.0-only"],
+      "copyright": "Copyright R Core Team, webR contributors, and included-software copyright holders",
+      "sourceUrl": "https://github.com/r-wasm/webr/tree/v0.5.4",
+      "correspondingSourceUrl": "https://github.com/r-wasm/webr/tree/v0.5.4",
+      "upstreamSourceUrl": "https://cran.r-project.org/src/base/R-4/R-4.5.1.tar.gz",
+      "licenseUrl": "https://github.com/r-wasm/webr/blob/v0.5.4/LICENSE.md",
+      "delivery": { "kind": "runtime", "language": "r" },
+      "provenance": { "modified": true, "basis": "The Free build downloads upstream files without transforming them. Builds that bundle R deterministically gunzip .data.gz containers and clear their matching metadata gzip flag for Android WebView; the decompressed executable data is not otherwise changed." },
+      "notes": "SciREPL Free downloads this runtime on first R use; it is not embedded in the Free APK. The runtime executes locally after download. Pro builds reproduce the transform with scripts/fetch-bundles.mjs; corresponding upstream sources and the exact build recipe are linked and recorded here."
+    },
+    {
+      "id": "docx",
+      "name": "docx",
+      "version": "9.6.0",
+      "licenseExpression": "MIT",
+      "licenseDocuments": ["MIT"],
+      "copyright": "Copyright (c) 2016 Dolan and contributors",
+      "sourceUrl": "https://github.com/dolanmiu/docx/tree/9.6.0",
+      "delivery": { "kind": "downloaded", "when": "first DOCX export" },
+      "provenance": { "modified": false, "basis": "Exact upstream CDN release" },
+      "runtime": { "sources": [
+        { "type": "cdn", "url": "https://cdn.jsdelivr.net/npm/docx@{version}/dist/index.iife.js" },
+        { "type": "cdn", "url": "https://unpkg.com/docx@{version}/dist/index.iife.js" }
+      ] }
+    },
+    {
+      "id": "capacitor",
+      "name": "Capacitor and official plugins",
+      "version": "core/android 8.0.2; browser/share 8.0.1; filesystem 8.1.2",
+      "licenseExpression": "MIT",
+      "licenseDocuments": ["MIT"],
+      "copyright": "Copyright (c) 2017-present Drifty Co. and contributors",
+      "sourceUrl": "https://github.com/ionic-team/capacitor",
+      "delivery": { "kind": "platform", "platform": "Android" },
+      "packages": [
+        { "name": "@capacitor/android", "packageName": "@capacitor/android", "version": "8.0.2", "licenseExpression": "MIT", "sourceUrl": "https://github.com/ionic-team/capacitor/tree/8.0.2" },
+        { "name": "@capacitor/core", "packageName": "@capacitor/core", "version": "8.0.2", "licenseExpression": "MIT", "sourceUrl": "https://github.com/ionic-team/capacitor/tree/8.0.2" },
+        { "name": "@capacitor/browser", "packageName": "@capacitor/browser", "version": "8.0.1", "licenseExpression": "MIT", "sourceUrl": "https://github.com/ionic-team/capacitor-plugins/tree/%40capacitor/browser%408.0.1/browser" },
+        { "name": "@capacitor/filesystem", "packageName": "@capacitor/filesystem", "version": "8.1.2", "licenseExpression": "MIT", "sourceUrl": "https://github.com/ionic-team/capacitor-plugins/tree/%40capacitor/filesystem%408.1.2/filesystem" },
+        { "name": "@capacitor/share", "packageName": "@capacitor/share", "version": "8.0.1", "licenseExpression": "MIT", "sourceUrl": "https://github.com/ionic-team/capacitor-plugins/tree/%40capacitor/share%408.0.1/share" }
+      ]
+    },
+    {
+      "id": "capgo-pdf-generator",
+      "name": "@capgo/capacitor-pdf-generator",
+      "version": "8.0.19",
+      "licenseExpression": "MPL-2.0",
+      "licenseDocuments": ["MPL-2.0"],
+      "copyright": "Copyright Cap-go contributors",
+      "sourceUrl": "https://github.com/Cap-go/capacitor-pdf-generator",
+      "delivery": { "kind": "platform", "platform": "Android" },
+      "packageName": "@capgo/capacitor-pdf-generator",
+      "packageLock": "package-lock.json"
+    },
+    {
+      "id": "electron",
+      "name": "Electron",
+      "version": "43.3.0",
+      "licenseExpression": "MIT",
+      "licenseDocuments": ["MIT"],
+      "copyright": "Copyright (c) Electron contributors; Chromium third-party notices ship with Electron builds",
+      "sourceUrl": "https://github.com/electron/electron/tree/v43.3.0",
+      "delivery": { "kind": "platform", "platform": "Electron desktop" },
+      "packageName": "electron",
+      "packageLock": "desktop/electron/package-lock.json",
+      "notes": "Electron distributions also include Chromium's generated LICENSES.chromium.html."
+    }
+  ]
+}

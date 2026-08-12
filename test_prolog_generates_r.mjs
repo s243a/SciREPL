@@ -54,6 +54,8 @@ const R_TIMEOUT = 180_000;     // 3 min for webR init
     await context.addInitScript(() => {
       localStorage.setItem('scirepl_privacy_accepted', '1');
       localStorage.setItem('scirepl_onboarding_seen', '1');
+      addEventListener('DOMContentLoaded', () => localStorage.setItem(
+          'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
       localStorage.setItem('scirepl_auto_download', '1');
     });
 

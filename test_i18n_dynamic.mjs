@@ -17,6 +17,8 @@ const context = await browser.newContext({ viewport: { width: 411, height: 891 }
 await context.addInitScript(() => {
     localStorage.setItem('scirepl_privacy_accepted', '1');
     localStorage.setItem('scirepl_onboarding_seen', '1');
+    addEventListener('DOMContentLoaded', () => localStorage.setItem(
+        'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
     localStorage.setItem('scirepl_auto_download', '1');
     localStorage.removeItem('scirepl_session_v2');
     localStorage.removeItem('scirepl_session_v1');
