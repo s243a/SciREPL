@@ -106,8 +106,9 @@ jobs:
       - name: Notebook VFS
         run: node test_notebook_vfs.mjs
 
-  # test_pwa_release starts its OWN server on :8085, so it cannot share the job
-  # above (port conflict). It runs in a dedicated job with no shared server.
+  # test_pwa_release starts its OWN server (on :8086) and drives a full install/
+  # offline/reload cycle, so it runs in a dedicated job rather than sharing the
+  # long-running suite above.
   pwa-release:
     runs-on: ubuntu-latest
     timeout-minutes: 60
