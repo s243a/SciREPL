@@ -405,15 +405,67 @@ Two surprises relative to the usual “native apps ignore CORS” intuition:
 
 1. **Electron is not Android.** `desktop/electron/security.js` treats the
    renderer as fully untrusted because the JavaScript kernel (and Scittle,
-   Fengari, Pyodide’s JS bridge) share `window`. There is no privileged
-   “download this URL” channel, on purpose. Adding one for catalog sources
-   would be reachable from notebook code. **Do not add it for this feature.**
-   Electron stays on the PWA fetch rules.
+   Fengari, Pyodide's JS bridge) share `window`. There is no privileged
+   "download this URL" channel, on purpose. Adding one for catalog sources
+   would be reachable from notebook code. **Do not add a general one for
+   this feature.** Electron stays on the PWA fetch rules until the
+   allowlist-scoped channel below ships.
 2. **The PWA cannot grow a proxy** without becoming a hosted backend, which
    SciREPL is not. Extending `server.js` `/proxy` helps local development
    only. It does not help `*.github.io` installs, F-Droid WebView builds
    that load Pages, or a service-worker-cached PWA opened from the home
-   screen.
+   screen. (Locally serving the PWA is still a supported power-user
+   configuration — see "Local escape hatches" below.)
+
+### Planned: Electron allowlist fetch channel
+
+A follow-up change (not the first catalog PR) adds a narrow fetch channel
+in the Electron main process: the renderer passes a URL, the main process
+fetches it — no CORS outside a renderer — and returns the bytes. The
+channel is constrained by **destination**, not by caller:
+
+- Default allowlist, **on by default**: `github.com`,
+  `raw.githubusercontent.com`, `objects.githubusercontent.com`,
+  `cdn.jsdelivr.net`. This covers catalog indexes, community workbooks on
+  raw/jsDelivr, and GitHub Releases assets.
+- A settings toggle can **disable the channel entirely**. The allowlist
+  itself is a frozen constant in the main process, **not**
+  renderer-editable: a renderer-writable allowlist would be expanded by
+  the very notebook code the boundary exists to contain.
+- This is safe to expose even though notebook code shares `window` with
+  the UI, because the filter does not need to distinguish UI code from
+  notebook code. `security.js` warns that a *caller* filter is
+  impossible; a *destination* filter is not. The worst a hostile notebook
+  can do through it is download public files from GitHub — which it can
+  already do for raw/jsDelivr via ordinary CORS-open `fetch`.
+- Same hygiene rules as everywhere else: HTTPS only, no credential-bearing
+  URLs, refuse redirects off the allowlist, cap response size, no dynamic
+  IPC dispatch (extend `ipc.js`'s explicit channel list).
+
+Once it ships, Electron joins Android as a low-friction path for
+GitHub-hosted content, and the Electron row in the matrix above becomes
+"Yes (allowlisted fetch channel)" for the GitHub columns. The channel is
+an app capability, not catalog-specific: anything that installs over
+HTTPS from GitHub benefits.
+
+### Local escape hatches (no app changes needed)
+
+Two user-run options already exist or ship with this proposal:
+
+- **Serve the PWA locally.** `npm run serve` puts the app and the dev
+  `/proxy` on the same localhost origin, so GitHub release installs work.
+  This is a legitimate end-user configuration for technical users — while
+  the PWA is not hosted anywhere, it is the *primary* PWA distribution
+  channel. A server you control can also serve genuinely custom content:
+  front a private API (keys stay server-side), or publish a local
+  `scirepl-catalog.json` that never touches GitHub.
+- **Local fetch helper.** `tools/local-fetch-helper/local-fetch-helper.mjs`
+  is a zero-dependency Node script that re-serves arbitrary HTTPS URLs
+  with CORS and Private-Network-Access headers on `127.0.0.1`. It
+  generalizes the dev `/proxy` beyond GitHub Releases and works for a
+  *hosted* PWA too. Setup and security trade-offs:
+  `docs/local-fetch-helper.md`. Same sidecar pattern as UnifyWeaver's
+  HTTP CLI server.
 
 ### Practical consequence for source authors
 
@@ -440,7 +492,8 @@ still do it, and offer the existing manual path:
 
 > This file is on a host the browser will not read (cross-origin). On
 > Android it would download directly. Elsewhere, download it yourself and
-> use Menu → Import Package.
+> use Menu → Import Package — or run the local fetch helper, see
+> docs/local-fetch-helper.md.
 
 Sources that fail at **index** fetch get a Retry on the Sources panel, not
 a modal.
@@ -488,7 +541,9 @@ sends a huge `Content-Length`, abort).
 - Seeding fallbacks from `navigator.languages`. Initialize to English
   only. Extra languages are an explicit user choice.
 - Per-locale string maps on remote items in v1.
-- An Electron or PWA CORS bypass.
+- A general-purpose Electron or PWA CORS bypass. The planned Electron
+  channel is allowlist-scoped (GitHub hosts, on by default, user can
+  disable) — not an open fetch hole, and not part of the first catalog PR.
 - Defaulting the kernel filter to the editor language. That would hide
   most of today’s list. Kernel defaults to All.
 
@@ -593,3 +648,15 @@ URL and then fails silently on the PWA is worse than no button.
    Edit panel?** Toolbar: the checkbox is the thing you toggle per
    search. Edit panel: the ordered list. Duplicating the checkbox in
    both is fine if they are the same persisted bit.
+9. **Electron allowlist channel: master toggle or per-host control?**
+   Recommendation: one master toggle in settings ("Allow the desktop app
+   to fetch from GitHub on my behalf", default on). Per-host editing
+   lives in a main-process config file for advanced users, never in
+   renderer state — anything the renderer can write, notebook code can
+   write. The disable path must also cover installs already in flight.
+10. **Should the app detect a running local fetch helper?** A one-time
+    `GET http://127.0.0.1:8787/health` probe on CORS failure (not on every
+    open) would let the error message upgrade itself from "download it
+    yourself" to "your helper is running — retry?" Probing localhost from
+    a hosted page is a private-network request, so expect a preflight;
+    the helper already answers it. Keep the probe failure silent.
