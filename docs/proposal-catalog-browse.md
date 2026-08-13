@@ -12,8 +12,8 @@ curated list as the **default view**, then adding:
    defaults.
 2. A **spoken-language** filter (interface / content locale) that **defaults
    to the app’s current locale** (`i18n.current`), plus an ordered **fallback
-   list** (initialized to English) and a control for whether fallbacks are
-   allowed.
+   list** initialized to English with **Allow fallbacks on**. The user can
+   turn fallbacks off or edit the list; first run must not start strict.
 3. A **programming-language** filter (kernel) as a second control, defaulting
    to All so the first-open list stays the same as today.
 4. A Sources panel for **catalog index URLs** (typically GitHub repos that
@@ -173,7 +173,7 @@ Two pieces, not one dropdown:
 | Piece | Session or persisted | Default |
 | --- | --- | --- |
 | **Primary** (the spoken-language select) | Session. Reset on each open. | `i18n.current` |
-| **Fallbacks** (ordered list) + **Allow fallbacks** | Persisted in `localStorage` | `fallbacks: ['en']`, `allowFallbacks: true` |
+| **Fallbacks** (ordered list) + **Allow fallbacks** | Persisted in `localStorage` | First run: `fallbacks: ['en']`, `allowFallbacks: true`. Missing or corrupt storage re-initializes to that pair, not to fallbacks-off. |
 
 Effective preference order is:
 
@@ -244,6 +244,10 @@ Stored shape:
   "fallbacks": ["en"]
 }
 ```
+
+A missing `allowFallbacks` key is **true**, not false. First launch, wiped
+storage, and a partial write must all come up with fallbacks allowed and
+English on the list. Only an explicit user off-toggle stores `false`.
 
 ### Programming-language filter (defaults to All)
 
