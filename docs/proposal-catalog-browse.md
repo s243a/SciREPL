@@ -201,8 +201,15 @@ Japanese, the chain is `['ja', 'en']`.
   off.
 - Duplicate codes are illegal; adding a locale that is already primary or
   already a fallback is a no-op.
-- Only codes the app can activate are addable (same list as the primary
-  dropdown, minus All).
+- The **fallback Add list is wider than the primary dropdown.** Primary is
+  an interface-locale choice, so it lists only manifest locales. Fallbacks
+  are a *content* preference: addable codes are the manifest set **plus**
+  any BCP 47 tag declared by an enabled source's items. Content language
+  is not UI language — a Korean workbook should not have to wait for a
+  Korean UI translation before `ko` can be a fallback. The Add picker
+  groups these as "interface languages" and "languages from your
+  sources". A free-text code is not allowed; the code must come from a
+  known set so matching and endonym labels stay well-defined.
 - This filter does **not** hide built-in curated entries on **empty
   search**. Those are the default view. Their titles and descriptions are
   already translated; their notebook bodies are English and stay English.
@@ -316,6 +323,26 @@ hit in a Japanese UI is not noisy.
   primitive. Repo paste is sugar over that.
 - Removing a source does not uninstall anything already imported.
 
+### Source index caching
+
+"Fetch on first search of the session" needs a staleness policy, because
+indexes resolved through mutable refs (`@HEAD`, `main`) change under the
+same URL:
+
+- Fetched indexes are held in memory for the session **and** persisted
+  (with `lastFetchedAt`) so a second search session does not re-fetch
+  immediately.
+- A persisted index is re-fetched when it is older than **24 hours**, when
+  the user taps **Retry** or toggles the source on, or when the source URL
+  is re-added. Send `If-None-Match` / `If-Modified-Since` when the
+  previous response carried an ETag/Last-Modified, so a fresh-but-
+  unchanged index is cheap.
+- Never cache a mutable-ref index past the TTL "just in case": a catalog
+  that silently goes weeks stale is how "update available" badges lie.
+- If a re-fetch fails, keep the last good index, mark it stale in the
+  Sources panel ("last fetched 9 days ago — refresh failed"), and rank its
+  items normally. A failed refresh must not make a source's items vanish.
+
 ## Catalog index format
 
 Keep it aligned with the in-app entry schema so `_renderCard` / `_install`
@@ -337,6 +364,7 @@ can consume remote items without a second type.
       "locales": ["ja"],
       "url": "https://raw.githubusercontent.com/example/scirepl-workbooks/main/pi.srwb",
       "size": "~6 KB",
+      "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "revision": 1,
       "format": "srwb"
     }
@@ -349,10 +377,11 @@ Rules for remote items:
 - `id` must be unique **within that source**. The app namespaces as
   `sourceId:itemId` so two repos can both ship `intro`.
 - `locales` is the **content** language of the notebook or package, BCP 47
-  tags from the same set the app uses (`en`, `ja`, `pt-BR`, …). It is not
-  the kernel. A bilingual notebook lists both (`["en", "ja"]`) and takes
-  the best slot on the user’s preference chain (Japanese primary ranks it
-  as Japanese, not as an English fallback).
+  tags (`en`, `ja`, `pt-BR`, …). The set is not limited to the app's
+  interface locales — sources can publish content in languages the UI
+  does not ship. It is not the kernel. A bilingual notebook lists both
+  (`["en", "ja"]`) and takes the best slot on the user’s preference chain
+  (Japanese primary ranks it as Japanese, not as an English fallback).
 - Index-level `locales` is the default for items that omit the field.
   Item-level wins. If both are missing, treat as `["en"]`.
 - `name` / `description` are in the content language. v1 does not take
@@ -364,6 +393,19 @@ Rules for remote items:
 - `url` is the installable artifact. For the PWA it must be a CORS-open
   HTTPS URL (see below). `pages_url` on a remote item is only useful if it
   is same-origin with the running app, which community repos will not be.
+- `sha256` (optional, **recommended**) is the lowercase hex SHA-256 of the
+  artifact bytes. When present, the app verifies the download before
+  install and refuses on mismatch. When absent, the install proceeds but
+  the card and the confirmation show an "unverified content" note.
+  Rationale: a source URL is entered once and then re-fetched silently,
+  and installed notebooks and package wrappers are *executed* — HTTPS
+  alone does not cover a compromised source repo or a poisoned CDN cache
+  between the day the user added the source and the day they install.
+- `revision` is a source-local, monotonically increasing integer. The app
+  compares it against the installed copy to badge "update available";
+  it carries no cross-source meaning. Bumping `revision` without
+  changing `sha256` (when both are present) is treated as an index
+  error, not an update.
 - Ignore unknown fields. Reject the whole index if `format_version` is
   newer than we understand, and say so in `lastError`.
 - Cap index size (e.g. 500 items / 1 MB JSON) so a huge file cannot stall
@@ -525,6 +567,14 @@ visible on every remote card.
 Refuse to follow redirects off HTTPS. Cap download size with the same
 instinct as package install (show `size` from the index; if the host
 sends a huge `Content-Length`, abort).
+
+Verify `sha256` after download when the index provides it, and treat a
+mismatch as a hard install failure that names the source — a mismatch
+means the index and the artifact disagree, which is exactly what a
+compromised repo or poisoned cache looks like. Items without `sha256`
+are installable but labelled unverified; source authors should be told,
+in the publishing docs, that omitting it caps their users' trust at
+"whatever the host served today".
 
 ## What we are not doing
 
