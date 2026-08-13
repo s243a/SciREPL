@@ -49,6 +49,9 @@ function corsHeaders(extra = {}) {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
     'Access-Control-Allow-Headers': '*',
+    // ETag is not a CORS-safelisted response header; without this the page's
+    // JS can see the body but not the validator it needs for If-None-Match.
+    'Access-Control-Expose-Headers': 'ETag, Last-Modified, Content-Length',
     // Private Network Access: a public-https page (a hosted PWA) calling
     // http://127.0.0.1 triggers a preflight that requires this header.
     'Access-Control-Allow-Private-Network': 'true',
@@ -73,9 +76,10 @@ function isAllowedTarget(raw) {
   return url;
 }
 
-function fetchWithRedirects(url, redirectsLeft) {
+function fetchWithRedirects(url, redirectsLeft, conditionalHeaders = {}) {
   return new Promise((resolve, reject) => {
-    const req = https.get(url, { headers: { 'User-Agent': 'scirepl-local-fetch-helper/1.0' } }, (upstream) => {
+    const headers = { 'User-Agent': 'scirepl-local-fetch-helper/1.0', ...conditionalHeaders };
+    const req = https.get(url, { headers }, (upstream) => {
       const code = upstream.statusCode || 0;
       if (code >= 300 && code < 400 && upstream.headers.location) {
         upstream.resume(); // drain so the socket can be reused
@@ -88,7 +92,7 @@ function fetchWithRedirects(url, redirectsLeft) {
           reject(new Error('Refused redirect to a non-https or credential-bearing URL'));
           return;
         }
-        resolve(fetchWithRedirects(next, redirectsLeft - 1));
+        resolve(fetchWithRedirects(next, redirectsLeft - 1, conditionalHeaders));
         return;
       }
       resolve(upstream);
@@ -124,9 +128,16 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // Pass conditional-request headers through, so a catalog index re-fetch can
+  // be answered 304 Not Modified instead of re-downloading (the caching design
+  // in docs/proposal-catalog-browse.md relies on this).
+  const conditional = {};
+  if (req.headers['if-none-match']) conditional['If-None-Match'] = req.headers['if-none-match'];
+  if (req.headers['if-modified-since']) conditional['If-Modified-Since'] = req.headers['if-modified-since'];
+
   let upstream;
   try {
-    upstream = await fetchWithRedirects(target, MAX_REDIRECTS);
+    upstream = await fetchWithRedirects(target, MAX_REDIRECTS, conditional);
   } catch (err) {
     send(res, 502, 'Helper fetch failed: ' + (err && err.message ? err.message : String(err)));
     return;
@@ -139,9 +150,14 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  res.writeHead(upstream.statusCode || 502, corsHeaders({
-    'Content-Type': upstream.headers['content-type'] || 'application/octet-stream',
-  }));
+  // Forward Content-Length so the client can detect a mid-stream abort (the
+  // size-cap destroy below) as a truncated body rather than a complete file,
+  // and forward the validators the conditional headers above are answered by.
+  const passthrough = { 'Content-Type': upstream.headers['content-type'] || 'application/octet-stream' };
+  for (const name of ['content-length', 'etag', 'last-modified']) {
+    if (upstream.headers[name]) passthrough[name] = upstream.headers[name];
+  }
+  res.writeHead(upstream.statusCode || 502, corsHeaders(passthrough));
 
   let seen = 0;
   upstream.on('data', (chunk) => {
