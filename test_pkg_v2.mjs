@@ -36,10 +36,10 @@ const TIMEOUT = 120_000;
 
     await page.goto('http://localhost:8085/', { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
 
-    // Wait for Pyodide to be available (loaded after privacy acceptance)
-    console.log('   Waiting for Pyodide to load...');
-    await page.waitForFunction(() => typeof window.loadPyodide !== 'undefined', { timeout: TIMEOUT });
-    console.log('   Pyodide script available.');
+    // Kernels load lazily; wait for the app shell, not for Pyodide's loader.
+    console.log('   Waiting for app ready...');
+    await page.waitForFunction(() => window.__SCIREPL_APP_READY === true, null, { timeout: TIMEOUT });
+    console.log('   App ready.');
 
     await page.waitForTimeout(3000);
 
