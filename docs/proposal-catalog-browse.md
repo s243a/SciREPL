@@ -477,12 +477,37 @@ channel is constrained by **destination**, not by caller:
 - This is safe to expose even though notebook code shares `window` with
   the UI, because the filter does not need to distinguish UI code from
   notebook code. `security.js` warns that a *caller* filter is
-  impossible; a *destination* filter is not. The worst a hostile notebook
-  can do through it is download public files from GitHub — which it can
-  already do for raw/jsDelivr via ordinary CORS-open `fetch`.
+  impossible; a *destination* filter is not. To be precise about what the
+  channel adds: `github.com` release downloads and
+  `objects.githubusercontent.com` are **not** CORS-open, so this is new
+  reach for notebook code, not a no-op — the claim is that the *impact
+  class* is unchanged (reading public bytes from GitHub-operated hosts),
+  not that the capability already existed. The attacks that class
+  suggests all fail structurally:
+  - **Exfiltration via request URL** (encoding data into a path or query
+    the attacker later reads back) requires access to GitHub's or
+    jsDelivr's server logs, which an attacker does not have. The response
+    returns to the same renderer that asked; there is no side channel.
+  - **Session riding**: the main-process fetch carries no cookies and no
+    ambient GitHub credentials; there is nothing to ride.
+  - **Redirect laundering** off the allowlist is refused (below).
+  The remaining honest caveat: allowlisted hosts serve *arbitrary
+  user-published content* (any repo, any release), so the channel is a
+  transport, never an integrity boundary — `sha256` verification and the
+  unverified-content labelling apply to bytes from this channel exactly
+  as to CORS fetches.
 - Same hygiene rules as everywhere else: HTTPS only, no credential-bearing
   URLs, refuse redirects off the allowlist, cap response size, no dynamic
-  IPC dispatch (extend `ipc.js`'s explicit channel list).
+  IPC dispatch (extend `ipc.js`'s explicit channel list). Debounce or cap
+  per-session request volume so a hostile notebook cannot use the user's
+  IP to hammer GitHub.
+- **Disable control (decided; was open question 9):** one master toggle
+  in settings — "Allow the desktop app to fetch from GitHub on my
+  behalf", default on — and nothing per-host in the UI. The allowlist
+  stays a frozen constant in the main process; advanced users edit a
+  main-process config file, never renderer state, because anything the
+  renderer can write, notebook code can write. Flipping the toggle off
+  also aborts fetches already in flight.
 
 Once it ships, Electron joins Android as a low-friction path for
 GitHub-hosted content, and the Electron row in the matrix above becomes
@@ -539,6 +564,17 @@ still do it, and offer the existing manual path:
 
 Sources that fail at **index** fetch get a Retry on the Sources panel, not
 a modal.
+
+**Helper detection (decided; was open question 10):** on a CORS install
+failure — and only then, never on modal open — probe
+`GET http://127.0.0.1:8787/health` once per session. If it answers, the
+error copy upgrades to "your local fetch helper is running — retry
+through it?"; if it does not, stay silent and show the manual-import copy
+above. The probe is a private-network request from a secure page, so it
+triggers a PNA preflight; the helper answers that preflight. A probe
+failure is expected ambient state (helper not running), not an error to
+surface. Never auto-route installs through the helper without the user
+tapping the retry.
 
 ## Privacy and consent
 
@@ -699,14 +735,9 @@ URL and then fails silently on the PWA is worse than no button.
    search. Edit panel: the ordered list. Duplicating the checkbox in
    both is fine if they are the same persisted bit.
 9. **Electron allowlist channel: master toggle or per-host control?**
-   Recommendation: one master toggle in settings ("Allow the desktop app
-   to fetch from GitHub on my behalf", default on). Per-host editing
-   lives in a main-process config file for advanced users, never in
-   renderer state — anything the renderer can write, notebook code can
-   write. The disable path must also cover installs already in flight.
-10. **Should the app detect a running local fetch helper?** A one-time
-    `GET http://127.0.0.1:8787/health` probe on CORS failure (not on every
-    open) would let the error message upgrade itself from "download it
-    yourself" to "your helper is running — retry?" Probing localhost from
-    a hosted page is a private-network request, so expect a preflight;
-    the helper already answers it. Keep the probe failure silent.
+   Decided — master toggle only; see "Disable control" under "Planned:
+   Electron allowlist fetch channel".
+10. **Should the app detect a running local fetch helper?** Decided —
+    one probe per session on CORS failure, silent when absent, retry is
+    user-initiated; see "Helper detection" under "Error copy when CORS
+    blocks an install".
