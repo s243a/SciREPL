@@ -175,6 +175,85 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
         testLog('Call Graph workbook has the clean-output revision',
             tutorialRevisions.callGraph === 3, String(tutorialRevisions.callGraph));
 
+        console.log('6b. Testing catalog search and filter chrome...');
+
+        const filterDefaults = await page.evaluate(() => {
+            const spoken = document.getElementById('catalog-spoken-language');
+            const kernel = document.getElementById('catalog-kernel');
+            const allow = document.getElementById('catalog-allow-fallbacks');
+            return {
+                spoken: spoken?.value,
+                i18nCurrent: window.i18n?.current,
+                kernel: kernel?.value,
+                allow: !!allow?.checked,
+                summary: document.getElementById('catalog-fallback-summary')?.textContent?.trim() || '',
+                locales: window.packageCatalog.packages.map(p => (p.locales || []).join(',')),
+            };
+        });
+        testLog('Spoken-language select equals i18n.current on open',
+            filterDefaults.spoken === filterDefaults.i18nCurrent,
+            `${filterDefaults.spoken} vs ${filterDefaults.i18nCurrent}`);
+        testLog('Kernel select equals All on open',
+            filterDefaults.kernel === 'all', filterDefaults.kernel);
+        testLog('Allow fallbacks is on by default',
+            filterDefaults.allow === true, String(filterDefaults.allow));
+        testLog('English primary does not duplicate English in the fallback summary',
+            !/then English/i.test(filterDefaults.summary), filterDefaults.summary);
+        testLog('Every built-in entry declares locales [en]',
+            filterDefaults.locales.length >= 17 && filterDefaults.locales.every(v => v === 'en'),
+            filterDefaults.locales.slice(0, 3).join('|'));
+
+        const hasJa = await page.evaluate(() =>
+            [...document.getElementById('catalog-spoken-language').options]
+                .some(o => o.value === 'ja'));
+        if (hasJa) {
+            await page.selectOption('#catalog-spoken-language', 'ja');
+            const jaState = await page.evaluate(() => ({
+                summary: document.getElementById('catalog-fallback-summary')?.textContent?.trim() || '',
+                cards: document.querySelectorAll('#package-catalog-list .pkg-card').length,
+            }));
+            testLog('Fallback summary lists English when primary is not en',
+                /English/i.test(jaState.summary), jaState.summary);
+            testLog('Empty search still shows all built-in cards after changing spoken language',
+                jaState.cards >= 17, String(jaState.cards));
+            await page.selectOption('#catalog-spoken-language', filterDefaults.i18nCurrent || 'en');
+        } else {
+            testLog('Fallback summary lists English when primary is not en', false, 'ja option missing');
+        }
+
+        await page.selectOption('#catalog-kernel', 'lua');
+        const luaCards = await page.evaluate(() =>
+            [...document.querySelectorAll('#package-catalog-list .pkg-card')].map(card => ({
+                name: card.querySelector('strong')?.textContent?.trim(),
+                kernels: card.querySelector('.pkg-kernels')?.textContent?.trim() || '',
+            })));
+        testLog('Kernel lua hides non-Lua built-in cards',
+            luaCards.length > 0 && luaCards.every(c => c.kernels.split(',').some(k => k.trim() === 'lua')),
+            luaCards.map(c => `${c.name} [${c.kernels}]`).join('; '));
+
+        await page.selectOption('#catalog-kernel', 'all');
+        const restoredCards = await page.evaluate(() =>
+            document.querySelectorAll('#package-catalog-list .pkg-card').length);
+        testLog('Kernel All restores the built-in list',
+            restoredCards >= 17, String(restoredCards));
+
+        await page.setViewportSize({ width: 360, height: 740 });
+        const narrowLayout = await page.evaluate(() => {
+            const modal = document.querySelector('#package-catalog-modal .modal-content');
+            const search = document.getElementById('catalog-search');
+            const toolbar = document.querySelector('.catalog-toolbar');
+            if (!modal || !search || !toolbar) return { ok: false };
+            return {
+                ok: true,
+                overflow: modal.scrollWidth > modal.clientWidth + 2,
+                searchVisible: search.getBoundingClientRect().width > 80,
+                toolbarHeight: toolbar.getBoundingClientRect().height,
+            };
+        });
+        testLog('Filter chrome wraps on a 360×740 viewport without horizontal overflow',
+            narrowLayout.ok && !narrowLayout.overflow && narrowLayout.searchVisible,
+            JSON.stringify(narrowLayout));
+
         const bundleDefinition = await page.evaluate(() => {
             const bundle = window.packageCatalog.packages.find(p => p.id === 'unifyweaver-workbooks');
             return { items: bundle?.items || [], requires: bundle?.requires || [] };

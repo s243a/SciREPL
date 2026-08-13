@@ -917,9 +917,54 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
     <div id="package-catalog-modal" class="modal hidden">
         <div class="modal-content modal-content-scroll">
             <button class="modal-close" data-i18n-aria-label="common.close" data-i18n-title="common.close" aria-label="Close" title="Close">&times;</button>
-            <h2 data-i18n="packageCatalog.browsePackagesBundlesAmpWorkbooks">Browse Packages, Bundles &amp; Workbooks</h2>
-            <p data-i18n="packageCatalog.oneClickInstallPackagesDependency">One-click install packages, dependency-aware workbook bundles, and individual workbook templates into SciREPL.</p>
-            <div id="package-catalog-list"></div>
+
+            <div id="catalog-browse-panel">
+                <h2 data-i18n="packageCatalog.browsePackagesBundlesAmpWorkbooks">Browse Packages, Bundles &amp; Workbooks</h2>
+                <p data-i18n="packageCatalog.oneClickInstallPackagesDependency">One-click install packages, dependency-aware workbook bundles, and individual workbook templates into SciREPL.</p>
+                <div class="catalog-toolbar">
+                    <input type="search" id="catalog-search" class="catalog-search" data-i18n-placeholder="packageCatalog.searchPlaceholder" placeholder="Search packages, bundles, workbooks…" autocomplete="off">
+                    <div class="catalog-filter-grid">
+                        <label class="catalog-filter-label" for="catalog-spoken-language">
+                            <span data-i18n="packageCatalog.filterSpokenLanguage">Spoken language</span>
+                            <select id="catalog-spoken-language" class="catalog-select">
+                                <option value="all" data-i18n="packageCatalog.filterAllSpoken">All spoken languages</option>
+                            </select>
+                        </label>
+                        <div class="catalog-fallbacks-row">
+                            <label class="catalog-fallback-toggle">
+                                <input type="checkbox" id="catalog-allow-fallbacks" checked>
+                                <span data-i18n="packageCatalog.allowFallbacks">Allow fallbacks</span>
+                            </label>
+                            <span id="catalog-fallback-summary" class="catalog-fallback-summary"></span>
+                            <button type="button" id="catalog-edit-fallbacks" class="vfs-btn" data-i18n="packageCatalog.editFallbacks">Edit</button>
+                        </div>
+                        <label class="catalog-filter-label" for="catalog-kernel">
+                            <span data-i18n="packageCatalog.filterKernel">Kernel</span>
+                            <select id="catalog-kernel" class="catalog-select">
+                                <option value="all" data-i18n="packageCatalog.filterKernelAll">All</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                <div id="package-catalog-list"></div>
+            </div>
+
+            <div id="catalog-fallback-panel" class="hidden">
+                <button type="button" id="catalog-fallback-back" class="catalog-back-btn">
+                    <span aria-hidden="true">‹</span>
+                    <span data-i18n="packageCatalog.fallbackLanguages">Fallback languages</span>
+                </button>
+                <label class="catalog-fallback-toggle">
+                    <input type="checkbox" id="catalog-allow-fallbacks-edit" checked>
+                    <span data-i18n="packageCatalog.allowFallbacks">Allow fallbacks</span>
+                </label>
+                <ol id="catalog-fallback-list" class="catalog-fallback-list"></ol>
+                <label class="catalog-filter-label" for="catalog-fallback-add">
+                    <span data-i18n="packageCatalog.addLanguage">Add language…</span>
+                    <select id="catalog-fallback-add" class="catalog-select"></select>
+                </label>
+                <p id="catalog-fallback-help" class="catalog-fallback-help"></p>
+            </div>
         </div>
     </div>
 
@@ -1153,6 +1198,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <script src="js/kernels/clojurescript.js"></script>
     <script src="js/archive_extractors.js"></script>
     <script src="js/package_loader.js"></script>
+    <script src="js/catalog_filter.js"></script>
     <script src="js/package_catalog.js"></script>
     <script src="js/prolog_settings.js"></script>
     <script src="js/notebook_manager.js"></script>

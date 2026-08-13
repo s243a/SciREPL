@@ -9,6 +9,12 @@ class PackageCatalog {
     constructor() {
         this.modal = document.getElementById('package-catalog-modal');
         this.listEl = document.getElementById('package-catalog-list');
+        this._query = '';
+        this._sessionPrimary = null;
+        this._kernelFilter = null;
+        this._prefs = (typeof CatalogFilter !== 'undefined')
+            ? CatalogFilter.loadLocalePrefs()
+            : { allowFallbacks: true, fallbacks: ['en'] };
         this._init();
     }
 
@@ -61,6 +67,7 @@ class PackageCatalog {
                 pages_url: 'packages/unifyweaver_scirepl.zip',
                 size: '~2 MB',
                 kernels: ['prolog', 'python'],
+                locales: ['en'],
             },
             {
                 id: 'unifyweaver-workbooks',
@@ -74,6 +81,7 @@ class PackageCatalog {
                 contentsKey: 'packageCatalog.contentsWorkbooks',
                 contentsVars: { count: 4 },
                 kernels: ['prolog', 'r', 'bash'],
+                locales: ['en'],
                 requires: ['unifyweaver-scirepl'],
                 items: [
                     'unifyweaver-family-tree',
@@ -94,6 +102,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/01_family_tree_tutorial.ipynb',
                 size: '~10 KB',
                 kernels: ['prolog'],
+                locales: ['en'],
                 requires: ['unifyweaver-scirepl'],
             },
             {
@@ -108,6 +117,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/02_recursion_patterns.ipynb',
                 size: '~15 KB',
                 kernels: ['prolog'],
+                locales: ['en'],
                 requires: ['unifyweaver-scirepl'],
             },
             {
@@ -122,6 +132,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/03_call_graph_analysis.ipynb',
                 size: '~13 KB',
                 kernels: ['prolog'],
+                locales: ['en'],
                 requires: ['unifyweaver-scirepl'],
             },
             {
@@ -137,6 +148,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/prolog-generates-r.srwb',
                 size: '~13 KB',
                 kernels: ['prolog', 'r', 'bash'],
+                locales: ['en'],
                 requires: ['unifyweaver-scirepl'],
             },
             {
@@ -152,6 +164,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/prolog-generates-lua.srwb',
                 size: '~6 KB',
                 kernels: ['prolog', 'lua'],
+                locales: ['en'],
                 requires: ['unifyweaver-scirepl'],
             },
             {
@@ -167,6 +180,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/prolog-generates-clojurescript.srwb',
                 size: '~5 KB',
                 kernels: ['prolog', 'clojurescript'],
+                locales: ['en'],
                 requires: ['unifyweaver-scirepl'],
             },
             {
@@ -181,6 +195,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/life_expectancy_csv_demo.ipynb',
                 size: '~8 KB',
                 kernels: ['python', 'r'],
+                locales: ['en'],
             },
             {
                 id: 'compute-pi-archimedean',
@@ -195,6 +210,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/compute-pi-workbook.srwb',
                 size: '~6 KB',
                 kernels: ['python'],
+                locales: ['en'],
             },
             {
                 id: 'ggplot2-showcase',
@@ -207,6 +223,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/r_ggplot2_showcase.ipynb',
                 size: '~5 KB',
                 kernels: ['r'],
+                locales: ['en'],
             },
             {
                 id: 'tidyverse-data-wrangling',
@@ -220,6 +237,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/r_tidyverse_wrangling.ipynb',
                 size: '~6 KB',
                 kernels: ['python', 'r'],
+                locales: ['en'],
             },
             {
                 id: 'statistics-with-r',
@@ -233,6 +251,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/r_statistics.ipynb',
                 size: '~5 KB',
                 kernels: ['r'],
+                locales: ['en'],
             },
             {
                 id: 'lua-tables-coroutines',
@@ -245,6 +264,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/lua-tables-coroutines.srwb',
                 size: '~12 KB',
                 kernels: ['lua'],
+                locales: ['en'],
             },
             {
                 id: 'lua-parsing-coroutines',
@@ -258,6 +278,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/lua-parsing-coroutines.srwb',
                 size: '~14 KB',
                 kernels: ['lua'],
+                locales: ['en'],
             },
             {
                 id: 'typr-introduction',
@@ -273,6 +294,7 @@ class PackageCatalog {
                 pages_url: 'workbooks/typr-intro.srwb',
                 size: '~2 KB',
                 kernels: ['typr', 'r'],
+                locales: ['en'],
             },
             {
                 id: 'prolog-generates-typr',
@@ -287,23 +309,21 @@ class PackageCatalog {
                 pages_url: 'workbooks/prolog-generates-typr.srwb',
                 size: '~5 KB',
                 kernels: ['prolog', 'typr', 'r'],
+                locales: ['en'],
                 requires: ['unifyweaver-scirepl'],
             },
         ];
     }
 
     _init() {
-        // Open catalog from menu
         const browseBtn = document.getElementById('btn-browse-packages');
         if (browseBtn) {
             browseBtn.addEventListener('click', () => {
                 document.getElementById('menu-modal')?.classList.add('hidden');
-                this._render();
-                this.modal.classList.remove('hidden');
+                this._open();
             });
         }
 
-        // Close modal
         if (this.modal) {
             this.modal.addEventListener('click', (e) => {
                 if (e.target === this.modal || e.target.classList.contains('modal-close')) {
@@ -312,49 +332,366 @@ class PackageCatalog {
             });
         }
 
+        const search = document.getElementById('catalog-search');
+        if (search) {
+            search.addEventListener('input', () => {
+                this._query = search.value || '';
+                this._render();
+            });
+        }
+
+        const spoken = document.getElementById('catalog-spoken-language');
+        if (spoken) {
+            spoken.addEventListener('change', () => {
+                this._sessionPrimary = spoken.value === 'all' ? null : spoken.value;
+                this._syncFallbackControls();
+                this._render();
+            });
+        }
+
+        const kernel = document.getElementById('catalog-kernel');
+        if (kernel) {
+            kernel.addEventListener('change', () => {
+                this._kernelFilter = kernel.value === 'all' ? null : kernel.value;
+                this._render();
+            });
+        }
+
+        const allow = document.getElementById('catalog-allow-fallbacks');
+        const allowEdit = document.getElementById('catalog-allow-fallbacks-edit');
+        const persistAllow = (checked) => {
+            this._prefs.allowFallbacks = !!checked;
+            this._persistPrefs();
+            this._syncFallbackControls();
+            this._render();
+        };
+        if (allow) allow.addEventListener('change', () => persistAllow(allow.checked));
+        if (allowEdit) allowEdit.addEventListener('change', () => persistAllow(allowEdit.checked));
+
+        document.getElementById('catalog-edit-fallbacks')?.addEventListener('click', () => {
+            this._showFallbackPanel(true);
+        });
+        document.getElementById('catalog-fallback-back')?.addEventListener('click', () => {
+            this._showFallbackPanel(false);
+        });
+        document.getElementById('catalog-fallback-add')?.addEventListener('change', (e) => {
+            const code = e.target.value;
+            e.target.value = '';
+            if (!code) return;
+            this._prefs.fallbacks = CatalogFilter.addFallback(
+                this._prefs.fallbacks, code, this._sessionPrimary);
+            this._persistPrefs();
+            this._syncFallbackControls();
+            this._renderFallbackList();
+            this._render();
+        });
+
         document.addEventListener('i18n:changed', () => this._translateVisibleCatalog());
+    }
+
+    _open() {
+        this._query = '';
+        const search = document.getElementById('catalog-search');
+        if (search) search.value = '';
+        this._kernelFilter = null;
+        this._sessionPrimary = (window.i18n && window.i18n.current) ? window.i18n.current : 'en';
+        this._prefs = CatalogFilter.loadLocalePrefs();
+        this._showFallbackPanel(false);
+        this._populateSpokenSelect();
+        this._populateKernelSelect();
+        this._syncFallbackControls();
+        this._render();
+        this.modal?.classList.remove('hidden');
+        if (window.i18n && typeof window.i18n.applyToDom === 'function' && this.modal) {
+            window.i18n.applyToDom(this.modal);
+        }
+    }
+
+    _persistPrefs() {
+        this._prefs = CatalogFilter.saveLocalePrefs(this._prefs);
+    }
+
+    _showFallbackPanel(show) {
+        document.getElementById('catalog-browse-panel')?.classList.toggle('hidden', !!show);
+        document.getElementById('catalog-fallback-panel')?.classList.toggle('hidden', !show);
+        if (show) this._renderFallbackList();
+    }
+
+    _activatableLocales() {
+        if (window.i18n && typeof window.i18n.available === 'function') {
+            return window.i18n.available();
+        }
+        const locales = (window.i18n && window.i18n.LOCALES) || [];
+        return locales.map((l) => ({ ...l }));
+    }
+
+    _endonymMap() {
+        const map = {};
+        for (const loc of this._activatableLocales()) {
+            if (loc.code) map[loc.code] = loc.endonym || loc.code;
+        }
+        return map;
+    }
+
+    _endonym(code) {
+        if (!code) return '';
+        const map = this._endonymMap();
+        return map[code] || code;
+    }
+
+    _populateSpokenSelect() {
+        const select = document.getElementById('catalog-spoken-language');
+        if (!select) return;
+        const current = this._sessionPrimary || 'all';
+        const allLabel = this._t('packageCatalog.filterAllSpoken', 'All spoken languages');
+        select.innerHTML = '';
+        const allOpt = document.createElement('option');
+        allOpt.value = 'all';
+        allOpt.textContent = allLabel;
+        allOpt.setAttribute('data-i18n', 'packageCatalog.filterAllSpoken');
+        select.appendChild(allOpt);
+        for (const loc of this._activatableLocales()) {
+            const opt = document.createElement('option');
+            opt.value = loc.code;
+            opt.textContent = loc.endonym || loc.code;
+            select.appendChild(opt);
+        }
+        const hasCurrent = [...select.options].some((o) => o.value === current);
+        select.value = hasCurrent ? current : (current === null ? 'all' : current);
+        if (select.value !== current && current && current !== 'all') {
+            const extra = document.createElement('option');
+            extra.value = current;
+            extra.textContent = this._endonym(current) || current;
+            select.appendChild(extra);
+            select.value = current;
+        }
+    }
+
+    _kernelLabel(id) {
+        const keys = {
+            python: ['wbKernel.python', 'Python'],
+            prolog: ['wbKernel.prolog', 'Prolog'],
+            javascript: ['wbKernel.javascript', 'JavaScript'],
+            bash: ['wbKernel.bash', 'Bash'],
+            r: ['packageCatalog.kernel.r', 'R'],
+            lua: ['inputControls.lua', 'Lua'],
+            typr: ['packageCatalog.kernel.typr', 'TypR'],
+            clojurescript: ['packageCatalog.kernel.clojurescript', 'ClojureScript'],
+        };
+        const pair = keys[id];
+        return pair ? this._t(pair[0], pair[1]) : id;
+    }
+
+    _populateKernelSelect() {
+        const select = document.getElementById('catalog-kernel');
+        if (!select) return;
+        const langSel = document.getElementById('lang-selector');
+        const ids = langSel
+            ? [...langSel.options].map((o) => o.value)
+            : ['python', 'prolog', 'bash', 'javascript', 'r', 'lua', 'typr', 'clojurescript'];
+        const wanted = this._kernelFilter || 'all';
+        select.innerHTML = '';
+        const allOpt = document.createElement('option');
+        allOpt.value = 'all';
+        allOpt.textContent = this._t('packageCatalog.filterKernelAll', 'All');
+        allOpt.setAttribute('data-i18n', 'packageCatalog.filterKernelAll');
+        select.appendChild(allOpt);
+        for (const id of ids) {
+            const opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = this._kernelLabel(id);
+            select.appendChild(opt);
+        }
+        select.value = ids.includes(wanted) || wanted === 'all' ? wanted : 'all';
+    }
+
+    _syncFallbackControls() {
+        const allow = !!this._prefs.allowFallbacks;
+        const box = document.getElementById('catalog-allow-fallbacks');
+        const boxEdit = document.getElementById('catalog-allow-fallbacks-edit');
+        if (box) box.checked = allow;
+        if (boxEdit) boxEdit.checked = allow;
+
+        const summary = document.getElementById('catalog-fallback-summary');
+        if (summary) {
+            const primary = this._sessionPrimary;
+            const rest = (this._prefs.fallbacks || []).filter((code) =>
+                !primary || code.toLowerCase() !== String(primary).toLowerCase());
+            const names = rest.map((code) => this._endonym(code) || code).join(', ');
+            const allSpoken = CatalogFilter.isAllLocale(primary);
+            if (allSpoken) {
+                this._setTranslatedText(summary, 'packageCatalog.fallbacksRankingThen',
+                    'ranking only: {languages}', { languages: names || this._t('packageCatalog.fallbackNone', 'none') });
+            } else if (!names) {
+                this._setTranslatedText(summary, 'packageCatalog.fallbackNone', 'none');
+            } else {
+                this._setTranslatedText(summary, 'packageCatalog.fallbackThen',
+                    'then {languages}', { languages: names });
+            }
+        }
+
+        const help = document.getElementById('catalog-fallback-help');
+        if (help) {
+            const language = CatalogFilter.isAllLocale(this._sessionPrimary)
+                ? this._t('packageCatalog.filterAllSpoken', 'All spoken languages')
+                : (this._endonym(this._sessionPrimary) || this._sessionPrimary || 'English');
+            this._setTranslatedText(help, 'packageCatalog.fallbackHelp',
+                'When a workbook is not in {language}, show the next language on this list. English is the starting fallback; you can add more or turn fallbacks off.',
+                { language });
+        }
+        this._populateFallbackAdd();
+    }
+
+    _populateFallbackAdd() {
+        const select = document.getElementById('catalog-fallback-add');
+        if (!select) return;
+        const used = new Set((this._prefs.fallbacks || []).map((c) => c.toLowerCase()));
+        if (this._sessionPrimary) used.add(String(this._sessionPrimary).toLowerCase());
+        select.innerHTML = '';
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = this._t('packageCatalog.addLanguage', 'Add language…');
+        placeholder.setAttribute('data-i18n', 'packageCatalog.addLanguage');
+        select.appendChild(placeholder);
+        for (const loc of this._activatableLocales()) {
+            if (used.has(String(loc.code).toLowerCase())) continue;
+            const opt = document.createElement('option');
+            opt.value = loc.code;
+            opt.textContent = loc.endonym || loc.code;
+            select.appendChild(opt);
+        }
+        select.value = '';
+    }
+
+    _renderFallbackList() {
+        const list = document.getElementById('catalog-fallback-list');
+        if (!list) return;
+        list.innerHTML = '';
+        (this._prefs.fallbacks || []).forEach((code, index) => {
+            const li = document.createElement('li');
+            li.className = 'catalog-fallback-item';
+            const label = document.createElement('span');
+            label.textContent = `${index + 1}. ${this._endonym(code) || code}`;
+            const up = document.createElement('button');
+            up.type = 'button';
+            up.className = 'vfs-btn';
+            up.disabled = index === 0;
+            this._setButtonLabel(up, 'packageCatalog.moveFallbackUp', 'Move up');
+            up.addEventListener('click', () => {
+                if (index === 0) return;
+                const next = this._prefs.fallbacks.slice();
+                [next[index - 1], next[index]] = [next[index], next[index - 1]];
+                this._prefs.fallbacks = next;
+                this._persistPrefs();
+                this._syncFallbackControls();
+                this._renderFallbackList();
+                this._render();
+            });
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'vfs-btn';
+            this._setButtonLabel(remove, 'packageCatalog.removeFallback', 'Remove');
+            remove.addEventListener('click', () => {
+                this._prefs.fallbacks = this._prefs.fallbacks.filter((_, i) => i !== index);
+                this._persistPrefs();
+                this._syncFallbackControls();
+                this._renderFallbackList();
+                this._render();
+            });
+            li.append(label, up, remove);
+            list.appendChild(li);
+        });
+        this._populateFallbackAdd();
+    }
+
+    _filterRows() {
+        const all = this.packages;
+        if (typeof CatalogFilter === 'undefined') {
+            return all.map((entry, originalIndex) => ({
+                entry, originalIndex, matchedLocale: null, builtin: true,
+            }));
+        }
+        const withDisplay = all.map((entry) => Object.assign({}, entry, {
+            displayName: this._displayName(entry),
+        }));
+        return CatalogFilter.filterCatalog({
+            entries: withDisplay,
+            query: this._query,
+            primary: this._sessionPrimary,
+            allowFallbacks: this._prefs.allowFallbacks,
+            fallbacks: this._prefs.fallbacks,
+            kernel: this._kernelFilter,
+            endonyms: this._endonymMap(),
+        });
     }
 
     _render() {
         if (!this.listEl) return;
+        const rows = this._filterRows();
         const all = this.packages;
 
-        if (all.length === 0) {
+        if (rows.length === 0) {
             this.listEl.innerHTML = '<p class="catalog-empty"></p>';
-            this._setTranslatedText(this.listEl.querySelector('.catalog-empty'),
-                'packageCatalog.noItems', 'No items available.');
+            const empty = this.listEl.querySelector('.catalog-empty');
+            this._setEmptyCopy(empty);
             return;
         }
 
-        const packages = all.filter(p => (p.type || 'package') === 'package');
-        const bundles = all.filter(p => p.type === 'bundle');
-        const workbooks = all.filter(p => p.type === 'workbook');
+        const packages = rows.filter((r) => (r.entry.type || 'package') === 'package');
+        const bundles = rows.filter((r) => r.entry.type === 'bundle');
+        const workbooks = rows.filter((r) => r.entry.type === 'workbook');
 
         let html = '';
         if (packages.length > 0) {
             html += `<h3 class="catalog-section-header" data-i18n="packageCatalog.sectionPackages">${this._esc(this._t('packageCatalog.sectionPackages', 'Packages'))}</h3>`;
-            html += packages.map((pkg) => this._renderCard(pkg, all.indexOf(pkg))).join('');
+            html += packages.map((row) => this._renderCard(row.entry, row.originalIndex, row)).join('');
         }
         if (bundles.length > 0) {
             html += `<h3 class="catalog-section-header" data-i18n="packageCatalog.sectionBundles">${this._esc(this._t('packageCatalog.sectionBundles', 'Bundles'))}</h3>`;
-            html += bundles.map((pkg) => this._renderCard(pkg, all.indexOf(pkg))).join('');
+            html += bundles.map((row) => this._renderCard(row.entry, row.originalIndex, row)).join('');
         }
         if (workbooks.length > 0) {
             html += `<h3 class="catalog-section-header" data-i18n="packageCatalog.sectionWorkbooks">${this._esc(this._t('packageCatalog.sectionWorkbooks', 'Workbooks'))}</h3>`;
-            html += workbooks.map((pkg) => this._renderCard(pkg, all.indexOf(pkg))).join('');
+            html += workbooks.map((row) => this._renderCard(row.entry, row.originalIndex, row)).join('');
         }
 
         this.listEl.innerHTML = html;
         this._wireCatalogTranslations();
         this._syncInstallButtons();
 
-        // Attach install handlers
         this.listEl.querySelectorAll('.pkg-install-btn').forEach(btn => {
             btn.addEventListener('click', () => this._install(btn));
         });
     }
 
-    _renderCard(pkg, idx) {
+    _setEmptyCopy(el) {
+        if (!el) return;
+        const q = String(this._query || '').trim();
+        if (!q) {
+            this._setTranslatedText(el, 'packageCatalog.noItems', 'No items available.');
+            return;
+        }
+        const language = CatalogFilter.isAllLocale(this._sessionPrimary)
+            ? this._t('packageCatalog.filterAllSpoken', 'All spoken languages')
+            : (this._endonym(this._sessionPrimary) || this._sessionPrimary || 'English');
+        const rest = (this._prefs.fallbacks || []).filter((code) =>
+            !this._sessionPrimary
+            || code.toLowerCase() !== String(this._sessionPrimary).toLowerCase());
+        const fallbacks = rest.map((code) => this._endonym(code) || code).join(', ');
+        if (CatalogFilter.isAllLocale(this._sessionPrimary)) {
+            this._setTranslatedText(el, 'packageCatalog.noMatchesAll',
+                'No matching packages, bundles, or workbooks.');
+        } else if (this._prefs.allowFallbacks && fallbacks) {
+            this._setTranslatedText(el, 'packageCatalog.noMatches',
+                'No matches in {language}, or in fallbacks {fallbacks}',
+                { language, fallbacks });
+        } else {
+            this._setTranslatedText(el, 'packageCatalog.noMatchesPrimaryOnly',
+                'No matches in {language}', { language });
+        }
+    }
+
+    _renderCard(pkg, idx, row) {
         const installed = this._isInstalled(pkg);
         const dependencyNames = (pkg.requires || [])
             .map(ref => {
@@ -365,6 +702,14 @@ class PackageCatalog {
         const contents = pkg.contentsKey
             ? this._t(pkg.contentsKey, pkg.contents, pkg.contentsVars)
             : pkg.contents;
+        const appLocale = (window.i18n && window.i18n.current) || 'en';
+        const badge = (typeof CatalogFilter !== 'undefined')
+            ? CatalogFilter.localeBadge(pkg, this._sessionPrimary, appLocale,
+                row && row.matchedLocale)
+            : null;
+        const badgeHtml = badge
+            ? `<span class="pkg-locale-badge">${this._esc(badge)}</span>`
+            : '';
         return `
             <div class="pkg-card ${pkg.type === 'bundle' ? 'pkg-bundle-card' : ''}" data-catalog-id="${this._esc(pkg.id)}">
                 <div class="pkg-info">
@@ -373,6 +718,7 @@ class PackageCatalog {
                     ${pkg.size ? `<span class="pkg-size">${this._esc(pkg.size)}</span>` : ''}
                     ${contents ? `<span class="pkg-contents">${this._esc(contents)}</span>` : ''}
                     ${pkg.kernels ? `<span class="pkg-kernels">${pkg.kernels.map(k => this._esc(k)).join(', ')}</span>` : ''}
+                    ${badgeHtml}
                     <p class="pkg-description">${this._esc(this._description(pkg))}</p>
                     ${dependencyNames ? `<small class="pkg-requires">${this._esc(this._t('packageCatalog.requires', 'Requires: {dependencies}', { dependencies: dependencyNames }))}</small>` : ''}
                 </div>
@@ -412,10 +758,19 @@ class PackageCatalog {
     }
 
     _translateVisibleCatalog() {
-        if (!this.listEl || !this.listEl.children.length) return;
-        this._wireCatalogTranslations();
+        if (!this.modal || this.modal.classList.contains('hidden')) return;
+        const spoken = document.getElementById('catalog-spoken-language');
+        const keptPrimary = spoken ? spoken.value : this._sessionPrimary;
+        this._populateSpokenSelect();
+        if (spoken && keptPrimary) {
+            spoken.value = keptPrimary;
+            this._sessionPrimary = keptPrimary === 'all' ? null : keptPrimary;
+        }
+        this._populateKernelSelect();
+        this._syncFallbackControls();
+        this._render();
         if (window.i18n && typeof window.i18n.applyToDom === 'function') {
-            window.i18n.applyToDom(this.listEl);
+            window.i18n.applyToDom(this.modal);
         }
     }
 
