@@ -1,0 +1,743 @@
+# Proposal: searchable catalog, language filters, and catalog sources
+
+**Status:** design note. Nothing here is implemented.
+
+The Browse Packages, Bundles & Workbooks modal is a hardcoded list in
+`www/js/package_catalog.js`. Every curated entry is shown, in a fixed
+Packages → Bundles → Workbooks order, with no search, no filters, and no
+way to point SciREPL at another repo. This note proposes keeping that
+curated list as the **default view**, then adding:
+
+1. A search field that can surface **additional** items, not just filter the
+   defaults.
+2. A **spoken-language** filter (interface / content locale) that **defaults
+   to the app’s current locale** (`i18n.current`), plus an ordered **fallback
+   list** initialized to English with **Allow fallbacks on**. The user can
+   turn fallbacks off or edit the list; first run must not start strict.
+3. A **programming-language** filter (kernel) as a second control, defaulting
+   to All so the first-open list stays the same as today.
+4. A Sources panel for **catalog index URLs** (typically GitHub repos that
+   publish workbooks and packages).
+
+The two “language” controls are different senses. The i18n catalogues
+already keep them apart (`Language-Interface` vs `Language-Programming` in
+`www/i18n/manifest.json`). The first draft of this note used the kernel for
+the default filter; that was the wrong sense. Spoken language is the one
+that should follow the app. Kernel is optional extra narrowing. Fallbacks
+are how a Japanese UI still finds English community workbooks without
+making English the only language that exists.
+
+The hard part is still not the UI. It is where extra items live, and which
+platforms can fetch them. SciREPL has no production backend. The `/proxy`
+on `npm run serve` is a local-dev GitHub-release helper, not a PWA feature.
+
+## Why this shape
+
+The current catalog is small on purpose: it is the set of items that install
+offline from same-origin `pages_url` copies bundled with the app. That is
+the right default. Hiding it behind a remote registry, or replacing it with
+whatever a search index returns, would make the first-open experience
+depend on the network and on CORS.
+
+Search should **widen** the pool, not replace it:
+
+| Search box | Spoken language | Fallbacks | What you see |
+| --- | --- | --- | --- |
+| Empty | app locale (default) | n/a | Built-in curated entries, same as today. Kernel filter only if the user changed it from All. |
+| Non-empty | app locale (default) | on (English) | Built-in matches **plus** source matches in the primary locale, then English (and any other configured fallbacks), ranked in preference order |
+| Non-empty | app locale | off | Built-in matches **plus** source matches in the primary locale only |
+| Non-empty | All spoken languages | ranking only | Built-in matches plus source matches in any locale, still sorted by the preference list |
+
+Typing a query is what justifies extra network work. Opening Browse with an
+empty search stays a local, offline-capable view of the same items as today.
+
+That split also resolves the locale mismatch in the built-in catalog:
+**card chrome is translated, notebook content is English.** A Japanese UI
+still shows UnifyWeaver and ggplot2 on first open (names and descriptions
+come from `www/i18n/ja.json`). Search is how you find a Japanese-language
+workbook from a source you added. With fallbacks on (the default), an
+English community hit still appears, below the Japanese ones. With
+fallbacks off, search is strict: Japanese content only.
+
+The spoken-language filter is the default scope for that wider pool, not a
+knife that cuts the curated list down to whatever happens to be authored
+in `ja`.
+
+## Current behaviour (the baseline we must not regress)
+
+- Catalog data is a JS array getter, `PackageCatalog.packages`.
+- Each entry is `package`, `bundle`, or `workbook`, with `kernels`, optional
+  `requires` / `items`, and a fetch source (`pages_url` and/or `url`).
+- Display names and descriptions for built-in entries go through
+  `displayNameKey` / `descriptionKey`. The notebooks themselves are English.
+- Install tries `pages_url` first (same-origin, works in the PWA, Android
+  WebView, and Electron), then the GitHub release `url`.
+- `_fetchPackage` already has a platform cascade:
+
+  1. Same-origin / relative URL → `fetch`
+  2. Capacitor native `Filesystem.downloadFile` (Android)
+  3. Direct `fetch` (needs CORS)
+  4. `/proxy?url=...` (dev server only; GitHub **release downloads** only)
+
+- Production GitHub Pages has **no proxy**. Release URLs without CORS only
+  work because the same files are also shipped as `pages_url`.
+- Electron enables `webSecurity` and exposes **no download IPC**. The
+  renderer is treated as untrusted (notebook JS shares `window`). Electron
+  is therefore in the same CORS boat as the PWA, not the same boat as
+  Android.
+- `test_browse_catalog.mjs` asserts the modal opens with all three sections
+  and at least 17 cards. With the rules below, that still holds: empty
+  search + default filters = the current list.
+
+## UI
+
+Mobile-first, inside the existing catalog modal. No stacked second modal for
+the everyday controls; Sources is a panel you push/pop in the same dialog.
+
+```
+┌ Browse Packages, Bundles & Workbooks ──────────── × ┐
+│ One-click install packages, bundles, and workbooks. │
+│                                                     │
+│ [ Search packages, bundles, workbooks… ]  [Sources] │
+│ Spoken language: [ 日本語                 v ]       │
+│ Fallbacks: [x] then English                    [Edit]│
+│ Kernel:          [ All                    v ]       │
+│                                                     │
+│ Packages                                            │
+│   UnifyWeaver SciREPL     prolog, python  EN  [✓]   │
+│ Bundles                                             │
+│   UnifyWeaver Tutorials…  4 workbooks     EN  [Install]
+│ Workbooks                                           │
+│   Life Expectancy Analysis  python, r     EN  [Install]
+│   …every built-in card, same as today…              │
+└─────────────────────────────────────────────────────┘
+```
+
+After typing a query, with spoken language still 日本語 and fallbacks on:
+
+```
+│ Workbooks                                           │
+│   円周率の計算            python          JA  [Install]  ← source, primary
+│     example/scirepl-workbooks                       │
+│   Compute Pi …            python          EN  [Install]  ← built-in, fallback
+```
+
+Same query, fallbacks off: Compute Pi disappears (English content, not
+Japanese). The empty-search view still showed it; search is stricter.
+
+Sources panel (same modal, back chevron):
+
+```
+┌ ‹ Catalog sources ──────────────────────────────── × ┐
+│ Built-in SciREPL catalog              on  (pinned)   │
+│                                                      │
+│ [ https://github.com/user/workbooks          ] [Add] │
+│                                                      │
+│ My workbooks  github.com/user/workbooks              │
+│   last fetched 2h ago · 12 items            [on] [–] │
+│   fetch failed: blocked by browser CORS      [Retry] │
+│                                                      │
+│ Extra items appear when you search. HTTPS only.      │
+│ GitHub repos need a scirepl-catalog.json that the    │
+│ browser is allowed to read (see CORS below).         │
+└──────────────────────────────────────────────────────┘
+```
+
+On a narrow phone the selects wrap under the search row. Labels must use
+the existing senses so translators do not collapse them: spoken language
+is `Language-Interface`, kernel is `Language-Programming`. Endonyms in
+the spoken-language dropdown and the fallback editor come from
+`i18n/manifest.json` (`日本語`, `Deutsch`, `English`, …), not from
+English names.
+
+**Edit** opens a short ordered-list panel (push/pop in the same modal, like
+Sources). It is the only place you add, remove, or reorder fallbacks.
+
+```
+┌ ‹ Fallback languages ───────────────────────────── × ┐
+│ [x] Allow fallbacks                                  │
+│                                                      │
+│ 1. English                                    [↑][–] │
+│ [ Add language…                              v ]     │
+│                                                      │
+│ When a workbook is not in 日本語, show the next      │
+│ language on this list. English is the starting       │
+│ fallback; you can add more or turn fallbacks off.    │
+└──────────────────────────────────────────────────────┘
+```
+
+### Spoken-language filter (defaults to the app locale)
+
+Two pieces, not one dropdown:
+
+| Piece | Session or persisted | Default |
+| --- | --- | --- |
+| **Primary** (the spoken-language select) | Session. Reset on each open. | `i18n.current` |
+| **Fallbacks** (ordered list) + **Allow fallbacks** | Persisted in `localStorage` | First run: `fallbacks: ['en']`, `allowFallbacks: true`. Missing or corrupt storage re-initializes to that pair, not to fallbacks-off. |
+
+Effective preference order is:
+
+```
+[primary, ...fallbacks.filter(code => code !== primary)]
+```
+
+If the UI is already English, that collapses to `['en']` and the fallback
+toggle is a no-op until the user picks another primary. If the UI is
+Japanese, the chain is `['ja', 'en']`.
+
+- Primary options: **All spoken languages**, then every locale in the i18n
+  manifest that the app is willing to activate (same usability rule as
+  `i18n.resolve()`: complete enough, reviewed or drafts-shown).
+- On open, set primary to `window.i18n.current`. Changing the app locale
+  while the modal is already open does **not** retarget primary; reopening
+  does. Listen to `i18n:changed` only to relabel the chrome, not to
+  override a choice the user already made in the dropdown.
+- Fallbacks are independent of primary. Switching the dropdown from
+  Japanese to French yields `[fr, en]` when the stored fallbacks are
+  `['en']`. The previous primary is not automatically inserted into the
+  fallback list.
+- English is removable. The initial value is English, not a pinned slot.
+  An empty fallback list with Allow fallbacks on behaves like fallbacks
+  off.
+- Duplicate codes are illegal; adding a locale that is already primary or
+  already a fallback is a no-op.
+- The **fallback Add list is wider than the primary dropdown.** Primary is
+  an interface-locale choice, so it lists only manifest locales. Fallbacks
+  are a *content* preference: addable codes are the manifest set **plus**
+  any BCP 47 tag declared by an enabled source's items. Content language
+  is not UI language — a Korean workbook should not have to wait for a
+  Korean UI translation before `ko` can be a fallback. The Add picker
+  groups these as "interface languages" and "languages from your
+  sources". A free-text code is not allowed; the code must come from a
+  known set so matching and endonym labels stay well-defined.
+- This filter does **not** hide built-in curated entries on **empty
+  search**. Those are the default view. Their titles and descriptions are
+  already translated; their notebook bodies are English and stay English.
+- On **search**, locale matching applies to built-in and source items
+  alike. That is what makes “fallbacks off” mean something for a Japanese
+  user who does not want English notebooks in the results.
+- **All spoken languages** disables filtering. The preference list is
+  still used to **rank** (primary hits first, then each fallback, then
+  everything else). The Allow fallbacks toggle does not hide anything in
+  this mode; it only affects sort. Show the toggle as ranking-only, or
+  disable it, so it is not a trap.
+
+Matching an item against the chain:
+
+1. Take the item’s `locales` (missing ⇒ `['en']`).
+2. A locale on the item matches a preference slot on exact code, or on
+   equal `code.split('-')[0]` (`pt-BR` matches `pt`). Exact wins over
+   primary-subtag when ranking the same slot.
+3. The item’s **rank** is the lowest (best) preference index that matched.
+   Unmatched items are excluded unless primary is All, in which they sort
+   after every listed language.
+4. If Allow fallbacks is off, only index 0 (primary) is eligible, except
+   when primary is All (see above).
+
+Bilingual items (`locales: ['en', 'ja']`) match whichever slot is best.
+A Japanese-primary user with English fallback ranks that item as
+Japanese, not as a fallback.
+
+Do not persist the primary dropdown. Always re-default it to
+`i18n.current` on open so it tracks the app. Do persist fallbacks and
+Allow fallbacks: those are a preference, not a view over “the language I
+am using right now”.
+
+Stored shape:
+
+```json
+{
+  "allowFallbacks": true,
+  "fallbacks": ["en"]
+}
+```
+
+A missing `allowFallbacks` key is **true**, not false. First launch, wiped
+storage, and a partial write must all come up with fallbacks allowed and
+English on the list. Only an explicit user off-toggle stores `false`.
+
+### Programming-language filter (defaults to All)
+
+- Options: **All**, then every kernel in `#lang-selector` (python, prolog,
+  bash, javascript, r, lua, typr, clojurescript).
+- Default **All**, so first-open still shows Prolog workbooks when the
+  editor is on Python. That is the “same defaults” constraint.
+- A one-tap “This kernel” chip (the current `#lang-selector` value) is
+  worth adding if the two-select toolbar feels like too many steps to
+  get to “Python only”. It is not the default.
+- An entry matches All, or when `kernels` is missing, or when `kernels`
+  contains the selected kernel. Multi-kernel workbooks (python+r) match
+  either kernel.
+- A bundle matches if its own `kernels` matches, or if any of its `items`
+  would match. Showing a bundle that then installs a Prolog workbook the
+  kernel filter would have hidden is acceptable; the bundle card already
+  lists what it contains.
+- Empty sections omit their header (already true).
+- Changing the editor kernel while the modal is open does not retarget
+  this filter either.
+
+### Content-locale badge
+
+When the card’s best matching content locale is not the **primary**
+spoken language (or, if primary is All, not `i18n.current`), show a short
+badge (`EN`, `JA`, `PT-BR`). Japanese primary + English built-in workbook
+→ `EN`. A fallback hit is exactly the case the badge is for.
+
+Skip the badge when the best match is the primary, so a Japanese source
+hit in a Japanese UI is not noisy.
+
+### Search rules
+
+- Filter name, description, id, kernel ids, bundle contents, and locale
+  codes / endonyms.
+- Case-insensitive substring is enough for v1.
+- Rank by (1) preference-list index (primary, then each fallback), (2)
+  exact locale match before primary-subtag match, (3) built-in before
+  source, (4) original catalog order. Do not invent a text-relevance
+  score in v1.
+- Empty query: built-in entries only, after the **kernel** filter.
+  Spoken language and fallbacks do not hide them. **Do not** show
+  remote-source items, and **do not** fetch remote indexes.
+- Non-empty query: union of built-in matches and enabled-source matches
+  that pass kernel + spoken-language (with fallbacks as above). Fetch
+  each enabled source the first time a query is run this session (then
+  keep it in memory). A Sources “Retry” / toggle-on also fetches.
+- Source hits still carry a small origin label (`user/workbooks`) so it
+  is obvious they are not curated. Built-in-first is only a tiebreaker
+  inside the same preference slot: a Japanese source hit outranks an
+  English built-in hit when primary is `ja`.
+- Offline / CORS failure on a source: keep built-in results, show one
+  non-blocking line under the toolbar (“2 sources unavailable”). Never
+  empty the default catalog because a remote index failed.
+
+### Sources rules
+
+- Built-in catalog is pinned, always on, not editable.
+- User sources persist in `localStorage` (same family as installed-package
+  state). Shape: `{ id, url, enabled, label?, lastFetchedAt?, lastError? }`.
+- HTTPS only. Reject credentials in the URL, `javascript:`, and non-https
+  schemes. Same stance as Electron’s external-open policy.
+- Adding a **GitHub repo URL** (`https://github.com/owner/repo`) is a
+  convenience: resolve it to a catalog index, do not scrape HTML.
+- Adding a **direct index URL** (`…/scirepl-catalog.json`) is the
+  primitive. Repo paste is sugar over that.
+- Removing a source does not uninstall anything already imported.
+
+### Source index caching
+
+"Fetch on first search of the session" needs a staleness policy, because
+indexes resolved through mutable refs (`@HEAD`, `main`) change under the
+same URL:
+
+- Fetched indexes are held in memory for the session **and** persisted
+  (with `lastFetchedAt`) so a second search session does not re-fetch
+  immediately.
+- A persisted index is re-fetched when it is older than **24 hours**, when
+  the user taps **Retry** or toggles the source on, or when the source URL
+  is re-added. Send `If-None-Match` / `If-Modified-Since` when the
+  previous response carried an ETag/Last-Modified, so a fresh-but-
+  unchanged index is cheap.
+- Never cache a mutable-ref index past the TTL "just in case": a catalog
+  that silently goes weeks stale is how "update available" badges lie.
+- If a re-fetch fails, keep the last good index, mark it stale in the
+  Sources panel ("last fetched 9 days ago — refresh failed"), and rank its
+  items normally. A failed refresh must not make a source's items vanish.
+
+## Catalog index format
+
+Keep it aligned with the in-app entry schema so `_renderCard` / `_install`
+can consume remote items without a second type.
+
+```json
+{
+  "format_version": "1.0",
+  "name": "日本語ワークブック",
+  "source": "https://github.com/example/scirepl-workbooks",
+  "locales": ["ja"],
+  "items": [
+    {
+      "id": "example-pi",
+      "name": "円周率の計算",
+      "description": "アルキメデスの上下界で円周率を挟むノートブック。",
+      "type": "workbook",
+      "kernels": ["python"],
+      "locales": ["ja"],
+      "url": "https://raw.githubusercontent.com/example/scirepl-workbooks/main/pi.srwb",
+      "size": "~6 KB",
+      "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "revision": 1,
+      "format": "srwb"
+    }
+  ]
+}
+```
+
+Rules for remote items:
+
+- `id` must be unique **within that source**. The app namespaces as
+  `sourceId:itemId` so two repos can both ship `intro`.
+- `locales` is the **content** language of the notebook or package, BCP 47
+  tags (`en`, `ja`, `pt-BR`, …). The set is not limited to the app's
+  interface locales — sources can publish content in languages the UI
+  does not ship. It is not the kernel. A bilingual notebook lists both
+  (`["en", "ja"]`) and takes the best slot on the user’s preference chain
+  (Japanese primary ranks it as Japanese, not as an English fallback).
+- Index-level `locales` is the default for items that omit the field.
+  Item-level wins. If both are missing, treat as `["en"]`.
+- `name` / `description` are in the content language. v1 does not take
+  per-locale maps (`{ "en": "…", "ja": "…" }`). A second-language edition
+  is a second item (or a second source), not a parallel string table.
+- No `displayNameKey` / i18n keys from remote JSON. Remote text is shown
+  as authored. The chrome (Search, Sources, section headers, errors)
+  stays in the i18n catalogues.
+- `url` is the installable artifact. For the PWA it must be a CORS-open
+  HTTPS URL (see below). `pages_url` on a remote item is only useful if it
+  is same-origin with the running app, which community repos will not be.
+- `sha256` (optional, **recommended**) is the lowercase hex SHA-256 of the
+  artifact bytes. When present, the app verifies the download before
+  install and refuses on mismatch. When absent, the install proceeds but
+  the card and the confirmation show an "unverified content" note.
+  Rationale: a source URL is entered once and then re-fetched silently,
+  and installed notebooks and package wrappers are *executed* — HTTPS
+  alone does not cover a compromised source repo or a poisoned CDN cache
+  between the day the user added the source and the day they install.
+- `revision` is a source-local, monotonically increasing integer. The app
+  compares it against the installed copy to badge "update available";
+  it carries no cross-source meaning. Bumping `revision` without
+  changing `sha256` (when both are present) is treated as an index
+  error, not an update.
+- Ignore unknown fields. Reject the whole index if `format_version` is
+  newer than we understand, and say so in `lastError`.
+- Cap index size (e.g. 500 items / 1 MB JSON) so a huge file cannot stall
+  a phone.
+
+Built-in entries should grow an explicit `locales: ['en']` when this
+ships, even though the filter will not hide them. That feeds the badge
+and keeps the schema one shape.
+
+### Resolving a GitHub repo URL
+
+Try, in order, and stop on the first JSON that parses as a catalog:
+
+1. `https://cdn.jsdelivr.net/gh/owner/repo@HEAD/scirepl-catalog.json`
+2. `https://raw.githubusercontent.com/owner/repo/HEAD/scirepl-catalog.json`
+3. `https://owner.github.io/repo/scirepl-catalog.json` (often **fails CORS**
+   when `owner` is not the SciREPL Pages host)
+
+Do **not** call `api.github.com` from every Browse session. Unauthenticated
+GitHub API is 60 requests/hour/IP; a popular PWA would burn that immediately.
+
+jsDelivr is already in the privacy policy for runtime version checks, so it
+is a known optional network peer. Prefer it as the first probe because it
+sends CORS headers and sits on a CDN.
+
+## Cross-origin: what actually works
+
+This is the issue. There is no general “fetch this GitHub repo” that works
+everywhere.
+
+| Surface | Built-in `pages_url` | GitHub **release** zip/ipynb | `raw.githubusercontent.com` / jsDelivr | Other GitHub Pages origin | Arbitrary HTTPS |
+| --- | --- | --- | --- | --- | --- |
+| PWA on GitHub Pages | Yes (same origin) | **No** (no CORS, no `/proxy`) | Yes, if the file is public | **Usually no** (Pages does not send `ACAO`) | Only if that host sends CORS |
+| `npm run serve` | Yes | Yes, via `/proxy` **only** for `github.com/…/releases/download/` | Yes, if CORS | Usually no | No, proxy will 403 |
+| Android (Capacitor) | Yes | Yes (native HTTP) | Yes | Yes | Yes (native HTTP) |
+| Electron | Yes | **No** (CORS, and no download IPC) | Yes, if CORS | Usually no | Only if CORS |
+
+Two surprises relative to the usual “native apps ignore CORS” intuition:
+
+1. **Electron is not Android.** `desktop/electron/security.js` treats the
+   renderer as fully untrusted because the JavaScript kernel (and Scittle,
+   Fengari, Pyodide's JS bridge) share `window`. There is no privileged
+   "download this URL" channel, on purpose. Adding one for catalog sources
+   would be reachable from notebook code. **Do not add a general one for
+   this feature.** Electron stays on the PWA fetch rules until the
+   allowlist-scoped channel below ships.
+2. **The PWA cannot grow a proxy** without becoming a hosted backend, which
+   SciREPL is not. Extending `server.js` `/proxy` helps local development
+   only. It does not help `*.github.io` installs, F-Droid WebView builds
+   that load Pages, or a service-worker-cached PWA opened from the home
+   screen. (Locally serving the PWA is still a supported power-user
+   configuration — see "Local escape hatches" below.)
+
+### Planned: Electron allowlist fetch channel
+
+A follow-up change (not the first catalog PR) adds a narrow fetch channel
+in the Electron main process: the renderer passes a URL, the main process
+fetches it — no CORS outside a renderer — and returns the bytes. The
+channel is constrained by **destination**, not by caller:
+
+- Default allowlist, **on by default**: `github.com`,
+  `raw.githubusercontent.com`, `objects.githubusercontent.com`,
+  `cdn.jsdelivr.net`. This covers catalog indexes, community workbooks on
+  raw/jsDelivr, and GitHub Releases assets.
+- A settings toggle can **disable the channel entirely**. The allowlist
+  itself is a frozen constant in the main process, **not**
+  renderer-editable: a renderer-writable allowlist would be expanded by
+  the very notebook code the boundary exists to contain.
+- This is safe to expose even though notebook code shares `window` with
+  the UI, because the filter does not need to distinguish UI code from
+  notebook code. `security.js` warns that a *caller* filter is
+  impossible; a *destination* filter is not. To be precise about what the
+  channel adds: `github.com` release downloads and
+  `objects.githubusercontent.com` are **not** CORS-open, so this is new
+  reach for notebook code, not a no-op — the claim is that the *impact
+  class* is unchanged (reading public bytes from GitHub-operated hosts),
+  not that the capability already existed. The attacks that class
+  suggests all fail structurally:
+  - **Exfiltration via request URL** (encoding data into a path or query
+    the attacker later reads back) requires access to GitHub's or
+    jsDelivr's server logs, which an attacker does not have. The response
+    returns to the same renderer that asked; there is no side channel.
+  - **Session riding**: the main-process fetch carries no cookies and no
+    ambient GitHub credentials; there is nothing to ride.
+  - **Redirect laundering** off the allowlist is refused (below).
+  The remaining honest caveat: allowlisted hosts serve *arbitrary
+  user-published content* (any repo, any release), so the channel is a
+  transport, never an integrity boundary — `sha256` verification and the
+  unverified-content labelling apply to bytes from this channel exactly
+  as to CORS fetches.
+- Same hygiene rules as everywhere else: HTTPS only, no credential-bearing
+  URLs, refuse redirects off the allowlist, cap response size, no dynamic
+  IPC dispatch (extend `ipc.js`'s explicit channel list). Debounce or cap
+  per-session request volume so a hostile notebook cannot use the user's
+  IP to hammer GitHub.
+- **Disable control (decided; was open question 9):** one master toggle
+  in settings — "Allow the desktop app to fetch from GitHub on my
+  behalf", default on — and nothing per-host in the UI. The allowlist
+  stays a frozen constant in the main process; advanced users edit a
+  main-process config file, never renderer state, because anything the
+  renderer can write, notebook code can write. Flipping the toggle off
+  also aborts fetches already in flight.
+
+Once it ships, Electron joins Android as a low-friction path for
+GitHub-hosted content, and the Electron row in the matrix above becomes
+"Yes (allowlisted fetch channel)" for the GitHub columns. The channel is
+an app capability, not catalog-specific: anything that installs over
+HTTPS from GitHub benefits.
+
+### Local escape hatches (no app changes needed)
+
+Two user-run options already exist or ship with this proposal:
+
+- **Serve the PWA locally.** `npm run serve` puts the app and the dev
+  `/proxy` on the same localhost origin, so GitHub release installs work.
+  This is a legitimate end-user configuration for technical users — while
+  the PWA is not hosted anywhere, it is the *primary* PWA distribution
+  channel. A server you control can also serve genuinely custom content:
+  front a private API (keys stay server-side), or publish a local
+  `scirepl-catalog.json` that never touches GitHub.
+- **Local fetch helper.** `tools/local-fetch-helper/local-fetch-helper.mjs`
+  is a zero-dependency Node script that re-serves arbitrary HTTPS URLs
+  with CORS and Private-Network-Access headers on `127.0.0.1`. It
+  generalizes the dev `/proxy` beyond GitHub Releases and works for a
+  *hosted* PWA too. Setup and security trade-offs:
+  `docs/local-fetch-helper.md`. Same sidecar pattern as UnifyWeaver's
+  HTTP CLI server.
+
+### Practical consequence for source authors
+
+If a catalog is meant to work in the **PWA and Electron**, both the index
+and the artifacts must be on a CORS-open host. The reliable public options
+today:
+
+- `raw.githubusercontent.com/owner/repo/…`
+- `cdn.jsdelivr.net/gh/owner/repo@ref/…`
+
+GitHub **Releases** (`github.com/…/releases/download/…`) are the right
+place for large zips in the *built-in* catalog, because we also ship
+`pages_url`. They are the **wrong** default for community sources: they
+install on Android, and on `npm run serve`, and nowhere else.
+
+Same-org GitHub Pages is a narrow extra: `https://s243a.github.io/other-repo/…`
+is same-origin with the SciREPL PWA, so it would work without CORS. That is
+an implementation accident, not a community-source strategy.
+
+### Error copy when CORS blocks an install
+
+Do not dump a raw `TypeError: Failed to fetch`. Say which platform can
+still do it, and offer the existing manual path:
+
+> This file is on a host the browser will not read (cross-origin). On
+> Android it would download directly. Elsewhere, download it yourself and
+> use Menu → Import Package — or run the local fetch helper, see
+> docs/local-fetch-helper.md.
+
+Sources that fail at **index** fetch get a Retry on the Sources panel, not
+a modal.
+
+**Helper detection (decided; was open question 10):** on a CORS install
+failure — and only then, never on modal open — probe
+`GET http://127.0.0.1:8787/health` once per session. If it answers, the
+error copy upgrades to "your local fetch helper is running — retry
+through it?"; if it does not, stay silent and show the manual-import copy
+above. The probe is a private-network request from a secure page, so it
+triggers a PNA preflight; the helper answers that preflight. A probe
+failure is expected ambient state (helper not running), not an error to
+surface. Never auto-route installs through the helper without the user
+tapping the retry.
+
+## Privacy and consent
+
+Today, catalog installs are user-initiated downloads from GitHub, already
+disclosed. Two new behaviours need a policy line **when they ship**, not
+in this design-only PR:
+
+1. Fetching a user-added `scirepl-catalog.json` (and jsDelivr/GitHub as
+   the resolved host).
+2. Fetching the artifact URL when the user taps Install on a search hit.
+
+Empty-search Browse must not hit the network. That keeps the default view
+honest offline and avoids a surprise request on every menu open.
+
+Do not probe sources in the background. Do not send the search string, the
+spoken-language filter, the fallback list, or the kernel filter to any
+server; filtering is local against indexes the user enabled.
+
+## Trust
+
+A catalog source is as trusted as “Import Package” from a URL the user
+pasted. SciREPL already executes installed notebooks and package JS
+wrappers. Sources do not change that, but the UI should make origin
+visible on every remote card.
+
+Refuse to follow redirects off HTTPS. Cap download size with the same
+instinct as package install (show `size` from the index; if the host
+sends a huge `Content-Length`, abort).
+
+Verify `sha256` after download when the index provides it, and treat a
+mismatch as a hard install failure that names the source — a mismatch
+means the index and the artifact disagree, which is exactly what a
+compromised repo or poisoned cache looks like. Items without `sha256`
+are installable but labelled unverified; source authors should be told,
+in the publishing docs, that omitting it caps their users' trust at
+"whatever the host served today".
+
+## What we are not doing
+
+- A central SciREPL registry or search API. No backend.
+- Scraping GitHub repo file trees or README pages.
+- Using `api.github.com` as the everyday index.
+- Auto-adding community repos. The built-in list stays the default.
+- Changing which items are in the built-in array. Search finds *more*;
+  it does not demote UnifyWeaver, ggplot2, TypR, etc.
+- Hiding built-in English workbooks on **empty search** because the UI is
+  in another locale. Chrome is translated; content locale is a badge, not
+  a gate, for the curated default view. Search *does* apply locale +
+  fallbacks to built-in items.
+- Seeding fallbacks from `navigator.languages`. Initialize to English
+  only. Extra languages are an explicit user choice.
+- Per-locale string maps on remote items in v1.
+- A general-purpose Electron or PWA CORS bypass. The planned Electron
+  channel is allowlist-scoped (GitHub hosts, on by default, user can
+  disable) — not an open fetch hole, and not part of the first catalog PR.
+- Defaulting the kernel filter to the editor language. That would hide
+  most of today’s list. Kernel defaults to All.
+
+## Suggested implementation order
+
+Keep the comparison/filter layer pure and testable without a browser,
+same split as `docs/proposal-package-update-checks.md`.
+
+1. **Pure filter** — given entries, a query string, a primary locale
+   (`null` = All), `allowFallbacks`, an ordered fallback list, a kernel
+   id (`null` = All), and a bit that marks built-in vs source, return the
+   visible list in rank order. Unit-testable in node. Covers “empty query
+   ⇒ built-in only, locale ignored”, “non-empty + fallbacks on ⇒ primary
+   then English”, “non-empty + fallbacks off ⇒ primary only”, kernel
+   membership, bundle matching, namespacing, primary-subtag locale match,
+   bilingual items taking the best slot, English primary collapsing the
+   chain to `['en']`.
+2. **Catalog UI** — search input, spoken-language `<select>` defaulting
+   to `i18n.current`, Allow fallbacks checkbox, fallback summary (“then
+   English”) + Edit panel, kernel `<select>` defaulting to All, locale
+   badge, empty-state copy. Wired only to the built-in array. First-open
+   card count must stay ≥ 17 so `test_browse_catalog.mjs` does not look
+   like a missing workbook.
+3. **Index fetch + Sources panel** — persist sources, resolve GitHub
+   repo URLs, parse `scirepl-catalog.json`, union on search with locale
+   gating and preference ranking. CORS failures are first-class UI, not
+   console noise.
+4. **Install from remote hits** — reuse `_fetchPackage`. On PWA/Electron
+   CORS failure, the manual-import message above. Android uses native
+   HTTP as it already does.
+5. **Privacy policy** — one paragraph for user-added catalog sources,
+   kept in sync with `privacy:check`.
+6. **Docs** — a short “Publishing a catalog source” section in
+   `docs/packages.md` once the JSON schema is real, including `locales`.
+
+Phase 2 is already a useful PR on its own (search + both filters over
+today’s list). Phase 3 is what makes search find *more*, and what makes
+the spoken-language default do something beyond labelling. Do not ship
+Sources without the CORS error path; a button that adds a GitHub release
+URL and then fails silently on the PWA is worse than no button.
+
+## Test notes
+
+- `test_browse_catalog.mjs` currently assumes every built-in card is
+  visible on open. After phase 2 it should still assert that on a stock
+  English (or any) locale with kernel = All.
+- Additional assertions:
+  - spoken-language select equals `i18n.current` on open;
+  - Allow fallbacks is on and the summary lists English when primary is
+    not `en`;
+  - kernel select equals All on open;
+  - switching kernel to `lua` hides non-Lua built-in cards and All
+    restores them;
+  - a query that matches a remote fixture tagged `ja` and a built-in
+    tagged `en` lists the Japanese card first when primary is `ja` and
+    fallbacks are on, and lists only the Japanese card when fallbacks
+    are off (phase 3, stub index, not live GitHub);
+  - primary `en` with stored fallbacks `['en']` does not duplicate
+    English in the chain.
+- Do not hit the network in CI for source tests. Serve a tiny
+  `scirepl-catalog.json` from the same origin via `server.js`.
+- A Playwright case that points at a cross-origin URL **without** CORS
+  headers should assert the unavailable-source line, not a thrown error.
+
+## Open questions
+
+1. **Should a future built-in Japanese workbook be a second catalog
+   entry, or a locale variant of an English one?** Recommendation: a
+   second entry with `locales: ['ja']`. Variants need a grouping id we
+   do not have yet, and the empty-search view is allowed to show both
+   (built-in is never locale-gated there). Search + primary `ja` ranks
+   the Japanese entry in slot 0 and the English twin in the English
+   fallback slot (or hides the twin if fallbacks are off).
+2. **Should a non-empty search that matches nothing in sources still
+   show built-in misses?** No. Search filters everything, including
+   locale. Zero hits is allowed; keep the empty copy explicit (“No
+   matches in 日本語, or in fallbacks English”).
+3. **jsDelivr vs raw.githubusercontent.com as the documented author
+   path.** Both work in the PWA. jsDelivr caches; raw is canonical.
+   Resolve both; document raw as the file you put in the repo and
+   jsDelivr as the URL the app will try first.
+4. **F-Droid / Android WebView loading Pages rather than the Capacitor
+   shell.** If a build ever loads the PWA URL inside a WebView *without*
+   the Filesystem plugin, it inherits PWA CORS. Native HTTP is a
+   Capacitor-shell feature, not “any Android”.
+5. **Related work.** Package *update* checks
+   (`docs/proposal-package-update-checks.md`) also need a fetch layer
+   and must not cache mutable indexes forever. If both ship, they should
+   share “fetch this HTTPS JSON with CORS/native cascade” rather than
+   growing two helpers. Out of scope for the first catalog-browse PR.
+6. **Draft locales.** If the user has opted into draft UI translations,
+   should those codes appear in the spoken-language filter and the
+   fallback Add list? Yes — the same locales the app can activate. A
+   draft UI locale with no community content just means search will not
+   add source hits until someone publishes a `locales: ['bn']` index.
+7. **Should `navigator.languages` seed extra fallbacks?** No for v1.
+   English is the documented starting fallback. Browser language lists
+   are noisy (often include `en-US` plus a region the user does not
+   actually read) and would surprise a Japanese user with German hits
+   because they once accepted a `de` Chrome pack.
+8. **Does Allow fallbacks belong on the catalog toolbar or only in the
+   Edit panel?** Toolbar: the checkbox is the thing you toggle per
+   search. Edit panel: the ordered list. Duplicating the checkbox in
+   both is fine if they are the same persisted bit.
+9. **Electron allowlist channel: master toggle or per-host control?**
+   Decided — master toggle only; see "Disable control" under "Planned:
+   Electron allowlist fetch channel".
+10. **Should the app detect a running local fetch helper?** Decided —
+    one probe per session on CORS failure, silent when absent, retry is
+    user-initiated; see "Helper detection" under "Error copy when CORS
+    blocks an install".
