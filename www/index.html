@@ -938,6 +938,13 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                             <span id="catalog-fallback-summary" class="catalog-fallback-summary"></span>
                             <button type="button" id="catalog-edit-fallbacks" class="vfs-btn" data-i18n="packageCatalog.editFallbacks">Edit</button>
                         </div>
+                        <div class="catalog-fallbacks-row">
+                            <label class="catalog-fallback-toggle">
+                                <input type="checkbox" id="catalog-show-builtins" checked>
+                                <span data-i18n="packageCatalog.showBuiltins">Always show built-in items</span>
+                            </label>
+                            <span id="catalog-builtins-hint" class="catalog-fallback-summary" data-i18n="packageCatalog.builtinsAnyLanguageHint" hidden>Built-in items are shown in any language.</span>
+                        </div>
                         <label class="catalog-filter-label" for="catalog-kernel">
                             <span data-i18n="packageCatalog.filterKernel">Kernel</span>
                             <select id="catalog-kernel" class="catalog-select">

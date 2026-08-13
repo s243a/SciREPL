@@ -137,6 +137,12 @@
     "packageCatalog.allowFallbacks": [
       "Language-Interface"
     ],
+    "packageCatalog.showBuiltins": [
+      "Language-Interface"
+    ],
+    "packageCatalog.builtinsAnyLanguageHint": [
+      "Language-Interface"
+    ],
     "packageCatalog.fallbackThen": [
       "Language-Interface"
     ],
@@ -200,6 +206,8 @@
     "packageCatalog.filterKernel": "Label for the catalog filter that selects a programming language runtime (Python, Prolog, R…).",
     "packageCatalog.filterKernelAll": "Dropdown option meaning do not restrict catalog items by programming language.",
     "packageCatalog.allowFallbacks": "Checkbox. When on, catalog search also shows items in the user's fallback languages.",
+    "packageCatalog.showBuiltins": "Checkbox, default on. When on, the default (empty-search) view lists every built-in item regardless of its content language. When off, built-in items outside the spoken-language chain are hidden even without a search.",
+    "packageCatalog.builtinsAnyLanguageHint": "Short hint beside the checkbox, shown when foreign-language built-in items are listed because the checkbox is on. 'Language' means human language.",
     "packageCatalog.fallbackThen": "Short summary after the checkbox listing fallback language names. {languages} is a comma-separated list of endonyms such as English.",
     "packageCatalog.fallbackNone": "Shown when the fallback list is empty after removing the primary language.",
     "packageCatalog.fallbacksRankingThen": "Shown when Spoken language is All: fallbacks affect sort order only. {languages} is a comma-separated list of endonyms.",
@@ -927,6 +935,8 @@
     "packageCatalog.filterKernel": "Kernel",
     "packageCatalog.filterKernelAll": "All",
     "packageCatalog.allowFallbacks": "Allow fallbacks",
+    "packageCatalog.showBuiltins": "Always show built-in items",
+    "packageCatalog.builtinsAnyLanguageHint": "Built-in items are shown in any language.",
     "packageCatalog.fallbackThen": "then {languages}",
     "packageCatalog.fallbackNone": "none",
     "packageCatalog.fallbacksRankingThen": "ranking only: {languages}",

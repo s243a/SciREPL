@@ -221,6 +221,50 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
             testLog('Fallback summary lists English when primary is not en', false, 'ja option missing');
         }
 
+        // --- "Always show built-in items" gates the default view ---
+        if (hasJa) {
+            await page.selectOption('#catalog-spoken-language', 'ja');
+            await page.evaluate(() => {
+                const c = document.getElementById('catalog-allow-fallbacks');
+                if (c?.checked) c.click();               // fallbacks off: strict ja
+            });
+            const before = await page.evaluate(() => ({
+                cards: document.querySelectorAll('#package-catalog-list .pkg-card').length,
+                hint: !document.getElementById('catalog-builtins-hint')?.hidden,
+                checked: document.getElementById('catalog-show-builtins')?.checked,
+            }));
+            testLog('Exemption on: strict ja empty view still shows every built-in',
+                before.cards >= 17 && before.checked === true,
+                `cards=${before.cards} checked=${before.checked}`);
+            testLog('Hint explains foreign-language built-ins are being shown',
+                before.hint === true, String(before.hint));
+
+            await page.evaluate(() => document.getElementById('catalog-show-builtins')?.click());
+            const gated = await page.evaluate(() => ({
+                cards: document.querySelectorAll('#package-catalog-list .pkg-card').length,
+                empty: document.querySelector('#package-catalog-list .catalog-empty')?.textContent?.trim() || '',
+                stored: JSON.parse(localStorage.getItem('scirepl_catalog_locale') || '{}').showBuiltins,
+            }));
+            testLog('Unchecking hides English built-ins on the strict ja empty view',
+                gated.cards === 0, `cards=${gated.cards}`);
+            testLog('Gated empty view names the language, not a generic no-items',
+                gated.empty.length > 0 && !/No items available/i.test(gated.empty), gated.empty);
+            testLog('showBuiltins=false persists to localStorage',
+                gated.stored === false, String(gated.stored));
+
+            await page.evaluate(() => document.getElementById('catalog-show-builtins')?.click());
+            await page.evaluate(() => {
+                const c = document.getElementById('catalog-allow-fallbacks');
+                if (c && !c.checked) c.click();          // restore defaults
+            });
+            const restored = await page.evaluate(() =>
+                document.querySelectorAll('#package-catalog-list .pkg-card').length);
+            testLog('Re-checking restores the full built-in list', restored >= 17, String(restored));
+            await page.selectOption('#catalog-spoken-language', filterDefaults.i18nCurrent || 'en');
+        } else {
+            testLog('Exemption on: strict ja empty view still shows every built-in', false, 'ja option missing');
+        }
+
         await page.selectOption('#catalog-kernel', 'lua');
         const luaCards = await page.evaluate(() =>
             [...document.querySelectorAll('#package-catalog-list .pkg-card')].map(card => ({

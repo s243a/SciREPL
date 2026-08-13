@@ -368,6 +368,15 @@ class PackageCatalog {
         if (allow) allow.addEventListener('change', () => persistAllow(allow.checked));
         if (allowEdit) allowEdit.addEventListener('change', () => persistAllow(allowEdit.checked));
 
+        const showBuiltins = document.getElementById('catalog-show-builtins');
+        if (showBuiltins) {
+            showBuiltins.addEventListener('change', () => {
+                this._prefs.showBuiltins = !!showBuiltins.checked;
+                this._persistPrefs();
+                this._render();
+            });
+        }
+
         document.getElementById('catalog-edit-fallbacks')?.addEventListener('click', () => {
             this._showFallbackPanel(true);
         });
@@ -409,6 +418,28 @@ class PackageCatalog {
 
     _persistPrefs() {
         this._prefs = CatalogFilter.saveLocalePrefs(this._prefs);
+    }
+
+    /**
+     * The "shown in any language" hint explains why foreign-language built-ins
+     * are still listed. Visible only when that is actually happening: empty
+     * search, a real primary locale, the exemption on, and at least one card
+     * whose content is outside the user's chain.
+     */
+    _syncBuiltinsHint(rows) {
+        const hint = document.getElementById('catalog-builtins-hint');
+        if (!hint) return;
+        const emptyQuery = String(this._query || '').trim() === '';
+        const gated = CatalogFilter.isAllLocale(this._sessionPrimary);
+        const exempt = this._prefs.showBuiltins !== false;
+        let foreign = false;
+        if (emptyQuery && !gated && exempt) {
+            const chain = CatalogFilter.preferenceChain(
+                this._sessionPrimary, this._prefs.allowFallbacks, this._prefs.fallbacks);
+            foreign = (rows || []).some((row) =>
+                !CatalogFilter.bestLocaleMatch(row.entry, chain));
+        }
+        hint.hidden = !foreign;
     }
 
     _showFallbackPanel(show) {
@@ -511,6 +542,9 @@ class PackageCatalog {
         const boxEdit = document.getElementById('catalog-allow-fallbacks-edit');
         if (box) box.checked = allow;
         if (boxEdit) boxEdit.checked = allow;
+
+        const builtinsBox = document.getElementById('catalog-show-builtins');
+        if (builtinsBox) builtinsBox.checked = this._prefs.showBuiltins !== false;
 
         const summary = document.getElementById('catalog-fallback-summary');
         if (summary) {
@@ -620,6 +654,7 @@ class PackageCatalog {
             primary: this._sessionPrimary,
             allowFallbacks: this._prefs.allowFallbacks,
             fallbacks: this._prefs.fallbacks,
+            showBuiltins: this._prefs.showBuiltins,
             kernel: this._kernelFilter,
             endonyms: this._endonymMap(),
         });
@@ -629,6 +664,7 @@ class PackageCatalog {
         if (!this.listEl) return;
         const rows = this._filterRows();
         const all = this.packages;
+        this._syncBuiltinsHint(rows);
 
         if (rows.length === 0) {
             this.listEl.innerHTML = '<p class="catalog-empty"></p>';
@@ -667,7 +703,12 @@ class PackageCatalog {
     _setEmptyCopy(el) {
         if (!el) return;
         const q = String(this._query || '').trim();
-        if (!q) {
+        // An empty default view is only possible when the built-ins exemption
+        // is off and the locale chain matched nothing — say that, not a
+        // generic "no items", or the hidden list reads as data loss.
+        const localeGatedEmpty = !q && this._prefs.showBuiltins === false
+            && !CatalogFilter.isAllLocale(this._sessionPrimary);
+        if (!q && !localeGatedEmpty) {
             this._setTranslatedText(el, 'packageCatalog.noItems', 'No items available.');
             return;
         }

@@ -373,5 +373,86 @@ console.log('8. Badge quiet when content matches primary');
         enOnJa === 'EN', String(enOnJa));
 }
 
+console.log('9. showBuiltins=false applies the locale chain to the default view');
+
+{
+    // Spanish primary, fallbacks off: every English built-in disappears from
+    // the empty-search view — the exact report this pref answers.
+    const strict = F.filterCatalog({
+        entries: catalog, query: '', primary: 'es',
+        allowFallbacks: false, fallbacks: ['en'], showBuiltins: false,
+    });
+    check('es strict empty view hides English built-ins', strict.length === 0,
+        `rows=${strict.length}`);
+
+    const withFallback = F.filterCatalog({
+        entries: catalog, query: '', primary: 'es',
+        allowFallbacks: true, fallbacks: ['en'], showBuiltins: false,
+    });
+    check('es + en fallback readmits English built-ins on the gated view',
+        withFallback.length > 0 && withFallback.every((r) => r.builtin),
+        `rows=${withFallback.length}`);
+
+    const builtinPtBR = {
+        id: 'builtin-pt-br', name: 'Caderno embutido', type: 'workbook',
+        kernels: ['python'], locales: ['pt-BR'],
+    };
+    const pt = F.filterCatalog({
+        entries: [builtinPi, builtinPtBR], query: '', primary: 'pt',
+        allowFallbacks: false, fallbacks: [], showBuiltins: false,
+    });
+    check('pt strict gated view keeps a pt-BR built-in via subtag match',
+        pt.length === 1 && pt[0].entry.id === 'builtin-pt-br',
+        JSON.stringify(pt.map((r) => r.entry.id)));
+
+    const allSpoken = F.filterCatalog({
+        entries: catalog, query: '', primary: null,
+        allowFallbacks: false, fallbacks: [], showBuiltins: false,
+    });
+    check('showBuiltins=false is inert when primary is All',
+        allSpoken.filter((r) => r.builtin).length === 5, `rows=${allSpoken.length}`);
+
+    const defaulted = F.filterCatalog({
+        entries: catalog, query: '', primary: 'es',
+        allowFallbacks: false, fallbacks: ['en'],
+    });
+    check('omitted showBuiltins keeps the exemption (built-ins all visible)',
+        defaulted.filter((r) => r.builtin).length === 5, `rows=${defaulted.length}`);
+
+    const ordered = F.filterCatalog({
+        entries: catalog, query: '', primary: 'es',
+        allowFallbacks: true, fallbacks: ['en'], showBuiltins: false,
+    });
+    check('gated default view preserves catalog order',
+        ordered.every((r, i) => i === 0
+            || r.originalIndex > ordered[i - 1].originalIndex), 'order check');
+}
+
+console.log('10. showBuiltins storage round-trip');
+
+{
+    const missing = F.loadLocalePrefs(memStorage({}));
+    check('missing storage defaults showBuiltins to true',
+        missing.showBuiltins === true, JSON.stringify(missing));
+
+    const noKey = F.loadLocalePrefs(memStorage({
+        [F.STORAGE_KEY]: JSON.stringify({ fallbacks: ['de'] }),
+    }));
+    check('partial storage without the key defaults showBuiltins to true',
+        noKey.showBuiltins === true, JSON.stringify(noKey));
+
+    const off = F.loadLocalePrefs(memStorage({
+        [F.STORAGE_KEY]: JSON.stringify({ showBuiltins: false }),
+    }));
+    check('explicit false round-trips', off.showBuiltins === false,
+        JSON.stringify(off));
+
+    const store = memStorage({});
+    F.saveLocalePrefs({ allowFallbacks: true, fallbacks: ['en'], showBuiltins: false }, store);
+    const saved = JSON.parse(store.getItem(F.STORAGE_KEY));
+    check('save persists showBuiltins', saved.showBuiltins === false,
+        JSON.stringify(saved));
+}
+
 console.log('\n' + (failed ? `FAIL: ${failed} failed, ${passed} passed` : `PASS: ${passed} passed`));
 process.exit(failed ? 1 : 0);

@@ -19,6 +19,10 @@
     const DEFAULT_PREFS = Object.freeze({
         allowFallbacks: true,
         fallbacks: Object.freeze(['en']),
+        // Empty-search view: keep every built-in entry visible regardless of
+        // content language. Off = apply the same locale chain the search view
+        // uses. Default on, so first open always shows the full curated list.
+        showBuiltins: true,
     });
 
     function isAllLocale(primary) {
@@ -219,8 +223,13 @@
         const fallbacks = options.fallbacks;
         const kernel = options.kernel;
         const endonyms = options.endonyms || {};
+        // Empty-search built-ins are normally exempt from the locale gate; the
+        // showBuiltins pref (default on) turns that exemption off so a strict
+        // user's default view honours the same chain as search.
+        const showBuiltins = options.showBuiltins !== false;
         const rank = rankingChain(primary, allowFallbacks, fallbacks);
-        const filteringLocale = !emptyQuery && preferenceChain(primary, allowFallbacks, fallbacks);
+        const chain = preferenceChain(primary, allowFallbacks, fallbacks);
+        const filteringLocale = (!emptyQuery || !showBuiltins) && chain;
 
         const rows = [];
         for (let i = 0; i < all.length; i++) {
@@ -232,7 +241,7 @@
             if (!emptyQuery && !queryMatches(entry, query, endonyms, all)) continue;
 
             let loc = null;
-            if (!emptyQuery) {
+            if (!emptyQuery || !showBuiltins) {
                 loc = bestLocaleMatch(entry, rank);
                 if (filteringLocale && !loc) continue;
             }
@@ -289,16 +298,20 @@
             return {
                 allowFallbacks: DEFAULT_PREFS.allowFallbacks,
                 fallbacks: DEFAULT_PREFS.fallbacks.slice(),
+                showBuiltins: DEFAULT_PREFS.showBuiltins,
             };
         }
         const allowFallbacks = raw.allowFallbacks === false ? false : true;
+        // Same corruption rule as allowFallbacks: only an explicit false is
+        // false. A missing key or partial write must not come up strict.
+        const showBuiltins = raw.showBuiltins === false ? false : true;
         let fallbacks;
         if (!Object.prototype.hasOwnProperty.call(raw, 'fallbacks') || !Array.isArray(raw.fallbacks)) {
             fallbacks = DEFAULT_PREFS.fallbacks.slice();
         } else {
             fallbacks = uniqueCodes(raw.fallbacks.filter((c) => typeof c === 'string' && c));
         }
-        return { allowFallbacks, fallbacks };
+        return { allowFallbacks, fallbacks, showBuiltins };
     }
 
     function loadLocalePrefs(storage) {
@@ -324,6 +337,7 @@
         store.setItem(STORAGE_KEY, JSON.stringify({
             allowFallbacks: normalized.allowFallbacks,
             fallbacks: normalized.fallbacks,
+            showBuiltins: normalized.showBuiltins,
         }));
         return normalized;
     }

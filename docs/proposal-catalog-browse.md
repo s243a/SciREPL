@@ -210,9 +210,19 @@ Japanese, the chain is `['ja', 'en']`.
   groups these as "interface languages" and "languages from your
   sources". A free-text code is not allowed; the code must come from a
   known set so matching and endonym labels stay well-defined.
-- This filter does **not** hide built-in curated entries on **empty
-  search**. Those are the default view. Their titles and descriptions are
-  already translated; their notebook bodies are English and stay English.
+- By default this filter does **not** hide built-in curated entries on
+  **empty search**. Those are the default view. Their titles and
+  descriptions are already translated; their notebook bodies are English
+  and stay English. An **"Always show built-in items"** checkbox (default
+  on, persisted with the fallback prefs, missing/corrupt storage means
+  on) makes the exemption explicit: unchecking it applies the same
+  locale chain to the default view, so a strict user's unchecked
+  "Allow fallbacks" visibly does something there instead of appearing
+  broken. With spoken language = All the checkbox has no effect. While
+  the exemption is on and it is actually letting foreign-language cards
+  through, a short hint ("Built-in items are shown in any language.")
+  says so. A locale-gated default view that matches nothing states which
+  languages matched nothing, not a generic "no items".
 - On **search**, locale matching applies to built-in and source items
   alike. That is what makes “fallbacks off” mean something for a Japanese
   user who does not want English notebooks in the results.
@@ -620,10 +630,12 @@ in the publishing docs, that omitting it caps their users' trust at
 - Auto-adding community repos. The built-in list stays the default.
 - Changing which items are in the built-in array. Search finds *more*;
   it does not demote UnifyWeaver, ggplot2, TypR, etc.
-- Hiding built-in English workbooks on **empty search** because the UI is
-  in another locale. Chrome is translated; content locale is a badge, not
-  a gate, for the curated default view. Search *does* apply locale +
-  fallbacks to built-in items.
+- Hiding built-in English workbooks on **empty search** *by default*
+  because the UI is in another locale. Chrome is translated; content
+  locale is a badge, not a gate, for the curated default view. Search
+  *does* apply locale + fallbacks to built-in items, and a user who
+  unchecks "Always show built-in items" opts the default view into the
+  same gate.
 - Seeding fallbacks from `navigator.languages`. Initialize to English
   only. Extra languages are an explicit user choice.
 - Per-locale string maps on remote items in v1.
