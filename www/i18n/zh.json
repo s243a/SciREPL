@@ -723,6 +723,8 @@
     "packageCatalog.filterKernel": "内核",
     "packageCatalog.filterKernelAll": "全部",
     "packageCatalog.allowFallbacks": "允许后备语言",
+    "packageCatalog.showBuiltins": "始终显示内置项目",
+    "packageCatalog.builtinsAnyLanguageHint": "内置项目在任何语言下均会显示。",
     "packageCatalog.fallbackThen": "然后 {languages}",
     "packageCatalog.fallbackNone": "无",
     "packageCatalog.fallbacksRankingThen": "仅用于排序：{languages}",

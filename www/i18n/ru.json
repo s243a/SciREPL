@@ -723,6 +723,8 @@
     "packageCatalog.filterKernel": "Ядро",
     "packageCatalog.filterKernelAll": "Все",
     "packageCatalog.allowFallbacks": "Разрешить резервные языки",
+    "packageCatalog.showBuiltins": "Всегда показывать встроенные элементы",
+    "packageCatalog.builtinsAnyLanguageHint": "Встроенные элементы отображаются на любом языке.",
     "packageCatalog.fallbackThen": "затем {languages}",
     "packageCatalog.fallbackNone": "нет",
     "packageCatalog.fallbacksRankingThen": "только ранжирование: {languages}",

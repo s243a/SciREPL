@@ -732,6 +732,8 @@
     "packageCatalog.filterKernel": "Kernel",
     "packageCatalog.filterKernelAll": "Todo",
     "packageCatalog.allowFallbacks": "Permitir idiomas alternativos",
+    "packageCatalog.showBuiltins": "Mostrar siempre los elementos integrados",
+    "packageCatalog.builtinsAnyLanguageHint": "Los elementos integrados se muestran en cualquier idioma.",
     "packageCatalog.fallbackThen": "luego {languages}",
     "packageCatalog.fallbackNone": "ninguno",
     "packageCatalog.fallbacksRankingThen": "solo clasificación: {languages}",

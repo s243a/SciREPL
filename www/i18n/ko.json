@@ -723,6 +723,8 @@
     "packageCatalog.filterKernel": "커널",
     "packageCatalog.filterKernelAll": "모두",
     "packageCatalog.allowFallbacks": "대체 언어 허용",
+    "packageCatalog.showBuiltins": "항상 내장 항목 표시",
+    "packageCatalog.builtinsAnyLanguageHint": "내장 항목은 모든 언어로 표시됩니다.",
     "packageCatalog.fallbackThen": "다음: {languages}",
     "packageCatalog.fallbackNone": "없음",
     "packageCatalog.fallbacksRankingThen": "순위 지정 전용: {languages}",

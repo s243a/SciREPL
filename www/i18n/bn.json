@@ -723,6 +723,8 @@
     "packageCatalog.filterKernel": "কার্নেল",
     "packageCatalog.filterKernelAll": "সব",
     "packageCatalog.allowFallbacks": "ফলব্যাকের অনুমতি দিন",
+    "packageCatalog.showBuiltins": "সর্বদা অন্তর্নির্মিত আইটেম দেখান",
+    "packageCatalog.builtinsAnyLanguageHint": "অন্তর্নির্মিত আইটেম যেকোনো ভাষায় দেখানো হয়।",
     "packageCatalog.fallbackThen": "তারপর {languages}",
     "packageCatalog.fallbackNone": "কোনোটি নয়",
     "packageCatalog.fallbacksRankingThen": "শুধুমাত্র র‍্যাংকিং: {languages}",

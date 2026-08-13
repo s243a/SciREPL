@@ -724,6 +724,8 @@
     "packageCatalog.filterKernel": "カーネル",
     "packageCatalog.filterKernelAll": "すべて",
     "packageCatalog.allowFallbacks": "フォールバックを許可",
+    "packageCatalog.showBuiltins": "組み込みアイテムを常に表示",
+    "packageCatalog.builtinsAnyLanguageHint": "組み込みアイテムは任意の言語で表示されます。",
     "packageCatalog.fallbackThen": "次に {languages}",
     "packageCatalog.fallbackNone": "なし",
     "packageCatalog.fallbacksRankingThen": "順位付けのみ: {languages}",

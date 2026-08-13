@@ -731,6 +731,8 @@
     "packageCatalog.filterKernel": "Kernel",
     "packageCatalog.filterKernelAll": "Semua",
     "packageCatalog.allowFallbacks": "Izinkan bahasa cadangan",
+    "packageCatalog.showBuiltins": "Selalu tampilkan item bawaan",
+    "packageCatalog.builtinsAnyLanguageHint": "Item bawaan ditampilkan dalam bahasa apa pun.",
     "packageCatalog.fallbackThen": "lalu {languages}",
     "packageCatalog.fallbackNone": "tidak ada",
     "packageCatalog.fallbacksRankingThen": "hanya pemeringkatan: {languages}",

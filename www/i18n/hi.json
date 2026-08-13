@@ -723,6 +723,8 @@
     "packageCatalog.filterKernel": "कर्नेल",
     "packageCatalog.filterKernelAll": "सभी",
     "packageCatalog.allowFallbacks": "फ़ॉलबैक की अनुमति दें",
+    "packageCatalog.showBuiltins": "हमेशा अंतर्निहित आइटम दिखाएं",
+    "packageCatalog.builtinsAnyLanguageHint": "अंतर्निहित आइटम किसी भी भाषा में दिखाए जाते हैं।",
     "packageCatalog.fallbackThen": "फिर {languages}",
     "packageCatalog.fallbackNone": "कोई नहीं",
     "packageCatalog.fallbacksRankingThen": "केवल रैंकिंग: {languages}",
