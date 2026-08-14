@@ -379,9 +379,11 @@ class PackageCatalog {
 
         document.getElementById('catalog-edit-fallbacks')?.addEventListener('click', () => {
             this._showFallbackPanel(true);
+            document.getElementById('catalog-fallback-back')?.focus();
         });
         document.getElementById('catalog-fallback-back')?.addEventListener('click', () => {
             this._showFallbackPanel(false);
+            document.getElementById('catalog-edit-fallbacks')?.focus();
         });
         document.getElementById('catalog-fallback-add')?.addEventListener('change', (e) => {
             const code = e.target.value;

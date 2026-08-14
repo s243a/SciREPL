@@ -203,6 +203,29 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
             filterDefaults.locales.length >= 17 && filterDefaults.locales.every(v => v === 'en'),
             filterDefaults.locales.slice(0, 3).join('|'));
 
+        await page.click('#catalog-edit-fallbacks');
+        const fallbackFocus = await page.evaluate(() => ({
+            active: document.activeElement?.id,
+            browseHidden: document.getElementById('catalog-browse-panel')?.classList.contains('hidden'),
+            fallbackHidden: document.getElementById('catalog-fallback-panel')?.classList.contains('hidden'),
+        }));
+        testLog('Opening fallback settings moves focus into the visible panel',
+            fallbackFocus.active === 'catalog-fallback-back'
+                && fallbackFocus.browseHidden === true
+                && fallbackFocus.fallbackHidden === false,
+            JSON.stringify(fallbackFocus));
+        await page.click('#catalog-fallback-back');
+        const browseFocus = await page.evaluate(() => ({
+            active: document.activeElement?.id,
+            browseHidden: document.getElementById('catalog-browse-panel')?.classList.contains('hidden'),
+            fallbackHidden: document.getElementById('catalog-fallback-panel')?.classList.contains('hidden'),
+        }));
+        testLog('Returning to browse moves focus out of the hidden fallback panel',
+            browseFocus.active === 'catalog-edit-fallbacks'
+                && browseFocus.browseHidden === false
+                && browseFocus.fallbackHidden === true,
+            JSON.stringify(browseFocus));
+
         const hasJa = await page.evaluate(() =>
             [...document.getElementById('catalog-spoken-language').options]
                 .some(o => o.value === 'ja'));
