@@ -27,6 +27,7 @@ jobs:
       - run: node scripts/check-i18n-html-ids.mjs
       - run: node scripts/check-i18n-keys.mjs
       - run: node scripts/check-translations.mjs
+      - run: node test_catalog_filter.mjs
       - run: npm run privacy:check
       - run: node scripts/check-sw-shell.mjs
       - run: node test_sw_shell_guard.mjs

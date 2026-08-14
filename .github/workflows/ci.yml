@@ -57,6 +57,9 @@ jobs:
       - name: i18n — catalogue lint
         run: node scripts/check-translations.mjs
 
+      - name: Catalogue search and filter rules
+        run: node test_catalog_filter.mjs
+
       - name: Privacy policy — public and in-app disclosures agree
         run: npm run privacy:check
 
@@ -105,6 +108,9 @@ jobs:
 
       - name: Notebook VFS
         run: node test_notebook_vfs.mjs
+
+      - name: Package, bundle and workbook catalogue
+        run: node test_browse_catalog.mjs
 
   # test_pwa_release starts its OWN server (on :8086) and drives a full install/
   # offline/reload cycle, so it runs in a dedicated job rather than sharing the
