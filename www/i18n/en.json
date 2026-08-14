@@ -127,6 +127,55 @@
     ],
     "packageCatalog.sectionWorkbooks": [
       "Workbook-Bundle"
+    ],
+    "packageCatalog.filterSpokenLanguage": [
+      "Language-Interface"
+    ],
+    "packageCatalog.filterAllSpoken": [
+      "Language-Interface"
+    ],
+    "packageCatalog.allowFallbacks": [
+      "Language-Interface"
+    ],
+    "packageCatalog.showBuiltins": [
+      "Language-Interface"
+    ],
+    "packageCatalog.builtinsAnyLanguageHint": [
+      "Language-Interface"
+    ],
+    "packageCatalog.fallbackThen": [
+      "Language-Interface"
+    ],
+    "packageCatalog.fallbackNone": [
+      "Language-Interface"
+    ],
+    "packageCatalog.fallbacksRankingThen": [
+      "Language-Interface"
+    ],
+    "packageCatalog.fallbackLanguages": [
+      "Language-Interface"
+    ],
+    "packageCatalog.addLanguage": [
+      "Language-Interface"
+    ],
+    "packageCatalog.fallbackHelp": [
+      "Language-Interface",
+      "Workbook-Bundle"
+    ],
+    "packageCatalog.filterKernel": [
+      "Language-Programming"
+    ],
+    "packageCatalog.filterKernelAll": [
+      "Language-Programming"
+    ],
+    "packageCatalog.kernel.r": [
+      "Language-Programming"
+    ],
+    "packageCatalog.kernel.typr": [
+      "Language-Programming"
+    ],
+    "packageCatalog.kernel.clojurescript": [
+      "Language-Programming"
     ]
   },
   "__context": {
@@ -151,6 +200,29 @@
     "memory.localStorage": "localStorage is the browser API name and stays as-is.",
     "packageCatalog.item.unifyweaverScirepl.name": "UnifyWeaver and SciREPL are product names and stay as-is.",
     "packageCatalog.manualDownloadHelp": "Keep `npm run serve` exactly as written. Translate the Menu > Import Package navigation labels consistently with the interface.",
+    "packageCatalog.searchPlaceholder": "Search box in Browse Packages. Ellipsis is a prompt, not omitted text.",
+    "packageCatalog.filterSpokenLanguage": "Label for the catalog filter that selects the content's human language, not a programming language.",
+    "packageCatalog.filterAllSpoken": "Dropdown option meaning do not restrict catalog items by spoken language.",
+    "packageCatalog.filterKernel": "Label for the catalog filter that selects a programming language runtime (Python, Prolog, R…).",
+    "packageCatalog.filterKernelAll": "Dropdown option meaning do not restrict catalog items by programming language.",
+    "packageCatalog.allowFallbacks": "Checkbox. When on, catalog search also shows items in the user's fallback languages.",
+    "packageCatalog.showBuiltins": "Checkbox, default on. When on, the default (empty-search) view lists every built-in item regardless of its content language. When off, built-in items outside the spoken-language chain are hidden even without a search.",
+    "packageCatalog.builtinsAnyLanguageHint": "Short hint beside the checkbox, shown when foreign-language built-in items are listed because the checkbox is on. 'Language' means human language.",
+    "packageCatalog.fallbackThen": "Short summary after the checkbox listing fallback language names. {languages} is a comma-separated list of endonyms such as English.",
+    "packageCatalog.fallbackNone": "Shown when the fallback list is empty after removing the primary language.",
+    "packageCatalog.fallbacksRankingThen": "Shown when Spoken language is All: fallbacks affect sort order only. {languages} is a comma-separated list of endonyms.",
+    "packageCatalog.editFallbacks": "Button that opens the ordered list of fallback languages.",
+    "packageCatalog.fallbackLanguages": "Title of the panel where the user reorders fallback languages. Keep the contrast with Spoken language (interface) vs Kernel (programming).",
+    "packageCatalog.addLanguage": "Dropdown prompt to append a fallback language. Keep the ellipsis.",
+    "packageCatalog.fallbackHelp": "{language} is the currently selected spoken-language endonym (for example 日本語).",
+    "packageCatalog.moveFallbackUp": "Accessible label for the button that moves a fallback language one place earlier.",
+    "packageCatalog.removeFallback": "Accessible label for the button that removes a fallback language from the list.",
+    "packageCatalog.noMatches": "Empty search results. {language} is the primary spoken-language endonym; {fallbacks} is the comma-separated fallback list.",
+    "packageCatalog.noMatchesPrimaryOnly": "Empty search results when fallbacks are off. {language} is the primary spoken-language endonym.",
+    "packageCatalog.noMatchesAll": "Empty search results when Spoken language is All.",
+    "packageCatalog.kernel.r": "The R programming language. Keep as the letter R.",
+    "packageCatalog.kernel.typr": "TypR is the language name and stays as-is.",
+    "packageCatalog.kernel.clojurescript": "ClojureScript is the language name and stays as-is.",
     "rPackages.prompt": "Keep the HTML tags and the R package identifiers ggplot2 and dplyr exactly as written.",
     "electron.menu.file": "Native desktop application-menu label. Do not add an ampersand for a keyboard mnemonic; Electron adds it separately.",
     "electron.cache.disabledDetail": "SCIREPL_RUNTIME_CACHE=0 is an environment-variable assignment and stays as-is.",
@@ -189,7 +261,10 @@
     "mathPalette.lim",
     "app.search.position",
     "memory.localStorage",
-    "packageCatalog.item.unifyweaverScirepl.name"
+    "packageCatalog.item.unifyweaverScirepl.name",
+    "packageCatalog.kernel.r",
+    "packageCatalog.kernel.typr",
+    "packageCatalog.kernel.clojurescript"
   ],
   "strings": {
     "menu.title": "Menu",
@@ -854,6 +929,29 @@
     "prologSettings.fetchedPath": "Fetched: {path}",
     "prologSettings.errorStatus": "Error: {error}",
     "packageCatalog.contentsWorkbooks": "{count} workbooks",
+    "packageCatalog.searchPlaceholder": "Search packages, bundles, workbooks…",
+    "packageCatalog.filterSpokenLanguage": "Spoken language",
+    "packageCatalog.filterAllSpoken": "All spoken languages",
+    "packageCatalog.filterKernel": "Kernel",
+    "packageCatalog.filterKernelAll": "All",
+    "packageCatalog.allowFallbacks": "Allow fallbacks",
+    "packageCatalog.showBuiltins": "Always show built-in items",
+    "packageCatalog.builtinsAnyLanguageHint": "Built-in items are shown in any language.",
+    "packageCatalog.fallbackThen": "then {languages}",
+    "packageCatalog.fallbackNone": "none",
+    "packageCatalog.fallbacksRankingThen": "ranking only: {languages}",
+    "packageCatalog.editFallbacks": "Edit",
+    "packageCatalog.fallbackLanguages": "Fallback languages",
+    "packageCatalog.addLanguage": "Add language…",
+    "packageCatalog.fallbackHelp": "When a workbook is not in {language}, show the next language on this list. English is the starting fallback; you can add more or turn fallbacks off.",
+    "packageCatalog.moveFallbackUp": "Move up",
+    "packageCatalog.removeFallback": "Remove",
+    "packageCatalog.noMatches": "No matches in {language}, or in fallbacks {fallbacks}",
+    "packageCatalog.noMatchesPrimaryOnly": "No matches in {language}",
+    "packageCatalog.noMatchesAll": "No matching packages, bundles, or workbooks.",
+    "packageCatalog.kernel.r": "R",
+    "packageCatalog.kernel.typr": "TypR",
+    "packageCatalog.kernel.clojurescript": "ClojureScript",
     "packageCatalog.noItems": "No items available.",
     "packageCatalog.sectionPackages": "Packages",
     "packageCatalog.sectionBundles": "Bundles",

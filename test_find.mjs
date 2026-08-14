@@ -7,6 +7,13 @@ const TIMEOUT = 90_000;
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
 
+  await page.addInitScript(() => {
+    localStorage.setItem('scirepl_privacy_accepted', '1');
+    localStorage.setItem('scirepl_onboarding_seen', '1');
+    addEventListener('DOMContentLoaded', () => localStorage.setItem(
+        'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
+  });
+
   const consoleLogs = [];
   page.on('console', msg => consoleLogs.push(`[${msg.type()}] ${msg.text()}`));
   page.on('pageerror', err => consoleLogs.push(`[PAGE ERROR] ${err.message}`));
