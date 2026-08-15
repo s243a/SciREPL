@@ -19,9 +19,13 @@ const APP_CACHE_NAME = `scirepl-app-${CACHE_VERSION}`;
 const HOST = '127.0.0.1';
 const PORT = Number(process.env.PORT || 8086);
 const PREFIX = '/SciREPL/';
-const BASE_URL = `http://${HOST}:${PORT}${PREFIX}`;
+const ORIGIN = `http://${HOST}:${PORT}`;
+const BASE_URL = `${ORIGIN}${PREFIX}`;
+const OUT_OF_SCOPE_CATALOG_PATH = '/SciREPL-Catalog/stable.json';
+const IN_SCOPE_NO_STORE_PATH = `${PREFIX}catalog-no-store.json`;
 const WWW = resolve('www');
 const TIMEOUT = 120_000;
+const PRIVACY_REVISION = '2026-08-catalog-sources-v1';
 
 const MIME = {
     '.css': 'text/css',
@@ -59,9 +63,31 @@ async function withTimeout(promise, timeoutMs, label) {
 }
 
 function startStaticServer() {
+    const dynamicHits = {
+        outOfScopeCatalog: 0,
+        inScopeNoStore: 0,
+    };
     const server = createServer(async (req, res) => {
         try {
             const url = new URL(req.url || '/', BASE_URL);
+            if (url.pathname === OUT_OF_SCOPE_CATALOG_PATH) {
+                dynamicHits.outOfScopeCatalog++;
+                res.writeHead(200, {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-store',
+                });
+                res.end(JSON.stringify({ sequence: dynamicHits.outOfScopeCatalog }));
+                return;
+            }
+            if (url.pathname === IN_SCOPE_NO_STORE_PATH) {
+                dynamicHits.inScopeNoStore++;
+                res.writeHead(200, {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-store',
+                });
+                res.end(JSON.stringify({ sequence: dynamicHits.inScopeNoStore }));
+                return;
+            }
             if (url.pathname === PREFIX.slice(0, -1)) {
                 res.writeHead(302, { Location: PREFIX });
                 res.end();
@@ -97,7 +123,7 @@ function startStaticServer() {
     });
     return new Promise((resolveReady, reject) => {
         server.once('error', reject);
-        server.listen(PORT, HOST, () => resolveReady(server));
+        server.listen(PORT, HOST, () => resolveReady({ server, dynamicHits }));
     });
 }
 
@@ -153,7 +179,7 @@ assert(callGraphStructure.classificationSelfContained,
     'SCC classification cell reconstructs graph and components');
 assert(callGraphStructure.dotSaveSelfContained, 'DOT save cell reconstructs its source');
 
-const server = await startStaticServer();
+const { server, dynamicHits } = await startStaticServer();
 const browser = await chromium.launch({
     headless: true,
     args: ['--disable-dev-shm-usage', '--no-sandbox'],
@@ -173,6 +199,11 @@ await page.route('https://swi-prolog.github.io/**', async route => {
     prologCdnAttempts++;
     await route.abort('blockedbyclient');
 });
+for (const pattern of [
+    'https://s243a.github.io/SciREPL-Catalog/**',
+    'https://raw.githubusercontent.com/s243a/SciREPL-Catalog/**',
+    'https://api.github.com/repos/s243a/SciREPL-Catalog/**',
+]) await page.route(pattern, route => route.abort('blockedbyclient'));
 page.on('console', message => console.log(`  BROWSER ${message.type()}: ${message.text()}`));
 page.on('pageerror', error => {
     pageErrors.push(error.message);
@@ -189,14 +220,15 @@ page.on('dialog', async dialog => {
 try {
     console.log('1. Installing the service worker from a GitHub Pages-style subpath...');
     await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
-    await page.evaluate(() => {
+    await page.evaluate((privacyRevision) => {
         localStorage.clear();
         localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.setItem('scirepl_privacy_accepted_revision', privacyRevision);
         localStorage.setItem('scirepl_onboarding_seen', '1');
         localStorage.setItem('scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version);
         localStorage.setItem('scirepl_auto_switch_workbook', '0');
         localStorage.setItem('scirepl_auto_download', '1');
-    });
+    }, PRIVACY_REVISION);
     await page.reload({ waitUntil: 'domcontentloaded' });
     const scope = await page.evaluate(async () => {
         const registration = await Promise.race([
@@ -231,6 +263,63 @@ try {
         assert(cacheState.paths.includes(PREFIX + relative), `pre-cache contains ${relative}`);
     }
 
+    console.log('2b. Keeping catalog metadata and no-store requests outside the app cache...');
+    const dynamicCacheState = await page.evaluate(async ({
+        appCacheName,
+        outOfScopeUrl,
+        inScopeNoStoreUrl,
+    }) => {
+        const fetchSequence = async (url, options) => {
+            // Fully consume each response before issuing the next request so
+            // Chromium cannot coalesce two identical, concurrently live fetches.
+            const first = (await (await fetch(url, options)).json()).sequence;
+            const second = (await (await fetch(url, options)).json()).sequence;
+            return [first, second];
+        };
+        const outOfScopeSequence = await fetchSequence(outOfScopeUrl);
+        const inScopeNoStoreSequence = await fetchSequence(
+            inScopeNoStoreUrl,
+            { cache: 'no-store' },
+        );
+        const appCache = await caches.open(appCacheName);
+        return {
+            outOfScopeSequence,
+            inScopeNoStoreSequence,
+            outOfScopeCached: !!(await appCache.match(outOfScopeUrl)),
+            inScopeNoStoreCached: !!(await appCache.match(inScopeNoStoreUrl)),
+        };
+    }, {
+        appCacheName: APP_CACHE_NAME,
+        outOfScopeUrl: `${ORIGIN}${OUT_OF_SCOPE_CATALOG_PATH}`,
+        inScopeNoStoreUrl: `${ORIGIN}${IN_SCOPE_NO_STORE_PATH}`,
+    });
+    assert(
+        dynamicCacheState.outOfScopeSequence.join(',') === '1,2' &&
+            dynamicHits.outOfScopeCatalog === 2,
+        'same-origin catalog metadata outside the service-worker scope stays fresh',
+        JSON.stringify({
+            sequence: dynamicCacheState.outOfScopeSequence,
+            serverHits: dynamicHits.outOfScopeCatalog,
+        }),
+    );
+    assert(
+        !dynamicCacheState.outOfScopeCached,
+        'out-of-scope catalog metadata is not inserted into the app cache',
+    );
+    assert(
+        dynamicCacheState.inScopeNoStoreSequence.join(',') === '1,2' &&
+            dynamicHits.inScopeNoStore === 2,
+        'in-scope no-store requests stay fresh',
+        JSON.stringify({
+            sequence: dynamicCacheState.inScopeNoStoreSequence,
+            serverHits: dynamicHits.inScopeNoStore,
+        }),
+    );
+    assert(
+        !dynamicCacheState.inScopeNoStoreCached,
+        'in-scope no-store responses are not inserted into the app cache',
+    );
+
     console.log('3. Loading the bundled Prolog runtime while its CDN fallback is blocked...');
     await withTimeout(
         page.evaluate(() => window.kernelManager.ensureReady('prolog')),
@@ -251,13 +340,14 @@ try {
     const offlineInstall = await page.evaluate(async () => {
         document.getElementById('btn-browse-packages').click();
         const catalog = window.packageCatalog;
-        const all = catalog.packages;
-        const bundleIndex = all.findIndex(item => item.id === 'unifyweaver-workbooks');
-        const button = document.querySelector(`.pkg-install-btn[data-idx="${bundleIndex}"]`);
+        const all = catalog.builtinPackages;
+        const bundle = all.find(item => item.id === 'unifyweaver-workbooks');
+        const button = document.querySelector(
+            `.pkg-install-btn[data-catalog-key="${catalog._catalogId(bundle)}"]`);
         await catalog._install(button);
         return {
             packageInstalled: catalog._isInstalled(all.find(item => item.id === 'unifyweaver-scirepl')),
-            bundleInstalled: catalog._isInstalled(all[bundleIndex]),
+            bundleInstalled: catalog._isInstalled(bundle),
             notebooks: window.notebookManager.getNotebooks().map(notebook => notebook.name),
         };
     });

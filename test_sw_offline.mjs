@@ -296,7 +296,7 @@ try {
             await ctx.setOffline(true);
             const v = await pg.evaluate(async () => {
                 try {
-                    const r = await fetch('./i18n/manifest.json', { cache: 'no-store' });
+                    const r = await fetch('./i18n/manifest.json');
                     return (await r.json())._testVersion;
                 } catch (e) { return 'FETCH-FAILED'; }
             });
@@ -378,7 +378,7 @@ try {
         const served = async () => {
             await ctx.setOffline(true);
             const v = await pg.evaluate(async () => {
-                try { return (await (await fetch('./i18n/manifest.json', { cache: 'no-store' })).json())._testVersion; }
+                try { return (await (await fetch('./i18n/manifest.json')).json())._testVersion; }
                 catch { return 'FETCH-FAILED'; }
             });
             await ctx.setOffline(false);
@@ -393,7 +393,7 @@ try {
             // Network recovers; drive some fetches to trigger the throttled repair.
             broken = null;
             for (let i = 0; i < 6; i++) {
-                await pg.evaluate(() => fetch('./index.html', { cache: 'no-store' }).catch(() => {}));
+                await pg.evaluate(() => fetch('./index.html').catch(() => {}));
                 await pg.waitForTimeout(2500);
             }
             // The recovered file is now in the cache, and the cache is complete...
@@ -458,7 +458,7 @@ try {
             koFetches = 0;
             await pg.evaluate(async () => {
                 const ps = [];
-                for (let i = 0; i < 30; i++) ps.push(fetch('./index.html?b=' + i, { cache: 'no-store' }).catch(() => {}));
+                for (let i = 0; i < 30; i++) ps.push(fetch('./index.html?b=' + i).catch(() => {}));
                 await Promise.all(ps);
             });
             await pg.waitForTimeout(3000);
@@ -516,7 +516,7 @@ try {
             await pg.waitForLoadState('load').catch(() => {});
         };
         const servedSub = () => pg.evaluate(async () => {
-            try { return (await (await fetch('./i18n/manifest.json', { cache: 'no-store' })).json())._testVersion; }
+            try { return (await (await fetch('./i18n/manifest.json')).json())._testVersion; }
             catch { return 'FETCH-FAILED'; }
         });
 
@@ -525,7 +525,7 @@ try {
             await install('p2', 'ko.json');   // partial, doc re-pins to p1
             broken = null;
             for (let i = 0; i < 5; i++) {      // repair -> promote p2 under the open doc
-                await pg.evaluate(() => fetch('./index.html?x=' + Math.random(), { cache: 'no-store' }).catch(() => {}));
+                await pg.evaluate(() => fetch('./index.html?x=' + Math.random()).catch(() => {}));
                 await pg.waitForTimeout(2500);
             }
             check('the open document stays on its version after a mid-session promotion',
@@ -551,7 +551,7 @@ try {
         await ctx.addInitScript(() => {
             localStorage.setItem('scirepl_privacy_accepted', '1');
             localStorage.setItem('scirepl_privacy_accepted_revision',
-                '2026-08-runtime-metadata-v1');
+                '2026-08-catalog-sources-v1');
             localStorage.setItem('scirepl_onboarding_seen', '1');
             addEventListener('DOMContentLoaded', () => localStorage.setItem(
                 'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });

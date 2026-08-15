@@ -33,9 +33,16 @@ available.
 The legacy `scirepl_privacy_accepted` boolean remains valid for the runtime
 downloads it originally disclosed, but it does not authorize automatic version
 metadata checks. Those checks require
-`scirepl_privacy_accepted_revision=2026-08-runtime-metadata-v1`; **Check latest**
+`scirepl_privacy_accepted_revision=2026-08-catalog-sources-v1`; **Check latest**
 opens the current policy before making any metadata request when that marker is
 missing.
+
+The separately published SciREPL Catalog has its own release identity. The
+default app channel reads its static `stable.json` descriptor after consent,
+then verifies the pinned catalogue index and each workbook by raw-byte size and
+SHA-256. A SciREPL app release therefore does not silently bundle whichever
+catalogue happens to be current at build time. See
+[Verified catalogue sources](CATALOG_SOURCES.md).
 
 For R, choosing the rolling value `latest` is an explicit override and is not
 described as tested. Prolog rejects its global `latest` because that now points
@@ -78,7 +85,11 @@ the pinned fetch script is the preferred way to reproduce the distributed tree.
    `npm run configure`, followed by localization checks and the service-worker
    shell lock update. CI uses this order so stale committed notices fail rather
    than being silently regenerated.
-4. Run `node scripts/check-release-version.mjs --tag=vX.Y.Z` before creating
+4. Run `npm run test:catalog`, then run `npm run test:catalog:import` with the
+   development server and Chromium available, so channel resolution, byte
+   verification, cache recovery, and atomic workbook import remain
+   release-gated.
+5. Run `node scripts/check-release-version.mjs --tag=vX.Y.Z` before creating
    the tag. Tag builds run the same comparison and refuse a mismatched tag.
 
 After tagging, switch the channel back to `development` before adding the next

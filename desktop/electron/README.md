@@ -133,6 +133,14 @@ is unaffected.
 the JavaScript kernel, Scittle and Pyodide all require them. The CSP is
 restrictive about *origins*, which is the part that protects a packaged app.
 
+The official `https://s243a.github.io/SciREPL-Catalog/` release channel is a
+data-only exception: its origin appears in `connect-src`, but not in
+`script-src`, `style-src`, `img-src`, or `font-src`. Free Electron v1 does not
+grant arbitrary HTTPS mirrors the same capability. A custom mirror works only
+after its exact origin is reviewed, added to `CONNECT_ONLY_ORIGINS`, and shipped
+in a new build; see
+[`docs/CATALOG_SOURCES.md`](../../docs/CATALOG_SOURCES.md).
+
 ### External support link
 
 Help uses an ordinary `target="_blank"` HTTPS link to Ko-fi. No Ko-fi script is

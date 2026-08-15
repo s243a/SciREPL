@@ -489,7 +489,13 @@ Packages with `format_version: "1.0"` continue to work. Files without a `target`
 
 ## Package Catalog
 
-The built-in catalog (Menu > Browse Packages, Bundles & Workbooks) lists curated runtime packages, dependency-aware workbook bundles, and individually installable workbooks. Installed package state persists across app launches; workbook state is derived from the notebooks currently present.
+The catalogue (Menu > Browse Packages, Bundles & Workbooks) lists curated
+offline runtime packages, dependency-aware workbook bundles, and individually
+installable workbooks. It can also load integrity-checked official release
+workbooks from a selected remote source. See
+[Verified catalogue sources](CATALOG_SOURCES.md) for channel, cache, privacy,
+release-pinning, and platform behavior. Installed package state persists across
+app launches; workbook state is derived from the notebooks currently present.
 
 To add packages to the catalog, edit `www/js/package_catalog.js`:
 

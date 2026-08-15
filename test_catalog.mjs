@@ -1,16 +1,25 @@
 // Quick Playwright test: verify package catalog modal opens
 import { chromium } from 'playwright';
 
+const PRIVACY_REVISION = '2026-08-catalog-sources-v1';
+
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
 
-  await page.addInitScript(() => {
+  for (const pattern of [
+    'https://s243a.github.io/SciREPL-Catalog/**',
+    'https://raw.githubusercontent.com/s243a/SciREPL-Catalog/**',
+    'https://api.github.com/repos/s243a/SciREPL-Catalog/**',
+  ]) await page.route(pattern, route => route.abort('blockedbyclient'));
+
+  await page.addInitScript(({ privacyRevision }) => {
     localStorage.setItem('scirepl_privacy_accepted', '1');
+    localStorage.setItem('scirepl_privacy_accepted_revision', privacyRevision);
     localStorage.setItem('scirepl_onboarding_seen', '1');
     addEventListener('DOMContentLoaded', () => localStorage.setItem(
         'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
-  });
+  }, { privacyRevision: PRIVACY_REVISION });
 
   try {
     await page.goto('http://localhost:8085/', { waitUntil: 'domcontentloaded', timeout: 30000 });

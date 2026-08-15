@@ -349,6 +349,11 @@ class KernelManager {
         });
     }
 
+    /** Require the current disclosure before an app-initiated network lookup. */
+    async ensureNetworkConsent() {
+        return this._ensurePrivacyConsent({ requireCurrentRevision: true });
+    }
+
     _normalizeRuntimeCacheVersion(language, value) {
         const text = String(value || '').trim();
         if (!text || text === 'latest') return null;
@@ -1025,7 +1030,7 @@ class KernelManager {
 KernelManager.CDN_KERNELS = new Set(['python', 'prolog', 'r', 'lua', 'clojurescript']);
 KernelManager.CDN_CACHE = 'scirepl-cdn-v3';
 KernelManager.PRIVACY_POLICY_REVISION_KEY = 'scirepl_privacy_accepted_revision';
-KernelManager.PRIVACY_POLICY_REVISION = '2026-08-runtime-metadata-v1';
+KernelManager.PRIVACY_POLICY_REVISION = '2026-08-catalog-sources-v1';
 
 // Runtime display info for download confirmation modal
 KernelManager.RUNTIME_INFO = {

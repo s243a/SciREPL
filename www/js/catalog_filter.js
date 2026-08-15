@@ -1,10 +1,10 @@
 /**
  * catalog_filter.js — pure ranking/matching for Browse Packages.
+ * See docs/CATALOG_SOURCES.md for trusted-source visibility semantics.
  *
  * No DOM, no fetch. Browser script tag attaches `CatalogFilter` on
- * globalThis; Node can `require()` the same file. The ranking rules live in
- * docs/proposal-catalog-browse.md (Spoken-language filter, Programming-language
- * filter, Search rules).
+ * globalThis; Node can `require()` the same file. The source visibility rules
+ * are documented in docs/CATALOG_SOURCES.md.
  */
 (function (root, factory) {
     const api = factory();
@@ -38,6 +38,10 @@
         if (entry.builtin === false || entry.source === true) return false;
         if (entry.sourceId) return false;
         return true;
+    }
+
+    function isOfficial(entry) {
+        return !!(entry && entry.official === true && entry.sourceId);
     }
 
     function contentLocales(entry) {
@@ -229,30 +233,31 @@
         const showBuiltins = options.showBuiltins !== false;
         const rank = rankingChain(primary, allowFallbacks, fallbacks);
         const chain = preferenceChain(primary, allowFallbacks, fallbacks);
-        const filteringLocale = (!emptyQuery || !showBuiltins) && chain;
 
         const rows = [];
         for (let i = 0; i < all.length; i++) {
             const entry = all[i];
             if (!entry) continue;
             const builtin = isBuiltin(entry);
-            if (emptyQuery && !builtin) continue;
+            const official = isOfficial(entry);
+            // Verified first-party translations are part of the locale-aware
+            // default view. Future community sources remain search-only.
+            if (emptyQuery && !builtin && !official) continue;
             if (!kernelMatches(entry, kernel, all)) continue;
             if (!emptyQuery && !queryMatches(entry, query, endonyms, all)) continue;
 
-            let loc = null;
-            if (!emptyQuery || !showBuiltins) {
-                loc = bestLocaleMatch(entry, rank);
-                if (filteringLocale && !loc) continue;
-            }
+            const loc = bestLocaleMatch(entry, rank);
+            const localeGated = !!chain && (!emptyQuery || official || !showBuiltins);
+            if (localeGated && !loc) continue;
 
             rows.push({
                 entry,
                 originalIndex: i,
-                prefIndex: emptyQuery ? 0 : (loc ? loc.index : Number.POSITIVE_INFINITY),
-                exact: emptyQuery ? true : !!(loc && loc.exact),
+                prefIndex: loc ? loc.index : Number.POSITIVE_INFINITY,
+                exact: !!(loc && loc.exact),
                 matchedLocale: loc ? loc.locale : null,
                 builtin,
+                official,
             });
         }
 
@@ -346,6 +351,7 @@
         STORAGE_KEY,
         DEFAULT_PREFS,
         isBuiltin,
+        isOfficial,
         isAllLocale,
         contentLocales,
         uniqueCodes,

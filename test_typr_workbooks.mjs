@@ -3,6 +3,7 @@ import { chromium } from 'playwright';
 
 const BASE = process.env.BASE_URL || 'http://localhost:8085';
 const TIMEOUT = 300_000;
+const PRIVACY_REVISION = '2026-08-catalog-sources-v1';
 
 function assert(condition, message, detail = '') {
     if (!condition) throw new Error(message + (detail ? `: ${detail}` : ''));
@@ -42,15 +43,21 @@ async function runAllAndCollect(page) {
         args: ['--disable-dev-shm-usage', '--disable-gpu', '--no-sandbox'],
     });
     const context = await browser.newContext({ serviceWorkers: 'block' });
-    await context.addInitScript(() => {
+    for (const pattern of [
+        'https://s243a.github.io/SciREPL-Catalog/**',
+        'https://raw.githubusercontent.com/s243a/SciREPL-Catalog/**',
+        'https://api.github.com/repos/s243a/SciREPL-Catalog/**',
+    ]) await context.route(pattern, route => route.abort('blockedbyclient'));
+    await context.addInitScript(({ privacyRevision }) => {
         localStorage.clear();
         localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.setItem('scirepl_privacy_accepted_revision', privacyRevision);
         localStorage.setItem('scirepl_onboarding_seen', '1');
         addEventListener('DOMContentLoaded', () => localStorage.setItem(
             'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
         localStorage.setItem('scirepl_auto_download', '1');
         localStorage.removeItem('scirepl_enabled_languages');
-    });
+    }, { privacyRevision: PRIVACY_REVISION });
     const page = await context.newPage();
     page.setDefaultTimeout(TIMEOUT);
     page.on('console', msg => {

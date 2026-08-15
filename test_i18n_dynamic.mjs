@@ -5,6 +5,7 @@ import { chromium } from 'playwright';
 const PORT = process.env.PORT || 8085;
 const URL = `http://localhost:${PORT}/index.html`;
 const TIMEOUT = 60_000;
+const PRIVACY_REVISION = '2026-08-catalog-sources-v1';
 
 let failures = 0;
 const check = (name, passed, detail = '') => {
@@ -14,15 +15,21 @@ const check = (name, passed, detail = '') => {
 
 const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({ viewport: { width: 411, height: 891 } });
-await context.addInitScript(() => {
+for (const pattern of [
+    'https://s243a.github.io/SciREPL-Catalog/**',
+    'https://raw.githubusercontent.com/s243a/SciREPL-Catalog/**',
+    'https://api.github.com/repos/s243a/SciREPL-Catalog/**',
+]) await context.route(pattern, route => route.abort('blockedbyclient'));
+await context.addInitScript(({ privacyRevision }) => {
     localStorage.setItem('scirepl_privacy_accepted', '1');
+    localStorage.setItem('scirepl_privacy_accepted_revision', privacyRevision);
     localStorage.setItem('scirepl_onboarding_seen', '1');
     addEventListener('DOMContentLoaded', () => localStorage.setItem(
         'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
     localStorage.setItem('scirepl_auto_download', '1');
     localStorage.removeItem('scirepl_session_v2');
     localStorage.removeItem('scirepl_session_v1');
-});
+}, { privacyRevision: PRIVACY_REVISION });
 const page = await context.newPage();
 const pageErrors = [];
 page.on('pageerror', (error) => pageErrors.push(error.message));
@@ -170,11 +177,11 @@ try {
     state = await page.evaluate(() => ({
         packages: document.querySelector('.catalog-section-header')?.textContent,
         packagesWant: window.t('packageCatalog.sectionPackages'),
-        item: document.querySelector('[data-catalog-id="unifyweaver-scirepl"] .pkg-display-name')?.textContent,
+        item: document.querySelector('[data-catalog-key="unifyweaver-scirepl"] .pkg-display-name')?.textContent,
         itemWant: window.t('packageCatalog.item.unifyweaverScirepl.name'),
-        description: document.querySelector('[data-catalog-id="unifyweaver-scirepl"] .pkg-description')?.textContent,
+        description: document.querySelector('[data-catalog-key="unifyweaver-scirepl"] .pkg-description')?.textContent,
         descriptionWant: window.t('packageCatalog.item.unifyweaverScirepl.description'),
-        install: document.querySelector('[data-catalog-id="unifyweaver-scirepl"] .pkg-install-btn')?.textContent,
+        install: document.querySelector('[data-catalog-key="unifyweaver-scirepl"] .pkg-install-btn')?.textContent,
         installWant: window.t('packageCatalog.install'),
     }));
     check('catalog headings, item copy, and action are localized',
@@ -186,9 +193,9 @@ try {
     // panel is open must update it in place rather than requiring a close/reopen.
     await activate('fr');
     state = await page.evaluate(() => ({
-        description: document.querySelector('[data-catalog-id="unifyweaver-scirepl"] .pkg-description')?.textContent,
+        description: document.querySelector('[data-catalog-key="unifyweaver-scirepl"] .pkg-description')?.textContent,
         want: window.t('packageCatalog.item.unifyweaverScirepl.description'),
-        install: document.querySelector('[data-catalog-id="unifyweaver-scirepl"] .pkg-install-btn')?.textContent,
+        install: document.querySelector('[data-catalog-key="unifyweaver-scirepl"] .pkg-install-btn')?.textContent,
         installWant: window.t('packageCatalog.install'),
     }));
     check('an open generated catalog retranslates in place',
