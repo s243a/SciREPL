@@ -813,6 +813,8 @@
     "packageCatalog.item.prologGeneratesLua.description": "名前付きクエリ ソース セル、埋め込みまたはノートブック VFS ファクト、および直接の Lua セル I/O を使用して、Prolog の推移的閉包を Lua にコンパイルします。",
     "packageCatalog.item.prologGeneratesClojureScript.name": "Prolog が ClojureScript を生成",
     "packageCatalog.item.prologGeneratesClojureScript.description": "Prolog の推移的閉包をブラウザで実行可能な ClojureScript にコンパイルし、Scittle で生成された定義をクエリします。",
+    "packageCatalog.item.nQueensPrologToClojureScript.name": "N クイーン：Prolog から ClojureScript へ",
+    "packageCatalog.item.nQueensPrologToClojureScript.description": "簡潔な Prolog の N クイーンコードを SharedVFS 内の ClojureScript ファイルへトランスパイルし、生成されたランタイムをノートブックへ出力せずに 4 つの盤面を実行します。",
     "packageCatalog.item.lifeExpectancyAnalysis.name": "平均余命の分析",
     "packageCatalog.item.lifeExpectancyAnalysis.description": "Python/R 混合ワークブック: pandas、Plotly、および R 基本グラフィックスを使用した Gapminder および WHO データセットの分析。",
     "packageCatalog.item.computePiArchimedean.name": "アルキメデスの限界による円周率 Pi の計算",

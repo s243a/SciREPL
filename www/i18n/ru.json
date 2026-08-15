@@ -812,6 +812,8 @@
     "packageCatalog.item.prologGeneratesLua.description": "Компиляция транзитивного замыкания Prolog в Lua с использованием именованной ячейки запроса, фактов VFS блокнота и прямого ввода-вывода ячеек Lua.",
     "packageCatalog.item.prologGeneratesClojureScript.name": "Prolog генерирует ClojureScript",
     "packageCatalog.item.prologGeneratesClojureScript.description": "Компиляция транзитивного замыкания Prolog в исполняемый в браузере ClojureScript с последующим опросом сгенерированных определений в Scittle.",
+    "packageCatalog.item.nQueensPrologToClojureScript.name": "N ферзей: из Prolog в ClojureScript",
+    "packageCatalog.item.nQueensPrologToClojureScript.description": "Транспилируйте компактный код задачи о N ферзях на Prolog в файлы ClojureScript в SharedVFS, затем запустите четыре расстановки, не выводя сгенерированную среду выполнения в блокнот.",
     "packageCatalog.item.lifeExpectancyAnalysis.name": "Анализ ожидаемой продолжительности жизни",
     "packageCatalog.item.lifeExpectancyAnalysis.description": "Смешанный блокнот Python/R: наборы данных Gapminder и ВОЗ с использованием pandas, Plotly и базовой графики R.",
     "packageCatalog.item.computePiArchimedean.name": "Вычисление числа Пи методом Архимеда",

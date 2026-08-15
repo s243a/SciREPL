@@ -820,6 +820,8 @@
     "packageCatalog.item.prologGeneratesLua.description": "Kompilasi penutupan transitif Prolog ke Lua menggunakan sel sumber kueri bernama, fakta VFS buku catatan atau tertanam, dan I/O sel Lua langsung.",
     "packageCatalog.item.prologGeneratesClojureScript.name": "Prolog Menghasilkan ClojureScript",
     "packageCatalog.item.prologGeneratesClojureScript.description": "Kompilasi penutupan transitif Prolog ke ClojureScript yang dapat dijalankan di peramban, lalu buat kueri definisi yang dihasilkan di Scittle.",
+    "packageCatalog.item.nQueensPrologToClojureScript.name": "N-Queens: Prolog ke ClojureScript",
+    "packageCatalog.item.nQueensPrologToClojureScript.description": "Transpilasikan kode Prolog N-Queens yang ringkas menjadi berkas ClojureScript di SharedVFS, lalu jalankan empat papan tanpa menampilkan lingkungan eksekusi yang dihasilkan di buku catatan.",
     "packageCatalog.item.lifeExpectancyAnalysis.name": "Analisis Harapan Hidup",
     "packageCatalog.item.lifeExpectancyAnalysis.description": "Buku kerja campuran Python/R: Dataset Gapminder & WHO dengan pandas, Plotly, dan grafik dasar R.",
     "packageCatalog.item.computePiArchimedean.name": "Hitung Pi dengan Batas Archimedes",

@@ -827,6 +827,8 @@
     "packageCatalog.item.prologGeneratesLua.description": "Kompilieren Sie einen transitiven Prolog-Abschluss nach Lua. Verwendet werden eine benannte Quellzelle für Abfragen, eingebettete oder Notebook-VFS-Fakten sowie direkter Lua-Zellzugriff.",
     "packageCatalog.item.prologGeneratesClojureScript.name": "Prolog generiert ClojureScript",
     "packageCatalog.item.prologGeneratesClojureScript.description": "Kompilieren Sie einen transitiven Prolog-Abschluss zu im Browser ausführbarem ClojureScript und fragen Sie anschließend die generierten Definitionen in Scittle ab.",
+    "packageCatalog.item.nQueensPrologToClojureScript.name": "N-Damen: Prolog zu ClojureScript",
+    "packageCatalog.item.nQueensPrologToClojureScript.description": "Transpilieren Sie kompakten Prolog-Code für das N-Damen-Problem in ClojureScript-Dateien im SharedVFS und führen Sie anschließend vier Brettstellungen aus, ohne die generierte Laufzeitumgebung in das Notebook zu schreiben.",
     "packageCatalog.item.lifeExpectancyAnalysis.name": "Lebenserwartungsanalyse",
     "packageCatalog.item.lifeExpectancyAnalysis.description": "Gemischte Python/R-Arbeitsmappe: Gapminder- und WHO-Datensätze mit pandas, plotly und R-Basisgrafiken.",
     "packageCatalog.item.computePiArchimedean.name": "Pi mit archimedischen Grenzen berechnen",

@@ -112,6 +112,9 @@ jobs:
       - name: Package, bundle and workbook catalogue
         run: node test_browse_catalog.mjs
 
+      - name: N-Queens Prolog-to-ClojureScript workbook
+        run: node test_nqueens_workbook.mjs
+
       - name: Verified catalogue workbook import
         run: npm run test:catalog:import
 

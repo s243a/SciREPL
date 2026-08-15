@@ -273,7 +273,7 @@ const catalogRoutes = new Map([
             });
         });
 
-        testLog('Has at least 17 catalog entries', cards.length >= 17, `${cards.length} entries`);
+        testLog('Has at least 18 catalog entries', cards.length >= 18, `${cards.length} entries`);
 
         const packageEntry = cards.find(c => c.name === 'UnifyWeaver SciREPL');
         const bundleEntry = cards.find(c => c.name === 'UnifyWeaver Tutorials & Compiler Demos');
@@ -281,6 +281,7 @@ const catalogRoutes = new Map([
         const computePiEntry = cards.find(c => c.name === 'Compute Pi with Archimedean Bounds');
         const generatedLuaEntry = cards.find(c => c.name === 'Prolog Generates Lua');
         const generatedCljsEntry = cards.find(c => c.name === 'Prolog Generates ClojureScript');
+        const nQueensEntry = cards.find(c => c.name === 'N-Queens: Prolog to ClojureScript');
         const typrIntroEntry = cards.find(c => c.name === 'TypR Introduction');
         const generatedTyprEntry = cards.find(c => c.name === 'Prolog Generates TypR');
         const callGraphEntry = cards.find(c => c.name === 'Call Graph Analysis and SCC Detection');
@@ -312,6 +313,9 @@ const catalogRoutes = new Map([
         testLog('Generated ClojureScript entry exists', !!generatedCljsEntry);
         testLog('Generated ClojureScript shows prolog, clojurescript kernels',
             generatedCljsEntry?.kernels === 'prolog, clojurescript', generatedCljsEntry?.kernels);
+        testLog('N-Queens ClojureScript workbook exists', !!nQueensEntry);
+        testLog('N-Queens workbook uses the Prolog and ClojureScript kernels',
+            nQueensEntry?.kernels === 'prolog, clojurescript', nQueensEntry?.kernels);
         testLog('TypR introduction entry exists', !!typrIntroEntry);
         testLog('TypR introduction shows typr, r kernels', typrIntroEntry?.kernels === 'typr, r', typrIntroEntry?.kernels);
         const typrIntroDefinition = await page.evaluate(() => {
@@ -365,7 +369,7 @@ const catalogRoutes = new Map([
         testLog('English primary does not duplicate English in the fallback summary',
             !/then English/i.test(filterDefaults.summary), filterDefaults.summary);
         testLog('Every built-in entry declares locales [en]',
-            filterDefaults.locales.length >= 17 && filterDefaults.locales.every(v => v === 'en'),
+            filterDefaults.locales.length >= 18 && filterDefaults.locales.every(v => v === 'en'),
             filterDefaults.locales.slice(0, 3).join('|'));
 
         await page.click('#catalog-edit-fallbacks');
@@ -403,7 +407,7 @@ const catalogRoutes = new Map([
             testLog('Fallback summary lists English when primary is not en',
                 /English/i.test(jaState.summary), jaState.summary);
             testLog('Empty search still shows all built-in cards after changing spoken language',
-                jaState.cards >= 17, String(jaState.cards));
+                jaState.cards >= 18, String(jaState.cards));
             await page.selectOption('#catalog-spoken-language', filterDefaults.i18nCurrent || 'en');
         } else {
             testLog('Fallback summary lists English when primary is not en', false, 'ja option missing');
@@ -422,7 +426,7 @@ const catalogRoutes = new Map([
                 checked: document.getElementById('catalog-show-builtins')?.checked,
             }));
             testLog('Exemption on: strict ja empty view still shows every built-in',
-                before.cards >= 17 && before.checked === true,
+                before.cards >= 18 && before.checked === true,
                 `cards=${before.cards} checked=${before.checked}`);
             testLog('Hint explains foreign-language built-ins are being shown',
                 before.hint === true, String(before.hint));
@@ -447,7 +451,7 @@ const catalogRoutes = new Map([
             });
             const restored = await page.evaluate(() =>
                 document.querySelectorAll('#package-catalog-list .pkg-card').length);
-            testLog('Re-checking restores the full built-in list', restored >= 17, String(restored));
+            testLog('Re-checking restores the full built-in list', restored >= 18, String(restored));
             await page.selectOption('#catalog-spoken-language', filterDefaults.i18nCurrent || 'en');
         } else {
             testLog('Exemption on: strict ja empty view still shows every built-in', false, 'ja option missing');
@@ -467,7 +471,7 @@ const catalogRoutes = new Map([
         const restoredCards = await page.evaluate(() =>
             document.querySelectorAll('#package-catalog-list .pkg-card').length);
         testLog('Kernel All restores the built-in list',
-            restoredCards >= 17, String(restoredCards));
+            restoredCards >= 18, String(restoredCards));
 
         await page.setViewportSize({ width: 360, height: 740 });
         const narrowLayout = await page.evaluate(() => {
@@ -513,7 +517,7 @@ const catalogRoutes = new Map([
             `${sourceState.privacyCurrent} @ ${sourceState.privacyRevision}`);
         testLog('Verified source adds three official rows without changing built-ins',
             sourceState.remoteIds.join('|') === 'compute-pi-es-browser|tampered-es-browser|ipynb-es-browser'
-                && sourceState.builtinCount >= 17,
+                && sourceState.builtinCount >= 18,
             `remote=${sourceState.remoteIds.join(',')} builtins=${sourceState.builtinCount}`);
         testLog('Stable release path does not call the GitHub API',
             remoteCatalogRequests.every(url => !url.startsWith('https://api.github.com/')),

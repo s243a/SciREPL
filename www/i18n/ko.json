@@ -812,6 +812,8 @@
     "packageCatalog.item.prologGeneratesLua.description": "명명된 쿼리 소스 셀, 포함되거나 노트북 VFS 팩트 및 직접 Lua 셀 I/O를 사용하여 Prolog 이행 폐포를 Lua로 컴파일합니다.",
     "packageCatalog.item.prologGeneratesClojureScript.name": "Prolog가 ClojureScript 생성",
     "packageCatalog.item.prologGeneratesClojureScript.description": "Prolog 이행 폐포를 브라우저에서 실행 가능한 ClojureScript로 컴파일한 다음 Scittle에서 생성된 정의를 쿼리합니다.",
+    "packageCatalog.item.nQueensPrologToClojureScript.name": "N-퀸: Prolog에서 ClojureScript로",
+    "packageCatalog.item.nQueensPrologToClojureScript.description": "간결한 Prolog N-퀸 코드를 SharedVFS의 ClojureScript 파일로 트랜스파일한 다음, 생성된 런타임을 노트북에 출력하지 않고 네 개의 보드를 실행합니다.",
     "packageCatalog.item.lifeExpectancyAnalysis.name": "기대 수명 데이터 분석",
     "packageCatalog.item.lifeExpectancyAnalysis.description": "Python/R 혼합 워크북: pandas, Plotly 및 R 기본 그래픽을 활용한 Gapminder 및 WHO 데이터셋 분석.",
     "packageCatalog.item.computePiArchimedean.name": "아르키메데스 한계를 이용한 원주율 Pi 계산",

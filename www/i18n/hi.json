@@ -812,6 +812,8 @@
     "packageCatalog.item.prologGeneratesLua.description": "नामित क्वेरी स्रोत सेल, एम्बेडेड या नोटबुक VFS तथ्यों और सीधे Lua सेल I/O का उपयोग करके Prolog ट्रांज़िटिव क्लोज़र को Lua में संकलित करें।",
     "packageCatalog.item.prologGeneratesClojureScript.name": "Prolog से ClojureScript उत्पन्न करना",
     "packageCatalog.item.prologGeneratesClojureScript.description": "Prolog ट्रांज़िटिव क्लोज़र को ब्राउज़र में चलने योग्य ClojureScript में संकलित करें, फिर Scittle में उत्पन्न परिभाषाओं की क्वेरी करें।",
+    "packageCatalog.item.nQueensPrologToClojureScript.name": "N-क्वीन्स: Prolog से ClojureScript",
+    "packageCatalog.item.nQueensPrologToClojureScript.description": "संक्षिप्त Prolog N-क्वीन्स कोड को SharedVFS में ClojureScript फ़ाइलों में ट्रांसपाइल करें, फिर उत्पन्न रनटाइम को नोटबुक में डाले बिना चार बोर्ड चलाएँ।",
     "packageCatalog.item.lifeExpectancyAnalysis.name": "जीवन प्रत्याशा विश्लेषण",
     "packageCatalog.item.lifeExpectancyAnalysis.description": "मिश्रित Python/R वर्कबुक: pandas, Plotly और R बेस ग्राफ़िक्स के साथ Gapminder और WHO डेटासेट।",
     "packageCatalog.item.computePiArchimedean.name": "आर्किमिडीयन सीमाओं के साथ Pi की गणना",

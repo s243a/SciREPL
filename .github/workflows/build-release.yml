@@ -98,6 +98,9 @@ jobs:
       - name: Run package catalog tests
         run: node test_browse_catalog.mjs
 
+      - name: Run N-Queens workbook tests
+        run: node test_nqueens_workbook.mjs
+
       - name: Run TypR workbook tests
         run: node test_typr_workbooks.mjs
 

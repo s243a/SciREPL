@@ -812,6 +812,8 @@
     "packageCatalog.item.prologGeneratesLua.description": "使用命名查询源单元格、嵌入式或笔记本 VFS 事实以及直接 Lua 单元格 I/O，将 Prolog 传递闭包编译为 Lua。",
     "packageCatalog.item.prologGeneratesClojureScript.name": "Prolog 生成 ClojureScript 代码",
     "packageCatalog.item.prologGeneratesClojureScript.description": "将 Prolog 传递闭包编译为可在浏览器中运行的 ClojureScript，然后在 Scittle 中查询生成的定义。",
+    "packageCatalog.item.nQueensPrologToClojureScript.name": "N 皇后：从 Prolog 到 ClojureScript",
+    "packageCatalog.item.nQueensPrologToClojureScript.description": "将精简的 Prolog N 皇后代码转译为 SharedVFS 中的 ClojureScript 文件，然后运行四个棋盘，而不将生成的运行时内容输出到笔记本中。",
     "packageCatalog.item.lifeExpectancyAnalysis.name": "预期寿命数据分析",
     "packageCatalog.item.lifeExpectancyAnalysis.description": "Python/R 混合工作簿：结合 pandas、Plotly 与 R 基础绘图的 Gapminder 和 WHO 数据集分析。",
     "packageCatalog.item.computePiArchimedean.name": "基于阿基米德上下界计算圆周率 Pi",

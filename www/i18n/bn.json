@@ -812,6 +812,8 @@
     "packageCatalog.item.prologGeneratesLua.description": "নামকরণ করা কোয়েরি সোর্স সেল, এমবেডেড বা নোটবুক VFS ফ্যাক্ট এবং সরাসরি Lua সেল I/O ব্যবহার করে Prolog ট্রানজিটিভ ক্লোজারকে Lua-তে সংকলন করুন।",
     "packageCatalog.item.prologGeneratesClojureScript.name": "Prolog উৎপন্ন করে ClojureScript",
     "packageCatalog.item.prologGeneratesClojureScript.description": "Prolog ট্রানজিটিভ ক্লোজারকে ব্রাউজারে রানযোগ্য ClojureScript-এ সংকলন করুন, তারপর Scittle-এ উৎপন্ন সংজ্ঞাগুলি নিয়ে অনুসন্ধান করুন।",
+    "packageCatalog.item.nQueensPrologToClojureScript.name": "N-Queens: Prolog থেকে ClojureScript",
+    "packageCatalog.item.nQueensPrologToClojureScript.description": "সংক্ষিপ্ত Prolog N-Queens কোডকে SharedVFS-এর ClojureScript ফাইলে ট্রান্সপাইল করুন, তারপর উৎপন্ন রানটাইমটি নোটবুকে না লিখে চারটি বোর্ড চালান।",
     "packageCatalog.item.lifeExpectancyAnalysis.name": "গড় আয়ু বিশ্লেষণ",
     "packageCatalog.item.lifeExpectancyAnalysis.description": "মিশ্র Python/R ওয়ার্কবুক: pandas, Plotly এবং R বেস গ্রাফিক্সসহ Gapminder ও WHO ডেটাসেট।",
     "packageCatalog.item.computePiArchimedean.name": "আর্কিমিডীয় সীমার সাহায্যে Pi-এর মান গণনা",

@@ -819,6 +819,8 @@
     "packageCatalog.item.prologGeneratesLua.description": "Compile um fechamento transitivo Prolog para Lua usando uma célula de código-fonte de consulta nomeada, fatos incorporados ou do VFS do caderno e acesso direto das células Lua a outras células.",
     "packageCatalog.item.prologGeneratesClojureScript.name": "Prolog gera ClojureScript",
     "packageCatalog.item.prologGeneratesClojureScript.description": "Compile um fecho transitivo Prolog para ClojureScript executável no navegador e consulte as definições geradas no Scittle.",
+    "packageCatalog.item.nQueensPrologToClojureScript.name": "N-Rainhas: de Prolog para ClojureScript",
+    "packageCatalog.item.nQueensPrologToClojureScript.description": "Transpile código Prolog conciso de N-Rainhas para arquivos ClojureScript no SharedVFS e execute quatro tabuleiros sem despejar o ambiente de execução gerado no notebook.",
     "packageCatalog.item.lifeExpectancyAnalysis.name": "Análise de expectativa de vida",
     "packageCatalog.item.lifeExpectancyAnalysis.description": "Pasta de trabalho mista de Python e R: conjuntos de dados Gapminder e WHO com pandas, plotly e gráficos básicos de R.",
     "packageCatalog.item.computePiArchimedean.name": "Calcular pi com limites de Arquimedes",

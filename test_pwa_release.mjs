@@ -135,6 +135,7 @@ const requiredCatalogPaths = [
     'workbooks/prolog-generates-r.srwb',
     'workbooks/prolog-generates-lua.srwb',
     'workbooks/prolog-generates-clojurescript.srwb',
+    'workbooks/nqueens-transpile.ipynb',
     'workbooks/compute-pi-workbook.srwb',
     'workbooks/life_expectancy_csv_demo.ipynb',
     'workbooks/r_ggplot2_showcase.ipynb',
