@@ -12,6 +12,14 @@ class PackageCatalog {
         this._query = '';
         this._sessionPrimary = null;
         this._kernelFilter = null;
+        this._remoteEntries = [];
+        this._sourceResult = null;
+        this._sourceGeneration = 0;
+        this._sourceManager = (typeof CatalogSource !== 'undefined')
+            ? new CatalogSource.CatalogSourceManager({
+                beforeNetwork: () => this._ensureCatalogNetworkConsent(),
+            })
+            : null;
         this._prefs = (typeof CatalogFilter !== 'undefined')
             ? CatalogFilter.loadLocalePrefs()
             : { allowFallbacks: true, fallbacks: ['en'] };
@@ -53,7 +61,7 @@ class PackageCatalog {
      * type: 'package' (default, .zip), 'bundle' (a set of catalog entries),
      * or 'workbook' (.ipynb/.srwb).
      */
-    get packages() {
+    get builtinPackages() {
         return [
             {
                 id: 'unifyweaver-scirepl',
@@ -179,6 +187,21 @@ class PackageCatalog {
                 format: 'srwb',
                 pages_url: 'workbooks/prolog-generates-clojurescript.srwb',
                 size: '~5 KB',
+                kernels: ['prolog', 'clojurescript'],
+                locales: ['en'],
+                requires: ['unifyweaver-scirepl'],
+            },
+            {
+                id: 'nqueens-prolog-to-clojurescript',
+                name: 'N-Queens: Prolog to ClojureScript',
+                displayNameKey: 'packageCatalog.item.nQueensPrologToClojureScript.name',
+                notebookName: 'N-Queens: transpile Prolog → ClojureScript (in-app)',
+                description: 'Transpile concise Prolog N-Queens code into SharedVFS ClojureScript files, then run four boards without dumping the generated runtime into the notebook.',
+                descriptionKey: 'packageCatalog.item.nQueensPrologToClojureScript.description',
+                type: 'workbook',
+                revision: 1,
+                pages_url: 'workbooks/nqueens-transpile.ipynb',
+                size: '~4 KB',
                 kernels: ['prolog', 'clojurescript'],
                 locales: ['en'],
                 requires: ['unifyweaver-scirepl'],
@@ -315,6 +338,10 @@ class PackageCatalog {
         ];
     }
 
+    get packages() {
+        return this.builtinPackages.concat(this._remoteEntries || []);
+    }
+
     _init() {
         const browseBtn = document.getElementById('btn-browse-packages');
         if (browseBtn) {
@@ -397,6 +424,30 @@ class PackageCatalog {
             this._render();
         });
 
+        document.getElementById('catalog-edit-source')?.addEventListener('click', () => {
+            this._showSourcePanel(true);
+            document.getElementById('catalog-source-mode')?.focus();
+        });
+        document.getElementById('catalog-source-back')?.addEventListener('click', () => {
+            this._showSourcePanel(false);
+            document.getElementById('catalog-edit-source')?.focus();
+        });
+        document.getElementById('catalog-source-mode')?.addEventListener('change', () => {
+            this._syncSourceForm();
+        });
+        document.getElementById('catalog-source-apply')?.addEventListener('click', () => {
+            this._applySourceForm();
+        });
+        document.getElementById('catalog-source-reset')?.addEventListener('click', () => {
+            this._resetSourceForm();
+        });
+        document.getElementById('catalog-source-clear-data')?.addEventListener('click', () => {
+            this._clearSourceData();
+        });
+        document.getElementById('catalog-refresh-source')?.addEventListener('click', () => {
+            this._loadSource({ refresh: true });
+        });
+
         document.addEventListener('i18n:changed', () => this._translateVisibleCatalog());
     }
 
@@ -408,14 +459,18 @@ class PackageCatalog {
         this._sessionPrimary = (window.i18n && window.i18n.current) ? window.i18n.current : 'en';
         this._prefs = CatalogFilter.loadLocalePrefs();
         this._showFallbackPanel(false);
+        this._showSourcePanel(false);
         this._populateSpokenSelect();
         this._populateKernelSelect();
         this._syncFallbackControls();
+        this._syncSourceForm();
+        this._renderSourceSummary();
         this._render();
         this.modal?.classList.remove('hidden');
         if (window.i18n && typeof window.i18n.applyToDom === 'function' && this.modal) {
             window.i18n.applyToDom(this.modal);
         }
+        this._loadSource();
     }
 
     _persistPrefs() {
@@ -439,7 +494,7 @@ class PackageCatalog {
             const chain = CatalogFilter.preferenceChain(
                 this._sessionPrimary, this._prefs.allowFallbacks, this._prefs.fallbacks);
             foreign = (rows || []).some((row) =>
-                !CatalogFilter.bestLocaleMatch(row.entry, chain));
+                row.builtin && !CatalogFilter.bestLocaleMatch(row.entry, chain));
         }
         hint.hidden = !foreign;
     }
@@ -447,7 +502,222 @@ class PackageCatalog {
     _showFallbackPanel(show) {
         document.getElementById('catalog-browse-panel')?.classList.toggle('hidden', !!show);
         document.getElementById('catalog-fallback-panel')?.classList.toggle('hidden', !show);
+        document.getElementById('catalog-source-panel')?.classList.add('hidden');
         if (show) this._renderFallbackList();
+    }
+
+    _showSourcePanel(show) {
+        document.getElementById('catalog-browse-panel')?.classList.toggle('hidden', !!show);
+        document.getElementById('catalog-source-panel')?.classList.toggle('hidden', !show);
+        document.getElementById('catalog-fallback-panel')?.classList.add('hidden');
+        if (show) this._populateSourceForm();
+    }
+
+    async _ensureCatalogNetworkConsent() {
+        if (!window.kernelManager) {
+            throw new Error(this._t('packageCatalog.privacyRequired',
+                'Accept the current network disclosure before refreshing the catalogue.'));
+        }
+        if (typeof window.kernelManager.ensureNetworkConsent === 'function') {
+            await window.kernelManager.ensureNetworkConsent();
+            return;
+        }
+        if (typeof window.kernelManager._ensurePrivacyConsent === 'function') {
+            await window.kernelManager._ensurePrivacyConsent({ requireCurrentRevision: true });
+            return;
+        }
+        throw new Error(this._t('packageCatalog.privacyRequired',
+            'Accept the current network disclosure before refreshing the catalogue.'));
+    }
+
+    _sourceModeCopy(mode) {
+        const copies = {
+            stable: ['packageCatalog.sourceLatestStable', 'Latest stable'],
+            release: ['packageCatalog.sourceSpecificRelease', 'Specific release'],
+            commit: ['packageCatalog.sourceSpecificCommit', 'Specific commit'],
+            development: ['packageCatalog.sourceDevelopmentBranch', 'Development branch'],
+        };
+        return copies[mode] || copies.stable;
+    }
+
+    _populateSourceForm() {
+        if (!this._sourceManager) return;
+        const config = this._sourceManager.getConfig();
+        const mode = document.getElementById('catalog-source-mode');
+        const value = document.getElementById('catalog-source-value');
+        const host = document.getElementById('catalog-source-host');
+        if (mode) mode.value = config.mode;
+        if (value) value.value = config.value || (config.mode === 'development' ? 'main' : '');
+        if (host) host.value = config.siteBase;
+        const error = document.getElementById('catalog-source-form-error');
+        if (error) error.textContent = '';
+        this._syncSourceForm();
+    }
+
+    _syncSourceForm() {
+        const mode = document.getElementById('catalog-source-mode')?.value || 'stable';
+        const valueRow = document.getElementById('catalog-source-value-row');
+        const value = document.getElementById('catalog-source-value');
+        const valueLabel = document.getElementById('catalog-source-value-label');
+        const hostRow = document.getElementById('catalog-source-host-row');
+        const warning = document.getElementById('catalog-source-warning');
+        const needsValue = mode === 'release' || mode === 'commit' || mode === 'development';
+        if (valueRow) valueRow.hidden = !needsValue;
+        if (hostRow) hostRow.hidden = !(mode === 'stable' || mode === 'release');
+        if (value && mode === 'development' && !value.value) value.value = 'main';
+        if (value) {
+            value.placeholder = mode === 'release' ? 'v0.1.0'
+                : mode === 'commit' ? '0123456789abcdef0123456789abcdef01234567'
+                    : 'main';
+        }
+        if (valueLabel) {
+            if (mode === 'release') this._setTranslatedText(valueLabel,
+                'packageCatalog.sourceReleaseTag', 'Release tag');
+            else if (mode === 'commit') this._setTranslatedText(valueLabel,
+                'packageCatalog.sourceCommitSha', 'Full commit SHA');
+            else this._setTranslatedText(valueLabel,
+                'packageCatalog.sourceBranchName', 'Branch name');
+        }
+        if (warning) {
+            warning.hidden = mode !== 'development';
+            if (!warning.hidden) this._setTranslatedText(warning,
+                'packageCatalog.sourceDevelopmentWarning',
+                'Development branches are volatile. The app uses the GitHub API to resolve the branch to one exact commit before loading it.');
+        }
+    }
+
+    async _applySourceForm() {
+        if (!this._sourceManager) return;
+        const error = document.getElementById('catalog-source-form-error');
+        try {
+            const mode = document.getElementById('catalog-source-mode')?.value || 'stable';
+            const value = document.getElementById('catalog-source-value')?.value || '';
+            const siteBase = document.getElementById('catalog-source-host')?.value
+                || CatalogSource.PAGES_ROOT;
+            this._sourceManager.setConfig({ mode, value, siteBase });
+            if (error) error.textContent = '';
+            this._remoteEntries = [];
+            this._sourceResult = null;
+            this._sourceGeneration++;
+            this._showSourcePanel(false);
+            this._render();
+            await this._loadSource({ refresh: true });
+            document.getElementById('catalog-edit-source')?.focus();
+        } catch (cause) {
+            if (error) error.textContent = cause.message;
+        }
+    }
+
+    async _resetSourceForm() {
+        if (!this._sourceManager || typeof CatalogSource === 'undefined') return;
+        this._sourceManager.setConfig(CatalogSource.DEFAULT_CONFIG);
+        this._populateSourceForm();
+        this._remoteEntries = [];
+        this._sourceResult = null;
+        this._sourceGeneration++;
+        this._showSourcePanel(false);
+        this._render();
+        await this._loadSource({ refresh: true });
+        document.getElementById('catalog-edit-source')?.focus();
+    }
+
+    async _clearSourceData() {
+        if (!this._sourceManager) return;
+        const accepted = window.confirm(this._t(
+            'packageCatalog.clearVerifiedDataConfirm',
+            'Clear cached catalogue workbook artifact bytes, verified snapshots, and release trust pins? Installed catalogue notebook copies and built-in items remain available.'));
+        if (!accepted) return;
+        await this._sourceManager.clearCache();
+        this._sourceGeneration++;
+        this._remoteEntries = [];
+        this._sourceResult = { status: 'cleared', entries: [] };
+        this._renderSourceSummary();
+        this._render();
+    }
+
+    _setSourceLoading() {
+        const status = document.getElementById('catalog-source-status');
+        if (status) this._setTranslatedText(status,
+            'packageCatalog.sourceLoading', 'Checking the verified catalogue…');
+        const refresh = document.getElementById('catalog-refresh-source');
+        if (refresh) refresh.disabled = true;
+    }
+
+    _applySourceResult(result) {
+        this._sourceResult = result;
+        this._remoteEntries = Array.isArray(result && result.entries) ? result.entries : [];
+        const refresh = document.getElementById('catalog-refresh-source');
+        if (refresh) refresh.disabled = false;
+        this._renderSourceSummary();
+        this._render();
+    }
+
+    _renderSourceSummary() {
+        if (!this._sourceManager) return;
+        const config = this._sourceManager.getConfig();
+        const result = this._sourceResult;
+        const provenance = result && result.provenance;
+        const summary = document.getElementById('catalog-source-summary');
+        const status = document.getElementById('catalog-source-status');
+        const pair = this._sourceModeCopy(config.mode);
+        let summaryText = this._t(pair[0], pair[1]);
+        if (provenance && provenance.tag) summaryText += ` · ${provenance.tag}`;
+        else if (provenance && provenance.commit) summaryText += ` · ${provenance.commit.slice(0, 8)}`;
+        else if (config.value) summaryText += ` · ${config.value}`;
+        if (summary) summary.textContent = summaryText;
+        if (!status) return;
+        const count = this._remoteEntries.length;
+        if (!result) {
+            this._setTranslatedText(status, 'packageCatalog.sourceNotChecked', 'Not checked yet.');
+        } else if (result.status === 'verified') {
+            this._setTranslatedText(status, 'packageCatalog.sourceVerifiedItems',
+                'Verified · {count} items', { count });
+        } else if (result.status === 'cached') {
+            this._setTranslatedText(status, 'packageCatalog.sourceCachedItems',
+                'Verified cached copy · {count} items', { count });
+        } else if (result.status === 'cached-stale' || result.status === 'refresh-failed') {
+            this._setTranslatedText(status, 'packageCatalog.sourceStaleItems',
+                'Using the last verified copy · {count} items; refresh unavailable.', { count });
+        } else if (result.status === 'tag-moved') {
+            this._setTranslatedText(status, 'packageCatalog.sourceMovedTagKept',
+                'The release tag changed. The previous verified copy was kept.');
+        } else if (result.status === 'unavailable') {
+            this._setTranslatedText(status, 'packageCatalog.sourceUnavailable',
+                'Remote catalogue unavailable; built-in items remain available.');
+        } else if (result.status === 'cleared') {
+            this._setTranslatedText(status, 'packageCatalog.clearVerifiedDataDone',
+                'Cached verified catalogue data and release trust pins were cleared. Installed catalogue notebook copies and built-in items remain available.');
+        } else {
+            this._setTranslatedText(status, 'packageCatalog.sourceBundledOnly',
+                'Built-in items only.');
+        }
+        status.title = result && result.error ? result.error : '';
+    }
+
+    async _loadSource({ refresh = false } = {}) {
+        if (!this._sourceManager) return;
+        const generation = ++this._sourceGeneration;
+        this._setSourceLoading();
+        const cached = await this._sourceManager.load({ allowNetwork: false });
+        if (generation !== this._sourceGeneration) return;
+        this._applySourceResult(cached);
+        if (!refresh && !cached.needsRefresh) return;
+        this._setSourceLoading();
+        let result = await this._sourceManager.load({ allowNetwork: true, refresh });
+        if (generation !== this._sourceGeneration) return;
+        if (result.status === 'tag-moved') {
+            const trusted = result.trusted || {};
+            const candidate = result.candidate || {};
+            const accepted = window.confirm(this._t('packageCatalog.sourceMovedTagPrompt',
+                'Release tag {tag} changed from commit {oldCommit} to {newCommit}. Keep the trusted copy unless you intentionally want to accept the moved tag. Accept the new mapping?', {
+                    tag: candidate.tag || '',
+                    oldCommit: `${String(trusted.commit || '').slice(0, 12)} / ${String(trusted.indexSha256 || '').slice(0, 12)}`,
+                    newCommit: `${String(candidate.commit || '').slice(0, 12)} / ${String(candidate.indexSha256 || '').slice(0, 12)}`,
+                }));
+            if (accepted) result = await this._sourceManager.acceptMovedTag();
+        }
+        if (generation !== this._sourceGeneration) return;
+        this._applySourceResult(result);
     }
 
     _activatableLocales() {
@@ -682,15 +952,15 @@ class PackageCatalog {
         let html = '';
         if (packages.length > 0) {
             html += `<h3 class="catalog-section-header" data-i18n="packageCatalog.sectionPackages">${this._esc(this._t('packageCatalog.sectionPackages', 'Packages'))}</h3>`;
-            html += packages.map((row) => this._renderCard(row.entry, row.originalIndex, row)).join('');
+            html += packages.map((row) => this._renderCard(row.entry, row)).join('');
         }
         if (bundles.length > 0) {
             html += `<h3 class="catalog-section-header" data-i18n="packageCatalog.sectionBundles">${this._esc(this._t('packageCatalog.sectionBundles', 'Bundles'))}</h3>`;
-            html += bundles.map((row) => this._renderCard(row.entry, row.originalIndex, row)).join('');
+            html += bundles.map((row) => this._renderCard(row.entry, row)).join('');
         }
         if (workbooks.length > 0) {
             html += `<h3 class="catalog-section-header" data-i18n="packageCatalog.sectionWorkbooks">${this._esc(this._t('packageCatalog.sectionWorkbooks', 'Workbooks'))}</h3>`;
-            html += workbooks.map((row) => this._renderCard(row.entry, row.originalIndex, row)).join('');
+            html += workbooks.map((row) => this._renderCard(row.entry, row)).join('');
         }
 
         this.listEl.innerHTML = html;
@@ -734,7 +1004,7 @@ class PackageCatalog {
         }
     }
 
-    _renderCard(pkg, idx, row) {
+    _renderCard(pkg, row) {
         const installed = this._isInstalled(pkg);
         const dependencyNames = (pkg.requires || [])
             .map(ref => {
@@ -753,19 +1023,27 @@ class PackageCatalog {
         const badgeHtml = badge
             ? `<span class="pkg-locale-badge">${this._esc(badge)}</span>`
             : '';
+        const sourceRef = pkg._catalog
+            ? (pkg._catalog.tag || String(pkg._catalog.commit || '').slice(0, 8))
+            : '';
+        const sourceHtml = pkg.sourceId
+            ? `<small class="pkg-source">${this._esc(pkg.sourceLabel || pkg.sourceId)}${sourceRef ? ` · ${this._esc(sourceRef)}` : ''}</small>`
+            : '';
+        const catalogKey = this._catalogId(pkg);
         return `
-            <div class="pkg-card ${pkg.type === 'bundle' ? 'pkg-bundle-card' : ''}" data-catalog-id="${this._esc(pkg.id)}">
+            <div class="pkg-card ${pkg.type === 'bundle' ? 'pkg-bundle-card' : ''}" data-catalog-key="${this._esc(catalogKey)}">
                 <div class="pkg-info">
                     <strong class="pkg-display-name">${this._esc(this._displayName(pkg))}</strong>
                     ${pkg.version ? `<span class="pkg-version">${this._esc(pkg.version)}</span>` : ''}
-                    ${pkg.size ? `<span class="pkg-size">${this._esc(pkg.size)}</span>` : ''}
+                    ${pkg.size ? `<span class="pkg-size">${this._esc(pkg.sizeLabel || pkg.size)}</span>` : ''}
                     ${contents ? `<span class="pkg-contents">${this._esc(contents)}</span>` : ''}
                     ${pkg.kernels ? `<span class="pkg-kernels">${pkg.kernels.map(k => this._esc(k)).join(', ')}</span>` : ''}
                     ${badgeHtml}
                     <p class="pkg-description">${this._esc(this._description(pkg))}</p>
+                    ${sourceHtml}
                     ${dependencyNames ? `<small class="pkg-requires">${this._esc(this._t('packageCatalog.requires', 'Requires: {dependencies}', { dependencies: dependencyNames }))}</small>` : ''}
                 </div>
-                <button class="pkg-install-btn${installed ? ' pkg-installed' : ''}" data-idx="${idx}"${installed ? ' disabled' : ''}></button>
+                <button class="pkg-install-btn${installed ? ' pkg-installed' : ''}" data-catalog-key="${this._esc(catalogKey)}"${installed ? ' disabled' : ''}></button>
             </div>
         `;
     }
@@ -774,7 +1052,7 @@ class PackageCatalog {
         if (!this.listEl) return;
         const all = this.packages;
         for (const card of this.listEl.querySelectorAll('.pkg-card')) {
-            const pkg = all.find(item => item.id === card.dataset.catalogId);
+            const pkg = all.find(item => this._catalogId(item) === card.dataset.catalogKey);
             if (!pkg) continue;
             if (pkg.displayNameKey) {
                 this._setTranslatedText(card.querySelector('.pkg-display-name'),
@@ -815,10 +1093,24 @@ class PackageCatalog {
         if (window.i18n && typeof window.i18n.applyToDom === 'function') {
             window.i18n.applyToDom(this.modal);
         }
+        // The source summary is dynamic (channel, tag, or commit), while its
+        // initial DOM marker describes only the default Stable state. Restore
+        // the selected source after the generic translation pass.
+        this._syncSourceForm();
+        this._renderSourceSummary();
+    }
+
+    _catalogId(pkg) {
+        if (!pkg) return '';
+        if (pkg.catalogKey) return pkg.catalogKey;
+        if (typeof CatalogFilter !== 'undefined' && typeof CatalogFilter.namespacedId === 'function') {
+            return CatalogFilter.namespacedId(pkg);
+        }
+        return pkg.sourceId ? `${pkg.sourceId}:${pkg.id}` : pkg.id;
     }
 
     _findEntry(ref) {
-        return this.packages.find(p => p.id === ref || p.name === ref);
+        return this.packages.find(p => this._catalogId(p) === ref || p.id === ref || p.name === ref);
     }
 
     _installedPackages() {
@@ -845,12 +1137,15 @@ class PackageCatalog {
         if (pkg.type === 'workbook') {
             const notebooks = window.notebookManager?.getNotebooks?.() || [];
             const expectedName = pkg.notebookName || pkg.name;
-            const matches = notebooks.filter(nb => nb && nb.name === expectedName);
+            const catalogId = this._catalogId(pkg);
+            let matches = notebooks.filter(nb => nb && nb.catalogId === catalogId);
+            if (matches.length === 0) matches = notebooks.filter(nb => nb && nb.name === expectedName);
             if (matches.length === 0) return 'missing';
             if (pkg.revision == null) return 'current';
             return matches.some(nb =>
-                nb.catalogId === pkg.id &&
-                String(nb.catalogRevision) === String(pkg.revision)
+                nb.catalogId === catalogId
+                && String(nb.catalogRevision) === String(pkg.revision)
+                && (!pkg._catalog || nb.catalogSha256 === pkg._catalog.sha256)
             ) ? 'current' : 'outdated';
         }
 
@@ -872,7 +1167,7 @@ class PackageCatalog {
         if (!this.listEl) return;
         const all = this.packages;
         this.listEl.querySelectorAll('.pkg-install-btn').forEach(btn => {
-            const pkg = all[parseInt(btn.dataset.idx, 10)];
+            const pkg = all.find(item => this._catalogId(item) === btn.dataset.catalogKey);
             const state = this._installState(pkg);
             if (state === 'current') {
                 this._setButtonLabel(btn, 'packageCatalog.installed', 'Installed');
@@ -888,6 +1183,12 @@ class PackageCatalog {
 
     async _fetchCatalogItem(pkg) {
         if (!pkg || pkg.type === 'bundle') return null;
+
+        if (pkg.sourceId && this._sourceManager
+            && typeof CatalogSource !== 'undefined'
+            && pkg.sourceId === CatalogSource.SOURCE_ID) {
+            return this._sourceManager.fetchArtifact(pkg);
+        }
 
         let blob = null;
         let lastError = null;
@@ -918,8 +1219,8 @@ class PackageCatalog {
      * but imports are queued so notebook state stays consistent.
      */
     async _install(btn) {
-        const idx = parseInt(btn.dataset.idx, 10);
-        const pkg = this.packages[idx];
+        const key = btn.dataset.catalogKey;
+        const pkg = this.packages.find(item => this._catalogId(item) === key);
         if (!pkg) return;
         if (this._isInstalled(pkg)) {
             this._syncInstallButtons();
@@ -1100,13 +1401,35 @@ class PackageCatalog {
             const text = await blob.text();
             if (!window.fileIO) throw new Error(this._t(
                 'packageCatalog.fileIoUnavailable', 'File IO not available'));
-            await this._importWorkbook(pkg, () => window.fileIO.importSrwb(text));
+            if (pkg.sourceId && typeof window.fileIO.importWorkbook !== 'function') {
+                throw new Error(this._t(
+                    'packageCatalog.fileIoUnavailable', 'File IO not available'));
+            }
+            const importer = pkg.sourceId
+                ? () => window.fileIO.importWorkbook(text, {
+                    format: 'srwb', mode: 'create', sha256: pkg._catalog?.sha256,
+                    size: pkg._catalog?.size,
+                })
+                : () => window.fileIO.importSrwb(text);
+            await this._importWorkbook(pkg, importer);
         } else if (pkg.type === 'workbook') {
             const text = await blob.text();
             if (!window.fileIO) throw new Error(this._t(
                 'packageCatalog.fileIoUnavailable', 'File IO not available'));
-            // importIpynb now returns a promise (resolves when importCells finishes)
-            await this._importWorkbook(pkg, () => window.fileIO.importIpynb(text));
+            // Verified remote workbooks use the atomic application importer,
+            // which never auto-executes even when the user's ordinary file
+            // import preference is enabled.
+            if (pkg.sourceId && typeof window.fileIO.importWorkbook !== 'function') {
+                throw new Error(this._t(
+                    'packageCatalog.fileIoUnavailable', 'File IO not available'));
+            }
+            const importer = pkg.sourceId
+                ? () => window.fileIO.importWorkbook(text, {
+                    format: 'ipynb', mode: 'create', sha256: pkg._catalog?.sha256,
+                    size: pkg._catalog?.size,
+                })
+                : () => window.fileIO.importIpynb(text);
+            await this._importWorkbook(pkg, importer);
         } else {
             const sourceUrl = pkg.url || pkg.pages_url || 'package.zip';
             const urlParts = sourceUrl.split('/');
@@ -1129,16 +1452,30 @@ class PackageCatalog {
             'packageCatalog.notebookManagerUnavailable', 'NotebookManager not available'));
 
         const expectedName = pkg.notebookName || pkg.name;
-        const previous = nm.getNotebooks().filter(nb => nb && nb.name === expectedName);
+        const catalogId = this._catalogId(pkg);
+        const activeBeforeImport = nm.getActiveNotebook();
+        const before = nm.getNotebooks().slice();
+        const beforeSet = new Set(before);
+        let previous = before.filter(nb => nb && nb.catalogId === catalogId);
+        if (previous.length === 0) {
+            // Migration path for catalog workbooks installed before source-aware
+            // provenance existed. Name matching is never used once an id is set.
+            previous = before.filter(nb => nb && !nb.catalogId && nb.name === expectedName);
+        }
         await Promise.resolve(importer());
 
-        const matches = nm.getNotebooks().filter(nb => nb && nb.name === expectedName);
-        const imported = [...matches].reverse().find(nb => !previous.includes(nb));
+        const imported = [...nm.getNotebooks()].reverse().find(nb => nb && !beforeSet.has(nb));
         if (!imported) throw new Error(this._t('packageCatalog.workbookNotCreated',
             'Imported workbook was not created: {name}', { name: expectedName }));
 
-        imported.catalogId = pkg.id;
+        imported.catalogId = catalogId;
         imported.catalogRevision = pkg.revision ?? null;
+        imported.catalogSourceId = pkg.sourceId || null;
+        imported.catalogRef = pkg._catalog
+            ? (pkg._catalog.tag || pkg._catalog.ref || null) : null;
+        imported.catalogCommit = pkg._catalog ? pkg._catalog.commit : null;
+        imported.catalogPath = pkg._catalog ? pkg._catalog.path : null;
+        imported.catalogSha256 = pkg._catalog ? pkg._catalog.sha256 : null;
 
         // Import first, then preserve stale copies under unique backup names.
         // Catalog workbooks are editable, and older releases did not record
@@ -1161,10 +1498,19 @@ class PackageCatalog {
             }
             oldNotebook.catalogId = null;
             oldNotebook.catalogRevision = null;
+            oldNotebook.catalogSourceId = null;
+            oldNotebook.catalogRef = null;
+            oldNotebook.catalogCommit = null;
+            oldNotebook.catalogPath = null;
+            oldNotebook.catalogSha256 = null;
             nm.renameNotebook(oldNotebook.id, backupName);
             existingNames.add(backupName);
         }
         nm.saveState();
+        if (localStorage.getItem('scirepl_auto_switch_workbook') === '0'
+            && activeBeforeImport && activeBeforeImport.id !== imported.id) {
+            nm.switchTo(activeBeforeImport.id);
+        }
         return imported;
     }
 

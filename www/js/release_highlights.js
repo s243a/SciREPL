@@ -22,6 +22,8 @@
             'whatsNew.highlightShortcuts',
             'whatsNew.highlightRuntimeMetadata',
         ]),
-        unreleased: Object.freeze([]),
+        unreleased: Object.freeze([
+            'whatsNew.highlightCatalogSources',
+        ]),
     });
 })();

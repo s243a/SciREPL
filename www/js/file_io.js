@@ -1849,6 +1849,438 @@ class FileIO {
         }
     }
 
+    /** Maximum UTF-8 payload accepted by the atomic workbook importer (8 MiB). */
+    static WORKBOOK_IMPORT_MAX_BYTES = 8 * 1024 * 1024;
+
+    async _workbookSha256(bytes) {
+        if (!globalThis.crypto || !globalThis.crypto.subtle) {
+            throw new Error('SHA-256 is unavailable in this browser.');
+        }
+        const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
+        return Array.from(new Uint8Array(digest), byte =>
+            byte.toString(16).padStart(2, '0')).join('');
+    }
+
+    _normalizeWorkbookLanguage(value, fallback = 'python') {
+        const language = String(value || '').trim().toLowerCase();
+        const supported = new Set([
+            'python', 'prolog', 'javascript', 'bash', 'r', 'lua',
+            'typr', 'clojurescript', 'markdown',
+        ]);
+        return supported.has(language) ? language : fallback;
+    }
+
+    _parseSrwbWorkbook(content) {
+        const srwb = JSON.parse(content);
+        if (!srwb || srwb.format !== 'srwb') {
+            throw new Error('Serialized content is not a valid .srwb notebook.');
+        }
+        if (srwb.workbook) {
+            throw new Error('Atomic import accepts one notebook; use the interactive importer for multi-tab .srwb files.');
+        }
+        if (!srwb.notebook || typeof srwb.notebook !== 'object'
+            || !Array.isArray(srwb.notebook.cells)) {
+            throw new Error('The .srwb file does not contain a notebook cell array.');
+        }
+
+        const data = srwb.notebook;
+        const kernelLanguage = this._normalizeWorkbookLanguage(
+            data.kernelLanguage, 'python');
+        const usedCellIds = new Set();
+        let nextCellId = 1;
+        const claimCellId = value => {
+            const requested = Number(value);
+            if (Number.isSafeInteger(requested) && requested > 0
+                && requested <= 1_000_000_000
+                && !usedCellIds.has(requested)) {
+                usedCellIds.add(requested);
+                nextCellId = Math.max(nextCellId, requested + 1);
+                return requested;
+            }
+            while (usedCellIds.has(nextCellId)) nextCellId++;
+            const generated = nextCellId++;
+            usedCellIds.add(generated);
+            return generated;
+        };
+
+        return {
+            data: {
+                ...data,
+                name: String(data.name || this._t(
+                    'fileIo.importedNotebookName', 'Imported Notebook')),
+                description: String(data.description || ''),
+                kernelLanguage,
+            },
+            cells: data.cells.map(cell => ({
+                id: claimCellId(cell && cell.id),
+                code: String((cell && cell.code) || ''),
+                type: cell && cell.type === 'markdown' ? 'markdown' : 'code',
+                language: cell && cell.type === 'markdown' ? 'markdown'
+                    : this._normalizeWorkbookLanguage(
+                        cell && cell.language, kernelLanguage),
+                name: String((cell && cell.name) || ''),
+                lastOutput: String((cell && cell.lastOutput) || ''),
+                lastOutputHtml: this._sanitizeImportedHtml(
+                    (cell && cell.lastOutputHtml) || ''),
+            })),
+        };
+    }
+
+    _parseIpynbWorkbook(content) {
+        const notebook = JSON.parse(content);
+        if (!notebook || Number(notebook.nbformat) !== 4
+            || !Array.isArray(notebook.cells)) {
+            throw new Error('Serialized content is not a valid nbformat 4 .ipynb notebook.');
+        }
+
+        let notebookLanguage = 'python';
+        const kernelspec = notebook.metadata && notebook.metadata.kernelspec;
+        const languageInfo = notebook.metadata && notebook.metadata.language_info;
+        const candidates = [kernelspec && kernelspec.language, languageInfo && languageInfo.name]
+            .filter(Boolean).map(value => String(value).toLowerCase());
+        if (kernelspec && kernelspec.name === 'swipl') candidates.unshift('prolog');
+        const recognized = candidates
+            .map(value => this._normalizeWorkbookLanguage(value, null)).find(Boolean);
+        if (recognized) notebookLanguage = recognized;
+
+        const cells = notebook.cells.map(cell => {
+            const metadata = cell && cell.metadata && typeof cell.metadata === 'object'
+                ? cell.metadata : {};
+            let source = Array.isArray(cell && cell.source)
+                ? cell.source.join('') : String((cell && cell.source) || '');
+            let language = cell && cell.cell_type === 'markdown' ? 'markdown'
+                : this._normalizeWorkbookLanguage(
+                    metadata.scirepl_language, notebookLanguage);
+            if (!cell || cell.cell_type !== 'markdown') {
+                const magic = source.match(/^%%([a-z][\w-]*)\s*\r?\n/i);
+                const magicLanguage = magic
+                    ? this._normalizeWorkbookLanguage(magic[1], null) : null;
+                if (magicLanguage) {
+                    language = magicLanguage;
+                    source = source.slice(magic[0].length);
+                }
+            }
+            return {
+                code: source,
+                type: cell && cell.cell_type === 'markdown' ? 'markdown' : 'code',
+                language,
+                name: String(metadata.scirepl_name || ''),
+                outputs: Array.isArray(cell && cell.outputs) ? cell.outputs : [],
+            };
+        });
+
+        let name = this._t('fileIo.importedWorkbookName', 'Imported Workbook');
+        const headingCell = cells.find(cell => cell.type === 'markdown');
+        const heading = headingCell && headingCell.code.match(/^#\s+(.+)/m);
+        if (heading) name = heading[1].trim();
+        return {
+            data: {
+                name,
+                description: '',
+                kernelLanguage: notebookLanguage,
+                cellCounter: cells.length,
+            },
+            cells,
+        };
+    }
+
+    _clearNotebookForImport(notebook) {
+        if (!notebook) return;
+        const cells = notebook.isActive ? (window._cells || []) : (notebook.cells || []);
+        for (const cell of cells) {
+            if (cell.inputCard && cell.inputCard.remove) cell.inputCard.remove();
+            if (cell.outputCard && cell.outputCard.remove) cell.outputCard.remove();
+        }
+        notebook.cells = [];
+        notebook.cellCounter = 0;
+        if (notebook.isActive) {
+            window._cells = notebook.cells;
+            window._cellCounter = 0;
+        }
+    }
+
+    _snapshotWorkbook(notebook) {
+        if (!notebook) return null;
+        const cells = notebook.isActive ? (window._cells || []) : (notebook.cells || []);
+        return {
+            data: {
+                name: notebook.name,
+                autoNameNumber: notebook.autoNameNumber,
+                description: notebook.description,
+                kernelLanguage: notebook.kernelLanguage,
+                catalogId: notebook.catalogId,
+                catalogRevision: notebook.catalogRevision,
+                catalogSourceId: notebook.catalogSourceId,
+                catalogRef: notebook.catalogRef,
+                catalogCommit: notebook.catalogCommit,
+                catalogPath: notebook.catalogPath,
+                catalogSha256: notebook.catalogSha256,
+                cellCounter: notebook.isActive
+                    ? (window._cellCounter || 0) : (notebook.cellCounter || 0),
+            },
+            cells: cells.map(cell => ({
+                id: cell.id,
+                code: cell.code,
+                type: cell.type,
+                language: cell.language,
+                name: cell.name,
+                lastOutput: cell.lastOutput,
+                lastOutputHtml: cell.lastOutputHtml,
+            })),
+        };
+    }
+
+    /**
+     * Keep imported rich output inert while retaining ordinary formatting,
+     * local SVG fragment references, and embedded raster data images.
+     */
+    _sanitizeImportedHtml(value) {
+        const template = document.createElement('template');
+        template.innerHTML = String(value || '');
+        template.content.querySelectorAll(
+            'script,style,iframe,object,embed,link,meta,base,form,input,button,textarea,select,'
+            + 'template,animate,set,animateMotion,animateTransform,discard'
+        ).forEach(element => element.remove());
+        template.content.querySelectorAll('*').forEach(element => {
+            for (const attribute of [...element.attributes]) {
+                const name = attribute.name.toLowerCase();
+                const raw = attribute.value.toLowerCase()
+                    .replace(/[\u0000-\u0020\u007f]+/g, '');
+                const tag = element.localName.toLowerCase();
+                const isSvg = element.namespaceURI === 'http://www.w3.org/2000/svg';
+                const safeRasterDataImage = /^data:image\/(?:png|jpe?g|gif|webp|avif|bmp);base64,/i
+                    .test(raw);
+                const networkActiveSource = name === 'src'
+                    && !(tag === 'img' && safeRasterDataImage);
+                const networkActiveSvgReference = isSvg
+                    && (name === 'href' || name === 'xlink:href')
+                    && !raw.startsWith('#')
+                    && !(tag === 'image' && safeRasterDataImage);
+                if (name.startsWith('on') || name === 'srcdoc'
+                    || name === 'srcset'
+                    || name === 'poster'
+                    || name === 'background'
+                    || name === 'ping'
+                    || networkActiveSource
+                    || networkActiveSvgReference
+                    || /url\s*\(/i.test(attribute.value)
+                    || ((name === 'href' || name === 'src' || name === 'xlink:href')
+                        && (raw.startsWith('javascript:') || raw.startsWith('vbscript:')
+                            || raw.startsWith('data:text/html')
+                            || raw.startsWith('data:image/svg+xml')))
+                    || (name === 'style'
+                        && /(?:javascript:|expression\s*\(|url\s*\(|@import|behavior\s*:)/i
+                            .test(attribute.value))) {
+                    element.removeAttribute(attribute.name);
+                }
+            }
+        });
+        return template.innerHTML;
+    }
+
+    _sanitizeJupyterOutputs(outputs) {
+        return (outputs || []).map(output => {
+            if (!output || typeof output !== 'object') return output;
+            const clean = { ...output };
+            if (output.data && typeof output.data === 'object') {
+                clean.data = { ...output.data };
+                for (const mimeType of ['text/html', 'image/svg+xml']) {
+                    if (!Object.prototype.hasOwnProperty.call(clean.data, mimeType)) continue;
+                    const html = Array.isArray(clean.data[mimeType])
+                        ? clean.data[mimeType].join('') : clean.data[mimeType];
+                    clean.data[mimeType] = [this._sanitizeImportedHtml(html)];
+                }
+            }
+            return clean;
+        });
+    }
+
+    _renderImportedNotebook(notebook, data, cellDefs, options = {}) {
+        const trustedSnapshot = options.trustedSnapshot === true;
+        const preserveIds = trustedSnapshot || options.preserveIds === true;
+        const nm = window.notebookManager;
+        const app = window._appInternals;
+        if (!nm || !app || !app.createInputCard || !app.createOutputCard) {
+            throw new Error('SciREPL is not ready to import a notebook.');
+        }
+        if (!notebook.isActive) nm.switchTo(notebook.id);
+
+        this._clearNotebookForImport(notebook);
+        notebook.name = String(data.name
+            || this._t('fileIo.importedNotebookName', 'Imported Notebook'));
+        notebook.autoNameNumber = data.autoNameNumber ?? null;
+        notebook.description = String(data.description || '');
+        notebook.kernelLanguage = this._normalizeWorkbookLanguage(
+            data.kernelLanguage, null);
+
+        // Catalogue provenance is trusted only when restoring the app's own
+        // pre-import snapshot. Remote serialized content cannot claim it.
+        notebook.catalogId = trustedSnapshot ? (data.catalogId || null) : null;
+        notebook.catalogRevision = trustedSnapshot ? (data.catalogRevision ?? null) : null;
+        notebook.catalogSourceId = trustedSnapshot ? (data.catalogSourceId || null) : null;
+        notebook.catalogRef = trustedSnapshot ? (data.catalogRef || null) : null;
+        notebook.catalogCommit = trustedSnapshot ? (data.catalogCommit || null) : null;
+        notebook.catalogPath = trustedSnapshot ? (data.catalogPath || null) : null;
+        notebook.catalogSha256 = trustedSnapshot ? (data.catalogSha256 || null) : null;
+
+        for (const def of cellDefs) {
+            const snapshotId = preserveIds && Number.isSafeInteger(def.id) && def.id > 0
+                ? def.id : null;
+            const cellId = snapshotId || (window._cellCounter + 1);
+            window._cellCounter = Math.max(window._cellCounter, cellId);
+            const type = def.type === 'markdown' ? 'markdown' : 'code';
+            const language = type === 'markdown' ? 'markdown'
+                : this._normalizeWorkbookLanguage(
+                    def.language, notebook.kernelLanguage || 'python');
+            const code = String(def.code || '');
+            const outputHtml = trustedSnapshot
+                ? String(def.lastOutputHtml || '')
+                : this._sanitizeImportedHtml(def.lastOutputHtml || '');
+            const inputCard = app.createInputCard(code, cellId, type, language);
+            const outputCard = app.createOutputCard(cellId, type);
+            const cell = {
+                id: cellId,
+                code,
+                type,
+                language,
+                name: String(def.name || ''),
+                lastOutput: String(def.lastOutput || ''),
+                lastOutputHtml: outputHtml,
+                inputCard,
+                outputCard,
+            };
+            window._cells.push(cell);
+
+            if (cell.name && window.notebookVFS && window.notebookVFS._setCellName) {
+                window.notebookVFS._setCellName(window._cells.length - 1, cell.name);
+            }
+            if (type === 'markdown') {
+                const body = outputCard.querySelector('.card-body');
+                if (body) body.innerHTML = this._sanitizeImportedHtml(app.renderMarkdown(code));
+                const pre = inputCard.querySelector('pre');
+                if (pre) pre.style.display = 'none';
+            } else if (Array.isArray(def.outputs) && def.outputs.length
+                && window.renderJupyterOutputs) {
+                window.renderJupyterOutputs(
+                    this._sanitizeJupyterOutputs(def.outputs), outputCard);
+                const body = outputCard.querySelector('.card-body');
+                if (body) {
+                    cell.lastOutput = body.textContent || '';
+                    cell.lastOutputHtml = body.innerHTML || '';
+                }
+            } else if (cell.lastOutputHtml || cell.lastOutput) {
+                const body = outputCard.querySelector('.card-body');
+                if (body) {
+                    if (cell.lastOutputHtml) body.innerHTML = cell.lastOutputHtml;
+                    else body.textContent = cell.lastOutput;
+                }
+            } else {
+                outputCard.remove();
+                cell.outputCard = null;
+            }
+        }
+
+        const requestedCounter = Number(data.cellCounter);
+        if (Number.isSafeInteger(requestedCounter) && requestedCounter > 0
+            && requestedCounter <= 1_000_000_000) {
+            window._cellCounter = Math.max(window._cellCounter, requestedCounter);
+        }
+        notebook.cells = window._cells;
+        notebook.cellCounter = window._cellCounter;
+        nm.renderSelector();
+    }
+
+    /**
+     * Import one serialized notebook without executing any cell. Size, hash,
+     * parsing, and structural checks complete before notebook state changes.
+     */
+    async importWorkbook(content, options = {}) {
+        if (typeof content !== 'string') {
+            throw new Error('Workbook content must be a UTF-8 JSON string.');
+        }
+        const format = String(options.format || '').toLowerCase();
+        const mode = String(options.mode || 'replace').toLowerCase();
+        if (!['srwb', 'ipynb'].includes(format)) {
+            throw new Error(`Unsupported workbook format: ${format || '(missing)'}`);
+        }
+        if (!['create', 'replace'].includes(mode)) {
+            throw new Error(`Unsupported import mode: ${mode}`);
+        }
+
+        const bytes = new TextEncoder().encode(content);
+        if (bytes.byteLength > FileIO.WORKBOOK_IMPORT_MAX_BYTES) {
+            throw new Error(`Workbook is ${bytes.byteLength} bytes; the import limit is ${FileIO.WORKBOOK_IMPORT_MAX_BYTES} bytes.`);
+        }
+        if (options.size !== undefined) {
+            const expectedSize = Number(options.size);
+            if (!Number.isSafeInteger(expectedSize) || expectedSize < 0) {
+                throw new Error('Workbook expected size must be a non-negative integer.');
+            }
+            if (expectedSize !== bytes.byteLength) {
+                throw new Error('Workbook size does not match the supplied size.');
+            }
+        }
+
+        const sha256 = await this._workbookSha256(bytes);
+        if (options.sha256) {
+            const expectedSha256 = String(options.sha256).toLowerCase();
+            if (!/^[0-9a-f]{64}$/.test(expectedSha256)) {
+                throw new Error('Workbook SHA-256 must be a 64-character hexadecimal digest.');
+            }
+            if (expectedSha256 !== sha256) {
+                throw new Error('Workbook SHA-256 does not match the supplied digest.');
+            }
+        }
+
+        // Parsing and structural validation happen before any mutation.
+        const prepared = format === 'srwb'
+            ? this._parseSrwbWorkbook(content) : this._parseIpynbWorkbook(content);
+        const nm = window.notebookManager;
+        if (!nm) throw new Error('NotebookManager is not available.');
+
+        const previous = nm.getActiveNotebook();
+        const snapshot = this._snapshotWorkbook(previous);
+        let target = previous;
+        let created = false;
+
+        try {
+            if (mode === 'create' || !target) {
+                target = nm.createNotebook({ name: prepared.data.name });
+                created = true;
+            }
+            this._renderImportedNotebook(
+                target, prepared.data, prepared.cells,
+                { preserveIds: format === 'srwb' });
+            nm.saveState();
+        } catch (error) {
+            try {
+                if (created && target) {
+                    if (previous) nm.switchTo(previous.id);
+                    if (nm.getNotebooks().length > 1) nm.removeNotebook(target.id);
+                } else if (snapshot && previous) {
+                    this._renderImportedNotebook(
+                        previous, snapshot.data, snapshot.cells,
+                        { trustedSnapshot: true });
+                    nm.saveState();
+                }
+            } catch (rollbackError) {
+                console.error('[importWorkbook] rollback failed:', rollbackError);
+            }
+            throw error;
+        }
+
+        return {
+            ok: true,
+            format,
+            mode: created ? 'create' : 'replace',
+            notebookId: target.id,
+            name: target.name,
+            cells: prepared.cells.length,
+            size: bytes.byteLength,
+            sha256,
+        };
+    }
+
     /**
      * Import a .ipynb file — create cells and execute them.
      * If window.importCells is available (set by app.js), uses it to

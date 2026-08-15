@@ -269,6 +269,11 @@
             html = html.replace(placeholder, rendered);
         });
 
+        // marked accepts raw HTML. Keep it inert across initial import,
+        // session restore, and later markdown re-rendering.
+        if (window.fileIO && window.fileIO._sanitizeImportedHtml) {
+            html = window.fileIO._sanitizeImportedHtml(html);
+        }
         return html;
     }
 
@@ -1199,16 +1204,31 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                     existingCards.forEach(c => c.remove());
 
                     const cellDefs = (nb.cells || []).map(c => ({
+                        id: c.id,
                         code: c.code, type: c.type, language: c.language || 'python',
-                        name: c.name || ''
+                        name: c.name || '',
+                        lastOutput: c.lastOutput || '',
+                        lastOutputHtml: c.lastOutputHtml || '',
                     }));
                     window._cells.length = 0;
                     window._cellCounter = 0;
+                    const restoredIds = new Set();
 
                     for (const saved of cellDefs) {
-                        window._cellCounter++;
-                        const cellId = window._cellCounter;
+                        const requestedId = Number(saved.id);
+                        let cellId = Number.isSafeInteger(requestedId) && requestedId > 0
+                            && requestedId <= 1_000_000_000
+                            && !restoredIds.has(requestedId)
+                            ? requestedId : window._cellCounter + 1;
+                        while (restoredIds.has(cellId)) cellId++;
+                        restoredIds.add(cellId);
+                        window._cellCounter = Math.max(window._cellCounter, cellId);
                         const language = saved.language || 'python';
+                        const lastOutput = String(saved.lastOutput || '');
+                        const lastOutputHtml = window.fileIO
+                            && window.fileIO._sanitizeImportedHtml
+                            ? window.fileIO._sanitizeImportedHtml(saved.lastOutputHtml || '')
+                            : '';
 
                         const inputCard = createInputCard(saved.code, cellId, saved.type, language);
                         const outputCard = createOutputCard(cellId, saved.type);
@@ -1219,6 +1239,8 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                             type: saved.type,
                             language: language,
                             name: saved.name || '',
+                            lastOutput,
+                            lastOutputHtml,
                             inputCard: inputCard,
                             outputCard: outputCard
                         };
@@ -1233,6 +1255,10 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                             body.innerHTML = renderMarkdown(saved.code);
                             const pre = inputCard.querySelector('pre');
                             if (pre) pre.style.display = 'none';
+                        } else if (lastOutputHtml || lastOutput) {
+                            const body = outputCard.querySelector('.card-body');
+                            if (lastOutputHtml) body.innerHTML = lastOutputHtml;
+                            else body.textContent = lastOutput;
                         } else {
                             // Code cell without execution — remove empty output card
                             outputCard.remove();
@@ -1241,6 +1267,11 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                     }
 
                     nb.cells = [...window._cells];
+                    const savedCounter = Number(nb.cellCounter);
+                    if (Number.isSafeInteger(savedCounter) && savedCounter > 0
+                        && savedCounter <= 1_000_000_000) {
+                        window._cellCounter = Math.max(window._cellCounter, savedCounter);
+                    }
                     nb.cellCounter = window._cellCounter;
                 }
 

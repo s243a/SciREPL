@@ -57,8 +57,8 @@ jobs:
       - name: i18n — catalogue lint
         run: node scripts/check-translations.mjs
 
-      - name: Catalogue search and filter rules
-        run: node test_catalog_filter.mjs
+      - name: Catalogue search, source, integrity, and cache rules
+        run: npm run test:catalog
 
       - name: Privacy policy — public and in-app disclosures agree
         run: npm run privacy:check
@@ -111,6 +111,12 @@ jobs:
 
       - name: Package, bundle and workbook catalogue
         run: node test_browse_catalog.mjs
+
+      - name: N-Queens Prolog-to-ClojureScript workbook
+        run: node test_nqueens_workbook.mjs
+
+      - name: Verified catalogue workbook import
+        run: npm run test:catalog:import
 
   # test_pwa_release starts its OWN server (on :8086) and drives a full install/
   # offline/reload cycle, so it runs in a dedicated job rather than sharing the

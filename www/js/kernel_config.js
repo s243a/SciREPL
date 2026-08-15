@@ -17,7 +17,7 @@ window.KERNEL_CONFIG = {
   "app": {
     "name": "SciREPL",
     "version": "1.2.0",
-    "releaseChannel": "release",
+    "releaseChannel": "development",
     "releaseUrl": "https://github.com/s243a/SciREPL/releases",
     "repository": "https://github.com/s243a/SciREPL",
     "releasesUrl": "https://github.com/s243a/SciREPL/releases"

@@ -87,6 +87,7 @@ const prologR = {
 const sourceJaPi = {
     id: 'example-pi',
     sourceId: 'example/workbooks',
+    official: true,
     builtin: false,
     name: '円周率の計算',
     description: 'アルキメデスの上下界。',
@@ -97,6 +98,7 @@ const sourceJaPi = {
 const sourceEnExtra = {
     id: 'extra-en',
     sourceId: 'example/workbooks',
+    official: true,
     builtin: false,
     name: 'Extra English notebook',
     description: 'Another pi method.',
@@ -107,6 +109,7 @@ const sourceEnExtra = {
 const bilingual = {
     id: 'bilingual-intro',
     sourceId: 'example/workbooks',
+    official: true,
     builtin: false,
     name: 'Intro',
     description: 'Bilingual notebook.',
@@ -117,6 +120,7 @@ const bilingual = {
 const ptItem = {
     id: 'pt-only',
     sourceId: 'example/workbooks',
+    official: true,
     builtin: false,
     name: 'Caderno',
     description: 'Portuguese only.',
@@ -127,6 +131,7 @@ const ptItem = {
 const ptBRItem = {
     id: 'pt-br-only',
     sourceId: 'example/workbooks',
+    official: true,
     builtin: false,
     name: 'Caderno BR',
     description: 'Brazilian Portuguese.',
@@ -134,13 +139,23 @@ const ptBRItem = {
     kernels: ['python'],
     locales: ['pt-BR'],
 };
+const communityJa = {
+    id: 'community-ja',
+    sourceId: 'community/workbooks',
+    builtin: false,
+    name: 'コミュニティ教材',
+    description: 'Search-only community workbook.',
+    type: 'workbook',
+    kernels: ['python'],
+    locales: ['ja'],
+};
 
 const catalog = [
     builtinPi, builtinLua, builtinBundle, familyTree, prologR,
-    sourceJaPi, sourceEnExtra, bilingual, ptItem, ptBRItem,
+    sourceJaPi, sourceEnExtra, bilingual, ptItem, ptBRItem, communityJa,
 ];
 
-console.log('1. Empty query is built-in only; locale is ignored');
+console.log('1. Empty query includes official locale matches, but not community sources');
 
 {
     const rows = F.filterCatalog({
@@ -151,15 +166,24 @@ console.log('1. Empty query is built-in only; locale is ignored');
         fallbacks: ['en'],
         kernel: null,
     });
-    check('empty query hides source items',
-        rows.every((r) => r.builtin) && !ids(rows).includes('example-pi'),
+    check('empty query includes official Japanese source items',
+        ids(rows).includes('example-pi') && ids(rows).includes('bilingual-intro'),
         ids(rows).join(','));
+    check('empty query excludes official source items outside the strict locale',
+        !ids(rows).includes('extra-en'), ids(rows).join(','));
+    check('empty query keeps arbitrary community sources search-only',
+        !ids(rows).includes('community-ja'), ids(rows).join(','));
     check('empty query still includes English built-ins under a Japanese primary',
         ids(rows).includes('compute-pi') && ids(rows).includes('lua-tables'),
         ids(rows).join(','));
-    check('empty query preserves original catalog order',
-        ids(rows).join(',') === 'compute-pi,lua-tables,unifyweaver-workbooks,family-tree,prolog-generates-r',
-        ids(rows).join(','));
+    const builtins = rows.filter((row) => row.builtin);
+    check('empty query preserves built-in catalog order',
+        ids(builtins).join(',') === 'compute-pi,lua-tables,unifyweaver-workbooks,family-tree,prolog-generates-r',
+        ids(builtins).join(','));
+    const jaRow = rows.find((row) => row.entry.id === 'example-pi');
+    check('empty-query official row records its exact locale match',
+        jaRow?.matchedLocale === 'ja' && jaRow.exact === true && jaRow.prefIndex === 0,
+        jaRow ? JSON.stringify(jaRow) : 'missing');
 }
 
 console.log('2. Kernel filter');
@@ -180,7 +204,7 @@ console.log('2. Kernel filter');
 
     const restored = F.filterCatalog({ entries: catalog, query: '', kernel: 'all' });
     check('kernel All restores the built-in list',
-        restored.length === 5, String(restored.length));
+        restored.filter((r) => r.builtin).length === 5, String(restored.length));
 
     const prolog = F.filterCatalog({ entries: catalog, query: '', kernel: 'prolog' });
     check('bundle matches when any item matches the kernel',
@@ -390,7 +414,8 @@ console.log('9. showBuiltins=false applies the locale chain to the default view'
         allowFallbacks: true, fallbacks: ['en'], showBuiltins: false,
     });
     check('es + en fallback readmits English built-ins on the gated view',
-        withFallback.length > 0 && withFallback.every((r) => r.builtin),
+        withFallback.some((r) => r.builtin)
+            && withFallback.some((r) => r.entry.id === 'extra-en'),
         `rows=${withFallback.length}`);
 
     const builtinPtBR = {
@@ -426,6 +451,16 @@ console.log('9. showBuiltins=false applies the locale chain to the default view'
     check('gated default view preserves catalog order',
         ordered.every((r, i) => i === 0
             || r.originalIndex > ordered[i - 1].originalIndex), 'order check');
+
+    const officialOnly = F.filterCatalog({
+        entries: catalog, query: '', primary: 'ja',
+        allowFallbacks: false, fallbacks: ['en'], showBuiltins: false,
+    });
+    check('strict Japanese with built-ins hidden shows official Japanese items',
+        ids(officialOnly).join(',') === 'example-pi,bilingual-intro',
+        ids(officialOnly).join(','));
+    check('showBuiltins does not make a community source part of the default view',
+        !ids(officialOnly).includes('community-ja'), ids(officialOnly).join(','));
 }
 
 console.log('10. showBuiltins storage round-trip');

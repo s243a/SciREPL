@@ -1,8 +1,144 @@
 // Playwright test: Browse Packages, Bundles & Workbooks catalog
 import { chromium } from 'playwright';
+import { createHash } from 'node:crypto';
 
-const TIMEOUT = 180_000;
 const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
+const TIMEOUT = 180_000;
+const CATALOG_ROOT = 'https://s243a.github.io/SciREPL-Catalog/';
+const CATALOG_RAW_ROOT = 'https://raw.githubusercontent.com/s243a/SciREPL-Catalog/';
+const CATALOG_TAG = 'v1.2.3';
+const CATALOG_COMMIT = 'a'.repeat(40);
+const PRIVACY_REVISION = '2026-08-catalog-sources-v1';
+
+const encodeJson = value => Buffer.from(JSON.stringify(value, null, 2) + '\n', 'utf8');
+const sha256 = value => createHash('sha256').update(value).digest('hex');
+
+const goodWorkbookBytes = encodeJson({
+    format: 'srwb',
+    version: 1,
+    notebook: {
+        name: 'Cálculo de Pi (catálogo)',
+        kernelLanguage: 'python',
+        cells: [{
+            id: 1,
+            type: 'markdown',
+            language: 'markdown',
+            code: '# Cálculo de Pi (catálogo)\n\nContenido verificado en español.',
+        }, {
+            id: 2,
+            type: 'code',
+            language: 'javascript',
+            name: 'must_not_auto_execute',
+            code: 'globalThis.__catalogRemoteAutoExecuted = true;',
+        }],
+    },
+});
+const goodIpynbBytes = encodeJson({
+    nbformat: 4,
+    nbformat_minor: 5,
+    metadata: {
+        kernelspec: { name: 'javascript', language: 'javascript', display_name: 'JavaScript' },
+        language_info: { name: 'javascript' },
+    },
+    cells: [{
+        cell_type: 'markdown',
+        metadata: {},
+        source: ['# Cuaderno IPYNB verificado\n', 'Contenido en español.'],
+    }, {
+        cell_type: 'code',
+        execution_count: null,
+        metadata: { scirepl_language: 'javascript', scirepl_name: 'ipynb_must_not_auto_execute' },
+        outputs: [],
+        source: ['globalThis.__catalogRemoteIpynbExecuted = true;'],
+    }],
+});
+const expectedBadWorkbookBytes = encodeJson({
+    format: 'srwb',
+    version: 1,
+    notebook: {
+        name: 'Libro alterado',
+        kernelLanguage: 'python',
+        cells: [{ id: 1, type: 'markdown', language: 'markdown', code: '# Original' }],
+    },
+});
+const servedBadWorkbookBytes = Buffer.from(expectedBadWorkbookBytes);
+const badMutationOffset = servedBadWorkbookBytes.indexOf(Buffer.from('Original'));
+if (badMutationOffset < 0) throw new Error('Tampered catalogue fixture marker is missing.');
+servedBadWorkbookBytes[badMutationOffset] = 'T'.charCodeAt(0);
+
+const catalogIndexBytes = encodeJson({
+    format_version: '2.0',
+    name: 'SciREPL Catalog browser fixture',
+    source: 'https://github.com/s243a/SciREPL-Catalog',
+    locales: ['es'],
+    items: [
+        {
+            id: 'compute-pi-es-browser',
+            name: 'Cálculo de Pi (catálogo)',
+            description: 'Libro oficial verificado en español.',
+            type: 'workbook',
+            kernels: ['python'],
+            locales: ['es'],
+            format: 'srwb',
+            path: 'workbooks/es/compute-pi-browser.srwb',
+            revision: 2,
+            size: goodWorkbookBytes.byteLength,
+            sha256: sha256(goodWorkbookBytes),
+        },
+        {
+            id: 'tampered-es-browser',
+            name: 'Libro alterado (prueba)',
+            description: 'Este artefacto debe rechazarse por su digest.',
+            type: 'workbook',
+            kernels: ['python'],
+            locales: ['es'],
+            format: 'srwb',
+            path: 'workbooks/es/tampered-browser.srwb',
+            revision: 1,
+            size: expectedBadWorkbookBytes.byteLength,
+            sha256: sha256(expectedBadWorkbookBytes),
+        },
+        {
+            id: 'ipynb-es-browser',
+            name: 'Cuaderno IPYNB verificado',
+            description: 'Cuaderno oficial IPYNB en español.',
+            type: 'workbook',
+            kernels: ['javascript'],
+            locales: ['es'],
+            format: 'ipynb',
+            path: 'workbooks/es/verified-browser.ipynb',
+            revision: 1,
+            size: goodIpynbBytes.byteLength,
+            sha256: sha256(goodIpynbBytes),
+        },
+    ],
+});
+const catalogDescriptorBytes = encodeJson({
+    schema: 1,
+    tag: CATALOG_TAG,
+    commit: CATALOG_COMMIT,
+    date: '2026-08-14T21:08:44-06:00',
+    catalog: `releases/${CATALOG_TAG}/catalog.json`,
+    files_base: `releases/${CATALOG_TAG}/files/`,
+    raw_base: `${CATALOG_RAW_ROOT}${CATALOG_COMMIT}/`,
+    index: {
+        sha256: sha256(catalogIndexBytes),
+        size: catalogIndexBytes.byteLength,
+        format_version: '2.0',
+        items: 3,
+    },
+});
+
+const catalogRoutes = new Map([
+    [`${CATALOG_ROOT}stable.json`, catalogDescriptorBytes],
+    [`${CATALOG_ROOT}releases/${CATALOG_TAG}/catalog.json`, catalogIndexBytes],
+    [`${CATALOG_ROOT}releases/${CATALOG_TAG}/files/workbooks/es/compute-pi-browser.srwb`, goodWorkbookBytes],
+    [`${CATALOG_RAW_ROOT}${CATALOG_COMMIT}/workbooks/es/compute-pi-browser.srwb`, goodWorkbookBytes],
+    [`${CATALOG_ROOT}releases/${CATALOG_TAG}/files/workbooks/es/tampered-browser.srwb`, servedBadWorkbookBytes],
+    [`${CATALOG_RAW_ROOT}${CATALOG_COMMIT}/workbooks/es/tampered-browser.srwb`, servedBadWorkbookBytes],
+    [`${CATALOG_ROOT}releases/${CATALOG_TAG}/files/workbooks/es/verified-browser.ipynb`, goodIpynbBytes],
+    [`${CATALOG_RAW_ROOT}${CATALOG_COMMIT}/workbooks/es/verified-browser.ipynb`, goodIpynbBytes],
+]);
 
 (async () => {
     const browser = await chromium.launch({ headless: true });
@@ -25,21 +161,50 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
         console.log('1. Navigating to SciREPL...');
 
         const context = browser.contexts()[0];
-        await context.addInitScript(() => {
+        const remoteCatalogRequests = [];
+        await context.route('https://s243a.github.io/SciREPL-Catalog/**', async route => {
+            const url = route.request().url();
+            remoteCatalogRequests.push(url);
+            const body = catalogRoutes.get(url);
+            if (!body) return route.abort('blockedbyclient');
+            await route.fulfill({
+                status: 200,
+                contentType: url.endsWith('.srwb')
+                    ? 'application/json' : 'application/json; charset=utf-8',
+                body,
+            });
+        });
+        await context.route('https://raw.githubusercontent.com/s243a/SciREPL-Catalog/**', async route => {
+            const url = route.request().url();
+            remoteCatalogRequests.push(url);
+            const body = catalogRoutes.get(url);
+            if (!body) return route.abort('blockedbyclient');
+            await route.fulfill({ status: 200, contentType: 'application/json', body });
+        });
+        await context.route('https://api.github.com/repos/s243a/SciREPL-Catalog/**', route => {
+            remoteCatalogRequests.push(route.request().url());
+            return route.abort('blockedbyclient');
+        });
+        await context.addInitScript(({ privacyRevision }) => {
             if (!sessionStorage.getItem('catalog_test_seeded')) {
                 sessionStorage.setItem('catalog_test_seeded', '1');
                 localStorage.setItem('scirepl_privacy_accepted', '1');
+                localStorage.setItem('scirepl_privacy_accepted_revision', privacyRevision);
                 localStorage.setItem('scirepl_onboarding_seen', '1');
-                addEventListener('DOMContentLoaded', () => localStorage.setItem(
-                    'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
+                localStorage.setItem('scirepl_auto_execute', '1');
+                addEventListener('DOMContentLoaded', () => {
+                    localStorage.setItem('scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version);
+                }, { once: true });
                 localStorage.setItem('scirepl_installed_packages', JSON.stringify([{
                     name: 'UnifyWeaver SciREPL',
                     pages_url: 'packages/unifyweaver_scirepl.zip'
                 }]));
             }
-        });
+        }, { privacyRevision: PRIVACY_REVISION });
 
         await page.goto(BASE, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+        testLog('Remote catalogue stays idle until Browse is opened',
+            remoteCatalogRequests.length === 0, remoteCatalogRequests.join(', '));
 
 
         // ── Test: Menu button text ──
@@ -108,7 +273,7 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
             });
         });
 
-        testLog('Has at least 17 catalog entries', cards.length >= 17, `${cards.length} entries`);
+        testLog('Has at least 18 catalog entries', cards.length >= 18, `${cards.length} entries`);
 
         const packageEntry = cards.find(c => c.name === 'UnifyWeaver SciREPL');
         const bundleEntry = cards.find(c => c.name === 'UnifyWeaver Tutorials & Compiler Demos');
@@ -116,6 +281,7 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
         const computePiEntry = cards.find(c => c.name === 'Compute Pi with Archimedean Bounds');
         const generatedLuaEntry = cards.find(c => c.name === 'Prolog Generates Lua');
         const generatedCljsEntry = cards.find(c => c.name === 'Prolog Generates ClojureScript');
+        const nQueensEntry = cards.find(c => c.name === 'N-Queens: Prolog to ClojureScript');
         const typrIntroEntry = cards.find(c => c.name === 'TypR Introduction');
         const generatedTyprEntry = cards.find(c => c.name === 'Prolog Generates TypR');
         const callGraphEntry = cards.find(c => c.name === 'Call Graph Analysis and SCC Detection');
@@ -147,6 +313,9 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
         testLog('Generated ClojureScript entry exists', !!generatedCljsEntry);
         testLog('Generated ClojureScript shows prolog, clojurescript kernels',
             generatedCljsEntry?.kernels === 'prolog, clojurescript', generatedCljsEntry?.kernels);
+        testLog('N-Queens ClojureScript workbook exists', !!nQueensEntry);
+        testLog('N-Queens workbook uses the Prolog and ClojureScript kernels',
+            nQueensEntry?.kernels === 'prolog, clojurescript', nQueensEntry?.kernels);
         testLog('TypR introduction entry exists', !!typrIntroEntry);
         testLog('TypR introduction shows typr, r kernels', typrIntroEntry?.kernels === 'typr, r', typrIntroEntry?.kernels);
         const typrIntroDefinition = await page.evaluate(() => {
@@ -187,7 +356,7 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
                 kernel: kernel?.value,
                 allow: !!allow?.checked,
                 summary: document.getElementById('catalog-fallback-summary')?.textContent?.trim() || '',
-                locales: window.packageCatalog.packages.map(p => (p.locales || []).join(',')),
+                locales: window.packageCatalog.builtinPackages.map(p => (p.locales || []).join(',')),
             };
         });
         testLog('Spoken-language select equals i18n.current on open',
@@ -200,7 +369,7 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
         testLog('English primary does not duplicate English in the fallback summary',
             !/then English/i.test(filterDefaults.summary), filterDefaults.summary);
         testLog('Every built-in entry declares locales [en]',
-            filterDefaults.locales.length >= 17 && filterDefaults.locales.every(v => v === 'en'),
+            filterDefaults.locales.length >= 18 && filterDefaults.locales.every(v => v === 'en'),
             filterDefaults.locales.slice(0, 3).join('|'));
 
         await page.click('#catalog-edit-fallbacks');
@@ -238,7 +407,7 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
             testLog('Fallback summary lists English when primary is not en',
                 /English/i.test(jaState.summary), jaState.summary);
             testLog('Empty search still shows all built-in cards after changing spoken language',
-                jaState.cards >= 17, String(jaState.cards));
+                jaState.cards >= 18, String(jaState.cards));
             await page.selectOption('#catalog-spoken-language', filterDefaults.i18nCurrent || 'en');
         } else {
             testLog('Fallback summary lists English when primary is not en', false, 'ja option missing');
@@ -257,7 +426,7 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
                 checked: document.getElementById('catalog-show-builtins')?.checked,
             }));
             testLog('Exemption on: strict ja empty view still shows every built-in',
-                before.cards >= 17 && before.checked === true,
+                before.cards >= 18 && before.checked === true,
                 `cards=${before.cards} checked=${before.checked}`);
             testLog('Hint explains foreign-language built-ins are being shown',
                 before.hint === true, String(before.hint));
@@ -282,7 +451,7 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
             });
             const restored = await page.evaluate(() =>
                 document.querySelectorAll('#package-catalog-list .pkg-card').length);
-            testLog('Re-checking restores the full built-in list', restored >= 17, String(restored));
+            testLog('Re-checking restores the full built-in list', restored >= 18, String(restored));
             await page.selectOption('#catalog-spoken-language', filterDefaults.i18nCurrent || 'en');
         } else {
             testLog('Exemption on: strict ja empty view still shows every built-in', false, 'ja option missing');
@@ -302,7 +471,7 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
         const restoredCards = await page.evaluate(() =>
             document.querySelectorAll('#package-catalog-list .pkg-card').length);
         testLog('Kernel All restores the built-in list',
-            restoredCards >= 17, String(restoredCards));
+            restoredCards >= 18, String(restoredCards));
 
         await page.setViewportSize({ width: 360, height: 740 });
         const narrowLayout = await page.evaluate(() => {
@@ -320,6 +489,287 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
         testLog('Filter chrome wraps on a 360×740 viewport without horizontal overflow',
             narrowLayout.ok && !narrowLayout.overflow && narrowLayout.searchVisible,
             JSON.stringify(narrowLayout));
+
+        // ── Verified remote SciREPL Catalog release ──
+
+        console.log('6c. Testing the verified remote catalogue source...');
+
+        await page.waitForFunction(() =>
+            window.packageCatalog?._sourceResult?.status === 'verified', null, { timeout: 10_000 });
+        const sourceState = await page.evaluate(() => ({
+            status: window.packageCatalog._sourceResult?.status,
+            tag: window.packageCatalog._sourceResult?.provenance?.tag,
+            commit: window.packageCatalog._sourceResult?.provenance?.commit,
+            remoteIds: window.packageCatalog._remoteEntries.map(item => item.id),
+            builtinCount: window.packageCatalog.builtinPackages.length,
+            summary: document.getElementById('catalog-source-summary')?.textContent?.trim() || '',
+            privacyCurrent: localStorage.getItem('scirepl_privacy_accepted') === '1'
+                && localStorage.getItem('scirepl_privacy_accepted_revision')
+                    === window.kernelManager?.constructor?.PRIVACY_POLICY_REVISION,
+            privacyRevision: localStorage.getItem('scirepl_privacy_accepted_revision'),
+        }));
+        testLog('Stable release descriptor and index verify locally',
+            sourceState.status === 'verified' && sourceState.tag === CATALOG_TAG
+                && sourceState.commit === CATALOG_COMMIT,
+            JSON.stringify(sourceState));
+        testLog('Catalogue network test accepts the current privacy revision',
+            sourceState.privacyCurrent === true && sourceState.privacyRevision === PRIVACY_REVISION,
+            `${sourceState.privacyCurrent} @ ${sourceState.privacyRevision}`);
+        testLog('Verified source adds three official rows without changing built-ins',
+            sourceState.remoteIds.join('|') === 'compute-pi-es-browser|tampered-es-browser|ipynb-es-browser'
+                && sourceState.builtinCount >= 18,
+            `remote=${sourceState.remoteIds.join(',')} builtins=${sourceState.builtinCount}`);
+        testLog('Stable release path does not call the GitHub API',
+            remoteCatalogRequests.every(url => !url.startsWith('https://api.github.com/')),
+            remoteCatalogRequests.join(', '));
+        const sourceControls = await page.evaluate(() => {
+            document.getElementById('catalog-edit-source').click();
+            const panel = document.getElementById('catalog-source-panel');
+            const values = [...document.getElementById('catalog-source-mode').options]
+                .map(option => option.value);
+            const host = document.getElementById('catalog-source-host').value;
+            const visible = !panel.classList.contains('hidden');
+            document.getElementById('catalog-source-back').click();
+            return { visible, values, host };
+        });
+        testLog('Source chooser exposes stable, release, commit, and development channels',
+            sourceControls.visible
+                && sourceControls.values.join('|') === 'stable|release|commit|development'
+                && sourceControls.host === CATALOG_ROOT,
+            JSON.stringify(sourceControls));
+        const translatedSourceSummary = await page.evaluate(() => {
+            const summary = document.getElementById('catalog-source-summary');
+            const before = summary?.textContent?.trim() || '';
+            document.dispatchEvent(new CustomEvent('i18n:changed'));
+            return { before, after: summary?.textContent?.trim() || '' };
+        });
+        testLog('Language refresh preserves the selected source and release tag',
+            translatedSourceSummary.before === translatedSourceSummary.after
+                && translatedSourceSummary.after.includes(CATALOG_TAG),
+            JSON.stringify(translatedSourceSummary));
+        const atomicImportFallback = await page.evaluate(async () => {
+            const atomic = window.fileIO.importWorkbook;
+            const legacy = window.fileIO.importIpynb;
+            let legacyCalls = 0;
+            window.fileIO.importWorkbook = undefined;
+            window.fileIO.importIpynb = () => { legacyCalls++; };
+            let rejected = false;
+            try {
+                await window.packageCatalog._doImport({
+                    id: 'remote-without-atomic-import',
+                    type: 'workbook',
+                    format: 'ipynb',
+                    sourceId: 'scirepl-catalog',
+                    _catalog: { sha256: '0'.repeat(64) },
+                }, new Blob(['{}'], { type: 'application/json' }));
+            } catch (_) {
+                rejected = true;
+            } finally {
+                window.fileIO.importWorkbook = atomic;
+                window.fileIO.importIpynb = legacy;
+            }
+            return { rejected, legacyCalls };
+        });
+        testLog('Verified remote workbooks never fall back to auto-executing legacy import',
+            atomicImportFallback.rejected && atomicImportFallback.legacyCalls === 0,
+            JSON.stringify(atomicImportFallback));
+
+        const hasEs = await page.evaluate(() =>
+            [...document.getElementById('catalog-spoken-language').options]
+                .some(option => option.value === 'es'));
+        testLog('Spanish is available as a spoken-language filter', hasEs);
+        if (hasEs) {
+            await page.selectOption('#catalog-spoken-language', 'es');
+            await page.evaluate(() => {
+                const allow = document.getElementById('catalog-allow-fallbacks');
+                if (allow?.checked) allow.click();
+                const builtins = document.getElementById('catalog-show-builtins');
+                if (builtins?.checked) builtins.click();
+            });
+            const strictSpanish = await page.evaluate(() => ({
+                cards: [...document.querySelectorAll('#package-catalog-list .pkg-card')].map(card => ({
+                    key: card.dataset.catalogKey,
+                    name: card.querySelector('strong')?.textContent?.trim(),
+                })),
+                allowFallbacks: document.getElementById('catalog-allow-fallbacks')?.checked,
+                showBuiltins: document.getElementById('catalog-show-builtins')?.checked,
+            }));
+            testLog('Strict Spanish empty view shows official Spanish workbooks',
+                strictSpanish.cards.length === 3
+                    && strictSpanish.cards.every(card => card.key.startsWith('scirepl-catalog:'))
+                    && strictSpanish.allowFallbacks === false
+                    && strictSpanish.showBuiltins === false,
+                JSON.stringify(strictSpanish));
+
+            await page.evaluate(() => {
+                delete window.__catalogRemoteAutoExecuted;
+                window.__catalogRemoteEnsureReadyCalls = 0;
+                window.__catalogRemoteOriginalEnsureReady = window.kernelManager.ensureReady;
+                window.kernelManager.ensureReady = function (...args) {
+                    window.__catalogRemoteEnsureReadyCalls++;
+                    return window.__catalogRemoteOriginalEnsureReady.apply(this, args);
+                };
+            });
+            await page.click(
+                '.pkg-card[data-catalog-key="scirepl-catalog:compute-pi-es-browser"] .pkg-install-btn');
+            await page.waitForFunction(() => window.notebookManager.getNotebooks().some(notebook =>
+                notebook.catalogId === 'scirepl-catalog:compute-pi-es-browser'),
+            null, { timeout: 10_000 });
+            const installedRemote = await page.evaluate(() => {
+                const notebook = window.notebookManager.getNotebooks().find(item =>
+                    item.catalogId === 'scirepl-catalog:compute-pi-es-browser');
+                const entry = window.packageCatalog.packages.find(item =>
+                    item.catalogKey === 'scirepl-catalog:compute-pi-es-browser');
+                return {
+                    name: notebook?.name,
+                    installed: window.packageCatalog._isInstalled(entry),
+                    catalogId: notebook?.catalogId,
+                    catalogRevision: notebook?.catalogRevision,
+                    catalogSourceId: notebook?.catalogSourceId,
+                    catalogRef: notebook?.catalogRef,
+                    catalogCommit: notebook?.catalogCommit,
+                    catalogPath: notebook?.catalogPath,
+                    catalogSha256: notebook?.catalogSha256,
+                    autoExecuteEnabled: localStorage.getItem('scirepl_auto_execute') === '1',
+                    sentinelPresent: notebook?.cells?.some(cell =>
+                        cell.name === 'must_not_auto_execute'
+                            && cell.code.includes('__catalogRemoteAutoExecuted')),
+                    sentinelExecuted: window.__catalogRemoteAutoExecuted === true,
+                    ensureReadyCalls: window.__catalogRemoteEnsureReadyCalls,
+                };
+            });
+            testLog('Official remote workbook installs through the normal import path',
+                installedRemote.installed
+                    && installedRemote.name === 'Cálculo de Pi (catálogo)'
+                    && installedRemote.catalogRevision === 2,
+                JSON.stringify(installedRemote));
+            testLog('Remote install records namespaced, immutable provenance',
+                installedRemote.catalogId === 'scirepl-catalog:compute-pi-es-browser'
+                    && installedRemote.catalogSourceId === 'scirepl-catalog'
+                    && installedRemote.catalogRef === CATALOG_TAG
+                    && installedRemote.catalogCommit === CATALOG_COMMIT
+                    && installedRemote.catalogPath === 'workbooks/es/compute-pi-browser.srwb'
+                    && installedRemote.catalogSha256 === sha256(goodWorkbookBytes),
+                JSON.stringify(installedRemote));
+            testLog('Verified remote workbook never auto-executes with auto-execute enabled',
+                installedRemote.autoExecuteEnabled
+                    && installedRemote.sentinelPresent
+                    && !installedRemote.sentinelExecuted
+                    && installedRemote.ensureReadyCalls === 0,
+                JSON.stringify(installedRemote));
+
+            await page.evaluate(() => { delete window.__catalogRemoteIpynbExecuted; });
+            await page.click(
+                '.pkg-card[data-catalog-key="scirepl-catalog:ipynb-es-browser"] .pkg-install-btn');
+            await page.waitForFunction(() => window.notebookManager.getNotebooks().some(notebook =>
+                notebook.catalogId === 'scirepl-catalog:ipynb-es-browser'),
+            null, { timeout: 10_000 });
+            const installedIpynb = await page.evaluate(() => {
+                const notebook = window.notebookManager.getNotebooks().find(item =>
+                    item.catalogId === 'scirepl-catalog:ipynb-es-browser');
+                return {
+                    present: !!notebook,
+                    sentinelPresent: notebook?.cells?.some(cell =>
+                        cell.name === 'ipynb_must_not_auto_execute'
+                            && cell.code.includes('__catalogRemoteIpynbExecuted')),
+                    sentinelExecuted: window.__catalogRemoteIpynbExecuted === true,
+                    ensureReadyCalls: window.__catalogRemoteEnsureReadyCalls,
+                    sha256: notebook?.catalogSha256,
+                };
+            });
+            testLog('Verified IPYNB import is hash-bound and never auto-executes',
+                installedIpynb.present
+                    && installedIpynb.sentinelPresent
+                    && !installedIpynb.sentinelExecuted
+                    && installedIpynb.ensureReadyCalls === 0
+                    && installedIpynb.sha256 === sha256(goodIpynbBytes),
+                JSON.stringify(installedIpynb));
+            await page.evaluate(() => {
+                if (window.__catalogRemoteOriginalEnsureReady) {
+                    window.kernelManager.ensureReady = window.__catalogRemoteOriginalEnsureReady;
+                }
+                delete window.__catalogRemoteOriginalEnsureReady;
+                delete window.__catalogRemoteEnsureReadyCalls;
+                localStorage.setItem('scirepl_auto_execute', '0');
+            });
+
+            const tamperedResult = await page.evaluate(async () => {
+                const catalog = window.packageCatalog;
+                const entry = catalog.packages.find(item =>
+                    item.catalogKey === 'scirepl-catalog:tampered-es-browser');
+                const before = catalog._catalogId(entry);
+                try {
+                    await catalog._fetchCatalogItem(entry);
+                    return { rejected: false, before };
+                } catch (error) {
+                    return {
+                        rejected: true,
+                        error: error?.message || String(error),
+                        before,
+                        imported: window.notebookManager.getNotebooks().some(notebook =>
+                            notebook.catalogId === before),
+                    };
+                }
+            });
+            testLog('Digest-mismatched workbook fails closed before import',
+                tamperedResult.rejected && !tamperedResult.imported
+                    && /SHA-256/.test(tamperedResult.error || ''),
+                JSON.stringify(tamperedResult));
+
+            const requestCountBeforeReload = remoteCatalogRequests.length;
+            await page.reload({ waitUntil: 'domcontentloaded' });
+            await page.waitForSelector('#run-btn:not([disabled])');
+            const persistedRemote = await page.evaluate(() => {
+                const notebook = window.notebookManager.getNotebooks().find(item =>
+                    item.catalogId === 'scirepl-catalog:compute-pi-es-browser');
+                return notebook ? {
+                    catalogId: notebook.catalogId,
+                    catalogRevision: notebook.catalogRevision,
+                    catalogSourceId: notebook.catalogSourceId,
+                    catalogRef: notebook.catalogRef,
+                    catalogCommit: notebook.catalogCommit,
+                    catalogPath: notebook.catalogPath,
+                    catalogSha256: notebook.catalogSha256,
+                } : null;
+            });
+            testLog('Remote workbook provenance survives app reload',
+                persistedRemote?.catalogId === 'scirepl-catalog:compute-pi-es-browser'
+                    && persistedRemote?.catalogRevision === 2
+                    && persistedRemote?.catalogSourceId === 'scirepl-catalog'
+                    && persistedRemote?.catalogRef === CATALOG_TAG
+                    && persistedRemote?.catalogCommit === CATALOG_COMMIT
+                    && persistedRemote?.catalogSha256 === sha256(goodWorkbookBytes),
+                JSON.stringify(persistedRemote));
+
+            await page.evaluate(() => document.getElementById('btn-browse-packages').click());
+            await page.waitForFunction(() =>
+                window.packageCatalog?._sourceResult?.status === 'cached', null, { timeout: 10_000 });
+            testLog('Fresh verified catalogue cache restores without another network request',
+                remoteCatalogRequests.length === requestCountBeforeReload,
+                `${requestCountBeforeReload} before, ${remoteCatalogRequests.length} after`);
+
+            await page.click('#catalog-edit-source');
+            page.once('dialog', dialog => dialog.accept());
+            await page.click('#catalog-source-clear-data');
+            await page.waitForFunction(() =>
+                window.packageCatalog?._sourceResult?.status === 'cleared');
+            const clearedSource = await page.evaluate(() => ({
+                remoteCount: window.packageCatalog._remoteEntries.length,
+                status: document.getElementById('catalog-source-status')?.textContent?.trim() || '',
+            }));
+            testLog('Explicit source reset clears verified cache and trust state from the UI',
+                clearedSource.remoteCount === 0 && /cleared/i.test(clearedSource.status),
+                JSON.stringify(clearedSource));
+            await page.click('#catalog-source-back');
+
+            await page.selectOption('#catalog-spoken-language', 'en');
+            await page.evaluate(() => {
+                const allow = document.getElementById('catalog-allow-fallbacks');
+                if (allow && !allow.checked) allow.click();
+                const builtins = document.getElementById('catalog-show-builtins');
+                if (builtins && !builtins.checked) builtins.click();
+            });
+        }
 
         const bundleDefinition = await page.evaluate(() => {
             const bundle = window.packageCatalog.packages.find(p => p.id === 'unifyweaver-workbooks');
@@ -521,7 +971,6 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
             const catalog = window.packageCatalog;
             const nm = window.notebookManager;
             const pkg = catalog.packages.find(item => item.id === 'prolog-generates-typr');
-            const pkgIndex = catalog.packages.findIndex(item => item.id === pkg.id);
 
             // Simulate a workbook restored from before catalog revisions existed.
             const stale = nm.createNotebook({
@@ -529,7 +978,8 @@ const BASE = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
                 cells: [{ code: 'user-edited legacy content', type: 'code', language: 'typr' }]
             });
             catalog._syncInstallButtons();
-            const button = document.querySelector(`.pkg-install-btn[data-idx="${pkgIndex}"]`);
+            const button = document.querySelector(
+                `.pkg-install-btn[data-catalog-key="${catalog._catalogId(pkg)}"]`);
             const before = button.textContent.trim();
 
             const response = await fetch(pkg.pages_url);
