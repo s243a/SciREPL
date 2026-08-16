@@ -147,6 +147,83 @@ try {
     check('palette-built markdown renders through KaTeX', await page.evaluate(() => !!document.querySelector('.katex')));
     await page.context().close();
 
+    console.log('3b. ONE shared tokenizer: renderer and palette agree on what is math');
+    page = await freshPage();
+    await enableFormula(page);
+    check('md_math.js is loaded and shared', await page.evaluate(() =>
+        typeof window.MdMath === 'object' && !!window.MdMath.scan && !!window.MdMath.stateAt));
+    await page.click('#cell-type-toggle');
+    await page.click('#math-mode-btn');
+    // Sol's rendering regression: escaped currency + one real formula
+    const renderProbe = await page.evaluate(() => {
+        const html = window._appInternals.renderMarkdown('costs \\$5 today $\\sqrt{}$');
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        const outside = div.cloneNode(true);
+        outside.querySelectorAll('.katex').forEach(k => k.remove());
+        return {
+            katexCount: div.querySelectorAll('.katex').length,
+            sqrtRendered: !!div.querySelector('.katex .sqrt, .katex .mord.sqrt, .katex svg'),
+            text: div.textContent,
+            textOutsideMath: outside.textContent,
+        };
+    });
+    check('exactly ONE KaTeX expression', renderProbe.katexCount === 1, String(renderProbe.katexCount));
+    check('\\$5 stays literal currency text', renderProbe.text.includes('$5'), JSON.stringify(renderProbe.text));
+    check('the expression is the sqrt (KaTeX markup present)', renderProbe.sqrtRendered);
+    // KaTeX embeds the TeX source in its MathML annotation, so "no raw
+    // trailing formula text" means: nothing OUTSIDE the .katex elements
+    check('no raw trailing formula text remains outside the math',
+        !renderProbe.textOutsideMath.includes('\\sqrt') && !renderProbe.textOutsideMath.includes('$\\'),
+        JSON.stringify(renderProbe.textOutsideMath));
+    // dollars inside code spans and fences are inert for the RENDERER
+    const codeProbe = await page.evaluate(() => {
+        const one = (t) => {
+            const d = document.createElement('div');
+            d.innerHTML = window._appInternals.renderMarkdown(t);
+            return { katex: d.querySelectorAll('.katex').length, text: d.textContent };
+        };
+        return {
+            span: one('`$5` and $x$'),
+            fence: one('```\n$notmath$\n```\n\n$y$'),
+            doubletick: one('``a`$b`` then $z$'),
+        };
+    });
+    check('inline code span protects its $ (one katex from $x$)',
+        codeProbe.span.katex === 1 && codeProbe.span.text.includes('$5'), JSON.stringify(codeProbe.span));
+    check('fenced block protects its $ (one katex from $y$)',
+        codeProbe.fence.katex === 1 && codeProbe.fence.text.includes('$notmath$'), JSON.stringify(codeProbe.fence));
+    check('variable-length backtick span protects its $',
+        codeProbe.doubletick.katex === 1 && codeProbe.doubletick.text.includes('a`$b'), JSON.stringify(codeProbe.doubletick));
+    // palette insertion AFTER code regions containing $ — caret is outside
+    // math, so the insert must still wrap (the code-span $ must not flip state)
+    const insertAfter = async (prefix) => {
+        await page.evaluate((v) => {
+            const i = document.getElementById('code-input');
+            i.value = v;
+            i.selectionStart = i.selectionEnd = v.length;
+        }, prefix);
+        await page.click('#math-palette button[title="Square root"]');
+        return page.evaluate(() => document.getElementById('code-input').value);
+    };
+    check('insertion after inline code with $ wraps correctly',
+        (await insertAfter('`$a` ')) === '`$a` $\\sqrt{}$');
+    check('insertion after fenced code with $ wraps correctly',
+        (await insertAfter('```\n$x\n```\n')) === '```\n$x\n```\n$\\sqrt{}$');
+    check('escaped-backslash parity: \\\\ then $x -> caret is INSIDE math (bare insert)',
+        (await insertAfter('\\\\$x')) === '\\\\$x\\sqrt{}');
+    check('escaped dollar: \\$x is NOT math (wrapped insert)',
+        (await insertAfter('\\$x ')) === '\\$x $\\sqrt{}$');
+    // caret INSIDE a code span: not math, so the palette wraps (WYSIWYG text)
+    const inCode = await page.evaluate(() => {
+        const i = document.getElementById('code-input');
+        i.value = '`code`';
+        i.selectionStart = i.selectionEnd = 3;
+        return window.MdMath.stateAt(i.value, 3);
+    });
+    check("caret inside a code span reports 'code' (never inline/display)", inCode === 'code', inCode);
+    await page.context().close();
+
     console.log('4. Footer layout invariants');
     // baseline: closed palette
     page = await freshPage({ viewport: { width: 320, height: 640 } });
@@ -261,13 +338,25 @@ try {
         await page.evaluate(() => !!document.querySelector('.katex')));
     await page.context().close();
 
-    console.log('5c. Second notebook and growing composer keep the reservation');
+    console.log('5c. SECOND notebook (really switched to) and growing composer');
     page = await freshPage({ viewport: { width: 320, height: 640 } });
     await enableFormula(page);
+    // create AND SWITCH via the real notebook-switch path, then verify the
+    // second container is the active one before exercising anything
     const madeSecond = await page.evaluate(() => {
-        try { return !!(window.notebookManager && window.notebookManager.createNotebook({ name: 'second' })); }
-        catch (_) { return false; }
+        try {
+            const nm = window.notebookManager;
+            if (!nm) return false;
+            const before = nm.getActiveNotebook && nm.getActiveNotebook();
+            const nb = nm.createNotebook({ name: 'second' });
+            nm.switchTo(nb.id);
+            const active = nm.getActiveNotebook();
+            const visible = nb.replContainer && nb.replContainer.offsetParent !== null
+                && getComputedStyle(nb.replContainer).display !== 'none';
+            return !!(active && active.id === nb.id && (!before || before.id !== nb.id) && visible);
+        } catch (_) { return false; }
     });
+    check('second notebook is created, switched to, and its container is active', madeSecond === true);
     await page.click('#math-mode-btn');
     await page.waitForTimeout(150);
     const noOverlap = () => page.evaluate(() => {
@@ -291,7 +380,35 @@ try {
     });
     await page.waitForTimeout(250);
     inv = await noOverlap();
-    check('composer growth keeps scroller and Run clear', inv.scrollerClear && inv.runOnScreen, JSON.stringify(inv));
+    check('composer growth keeps scroller and Run clear (second notebook)', inv.scrollerClear && inv.runOnScreen, JSON.stringify(inv));
+    // safe-inset change while the SECOND notebook is active
+    await page.evaluate(() => document.documentElement.style.setProperty('--safe-area-inset-bottom', '48px'));
+    await page.waitForTimeout(250);
+    inv = await noOverlap();
+    check('late 48px inset on the second notebook keeps everything clear', inv.scrollerClear && inv.runOnScreen && inv.barOnScreen, JSON.stringify(inv));
+    // fill the second notebook and scroll ITS container to the bottom
+    for (let i = 0; i < 3; i++) {
+        await page.evaluate((n) => {
+            const inp = document.getElementById('code-input');
+            inp.value = `# Second notebook heading ${n}\n\ncontent ${n}`;
+            inp.dispatchEvent(new Event('input', { bubbles: true }));
+        }, i);
+        const isMd = await page.evaluate(() => document.getElementById('cell-type-toggle').classList.contains('markdown-active'));
+        if (!isMd) await page.click('#cell-type-toggle');
+        await page.click('#run-btn');
+        await page.waitForTimeout(200);
+    }
+    const secondScroll = await page.evaluate(async () => {
+        const scroller = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
+        scroller.style.scrollBehavior = 'auto';
+        scroller.scrollTop = scroller.scrollHeight;
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const last = scroller.lastElementChild;
+        if (!last) return { ok: false, why: 'no content' };
+        const bar = document.getElementById('input-bar').getBoundingClientRect();
+        return { ok: last.getBoundingClientRect().bottom <= bar.top + 1, hasContent: scroller.children.length > 0 };
+    });
+    check('second notebook at max scroll: content clear of the footer', secondScroll.ok && secondScroll.hasContent, JSON.stringify(secondScroll));
     await page.context().close();
 
     console.log('5d. Desktop width keeps the reservation (responsive padding rule)');
@@ -343,17 +460,142 @@ try {
         JSON.stringify(lateInset));
     await page.context().close();
 
-    console.log('5g. Landscape side insets, LTR and RTL');
+    console.log('5i. WORST CASE: 320x240 + 48px inset + open palette + grown composer');
+    page = await freshPage({ viewport: { width: 320, height: 240 } });
+    await enableFormula(page);
+    await page.evaluate(() => document.documentElement.style.setProperty('--safe-area-inset-bottom', '48px'));
+    await page.click('#cell-type-toggle');          // markdown palette (2 rows, 10 buttons)
+    await page.click('#math-mode-btn');
+    await page.evaluate(() => {
+        const i = document.getElementById('code-input');
+        i.value = Array.from({ length: 10 }, (_, n) => 'line ' + n).join('\n');   // grown to max
+        i.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.waitForTimeout(300);
+    const worst = await page.evaluate(() => {
+        const header = document.getElementById('app-header').getBoundingClientRect();
+        const bar = document.getElementById('input-bar').getBoundingClientRect();
+        const input = document.getElementById('code-input').getBoundingClientRect();
+        const run = document.getElementById('run-btn').getBoundingClientRect();
+        const vh = window.innerHeight;
+        return {
+            headerVisible: header.top >= 0 && header.bottom > 0,
+            footerBelowHeader: bar.top >= header.bottom - 1,
+            footerOnScreen: bar.bottom <= vh + 1,
+            composerVisible: input.top >= header.bottom - 1 && input.bottom <= vh + 1 && input.height >= 30,
+            runUsable: run.top >= header.bottom - 1 && run.bottom <= vh + 1 && run.height >= 20,
+        };
+    });
+    check('header visible, footer below it and on screen', worst.headerVisible && worst.footerBelowHeader && worst.footerOnScreen, JSON.stringify(worst));
+    check('grown composer stays visible and usable', worst.composerVisible, JSON.stringify(worst));
+    check('Run button fully on screen', worst.runUsable, JSON.stringify(worst));
+    // EVERY palette button: scroll into view, then center-point hit-test;
+    // no hit target may be covered by the header
+    const worstHits = await page.evaluate(async () => {
+        const headerBottom = document.getElementById('app-header').getBoundingClientRect().bottom;
+        const palette = document.getElementById('math-palette');
+        const buttons = [...palette.querySelectorAll('button')]
+            .filter(b => getComputedStyle(b).display !== 'none' && b.offsetParent !== null);
+        const results = [];
+        for (const b of buttons) {
+            b.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+            await new Promise(r => requestAnimationFrame(r));
+            const r = b.getBoundingClientRect();
+            const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+            const el = document.elementFromPoint(cx, cy);
+            results.push({
+                hit: b === el || b.contains(el),
+                aboveHeader: cy > headerBottom,
+                onScreen: cy > 0 && cy < innerHeight,
+            });
+        }
+        return {
+            total: buttons.length,
+            hittable: results.filter(x => x.hit).length,
+            clearOfHeader: results.filter(x => x.aboveHeader && x.onScreen).length,
+        };
+    });
+    check(`all ${worstHits.total} palette buttons reachable by scrolling + center hit-test`,
+        worstHits.total >= 10 && worstHits.hittable === worstHits.total, JSON.stringify(worstHits));
+    check('no hit target sits under the header', worstHits.clearOfHeader === worstHits.total, JSON.stringify(worstHits));
+    // visualViewport/keyboard-style resize while everything is open. When
+    // the Android keyboard opens it COVERS the system nav bar, so the
+    // bottom safe inset drops to 0 as the viewport shrinks.
+    await page.evaluate(() => document.documentElement.style.setProperty('--safe-area-inset-bottom', '0px'));
+    await page.setViewportSize({ width: 320, height: 180 });
+    await page.waitForTimeout(300);
+    const shrunk = await page.evaluate(() => {
+        const header = document.getElementById('app-header').getBoundingClientRect();
+        const run = document.getElementById('run-btn').getBoundingClientRect();
+        const input = document.getElementById('code-input').getBoundingClientRect();
+        const vh = window.innerHeight;
+        return {
+            runUsable: run.top >= header.bottom - 1 && run.bottom <= vh + 1,
+            composerUsable: input.bottom <= vh + 1 && input.height >= 20,
+        };
+    });
+    check('keyboard-style resize (240->180) keeps composer and Run usable', shrunk.runUsable && shrunk.composerUsable, JSON.stringify(shrunk));
+    await page.context().close();
+
+    console.log('5j. Tablet/desktop editor width restored (768/800/1024) + narrow phone');
+    for (const width of [768, 800, 1024]) {
+        page = await freshPage({ viewport: { width, height: 600 } });
+        const geo = await page.evaluate(() => {
+            const bar = document.getElementById('input-bar').getBoundingClientRect();
+            const input = document.getElementById('code-input').getBoundingClientRect();
+            return { barW: Math.round(bar.width), inputW: Math.round(input.width),
+                     barLeft: Math.round(bar.left), barRight: Math.round(innerWidth - bar.right) };
+        });
+        check(`${width}px: footer takes full available width up to 720px cap`,
+            geo.barW === Math.min(width, 720), JSON.stringify(geo));
+        check(`${width}px: editor is wide (not collapsed)`, geo.inputW >= geo.barW - 220, JSON.stringify(geo));
+        check(`${width}px: footer is centered`, Math.abs(geo.barLeft - geo.barRight) <= 2, JSON.stringify(geo));
+        await page.context().close();
+    }
+    page = await freshPage({ viewport: { width: 320, height: 640 } });
+    const phoneGeo = await page.evaluate(() => {
+        const bar = document.getElementById('input-bar').getBoundingClientRect();
+        const input = document.getElementById('code-input').getBoundingClientRect();
+        return { barW: Math.round(bar.width), inputW: Math.round(input.width) };
+    });
+    check('narrow phone regression: footer spans the viewport', phoneGeo.barW === 320, JSON.stringify(phoneGeo));
+    check('narrow phone regression: editor not collapsed', phoneGeo.inputW >= 130, JSON.stringify(phoneGeo));
+    await page.context().close();
+
+    console.log('5g. Landscape side insets, LTR and RTL — actual control rectangles');
     for (const dir of ['ltr', 'rtl']) {
-        page = await freshPage();
-        const pads = await page.evaluate((d) => {
+        page = await freshPage({ viewport: { width: 640, height: 320 } });   // landscape
+        const probe = await page.evaluate((d) => {
             document.documentElement.dir = d;
             document.documentElement.style.setProperty('--safe-area-inset-left', '30px');
             document.documentElement.style.setProperty('--safe-area-inset-right', '20px');
             const cs = getComputedStyle(document.getElementById('input-bar'));
-            return { left: parseInt(cs.paddingLeft), right: parseInt(cs.paddingRight) };
+            const hcs = getComputedStyle(document.getElementById('app-header'));
+            // actual rectangles: every visible header control and the
+            // composer/Run in the footer must respect the PHYSICAL insets
+            const rects = [];
+            const collect = (root, label) => {
+                for (const el of root.querySelectorAll('button, select, textarea, h1')) {
+                    if (el.offsetParent === null) continue;
+                    const r = el.getBoundingClientRect();
+                    if (r.width === 0) continue;
+                    rects.push({ label: label + ':' + (el.id || el.tagName), left: r.left, right: r.right });
+                }
+            };
+            collect(document.getElementById('app-header'), 'header');
+            collect(document.querySelector('#input-bar .input-row') || document.getElementById('input-bar'), 'footer');
+            const bad = rects.filter(r => r.left < 30 - 0.5 || r.right > innerWidth - 20 + 0.5).map(r => r.label);
+            return {
+                footerPad: { left: parseInt(cs.paddingLeft), right: parseInt(cs.paddingRight) },
+                headerPad: { left: parseInt(hcs.paddingLeft), right: parseInt(hcs.paddingRight) },
+                controls: rects.length,
+                violations: bad,
+            };
         }, dir);
-        check(`side insets respected physically (${dir})`, pads.left === 42 && pads.right === 32, JSON.stringify(pads));
+        check(`footer side padding physical (${dir})`, probe.footerPad.left === 42 && probe.footerPad.right === 32, JSON.stringify(probe.footerPad));
+        check(`header side padding physical (${dir})`, probe.headerPad.left === 46 && probe.headerPad.right === 36, JSON.stringify(probe.headerPad));
+        check(`no header/footer control intrudes into the insets (${dir}, ${probe.controls} controls)`,
+            probe.controls >= 4 && probe.violations.length === 0, probe.violations.join());
         await page.context().close();
     }
 
@@ -395,8 +637,10 @@ try {
     check('invalid/extras lines: ZERO CDN fetches', netProbe.cdnFetches === 0, String(netProbe.cdnFetches));
     check('extras give a clear unsupported error',
         netProbe.text.includes('extras are not supported yet') && netProbe.text.includes('pandas[performance]'));
-    check('all three lines report skipped entirely',
-        (netProbe.text.match(/line skipped entirely/g) || []).length >= 3);
+    check('all three lines report nothing installed',
+        (netProbe.text.match(/nothing on this line was installed/g) || []).length >= 3);
+    check('all three rejected lines FAIL their cell',
+        (netProbe.text.match(/the rest of this cell was not executed/g) || []).length >= 3);
     await page.context().close();
 
     console.log('5e. Offline upgrade: resolver is in the precached shell');
@@ -418,6 +662,9 @@ try {
         const offlineResolver = await p2.evaluate(() => typeof globalThis.PipResolver === 'object' && !!globalThis.PipResolver.parsePipLine)
             .catch(() => false);
         check('offline reload still has PipResolver (precached)', offlineResolver === true, String(offlineResolver));
+        const offlineMdMath = await p2.evaluate(() => typeof globalThis.MdMath === 'object' && !!globalThis.MdMath.stateAt)
+            .catch(() => false);
+        check('offline reload still has the shared MdMath tokenizer (precached)', offlineMdMath === true, String(offlineMdMath));
         await ctx.close();
     }
 
