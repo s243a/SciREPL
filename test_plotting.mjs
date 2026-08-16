@@ -34,6 +34,9 @@ const TIMEOUT = 180_000;
     await context.addInitScript(() => {
       localStorage.setItem('scirepl_privacy_accepted', '1');
       localStorage.setItem('scirepl_onboarding_seen', '1');
+      // Non-bundled kernels (R here) show a download-consent dialog that no
+      // one can click headlessly; without this ensureReady('r') never resolves.
+      localStorage.setItem('scirepl_auto_download', '1');
       addEventListener('DOMContentLoaded', () => localStorage.setItem(
           'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
     });
