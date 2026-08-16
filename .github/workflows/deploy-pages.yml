@@ -115,6 +115,12 @@ jobs:
       # so old tags deploy while new tags are fully gated.
       # Explicit if/then so a PRESENT-but-FAILING suite fails the deploy;
       # only a suite absent from an old tag may be skipped.
+      - name: Python packaging >=26 for the specifier differential
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install packaging for the differential oracle
+        run: python3 -m pip install 'packaging>=26'
       - name: Pip resolver unit tests (when present on this tag)
         run: |
           if test -f test_pip_resolver.mjs; then

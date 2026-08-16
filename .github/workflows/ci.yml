@@ -69,6 +69,12 @@ jobs:
       - name: Service worker — shell-guard cannot be bypassed
         run: node test_sw_shell_guard.mjs
 
+      - name: Python packaging >=26 for the specifier differential
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install packaging for the differential oracle
+        run: python3 -m pip install 'packaging>=26'
       - name: Pip resolver unit tests (deterministic, fixture lockfile)
         run: node test_pip_resolver.mjs
 

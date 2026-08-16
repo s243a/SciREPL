@@ -31,6 +31,10 @@ jobs:
       - run: npm run privacy:check
       - run: node scripts/check-sw-shell.mjs
       - run: node test_sw_shell_guard.mjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m pip install 'packaging>=26'
       - run: npm run test:pip-resolver
       - run: node server.js &
       - run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null

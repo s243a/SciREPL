@@ -179,6 +179,17 @@ print(json.dumps(out))
         check(`differential: ${pairs.length} comparisons agree with packaging.version`, diff === 0);
 
         console.log('6d. Differential vs packaging.specifiers.SpecifierSet');
+        // The resolver implements the CURRENT spec semantics (packaging >= 26:
+        // contains() matches pre-releases per the updated PEP 440
+        // recommendation, '>V' uses the post-base rule, '<V' the
+        // earliest-prerelease rule). Older packaging predates those
+        // clarifications, so the differential is only meaningful there.
+        const pkgVersion = execFileSync('python3', ['-c', 'import packaging; print(packaging.__version__)'],
+            { encoding: 'utf8' }).trim();
+        const pkgMajor = parseInt(pkgVersion.split('.')[0], 10);
+        if (!(pkgMajor >= 26)) {
+            console.log(`  [SKIP] packaging ${pkgVersion} < 26 — SpecifierSet differential needs the PEP 440 clarifications (CI installs packaging>=26)`);
+        } else {
         // Full cross product: real lock versions (python-dateutil 2.9.0.post0,
         // python-sat 1.8.dev13, jinja2 3.1.3, ...) plus synthetic edge forms.
         const dVersions = ['1.0', '1.0.post0', '1.0.post1', '1.0a1', '1.0b2', '1.0rc1', '1.0.dev1',
@@ -219,8 +230,9 @@ print(json.dumps(out))
             }
         });
         const dFailClosed = dCases.filter((_, i) => dOurs[i] === 'ERR' && dExp[i] !== 'ERR').length;
-        check(`SpecifierSet differential: ${dCases.length} cases agree with packaging`, dBad === 0,
+        check(`SpecifierSet differential: ${dCases.length} cases agree with packaging ${pkgVersion}`, dBad === 0,
             `${dFailClosed} fail-closed-only-ours`);
+        }
     }
 }
 
