@@ -238,38 +238,31 @@
      * Render markdown text to HTML with KaTeX math support.
      * Supports $inline$ and $$display$$ math blocks.
      */
-    function renderMarkdown(text) {
-        // Math extraction is delegated to the SHARED tokenizer (md_math.js,
-        // also used by the Formula palette): escape-aware, code-span- and
-        // fence-aware, '$' vs '$$' as distinct tokens. Regexes here once
-        // matched the '\$5' in "costs \$5 today" as a math delimiter.
-        const mathBlocks = [];
-        let processed = '';
-        for (const r of window.MdMath.scan(text)) {
-            if (r.type === 'math') {
-                const id = `%%MATH_BLOCK_${mathBlocks.length}%%`;
-                mathBlocks.push({ tex: text.slice(r.bodyStart, r.bodyEnd).trim(), display: !!r.display });
-                processed += id;
-            } else {
-                processed += text.slice(r.start, r.end);
-            }
-        }
-
-        let html = marked.parse(processed);
-
-        mathBlocks.forEach((block, i) => {
-            const placeholder = `%%MATH_BLOCK_${i}%%`;
-            let rendered;
-            try {
-                rendered = katex.renderToString(block.tex, {
-                    throwOnError: false,
-                    displayMode: block.display
-                });
-            } catch (e) {
-                rendered = `<code>${block.tex}</code>`;
-            }
-            html = html.replace(placeholder, rendered);
+    // Math rendering is STRUCTURAL: marked inline extensions (from the
+    // shared md_math.js) recognize $…$/$$…$$ only in eligible inline text —
+    // never in link destinations, image sources, autolinks, raw-HTML
+    // attributes, or any code context — and render KaTeX directly into the
+    // token stream. No placeholder strings (a user typing %%MATH_BLOCK_0%%
+    // keeps their literal text) and no whole-HTML String.replace.
+    let _mathExtensionsInstalled = false;
+    function _installMathExtensions() {
+        if (_mathExtensionsInstalled) return;
+        _mathExtensionsInstalled = true;
+        marked.use({
+            extensions: window.MdMath.markedExtensions((tex, display) => {
+                try {
+                    return katex.renderToString(tex, { throwOnError: false, displayMode: display });
+                } catch (e) {
+                    const esc = tex.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    return `<code>${esc}</code>`;
+                }
+            }),
         });
+    }
+
+    function renderMarkdown(text) {
+        _installMathExtensions();
+        let html = marked.parse(text);
 
         // marked accepts raw HTML. Keep it inert across initial import,
         // session restore, and later markdown re-rendering.
@@ -913,8 +906,63 @@
                 if (depFiles.length) await loadFiles(depFiles);
             } catch (_) { /* the import verification below reports honestly */ }
         }
-        const importName = entry ? R.importNamesOf(entry, req.name)[0] : req.norm.replace(/-/g, '_');
-        let verdict = tryImport(importName);
+        // Authoritative import names: the lock's declared imports when the
+        // distribution is in the lock; otherwise the INSTALLED metadata
+        // (importlib.metadata.packages_distributions / top_level.txt). If
+        // neither yields a module name, fail CLOSED — installed metadata
+        // alone proves nothing about importability, and reporting an
+        // unverified install as ok once let a broken environment run user
+        // code against it.
+        const discoverModules = (dist) => {
+            try {
+                return JSON.parse(pyodide.runPython(`
+def _scirepl_modules_for(dist):
+    import importlib.metadata as md
+    import json, re
+    def norm(s):
+        return re.sub(r'[-_.]+', '-', s).lower()
+    mods = []
+    try:
+        for m, ds in (md.packages_distributions() or {}).items():
+            if any(norm(d) == norm(dist) for d in ds):
+                mods.append(m)
+    except Exception:
+        pass
+    if not mods:
+        try:
+            t = md.distribution(dist).read_text('top_level.txt')
+            if t:
+                mods = [l.strip() for l in t.splitlines() if l.strip()]
+        except Exception:
+            pass
+    return json.dumps(mods)
+
+_scirepl_modules_for(${JSON.stringify(dist)})
+`));
+            } catch (_) { return []; }
+        };
+        let candidates;
+        if (entry) {
+            candidates = R.importNamesOf(entry, req.name);
+        } else if (version) {
+            candidates = discoverModules(req.name);
+            if (!candidates.length) {
+                return { ok: false, healed: 0, message:
+                    `%pip: '${req.raw}': ${req.name} ${version} is installed, but no importable module name ` +
+                    `could be determined from its metadata — failing closed rather than reporting an unverified install.` };
+            }
+        } else {
+            candidates = [req.norm.replace(/-/g, '_')];
+        }
+        const tryCandidates = () => {
+            let v = { ok: false, missing: null, error: 'no importable module name' };
+            for (const mod of candidates) {
+                v = tryImport(mod);
+                if (v.ok) return v;   // at least one authoritative import must succeed
+            }
+            return v;
+        };
+        let verdict = tryCandidates();
         let healed = 0;
         const impIdx = lock ? R.importIndex(lock) : {};
         while (!verdict.ok && verdict.missing && healed < 6) {
@@ -925,17 +973,13 @@
             if (!resolved.files.length) break;
             try { await loadFiles(resolved.files); } catch (_) { break; }
             healed++;
-            verdict = tryImport(importName);
+            verdict = tryCandidates();
         }
         if (verdict.ok) {
             const message = (!version || healed)
                 ? `  (${req.name}: ${healed ? healed + ' missing dependenc' + (healed > 1 ? 'ies' : 'y') + ' recovered from the Pyodide CDN' : 'fetched from the Pyodide CDN'})`
                 : null;
             return { ok: true, healed, message };
-        }
-        if (!entry && version) {
-            return { ok: true, healed: 0, message:
-                `  Note: '${req.name}' ${version} is installed; it is not importable as '${importName}' — the import name may differ.` };
         }
         return { ok: false, healed, message: `%pip: '${req.raw}' failed verification: ${verdict.error || 'not importable'}` };
     };

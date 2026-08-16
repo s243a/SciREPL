@@ -41,6 +41,9 @@ build("fixture-depa", "1.0.0", "fixture_depa", "VALUE = 'depa'\\n")
 build("fixture-depb", "1.0.0", "fixture_depb", "VALUE = 'depb'\\n")
 build("fixture-root", "1.0.0", "fixture_root",
       "import fixture_depa, fixture_depb\\nVALUE = 'root'\\n")
+build("fixture-badimport", "1.0.0", "fixture_badimport",
+      "import fixture_missing_dep\\nVALUE = 'bad'\\n")
+build("fixture-diffname", "1.0.0", "fdn_module", "VALUE = 'diffname'\\n")
 `, FIXDIR]);
 }
 
@@ -164,6 +167,37 @@ const FIXTURE_LOCK = {
       return { ok: r.ok, message: r.message || '' };
     });
     testLog("'constructor' fails cleanly (no inherited lock hit)", proto.ok === false && !proto.message.includes('undefined'), proto.message);
+
+    // ---- 3b. Installed metadata is NOT verification ----
+    console.log('3b. Installed-but-broken and differing-import-name distributions...');
+    // both wheels are absent from the fixture lock: verification must rely
+    // on INSTALLED metadata (packages_distributions/top_level.txt), and an
+    // installed distribution whose module cannot import must FAIL.
+    const metaPre = await page.evaluate(async (urls) => {
+      const pyodide = window.kernelManager.getKernel('python').getPyodide();
+      await pyodide.loadPackage(urls);
+      pyodide.runPython('import importlib; importlib.invalidate_caches()');
+      return pyodide.runPython(`__import__('importlib.metadata', fromlist=['metadata']).version('fixture-badimport')`);
+    }, [
+      `${BASE}/test_fixtures/wheels/fixture_badimport-1.0.0-py3-none-any.whl`,
+      `${BASE}/test_fixtures/wheels/fixture_diffname-1.0.0-py3-none-any.whl`,
+    ]);
+    testLog('broken fixture installed, metadata says 1.0.0 (precondition)', metaPre === '1.0.0');
+    const badEnsure = await page.evaluate(async () => await window.ensurePyodidePackage('fixture-badimport'));
+    testLog('installed metadata + failing import -> ok:false (never "verified")',
+      badEnsure.ok === false && /failed verification|No module named/.test(badEnsure.message || ''), badEnsure.message);
+    const t6 = await runCell('%pip install fixture-badimport\nprint("AFTER_RAN6")', 'not executed');
+    testLog('installed-but-broken distribution FAILS the cell', t6.includes('the rest of this cell was not executed'), t6.slice(-160));
+    testLog('installed-but-broken: AFTER_RAN6 did not run', !t6.includes('AFTER_RAN6'));
+    const diffName = await page.evaluate(async () => {
+      const r = await window.ensurePyodidePackage('fixture-diffname');
+      const pyodide = window.kernelManager.getKernel('python').getPyodide();
+      let mod;
+      try { mod = pyodide.runPython('import fdn_module; fdn_module.VALUE'); } catch (e) { mod = 'IMPORT FAILED'; }
+      return { ok: r.ok, mod, message: r.message || '' };
+    });
+    testLog('import name differing from distribution name is DISCOVERED and verifies',
+      diffName.ok === true && diffName.mod === 'diffname', JSON.stringify(diffName));
 
     // ---- 4. Failed verification stops the cell (AFTER_RAN family) ----
     console.log('4. Failed install must stop the cell...');
