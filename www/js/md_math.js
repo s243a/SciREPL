@@ -1,28 +1,87 @@
 /**
- * md_math.js — ONE escape-aware Markdown math tokenizer, shared by the
- * renderer (app.js renderMarkdown) and the Formula palette (math_mode.js).
- * Loaded before both; no DOM, no dependencies, so it runs under node for
- * regression tests and is precached in the service-worker shell.
+ * md_math.js — the ONE source of truth for what counts as math in Markdown,
+ * shared by the renderer and the Formula palette. No DOM, no dependencies.
  *
- * The scanner walks the text once, left to right, and produces disjoint
- * regions covering the whole string:
- *   - code:  fenced code blocks (``` / ~~~, 3+ markers, up to 3 leading
- *            spaces, closed by a same-char fence at least as long) and
- *            inline code spans (a run of N backticks closed by the next run
- *            of exactly N — CommonMark's rule); dollars inside are inert
- *   - math:  $...$ (inline, single line, non-empty) and $$...$$ (display,
- *            may span lines, non-empty); '$$' and '$' are distinct tokens
- *   - text:  everything else
- * '\' escapes the next character everywhere outside code, so '\$5' is
- * currency, '\\$x$' is an escaped backslash followed by real math, and
- * unclosed delimiters stay literal text.
+ * Renderer side: markedExtensions(renderMath) returns marked inline
+ * extensions, so math is recognized STRUCTURALLY — only in eligible inline
+ * text, never in link destinations, image sources, autolinks, raw-HTML
+ * attributes, inline code, fenced code, or indented code (marked's own
+ * tokenizers consume those before the extension is consulted, and marked's
+ * escape rule consumes '\$' first). No placeholders, no post-hoc HTML
+ * string replacement.
+ *
+ * Palette side: stateAt(text, caret) reports the caret's context over the
+ * SAME protected regions ('inline' | 'display' | 'code' | 'outside'),
+ * with in-progress (unclosed-delimiter) semantics so mid-formula insertion
+ * never nests delimiters.
  */
 (function () {
     'use strict';
 
+    /** '$$body$$' at the start of src (display math): escape-aware, body
+     *  non-empty, may span newlines within one inline run. */
+    function matchDisplay(src) {
+        if (!(src[0] === '$' && src[1] === '$')) return null;
+        let i = 2;
+        while (i < src.length) {
+            if (src[i] === '\\') { i += 2; continue; }
+            if (src[i] === '$' && src[i + 1] === '$') {
+                if (i === 2) return null;                // empty body
+                return { raw: src.slice(0, i + 2), body: src.slice(2, i) };
+            }
+            i++;
+        }
+        return null;
+    }
+
+    /** '$body$' at the start of src (inline math): single line, non-empty,
+     *  escape-aware; a backtick aborts (the code span wins, as in marked). */
+    function matchInline(src) {
+        if (src[0] !== '$' || src[1] === '$') return null;
+        let i = 1;
+        while (i < src.length && src[i] !== '\n') {
+            if (src[i] === '\\') { i += 2; continue; }
+            if (src[i] === '`') return null;
+            if (src[i] === '$') {
+                if (i === 1) return null;                // empty body
+                return { raw: src.slice(0, i + 1), body: src.slice(1, i) };
+            }
+            i++;
+        }
+        return null;
+    }
+
+    /**
+     * marked inline extensions rendering math via renderMath(tex, display).
+     * Display is tried before inline at the same position ('$$' vs '$').
+     */
+    function markedExtensions(renderMath) {
+        return [{
+            name: 'sciDisplayMath',
+            level: 'inline',
+            start(src) { const p = src.indexOf('$$'); return p === -1 ? undefined : p; },
+            tokenizer(src) {
+                const m = matchDisplay(src);
+                if (m) return { type: 'sciDisplayMath', raw: m.raw, body: m.body };
+            },
+            renderer(token) { return renderMath(token.body.trim(), true); },
+        }, {
+            name: 'sciInlineMath',
+            level: 'inline',
+            start(src) { const p = src.indexOf('$'); return p === -1 ? undefined : p; },
+            tokenizer(src) {
+                const m = matchInline(src);
+                if (m) return { type: 'sciInlineMath', raw: m.raw, body: m.body };
+            },
+            renderer(token) { return renderMath(token.body.trim(), false); },
+        }];
+    }
+
     /** Disjoint regions covering [0, text.length):
      *  {type:'text'|'code'|'math', start, end} — math regions also carry
-     *  {display, bodyStart, bodyEnd}. */
+     *  {display, bodyStart, bodyEnd}. 'code' covers every context the
+     *  renderer protects: fenced and indented code, inline code spans,
+     *  autolinks, raw-HTML tags, and link/image destinations. */
     function scan(text) {
         const s = String(text);
         const len = s.length;
@@ -31,11 +90,22 @@
         let textStart = 0;
         let atLineStart = true;
         const pushText = (end) => { if (end > textStart) regions.push({ type: 'text', start: textStart, end }); };
+        const prevLineBlank = (pos) => {
+            // is the line ENDING at pos-1 blank (or are we at document start)?
+            if (pos === 0) return true;
+            let j = pos - 1;                             // the '\n' ending the previous line
+            let k = j - 1;
+            while (k >= 0 && s[k] !== '\n') {
+                if (s[k] !== ' ' && s[k] !== '\t') return false;
+                k--;
+            }
+            return true;
+        };
 
         while (i < len) {
             const ch = s[i];
 
-            if (atLineStart && (ch === '`' || ch === '~' || ch === ' ')) {
+            if (atLineStart) {
                 const nl = s.indexOf('\n', i);
                 const line = s.slice(i, nl === -1 ? len : nl);
                 const fm = /^ {0,3}(`{3,}|~{3,})/.exec(line);
@@ -56,12 +126,56 @@
                     i = end; textStart = i; atLineStart = false;
                     continue;
                 }
+                // indented code block: 4 spaces / tab after a blank line
+                if (/^(?: {4}|\t)/.test(line) && line.trim() !== '' && prevLineBlank(i)) {
+                    let j = i, end = len;
+                    while (j < len) {
+                        const le = s.indexOf('\n', j);
+                        const l2 = s.slice(j, le === -1 ? len : le);
+                        if (l2.trim() !== '' && !/^(?: {4}|\t)/.test(l2)) { end = j; break; }
+                        if (le === -1) { end = len; break; }
+                        j = le + 1;
+                    }
+                    pushText(i);
+                    regions.push({ type: 'code', start: i, end });
+                    i = end; textStart = i; atLineStart = true;
+                    continue;
+                }
             }
 
             if (ch === '\n') { i++; atLineStart = true; continue; }
             atLineStart = false;
 
             if (ch === '\\') { i += 2; continue; }       // escape consumes the next char
+
+            if (ch === '<') {
+                // autolink or raw-HTML tag: the whole construct is protected
+                const rest = s.slice(i, i + 1024);
+                const m = /^<[a-zA-Z][a-zA-Z0-9+.-]*:[^<>\s]*>/.exec(rest)
+                    || /^<\/?[a-zA-Z][^<>]*>/.exec(rest);
+                if (m) {
+                    pushText(i);
+                    regions.push({ type: 'code', start: i, end: i + m[0].length });
+                    i += m[0].length; textStart = i;
+                    continue;
+                }
+                i++; continue;
+            }
+
+            if (ch === ']' && s[i + 1] === '(') {
+                // link/image DESTINATION: protected until the matching ')'
+                let j = i + 2, depth = 1;
+                while (j < len && depth > 0) {
+                    if (s[j] === '\\') { j += 2; continue; }
+                    if (s[j] === '(') depth++;
+                    else if (s[j] === ')') depth--;
+                    j++;
+                }
+                pushText(i);
+                regions.push({ type: 'code', start: i, end: j });
+                i = j; textStart = i;
+                continue;
+            }
 
             if (ch === '`') {
                 // inline code span: run of N backticks, closed by the next
@@ -88,38 +202,22 @@
             }
 
             if (ch === '$') {
-                if (s[i + 1] === '$') {
-                    // display math: next unescaped '$$', any distance
-                    let j = i + 2, close = -1;
-                    while (j < len) {
-                        if (s[j] === '\\') { j += 2; continue; }
-                        if (s[j] === '$' && s[j + 1] === '$') { close = j; break; }
-                        j++;
-                    }
-                    if (close !== -1 && close > i + 2) {
-                        pushText(i);
-                        regions.push({ type: 'math', display: true, start: i, end: close + 2, bodyStart: i + 2, bodyEnd: close });
-                        i = close + 2; textStart = i;
-                    } else {
-                        i += 2;                          // unclosed/empty: literal
-                    }
+                const rest = s.slice(i);
+                const dm = matchDisplay(rest);
+                if (dm) {
+                    pushText(i);
+                    regions.push({ type: 'math', display: true, start: i, end: i + dm.raw.length, bodyStart: i + 2, bodyEnd: i + dm.raw.length - 2 });
+                    i += dm.raw.length; textStart = i;
                     continue;
                 }
-                // inline math: closing unescaped '$' on the same line; a
-                // backtick aborts (the code span wins, as in CommonMark)
-                let j = i + 1, close = -1;
-                while (j < len && s[j] !== '\n' && s[j] !== '`') {
-                    if (s[j] === '\\') { j += 2; continue; }
-                    if (s[j] === '$') { close = j; break; }
-                    j++;
-                }
-                if (close !== -1 && close > i + 1) {
+                const im = matchInline(rest);
+                if (im) {
                     pushText(i);
-                    regions.push({ type: 'math', display: false, start: i, end: close + 1, bodyStart: i + 1, bodyEnd: close });
-                    i = close + 1; textStart = i;
-                } else {
-                    i++;                                 // unclosed/empty: literal
+                    regions.push({ type: 'math', display: false, start: i, end: i + im.raw.length, bodyStart: i + 1, bodyEnd: i + im.raw.length - 1 });
+                    i += im.raw.length; textStart = i;
+                    continue;
                 }
+                i += (s[i + 1] === '$') ? 2 : 1;         // unclosed/empty: literal
                 continue;
             }
 
@@ -176,5 +274,5 @@
         return 'outside';
     }
 
-    globalThis.MdMath = { scan, mathSegments, stateAt };
+    globalThis.MdMath = { scan, mathSegments, stateAt, matchDisplay, matchInline, markedExtensions };
 })();
