@@ -440,22 +440,6 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
     </div>
 
     <!-- Math Palette -->
-    <div id="math-palette" class="math-palette hidden">
-        <div class="math-row">
-            <button data-i18n-title="mathPalette.differentiateTitle" data-insert="diff(, x)" title="Differentiate">d/dx</button>
-            <button data-i18n-title="mathPalette.integrateTitle" data-insert="integrate(, x)" title="Integrate">∫</button>
-            <button data-i18n-title="mathPalette.solveTitle" data-i18n="mathPalette.solve" data-insert="solve(, x)" title="Solve">solve</button>
-            <button data-i18n-title="mathPalette.simplifyTitle" data-i18n="mathPalette.simp" data-insert="simplify()" title="Simplify">simp</button>
-            <button data-i18n-title="mathPalette.expandTitle" data-i18n="mathPalette.exp" data-insert="expand()" title="Expand">exp</button>
-        </div>
-        <div class="math-row">
-            <button data-i18n-title="mathPalette.matrixTitle" data-i18n="mathPalette.mat" data-insert="Matrix([[]])" title="Matrix">Mat</button>
-            <button data-i18n-title="mathPalette.symbolsTitle" data-i18n="mathPalette.sym" data-insert="symbols('')" title="Symbols">sym</button>
-            <button data-i18n-title="mathPalette.limitTitle" data-i18n="mathPalette.lim" data-insert="limit(, x, oo)" title="Limit">lim</button>
-            <button data-i18n-title="mathPalette.seriesTitle" data-i18n="mathPalette.ser" data-insert="series(, x, 0, 6)" title="Series">ser</button>
-            <button data-i18n-title="mathPalette.factorTitle" data-i18n="mathPalette.fac" data-insert="factor()" title="Factor">fac</button>
-        </div>
-    </div>
 
     <!-- Rename Cell Modal -->
     <div id="rename-cell-modal" class="modal hidden">
@@ -1155,6 +1139,23 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
 
     <!-- Sticky input bar -->
     <footer id="input-bar">
+        <div id="math-palette" class="math-palette hidden">
+            <div class="math-row">
+                <button data-i18n-title="mathPalette.differentiateTitle" data-insert="diff(, x)" title="Differentiate">d/dx</button>
+                <button data-i18n-title="mathPalette.integrateTitle" data-insert="integrate(, x)" title="Integrate">∫</button>
+                <button data-i18n-title="mathPalette.solveTitle" data-i18n="mathPalette.solve" data-insert="solve(, x)" title="Solve">solve</button>
+                <button data-i18n-title="mathPalette.simplifyTitle" data-i18n="mathPalette.simp" data-insert="simplify()" title="Simplify">simp</button>
+                <button data-i18n-title="mathPalette.expandTitle" data-i18n="mathPalette.exp" data-insert="expand()" title="Expand">exp</button>
+            </div>
+            <div class="math-row">
+                <button data-i18n-title="mathPalette.matrixTitle" data-i18n="mathPalette.mat" data-insert="Matrix([[]])" title="Matrix">Mat</button>
+                <button data-i18n-title="mathPalette.symbolsTitle" data-i18n="mathPalette.sym" data-insert="symbols('')" title="Symbols">sym</button>
+                <button data-i18n-title="mathPalette.limitTitle" data-i18n="mathPalette.lim" data-insert="limit(, x, oo)" title="Limit">lim</button>
+                <button data-i18n-title="mathPalette.seriesTitle" data-i18n="mathPalette.ser" data-insert="series(, x, 0, 6)" title="Series">ser</button>
+                <button data-i18n-title="mathPalette.factorTitle" data-i18n="mathPalette.fac" data-insert="factor()" title="Factor">fac</button>
+            </div>
+        </div>
+        <div class="input-row">
         <div id="input-controls">
             <select data-i18n-title="editor.programmingLanguageTitle" id="lang-selector" title="Programming language">
                 <option value="python" selected>Py</option>
@@ -1171,6 +1172,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
         <textarea id="code-input" rows="3" data-i18n-placeholder="app.input.codePlaceholder" data-i18n-placeholder-vars='{"language":"Python"}' placeholder="Type Python here…" spellcheck="false" autocapitalize="off"
             autocomplete="off"></textarea>
         <button data-i18n="inputControls.run" id="run-btn" disabled>▶ Run</button>
+        </div>
     </footer>
 
     <!-- Pyodide loaded dynamically after privacy acceptance — see below -->

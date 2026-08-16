@@ -18,6 +18,16 @@ class MathMode {
             this.toggleBtn.classList.toggle('active');
         });
 
+        // Contextual visibility: the palette inserts SymPy calls, which only
+        // mean something in Python cells. Hide the button (and close the
+        // palette) for other composer languages. Future direction: per-
+        // language palettes and numeric-vs-symbolic context awareness.
+        this.langSelector = document.getElementById('lang-selector');
+        if (this.langSelector) {
+            this.langSelector.addEventListener('change', () => this.syncLanguage());
+            this.syncLanguage();
+        }
+
         // Handle palette button clicks
         this.palette.addEventListener('click', (e) => {
             if (e.target.tagName === 'BUTTON') {
@@ -27,6 +37,16 @@ class MathMode {
                 }
             }
         });
+    }
+
+    /** Show the palette control only for languages it applies to. */
+    syncLanguage() {
+        const applies = !this.langSelector || this.langSelector.value === 'python';
+        this.toggleBtn.classList.toggle('lang-hidden', !applies);
+        if (!applies) {
+            this.palette.classList.add('hidden');
+            this.toggleBtn.classList.remove('active');
+        }
     }
 
     /**

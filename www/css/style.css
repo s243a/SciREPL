@@ -28,6 +28,14 @@
        distinct from unset. See www/js/appearance.js. */
     --app-top-margin: env(safe-area-inset-top, 28px);
 
+    /* Space reserved below the input bar so the composer does not sit under
+       the device navigation bar. targetSdk 36 enforces edge-to-edge on
+       Android, so 3-button navigation devices report a real inset here
+       (Play-testing screenshot: system back/home/recents drawn over the
+       composer); gesture navigation and desktop report ~0 and lose no
+       space. */
+    --app-bottom-margin: env(safe-area-inset-bottom, 0px);
+
     /* Multiplier for header icon buttons. 1 keeps the historical 28px. */
     --ui-btn-scale: 1;
     --icon-btn-size: 28px;
@@ -416,7 +424,7 @@ html, body {
     bottom: 0;
     display: flex;
     gap: 8px;
-    padding: 10px 12px;
+    padding: 10px 12px calc(10px + var(--app-bottom-margin));
     background: var(--bg-secondary);
     border-top: 1px solid var(--border);
     align-items: flex-end;
@@ -1322,25 +1330,37 @@ html, body {
 /* ===== Math Palette ===== */
 
 .math-palette {
-    position: fixed;
-    bottom: 65px; /* Above input bar */
-    inset-inline: 0;
+    /* In-flow row INSIDE the sticky input bar: reserves its own space, so
+       it can never cover the composer or Run button (Android tester report:
+       the old fixed overlay sat exactly on top of the input it inserts
+       into). */
     background: var(--bg-secondary);
-    border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
-    padding: 8px;
-    z-index: 90;
+    padding: 0 0 8px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    transition: transform 0.3s ease, opacity 0.3s ease;
     box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
 }
 
 .math-palette.hidden {
-    transform: translateY(20px);
-    opacity: 0;
-    pointer-events: none;
+    display: none;
+}
+
+/* Footer stacks the (optional) palette row above the composer row. */
+#input-bar {
+    flex-direction: column;
+    align-items: stretch;
+}
+#input-bar .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+/* The formula button hides when the composer language has no palette. */
+#math-mode-btn.lang-hidden {
+    display: none;
 }
 
 .math-row {

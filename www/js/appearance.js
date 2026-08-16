@@ -116,8 +116,12 @@
             return localStorage.getItem(KEYS.showTourShortcut) !== '0';
         }
 
+        /** Formula palette is opt-in (off by default): its inserts are
+         *  SymPy-specific, and on phones the palette competes with the
+         *  composer for space — users who want it enable it once in
+         *  Appearance. (Owner decision, Play closed-testing feedback.) */
         getShowFormulaShortcut() {
-            return localStorage.getItem(KEYS.showFormulaShortcut) !== '0';
+            return localStorage.getItem(KEYS.showFormulaShortcut) === '1';
         }
 
         /* ---------------------------- writing ---------------------------- */
