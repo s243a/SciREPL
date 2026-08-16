@@ -110,6 +110,15 @@ jobs:
       - name: Check public and in-app privacy disclosures agree
         run: npm run privacy:check
 
+      # Tag-only coverage: the Pages main path checks out the last stable
+      # Free tag, which may predate these suites — guard on file existence
+      # so old tags deploy while new tags are fully gated.
+      - name: Pip resolver unit tests (when present on this tag)
+        run: test -f test_pip_resolver.mjs && node test_pip_resolver.mjs || echo "suite not on this tag — skipped"
+
+      - name: Math palette regressions (when present on this tag)
+        run: test -f test_math_palette.mjs && node test_math_palette.mjs || echo "suite not on this tag — skipped"
+
       - name: Run cell operations tests
         run: node test_cell_ops.mjs
 

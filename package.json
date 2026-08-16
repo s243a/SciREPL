@@ -38,7 +38,9 @@
     "sw:lock": "node scripts/check-sw-shell.mjs --write",
     "licenses:generate": "node scripts/generate-third-party-notices.mjs",
     "licenses:check": "node scripts/generate-third-party-notices.mjs --check",
-    "release:check": "node scripts/check-release-version.mjs"
+    "release:check": "node scripts/check-release-version.mjs",
+    "test:pip-resolver": "node test_pip_resolver.mjs",
+    "test:math-palette": "node test_math_palette.mjs"
   },
   "keywords": [
     "python",
