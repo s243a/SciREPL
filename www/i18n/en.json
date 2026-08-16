@@ -1074,6 +1074,16 @@
     "packageCatalog.item.typrIntroduction.name": "TypR Introduction",
     "packageCatalog.item.typrIntroduction.description": "Typed R superset — variable binding, functions, type annotations, variadic calls, and source/type-check/transpiler directives. Compiles to R via WASM.",
     "packageCatalog.item.prologGeneratesTypr.name": "Prolog Generates TypR",
-    "packageCatalog.item.prologGeneratesTypr.description": "Compile a Prolog transitive-closure predicate to typed TypR, then execute the generated code with native variadic output calls."
+    "packageCatalog.item.prologGeneratesTypr.description": "Compile a Prolog transitive-closure predicate to typed TypR, then execute the generated code with native variadic output calls.",
+    "mathPalette.mdFraction": "Fraction",
+    "mathPalette.mdSquareRoot": "Square root",
+    "mathPalette.mdSuperscript": "Superscript",
+    "mathPalette.mdSubscript": "Subscript",
+    "mathPalette.mdSum": "Sum",
+    "mathPalette.mdIntegral": "Integral",
+    "mathPalette.mdLimit": "Limit",
+    "mathPalette.mdMatrix": "Matrix",
+    "mathPalette.mdNthRoot": "Nth root",
+    "mathPalette.mdInfinity": "Infinity"
   }
 }

@@ -846,6 +846,16 @@
     "packageCatalog.item.typrIntroduction.name": "Einführung in TypR",
     "packageCatalog.item.typrIntroduction.description": "Typisierte R-Obermenge: Variablenbindung, Funktionen, Typannotationen, variadische Aufrufe und source/type-check/transpiler-Direktiven. Kompiliert über WASM nach R.",
     "packageCatalog.item.prologGeneratesTypr.name": "Prolog generiert TypR",
-    "packageCatalog.item.prologGeneratesTypr.description": "Kompilieren Sie ein transitives Prolog-Abschlussprädikat zu typisiertem TypR und führen Sie den generierten Code anschließend mit nativen variadischen Ausgabeaufrufen aus."
+    "packageCatalog.item.prologGeneratesTypr.description": "Kompilieren Sie ein transitives Prolog-Abschlussprädikat zu typisiertem TypR und führen Sie den generierten Code anschließend mit nativen variadischen Ausgabeaufrufen aus.",
+    "mathPalette.mdFraction": "Bruch",
+    "mathPalette.mdSquareRoot": "Quadratwurzel",
+    "mathPalette.mdSuperscript": "Hochgestellt",
+    "mathPalette.mdSubscript": "Tiefgestellt",
+    "mathPalette.mdSum": "Summe",
+    "mathPalette.mdIntegral": "Integral",
+    "mathPalette.mdLimit": "Grenzwert",
+    "mathPalette.mdMatrix": "Matrix",
+    "mathPalette.mdNthRoot": "n-te Wurzel",
+    "mathPalette.mdInfinity": "Unendlich"
   }
 }

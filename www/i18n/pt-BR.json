@@ -838,6 +838,16 @@
     "packageCatalog.item.typrIntroduction.name": "Introdução ao TypR",
     "packageCatalog.item.typrIntroduction.description": "Superconjunto tipado de R: vinculação de variáveis, funções, anotações de tipo, chamadas variádicas e diretivas source/type-check/transpiler. Compila para R via WASM.",
     "packageCatalog.item.prologGeneratesTypr.name": "Prolog gera TypR",
-    "packageCatalog.item.prologGeneratesTypr.description": "Compile um predicado de fechamento transitivo Prolog para TypR tipado e execute o código gerado com chamadas de saída variádicas nativas."
+    "packageCatalog.item.prologGeneratesTypr.description": "Compile um predicado de fechamento transitivo Prolog para TypR tipado e execute o código gerado com chamadas de saída variádicas nativas.",
+    "mathPalette.mdFraction": "Fração",
+    "mathPalette.mdSquareRoot": "Raiz quadrada",
+    "mathPalette.mdSuperscript": "Sobrescrito",
+    "mathPalette.mdSubscript": "Subscrito",
+    "mathPalette.mdSum": "Somatório",
+    "mathPalette.mdIntegral": "Integral",
+    "mathPalette.mdLimit": "Limite",
+    "mathPalette.mdMatrix": "Matriz",
+    "mathPalette.mdNthRoot": "Raiz enésima",
+    "mathPalette.mdInfinity": "Infinito"
   }
 }

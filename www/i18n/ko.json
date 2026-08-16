@@ -831,6 +831,16 @@
     "packageCatalog.item.typrIntroduction.name": "TypR 소개",
     "packageCatalog.item.typrIntroduction.description": "타입이 지정된 R 상위 집합 — 변수 바인딩, 함수, 타입 주석, 가변 인자 호출 및 소스/타입 검사/트랜스파일러 지시문. WASM을 통해 R로 컴파일.",
     "packageCatalog.item.prologGeneratesTypr.name": "Prolog가 TypR 생성",
-    "packageCatalog.item.prologGeneratesTypr.description": "Prolog 이행 폐포 술어를 타입이 지정된 TypR로 컴파일한 다음 기본 가변 인자 출력 호출을 사용하여 생성된 코드를 실행합니다."
+    "packageCatalog.item.prologGeneratesTypr.description": "Prolog 이행 폐포 술어를 타입이 지정된 TypR로 컴파일한 다음 기본 가변 인자 출력 호출을 사용하여 생성된 코드를 실행합니다.",
+    "mathPalette.mdFraction": "분수",
+    "mathPalette.mdSquareRoot": "제곱근",
+    "mathPalette.mdSuperscript": "위 첨자",
+    "mathPalette.mdSubscript": "아래 첨자",
+    "mathPalette.mdSum": "합",
+    "mathPalette.mdIntegral": "적분",
+    "mathPalette.mdLimit": "극한",
+    "mathPalette.mdMatrix": "행렬",
+    "mathPalette.mdNthRoot": "n제곱근",
+    "mathPalette.mdInfinity": "무한대"
   }
 }

@@ -69,6 +69,9 @@ jobs:
       - name: Service worker — shell-guard cannot be bypassed
         run: node test_sw_shell_guard.mjs
 
+      - name: Pip resolver unit tests (deterministic, fixture lockfile)
+        run: node test_pip_resolver.mjs
+
       - name: Start dev server
         run: node server.js &
 
@@ -84,6 +87,9 @@ jobs:
 
       - name: What's New and header shortcuts
         run: node test_whats_new.mjs
+
+      - name: Math palette, contexts, layout invariants
+        run: node test_math_palette.mjs
 
       - name: Right-to-left layout
         run: node test_rtl_layout.mjs

@@ -831,6 +831,16 @@
     "packageCatalog.item.typrIntroduction.name": "TypR परिचय",
     "packageCatalog.item.typrIntroduction.description": "टाइप्ड R सुपरसेट — वेरिएबल बाइंडिंग, फ़ंक्शंस, टाइप एनोटेशन, वरियाडिक कॉल्स और सोर्स/टाइप-चेक/ट्रांसपाइलर निर्देश। WASM के माध्यम से R में संकलित होता है।",
     "packageCatalog.item.prologGeneratesTypr.name": "Prolog से TypR उत्पन्न करना",
-    "packageCatalog.item.prologGeneratesTypr.description": "Prolog ट्रांज़िटिव-क्लोज़र प्रेडिकेट को टाइप्ड TypR में संकलित करें, फिर मूल वरियाडिक आउटपुट कॉल्स के साथ उत्पन्न कोड निष्पादित करें।"
+    "packageCatalog.item.prologGeneratesTypr.description": "Prolog ट्रांज़िटिव-क्लोज़र प्रेडिकेट को टाइप्ड TypR में संकलित करें, फिर मूल वरियाडिक आउटपुट कॉल्स के साथ उत्पन्न कोड निष्पादित करें।",
+    "mathPalette.mdFraction": "भिन्न",
+    "mathPalette.mdSquareRoot": "वर्गमूल",
+    "mathPalette.mdSuperscript": "ऊपरी सूचकांक",
+    "mathPalette.mdSubscript": "निचला सूचकांक",
+    "mathPalette.mdSum": "योग",
+    "mathPalette.mdIntegral": "समाकल",
+    "mathPalette.mdLimit": "सीमा",
+    "mathPalette.mdMatrix": "आव्यूह",
+    "mathPalette.mdNthRoot": "n-वाँ मूल",
+    "mathPalette.mdInfinity": "अनंत"
   }
 }

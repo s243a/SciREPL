@@ -64,6 +64,10 @@ The relevant preferences are:
 - `scirepl_appearance_show_tour_shortcut`
 - `scirepl_appearance_show_formula_shortcut`
 
-The value `0` means hidden; absence means visible. This opt-out representation
-applies the new opt-in Formula default to existing installations as well
-(an explicit earlier choice, stored under its own key, is preserved).
+Because Formula reads its own key, upgrading applies the new opt-in default
+to existing installations as well; an explicit earlier choice, stored under
+its own key, is preserved.
+
+Preference storage semantics: Tour is opt-out (`showTourShortcut` absent or
+any value other than `"0"` means visible); Formula is opt-in (`showFormulaShortcut`
+must be exactly `"1"` to be visible — absence means hidden).
