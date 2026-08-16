@@ -120,29 +120,14 @@ class MathMode {
         this.publishPaletteSpace();
     }
 
-    /** True when the caret sits inside a math span. '$$' and '$' are
-     *  distinct delimiter TOKENS (naive dollar parity says the inside of
-     *  $$x$$ is outside): scan unescaped delimiters as a state machine
-     *  over {outside, inline, display}. */
+    /** True when the caret sits inside a math span — delegated to the ONE
+     *  shared tokenizer (md_math.js) the renderer also uses, so the palette
+     *  and the rendered output can never disagree about what is math:
+     *  escaped '\$', inline code spans (any backtick run length), fenced
+     *  code blocks, and '$' vs '$$' as distinct tokens are all honored. */
     caretInsideMathSpan() {
-        const before = this.input.value.slice(0, this.input.selectionStart);
-        let state = 'outside';
-        for (let i = 0; i < before.length; i++) {
-            const c = before[i];
-            if (c === '\\') { i++; continue; }           // escaped char
-            if (c !== '$') continue;
-            if (before[i + 1] === '$') {
-                if (state === 'outside') state = 'display';
-                else if (state === 'display') state = 'outside';
-                // '$$' inside an inline span is left as literal content
-                i++;
-                continue;
-            }
-            if (state === 'outside') state = 'inline';
-            else if (state === 'inline') state = 'outside';
-            // a single '$' inside display math is literal content
-        }
-        return state !== 'outside';
+        const state = window.MdMath.stateAt(this.input.value, this.input.selectionStart);
+        return state === 'inline' || state === 'display';
     }
 
     /** Insert a LaTeX template. Outside a math span the template is wrapped
