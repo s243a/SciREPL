@@ -112,6 +112,26 @@ check('padded wildcard: ==1.4.* accepts 1.4.0.post1', R.versionSatisfies('1.4.0.
 check('unparseable version -> UNSUPPORTED', throws(() => R.parseVersion('not-a-version'), 'UNSUPPORTED') === true);
 
 check('rc numeric ordering (rc10 > rc2)', R.cmpVersions('1.0rc10', '1.0rc2') > 0);
+check('post attached to a PRERELEASE orders above it (1.0a1.post1 > 1.0a1)',
+    R.cmpVersions('1.0a1.post1', '1.0a1') > 0);
+check('posts on the same prerelease order numerically', R.cmpVersions('1.0a1.post2', '1.0a1.post1') > 0);
+check('1.0a1 does NOT satisfy >=1.0a1.post1',
+    !R.versionSatisfies('1.0a1', [{ op: '>=', version: '1.0a1.post1' }]));
+check('1.0a1.post1 does NOT satisfy ==1.0a1',
+    !R.versionSatisfies('1.0a1.post1', [{ op: '==', version: '1.0a1' }]));
+check('pre+post+dev orders below pre+post', R.cmpVersions('1.0a1.post1.dev2', '1.0a1.post1') < 0);
+check('release beyond 2^53 compares losslessly',
+    R.cmpVersions('9007199254740993', '9007199254740992') > 0);
+check('epoch beyond 2^53 compares losslessly',
+    R.cmpVersions('9007199254740993!1.0', '9007199254740992!1.0') > 0);
+check('pre number beyond 2^53 compares losslessly',
+    R.cmpVersions('1.0a9007199254740993', '1.0a9007199254740992') > 0);
+check('post number beyond 2^53 compares losslessly',
+    R.cmpVersions('1.0.post9007199254740993', '1.0.post9007199254740992') > 0);
+check('dev number beyond 2^53 compares losslessly',
+    R.cmpVersions('1.0.dev9007199254740993', '1.0.dev9007199254740992') > 0);
+check('local numeric segment beyond 2^53 compares losslessly',
+    R.cmpVersions('1.0+9007199254740993', '1.0+9007199254740992') > 0);
 check("'===' arbitrary equality rejected", throws(() => R.parseRequirement('pkg===1.0'), 'UNSUPPORTED') === true);
 check('~= compatible release accepts', R.versionSatisfies('2.9.5', [{ op: '~=', version: '2.9.0' }]));
 check('~= compatible release rejects next minor', !R.versionSatisfies('2.10.0', [{ op: '~=', version: '2.9.0' }]));
@@ -159,6 +179,18 @@ console.log('6b. Differential vs Python packaging (skipped if unavailable)');
             ['1.4', '1.4.0'], ['1.0rc1', '1.0b2'], ['1.0rc10', '1.0rc2'], ['1.0.post1', '1.0.post0'],
             ['1.0+local', '1.0'], ['3.8.4', '3.8.10'], ['0.9', '0.10'], ['1.0b2.dev1', '1.0b2'],
             ['2.0.0rc1', '2.0.0'], ['1.0.post0.dev1', '1.0.post0'],
+            // prerelease+postrelease(+dev) — the round-5 corrections
+            ['1.0a1.post1', '1.0a1'], ['1.0a1.post2', '1.0a1.post1'], ['1.0a1.post1.dev2', '1.0a1.post1'],
+            ['1.0a1.post1', '1.0a2'], ['1.0rc1.post0', '1.0rc1'], ['1.0rc1.post0.dev0', '1.0rc1.post0'],
+            ['1.0a1.post1.dev2', '1.0a1.post1.dev3'], ['1.0b1.post5', '1.0b1.post5.dev9'],
+            // arbitrary-size integer components (beyond 2^53)
+            ['9007199254740993', '9007199254740992'],
+            ['9007199254740993!1.0', '9007199254740992!1.0'],
+            ['1.0a9007199254740993', '1.0a9007199254740992'],
+            ['1.0.post9007199254740993', '1.0.post9007199254740992'],
+            ['1.0.dev9007199254740993', '1.0.dev9007199254740992'],
+            ['1.0+9007199254740993', '1.0+9007199254740992'],
+            ['1.18446744073709551617.5', '1.18446744073709551616.5'],
         ];
         const py = execFileSync('python3', ['-c', `
 import json, sys
@@ -196,13 +228,20 @@ print(json.dumps(out))
             '1.0a1.post2', '1.0+local', '1.0+cu118', '0.9', '1.1', '2.0', '1!1.4.5', '1!1.0',
             '2.9.0', '2.9.0.post0', '1.8', '1.8.dev13', '1.4', '1.4.0', '1.4.5', '1.4.0.post1',
             '2.2', '2.2.post3', '2.2a1', '2.2.dev1', '3.8.4', '3.9.0', '3.1.3',
-            '1.0.post0.dev2', '1.0rc1.post0', '1.0a1+l', '1.2.3.4.5', '10.0', '1.10', '2.2rc1'];
+            '1.0.post0.dev2', '1.0rc1.post0', '1.0a1+l', '1.2.3.4.5', '10.0', '1.10', '2.2rc1',
+            '1.0a1.post1', '1.0a1.post2', '1.0a1.post1.dev2', '1.0rc1.post0.dev0', '1.0b1.post5',
+            '9007199254740992', '9007199254740993', '1.0a9007199254740993',
+            '9007199254740993!1.0', '1.0+9007199254740993'];
         const dSpecs = ['>2.9.0', '>=2.9.0', '<1.8', '<=1.8', '==1.0', '!=1.0', '==1.4.*', '!=1.4.*',
             '~=1.4.0', '~=1!1.4.0', '~=2.2', '>1.0', '<1.0', '>=1.0', '<=1.0', '>1.0.post0',
             '<1.8.dev20', '==2.2.*', '>=1.0a1', '<2.0a1', '~=1.0a1', '>0.9', '!=2.2.*',
             '==1.0+local', '>=1!1.0', '>=1.0,<2.0', '>1.0rc1', '<1.0rc1', '~=1.0.post0',
             '>=1.0.dev1', '==1.*', '!=1.*', '>1.0.dev1', '<1.0.dev1', '<1.0.post0', '~=1.2.3.4',
-            '~=3.1.0', '==1.0.0.*'];
+            '~=3.1.0', '==1.0.0.*',
+            '==1.0a1', '!=1.0a1', '>=1.0a1.post1', '<=1.0a1.post1', '>1.0a1.post1', '<1.0a1.post1',
+            '==1.0a1.post1', '~=1.0a1.post1', '>=1.0a1.post1.dev2', '<1.0a1.post1.dev2',
+            '>9007199254740992', '>=9007199254740993', '==9007199254740993', '<9007199254740993',
+            '>=9007199254740992!1.0', '==1.0+9007199254740993'];
         const dCases = [];
         for (const v of dVersions) for (const s of dSpecs) dCases.push([v, s]);
         const dOurs = dCases.map(([v, s]) => {

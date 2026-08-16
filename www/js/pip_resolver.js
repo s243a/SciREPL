@@ -112,14 +112,19 @@
             e.code = 'UNSUPPORTED';
             throw e;
         }
+        // Numeric components are BigInt: PEP 440 places no bound on epochs,
+        // release segments, or pre/post/dev/local numbers, and Number would
+        // silently collapse values beyond 2^53 (9007199254740993 would
+        // compare equal to ...992).
         return {
-            epoch: m[1] ? Number(m[1]) : 0,
-            release: m[2].split('.').map(Number),
-            // pre: [rank, n]; absent pre sorts ABOVE any pre-release
-            pre: m[3] ? [PRE_RANK[m[3]], m[4] ? Number(m[4]) : 0] : null,
-            post: m[5] !== undefined && m[5] !== null ? Number(m[5] || 0)
-                : (m[6] !== undefined && m[6] !== null ? Number(m[6]) : null),
-            dev: m[7] !== undefined && m[7] !== null ? Number(m[7] || 0) : null,
+            epoch: m[1] ? BigInt(m[1]) : 0n,
+            release: m[2].split('.').map(BigInt),
+            // pre: [rank, n]; ordering of an absent pre is phase-dependent
+            // (see cmpParsed's canonical key)
+            pre: m[3] ? [PRE_RANK[m[3]], m[4] ? BigInt(m[4]) : 0n] : null,
+            post: m[5] !== undefined && m[5] !== null ? BigInt(m[5] || 0)
+                : (m[6] !== undefined && m[6] !== null ? BigInt(m[6]) : null),
+            dev: m[7] !== undefined && m[7] !== null ? BigInt(m[7] || 0) : null,
             local: m[8] || null,
         };
     }
@@ -145,28 +150,40 @@
     const isPrerelease = (p) => p.pre !== null || p.dev !== null;
     const isPostrelease = (p) => p.post !== null;
 
+    /**
+     * Canonical PEP 440 ordering tuple, mirroring packaging's _cmpkey:
+     * (epoch, release, pre, post, dev, local), where
+     *   - pre  is -inf for a DEV-ONLY version (no pre, no post, dev set),
+     *     +inf for a final/post version without pre, else (rank, n) —
+     *     so 1.0a1 < 1.0a1.post1 and 1.0a1.post1.dev2 < 1.0a1.post1;
+     *   - post is -inf when absent (any post sorts above its base);
+     *   - dev  is +inf when absent (any dev sorts below its base);
+     *   - local is -inf when absent; else segment tuples with numeric
+     *     segments above alphanumeric ones.
+     * Every numeric component is BigInt — no precision cliffs.
+     */
     function cmpParsed(va, vb) {
         if (va.epoch !== vb.epoch) return va.epoch < vb.epoch ? -1 : 1;
         const len = Math.max(va.release.length, vb.release.length);
         for (let i = 0; i < len; i++) {
-            const x = va.release[i] || 0, y = vb.release[i] || 0;   // 1.4 == 1.4.0
+            const x = i < va.release.length ? va.release[i] : 0n;   // 1.4 == 1.4.0
+            const y = i < vb.release.length ? vb.release[i] : 0n;
             if (x !== y) return x < y ? -1 : 1;
         }
-        // dev < pre < final < post at the same release number
-        const phase = (p) => p.dev !== null && p.pre === null && p.post === null ? 0
-            : p.pre !== null ? 1 : p.post !== null ? 3 : 2;
-        const pa = phase(va), pb = phase(vb);
-        if (pa !== pb) return pa < pb ? -1 : 1;
-        if (va.pre && vb.pre) {
+        // pre marker: -1 = -inf (dev-only), 0 = actual pre, 1 = +inf
+        const preKind = (p) => p.pre ? 0 : (p.post === null && p.dev !== null ? -1 : 1);
+        const ka = preKind(va), kb = preKind(vb);
+        if (ka !== kb) return ka < kb ? -1 : 1;
+        if (ka === 0) {
             if (va.pre[0] !== vb.pre[0]) return va.pre[0] < vb.pre[0] ? -1 : 1;
             if (va.pre[1] !== vb.pre[1]) return va.pre[1] < vb.pre[1] ? -1 : 1;
         }
-        if (pa === 3 && va.post !== vb.post) return va.post < vb.post ? -1 : 1;
-        // dev segment orders within any phase (X.YaN.devM < X.YaN)
-        const dv = (p) => p.dev === null ? [1, 0] : [0, p.dev];
-        const [da, na] = dv(va), [db, nb] = dv(vb);
-        if (da !== db) return da < db ? -1 : 1;
-        if (na !== nb) return na < nb ? -1 : 1;
+        // post: absent (-inf) < any post — compared REGARDLESS of pre
+        if ((va.post === null) !== (vb.post === null)) return va.post === null ? -1 : 1;
+        if (va.post !== null && va.post !== vb.post) return va.post < vb.post ? -1 : 1;
+        // dev: absent (+inf) > any dev — compared regardless of pre/post
+        if ((va.dev === null) !== (vb.dev === null)) return va.dev === null ? 1 : -1;
+        if (va.dev !== null && va.dev !== vb.dev) return va.dev < vb.dev ? -1 : 1;
         // local versions: absent < present; both present -> segment compare
         if (!va.local && !vb.local) return 0;
         if (!va.local) return -1;
@@ -176,7 +193,7 @@
             const x = la[i], y = lb[i];
             if (x === undefined) return -1;
             if (y === undefined) return 1;
-            const nx = /^\d+$/.test(x) ? Number(x) : null, ny = /^\d+$/.test(y) ? Number(y) : null;
+            const nx = /^\d+$/.test(x) ? BigInt(x) : null, ny = /^\d+$/.test(y) ? BigInt(y) : null;
             if (nx !== null && ny !== null) { if (nx !== ny) return nx < ny ? -1 : 1; }
             else if (nx !== null) return 1;      // numeric > alpha per PEP 440 local rules
             else if (ny !== null) return -1;
@@ -250,7 +267,7 @@
                 // earliest pre-release (V with dev=0), unless V is itself a
                 // pre-release
                 if (!isPrerelease(spec) && isPrerelease(cand)
-                    && cmpParsed(cand, { ...spec, dev: 0, local: null }) >= 0) return false;
+                    && cmpParsed(cand, { ...spec, dev: 0n, local: null }) >= 0) return false;
                 return true;
             }
             case '~=': {
