@@ -91,6 +91,45 @@ check('local version sorts above public', R.cmpVersions('1.0+cu118', '1.0') > 0)
 check('padded wildcard: ==1.4.* accepts 1.4.0.post1', R.versionSatisfies('1.4.0.post1', [{ op: '==', version: '1.4.*' }]));
 check('unparseable version -> UNSUPPORTED', throws(() => R.parseVersion('not-a-version'), 'UNSUPPORTED') === true);
 
+check('rc numeric ordering (rc10 > rc2)', R.cmpVersions('1.0rc10', '1.0rc2') > 0);
+check("'===' arbitrary equality rejected", throws(() => R.parseRequirement('pkg===1.0'), 'UNSUPPORTED') === true);
+check('~= compatible release accepts', R.versionSatisfies('2.9.5', [{ op: '~=', version: '2.9.0' }]));
+check('~= compatible release rejects next minor', !R.versionSatisfies('2.10.0', [{ op: '~=', version: '2.9.0' }]));
+
+console.log('6b. Differential vs Python packaging (skipped if unavailable)');
+{
+    const { execFileSync } = await import('node:child_process');
+    let available = false;
+    try { execFileSync('python3', ['-c', 'import packaging.version'], { stdio: 'ignore' }); available = true; } catch (_) { }
+    if (!available) {
+        console.log('  [SKIP] python3 packaging not available');
+    } else {
+        const pairs = [
+            ['2.9.0.post0', '2.9.0'], ['1.0a1', '1.0'], ['1.0.dev1', '1.0a1'], ['1!1.0', '2.0'],
+            ['1.4', '1.4.0'], ['1.0rc1', '1.0b2'], ['1.0rc10', '1.0rc2'], ['1.0.post1', '1.0.post0'],
+            ['1.0+local', '1.0'], ['3.8.4', '3.8.10'], ['0.9', '0.10'], ['1.0b2.dev1', '1.0b2'],
+            ['2.0.0rc1', '2.0.0'], ['1.0.post0.dev1', '1.0.post0'],
+        ];
+        const py = execFileSync('python3', ['-c', `
+import json, sys
+from packaging.version import Version
+pairs = json.load(sys.stdin)
+out = []
+for a, b in pairs:
+    va, vb = Version(a), Version(b)
+    out.append(-1 if va < vb else (1 if va > vb else 0))
+print(json.dumps(out))
+`], { input: JSON.stringify(pairs), encoding: 'utf8' });
+        const expected = JSON.parse(py.trim());
+        let diff = 0;
+        pairs.forEach(([a, b], i) => {
+            const got = Math.sign(R.cmpVersions(a, b));
+            if (got !== expected[i]) { console.log(`  [FAIL] differential ${a} vs ${b}: ours ${got}, packaging ${expected[i]}`); diff++; failures++; }
+        });
+        check(`differential: ${pairs.length} comparisons agree with packaging.version`, diff === 0);
+    }
+}
+
 console.log('7. Whole-line atomic parsing');
 check('-r rejects the WHOLE line (never installs requirements.txt)',
     throws(() => R.parsePipLine('-r requirements.txt'), 'UNSUPPORTED') === true);

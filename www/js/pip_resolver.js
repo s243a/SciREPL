@@ -50,9 +50,10 @@
             for (const clause of rest.split(',')) {
                 const c = clause.trim();
                 if (!c) continue;
-                const sm = /^(===|==|!=|~=|>=|<=|>|<)\s*([A-Za-z0-9!+*._-]+)$/.exec(c);
+                if (c.startsWith('===')) fail("arbitrary equality '===' is not supported");
+                const sm = /^(==|!=|~=|>=|<=|>|<)\s*([A-Za-z0-9!+*._-]+)$/.exec(c);
                 if (!sm) fail(`bad specifier clause '${c}'`);
-                specifiers.push({ op: sm[1] === '===' ? '==' : sm[1], version: sm[2] });
+                specifiers.push({ op: sm[1], version: sm[2] });
             }
         }
         return { name, norm: normName(name), extras, specifiers, raw: text };
