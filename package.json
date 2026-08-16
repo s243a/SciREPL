@@ -40,6 +40,7 @@
     "licenses:check": "node scripts/generate-third-party-notices.mjs --check",
     "release:check": "node scripts/check-release-version.mjs",
     "test:pip-resolver": "node test_pip_resolver.mjs",
+    "test:pip-cell": "node test_pip_cell.mjs",
     "test:math-palette": "node test_math_palette.mjs"
   },
   "keywords": [

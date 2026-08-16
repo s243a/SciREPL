@@ -239,21 +239,21 @@
      * Supports $inline$ and $$display$$ math blocks.
      */
     function renderMarkdown(text) {
+        // Math extraction is delegated to the SHARED tokenizer (md_math.js,
+        // also used by the Formula palette): escape-aware, code-span- and
+        // fence-aware, '$' vs '$$' as distinct tokens. Regexes here once
+        // matched the '\$5' in "costs \$5 today" as a math delimiter.
         const mathBlocks = [];
-
-        // Replace $$...$$ display math
-        let processed = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, tex) => {
-            const id = `%%MATH_BLOCK_${mathBlocks.length}%%`;
-            mathBlocks.push({ tex: tex.trim(), display: true });
-            return id;
-        });
-
-        // Replace $...$ inline math (not greedy, no newlines)
-        processed = processed.replace(/\$([^\$\n]+?)\$/g, (match, tex) => {
-            const id = `%%MATH_BLOCK_${mathBlocks.length}%%`;
-            mathBlocks.push({ tex: tex.trim(), display: false });
-            return id;
-        });
+        let processed = '';
+        for (const r of window.MdMath.scan(text)) {
+            if (r.type === 'math') {
+                const id = `%%MATH_BLOCK_${mathBlocks.length}%%`;
+                mathBlocks.push({ tex: text.slice(r.bodyStart, r.bodyEnd).trim(), display: !!r.display });
+                processed += id;
+            } else {
+                processed += text.slice(r.start, r.end);
+            }
+        }
 
         let html = marked.parse(processed);
 
@@ -861,14 +861,15 @@
             }
         };
         const loadFiles = async (files) => {
-            await pyodide.loadPackage(files.map(f => cdnBase + f));
+            // lock file_name entries are CDN-relative; absolute URLs pass through
+            await pyodide.loadPackage(files.map(f => /^https?:\/\//i.test(f) ? f : cdnBase + f));
             pyodide.runPython(`import importlib; importlib.invalidate_caches()`);
         };
         const version = installedVersion(req.name);
         if (version && !R.versionSatisfies(version, req.specifiers)) {
             return { ok: false, healed: 0, message:
-                `%pip: '${req.raw}' cannot be satisfied — this environment has ${req.name} ${version}, ` +
-                `and the Pyodide distribution pins one version per release.` };
+                `%pip: '${req.raw}' cannot be satisfied — this environment already has ${req.name} ${version}, ` +
+                `which does not match, and the Pyodide distribution pins one version per release.` };
         }
         let lock = null;
         try {
@@ -879,20 +880,38 @@
             }
             lock = window._pyodideCdnLock;
         } catch (_) { /* verify without recovery below */ }
-        const loadedNorms = () => new Set(Object.keys(pyodide.loadedPackages).map(R.normName));
+        // "Present" = loaded in pyodide OR carrying importlib metadata (a
+        // PyPI/micropip install this call didn't make). Consulted during
+        // graph traversal so present wheels are never reloaded — and never
+        // downgraded to the lock's copy.
+        const presentNorms = () => {
+            const base = new Set(Object.keys(pyodide.loadedPackages).map(R.normName));
+            return { has: (n) => base.has(n) || installedVersion(n) !== null };
+        };
         const entry = lock ? R.indexLock(lock)[req.norm] : null;
         // The lock's pinned version gates ONLY when the lock is the SOURCE;
         // a satisfying install from any origin (micropip/PyPI) takes
-        // precedence, and the lock then serves purely to heal dependencies.
+        // precedence, and the lock then serves purely as a dependency graph.
         if (!version) {
             if (entry && !R.versionSatisfies(entry.version, req.specifiers)) {
                 return { ok: false, healed: 0, message:
                     `%pip: '${req.raw}' cannot be satisfied: the Pyodide distribution provides ${req.name} ${entry.version} only.` };
             }
             if (entry) {
-                try { await loadFiles(R.resolveFromLock(lock, req, loadedNorms()).files); }
+                try { await loadFiles(R.resolveFromLock(lock, req, presentNorms()).files); }
                 catch (e) { return { ok: false, healed: 0, message: `%pip: ${e.message}` }; }
             }
+        } else if (lock) {
+            // The root is already satisfied outside the lock, but installed
+            // metadata says NOTHING about the dependency closure (a directly
+            // loaded wheel brings none of its deps). Always walk the lock's
+            // declared dependencies and load the missing ones — without
+            // re-applying the lock's root version, which the satisfying
+            // installed version outranks.
+            try {
+                const depFiles = R.resolveDepsOf(lock, req.norm, presentNorms());
+                if (depFiles.length) await loadFiles(depFiles);
+            } catch (_) { /* the import verification below reports honestly */ }
         }
         const importName = entry ? R.importNamesOf(entry, req.name)[0] : req.norm.replace(/-/g, '_');
         let verdict = tryImport(importName);
@@ -901,7 +920,7 @@
         while (!verdict.ok && verdict.missing && healed < 6) {
             const distNorm = impIdx[verdict.missing] || R.normName(verdict.missing);
             let resolved;
-            try { resolved = R.resolveFromLock(lock || { packages: {} }, R.parseRequirement(distNorm), loadedNorms()); }
+            try { resolved = R.resolveFromLock(lock || { packages: {} }, R.parseRequirement(distNorm), presentNorms()); }
             catch (_) { break; }
             if (!resolved.files.length) break;
             try { await loadFiles(resolved.files); } catch (_) { break; }
@@ -943,6 +962,10 @@
                 const lines = code.split('\n');
                 const remainingLines = [];
                 const requirements = [];
+                // A rejected or unverified %pip line FAILS THE CELL: the
+                // Python tail must never run against packages the user did
+                // not get (or pre-existing incompatible ones).
+                const failures = [];
                 for (const line of lines) {
                     const pm = line.match(/^%pip\s+install\s+(.+)$/);
                     if (!pm) { remainingLines.push(line); continue; }
@@ -950,12 +973,14 @@
                     try {
                         parsed = R.parsePipLine(pm[1]);
                     } catch (e) {
-                        window.renderText(`%pip: ${e.message} — line skipped entirely`, true);
+                        failures.push(e.message);
+                        window.renderText(`%pip: ${e.message} — nothing on this line was installed`, true);
                         continue;
                     }
                     const withExtras = parsed.filter(r => r.extras.length);
                     if (withExtras.length) {
-                        window.renderText(`%pip: extras are not supported yet (${withExtras.map(r => r.raw).join(', ')}) — line skipped entirely`, true);
+                        failures.push(`extras are not supported yet (${withExtras.map(r => r.raw).join(', ')})`);
+                        window.renderText(`%pip: extras are not supported yet (${withExtras.map(r => r.raw).join(', ')}) — nothing on this line was installed`, true);
                         continue;
                     }
                     requirements.push(...parsed);
@@ -976,10 +1001,18 @@ sys.stdout = _pip_stdout
                 for (const req of requirements) {
                     const r = await window.ensurePyodidePackage(req.raw);
                     if (r.message) window.renderText(r.message, !r.ok);
+                    if (!r.ok) failures.push(r.message || `'${req.raw}' failed`);
+                }
+
+                if (failures.length) {
+                    const summary = `%pip: install failed — the rest of this cell was not executed`;
+                    window.renderText(summary, true);
+                    return { stdout: '', result: null, error: summary };
                 }
 
                 // ---- matplotlib inline hook: MUST be live before the same
-                // cell's remaining code runs; failures are surfaced. ----
+                // cell's remaining code runs; failures are surfaced. Only
+                // reached when every requirement verified ok. ----
                 try {
                     pyodide.runPython(`
 if 'matplotlib' in sys.modules or importlib.util.find_spec('matplotlib'):

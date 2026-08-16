@@ -49,3 +49,6 @@ desktop/electron/test/results/
 # Python bytecode from the locale build scripts
 __pycache__/
 *.pyc
+
+# Built at test time by test_pip_cell.mjs
+www/test_fixtures/
