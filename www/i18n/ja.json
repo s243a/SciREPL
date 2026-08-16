@@ -118,7 +118,7 @@
     "tour.progress": "{total} 中 {current}",
     "help.showTour": "ツアーを再表示",
     "help.showWhatsNew": "このバージョンの新機能",
-    "help.headerShortcuts": "ヘッダーのショートカット：🧭 ツアーと ∑ 数式のボタンはデフォルトで表示されます。外観 → ヘッダーのショートカットで、どちらも個別に非表示または再表示できます。",
+    "help.headerShortcuts": "ヘッダーのショートカット：🧭 ツアーのボタンはデフォルトで表示されます。∑ 数式のボタンはデフォルトでは無効です。外観 → ヘッダーのショートカットで有効にできます。数式は Python コードと Markdown セルで利用できます。",
     "help.openSourceLicenses": "オープンソースライセンス",
     "header.takeTourTitle": "ツアーを開始",
     "whatsNew.displayLanguage": "表示言語",

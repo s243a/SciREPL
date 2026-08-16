@@ -132,7 +132,7 @@
     "tour.progress": "{current} von {total}",
     "help.showTour": "Tour erneut anzeigen",
     "help.showWhatsNew": "Neues in dieser Version",
-    "help.headerShortcuts": "Verknüpfungen in der Kopfzeile: Die Schaltflächen 🧭 Tour und ∑ Formel werden standardmäßig angezeigt. Unter Erscheinungsbild → Verknüpfungen in der Kopfzeile können Sie beide einzeln ausblenden oder wiederherstellen.",
+    "help.headerShortcuts": "Verknüpfungen in der Kopfzeile: Die Schaltfläche 🧭 Tour wird standardmäßig angezeigt. Die Schaltfläche ∑ Formel ist standardmäßig deaktiviert – aktivieren Sie sie unter Erscheinungsbild → Verknüpfungen in der Kopfzeile. Formel erscheint für Python-Code und Markdown-Zellen.",
     "help.openSourceLicenses": "Open-Source-Lizenzen",
     "header.takeTourTitle": "Tour starten",
     "whatsNew.displayLanguage": "Anzeigesprache",

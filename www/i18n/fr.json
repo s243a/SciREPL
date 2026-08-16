@@ -129,7 +129,7 @@
     "tour.progress": "{current} sur {total}",
     "help.showTour": "Revoir la visite guidée",
     "help.showWhatsNew": "Nouveautés de cette version",
-    "help.headerShortcuts": "Raccourcis de l’en-tête : les boutons 🧭 Visite guidée et ∑ Formule sont affichés par défaut. Masquez ou restaurez l’un ou l’autre sous Apparence → Raccourcis de l’en-tête.",
+    "help.headerShortcuts": "Raccourcis de l’en-tête : le bouton 🧭 Visite guidée est affiché par défaut. Le bouton ∑ Formule est désactivé par défaut — activez-le sous Apparence → Raccourcis de l’en-tête. Formule apparaît pour le code Python et les cellules Markdown.",
     "help.openSourceLicenses": "Licences open source",
     "header.takeTourTitle": "Commencer la visite guidée",
     "whatsNew.displayLanguage": "Langue d’affichage",

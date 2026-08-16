@@ -126,7 +126,7 @@
     "tour.progress": "{current} de {total}",
     "help.showTour": "Ver el recorrido otra vez",
     "help.showWhatsNew": "Novedades de esta versión",
-    "help.headerShortcuts": "Accesos directos del encabezado: los botones 🧭 Recorrido y ∑ Fórmula se muestran de forma predeterminada. Oculta o restaura cualquiera de ellos en Apariencia → Accesos directos del encabezado.",
+    "help.headerShortcuts": "Accesos directos del encabezado: el botón 🧭 Recorrido se muestra de forma predeterminada. El botón ∑ Fórmula está desactivado de forma predeterminada; actívalo en Apariencia → Accesos directos del encabezado. Fórmula aparece para código Python y celdas Markdown.",
     "help.openSourceLicenses": "Licencias de código abierto",
     "header.takeTourTitle": "Iniciar el recorrido",
     "whatsNew.displayLanguage": "Idioma de la interfaz",

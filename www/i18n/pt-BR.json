@@ -124,7 +124,7 @@
     "tour.progress": "{current} de {total}",
     "help.showTour": "Mostrar tour novamente",
     "help.showWhatsNew": "Novidades desta versão",
-    "help.headerShortcuts": "Atalhos do cabeçalho: os botões 🧭 Tour e ∑ Fórmula são exibidos por padrão. Oculte ou restaure qualquer um deles em Aparência → Atalhos do cabeçalho.",
+    "help.headerShortcuts": "Atalhos do cabeçalho: o botão 🧭 Tour é exibido por padrão. O botão ∑ Fórmula fica desativado por padrão — ative-o em Aparência → Atalhos do cabeçalho. Fórmula aparece para código Python e células Markdown.",
     "help.openSourceLicenses": "Licenças de código aberto",
     "header.takeTourTitle": "Iniciar o tour",
     "whatsNew.displayLanguage": "Idioma da interface",

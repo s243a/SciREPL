@@ -117,7 +117,7 @@
     "tour.progress": "{total} 중 {current}",
     "help.showTour": "둘러보기 다시 보기",
     "help.showWhatsNew": "이 버전의 새로운 기능",
-    "help.headerShortcuts": "헤더 바로가기: 🧭 둘러보기와 ∑ 수식 버튼은 기본적으로 표시됩니다. 모양 및 화면 → 헤더 바로가기에서 각 버튼을 숨기거나 다시 표시할 수 있습니다.",
+    "help.headerShortcuts": "헤더 바로가기: 🧭 둘러보기 버튼은 기본적으로 표시됩니다. ∑ 수식 버튼은 기본적으로 꺼져 있으며, 모양 및 화면 → 헤더 바로가기에서 켤 수 있습니다. 수식은 Python 코드와 Markdown 셀에서 사용할 수 있습니다.",
     "help.openSourceLicenses": "오픈 소스 라이선스",
     "header.takeTourTitle": "둘러보기 시작",
     "whatsNew.displayLanguage": "표시 언어",

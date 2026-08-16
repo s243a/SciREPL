@@ -125,7 +125,7 @@
     "tour.progress": "{current} dari {total}",
     "help.showTour": "Tampilkan tur lagi",
     "help.showWhatsNew": "Yang baru dalam versi ini",
-    "help.headerShortcuts": "Pintasan header: tombol 🧭 Tur dan ∑ Rumus ditampilkan secara default. Sembunyikan atau tampilkan kembali salah satunya melalui Tampilan → Pintasan header.",
+    "help.headerShortcuts": "Pintasan header: tombol 🧭 Tur ditampilkan secara default. Tombol ∑ Rumus nonaktif secara default — aktifkan melalui Tampilan → Pintasan header. Rumus muncul untuk kode Python dan sel Markdown.",
     "help.openSourceLicenses": "Lisensi sumber terbuka",
     "header.takeTourTitle": "Mulai tur",
     "whatsNew.displayLanguage": "Bahasa tampilan",
