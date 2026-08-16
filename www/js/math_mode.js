@@ -85,6 +85,7 @@ class MathMode {
     _measureFooterOverlay() {
         const bar = document.getElementById('input-bar');
         if (!bar) return;
+        this._publishFooterBudget(bar);
         const barTop = bar.getBoundingClientRect().top;
         for (const scroller of document.querySelectorAll('#repl, .repl-container')) {
             if (!this._observedScrollers.has(scroller)) {
@@ -97,6 +98,52 @@ class MathMode {
         }
     }
 
+    /** Budget the footer's interior so its CONTENT always ends above the
+     *  bottom safe-area boundary (innerHeight - inset): the composer is
+     *  capped first (min one line), the palette gets the leftover (it
+     *  collapses to a scrollable strip — or nothing — before composer or
+     *  Run may enter the unsafe region), and a small notebook slice is
+     *  reserved whenever physically possible. The inset is derived from the
+     *  bar's RESOLVED padding, so Capacitor vars and env() both count. */
+    _publishFooterBudget(bar) {
+        const header = document.getElementById('app-header');
+        const paletteOpen = this.palette && !this.palette.classList.contains('hidden');
+        const cs = getComputedStyle(bar);
+        const pads = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+        const gap = parseFloat(cs.rowGap || cs.gap) || 8;
+        const vh = window.visualViewport
+            ? Math.min(window.innerHeight, window.visualViewport.height)
+            : window.innerHeight;
+        const headerBottom = header ? header.getBoundingClientRect().bottom : 0;
+        // measured minimum row height: the non-composer children (control
+        // stack, Run) set the floor — at narrow widths the controls are
+        // taller than the composer's single line
+        const controls = document.getElementById('input-controls');
+        const runBtn = document.getElementById('run-btn');
+        const rowMin = Math.max(44,
+            controls ? controls.getBoundingClientRect().height : 0,
+            runBtn ? runBtn.getBoundingClientRect().height : 0);
+        // one FULL palette button row, in border-box pixels of the palette
+        const palCs = this.palette ? getComputedStyle(this.palette) : null;
+        const palChrome = palCs
+            ? (parseFloat(palCs.paddingTop) || 0) + (parseFloat(palCs.paddingBottom) || 0)
+                + (parseFloat(palCs.borderTopWidth) || 0) + (parseFloat(palCs.borderBottomWidth) || 0)
+            : 9;
+        const PALETTE_ROW = 36 + palChrome;
+        const minContent = rowMin + (paletteOpen ? gap + PALETTE_ROW : 0);
+        const leftover = vh - headerBottom - pads - minContent;
+        const notebookReserve = Math.max(0, Math.min(40, leftover));
+        const content = Math.max(0, vh - headerBottom - pads - notebookReserve);
+        const rowCap = Math.min(200, Math.max(rowMin, content - (paletteOpen ? gap + PALETTE_ROW : 0)));
+        const input = this.input;
+        const naturalRow = Math.max(rowMin,
+            input ? Math.min(input.scrollHeight || 44, 200) : 44);
+        const rowH = Math.min(naturalRow, rowCap);
+        bar.style.setProperty('--sci-composer-max', rowCap + 'px');
+        bar.style.setProperty('--sci-palette-max',
+            paletteOpen ? Math.max(0, content - rowH - gap) + 'px' : '32vh');
+    }
+
     _installGeometryObservers() {
         this._observedScrollers = new Set();
         this._resizeObserver = new ResizeObserver(() => this._measureFooterOverlay());
@@ -104,6 +151,12 @@ class MathMode {
         if (bar) this._resizeObserver.observe(bar);
         window.addEventListener('resize', () => this._measureFooterOverlay());
         if (window.visualViewport) window.visualViewport.addEventListener('resize', () => this._measureFooterOverlay());
+        // composer growth may be CAPPED (bar size unchanged -> no resize
+        // event), and safe-area insets arrive as style mutations on the
+        // document element — both must re-run the budget
+        if (this.input) this.input.addEventListener('input', () => this.publishPaletteSpace());
+        this._insetObserver = new MutationObserver(() => this.publishPaletteSpace());
+        this._insetObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
         this._measureFooterOverlay();
     }
 

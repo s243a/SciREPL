@@ -195,6 +195,68 @@ try {
         codeProbe.fence.katex === 1 && codeProbe.fence.text.includes('$notmath$'), JSON.stringify(codeProbe.fence));
     check('variable-length backtick span protects its $',
         codeProbe.doubletick.katex === 1 && codeProbe.doubletick.text.includes('a`$b'), JSON.stringify(codeProbe.doubletick));
+    // STRUCTURAL protection: math is recognized only in eligible inline
+    // text — link destinations, autolinks, image sources, raw-HTML
+    // attributes, and indented code stay byte-for-byte intact.
+    const structProbe = await page.evaluate(() => {
+        const one = (t) => {
+            const d = document.createElement('div');
+            d.innerHTML = window._appInternals.renderMarkdown(t);
+            return { katex: d.querySelectorAll('.katex').length, html: d.innerHTML,
+                     aHref: d.querySelector('a') ? d.querySelector('a').getAttribute('href') : null,
+                     imgSrc: d.querySelector('img') ? d.querySelector('img').getAttribute('src') : null,
+                     spanTitle: d.querySelector('span[title]') ? d.querySelector('span[title]').getAttribute('title') : null,
+                     pre: d.querySelector('pre') ? d.querySelector('pre').textContent : null,
+                     text: d.textContent };
+        };
+        return {
+            linkDest: one('[link](https://example.com/$x$/file)'),
+            autolink: one('<https://example.com/$x$/file>'),
+            imageSrc: one('![alt](https://example.com/$x$.png)'),
+            htmlAttr: one('<span title="$x$">label</span>'),
+            indented: one('para\n\n    $x$'),
+            placeholder: one('literal %%MATH_BLOCK_0%% and $y$'),
+            labelMath: one('[$x$](https://example.com/)'),
+            sanitizer: one('$x$ <img src=x onerror="window.__pwned=1">'),
+        };
+    });
+    check('link DESTINATION with $x$ stays byte-intact (no katex, href whole)',
+        structProbe.linkDest.katex === 0 && structProbe.linkDest.aHref === 'https://example.com/$x$/file',
+        JSON.stringify(structProbe.linkDest.aHref));
+    check('autolink with $x$ stays byte-intact',
+        structProbe.autolink.katex === 0 && structProbe.autolink.aHref === 'https://example.com/$x$/file',
+        JSON.stringify(structProbe.autolink.aHref));
+    // the app sanitizer strips NETWORK image srcs by design (privacy
+    // policy, pre-existing); byte-intactness of the URL is asserted at the
+    // marked stage, and the sanitizer's stripping is asserted unchanged
+    const imgStage = await page.evaluate(() => {
+        const d = document.createElement('div');
+        d.innerHTML = window.marked.parse('![alt](https://example.com/$x$.png)');
+        const img = d.querySelector('img');
+        return { katex: d.querySelectorAll('.katex').length, src: img ? img.getAttribute('src') : null };
+    });
+    check('image SOURCE with $x$ stays byte-intact at the markdown stage',
+        imgStage.katex === 0 && imgStage.src === 'https://example.com/$x$.png', JSON.stringify(imgStage));
+    check('sanitizer still strips network image srcs (no katex, no truncated URL)',
+        structProbe.imageSrc.katex === 0 && structProbe.imageSrc.imgSrc === null
+        && !structProbe.imageSrc.html.includes('example.com/$'),
+        JSON.stringify(structProbe.imageSrc.imgSrc));
+    check('raw-HTML attribute with $x$ stays intact (no katex, title whole)',
+        structProbe.htmlAttr.katex === 0 && structProbe.htmlAttr.spanTitle === '$x$'
+        && structProbe.htmlAttr.text.includes('label'),
+        JSON.stringify({ t: structProbe.htmlAttr.spanTitle, text: structProbe.htmlAttr.text }));
+    check('indented code block with $x$ is NOT math',
+        structProbe.indented.katex === 0 && (structProbe.indented.pre || '').includes('$x$'),
+        JSON.stringify(structProbe.indented.pre));
+    check('literal %%MATH_BLOCK_0%% stays where the user wrote it, $y$ still renders',
+        structProbe.placeholder.katex === 1 && structProbe.placeholder.text.includes('%%MATH_BLOCK_0%%'),
+        JSON.stringify(structProbe.placeholder.text));
+    check('math in a link LABEL still renders (one katex inside the anchor)',
+        structProbe.labelMath.katex === 1 && structProbe.labelMath.aHref === 'https://example.com/',
+        JSON.stringify(structProbe.labelMath.aHref));
+    check('sanitized output stays inert (onerror stripped, math still rendered)',
+        structProbe.sanitizer.katex === 1 && !structProbe.sanitizer.html.includes('onerror'),
+        structProbe.sanitizer.html.slice(0, 120));
     // palette insertion AFTER code regions containing $ — caret is outside
     // math, so the insert must still wrap (the code-span $ must not flip state)
     const insertAfter = async (prefix) => {
@@ -222,6 +284,27 @@ try {
         return window.MdMath.stateAt(i.value, 3);
     });
     check("caret inside a code span reports 'code' (never inline/display)", inCode === 'code', inCode);
+    // palette context matches the renderer's protected contexts
+    const ctxProbe = await page.evaluate(() => {
+        const st = (v, p) => window.MdMath.stateAt(v, p);
+        return {
+            inLinkDest: st('[t](https://e.com/$x$/f)', 12),           // inside the URL
+            afterLinkDest: st('[t](https://e.com/$x$/f) ', 25),       // after the link
+            inAutolink: st('<https://e.com/$x$/f>', 10),
+            inHtmlAttr: st('<span title="$x$">', 15),
+            inIndented: st('para\n\n    $x$\n', 12),
+            afterIndented: st('para\n\n    $x$\n\ntail ', 21),
+        };
+    });
+    check("caret inside a link destination reports 'code'", ctxProbe.inLinkDest === 'code', ctxProbe.inLinkDest);
+    check("caret after a $-bearing link is 'outside' (URL $ did not flip state)", ctxProbe.afterLinkDest === 'outside', ctxProbe.afterLinkDest);
+    check("caret inside an autolink reports 'code'", ctxProbe.inAutolink === 'code', ctxProbe.inAutolink);
+    check("caret inside a raw-HTML attribute reports 'code'", ctxProbe.inHtmlAttr === 'code', ctxProbe.inHtmlAttr);
+    check("caret inside indented code reports 'code'", ctxProbe.inIndented === 'code', ctxProbe.inIndented);
+    check("caret after indented code is 'outside'", ctxProbe.afterIndented === 'outside', ctxProbe.afterIndented);
+    // insertion after a $-bearing URL wraps correctly (parity preserved)
+    check('insertion after a link with $ in its URL wraps correctly',
+        (await insertAfter('[t](https://e.com/$x$/f) ')) === '[t](https://e.com/$x$/f) $\\sqrt{}$');
     await page.context().close();
 
     console.log('4. Footer layout invariants');
@@ -460,81 +543,110 @@ try {
         JSON.stringify(lateInset));
     await page.context().close();
 
-    console.log('5i. WORST CASE: 320x240 + 48px inset + open palette + grown composer');
-    page = await freshPage({ viewport: { width: 320, height: 240 } });
-    await enableFormula(page);
-    await page.evaluate(() => document.documentElement.style.setProperty('--safe-area-inset-bottom', '48px'));
-    await page.click('#cell-type-toggle');          // markdown palette (2 rows, 10 buttons)
-    await page.click('#math-mode-btn');
-    await page.evaluate(() => {
-        const i = document.getElementById('code-input');
-        i.value = Array.from({ length: 10 }, (_, n) => 'line ' + n).join('\n');   // grown to max
-        i.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-    await page.waitForTimeout(300);
-    const worst = await page.evaluate(() => {
-        const header = document.getElementById('app-header').getBoundingClientRect();
-        const bar = document.getElementById('input-bar').getBoundingClientRect();
+    console.log('5i. SAFE-AREA BOUNDARY: every control above innerHeight - inset');
+    // helpers evaluate the REAL boundary (inset derived from the footer's
+    // resolved padding), and hit-test FULL rectangles (4 corners + center)
+    const boundaryProbe = () => page.evaluate(() => {
+        const bar = document.getElementById('input-bar');
+        const inset = Math.max(0, (parseFloat(getComputedStyle(bar).paddingBottom) || 0) - 10);
+        const boundary = innerHeight - inset;
+        const headerBottom = document.getElementById('app-header').getBoundingClientRect().bottom;
+        const within = (r) => r.top >= headerBottom - 1 && r.bottom <= boundary + 1;
         const input = document.getElementById('code-input').getBoundingClientRect();
         const run = document.getElementById('run-btn').getBoundingClientRect();
-        const vh = window.innerHeight;
+        const scroller = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
         return {
-            headerVisible: header.top >= 0 && header.bottom > 0,
-            footerBelowHeader: bar.top >= header.bottom - 1,
-            footerOnScreen: bar.bottom <= vh + 1,
-            composerVisible: input.top >= header.bottom - 1 && input.bottom <= vh + 1 && input.height >= 30,
-            runUsable: run.top >= header.bottom - 1 && run.bottom <= vh + 1 && run.height >= 20,
+            boundary: Math.round(boundary),
+            composerOk: within(input) && input.height >= 30,
+            runOk: within(run) && run.height >= 20,
+            notebookH: scroller ? Math.round(scroller.getBoundingClientRect().height) : 0,
+            inputBottom: Math.round(input.bottom), runBottom: Math.round(run.bottom),
         };
     });
-    check('header visible, footer below it and on screen', worst.headerVisible && worst.footerBelowHeader && worst.footerOnScreen, JSON.stringify(worst));
-    check('grown composer stays visible and usable', worst.composerVisible, JSON.stringify(worst));
-    check('Run button fully on screen', worst.runUsable, JSON.stringify(worst));
-    // EVERY palette button: scroll into view, then center-point hit-test;
-    // no hit target may be covered by the header
-    const worstHits = await page.evaluate(async () => {
+    const paletteFullRect = () => page.evaluate(async () => {
+        const bar = document.getElementById('input-bar');
+        const inset = Math.max(0, (parseFloat(getComputedStyle(bar).paddingBottom) || 0) - 10);
+        const boundary = innerHeight - inset;
         const headerBottom = document.getElementById('app-header').getBoundingClientRect().bottom;
         const palette = document.getElementById('math-palette');
         const buttons = [...palette.querySelectorAll('button')]
             .filter(b => getComputedStyle(b).display !== 'none' && b.offsetParent !== null);
-        const results = [];
+        let ok = 0; const bad = [];
         for (const b of buttons) {
             b.scrollIntoView({ block: 'nearest', behavior: 'instant' });
             await new Promise(r => requestAnimationFrame(r));
             const r = b.getBoundingClientRect();
-            const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-            const el = document.elementFromPoint(cx, cy);
-            results.push({
-                hit: b === el || b.contains(el),
-                aboveHeader: cy > headerBottom,
-                onScreen: cy > 0 && cy < innerHeight,
+            const pts = [[r.left + 3, r.top + 3], [r.right - 3, r.top + 3],
+                [r.left + 3, r.bottom - 3], [r.right - 3, r.bottom - 3],
+                [(r.left + r.right) / 2, (r.top + r.bottom) / 2]];
+            const hitAll = pts.every(([x, y]) => {
+                const el = document.elementFromPoint(x, y);
+                return el === b || b.contains(el);
             });
+            const inBounds = r.top >= headerBottom - 1 && r.bottom <= boundary + 1;
+            if (hitAll && inBounds) ok++; else bad.push(b.textContent.trim());
         }
-        return {
-            total: buttons.length,
-            hittable: results.filter(x => x.hit).length,
-            clearOfHeader: results.filter(x => x.aboveHeader && x.onScreen).length,
-        };
+        return { total: buttons.length, ok, bad: bad.join(',') };
     });
-    check(`all ${worstHits.total} palette buttons reachable by scrolling + center hit-test`,
-        worstHits.total >= 10 && worstHits.hittable === worstHits.total, JSON.stringify(worstHits));
-    check('no hit target sits under the header', worstHits.clearOfHeader === worstHits.total, JSON.stringify(worstHits));
-    // visualViewport/keyboard-style resize while everything is open. When
-    // the Android keyboard opens it COVERS the system nav bar, so the
-    // bottom safe inset drops to 0 as the viewport shrinks.
+    const growComposer = () => page.evaluate(() => {
+        const i = document.getElementById('code-input');
+        i.value = Array.from({ length: 10 }, (_, n) => 'line ' + n).join('\n');
+        i.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    // config A: 320x240, RETAINED 48px inset, markdown palette open, grown
+    // composer — in BOTH directions
+    for (const dir of ['ltr', 'rtl']) {
+        page = await freshPage({ viewport: { width: 320, height: 240 } });
+        await enableFormula(page);
+        await page.evaluate((d) => {
+            document.documentElement.dir = d;
+            document.documentElement.style.setProperty('--safe-area-inset-bottom', '48px');
+        }, dir);
+        await page.click('#cell-type-toggle');
+        await page.click('#math-mode-btn');
+        await growComposer();
+        await page.waitForTimeout(350);
+        const a = await boundaryProbe();
+        check(`320x240+48 (${dir}): composer and Run FULL RECTS above the safe boundary`,
+            a.composerOk && a.runOk, JSON.stringify(a));
+        const aHits = await paletteFullRect();
+        check(`320x240+48 (${dir}): all ${aHits.total} palette buttons full-rect hittable above the boundary`,
+            aHits.total >= 10 && aHits.ok === aHits.total, JSON.stringify(aHits));
+        check(`320x240+48 (${dir}): nonzero notebook area`, a.notebookH > 0, String(a.notebookH));
+        await page.context().close();
+    }
+
+    // config B: 320x320, retained inset — roomier, notebook must be real
+    page = await freshPage({ viewport: { width: 320, height: 320 } });
+    await enableFormula(page);
+    await page.evaluate(() => document.documentElement.style.setProperty('--safe-area-inset-bottom', '48px'));
+    await page.click('#cell-type-toggle');
+    await page.click('#math-mode-btn');
+    await growComposer();
+    await page.waitForTimeout(350);
+    const b320 = await boundaryProbe();
+    check('320x320+48: composer and Run above the safe boundary', b320.composerOk && b320.runOk, JSON.stringify(b320));
+    const bHits = await paletteFullRect();
+    check(`320x320+48: all ${bHits.total} palette buttons full-rect hittable`,
+        bHits.total >= 10 && bHits.ok === bHits.total, JSON.stringify(bHits));
+    check('320x320+48: notebook area at least 20px', b320.notebookH >= 20, String(b320.notebookH));
+
+    // config C: keyboard-style shrink with the inset RETAINED (platforms
+    // that keep the nav-bar inset under the keyboard)
+    await page.setViewportSize({ width: 320, height: 220 });
+    await page.waitForTimeout(350);
+    const c220 = await boundaryProbe();
+    check('keyboard shrink to 220 with RETAINED 48px inset: composer and Run stay above the boundary',
+        c220.composerOk && c220.runOk, JSON.stringify(c220));
+
+    // config D: keyboard shrink where the platform CLEARS the inset
     await page.evaluate(() => document.documentElement.style.setProperty('--safe-area-inset-bottom', '0px'));
     await page.setViewportSize({ width: 320, height: 180 });
-    await page.waitForTimeout(300);
-    const shrunk = await page.evaluate(() => {
-        const header = document.getElementById('app-header').getBoundingClientRect();
-        const run = document.getElementById('run-btn').getBoundingClientRect();
-        const input = document.getElementById('code-input').getBoundingClientRect();
-        const vh = window.innerHeight;
-        return {
-            runUsable: run.top >= header.bottom - 1 && run.bottom <= vh + 1,
-            composerUsable: input.bottom <= vh + 1 && input.height >= 20,
-        };
-    });
-    check('keyboard-style resize (240->180) keeps composer and Run usable', shrunk.runUsable && shrunk.composerUsable, JSON.stringify(shrunk));
+    await page.waitForTimeout(350);
+    const d180 = await boundaryProbe();
+    check('keyboard shrink to 180 with the inset cleared: composer and Run stay usable',
+        d180.composerOk && d180.runOk, JSON.stringify(d180));
     await page.context().close();
 
     console.log('5j. Tablet/desktop editor width restored (768/800/1024) + narrow phone');

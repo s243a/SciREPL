@@ -474,8 +474,9 @@ html, body {
     transition: border-color 0.2s;
     min-height: 44px;
     max-height: 200px;
-    /* short viewports: never let a grown composer push Run off-screen */
-    max-height: min(200px, 30dvh);
+    /* short viewports: the measured footer budget (math_mode.js) caps the
+       composer so it can never push Run into the bottom safe-area zone */
+    max-height: min(200px, var(--sci-composer-max, 200px));
 }
 
 #code-input:focus {
@@ -1415,17 +1416,25 @@ html, body {
    than pushing the composer off-screen. */
 .math-palette {
     max-height: 32vh;
+    /* the measured footer budget caps the palette at whatever remains
+       after the composer row — it collapses to a scrollable strip (or
+       nothing) BEFORE composer or Run may cross the safe-area boundary */
+    max-height: min(32vh, var(--sci-palette-max, 32vh));
+    box-sizing: border-box;   /* the budget is in border-box pixels */
     overflow-y: auto;
-    /* shrink priority inside the footer column: the palette gives way
-       (scrolling internally) long before the composer row would */
     flex: 0 10 auto;
-    min-height: 42px;
+    min-height: 0;
 }
-@media (max-height: 220px) {
-    /* keyboard-open extremes: composer and Run outrank the palette; it
-       collapses to a scrollable strip instead of pushing them off-screen */
+@media (max-height: 340px) {
+    /* extreme heights: the control stack flattens and palette chrome
+       compresses so one FULL button row still fits above the safe-area
+       boundary at 320x240 with a 48px inset */
+    #input-controls {
+        flex-direction: row;
+        align-self: flex-end;
+    }
     .math-palette {
-        min-height: 0;
+        padding-bottom: 2px;
     }
 }
 #input-bar .input-row {
