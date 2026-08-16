@@ -43,6 +43,17 @@ const btnState = (page) => page.evaluate(() => {
 });
 
 try {
+    console.log('0. Static guard: every mandatory local script is in the app shell');
+    {
+        const html = readFileSync('www/index.html', 'utf8');
+        const sw = readFileSync('www/sw.js', 'utf8');
+        const shellStart = sw.indexOf('const APP_SHELL');
+        const shellBlock = sw.slice(shellStart, sw.indexOf('];', shellStart));
+        const scripts = [...html.matchAll(/<script src="(js\/[^"]+)"><\/script>/g)].map(m => m[1]);
+        const missing = scripts.filter(src => !shellBlock.includes(`'./${src}'`));
+        check('all index.html local scripts precached in APP_SHELL', scripts.length > 10 && missing.length === 0, missing.join());
+    }
+
     console.log('1. Composer contexts drive the palette');
     let page = await freshPage();
     await enableFormula(page);
@@ -103,6 +114,26 @@ try {
     composer = await page.evaluate(() => document.getElementById('code-input').value);
     check('inserting INSIDE a math span does not nest delimiters',
         composer === '$\\frac{\\sqrt{}}{}$', JSON.stringify(composer));
+    // escaped dollars are literal text, not delimiters
+    await page.evaluate(() => {
+        const i = document.getElementById('code-input');
+        i.value = 'costs \\$5 today ';
+        i.selectionStart = i.selectionEnd = i.value.length;
+    });
+    await page.click('#math-palette button[title="Square root"]');
+    composer = await page.evaluate(() => document.getElementById('code-input').value);
+    check('escaped \\$ does not open a math span (insert is wrapped)',
+        composer === 'costs \\$5 today $\\sqrt{}$', JSON.stringify(composer));
+    // explicit inline case: caret inside $x$
+    await page.evaluate(() => {
+        const i = document.getElementById('code-input');
+        i.value = '$x$';
+        i.selectionStart = i.selectionEnd = 2;   // between x and closing $
+    });
+    await page.click('#math-palette button[title="Superscript"]');
+    composer = await page.evaluate(() => document.getElementById('code-input').value);
+    check('caret inside $x$ inserts bare superscript', composer === '$x^{}$', JSON.stringify(composer));
+
     // rendered output: run a markdown cell built from the palette
     await page.evaluate(() => { const i = document.getElementById('code-input'); i.value = ''; });
     await page.click('#math-palette button[title="Fraction"]');
@@ -239,29 +270,28 @@ try {
     });
     await page.click('#math-mode-btn');
     await page.waitForTimeout(150);
-    const reservation = await page.evaluate(() => {
-        const active = [...document.querySelectorAll('#repl, .repl-container')]
-            .filter(el => el.offsetParent !== null);
-        return active.map(el => el.style.getPropertyValue('--footer-overlay-local') || '0px');
-    });
-    check('active scroller(s) carry a non-zero reservation with the palette open' + (madeSecond ? ' (second notebook)' : ''),
-        reservation.length > 0 && reservation.every(v => parseInt(v) > 0), JSON.stringify(reservation));
-    // growing composer: autosize must re-trigger measurement
-    const before = await page.evaluate(() => {
+    const noOverlap = () => page.evaluate(() => {
+        const bar = document.getElementById('input-bar').getBoundingClientRect();
         const el = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
-        return parseInt(el.style.getPropertyValue('--footer-overlay-local') || '0');
+        const run = document.getElementById('run-btn').getBoundingClientRect();
+        return {
+            scrollerClear: el.getBoundingClientRect().bottom <= bar.top + 1,
+            runOnScreen: run.bottom <= innerHeight + 1 && run.top >= 0,
+            barOnScreen: bar.bottom <= innerHeight + 1,
+        };
     });
+    let inv = await noOverlap();
+    check('open palette: scroller never under the footer' + (madeSecond ? ' (second notebook)' : ''),
+        inv.scrollerClear && inv.runOnScreen && inv.barOnScreen, JSON.stringify(inv));
+    // growing composer keeps the invariant (footer participates in layout)
     await page.evaluate(() => {
         const i = document.getElementById('code-input');
         i.value = Array.from({ length: 8 }, (_, n) => 'line ' + n).join('\n');
         i.dispatchEvent(new Event('input', { bubbles: true }));
     });
     await page.waitForTimeout(250);
-    const after = await page.evaluate(() => {
-        const el = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
-        return parseInt(el.style.getPropertyValue('--footer-overlay-local') || '0');
-    });
-    check('composer growth re-measures the reservation', after >= before, `${before} -> ${after}`);
+    inv = await noOverlap();
+    check('composer growth keeps scroller and Run clear', inv.scrollerClear && inv.runOnScreen, JSON.stringify(inv));
     await page.context().close();
 
     console.log('5d. Desktop width keeps the reservation (responsive padding rule)');
@@ -269,11 +299,104 @@ try {
     await enableFormula(page);
     await page.click('#math-mode-btn');
     await page.waitForTimeout(150);
-    const desktopPad = await page.evaluate(() => {
+    const desktopInv = await page.evaluate(() => {
+        const bar = document.getElementById('input-bar').getBoundingClientRect();
         const el = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
-        return { pad: getComputedStyle(el).paddingBottom, varv: el.style.getPropertyValue('--footer-overlay-local') };
+        return { clear: el.getBoundingClientRect().bottom <= bar.top + 1, barBottom: Math.round(bar.bottom), vh: innerHeight };
     });
-    check('>=900px media rule preserves the overlay padding', parseInt(desktopPad.pad) > 20, JSON.stringify(desktopPad));
+    check('>=900px: scroller clear of the footer', desktopInv.clear && desktopInv.barBottom <= desktopInv.vh + 1, JSON.stringify(desktopInv));
+    await page.context().close();
+
+    console.log("5d2. 800px tablet width keeps the reservation");
+    page = await freshPage({ viewport: { width: 800, height: 500 } });
+    await enableFormula(page);
+    await page.click('#math-mode-btn');
+    await page.waitForTimeout(150);
+    const tabletInv = await page.evaluate(() => {
+        const bar = document.getElementById('input-bar').getBoundingClientRect();
+        const el = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
+        return { clear: el.getBoundingClientRect().bottom <= bar.top + 1, barBottom: Math.round(bar.bottom), vh: innerHeight };
+    });
+    check('800px: scroller clear of the footer', tabletInv.clear && tabletInv.barBottom <= tabletInv.vh + 1, JSON.stringify(tabletInv));
+    await page.context().close();
+
+    console.log('5f. Safe-area change AFTER opening re-measures');
+    page = await freshPage({ viewport: { width: 320, height: 640 } });
+    await enableFormula(page);
+    await page.click('#math-mode-btn');
+    await page.waitForTimeout(150);
+    await page.evaluate(() => document.documentElement.style.setProperty('--safe-area-inset-bottom', '48px'));
+    await page.waitForTimeout(250);
+    const lateInset = await page.evaluate(() => {
+        const bar = document.getElementById('input-bar').getBoundingClientRect();
+        const el = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
+        const run = document.getElementById('run-btn').getBoundingClientRect();
+        return {
+            barBottomOnScreen: Math.round(bar.bottom) <= innerHeight + 1,
+            padApplied: parseInt(getComputedStyle(document.getElementById('input-bar')).paddingBottom) >= 58,
+            runVisible: run.bottom <= innerHeight - 40,   // above the 48px inset zone
+            scrollerClear: el.getBoundingClientRect().bottom <= bar.top + 1,
+        };
+    });
+    check('a 48px inset applied AFTER opening keeps composer above it (layout reflows)',
+        lateInset.barBottomOnScreen && lateInset.padApplied && lateInset.runVisible && lateInset.scrollerClear,
+        JSON.stringify(lateInset));
+    await page.context().close();
+
+    console.log('5g. Landscape side insets, LTR and RTL');
+    for (const dir of ['ltr', 'rtl']) {
+        page = await freshPage();
+        const pads = await page.evaluate((d) => {
+            document.documentElement.dir = d;
+            document.documentElement.style.setProperty('--safe-area-inset-left', '30px');
+            document.documentElement.style.setProperty('--safe-area-inset-right', '20px');
+            const cs = getComputedStyle(document.getElementById('input-bar'));
+            return { left: parseInt(cs.paddingLeft), right: parseInt(cs.paddingRight) };
+        }, dir);
+        check(`side insets respected physically (${dir})`, pads.left === 42 && pads.right === 32, JSON.stringify(pads));
+        await page.context().close();
+    }
+
+    console.log('5h. Invalid %pip lines: zero installs, zero CDN fetches');
+    page = await freshPage();
+    await page.waitForFunction(() => !document.getElementById('run-btn').disabled, null, { timeout: 180000 });
+    const netProbe = await page.evaluate(async () => {
+        let cdnFetches = 0;
+        const origFetch = window.fetch;
+        window.fetch = (...args) => {
+            if (String(args[0]).includes('cdn.jsdelivr.net')) cdnFetches++;
+            return origFetch(...args);
+        };
+        let pipInstalls = 0;
+        await window.kernelManager.ensureReady('python');
+        const py = window.kernelManager.getKernel('python').getPyodide();
+        py.runPython('import builtins\n_real_pi = pip_install\nasync def pip_install(*a):\n    import js; js._pipCount()\n    await _real_pi(*a)');
+        window._pipCount = () => { pipInstalls++; };
+        const before = { cdnFetches, pipInstalls };
+        // drive the %pip flow through the real UI for two invalid lines
+        const runLine = async (text) => {
+            document.getElementById('code-input').value = text;
+            document.getElementById('run-btn').click();
+            await new Promise(r => {
+                const t = setInterval(() => { if (!document.getElementById('run-btn').disabled) { clearInterval(t); r(); } }, 100);
+            });
+        };
+        await runLine('%pip install -r requirements.txt');
+        await runLine('%pip install pkg @ https://example.com/x.whl');
+        await runLine('%pip install pandas[performance]');
+        window.fetch = origFetch;
+        return {
+            cdnFetches: cdnFetches - before.cdnFetches,
+            pipInstalls: pipInstalls - before.pipInstalls,
+            text: document.body.innerText,
+        };
+    });
+    check('invalid/extras lines: ZERO pip_install calls', netProbe.pipInstalls === 0, String(netProbe.pipInstalls));
+    check('invalid/extras lines: ZERO CDN fetches', netProbe.cdnFetches === 0, String(netProbe.cdnFetches));
+    check('extras give a clear unsupported error',
+        netProbe.text.includes('extras are not supported yet') && netProbe.text.includes('pandas[performance]'));
+    check('all three lines report skipped entirely',
+        (netProbe.text.match(/line skipped entirely/g) || []).length >= 3);
     await page.context().close();
 
     console.log('5e. Offline upgrade: resolver is in the precached shell');

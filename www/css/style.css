@@ -57,6 +57,13 @@
 
 html, body {
     height: 100%;
+    /* Column layout: header + app body + footer PARTICIPATE in layout, so
+       a taller footer (open Formula palette, runtime safe-area changes,
+       growing composer) shrinks the app body instead of overlaying it.
+       The previous #app-body height hardcoded a 100px footer — the root
+       cause of every palette/content overlap report. */
+    display: flex;
+    flex-direction: column;
     background: var(--bg-primary);
     color: var(--text-primary);
     font-family: var(--font-sans);
@@ -236,7 +243,7 @@ html, body {
     display: flex;
     flex: 1;
     overflow: hidden;
-    height: calc(100vh - 52px - 100px);
+    min-height: 0;   /* let the flex column shrink it below content size */
 }
 
 #repl-wrapper {

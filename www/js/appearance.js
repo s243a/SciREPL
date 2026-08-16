@@ -111,7 +111,7 @@
             return localStorage.getItem(KEYS.customCss) || '';
         }
 
-        /** Header shortcuts are opt-out: existing and new installs see both. */
+        /** Tour is opt-out: absent (or anything but '0') means visible. */
         getShowTourShortcut() {
             return localStorage.getItem(KEYS.showTourShortcut) !== '0';
         }
