@@ -91,6 +91,9 @@ jobs:
       - name: Math palette, contexts, layout invariants
         run: node test_math_palette.mjs
 
+      - name: Pip cell semantics (failed installs stop the cell; dep healing)
+        run: node test_pip_cell.mjs
+
       - name: Right-to-left layout
         run: node test_rtl_layout.mjs
 

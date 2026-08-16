@@ -38,6 +38,7 @@ jobs:
       - run: node test_onboarding.mjs
       - run: node test_whats_new.mjs
       - run: npm run test:math-palette
+      - run: npm run test:pip-cell
       - run: node test_rtl_layout.mjs
       - run: node test_i18n_dynamic.mjs
       - run: npm run test:runtime-metadata

@@ -113,11 +113,31 @@ jobs:
       # Tag-only coverage: the Pages main path checks out the last stable
       # Free tag, which may predate these suites — guard on file existence
       # so old tags deploy while new tags are fully gated.
+      # Explicit if/then so a PRESENT-but-FAILING suite fails the deploy;
+      # only a suite absent from an old tag may be skipped.
       - name: Pip resolver unit tests (when present on this tag)
-        run: test -f test_pip_resolver.mjs && node test_pip_resolver.mjs || echo "suite not on this tag — skipped"
+        run: |
+          if test -f test_pip_resolver.mjs; then
+            node test_pip_resolver.mjs
+          else
+            echo "suite not on this tag — skipped"
+          fi
+
+      - name: Pip cell regressions (when present on this tag)
+        run: |
+          if test -f test_pip_cell.mjs; then
+            node test_pip_cell.mjs
+          else
+            echo "suite not on this tag — skipped"
+          fi
 
       - name: Math palette regressions (when present on this tag)
-        run: test -f test_math_palette.mjs && node test_math_palette.mjs || echo "suite not on this tag — skipped"
+        run: |
+          if test -f test_math_palette.mjs; then
+            node test_math_palette.mjs
+          else
+            echo "suite not on this tag — skipped"
+          fi
 
       - name: Run cell operations tests
         run: node test_cell_ops.mjs
