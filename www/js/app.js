@@ -832,9 +832,13 @@
         if (!km) throw new Error(window.t('app.errors.kernelManagerUnavailable'));
 
         // Handle %pip install magic (Jupyter-compatible).
-        // Requirements are parsed (PEP 508 subset, www/js/pip_resolver.js)
-        // and remain AUTHORITATIVE end to end: a specifier the environment
-        // cannot satisfy is a clear error, never a silent substitution.
+        // Lines are parsed ATOMICALLY (PEP 508 subset, www/js/pip_resolver.js):
+        // any unsupported token rejects the whole line — nothing on it may be
+        // installed from a source the user did not request. Specifiers stay
+        // authoritative end to end; installs are verified by ACTUAL IMPORT,
+        // with missing transitive modules recovered from the official
+        // Pyodide lockfile (a top-level find_spec proves nothing about the
+        // dependency closure).
         if (language === 'python' && /^%pip\s+install\s+/m.test(code)) {
             const kernel = km.getKernel('python');
             const pyodide = kernel && kernel.getPyodide();
@@ -846,42 +850,50 @@
                 for (const line of lines) {
                     const pm = line.match(/^%pip\s+install\s+(.+)$/);
                     if (!pm) { remainingLines.push(line); continue; }
-                    const accepted = [];
-                    for (const token of pm[1].trim().split(/\s+/)) {
-                        try {
-                            requirements.push(R.parseRequirement(token));
-                            accepted.push(token);
-                        } catch (e) {
-                            window.renderText(`%pip: ${e.message}`, true);
-                        }
+                    let parsed;
+                    try {
+                        parsed = R.parsePipLine(pm[1]);
+                    } catch (e) {
+                        window.renderText(`%pip: ${e.message} — line skipped entirely`, true);
+                        continue;
                     }
-                    if (accepted.length) {
-                        const pkgList = accepted.map(p => `'${p.replace(/'/g, "\\'")}'`).join(', ');
-                        pyodide.runPython(`
+                    const withExtras = parsed.filter(r => r.extras.length);
+                    if (withExtras.length) {
+                        window.renderText(`%pip: extras are not supported yet (${withExtras.map(r => r.raw).join(', ')}) — line skipped entirely`, true);
+                        continue;
+                    }
+                    requirements.push(...parsed);
+                    const pkgList = parsed.map(r => `'${r.raw.replace(/'/g, "\\'")}'`).join(', ');
+                    pyodide.runPython(`
 import io, sys
 _pip_stdout = io.StringIO()
 _pip_old_stdout = sys.stdout
 sys.stdout = _pip_stdout
 `);
-                        await pyodide.runPythonAsync(`await pip_install(${pkgList})`);
-                        pyodide.runPython(`sys.stdout = _pip_old_stdout`);
-                        const pipOut = pyodide.runPython(`_pip_stdout.getvalue()`);
-                        if (pipOut) window.renderText(pipOut, false);
-                    }
+                    await pyodide.runPythonAsync(`await pip_install(${pkgList})`);
+                    pyodide.runPython(`sys.stdout = _pip_old_stdout`);
+                    const pipOut = pyodide.runPython(`_pip_stdout.getvalue()`);
+                    if (pipOut) window.renderText(pipOut, false);
                 }
                 pyodide.runPython(`import importlib, importlib.util, importlib.metadata; importlib.invalidate_caches()`);
 
-                // ---- verification + partial-bundle recovery ----
+                // ---- verification by actual import + lock-driven recovery ----
                 const cdnBase = `https://cdn.jsdelivr.net/pyodide/v${pyodide.version}/full/`;
-                const importable = (mod) => {
-                    try { return pyodide.runPython(`importlib.util.find_spec(${JSON.stringify(mod)}) is not None`); }
-                    catch (_) { return false; }
-                };
                 const installedVersion = (dist) => {
                     try {
                         return pyodide.runPython(
-                            `(lambda: (lambda v: v)(__import__('importlib.metadata', fromlist=['metadata']).version(${JSON.stringify(dist)})))()`);
+                            `(lambda: __import__('importlib.metadata', fromlist=['metadata']).version(${JSON.stringify(dist)}))()`);
                     } catch (_) { return null; }
+                };
+                const tryImport = (mod) => {
+                    try {
+                        pyodide.runPython(`importlib.import_module(${JSON.stringify(mod)})`);
+                        return { ok: true };
+                    } catch (e) {
+                        const text = String(e && e.message || e);
+                        const mm = /No module named '([^']+)'/.exec(text);
+                        return { ok: false, missing: mm ? mm[1].split('.')[0] : null, error: text.slice(0, 400) };
+                    }
                 };
                 const fetchLock = async () => {
                     if (!window._pyodideCdnLock) {
@@ -892,6 +904,10 @@ sys.stdout = _pip_stdout
                     return window._pyodideCdnLock;
                 };
                 const loadedNorms = () => new Set(Object.keys(pyodide.loadedPackages).map(R.normName));
+                const loadFiles = async (files) => {
+                    await pyodide.loadPackage(files.map(f => cdnBase + f));
+                    pyodide.runPython(`importlib.invalidate_caches()`);
+                };
 
                 for (const req of requirements) {
                     const version = installedVersion(req.name);
@@ -901,54 +917,59 @@ sys.stdout = _pip_stdout
                             `and the Pyodide distribution pins one version per release.`, true);
                         continue;
                     }
-                    // quick path: distribution present and its conventional module imports
-                    if (version && importable(req.norm.replace(/-/g, '_'))) continue;
-                    let lock;
-                    try { lock = await fetchLock(); }
-                    catch (e) {
-                        window.renderText(`%pip: could not verify '${req.raw}' (CDN lockfile unreachable: ${e.message})`, true);
-                        continue;
-                    }
-                    const entry = R.indexLock(lock)[req.norm];
-                    if (!entry) {
-                        // not a pyodide-distribution package: micropip owns it
-                        if (version) {
+                    let lock = null;
+                    try { lock = await fetchLock(); } catch (_) { /* verified below without recovery */ }
+                    const entry = lock ? R.indexLock(lock)[req.norm] : null;
+                    // The lock's pinned version gates ONLY when the lock is the
+                    // SOURCE (nothing satisfying installed). A satisfying
+                    // install from any origin (e.g. micropip via PyPI) takes
+                    // precedence — the lock then serves purely to heal missing
+                    // transitive dependencies below.
+                    if (!version) {
+                        if (entry && !R.versionSatisfies(entry.version, req.specifiers)) {
                             window.renderText(
-                                `  Note: '${req.name}' ${version} is installed; its import name may differ from the package name.`, false);
-                        } else {
-                            window.renderText(`%pip: '${req.raw}' did not install (not in the Pyodide distribution; micropip reported no usable wheel).`, true);
-                        }
-                        continue;
-                    }
-                    const importNames = R.importNamesOf(entry, req.name);
-                    if (version && importNames.some(importable)) continue;
-                    let resolved;
-                    try {
-                        resolved = R.resolveFromLock(lock, req, loadedNorms());
-                    } catch (e) {
-                        window.renderText(`%pip: ${e.message}`, true);
-                        continue;
-                    }
-                    if (resolved.files.length) {
-                        try {
-                            await pyodide.loadPackage(resolved.files.map(f => cdnBase + f));
-                            pyodide.runPython(`importlib.invalidate_caches()`);
-                        } catch (e) {
-                            window.renderText(`%pip: fetching '${req.raw}' from the Pyodide CDN failed: ${String(e && e.message || e).slice(0, 200)}`, true);
+                                `%pip: '${req.raw}' cannot be satisfied: the Pyodide distribution provides ${req.name} ${entry.version} only.`, true);
                             continue;
                         }
+                        if (entry) {
+                            try { await loadFiles(R.resolveFromLock(lock, req, loadedNorms()).files); }
+                            catch (e) { window.renderText(`%pip: ${e.message}`, true); continue; }
+                        }
                     }
-                    if (resolved.importNames.some(importable)) {
-                        window.renderText(`  (${req.name} ${resolved.version}: not in the bundled runtime — fetched from the Pyodide CDN)`, false);
-                    } else {
-                        window.renderText(`%pip: '${req.raw}' loaded but is not importable as ${resolved.importNames.join('/')} — please report this.`, true);
+                    const importName = entry ? R.importNamesOf(entry, req.name)[0]
+                        : req.norm.replace(/-/g, '_');
+                    // actual-import loop: heal missing transitive modules from
+                    // the lock until the import succeeds or is unresolvable
+                    let verdict = tryImport(importName);
+                    let healed = 0;
+                    const impIdx = lock ? R.importIndex(lock) : {};
+                    while (!verdict.ok && verdict.missing && healed < 6) {
+                        const distNorm = impIdx[verdict.missing] || R.normName(verdict.missing);
+                        let resolved;
+                        try {
+                            resolved = R.resolveFromLock(lock || { packages: {} },
+                                R.parseRequirement(distNorm), loadedNorms());
+                        } catch (_) { break; }
+                        if (!resolved.files.length) break;
+                        try { await loadFiles(resolved.files); } catch (_) { break; }
+                        healed++;
+                        verdict = tryImport(importName);
                     }
+                    if (verdict.ok) {
+                        if (!version || healed) {
+                            window.renderText(`  (${req.name}: ${healed ? healed + ' missing dependenc' + (healed > 1 ? 'ies' : 'y') + ' recovered from the Pyodide CDN' : 'fetched from the Pyodide CDN'})`, false);
+                        }
+                        continue;
+                    }
+                    if (!entry && version) {
+                        window.renderText(`  Note: '${req.name}' ${version} is installed; it is not importable as '${importName}' — the import name may differ.`, false);
+                        continue;
+                    }
+                    window.renderText(`%pip: '${req.raw}' failed verification: ${verdict.error || 'not importable'}`, true);
                 }
 
                 // ---- matplotlib inline hook: MUST be live before the same
-                // cell's remaining code runs, or its plt.show() is the real
-                // (agg no-op) show and the figure is lost. A hook failure is
-                // surfaced, not swallowed. ----
+                // cell's remaining code runs; failures are surfaced. ----
                 try {
                     pyodide.runPython(`
 if 'matplotlib' in sys.modules or importlib.util.find_spec('matplotlib'):
