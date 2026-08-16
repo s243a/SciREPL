@@ -96,7 +96,7 @@
 
             <p><button id="btn-show-tour" class="vfs-btn" data-i18n="help.showTour">Show the tour again</button></p>
             <p><button id="btn-show-whats-new" class="vfs-btn" data-i18n="help.showWhatsNew">What’s new in this version</button></p>
-            <p data-i18n="help.headerShortcuts">Header shortcuts: the 🧭 Tour and ∑ Formula buttons are shown by default. Hide or restore either under Appearance → Header shortcuts.</p>
+            <p data-i18n="help.headerShortcuts">Header shortcuts: the 🧭 Tour button is shown by default. The ∑ Formula button is off by default — enable it under Appearance → Header shortcuts. Formula appears for Python code and Markdown cells.</p>
             <p><a class="vfs-btn" href="open-source-licenses.html" data-i18n="help.openSourceLicenses">Open-source licences</a></p>
 
             <h3 data-i18n="help.quickStartPython">Quick Start — Python</h3>
@@ -1183,20 +1183,34 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
 
     <!-- Sticky input bar -->
     <footer id="input-bar">
-        <div id="math-palette" class="math-palette hidden">
-            <div class="math-row">
+        <div id="math-palette" class="math-palette hidden" data-context="python">
+            <div class="math-row" data-context="python">
                 <button data-i18n-title="mathPalette.differentiateTitle" data-insert="diff(, x)" title="Differentiate">d/dx</button>
                 <button data-i18n-title="mathPalette.integrateTitle" data-insert="integrate(, x)" title="Integrate">∫</button>
                 <button data-i18n-title="mathPalette.solveTitle" data-i18n="mathPalette.solve" data-insert="solve(, x)" title="Solve">solve</button>
                 <button data-i18n-title="mathPalette.simplifyTitle" data-i18n="mathPalette.simp" data-insert="simplify()" title="Simplify">simp</button>
                 <button data-i18n-title="mathPalette.expandTitle" data-i18n="mathPalette.exp" data-insert="expand()" title="Expand">exp</button>
             </div>
-            <div class="math-row">
+            <div class="math-row" data-context="python">
                 <button data-i18n-title="mathPalette.matrixTitle" data-i18n="mathPalette.mat" data-insert="Matrix([[]])" title="Matrix">Mat</button>
                 <button data-i18n-title="mathPalette.symbolsTitle" data-i18n="mathPalette.sym" data-insert="symbols('')" title="Symbols">sym</button>
                 <button data-i18n-title="mathPalette.limitTitle" data-i18n="mathPalette.lim" data-insert="limit(, x, oo)" title="Limit">lim</button>
                 <button data-i18n-title="mathPalette.seriesTitle" data-i18n="mathPalette.ser" data-insert="series(, x, 0, 6)" title="Series">ser</button>
                 <button data-i18n-title="mathPalette.factorTitle" data-i18n="mathPalette.fac" data-insert="factor()" title="Factor">fac</button>
+            </div>
+            <div class="math-row" data-context="markdown">
+                <button data-mode="latex" data-insert="\frac{‸}{}" title="Fraction">a/b</button>
+                <button data-mode="latex" data-insert="\sqrt{‸}" title="Square root">√</button>
+                <button data-mode="latex" data-insert="^{‸}" title="Superscript">x^n</button>
+                <button data-mode="latex" data-insert="_{‸}" title="Subscript">x_n</button>
+                <button data-mode="latex" data-insert="\sum_{i=‸}^{n}" title="Sum">Σ</button>
+            </div>
+            <div class="math-row" data-context="markdown">
+                <button data-mode="latex" data-insert="\int_{‸}^{}\,dx" title="Integral">∫</button>
+                <button data-mode="latex" data-insert="\lim_{x \to ‸}" title="Limit">lim</button>
+                <button data-mode="latex" data-insert="\begin{pmatrix} ‸ &amp;  \\  &amp;  \end{pmatrix}" title="Matrix">Mat</button>
+                <button data-mode="latex" data-insert="\sqrt[‸]{}" title="Nth root">ⁿ√</button>
+                <button data-mode="latex" data-insert="\infty" title="Infinity">∞</button>
             </div>
         </div>
         <div class="input-row">
@@ -1226,6 +1240,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <!-- Generated app/runtime metadata is loaded first: several later modules
          use pinned component versions while constructing their controls. -->
     <script src="js/kernel_config.js"></script>
+    <script src="js/pip_resolver.js"></script>
     <script src="js/indexeddb_store.js"></script>
     <script src="js/persistence.js"></script>
     <script src="js/file_io.js"></script>

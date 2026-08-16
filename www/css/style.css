@@ -34,7 +34,7 @@
        (Play-testing screenshot: system back/home/recents drawn over the
        composer); gesture navigation and desktop report ~0 and lose no
        space. */
-    --app-bottom-margin: env(safe-area-inset-bottom, 0px);
+    --app-bottom-margin: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
 
     /* Multiplier for header icon buttons. 1 keeps the historical 28px. */
     --ui-btn-scale: 1;
@@ -252,7 +252,10 @@ html, body {
 #repl, .repl-container {
     flex: 1;
     overflow-y: auto;
-    padding: 12px 12px 12px;
+    /* bottom padding reserves the open Formula palette's height — the
+       sticky footer overlays this scroller, so without it the tail of the
+       notebook hides beneath the expanded footer */
+    padding: 12px 12px calc(12px + var(--footer-overlay, 0px));
     scroll-behavior: smooth;
 }
 
@@ -1364,9 +1367,25 @@ html, body {
 }
 
 .math-row {
-    display: flex;
+    display: none;
     gap: 8px;
     justify-content: center;
+}
+/* Only the rows for the current composer context are visible. */
+.math-palette[data-context="python"] .math-row[data-context="python"],
+.math-palette[data-context="markdown"] .math-row[data-context="markdown"] {
+    display: flex;
+}
+/* Layout invariants (see test_math_palette.mjs): every visible button
+   stays hittable even at 320x240 — the palette scrolls internally rather
+   than pushing the composer off-screen. */
+.math-palette {
+    max-height: 32vh;
+    overflow-y: auto;
+}
+.math-row button {
+    min-height: 34px;
+    min-width: 44px;
 }
 
 .math-palette button {
