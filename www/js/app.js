@@ -832,10 +832,12 @@
             if (pyodide) {
                 const lines = code.split('\n');
                 const remainingLines = [];
+                const allRequestedPackages = [];
                 for (const line of lines) {
                     const pm = line.match(/^%pip\s+install\s+(.+)$/);
                     if (pm) {
                         const packages = pm[1].trim().split(/\s+/);
+                        allRequestedPackages.push(...packages);
                         const pkgList = packages.map(p => `'${p.replace(/'/g, "\\'")}'`).join(', ');
                         pyodide.runPython(`
 import io, sys
@@ -851,21 +853,65 @@ sys.stdout = _pip_stdout
                         remainingLines.push(line);
                     }
                 }
-                pyodide.runPython(`import importlib; importlib.invalidate_caches()`);
-                // Eagerly set up matplotlib hook if it's now available,
-                // so plt.show() works on the first call in the remaining code
-                try {
-                    pyodide.runPython(`
-if 'matplotlib' in sys.modules or importlib.util.find_spec('matplotlib'):
-    try:
-        import matplotlib
-        if not getattr(matplotlib, '_scirepl_hooked', False):
-            _setup_matplotlib_hook()
-            matplotlib._scirepl_hooked = True
-    except Exception:
-        pass
-`);
-                } catch (_) { }
+                pyodide.runPython(`import importlib, importlib.util; importlib.invalidate_caches()`);
+                // Verify the installs actually took effect on THIS interpreter.
+                // The vendored (partial) Pyodide bundle is the root cause of a
+                // Play-testing bug: packages outside the bundle are absent from
+                // the vendored lockfile, yet micropip prints "Installed" and
+                // loadPackage returns without loading anything. When the
+                // verification probe fails, resolve the package and its
+                // transitive dependencies from the OFFICIAL Pyodide CDN
+                // lockfile for this interpreter version and load those wheels
+                // explicitly. (find_spec probes the module name; packages
+                // whose import name differs — beautifulsoup4/bs4 — fail the
+                // probe legitimately, so a miss after fallback is a note, not
+                // an error, and the remaining code always runs.)
+                const cdnBase = `https://cdn.jsdelivr.net/pyodide/v${pyodide.version}/full/`;
+                const importable = (name) => {
+                    try { return pyodide.runPython(`importlib.util.find_spec(${JSON.stringify(name)}) is not None`); }
+                    catch (_) { return false; }
+                };
+                const loadFromOfficialCdn = async (pkg) => {
+                    if (!window._pyodideCdnLock) {
+                        const resp = await fetch(cdnBase + 'pyodide-lock.json');
+                        if (!resp.ok) throw new Error(`CDN lockfile HTTP ${resp.status}`);
+                        window._pyodideCdnLock = await resp.json();
+                    }
+                    const lockPkgs = window._pyodideCdnLock.packages || {};
+                    const norm = (n) => n.toLowerCase().replace(/[-_.]+/g, '-');
+                    const byNorm = {};
+                    for (const [k, v] of Object.entries(lockPkgs)) byNorm[norm(k)] = v;
+                    const have = new Set(Object.keys(pyodide.loadedPackages).map(norm));
+                    const urls = [];
+                    const seen = new Set();
+                    const visit = (name) => {
+                        const key = norm(name);
+                        if (seen.has(key) || have.has(key)) return;
+                        seen.add(key);
+                        const entry = byNorm[key];
+                        if (!entry) return;   // not a pyodide-distribution package
+                        for (const dep of entry.depends || []) visit(dep);
+                        urls.push(cdnBase + entry.file_name);
+                    };
+                    visit(pkg);
+                    if (!urls.length) throw new Error(`'${pkg}' not in the official Pyodide distribution`);
+                    await pyodide.loadPackage(urls);
+                };
+                for (const pkg of allRequestedPackages) {
+                    const probe = pkg.split('[')[0].split('==')[0].trim();
+                    if (importable(probe)) continue;
+                    try {
+                        await loadFromOfficialCdn(probe);
+                        pyodide.runPython(`importlib.invalidate_caches()`);
+                        if (importable(probe)) {
+                            window.renderText(`  (${probe}: not in the bundled runtime — fetched from the Pyodide CDN)`, false);
+                            continue;
+                        }
+                    } catch (e) {
+                        window.renderText(`  Could not fetch '${probe}' from the Pyodide CDN: ${String(e && e.message || e)}`, false);
+                    }
+                    window.renderText(`  Note: '${probe}' is not importable under that name — the import name may differ from the package name, or the package is unavailable in this runtime.`, false);
+                }
                 const remaining = remainingLines.join('\n').trim();
                 if (remaining) {
                     return executePythonLegacy(remaining);
