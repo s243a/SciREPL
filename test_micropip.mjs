@@ -35,10 +35,14 @@ const TIMEOUT = 120_000;
 
     // Wait for Python kernel to be fully ready (including micropip)
     console.log('   Waiting for Pyodide + micropip...');
+    // Kernels load lazily: start Python explicitly, then wait with the
+    // options object in Playwright's THIRD argument position (previously it
+    // sat in the arg slot, silently leaving the 30s default timeout).
+    await page.evaluate(() => { window.kernelManager.ensureReady('python'); });
     await page.waitForFunction(() => {
       const km = window.kernelManager;
       return km && km.getKernel('python') && km.getKernel('python').isReady();
-    }, { timeout: TIMEOUT });
+    }, null, { timeout: TIMEOUT });
 
     // --- Test 1: micropip is available ---
     console.log('2. Testing micropip availability...');
