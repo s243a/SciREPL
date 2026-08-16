@@ -42,18 +42,53 @@
         const m = /^([A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?)(\[[A-Za-z0-9,._ -]*\])?\s*(.*)$/.exec(text);
         if (!m) fail('cannot parse');
         const name = m[1];
-        const extras = m[3] ? m[3].slice(1, -1).split(',').map(s => s.trim()).filter(Boolean) : [];
+        let extras = [];
+        if (m[3] !== undefined) {
+            // Extras must be a non-empty, well-formed, comma-separated list:
+            // 'pkg[]', 'pkg[,]', 'pkg[x,]' are malformed, not "empty extras".
+            const inner = m[3].slice(1, -1);
+            const items = inner.split(',').map(s => s.trim());
+            const EXTRA = /^[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?$/;
+            if (!items.length || items.some(s => !EXTRA.test(s))) {
+                fail(`malformed extras list '${m[3]}'`);
+            }
+            extras = items;
+        }
         let rest = m[4].trim();
         if (rest.startsWith('(') && rest.endsWith(')')) rest = rest.slice(1, -1).trim();
         const specifiers = [];
         if (rest) {
+            // Empty clauses are malformed, never skipped: 'pkg>=1,,<4' and
+            // leading/trailing commas reject the whole requirement.
             for (const clause of rest.split(',')) {
                 const c = clause.trim();
-                if (!c) continue;
+                if (!c) fail('empty specifier clause (stray comma)');
                 if (c.startsWith('===')) fail("arbitrary equality '===' is not supported");
                 const sm = /^(==|!=|~=|>=|<=|>|<)\s*([A-Za-z0-9!+*._-]+)$/.exec(c);
                 if (!sm) fail(`bad specifier clause '${c}'`);
-                specifiers.push({ op: sm[1], version: sm[2] });
+                const op = sm[1], v = sm[2];
+                if (v.includes('*')) {
+                    // Wildcards: only a trailing '.*' on == / !=, and the stem
+                    // must be a plain epoch+release version (PEP 440 allows a
+                    // few exotic prefix forms; we reject rather than guess).
+                    if (op !== '==' && op !== '!=') fail(`wildcard not allowed with '${op}'`);
+                    if (!v.endsWith('.*') || v.indexOf('*') !== v.length - 1) {
+                        fail(`invalid wildcard placement in '${v}'`);
+                    }
+                    const stem = parseVersion(v.slice(0, -2));   // throws UNSUPPORTED on garbage
+                    if (stem.pre || stem.post !== null || stem.dev !== null || stem.local) {
+                        fail(`unsupported prefix pattern '${v}'`);
+                    }
+                } else {
+                    const pv = parseVersion(v);                  // throws UNSUPPORTED on garbage
+                    if (pv.local && op !== '==' && op !== '!=') {
+                        fail(`local version not allowed with '${op}'`);
+                    }
+                    if (op === '~=' && pv.release.length < 2) {
+                        fail(`'~=' needs at least two release segments in '${v}'`);
+                    }
+                }
+                specifiers.push({ op, version: v });
             }
         }
         return { name, norm: normName(name), extras, specifiers, raw: text };
@@ -89,8 +124,28 @@
         };
     }
 
+    /** Total ORDER over versions (PEP 440). Ordering alone is not specifier
+     *  matching — see versionSatisfies below for the operator rules. */
     function cmpVersions(a, b) {
-        const va = parseVersion(a), vb = parseVersion(b);
+        return cmpParsed(parseVersion(a), parseVersion(b));
+    }
+
+    // ---- PEP 440 specifier semantics (mirrors packaging.specifiers) ----
+    //
+    // Ordering (cmpVersions) is necessary but NOT sufficient: the spec adds
+    // per-operator rules — '>V' excludes post-releases and local versions of
+    // V's base, '<V' excludes pre-releases of V's base, '==' ignores the
+    // candidate's local segment when the spec has none, prefix matching is
+    // segment-wise on the canonical form, and '~=' expands to '>=V' plus an
+    // epoch-aware '==prefix.*'. On top of that, a specifier SET excludes
+    // pre-release candidates unless some specifier mentions a pre-release
+    // (or the caller opts in). Verified differentially against
+    // packaging.specifiers.SpecifierSet in test_pip_resolver.mjs.
+
+    const isPrerelease = (p) => p.pre !== null || p.dev !== null;
+    const isPostrelease = (p) => p.post !== null;
+
+    function cmpParsed(va, vb) {
         if (va.epoch !== vb.epoch) return va.epoch < vb.epoch ? -1 : 1;
         const len = Math.max(va.release.length, vb.release.length);
         for (let i = 0; i < len; i++) {
@@ -130,41 +185,106 @@
         return 0;
     }
 
-    function prefixMatch(version, pattern) {
-        // '1.2.*' — compare release segments only, zero-padded (PEP 440
-        // prefix matching ignores pre/post/dev suffixes of the candidate)
-        const want = pattern.slice(0, -2).split('.').map(Number);
-        const have = parseVersion(version).release;
-        for (let i = 0; i < want.length; i++) {
-            if ((have[i] || 0) !== want[i]) return false;
-        }
-        return true;
+    const publicOf = (p) => p.local ? { ...p, local: null } : p;
+
+    /** Canonical dotted segments, packaging's _version_split shape:
+     *  ['<epoch>', d0, ..., dLast(+preLetterN), ('postN')?, ('devN')?]. */
+    function canonicalSegments(p) {
+        // pre/post/dev are their own segments (packaging's _prefix_regex
+        // splits '2a1' into '2','a1'), so '==2.2.*' matches 2.2a1
+        const segs = [String(p.epoch), ...p.release.map(String)];
+        if (p.pre) segs.push(['a', 'b', 'rc'][p.pre[0]] + String(p.pre[1]));
+        if (p.post !== null) segs.push('post' + p.post);
+        if (p.dev !== null) segs.push('dev' + p.dev);
+        return segs;
     }
 
-    function versionSatisfies(version, specifiers) {
-        for (const { op, version: v } of specifiers || []) {
-            let ok;
-            if (v.endsWith('.*') && (op === '==' || op === '!=')) {
-                ok = prefixMatch(version, v);
-                if (op === '!=') ok = !ok;
-            } else if (op === '~=') {
-                const parts = v.split('.');
-                if (parts.length < 2) return false;
-                const floor = cmpVersions(version, v) >= 0;
-                const ceilingPattern = parts.slice(0, -1).join('.') + '.*';
-                ok = floor && prefixMatch(version, ceilingPattern);
-            } else {
-                const c = cmpVersions(version, v);
-                ok = { '==': c === 0, '!=': c !== 0, '>=': c >= 0, '<=': c <= 0, '>': c > 0, '<': c < 0 }[op];
+    /** Prefix match for '==stem.*' — stem is epoch+release only (enforced at
+     *  parse time). Candidate's local is ignored; its numeric release is
+     *  zero-padded to the stem's length before segment comparison. */
+    function prefixSatisfies(cand, stem) {
+        const want = [String(stem.epoch), ...stem.release.map(String)];
+        let have = canonicalSegments(cand);
+        const numLen = (a) => { let n = 0; while (n < a.length && /^\d+$/.test(a[n])) n++; return n; };
+        const hn = numLen(have);
+        if (hn < want.length) {
+            have = [...have.slice(0, hn), ...Array(want.length - hn).fill('0'), ...have.slice(hn)];
+        }
+        return want.every((s, i) => have[i] === s);
+    }
+
+    /** One specifier clause against a parsed candidate (packaging's
+     *  Specifier._compare_*; pre-release policy is handled by the caller). */
+    function clauseSatisfies(cand, op, v) {
+        if (v.endsWith('.*')) {
+            const ok = prefixSatisfies(cand, parseVersion(v.slice(0, -2)));
+            return op === '!=' ? !ok : ok;
+        }
+        const spec = parseVersion(v);
+        switch (op) {
+            case '==': {
+                // A public spec ignores the candidate's local segment; a spec
+                // with a local segment requires an exact match.
+                const c = spec.local ? cand : publicOf(cand);
+                return cmpParsed(c, spec) === 0;
             }
-            if (!ok) return false;
+            case '!=': {
+                const c = spec.local ? cand : publicOf(cand);
+                return cmpParsed(c, spec) !== 0;
+            }
+            case '>=': return cmpParsed(publicOf(cand), spec) >= 0;
+            case '<=': return cmpParsed(publicOf(cand), spec) <= 0;
+            case '>': {
+                if (cmpParsed(cand, spec) <= 0) return false;
+                // '>V' must not match a post-release OF V (candidate minus
+                // post/dev/local equals V) unless V is itself a post-release,
+                // nor a local version of V (candidate's public part equals V)
+                if (!isPostrelease(spec) && isPostrelease(cand)
+                    && cmpParsed({ ...cand, post: null, dev: null, local: null }, spec) === 0) return false;
+                if (cand.local && cmpParsed(publicOf(cand), spec) === 0) return false;
+                return true;
+            }
+            case '<': {
+                if (cmpParsed(cand, spec) >= 0) return false;
+                // '<V' must not match a pre-release of V: candidate >= V's
+                // earliest pre-release (V with dev=0), unless V is itself a
+                // pre-release
+                if (!isPrerelease(spec) && isPrerelease(cand)
+                    && cmpParsed(cand, { ...spec, dev: 0, local: null }) >= 0) return false;
+                return true;
+            }
+            case '~=': {
+                // '~=V' === '>=V' plus epoch-aware '==E!R[:-1].*'
+                if (cmpParsed(publicOf(cand), spec) < 0) return false;
+                const stem = { ...spec, release: spec.release.slice(0, -1), pre: null, post: null, dev: null, local: null };
+                return prefixSatisfies(cand, stem);
+            }
+            default: return false;
         }
-        return true;
     }
 
-    /** Index a pyodide lockfile's packages by normalized name. */
+    /**
+     * SpecifierSet.contains semantics (packaging >= 24: per the updated
+     * PEP 440 recommendation, specifiers MATCH pre-release candidates by
+     * default — pre-release exclusion belongs to candidate selection, not
+     * to satisfaction checks like ours; the per-operator rules above still
+     * exclude e.g. post-releases under '>' and pre-releases of V under
+     * '<V'). options.prereleases: false forbids pre-release candidates
+     * outright. An empty set matches everything.
+     */
+    function versionSatisfies(version, specifiers, options) {
+        const specs = specifiers || [];
+        const cand = parseVersion(version);
+        if (!specs.length) return true;
+        if (options && options.prereleases === false && isPrerelease(cand)) return false;
+        return specs.every(s => clauseSatisfies(cand, s.op, s.version));
+    }
+
+    /** Index a pyodide lockfile's packages by normalized name. Null-prototype
+     *  so requirement names like 'constructor' can never resolve to inherited
+     *  Object.prototype members. */
     function indexLock(lock) {
-        const byNorm = {};
+        const byNorm = Object.create(null);
         for (const [key, entry] of Object.entries((lock && lock.packages) || {})) {
             byNorm[normName(entry.name || key)] = entry;
         }
@@ -232,6 +352,33 @@
     }
 
     /**
+     * Dependency closure for a root that is ALREADY satisfied outside the
+     * lock (installed metadata / a directly-loaded wheel). The lock serves
+     * purely as a dependency graph here: the root's own wheel is never
+     * listed and the lock's root VERSION is deliberately not re-checked —
+     * a satisfying installed version outranks the lock's copy. Returns the
+     * lock file_names of every missing dependency, dependencies first, or
+     * [] when the root is not in the lock (nothing to consult).
+     */
+    function resolveDepsOf(lock, norm, loadedNorms) {
+        const byNorm = indexLock(lock);
+        const rootEntry = byNorm[norm];
+        if (!rootEntry) return [];
+        const files = [];
+        const seen = new Set();
+        const visit = (n, isRoot) => {
+            if (seen.has(n)) return;
+            seen.add(n);
+            const entry = byNorm[n];
+            if (!entry) return;   // dep outside the lock: leave to the runtime to report
+            for (const dep of entry.depends || []) visit(normName(dep), false);
+            if (!isRoot && !loadedNorms.has(n)) files.push(entry.file_name);
+        };
+        visit(norm, true);
+        return files;
+    }
+
+    /**
      * Parse a complete %pip install argument sequence ATOMICALLY: if any
      * token is an option, marker, direct reference, URL, or otherwise
      * unsupported, the whole line is rejected — nothing on the line may be
@@ -255,9 +402,10 @@
         return tokens.map(parseRequirement);   // any throw aborts the whole line
     }
 
-    /** Reverse index: top-level import name -> normalized distribution name. */
+    /** Reverse index: top-level import name -> normalized distribution name.
+     *  Null-prototype for the same reason as indexLock. */
     function importIndex(lock) {
-        const idx = {};
+        const idx = Object.create(null);
         for (const [key, entry] of Object.entries((lock && lock.packages) || {})) {
             const norm = normName(entry.name || key);
             for (const imp of importNamesOf(entry, entry.name || key)) idx[imp] = norm;
@@ -268,6 +416,6 @@
     globalThis.PipResolver = {
         parsePipLine, importIndex,
         normName, parseRequirement, parseVersion, cmpVersions, versionSatisfies,
-        indexLock, importNamesOf, resolveFromLock,
+        indexLock, importNamesOf, resolveFromLock, resolveDepsOf,
     };
 })();
