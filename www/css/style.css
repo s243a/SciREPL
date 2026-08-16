@@ -255,7 +255,7 @@ html, body {
     /* bottom padding reserves the open Formula palette's height — the
        sticky footer overlays this scroller, so without it the tail of the
        notebook hides beneath the expanded footer */
-    padding: 12px 12px calc(12px + var(--footer-overlay, 0px));
+    padding: 12px 12px calc(12px + var(--footer-overlay-local, 0px));
     scroll-behavior: smooth;
 }
 
@@ -427,7 +427,10 @@ html, body {
     bottom: 0;
     display: flex;
     gap: 8px;
-    padding: 10px 12px calc(10px + var(--app-bottom-margin));
+    padding: 10px
+             calc(12px + var(--safe-area-inset-right, env(safe-area-inset-right, 0px)))
+             calc(10px + var(--app-bottom-margin))
+             calc(12px + var(--safe-area-inset-left, env(safe-area-inset-left, 0px)));
     background: var(--bg-secondary);
     border-top: 1px solid var(--border);
     align-items: flex-end;
@@ -494,7 +497,8 @@ html, body {
     #repl, .repl-container {
         max-width: 720px;
         margin: 0 auto;
-        padding: 20px;
+        /* keep the measured footer-overlay reservation at desktop widths */
+        padding: 20px 20px calc(20px + var(--footer-overlay-local, 0px));
     }
 
     #input-bar {

@@ -206,6 +206,98 @@ try {
         check(`${loc} translation updated and localized`, v && v !== en && !v.includes(legacy) && v.includes('∑'));
     }
 
+    console.log('5b. Display math ($$…$$) insertion');
+    page = await freshPage();
+    await enableFormula(page);
+    await page.click('#cell-type-toggle');
+    await page.click('#math-mode-btn');
+    await page.evaluate(() => {
+        const i = document.getElementById('code-input');
+        i.value = '$$x';
+        i.selectionStart = i.selectionEnd = 3;   // caret after x, inside $$…
+    });
+    await page.click('#math-palette button[title="Fraction"]');
+    let dm = await page.evaluate(() => document.getElementById('code-input').value);
+    check('caret inside $$…$$ inserts bare (no nested delimiters)', dm === '$$x\\frac{}{}', JSON.stringify(dm));
+    await page.evaluate(() => {
+        const i = document.getElementById('code-input');
+        const p = i.selectionStart;
+        i.value = i.value.slice(0, p) + '1}{2' + i.value.slice(p) + '$$';
+    });
+    await page.click('#run-btn');
+    await page.waitForSelector('.katex-display, .katex', { timeout: 30000 });
+    check('display math built via the palette renders through KaTeX',
+        await page.evaluate(() => !!document.querySelector('.katex')));
+    await page.context().close();
+
+    console.log('5c. Second notebook and growing composer keep the reservation');
+    page = await freshPage({ viewport: { width: 320, height: 640 } });
+    await enableFormula(page);
+    const madeSecond = await page.evaluate(() => {
+        try { return !!(window.notebookManager && window.notebookManager.createNotebook({ name: 'second' })); }
+        catch (_) { return false; }
+    });
+    await page.click('#math-mode-btn');
+    await page.waitForTimeout(150);
+    const reservation = await page.evaluate(() => {
+        const active = [...document.querySelectorAll('#repl, .repl-container')]
+            .filter(el => el.offsetParent !== null);
+        return active.map(el => el.style.getPropertyValue('--footer-overlay-local') || '0px');
+    });
+    check('active scroller(s) carry a non-zero reservation with the palette open' + (madeSecond ? ' (second notebook)' : ''),
+        reservation.length > 0 && reservation.every(v => parseInt(v) > 0), JSON.stringify(reservation));
+    // growing composer: autosize must re-trigger measurement
+    const before = await page.evaluate(() => {
+        const el = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
+        return parseInt(el.style.getPropertyValue('--footer-overlay-local') || '0');
+    });
+    await page.evaluate(() => {
+        const i = document.getElementById('code-input');
+        i.value = Array.from({ length: 8 }, (_, n) => 'line ' + n).join('\n');
+        i.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await page.waitForTimeout(250);
+    const after = await page.evaluate(() => {
+        const el = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
+        return parseInt(el.style.getPropertyValue('--footer-overlay-local') || '0');
+    });
+    check('composer growth re-measures the reservation', after >= before, `${before} -> ${after}`);
+    await page.context().close();
+
+    console.log('5d. Desktop width keeps the reservation (responsive padding rule)');
+    page = await freshPage({ viewport: { width: 1024, height: 500 } });
+    await enableFormula(page);
+    await page.click('#math-mode-btn');
+    await page.waitForTimeout(150);
+    const desktopPad = await page.evaluate(() => {
+        const el = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
+        return { pad: getComputedStyle(el).paddingBottom, varv: el.style.getPropertyValue('--footer-overlay-local') };
+    });
+    check('>=900px media rule preserves the overlay padding', parseInt(desktopPad.pad) > 20, JSON.stringify(desktopPad));
+    await page.context().close();
+
+    console.log('5e. Offline upgrade: resolver is in the precached shell');
+    {
+        const ctx = await browser.newContext();   // service worker ACTIVE
+        const p2 = await ctx.newPage();
+        await p2.addInitScript(() => {
+            localStorage.setItem('scirepl_privacy_accepted', '1');
+            localStorage.setItem('scirepl_onboarding_seen', '1');
+            addEventListener('DOMContentLoaded', () => localStorage.setItem(
+                'scirepl_whats_new_seen_version', window.KERNEL_CONFIG?.app?.version || ''), { once: true });
+        });
+        await p2.goto(APP_URL, { waitUntil: 'domcontentloaded' });
+        await p2.waitForFunction(() => window.__SCIREPL_APP_READY === true, null, { timeout: 120000 });
+        await p2.evaluate(() => navigator.serviceWorker.ready);
+        await p2.waitForTimeout(3000);   // let the shell precache settle
+        await ctx.setOffline(true);
+        await p2.reload({ waitUntil: 'domcontentloaded' });
+        const offlineResolver = await p2.evaluate(() => typeof globalThis.PipResolver === 'object' && !!globalThis.PipResolver.parsePipLine)
+            .catch(() => false);
+        check('offline reload still has PipResolver (precached)', offlineResolver === true, String(offlineResolver));
+        await ctx.close();
+    }
+
     if (process.env.RUN_LIVE_CDN === '1') {
         console.log('7. LIVE: %pip matplotlib same-cell image (Pyodide CDN)');
         page = await freshPage();

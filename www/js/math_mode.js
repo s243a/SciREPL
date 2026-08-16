@@ -28,12 +28,12 @@ class MathMode {
     }
 
     init() {
+        this.toggleBtn.setAttribute('aria-controls', 'math-palette');
+        this.toggleBtn.setAttribute('aria-expanded', 'false');
         this.toggleBtn.addEventListener('click', () => {
             this.syncContext();               // never open a stale palette
             if (this.context() === null) return;
-            this.palette.classList.toggle('hidden');
-            this.toggleBtn.classList.toggle('active');
-            this.publishPaletteSpace();
+            this.setOpen(this.palette.classList.contains('hidden'));
         });
 
         this.palette.addEventListener('click', (e) => {
@@ -50,7 +50,19 @@ class MathMode {
         document.addEventListener('scirepl:composer-context-changed', () => this.syncContext());
         if (this.langSelector) this.langSelector.addEventListener('change', () => setTimeout(() => this.syncContext(), 0));
         if (this.cellTypeToggle) this.cellTypeToggle.addEventListener('click', () => setTimeout(() => this.syncContext(), 0));
+        this._installGeometryObservers();
         this.syncContext();
+    }
+
+    /** Open/close the palette with all state kept in sync (class, button
+     *  active state, aria-expanded, reserved layout space). The ONLY
+     *  open/close path — appearance.js preference-driven closes call it
+     *  via window.mathMode.setOpen(false). */
+    setOpen(open) {
+        this.palette.classList.toggle('hidden', !open);
+        this.toggleBtn.classList.toggle('active', open);
+        this.toggleBtn.setAttribute('aria-expanded', String(!!open));
+        this.publishPaletteSpace();
     }
 
     /** 'python' | 'markdown' | null (no palette for this context). */
@@ -60,19 +72,39 @@ class MathMode {
         return null;
     }
 
-    /** The sticky footer overlays the #repl scroller (body is a block
-     *  layout), so the scroller reserves the MEASURED overlap as bottom
-     *  padding — however tall the footer currently is (palette open,
-     *  closed, or context-switched). Measured after a frame so the new
-     *  footer size has settled (layout invariant, test_math_palette.mjs). */
+    /** The sticky footer overlays the notebook scrollers (body is a block
+     *  layout), so every ACTIVE scroller reserves its own MEASURED overlap
+     *  as bottom padding — recomputed whenever the footer's geometry
+     *  changes for any reason (palette open/close/context, textarea
+     *  autosize, safe-inset updates, viewport resize, notebook switches).
+     *  Layout invariants: test_math_palette.mjs. */
     publishPaletteSpace() {
-        requestAnimationFrame(() => {
-            const repl = document.getElementById('repl');
-            const bar = document.getElementById('input-bar');
-            if (!repl || !bar) return;
-            const overlap = Math.max(0, repl.getBoundingClientRect().bottom - bar.getBoundingClientRect().top);
-            document.documentElement.style.setProperty('--footer-overlay', Math.ceil(overlap) + 'px');
-        });
+        requestAnimationFrame(() => this._measureFooterOverlay());
+    }
+
+    _measureFooterOverlay() {
+        const bar = document.getElementById('input-bar');
+        if (!bar) return;
+        const barTop = bar.getBoundingClientRect().top;
+        for (const scroller of document.querySelectorAll('#repl, .repl-container')) {
+            if (!this._observedScrollers.has(scroller)) {
+                this._observedScrollers.add(scroller);
+                this._resizeObserver.observe(scroller);
+            }
+            if (scroller.offsetParent === null) continue;   // hidden notebook
+            const overlap = Math.max(0, scroller.getBoundingClientRect().bottom - barTop);
+            scroller.style.setProperty('--footer-overlay-local', Math.ceil(overlap) + 'px');
+        }
+    }
+
+    _installGeometryObservers() {
+        this._observedScrollers = new Set();
+        this._resizeObserver = new ResizeObserver(() => this._measureFooterOverlay());
+        const bar = document.getElementById('input-bar');
+        if (bar) this._resizeObserver.observe(bar);
+        window.addEventListener('resize', () => this._measureFooterOverlay());
+        if (window.visualViewport) window.visualViewport.addEventListener('resize', () => this._measureFooterOverlay());
+        this._measureFooterOverlay();
     }
 
     /** Reflect the current composer context in the palette and its control. */
@@ -80,9 +112,7 @@ class MathMode {
         const ctx = this.context();
         if (ctx === null) {
             this.toggleBtn.classList.add('lang-hidden');
-            this.toggleBtn.classList.remove('active');
-            this.palette.classList.add('hidden');
-            this.publishPaletteSpace();
+            this.setOpen(false);
             return;
         }
         this.toggleBtn.classList.remove('lang-hidden');
@@ -90,12 +120,29 @@ class MathMode {
         this.publishPaletteSpace();
     }
 
-    /** True when the caret sits inside a $...$ / $$...$$ math span: an odd
-     *  number of unescaped '$' characters precedes it. */
+    /** True when the caret sits inside a math span. '$$' and '$' are
+     *  distinct delimiter TOKENS (naive dollar parity says the inside of
+     *  $$x$$ is outside): scan unescaped delimiters as a state machine
+     *  over {outside, inline, display}. */
     caretInsideMathSpan() {
         const before = this.input.value.slice(0, this.input.selectionStart);
-        const dollars = (before.match(/(?<!\\)\$/g) || []).length;
-        return dollars % 2 === 1;
+        let state = 'outside';
+        for (let i = 0; i < before.length; i++) {
+            const c = before[i];
+            if (c === '\\') { i++; continue; }           // escaped char
+            if (c !== '$') continue;
+            if (before[i + 1] === '$') {
+                if (state === 'outside') state = 'display';
+                else if (state === 'display') state = 'outside';
+                // '$$' inside an inline span is left as literal content
+                i++;
+                continue;
+            }
+            if (state === 'outside') state = 'inline';
+            else if (state === 'inline') state = 'outside';
+            // a single '$' inside display math is literal content
+        }
+        return state !== 'outside';
     }
 
     /** Insert a LaTeX template. Outside a math span the template is wrapped

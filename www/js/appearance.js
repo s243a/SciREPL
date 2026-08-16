@@ -320,9 +320,13 @@
             // control. If it is hidden while the palette is open, close the
             // palette first so no floating UI is left without its control.
             if (id === 'math-mode-btn' && !show) {
-                button.classList.remove('active');
-                const palette = document.getElementById('math-palette');
-                if (palette) palette.classList.add('hidden');
+                if (window.mathMode && window.mathMode.setOpen) {
+                    window.mathMode.setOpen(false);
+                } else {
+                    button.classList.remove('active');
+                    const palette = document.getElementById('math-palette');
+                    if (palette) palette.classList.add('hidden');
+                }
             }
         }
 
