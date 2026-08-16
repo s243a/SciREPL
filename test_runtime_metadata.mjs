@@ -30,7 +30,7 @@ try {
             'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
         localStorage.setItem('scirepl_privacy_accepted', '1');
         localStorage.setItem('scirepl_privacy_accepted_revision',
-            '2026-08-runtime-metadata-v1');
+            '2026-08-catalog-sources-v1');
         localStorage.removeItem('scirepl_webr_version');
         localStorage.removeItem('scirepl_r_source');
         localStorage.removeItem('scirepl_swipl_version');
@@ -256,7 +256,7 @@ try {
     assert(metadataRequests === 1, 'explicit consented check should make one metadata request');
     assert(await privatePage.evaluate(() =>
         localStorage.getItem('scirepl_privacy_accepted_revision'))
-        === '2026-08-runtime-metadata-v1',
+        === '2026-08-catalog-sources-v1',
     'accepting the revised policy must persist its exact revision');
     await privateContext.close();
 
@@ -273,7 +273,7 @@ try {
             'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
         localStorage.setItem('scirepl_privacy_accepted', '1');
         localStorage.setItem('scirepl_privacy_accepted_revision',
-            '2026-08-runtime-metadata-v1');
+            '2026-08-catalog-sources-v1');
     });
     await failurePage.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await failurePage.waitForSelector('#run-btn:not([disabled])', { timeout: 10000 });
@@ -301,7 +301,7 @@ try {
             'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
         localStorage.setItem('scirepl_privacy_accepted', '1');
         localStorage.setItem('scirepl_privacy_accepted_revision',
-            '2026-08-runtime-metadata-v1');
+            '2026-08-catalog-sources-v1');
     });
     await electronPage.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await electronPage.waitForSelector('#run-btn:not([disabled])', { timeout: 10000 });
@@ -339,12 +339,15 @@ try {
             'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
         localStorage.setItem('scirepl_privacy_accepted', '1');
         localStorage.setItem('scirepl_privacy_accepted_revision',
-            '2026-08-runtime-metadata-v1');
+            '2026-08-catalog-sources-v1');
         localStorage.setItem('scirepl_r_source', source);
     }, longSource);
     await mobilePage.goto(BASE, { waitUntil: 'domcontentloaded', timeout: 30000 });
     await mobilePage.waitForSelector('#run-btn:not([disabled])', { timeout: 10000 });
-    await mobilePage.evaluate(async () => window.i18n.activate('ar'));
+    await mobilePage.evaluate(async () => {
+        await window.i18n.init();
+        await window.i18n.activate('ar');
+    });
     await mobilePage.click('#menu-btn');
     await mobilePage.click('#btn-languages');
     await mobilePage.evaluate((source) => {

@@ -1499,6 +1499,13 @@ html, body {
     font-size: 0.78rem;
 }
 
+.pkg-source {
+    display: block;
+    margin-top: 5px;
+    color: var(--accent);
+    font-size: 0.76rem;
+}
+
 .pkg-install-btn {
     padding: 8px 16px;
     border: 1px solid var(--accent);
@@ -1533,6 +1540,74 @@ html, body {
     margin: 12px 0 6px;
     padding-bottom: 4px;
     border-bottom: 1px solid var(--border);
+}
+
+.catalog-source-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 10px 0;
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--bg-primary);
+}
+
+.catalog-source-copy {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 3px 8px;
+    min-width: 0;
+}
+
+.catalog-source-copy > span,
+.catalog-source-copy > small {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+}
+
+.catalog-source-copy > strong {
+    font-size: 0.88rem;
+}
+
+.catalog-source-copy > small {
+    flex-basis: 100%;
+}
+
+.catalog-source-actions,
+.catalog-source-panel-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.catalog-source-panel-actions {
+    margin-top: 12px;
+}
+
+.catalog-source-panel-actions .primary {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+#catalog-source-panel .catalog-filter-label {
+    margin-top: 10px;
+}
+
+.catalog-source-warning,
+.catalog-source-error {
+    margin: 10px 0 0;
+    font-size: 0.82rem;
+}
+
+.catalog-source-warning {
+    color: var(--yellow, #e3b341);
+}
+
+.catalog-source-error {
+    color: var(--red);
 }
 
 .catalog-toolbar {
@@ -1666,6 +1741,15 @@ html, body {
     .catalog-filter-label,
     .catalog-fallbacks-row {
         flex-basis: 100%;
+    }
+
+    .catalog-source-bar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .catalog-source-actions .vfs-btn {
+        flex: 1 1 0;
     }
 }
 

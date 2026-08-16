@@ -905,6 +905,17 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             <div id="catalog-browse-panel">
                 <h2 data-i18n="packageCatalog.browsePackagesBundlesAmpWorkbooks">Browse Packages, Bundles &amp; Workbooks</h2>
                 <p data-i18n="packageCatalog.oneClickInstallPackagesDependency">One-click install packages, dependency-aware workbook bundles, and individual workbook templates into SciREPL.</p>
+                <div class="catalog-source-bar">
+                    <div class="catalog-source-copy">
+                        <span data-i18n="packageCatalog.catalogSource">Catalog source</span>
+                        <strong id="catalog-source-summary" data-i18n="packageCatalog.sourceLatestStable">Latest stable</strong>
+                        <small id="catalog-source-status" aria-live="polite" data-i18n="packageCatalog.sourceNotChecked">Not checked yet.</small>
+                    </div>
+                    <div class="catalog-source-actions">
+                        <button type="button" id="catalog-edit-source" class="vfs-btn" data-i18n="packageCatalog.changeSource">Change</button>
+                        <button type="button" id="catalog-refresh-source" class="vfs-btn" data-i18n="packageCatalog.refreshSource">Refresh</button>
+                    </div>
+                </div>
                 <div class="catalog-toolbar">
                     <input type="search" id="catalog-search" class="catalog-search" data-i18n-placeholder="packageCatalog.searchPlaceholder" placeholder="Search packages, bundles, workbooks…" autocomplete="off">
                     <div class="catalog-filter-grid">
@@ -955,6 +966,39 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                     <select id="catalog-fallback-add" class="catalog-select"></select>
                 </label>
                 <p id="catalog-fallback-help" class="catalog-fallback-help"></p>
+            </div>
+
+            <div id="catalog-source-panel" class="hidden">
+                <button type="button" id="catalog-source-back" class="catalog-back-btn">
+                    <span aria-hidden="true">‹</span>
+                    <span data-i18n="packageCatalog.catalogSource">Catalog source</span>
+                </button>
+                <p data-i18n="packageCatalog.sourceHelp">Choose a verified SciREPL Catalog channel. Latest stable and release channels use a static host without the GitHub API.</p>
+                <label class="catalog-filter-label" for="catalog-source-mode">
+                    <span data-i18n="packageCatalog.sourceChannel">Channel</span>
+                    <select id="catalog-source-mode" class="catalog-select">
+                        <option value="stable" data-i18n="packageCatalog.sourceLatestStable">Latest stable</option>
+                        <option value="release" data-i18n="packageCatalog.sourceSpecificRelease">Specific release</option>
+                        <option value="commit" data-i18n="packageCatalog.sourceSpecificCommit">Specific commit</option>
+                        <option value="development" data-i18n="packageCatalog.sourceDevelopmentBranch">Development branch</option>
+                    </select>
+                </label>
+                <label id="catalog-source-value-row" class="catalog-filter-label" for="catalog-source-value" hidden>
+                    <span id="catalog-source-value-label" data-i18n="packageCatalog.sourceReleaseTag">Release tag</span>
+                    <input id="catalog-source-value" class="catalog-search" type="text" autocomplete="off" spellcheck="false">
+                </label>
+                <label id="catalog-source-host-row" class="catalog-filter-label" for="catalog-source-host">
+                    <span data-i18n="packageCatalog.sourceStaticHost">Static catalogue host</span>
+                    <input id="catalog-source-host" class="catalog-search" type="url" value="https://s243a.github.io/SciREPL-Catalog/" autocomplete="off" spellcheck="false">
+                </label>
+                <p id="catalog-source-warning" class="catalog-source-warning" hidden></p>
+                <p id="catalog-source-form-error" class="catalog-source-error" role="alert"></p>
+                <div class="catalog-source-panel-actions">
+                    <button type="button" id="catalog-source-apply" class="vfs-btn primary" data-i18n="packageCatalog.applySource">Apply source</button>
+                    <button type="button" id="catalog-source-reset" class="vfs-btn" data-i18n="packageCatalog.resetSource">Use official default</button>
+                    <button type="button" id="catalog-source-clear-data" class="vfs-btn" data-i18n="packageCatalog.clearVerifiedData">Clear verified data</button>
+                </div>
+                <p class="catalog-fallback-help" data-i18n="packageCatalog.sourceHostHelp">Compatible mirrors must use HTTPS, publish the same release layout, and allow browser cross-origin reads. Loopback HTTP is accepted for local testing.</p>
             </div>
         </div>
     </div>
@@ -1045,7 +1089,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
         <div class="modal-content modal-content-scroll">
             <button class="modal-close" data-i18n-aria-label="common.close" data-i18n-title="common.close" aria-label="Close" title="Close">&times;</button>
             <h2 data-i18n="privacy.privacyPolicy">Privacy Policy</h2>
-            <p data-i18n="privacy.lastUpdated" style="color: #888; font-size: 0.9em;">Last updated: August 11, 2026</p>
+            <p data-i18n="privacy.lastUpdated" style="color: #888; font-size: 0.9em;">Last updated: August 15, 2026</p>
 
             <!-- Filled by i18n.renderTranslationNotice() in the reader's own
                  language whenever the policy is being shown translated. Hidden
@@ -1062,9 +1106,9 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
                 <li data-i18n="privacy.commandHistoryInputRecall">Command history for input recall</li>
                 <li data-i18n="privacy.preferencesEGCellCounter">Preferences (e.g. cell counter state)</li>
                 <li data-i18n="privacy.sharedVfsAndUserFiles">SharedVFS files, uploaded files, installed package files, and search paths</li>
-                <li data-i18n="privacy.cachedResources">Downloaded runtimes, packages, and app resources kept in local caches</li>
+                <li data-i18n="privacy.cachedResources">Downloaded runtimes and packages, verified catalogue snapshots, cached catalogue workbook artifact bytes, and app resources kept in local caches</li>
             </ul>
-            <p data-i18n="privacy.dataNeverLeavesYourDevice">SciREPL does not send this local data to its servers. You can clear session and VFS data via Menu &gt; Clear History, and downloaded caches via Menu &gt; Memory &amp; Storage.</p>
+            <p data-i18n="privacy.dataNeverLeavesYourDevice">SciREPL does not send this local data to its servers. You can clear session and VFS data via Menu &gt; Clear History, downloaded runtime and app caches via Menu &gt; Memory &amp; Storage, and verified catalogue snapshots, cached workbook artifact bytes, and trusted release mappings via Browse &gt; Catalog source &gt; Clear verified data. Clear verified data does not remove installed catalogue notebook copies; delete those notebooks individually or use Menu &gt; Clear History.</p>
 
             <h3 data-i18n="privacy.networkRequestsAmpThirdParty">Network Requests &amp; Third-Party CDNs</h3>
             <p data-i18n="privacy.scireplBundlesCoreRuntimes">SciREPL bundles its core interface and most language runtimes directly in the app. The following items describe what is bundled and what may be downloaded from third-party services:</p>
@@ -1074,7 +1118,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
                 <li data-i18n-html="privacy.fengariLuaRuntimeFrom"><strong>Lua (Fengari)</strong> — from <code>cdn.jsdelivr.net</code> or <code>unpkg.com</code>, downloaded when Lua is first used and cached locally.</li>
                 <li data-i18n-html="privacy.docxLibraryFrom"><strong>DOCX export library</strong> — <code>docx@9.6.0</code> from <code>cdn.jsdelivr.net</code>, downloaded when DOCX export is first used.</li>
                 <li data-i18n="privacy.policyRuntimeVersionChecks">Runtime version checks — after network consent, opening Languages may query data.jsdelivr.com for package version metadata. If consent has not yet been given, tapping Check latest opens the consent dialog; no metadata request is sent unless you accept. It does not download or activate the runtime.</li>
-                <li data-i18n-html="privacy.additionalPackagesFromNetwork"><strong>Optional catalog packages</strong> are downloaded from GitHub when you install them. Other packages and user-requested data may be fetched from package repositories or URLs when you request them, for example with <code>install.packages()</code>, <code>%pip</code>, or file-fetching commands.</li>
+                <li data-i18n-html="privacy.additionalPackagesFromNetwork">After you accept the current network disclosure, opening Browse can fetch verified SciREPL Catalog release metadata from the configured static catalogue host (by default <code>s243a.github.io</code>) and immutable catalogue or workbook bytes from <code>raw.githubusercontent.com</code>. These requests do not intentionally include notebook content, search text, spoken-language choices, fallback preferences, or kernel filters. Selecting a development branch additionally asks <code>api.github.com</code> to resolve it to an exact commit. Other packages and user-requested data may be fetched from package repositories or URLs when you request them, for example with <code>install.packages()</code>, <code>%pip</code>, or file-fetching commands.</li>
                 <li data-i18n-html="privacy.koFiSupportLink"><strong>Ko-fi support link</strong> — Help includes a normal link to <code>ko-fi.com</code>. No Ko-fi request is made unless you choose to open it.</li>
             </ul>
             <p data-i18n="privacy.whenTheseResourcesFetchedCdn">When these resources are fetched, the CDN providers may receive:</p>
@@ -1084,7 +1128,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
                 <li data-i18n="privacy.timestampsRequests">Timestamps of requests</li>
                 <li data-i18n="privacy.urlsRequestedResources">URLs of requested resources</li>
             </ul>
-            <p data-i18n="privacy.cachingUsedMinimizeConnectionsCdn">Caching is used to minimize repeat connections. After a runtime or package has been downloaded successfully, SciREPL uses the local cached copy when available.</p>
+            <p data-i18n="privacy.cachingUsedMinimizeConnectionsCdn">Caching minimizes repeat connections. After a runtime or package is downloaded, SciREPL uses a local cached copy when available. Verified catalogue snapshots, downloaded catalogue workbook artifact bytes, and trusted release mappings are also stored locally; clear those from Browse &gt; Catalog source &gt; Clear verified data. This does not remove installed catalogue notebook copies; delete them individually or use Menu &gt; Clear History. Built-in catalogue items remain available.</p>
             <p data-i18n-html="privacy.jsdelivrSPrivacyPolicyJsdelivr">jsDelivr's privacy policy: <a href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net" target="_blank">jsdelivr.com/terms/privacy-policy-jsdelivr-net</a></p>
             <p data-i18n="privacy.yourCodeSessionData">Your code, session data, and exported files are not transmitted to a SciREPL server. Network requests occur only for the resources described above or when your code explicitly requests them.</p>
 
@@ -1208,6 +1252,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <script src="js/archive_extractors.js"></script>
     <script src="js/package_loader.js"></script>
     <script src="js/catalog_filter.js"></script>
+    <script src="js/catalog_source.js"></script>
     <script src="js/package_catalog.js"></script>
     <script src="js/prolog_settings.js"></script>
     <script src="js/notebook_manager.js"></script>

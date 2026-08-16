@@ -104,6 +104,26 @@ const REMOTE_ORIGINS = [
 ];
 
 /**
+ * Data-only origins used by optional application features.
+ *
+ * The official SciREPL Catalog release channel is published on GitHub Pages.
+ * It is deliberately separate from REMOTE_ORIGINS: the renderer may fetch its
+ * release descriptors and integrity-checked index/workbook bytes, but it may
+ * not load scripts,
+ * styles, images, or fonts from that host. The desktop policy names the
+ * official origin, while the catalogue loader separately constrains every
+ * descriptor and artifact path below SciREPL-Catalog/.
+ *
+ * Free Electron v1 does not grant arbitrary user-configured HTTPS mirrors a
+ * renderer-wide connection capability. A mirror needs an explicit origin here
+ * (and a reviewed release) before the desktop shell can contact it. The PWA and
+ * Android app continue to rely on the browser/WebView network and CORS policy.
+ */
+const CONNECT_ONLY_ORIGINS = [
+  'https://s243a.github.io',       // official SciREPL-Catalog release channel
+];
+
+/**
  * Content-Security-Policy for the application origin.
  *
  * `'unsafe-eval'` is present deliberately and cannot be removed: SciREPL's
@@ -120,13 +140,14 @@ const REMOTE_ORIGINS = [
  */
 function buildCsp() {
   const remote = REMOTE_ORIGINS.join(' ');
+  const connectOnly = CONNECT_ONLY_ORIGINS.join(' ');
   return [
     `default-src 'self' ${ORIGIN}`,
     `script-src 'self' ${ORIGIN} 'unsafe-eval' 'wasm-unsafe-eval' 'unsafe-inline' blob: ${remote}`,
     `style-src 'self' ${ORIGIN} 'unsafe-inline' ${remote}`,
     `img-src 'self' ${ORIGIN} data: blob: ${remote}`,
     `font-src 'self' ${ORIGIN} data: ${remote}`,
-    `connect-src 'self' ${ORIGIN} data: blob: ${remote}`,
+    `connect-src 'self' ${ORIGIN} data: blob: ${remote} ${connectOnly}`,
     `worker-src 'self' ${ORIGIN} blob:`,
     `child-src 'self' ${ORIGIN} blob:`,
     // No plugins, and the page may never be framed.
@@ -260,6 +281,7 @@ module.exports = {
   START_URL,
   MIME,
   REMOTE_ORIGINS,
+  CONNECT_ONLY_ORIGINS,
   buildCsp,
   registerScheme,
   registerProtocolHandler,

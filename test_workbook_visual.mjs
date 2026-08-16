@@ -2,16 +2,23 @@
 import { chromium } from 'playwright';
 
 const TIMEOUT = 180_000;
+const PRIVACY_REVISION = '2026-08-catalog-sources-v1';
 
 (async () => {
     const browser = await chromium.launch({ headless: false, slowMo: 150 });
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-    await context.addInitScript(() => {
+    for (const pattern of [
+        'https://s243a.github.io/SciREPL-Catalog/**',
+        'https://raw.githubusercontent.com/s243a/SciREPL-Catalog/**',
+        'https://api.github.com/repos/s243a/SciREPL-Catalog/**',
+    ]) await context.route(pattern, route => route.abort('blockedbyclient'));
+    await context.addInitScript(({ privacyRevision }) => {
         localStorage.setItem('scirepl_privacy_accepted', '1');
+        localStorage.setItem('scirepl_privacy_accepted_revision', privacyRevision);
         localStorage.setItem('scirepl_onboarding_seen', '1');
         addEventListener('DOMContentLoaded', () => localStorage.setItem(
             'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
-    });
+    }, { privacyRevision: PRIVACY_REVISION });
     const page = await context.newPage();
 
     // Auto-accept R download dialog

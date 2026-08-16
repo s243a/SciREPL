@@ -1,7 +1,7 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v160';
+const CACHE_VERSION = 'v165';
 
 // Marker entry recording whether an app cache finished installing. Stored in
 // the cache itself so the answer travels with it and survives a restart.
@@ -97,6 +97,7 @@ const APP_SHELL = [
   './js/notebook_vfs.js',
   './js/package_loader.js',
   './js/catalog_filter.js',
+  './js/catalog_source.js',
   './js/package_catalog.js',
   './vendor/hljs/highlight.min.js',
   './vendor/hljs/lua.min.js',
@@ -142,6 +143,7 @@ const APP_SHELL = [
   './workbooks/lua-parsing-coroutines.srwb',
   './workbooks/prolog-generates-r.srwb',
   './workbooks/prolog-generates-clojurescript.srwb',
+  './workbooks/nqueens-transpile.ipynb',
   './workbooks/prolog-generates-lua.srwb',
   './workbooks/compute-pi-workbook.srwb',
   './workbooks/typr-intro.srwb',
@@ -154,6 +156,15 @@ const CDN_DOMAINS = [
   'swi-prolog.github.io',
   'webr.r-wasm.org',
   'unpkg.com',
+];
+
+// Large bundled runtimes are intentionally cached on first use rather than
+// pre-cached with APP_SHELL. Keep this list narrow: an arbitrary same-origin
+// data path must not gain runtime-like cache privileges merely by being under
+// the worker's scope.
+const BUNDLED_RUNTIME_PATH_PREFIXES = [
+  'vendor/pyodide/',
+  'vendor/swipl/',
 ];
 
 function isCDNRequest(url) {
@@ -443,24 +454,53 @@ self.addEventListener('activate', (event) => {
   })());
 });
 
-// Fetch: cache-first for app shell and CDN, network-first for everything else
+// Fetch: cache-first for the scoped app shell and immutable CDN resources.
+// Requests outside this registration's app scope, and explicit no-store
+// requests, remain under the browser's normal network/cache handling.
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
+
+  // A caller using no-store is explicitly asking for a fresh response. In
+  // particular, verified catalog metadata uses this mode when checking for a
+  // newer release or a suspiciously moved ref. Never satisfy or populate one
+  // of our long-lived caches for such a request.
+  if (event.request.cache === 'no-store') return;
 
   // The public Pro landing and privacy pages are not part of the PWA app shell.
   // Always let the browser fetch them normally so marketing/policy edits are not
   // held behind the app's cache-first lifecycle.
   const appScopePath = new URL(self.registration.scope).pathname;
-  if (url.origin === self.location.origin && url.pathname.startsWith(`${appScopePath}pro/`)) {
+  const isScopedAppRequest = url.origin === self.location.origin &&
+    url.pathname.startsWith(appScopePath);
+  const scopedAppPath = isScopedAppRequest ? url.pathname.slice(appScopePath.length) : '';
+  const isAppShellRequest = isScopedAppRequest && !url.search && APP_SHELL.some(
+    (entry) => entry.replace(/^\.\//, '') === scopedAppPath,
+  );
+  const isBundledRuntimeRequest = isScopedAppRequest && !url.search &&
+    ['GET', 'HEAD'].includes(event.request.method) && BUNDLED_RUNTIME_PATH_PREFIXES.some(
+      (prefix) => scopedAppPath.startsWith(prefix),
+    );
+  if (isScopedAppRequest && url.pathname.startsWith(`${appScopePath}pro/`)) {
     return;
   }
+
+  // Chromium can present an explicit no-store subresource fetch to a service
+  // worker as `reload`. A reloaded document may also pass that value to later
+  // ordinary fetches, so the mode alone is ambiguous. In that case, keep cache
+  // handling only for the explicit offline classes: the enumerated app shell,
+  // narrowly allowlisted bundled-runtime directories, and immutable CDN URLs.
+  // Everything unlisted (including catalog metadata) stays fresh and is never
+  // inserted into a long-lived cache.
+  if (event.request.cache === 'reload' && event.request.mode !== 'navigate' &&
+      !isAppShellRequest && !isBundledRuntimeRequest &&
+      !isImmutableRuntimeRequest(event.request, url)) return;
 
   // App shell: served entirely from ONE coherent version — the newest cache
   // that installed completely. A half-installed upgrade therefore does not take
   // effect until it is whole; the user keeps running the last good version as a
   // consistent set rather than a mix. Never an unqualified caches.match(): that
   // searches oldest-first and would splice files across versions.
-  if (url.origin === self.location.origin) {
+  if (isScopedAppRequest) {
     // Kick a background repair if this version installed only partially; the
     // response itself still comes from the coherent serving cache below.
     maybeRepairInBackground(event);

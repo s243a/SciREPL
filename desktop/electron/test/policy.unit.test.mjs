@@ -301,6 +301,24 @@ export default async function run() {
   }
   r.log('CSP does not allow plaintext http: origins', !/\bhttp:\/\//.test(csp));
 
+  const directiveSources = (name) => {
+    const directive = csp.split(';')
+      .map(value => value.trim())
+      .find(value => value === name || value.startsWith(`${name} `));
+    return new Set((directive || '').split(/\s+/).slice(1));
+  };
+  const officialCatalogOrigin = 'https://s243a.github.io';
+  const connectSources = directiveSources('connect-src');
+  r.log('official SciREPL Catalog host is a connect-only origin',
+    protocol.CONNECT_ONLY_ORIGINS.includes(officialCatalogOrigin)
+      && connectSources.has(officialCatalogOrigin));
+  for (const directive of ['script-src', 'style-src', 'img-src', 'font-src']) {
+    r.log(`official catalogue host is absent from ${directive}`,
+      !directiveSources(directive).has(officialCatalogOrigin));
+  }
+  r.log('Free Electron does not admit arbitrary HTTPS connections',
+    !connectSources.has('https:') && !connectSources.has('https://*'));
+
   /* ---------------- ordinary support links stay external ------------- */
 
   // Help uses a plain HTTPS link to Ko-fi. It needs no renderer request

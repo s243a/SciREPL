@@ -24,6 +24,11 @@ class Notebook {
         this.kernelLanguage = opts.kernelLanguage || null; // null = infer from cells
         this.catalogId = opts.catalogId || null;
         this.catalogRevision = opts.catalogRevision ?? null;
+        this.catalogSourceId = opts.catalogSourceId || null;
+        this.catalogRef = opts.catalogRef || null;
+        this.catalogCommit = opts.catalogCommit || null;
+        this.catalogPath = opts.catalogPath || null;
+        this.catalogSha256 = opts.catalogSha256 || null;
         this.cells = opts.cells || [];
         this.cellCounter = opts.cellCounter || 0;
         this.replContainer = null; // DOM element
@@ -53,8 +58,14 @@ class Notebook {
             kernelLanguage: this.kernelLanguage,
             catalogId: this.catalogId,
             catalogRevision: this.catalogRevision,
+            catalogSourceId: this.catalogSourceId,
+            catalogRef: this.catalogRef,
+            catalogCommit: this.catalogCommit,
+            catalogPath: this.catalogPath,
+            catalogSha256: this.catalogSha256,
             cellCounter: this.cellCounter,
             cells: this.cells.map(c => ({
+                id: c.id,
                 code: c.code,
                 type: c.type,
                 language: c.language || 'python',
@@ -84,6 +95,11 @@ class Notebook {
             kernelLanguage: data.kernelLanguage,
             catalogId: data.catalogId,
             catalogRevision: data.catalogRevision,
+            catalogSourceId: data.catalogSourceId,
+            catalogRef: data.catalogRef,
+            catalogCommit: data.catalogCommit,
+            catalogPath: data.catalogPath,
+            catalogSha256: data.catalogSha256,
             cellCounter: data.cellCounter,
             cells: data.cells || []
         });
@@ -676,17 +692,21 @@ class NotebookManager {
             const item = document.createElement('div');
             item.className = 'sidebar-notebook-item' + (nb.isActive ? ' active' : '');
 
-            const langBadge = nb.kernelLanguage
-                ? `<span class="lang-badge lang-${nb.kernelLanguage}">${nb.kernelLanguage}</span>`
-                : '';
-
-            item.innerHTML = `
-                <span class="sidebar-nb-name">${nb.name}</span>
-                ${langBadge}
-            `;
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'sidebar-nb-name';
+            nameSpan.textContent = nb.name;
+            item.appendChild(nameSpan);
+            if (nb.kernelLanguage) {
+                const langBadge = document.createElement('span');
+                const classSuffix = String(nb.kernelLanguage).toLowerCase()
+                    .replace(/[^a-z0-9_-]/g, '');
+                langBadge.className = 'lang-badge'
+                    + (classSuffix ? ` lang-${classSuffix}` : '');
+                langBadge.textContent = nb.kernelLanguage;
+                item.appendChild(langBadge);
+            }
 
             // Double-click to rename
-            const nameSpan = item.querySelector('.sidebar-nb-name');
             if (nameSpan) {
                 nameSpan.addEventListener('dblclick', (e) => {
                     e.stopPropagation();
@@ -735,14 +755,22 @@ class NotebookManager {
             const tab = document.createElement('div');
             tab.className = 'notebook-tab' + (nb.isActive ? ' active' : '');
 
-            const langBadge = nb.kernelLanguage
-                ? `<span class="lang-badge lang-${nb.kernelLanguage}">${nb.kernelLanguage}</span>`
-                : '';
-
-            tab.innerHTML = `<span class="tab-name">${nb.name}</span> ${langBadge}`;
+            const tabName = document.createElement('span');
+            tabName.className = 'tab-name';
+            tabName.textContent = nb.name;
+            tab.appendChild(tabName);
+            if (nb.kernelLanguage) {
+                const langBadge = document.createElement('span');
+                const classSuffix = String(nb.kernelLanguage).toLowerCase()
+                    .replace(/[^a-z0-9_-]/g, '');
+                langBadge.className = 'lang-badge'
+                    + (classSuffix ? ` lang-${classSuffix}` : '');
+                langBadge.textContent = nb.kernelLanguage;
+                tab.appendChild(document.createTextNode(' '));
+                tab.appendChild(langBadge);
+            }
 
             // Double-click to rename
-            const tabName = tab.querySelector('.tab-name');
             if (tabName) {
                 tabName.addEventListener('dblclick', (e) => {
                     e.stopPropagation();

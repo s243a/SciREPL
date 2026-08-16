@@ -24,7 +24,7 @@
 <body>
     <!-- POLICY-CONTENT:START — keep synchronized with docs/privacy.html. -->
     <h1>SciREPL Privacy Policy</h1>
-    <p class="updated">Last updated: August 11, 2026</p>
+    <p class="updated">Last updated: August 15, 2026</p>
 
     <h2>Summary</h2>
     <p>SciREPL is designed to be a privacy-respecting application. All code execution happens locally on your device. We do not collect, store, or transmit any personal data to our servers.</p>
@@ -36,9 +36,9 @@
         <li>Command history for input recall</li>
         <li>Preferences (e.g. cell counter state)</li>
         <li>SharedVFS files, uploaded files, installed package files, and search paths</li>
-        <li>Downloaded runtimes, packages, and app resources kept in local caches</li>
+        <li>Downloaded runtimes and packages, verified catalogue snapshots, cached catalogue workbook artifact bytes, and app resources kept in local caches</li>
     </ul>
-    <p>SciREPL does not send this local data to its servers. You can clear session and VFS data via Menu &gt; Clear History, and downloaded caches via Menu &gt; Memory &amp; Storage.</p>
+    <p>SciREPL does not send this local data to its servers. You can clear session and VFS data via Menu &gt; Clear History, downloaded runtime and app caches via Menu &gt; Memory &amp; Storage, and verified catalogue snapshots, cached workbook artifact bytes, and trusted release mappings via Browse &gt; Catalog source &gt; Clear verified data. Clear verified data does not remove installed catalogue notebook copies; delete those notebooks individually or use Menu &gt; Clear History.</p>
 
     <h2>Network Requests &amp; Third-Party CDNs</h2>
     <p>SciREPL bundles its core interface and most language runtimes directly in the app. The following items describe what is bundled and what may be downloaded from third-party services:</p>
@@ -48,7 +48,7 @@
         <li><strong>Lua (Fengari)</strong> — from <code>cdn.jsdelivr.net</code> or <code>unpkg.com</code>, downloaded when Lua is first used and cached locally.</li>
         <li><strong>DOCX export library</strong> — <code>docx@9.6.0</code> from <code>cdn.jsdelivr.net</code>, downloaded when DOCX export is first used.</li>
         <li>Runtime version checks — after network consent, opening Languages may query data.jsdelivr.com for package version metadata. If consent has not yet been given, tapping Check latest opens the consent dialog; no metadata request is sent unless you accept. It does not download or activate the runtime.</li>
-        <li><strong>Optional catalog packages</strong> are downloaded from GitHub when you install them. Other packages and user-requested data may be fetched from package repositories or URLs when you request them, for example with <code>install.packages()</code>, <code>%pip</code>, or file-fetching commands.</li>
+        <li>After you accept the current network disclosure, opening Browse can fetch verified SciREPL Catalog release metadata from the configured static catalogue host (by default <code>s243a.github.io</code>) and immutable catalogue or workbook bytes from <code>raw.githubusercontent.com</code>. These requests do not intentionally include notebook content, search text, spoken-language choices, fallback preferences, or kernel filters. Selecting a development branch additionally asks <code>api.github.com</code> to resolve it to an exact commit. Other packages and user-requested data may be fetched from package repositories or URLs when you request them, for example with <code>install.packages()</code>, <code>%pip</code>, or file-fetching commands.</li>
         <li><strong>Ko-fi support link</strong> — Help includes a normal link to <code>ko-fi.com</code>. No Ko-fi request is made unless you choose to open it.</li>
     </ul>
     <p>When these resources are fetched, the CDN providers may receive:</p>
@@ -58,12 +58,12 @@
         <li>Timestamps of requests</li>
         <li>URLs of requested resources</li>
     </ul>
-    <p>This is standard HTTP behavior and is not under our control. Caching is used to minimize repeat connections. After a runtime or package has been downloaded successfully, SciREPL uses the local cached copy when available.</p>
+    <p>This is standard HTTP behavior and is not under our control. Caching minimizes repeat connections. After a runtime or package is downloaded, SciREPL uses a local cached copy when available. Verified catalogue snapshots, downloaded catalogue workbook artifact bytes, and trusted release mappings are also stored locally; clear those from Browse &gt; Catalog source &gt; Clear verified data. This does not remove installed catalogue notebook copies; delete them individually or use Menu &gt; Clear History. Built-in catalogue items remain available.</p>
     <p>jsDelivr's privacy policy is available at <a href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net" target="_blank">jsdelivr.com/terms/privacy-policy-jsdelivr-net</a>.</p>
     <p>Your code, session data, and exported files are not transmitted to a SciREPL server. Network requests occur only for the resources described above or when your code explicitly requests them.</p>
 
-    <h2>Package Downloads</h2>
-    <p>SciREPL includes a package catalog that allows you to download optional content packages from GitHub. When you choose to install a package, the app downloads the package file directly from GitHub's servers. GitHub may receive your IP address and standard HTTP headers during this download. SciREPL does not proxy, log, or monitor these requests. Package downloads are user-initiated and optional.</p>
+    <h2>Catalogue and Package Downloads</h2>
+    <p>After you accept the current network disclosure, opening Browse can contact the configured static catalogue host and <code>raw.githubusercontent.com</code> to load verified release metadata and catalogue content. A development branch additionally uses <code>api.github.com</code> only to resolve that branch to an exact commit. Installing an optional catalogue item downloads its selected workbook or package bytes. These requests do not intentionally include notebook content, search text, spoken-language choices, fallback preferences, or kernel filters. The services receive your IP address and standard HTTP headers. SciREPL does not proxy, log, or monitor these requests. Other package downloads are user-initiated and optional.</p>
 
     <h2>User-Initiated Network Requests</h2>
     <p>SciREPL provides a file-fetching feature that allows notebook code to download files from URLs you specify. When you use this feature (e.g., <code>fetch_file</code> in Prolog, or via the Prolog Settings panel), the request is made directly from your device to the specified URL. The remote server will receive your IP address and standard HTTP headers. SciREPL does not proxy, log, or monitor these requests.</p>

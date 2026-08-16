@@ -4,7 +4,7 @@ import { chromium } from 'playwright';
 
 const PORT = process.env.PORT || 8085;
 const URL = `http://localhost:${PORT}/index.html`;
-const PRIVACY_REVISION = '2026-08-runtime-metadata-v1';
+const PRIVACY_REVISION = '2026-08-catalog-sources-v1';
 let failures = 0;
 const check = (name, ok, detail = '') => {
     if (!ok) failures++;

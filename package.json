@@ -1,7 +1,7 @@
 {
   "name": "sci-repl",
   "version": "1.2.0",
-  "releaseChannel": "release",
+  "releaseChannel": "development",
   "android": {
     "versionCode": 12
   },
@@ -11,6 +11,8 @@
     "serve": "node server.js",
     "configure": "node scripts/configure-build.mjs",
     "fetch:bundles": "node scripts/fetch-bundles.mjs",
+    "test:catalog": "node test_catalog_filter.mjs && node test_catalog_sources.mjs",
+    "test:catalog:import": "node test_catalog_import.mjs",
     "test:sources": "node scripts/test-kernel-sources.mjs && node scripts/test-bundle-staging.mjs",
     "verify:bundles": "node scripts/verify-bundled-runtimes.mjs",
     "test:runtime-metadata": "node test_runtime_metadata.mjs",

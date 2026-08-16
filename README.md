@@ -35,7 +35,10 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 - **Import/Export** — `.ipynb`, `.py`, `.pl` with language-aware metadata; native share sheet
 - **Rich export** — HTML, Markdown, PDF, DOCX, and LaTeX via Export modal with theme (dark/light/browser default), page background, and image handling options. Exports include code, output, plots, LaTeX math, and tables. HTML and DOCX exports include syntax-highlighted code blocks.
 - **Import/Export with outputs** — `.ipynb` export includes cell outputs (text, images, LaTeX, tables), viewable in Jupyter and GitHub without re-execution. Import preserves outputs — no re-execution needed.
-- **Package catalog** — Browse and one-click install curated packages
+- **Verified package catalogue** — Browse and one-click install bundled items
+  plus integrity-checked SciREPL Catalog release workbooks; choose latest
+  stable, a release, a full commit, or an explicitly volatile branch. See
+  [catalogue sources](docs/CATALOG_SOURCES.md) for platform behavior.
 - **Math Mode palette** — Quick-insert SymPy functions (diff, integrate, solve, etc.)
 - **Variable persistence** across cells (like Jupyter)
 - **Semicolon suppression** (MATLAB/IPython-style)
@@ -289,6 +292,7 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - **[www/js/shared_vfs.js](www/js/shared_vfs.js)** — SharedVFS — in-memory filesystem shared across kernels
 - **[www/js/package_loader.js](www/js/package_loader.js)** — Package loading, target routing, WASM module loading
 - **[www/js/package_catalog.js](www/js/package_catalog.js)** — Packages, dependency-aware bundles, workbooks, and installed-state UI
+- **[www/js/catalog_source.js](www/js/catalog_source.js)** — Verified remote catalogue channels, release pinning, bounded fetches, and offline cache
 - **[www/js/persistence.js](www/js/persistence.js)** — Session save/restore via localStorage + IndexedDB (with language per cell)
 - **[www/js/indexeddb_store.js](www/js/indexeddb_store.js)** — IndexedDB storage for Prolog VFS and SharedVFS files
 - **[www/js/notebook_manager.js](www/js/notebook_manager.js)** — Multi-notebook management (tabs/sidebar/dropdown, rename, persistence)

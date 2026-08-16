@@ -212,7 +212,11 @@ Applied by the protocol handler to documents and scripts, so `www/index.html` is
 **unchanged** and the PWA is unaffected. Restrictive about origins
 (`object-src 'none'`, `frame-ancestors 'none'`, `form-action 'none'`,
 `base-uri 'self'`, no plaintext `http:`), with the remote allowlist derived from
-`build-profiles.json` and `package_catalog.js` rather than guessed.
+`build-profiles.json` and `package_catalog.js` rather than guessed. The official
+SciREPL Catalog's GitHub Pages origin is an additional data-only source: it is
+present in `connect-src` and absent from the script, style, image, and font
+directives. Free Electron v1 does not broaden this to arbitrary HTTPS mirrors;
+see [Verified catalogue sources](CATALOG_SOURCES.md).
 
 `'unsafe-eval'` and `'wasm-unsafe-eval'` are permitted and **cannot be removed** —
 the JavaScript kernel, Scittle and Pyodide all require them. Unit tests assert

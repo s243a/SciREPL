@@ -27,7 +27,7 @@ jobs:
       - run: node scripts/check-i18n-html-ids.mjs
       - run: node scripts/check-i18n-keys.mjs
       - run: node scripts/check-translations.mjs
-      - run: node test_catalog_filter.mjs
+      - run: npm run test:catalog
       - run: npm run privacy:check
       - run: node scripts/check-sw-shell.mjs
       - run: node test_sw_shell_guard.mjs
@@ -44,6 +44,7 @@ jobs:
       - run: node test_cell_ops.mjs
       - run: node test_js_kernel.mjs
       - run: node test_notebook_vfs.mjs
+      - run: npm run test:catalog:import
 
   build:
     needs: test
@@ -96,6 +97,9 @@ jobs:
 
       - name: Run package catalog tests
         run: node test_browse_catalog.mjs
+
+      - name: Run N-Queens workbook tests
+        run: node test_nqueens_workbook.mjs
 
       - name: Run TypR workbook tests
         run: node test_typr_workbooks.mjs
