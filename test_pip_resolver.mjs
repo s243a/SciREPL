@@ -79,5 +79,34 @@ check('loaded parent skipped, its MISSING deps still recovered',
 const allLoaded = R.resolveFromLock(LOCK, R.parseRequirement('plotlib'), new Set(['plotlib', 'numpy', 'kiwi', 'soup4']));
 check('fully loaded graph needs nothing', allLoaded.files.length === 0);
 
+console.log('6. PEP 440 conformance (post/dev/epoch/rc/local — real lock grammar)');
+check('post release sorts above its final (dateutil case)', R.cmpVersions('2.9.0.post0', '2.9.0') > 0);
+check('>=2.9.0 accepts 2.9.0.post0', R.versionSatisfies('2.9.0.post0', [{ op: '>=', version: '2.9.0' }]));
+check('dev sorts below pre-release', R.cmpVersions('1.0.dev1', '1.0a1') < 0);
+check('pre-release sorts below final', R.cmpVersions('1.0rc1', '1.0') < 0);
+check('rc above beta', R.cmpVersions('1.0rc1', '1.0b2') > 0);
+check('epoch dominates', R.cmpVersions('1!1.0', '2.0') > 0);
+check('zero padding equality (1.4 == 1.4.0)', R.cmpVersions('1.4', '1.4.0') === 0);
+check('local version sorts above public', R.cmpVersions('1.0+cu118', '1.0') > 0);
+check('padded wildcard: ==1.4.* accepts 1.4.0.post1', R.versionSatisfies('1.4.0.post1', [{ op: '==', version: '1.4.*' }]));
+check('unparseable version -> UNSUPPORTED', throws(() => R.parseVersion('not-a-version'), 'UNSUPPORTED') === true);
+
+console.log('7. Whole-line atomic parsing');
+check('-r rejects the WHOLE line (never installs requirements.txt)',
+    throws(() => R.parsePipLine('-r requirements.txt'), 'UNSUPPORTED') === true);
+check('pkg @ url rejects the WHOLE line (never installs pkg from the index)',
+    throws(() => R.parsePipLine('pkg @ https://x/y.whl'), 'UNSUPPORTED') === true);
+check('one bad token rejects sibling good tokens too',
+    throws(() => R.parsePipLine('numpy plotlib; python_version<"3"'), 'UNSUPPORTED') === true);
+check('clean multi-requirement line parses fully',
+    R.parsePipLine('numpy plotlib==3.8.4').map(r => r.norm).join() === 'numpy,plotlib');
+check('extras are recorded for the caller to reject',
+    R.parsePipLine('plotlib[png,svg]')[0].extras.join() === 'png,svg');
+
+console.log('8. Import index (reverse mapping)');
+const idx = R.importIndex(LOCK);
+check('import name maps to its distribution (bsoup -> soup4)', idx.bsoup === 'soup4');
+check('plain names map to themselves', idx.numpy === 'numpy');
+
 console.log(`\n${failures ? `FAILED: ${failures}` : 'All pip-resolver tests passed.'}`);
 process.exitCode = failures ? 1 : 0;
