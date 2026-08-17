@@ -199,6 +199,24 @@ const FIXTURE_LOCK = {
     testLog('import name differing from distribution name is DISCOVERED and verifies',
       diffName.ok === true && diffName.mod === 'diffname', JSON.stringify(diffName));
 
+    // ---- 3c. ZERO distribution evidence: never guess an import name ----
+    console.log('3c. Builtin-shadowed names without any distribution evidence...');
+    // 'sys' and 'json' are importable BUILTINS, but they are neither in the
+    // fixture lock nor installed as distributions: verification must fail
+    // closed instead of importing the builtin and claiming a CDN fetch.
+    const sysEnsure = await page.evaluate(async () => await window.ensurePyodidePackage('sys'));
+    testLog("helper: 'sys' with no lock entry and no metadata -> ok:false",
+      sysEnsure.ok === false, sysEnsure.message);
+    testLog("helper: no CDN claim in the 'sys' failure message",
+      !/CDN|fetched/i.test(sysEnsure.message || ''), sysEnsure.message);
+    const tSys = await runCell('%pip install sys\nprint("AFTER_SYS")', 'not executed');
+    testLog("'%pip install sys' fails the cell (builtin must not fake success)",
+      tSys.includes('the rest of this cell was not executed'), tSys.slice(-160));
+    testLog('AFTER_SYS did not run', !tSys.includes('AFTER_SYS'));
+    const tJson = await runCell('%pip install json==999\nprint("AFTER_JSON")', 'not executed');
+    testLog("'%pip install json==999' fails the cell", tJson.includes('the rest of this cell was not executed'), tJson.slice(-160));
+    testLog('AFTER_JSON did not run', !tJson.includes('AFTER_JSON'));
+
     // ---- 4. Failed verification stops the cell (AFTER_RAN family) ----
     console.log('4. Failed install must stop the cell...');
     const t1 = await runCell('%pip install matplotlib==0.0.1\nprint("AFTER_RAN")', 'not executed');

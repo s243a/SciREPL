@@ -952,7 +952,14 @@ _scirepl_modules_for(${JSON.stringify(dist)})
                     `could be determined from its metadata — failing closed rather than reporting an unverified install.` };
             }
         } else {
-            candidates = [req.norm.replace(/-/g, '_')];
+            // NO evidence of a distribution anywhere — not in the lock, no
+            // installed metadata. Guessing an import name here once let
+            // '%pip install sys' "succeed" because Python has a same-named
+            // BUILT-IN module, and the cell then ran as if an install had
+            // happened. Fail closed instead.
+            return { ok: false, healed: 0, message:
+                `%pip: '${req.raw}' could not be installed: '${req.name}' is not in the Pyodide distribution ` +
+                `and no installed distribution provides it.` };
         }
         const tryCandidates = () => {
             let v = { ok: false, missing: null, error: 'no importable module name' };
