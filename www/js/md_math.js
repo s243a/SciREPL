@@ -1,64 +1,36 @@
 /**
- * md_math.js — the ONE source of truth for what counts as math in Markdown,
- * shared by the renderer and the Formula palette. No DOM, no dependencies.
+ * md_math.js — TOKEN-STRUCTURAL Markdown math, shared by the renderer and
+ * the Formula palette. Requires globalThis.marked (loaded before this).
  *
- * Renderer side: markedExtensions(renderMath) returns marked inline
- * extensions, so math is recognized STRUCTURALLY — only in eligible inline
- * text, never in link destinations, image sources, autolinks, raw-HTML
- * attributes, inline code, fenced code, or indented code (marked's own
- * tokenizers consume those before the extension is consulted, and marked's
- * escape rule consumes '\$' first). No placeholders, no post-hoc HTML
- * string replacement.
+ * There is exactly ONE structural analysis: marked.lexer() produces the
+ * real token tree, and math is recognized ONLY inside eligible leaf runs
+ * of text/escape tokens. A '$' in ordinary text therefore can never close
+ * inside a link or image label, a destination, a reference, an autolink,
+ * an email autolink, raw HTML (tags, comments, declarations, PI, CDATA,
+ * doctype), emphasis, code, or any other nested construct — those are
+ * separate tokens, not text.
  *
- * Palette side: stateAt(text, caret) reports the caret's context over the
- * SAME protected regions ('inline' | 'display' | 'code' | 'outside'),
- * with in-progress (unclosed-delimiter) semantics so mid-formula insertion
- * never nests delimiters.
+ * Renderer path:  transformTokens(lexerTokens) rewrites text/escape runs
+ * into text + math tokens in place; marked.parser() then renders them via
+ * the renderer-only extensions from markedExtensions(). No raw-source
+ * scanning, no placeholders, no whole-HTML replacement.
+ *
+ * Palette path:   scan(src) maps the SAME token tree back to source
+ * offsets, yielding disjoint regions ('code' = protected construct,
+ * 'math' = a closed span, 'text' = eligible text); stateAt(src, caret)
+ * reports 'inline' | 'display' | 'code' | 'outside' with in-progress
+ * (unclosed-opener) semantics inside eligible text.
  */
 (function () {
     'use strict';
 
-    // CommonMark-shaped raw-HTML tag: attribute values must be quoted
-    // strings (which may contain '>' and '$') or unquoted spec tokens —
-    // '<b$ ok' is NOT a tag, so '$a<b$' stays math, while
-    // '<span title="a > $x$">' IS one.
-    const SPEC_TAG = /^<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s+[a-zA-Z_:][a-zA-Z0-9_.:-]*(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*\s*\/?>/;
-    const AUTOLINK = /^<[a-zA-Z][a-zA-Z0-9+.-]*:[^<>\s]*>/;
-
-    /** Length of the HTML construct (comment, autolink, or spec tag)
-     *  starting exactly at src[i], or 0. */
-    function htmlConstructAt(src, i) {
-        if (src[i] !== '<') return 0;
-        const rest = src.slice(i, i + 4096);
-        if (rest.startsWith('<!--')) {
-            const close = rest.indexOf('-->', 4);
-            return close === -1 ? rest.length : close + 3;
-        }
-        const auto = AUTOLINK.exec(rest);
-        if (auto) return auto[0].length;
-        const tag = SPEC_TAG.exec(rest);
-        return tag ? tag[0].length : 0;
-    }
-
-    /** A math span may never SWALLOW a construct Markdown would tokenize —
-     *  a '$' in ordinary text must not find its closing '$' inside a link
-     *  or image destination or a bare GFM URL. (Raw-HTML/autolink/comment
-     *  crossings are aborted during the scan itself, at the '<'.)
-     *  Fail-safe direction: a rare legitimate formula like '$f[x](y)$'
-     *  renders literally, never the other way around. */
-    function bodyCrossesProtected(body) {
-        return /\]\(/.test(body)                                   // into a link/image destination
-            || /(?:^|[^\w.+-])(?:https?:\/\/|www\.)/i.test(body);  // a bare GFM URL
-    }
-
     /** '$$body$$' at the start of src (display math): escape-aware, body
-     *  non-empty, may span newlines within one inline run. */
+     *  non-empty, may span newlines within one text run. */
     function matchDisplay(src) {
         if (!(src[0] === '$' && src[1] === '$')) return null;
         let i = 2;
         while (i < src.length) {
             if (src[i] === '\\') { i += 2; continue; }
-            if (src[i] === '<' && htmlConstructAt(src, i) > 0) return null;
             if (src[i] === '$' && src[i + 1] === '$') {
                 if (i === 2) return null;                // empty body
                 const body = src.slice(2, i);
@@ -71,15 +43,13 @@
     }
 
     /** '$body$' at the start of src (inline math): single line, non-empty,
-     *  escape-aware; a backtick or an HTML construct aborts (those
-     *  tokenizations win, as in marked). */
+     *  escape-aware; a backtick aborts. */
     function matchInline(src) {
         if (src[0] !== '$' || src[1] === '$') return null;
         let i = 1;
         while (i < src.length && src[i] !== '\n') {
             if (src[i] === '\\') { i += 2; continue; }
             if (src[i] === '`') return null;
-            if (src[i] === '<' && htmlConstructAt(src, i) > 0) return null;
             if (src[i] === '$') {
                 if (i === 1) return null;                // empty body
                 const body = src.slice(1, i);
@@ -91,198 +61,267 @@
         return null;
     }
 
-    /**
-     * marked inline extensions rendering math via renderMath(tex, display).
-     * Display is tried before inline at the same position ('$$' vs '$').
-     */
-    function markedExtensions(renderMath) {
-        return [{
-            name: 'sciDisplayMath',
-            level: 'inline',
-            start(src) { const p = src.indexOf('$$'); return p === -1 ? undefined : p; },
-            tokenizer(src) {
-                const m = matchDisplay(src);
-                if (m) return { type: 'sciDisplayMath', raw: m.raw, body: m.body };
-            },
-            renderer(token) { return renderMath(token.body.trim(), true); },
-        }, {
-            name: 'sciInlineMath',
-            level: 'inline',
-            start(src) { const p = src.indexOf('$'); return p === -1 ? undefined : p; },
-            tokenizer(src) {
-                const m = matchInline(src);
-                if (m) return { type: 'sciInlineMath', raw: m.raw, body: m.body };
-            },
-            renderer(token) { return renderMath(token.body.trim(), false); },
-        }];
+    /** Belt-and-braces for material that can legitimately sit in a text
+     *  run (unmatched constructs, URLs marked's flavor didn't linkify —
+     *  including uppercase forms): a math body may not contain a
+     *  link-destination opener or a bare URL. Case-insensitive. */
+    function bodyCrossesProtected(body) {
+        return /\]\(/.test(body)
+            || /(?:^|[^\w.+-])(?:https?:\/\/|www\.)/i.test(body);
     }
 
-    /** Disjoint regions covering [0, text.length):
-     *  {type:'text'|'code'|'math', start, end} — math regions also carry
-     *  {display, bodyStart, bodyEnd}. 'code' covers every context the
-     *  renderer protects: fenced and indented code, inline code spans,
-     *  autolinks, raw-HTML tags, and link/image destinations. */
-    function scan(text) {
-        const s = String(text);
-        const len = s.length;
-        const regions = [];
-        let i = 0;
-        let textStart = 0;
-        let atLineStart = true;
-        const pushText = (end) => { if (end > textStart) regions.push({ type: 'text', start: textStart, end }); };
-        const prevLineBlank = (pos) => {
-            // is the line ENDING at pos-1 blank (or are we at document start)?
-            if (pos === 0) return true;
-            let j = pos - 1;                             // the '\n' ending the previous line
-            let k = j - 1;
-            while (k >= 0 && s[k] !== '\n') {
-                if (s[k] !== ' ' && s[k] !== '\t') return false;
-                k--;
+    /** All math spans inside one eligible text run (relative offsets). */
+    function findMathSpans(raw) {
+        const spans = [];
+        let k = 0;
+        while (k < raw.length) {
+            const c = raw[k];
+            if (c === '\\') { k += 2; continue; }
+            if (c === '$') {
+                const rest = raw.slice(k);
+                const dm = matchDisplay(rest);
+                if (dm) { spans.push({ start: k, end: k + dm.raw.length, body: dm.body, display: true }); k += dm.raw.length; continue; }
+                const im = matchInline(rest);
+                if (im) { spans.push({ start: k, end: k + im.raw.length, body: im.body, display: false }); k += im.raw.length; continue; }
+                k += (raw[k + 1] === '$') ? 2 : 1;       // unclosed/empty: literal
+                continue;
             }
-            return true;
+            k++;
+        }
+        return spans;
+    }
+
+    const isLeafText = (t) => (t.type === 'text' && !Array.isArray(t.tokens)) || t.type === 'escape';
+
+    // ---------------- renderer path: rewrite the token tree ----------------
+
+    /** Rewrite one inline token array in place: maximal text/escape runs
+     *  become text/escape/math sequences; containers recurse. */
+    function transformInline(tokens) {
+        const out = [];
+        let i = 0;
+        while (i < tokens.length) {
+            const t = tokens[i];
+            if (!isLeafText(t)) {
+                recurseContainers(t);
+                out.push(t);
+                i++;
+                continue;
+            }
+            let j = i;
+            while (j < tokens.length && isLeafText(tokens[j])) j++;
+            out.push(...mathifyRun(tokens.slice(i, j)));
+            i = j;
+        }
+        tokens.length = 0;
+        tokens.push(...out);
+    }
+
+    function recurseContainers(t) {
+        // autolinks, email autolinks, and GFM bare-URL links: the visible
+        // text IS the destination — never mathify it
+        if ((t.type === 'link' || t.type === 'image')
+            && !(t.raw.startsWith('[') || t.raw.startsWith('!['))) return;
+        // never descend into code, codespan, or html — they have no .tokens
+        if (Array.isArray(t.tokens)) transformInline(t.tokens);
+        if (Array.isArray(t.items)) for (const it of t.items) if (Array.isArray(it.tokens)) transformInline(it.tokens);
+        if (Array.isArray(t.header)) for (const c of t.header) if (Array.isArray(c.tokens)) transformInline(c.tokens);
+        if (Array.isArray(t.rows)) for (const row of t.rows) for (const c of row) if (Array.isArray(c.tokens)) transformInline(c.tokens);
+    }
+
+    /** Split a run of text/escape tokens around its math spans. Escape
+     *  tokens are atomic (a span boundary can never split one, since the
+     *  matchers treat '\x' atomically). */
+    function mathifyRun(run) {
+        const raw = run.map(t => t.raw).join('');
+        const spans = findMathSpans(raw);
+        if (!spans.length) return run;
+        const result = [];
+        let pos = 0, ti = 0, tOff = 0;
+        const takeUpTo = (target, sink) => {
+            while (pos < target) {
+                const t = run[ti];
+                const avail = t.raw.length - tOff;
+                const need = target - pos;
+                if (need >= avail) {
+                    if (tOff === 0) sink.push(t);
+                    else sink.push({ type: 'text', raw: t.raw.slice(tOff), text: t.raw.slice(tOff), escaped: false });
+                    pos += avail; ti++; tOff = 0;
+                } else {
+                    sink.push({ type: 'text', raw: t.raw.slice(tOff, tOff + need), text: t.raw.slice(tOff, tOff + need), escaped: false });
+                    tOff += need; pos += need;
+                }
+            }
+        };
+        const discard = [];
+        for (const sp of spans) {
+            takeUpTo(sp.start, result);
+            takeUpTo(sp.end, discard);
+            result.push({
+                type: sp.display ? 'sciDisplayMath' : 'sciInlineMath',
+                raw: raw.slice(sp.start, sp.end),
+                body: sp.body,
+            });
+        }
+        takeUpTo(raw.length, result);
+        return result;
+    }
+
+    /** Rewrite a lexer token tree (top-level array) in place. */
+    function transformTokens(tokens) {
+        for (const t of tokens) {
+            if (Array.isArray(t.tokens) && (t.type === 'paragraph' || t.type === 'heading' || t.type === 'text')) {
+                transformInline(t.tokens);
+            } else {
+                recurseContainers(t);
+            }
+        }
+        return tokens;
+    }
+
+    /** Renderer-only extensions: the tokens are created by transformTokens,
+     *  never by raw-source tokenizing. */
+    function markedExtensions(renderMath) {
+        return [
+            { name: 'sciDisplayMath', level: 'inline', renderer(token) { return renderMath(token.body.trim(), true); } },
+            { name: 'sciInlineMath', level: 'inline', renderer(token) { return renderMath(token.body.trim(), false); } },
+        ];
+    }
+
+    // ------------- palette path: map the SAME tree to offsets -------------
+
+    /** Disjoint source regions from the token tree: {type:'code'|'math'|
+     *  'text', start, end} (math also carries display/bodyStart/bodyEnd).
+     *  'code' covers every protected construct; gaps (structural markers
+     *  like emphasis delimiters, list bullets) belong to no region. */
+    function scan(src) {
+        const marked = globalThis.marked;
+        const regions = [];
+        if (!marked || typeof marked.lexer !== 'function') return regions;
+        let tokens;
+        try { tokens = marked.lexer(String(src)); } catch (_) { return regions; }
+        const s = String(src);
+        const pushCode = (a, b) => { if (b > a) regions.push({ type: 'code', start: a, end: b }); };
+        const align = (raw, cur) => s.startsWith(raw, cur) ? cur : s.indexOf(raw, cur);
+
+        const emitRun = (raw, offset) => {
+            const spans = findMathSpans(raw);
+            let last = 0;
+            for (const sp of spans) {
+                if (sp.start > last) regions.push({ type: 'text', start: offset + last, end: offset + sp.start });
+                regions.push({
+                    type: 'math', display: sp.display,
+                    start: offset + sp.start, end: offset + sp.end,
+                    bodyStart: offset + sp.start + (sp.display ? 2 : 1),
+                    bodyEnd: offset + sp.end - (sp.display ? 2 : 1),
+                });
+                last = sp.end;
+            }
+            if (raw.length > last) regions.push({ type: 'text', start: offset + last, end: offset + raw.length });
         };
 
-        while (i < len) {
-            const ch = s[i];
-
-            if (atLineStart) {
-                const nl = s.indexOf('\n', i);
-                const line = s.slice(i, nl === -1 ? len : nl);
-                const fm = /^ {0,3}(`{3,}|~{3,})/.exec(line);
-                if (fm) {
-                    const fenceChar = fm[1][0];
-                    const fenceLen = fm[1].length;
-                    const closeRe = new RegExp('^ {0,3}\\' + fenceChar + '{' + fenceLen + ',}[ \t]*$');
-                    let j = nl === -1 ? len : nl + 1;
-                    let end = len;                       // unclosed fence runs to EOF
-                    while (j < len) {
-                        const le = s.indexOf('\n', j);
-                        if (closeRe.test(s.slice(j, le === -1 ? len : le))) { end = le === -1 ? len : le; break; }
-                        if (le === -1) break;
-                        j = le + 1;
+        const walkArray = (arr, base) => {
+            let cur = base;
+            let i = 0;
+            while (i < arr.length) {
+                const t = arr[i];
+                if (isLeafText(t)) {
+                    const runStart = align(t.raw, cur);
+                    if (runStart === -1) { i++; continue; }
+                    let runEnd = runStart;
+                    let raw = '';
+                    while (i < arr.length && isLeafText(arr[i]) && s.startsWith(arr[i].raw, runEnd)) {
+                        raw += arr[i].raw;
+                        runEnd += arr[i].raw.length;
+                        i++;
                     }
-                    pushText(i);
-                    regions.push({ type: 'code', start: i, end });
-                    i = end; textStart = i; atLineStart = false;
+                    if (raw) emitRun(raw, runStart);
+                    else i++;
+                    cur = runEnd;
                     continue;
                 }
-                // reference definition: the whole line is protected
-                if (/^ {0,3}\[[^\]]*\]:\s?/.test(line)) {
-                    const end = nl === -1 ? len : nl;
-                    pushText(i);
-                    regions.push({ type: 'code', start: i, end });
-                    i = end; textStart = i; atLineStart = false;
-                    continue;
-                }
-                // indented code block: 4 spaces / tab after a blank line
-                if (/^(?: {4}|\t)/.test(line) && line.trim() !== '' && prevLineBlank(i)) {
-                    let j = i, end = len;
-                    while (j < len) {
-                        const le = s.indexOf('\n', j);
-                        const l2 = s.slice(j, le === -1 ? len : le);
-                        if (l2.trim() !== '' && !/^(?: {4}|\t)/.test(l2)) { end = j; break; }
-                        if (le === -1) { end = len; break; }
-                        j = le + 1;
+                const start = align(t.raw, cur);
+                if (start === -1) { i++; continue; }
+                const end = start + t.raw.length;
+                visit(t, start, end);
+                cur = end;
+                i++;
+            }
+            return cur;
+        };
+
+        const visit = (t, start, end) => {
+            switch (t.type) {
+                case 'code':        // fenced AND indented code blocks
+                case 'codespan':
+                case 'html':        // raw HTML blocks/tags/comments/decls/PI/CDATA/doctype
+                case 'def':         // reference definitions incl. multiline titles
+                    pushCode(start, end);
+                    return;
+                case 'link':
+                case 'image': {
+                    // autolink, email autolink, or GFM bare URL: protected whole
+                    if (!(t.raw.startsWith('[') || t.raw.startsWith('!['))) { pushCode(start, end); return; }
+                    // '[label](dest)' / '![label](dest)' / '[label][id]' /
+                    // '[label][]' / '[label]': the label is eligible text,
+                    // everything else is protected
+                    const labelBase = start + (t.raw.startsWith('![') ? 2 : 1);
+                    pushCode(start, labelBase);
+                    let labelEnd = labelBase;
+                    if (Array.isArray(t.tokens) && t.tokens.length) {
+                        labelEnd = walkArray(t.tokens, labelBase);
+                    } else if (typeof t.text === 'string') {
+                        labelEnd = labelBase + t.text.length;
+                        emitRun(s.slice(labelBase, labelEnd), labelBase);
                     }
-                    pushText(i);
-                    regions.push({ type: 'code', start: i, end });
-                    i = end; textStart = i; atLineStart = true;
-                    continue;
+                    pushCode(labelEnd, end);
+                    return;
+                }
+                case 'space':
+                case 'hr':
+                case 'br':
+                    return;
+                default: {
+                    // paragraph, heading, blockquote, list(+items), table,
+                    // em/strong/del, generic containers
+                    if (Array.isArray(t.tokens)) { walkArray(t.tokens, start); return; }
+                    if (Array.isArray(t.items)) {
+                        let cur = start;
+                        for (const it of t.items) {
+                            const a = align(it.raw, cur);
+                            if (a === -1) continue;
+                            if (Array.isArray(it.tokens)) walkArray(it.tokens, a);
+                            cur = a + it.raw.length;
+                        }
+                        return;
+                    }
+                    if (Array.isArray(t.header) || Array.isArray(t.rows)) {
+                        const cells = [...(t.header || []), ...(t.rows || []).flat()];
+                        let cur = start;
+                        for (const c of cells) {
+                            if (!Array.isArray(c.tokens)) continue;
+                            cur = walkArray(c.tokens, cur);
+                        }
+                        return;
+                    }
                 }
             }
+        };
 
-            if (ch === '\n') { i++; atLineStart = true; continue; }
-            atLineStart = false;
-
-            if (ch === '\\') { i += 2; continue; }       // escape consumes the next char
-
-            if (ch === '<') {
-                // HTML comment, autolink, or spec-shaped raw-HTML tag
-                // (quoted attributes may contain '>'): protected in full
-                const consumed = htmlConstructAt(s, i);
-                if (consumed > 0) {
-                    pushText(i);
-                    regions.push({ type: 'code', start: i, end: i + consumed });
-                    i += consumed; textStart = i;
-                    continue;
-                }
-                i++; continue;
-            }
-
-            if ((ch === 'h' || ch === 'w') && (i === 0 || /[^\w.+-]/.test(s[i - 1]))) {
-                // bare GFM URL: protected in full
-                const m = /^(?:https?:\/\/|www\.)[^\s<]+/.exec(s.slice(i, i + 2048));
-                if (m) {
-                    pushText(i);
-                    regions.push({ type: 'code', start: i, end: i + m[0].length });
-                    i += m[0].length; textStart = i;
-                    continue;
-                }
-                i++; continue;
-            }
-
-            if (ch === ']' && s[i + 1] === '(') {
-                // link/image DESTINATION: protected until the matching ')'
-                let j = i + 2, depth = 1;
-                while (j < len && depth > 0) {
-                    if (s[j] === '\\') { j += 2; continue; }
-                    if (s[j] === '(') depth++;
-                    else if (s[j] === ')') depth--;
-                    j++;
-                }
-                pushText(i);
-                regions.push({ type: 'code', start: i, end: j });
-                i = j; textStart = i;
-                continue;
-            }
-
-            if (ch === '`') {
-                // inline code span: run of N backticks, closed by the next
-                // run of EXACTLY N backticks
-                let n = 1;
-                while (s[i + n] === '`') n++;
-                let j = i + n, close = -1;
-                while (j < len) {
-                    if (s[j] === '`') {
-                        let m = 1;
-                        while (s[j + m] === '`') m++;
-                        if (m === n) { close = j; break; }
-                        j += m;
-                    } else j++;
-                }
-                if (close !== -1) {
-                    pushText(i);
-                    regions.push({ type: 'code', start: i, end: close + n });
-                    i = close + n; textStart = i;
-                } else {
-                    i += n;                              // unclosed run: literal
-                }
-                continue;
-            }
-
-            if (ch === '$') {
-                const rest = s.slice(i);
-                const dm = matchDisplay(rest);
-                if (dm) {
-                    pushText(i);
-                    regions.push({ type: 'math', display: true, start: i, end: i + dm.raw.length, bodyStart: i + 2, bodyEnd: i + dm.raw.length - 2 });
-                    i += dm.raw.length; textStart = i;
-                    continue;
-                }
-                const im = matchInline(rest);
-                if (im) {
-                    pushText(i);
-                    regions.push({ type: 'math', display: false, start: i, end: i + im.raw.length, bodyStart: i + 1, bodyEnd: i + im.raw.length - 1 });
-                    i += im.raw.length; textStart = i;
-                    continue;
-                }
-                i += (s[i + 1] === '$') ? 2 : 1;         // unclosed/empty: literal
-                continue;
-            }
-
-            i++;
+        // Top level with GAP DETECTION: marked consumes reference
+        // definitions (including multiline titles) WITHOUT emitting any
+        // token — they only appear in tokens.links. Source ranges consumed
+        // without a token are therefore protected.
+        let cur = 0;
+        for (const t of tokens) {
+            const start = align(t.raw, cur);
+            if (start === -1) continue;
+            if (start > cur) pushCode(cur, start);
+            visit(t, start, start + t.raw.length);
+            cur = start + t.raw.length;
         }
-        pushText(len);
+        if (cur < s.length) pushCode(cur, s.length);
+        regions.sort((a, b) => a.start - b.start);
         return regions;
     }
 
@@ -291,22 +330,21 @@
         return scan(text).filter(r => r.type === 'math');
     }
 
-    /** In-progress delimiter state from `from` to `to` inside one TEXT
-     *  region (closed spans were already consumed by scan, so any opener
-     *  found here is unclosed — the state the caret is typing inside). */
+    /** In-progress delimiter state inside one eligible TEXT region (closed
+     *  spans were already extracted as math regions, so any opener found
+     *  here is unclosed). An unfinished single-$ RESETS at a newline;
+     *  display math persists intentionally. */
     function unclosedState(s, from, to) {
         let state = 'outside';
         for (let i = from; i < to; i++) {
             const c = s[i];
             if (c === '\\') { i++; continue; }
-            // inline math cannot cross a newline: an unfinished single-$
-            // span RESETS (display math intentionally persists)
             if (c === '\n') { if (state === 'inline') state = 'outside'; continue; }
             if (c !== '$') continue;
             if (s[i + 1] === '$' && i + 1 < to) {
                 if (state === 'outside') state = 'display';
                 else if (state === 'display') state = 'outside';
-                i++;                                     // '$$' in inline stays literal
+                i++;
                 continue;
             }
             if (state === 'outside') state = 'inline';
@@ -316,17 +354,19 @@
     }
 
     /**
-     * Caret context at position pos: 'inline' | 'display' | 'code' |
-     * 'outside'. Inside a CLOSED math region the delimiters themselves
-     * count as inside (typing between '$' and '$'); a caret in plain text
-     * after an UNCLOSED opener reports that opener's state, so the palette
-     * never nests delimiters while the user is mid-formula.
+     * Caret context at pos: 'inline' | 'display' | 'code' | 'outside'.
+     * Derived from the SAME structural tokenization as rendering. A caret
+     * in a structural gap (emphasis markers, bullets, blockquote prefixes)
+     * or past all regions is 'outside'. While the user types, the tail of
+     * the source may not yet be a closed construct — the containing text
+     * region's unclosed-opener state is reported so the palette never
+     * nests delimiters mid-formula.
      */
     function stateAt(text, pos) {
         const s = String(text);
         const p = Math.max(0, Math.min(pos | 0, s.length));
         for (const r of scan(s)) {
-            if (p <= r.start) break;
+            if (p <= r.start) continue;
             const inside = p < r.end || (r.type === 'text' && p === r.end);
             if (!inside) continue;
             if (r.type === 'math') return r.display ? 'display' : 'inline';
@@ -336,5 +376,9 @@
         return 'outside';
     }
 
-    globalThis.MdMath = { scan, mathSegments, stateAt, matchDisplay, matchInline, markedExtensions };
+    globalThis.MdMath = {
+        scan, mathSegments, stateAt,
+        matchDisplay, matchInline, findMathSpans,
+        transformTokens, markedExtensions,
+    };
 })();

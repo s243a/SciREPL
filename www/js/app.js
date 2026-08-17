@@ -238,12 +238,14 @@
      * Render markdown text to HTML with KaTeX math support.
      * Supports $inline$ and $$display$$ math blocks.
      */
-    // Math rendering is STRUCTURAL: marked inline extensions (from the
-    // shared md_math.js) recognize $…$/$$…$$ only in eligible inline text —
-    // never in link destinations, image sources, autolinks, raw-HTML
-    // attributes, or any code context — and render KaTeX directly into the
-    // token stream. No placeholder strings (a user typing %%MATH_BLOCK_0%%
-    // keeps their literal text) and no whole-HTML String.replace.
+    // Math rendering is TOKEN-STRUCTURAL: the source is lexed by marked
+    // FIRST (links, labels, references, autolinks, raw HTML, emphasis, and
+    // all code forms become their own tokens), and math is then recognized
+    // ONLY inside eligible text/escape runs of that tree (md_math.js
+    // transformTokens) — so a '$' in ordinary text can never close inside
+    // any nested construct. The math tokens render via renderer-only
+    // extensions; no raw-source scanning, no placeholder strings, no
+    // whole-HTML String.replace.
     let _mathExtensionsInstalled = false;
     function _installMathExtensions() {
         if (_mathExtensionsInstalled) return;
@@ -262,7 +264,9 @@
 
     function renderMarkdown(text) {
         _installMathExtensions();
-        let html = marked.parse(text);
+        const tokens = marked.lexer(text);
+        window.MdMath.transformTokens(tokens);
+        let html = marked.parser(tokens);
 
         // marked accepts raw HTML. Keep it inert across initial import,
         // session restore, and later markdown re-rendering.
