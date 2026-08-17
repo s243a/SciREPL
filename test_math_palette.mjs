@@ -472,6 +472,37 @@ try {
     check('insertion INSIDE list-item math is bare (no nested delimiters)',
         mlInsert === '1. first line\n   continued $x\\sqrt{}$ here', JSON.stringify(mlInsert));
 
+    // round 9: nested lists, display math across lines, fence immunity
+    const r9map = await page.evaluate(() => {
+        const st = (v, p) => window.MdMath.stateAt(v, p);
+        const deepNest = '1. outer\n   - mid\n     - deep $x$ end';
+        const dispList = '- item\n  $$a\n  b$$ tail';
+        const dispProgress = '> quote\n> $$x\n> unfinished';
+        const fenceTrap = '- item text\n\n```\nitem text $x$ here\n```';
+        return {
+            deepNest: st(deepNest, deepNest.indexOf('$x$') + 1),
+            listInQuote: st('> - item $x$ in quote-list', 10),
+            dispAcross: st(dispList, dispList.indexOf('b$$')),
+            dispProgress: st(dispProgress, dispProgress.length),
+            fenceSafe: st(fenceTrap, fenceTrap.indexOf('$x$') + 1),
+        };
+    });
+    check('deeply nested list item math reports inline', r9map.deepNest === 'inline', r9map.deepNest);
+    check('list inside blockquote math reports inline', r9map.listInQuote === 'inline', r9map.listInQuote);
+    check('display math ACROSS lines in a list keeps display state', r9map.dispAcross === 'display', r9map.dispAcross);
+    check('in-progress display math in a quote keeps display state', r9map.dispProgress === 'display', r9map.dispProgress);
+    check('a fence whose text matches a list line is NEVER claimed as math', r9map.fenceSafe === 'code', r9map.fenceSafe);
+    // insertion inside a nested list item stays bare
+    await page.evaluate(() => {
+        const i = document.getElementById('code-input');
+        i.value = '1. outer\n   - mid\n     - deep $x$ end';
+        i.selectionStart = i.selectionEnd = i.value.indexOf('$x$') + 2;
+    });
+    await page.click('#math-palette button[title="Square root"]');
+    const nestedInsert = await page.evaluate(() => document.getElementById('code-input').value);
+    check('insertion INSIDE nested-list math is bare (no corruption)',
+        nestedInsert === '1. outer\n   - mid\n     - deep $x\\sqrt{}$ end', JSON.stringify(nestedInsert));
+
     check('insertion after a reference definition wraps',
         (await insertAfter('[id]: https://e.com/$x$/f\n')) === '[id]: https://e.com/$x$/f\n$\\sqrt{}$');
     await page.context().close();
@@ -892,8 +923,12 @@ try {
         truth.truthful <= Math.max(0, truth.barTop - truth.appBodyTop) + 1
         && truth.naive >= truth.truthful,
         JSON.stringify(truth));
-    check('...and the naive rect measure WOULD have over-reported here',
-        truth.naive > truth.truthful, JSON.stringify(truth));
+    // NOTE: since the app body now ABSORBS the lift (round 9), the naive
+    // child-rect measure agrees with the truthful one in this state — the
+    // discrepancy the truthful measure guarded against no longer exists in
+    // the layout itself. The invariant that remains is one-sided:
+    check('...and the naive rect measure never reads LESS than the truthful one',
+        truth.naive >= truth.truthful, JSON.stringify(truth));
     // EVENTFUL pan: ONLY offsetTop changes, and only 'scroll' is
     // dispatched — the subscription itself must trigger the re-layout
     const panProbe = async (offsetTop) => {
@@ -1002,6 +1037,34 @@ try {
         focusProbe.collapsed && focusProbe.activeId === 'math-mode-btn' && !focusProbe.onBody,
         JSON.stringify(focusProbe));
 
+    // the LIFTED footer must never hide the tail of the notebook at
+    // maximum scroll: the app body absorbs the lift, so the last content
+    // is either fully above the footer or the notebook is honestly empty
+    for (let c = 0; c < 3; c++) {
+        const cfg = [[0, 200], [60, 200], [0, 140]][c];
+        await page.evaluate(({ ot, h }) => {
+            const vv = window.visualViewport;
+            vv.offsetTop = ot; vv.height = h;
+            vv.dispatchEvent(new Event('scroll'));
+        }, { ot: cfg[0], h: cfg[1] });
+        await page.waitForTimeout(350);
+        const tail = await page.evaluate(async () => {
+            const scroller = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
+            scroller.style.scrollBehavior = 'auto';
+            scroller.scrollTop = scroller.scrollHeight;
+            await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+            const last = scroller.lastElementChild;
+            const barTop = document.getElementById('input-bar').getBoundingClientRect().top;
+            const notebookH = document.getElementById('app-body').getBoundingClientRect().height;
+            const lastBottom = last ? last.getBoundingClientRect().bottom : 0;
+            return { ok: lastBottom <= barTop + 1 || notebookH <= 1,
+                     gap: Math.round(lastBottom - barTop), notebookH: Math.round(notebookH) };
+        });
+        check(`lifted footer @vv ${cfg[0]}/${cfg[1]}: max scroll never leaves content half-hidden`,
+            tail.ok, JSON.stringify(tail));
+    }
+
+
     // config D: keyboard shrink where the platform CLEARS the inset
     await page.evaluate(() => {
         Object.defineProperty(window, 'visualViewport', { configurable: true, value: undefined });
@@ -1012,6 +1075,17 @@ try {
     const d180 = await boundaryProbe();
     check('keyboard shrink to 180 with the inset cleared: composer and Run stay usable',
         d180.composerOk && d180.runOk, JSON.stringify(d180));
+
+    // destroy() detaches everything: after destroy, the toggle is inert
+    // (runs LAST — it removes the listeners the other checks depend on)
+    const destroyProbe = await page.evaluate(() => {
+        window.mathMode.destroy();
+        const before = document.getElementById('math-palette').classList.contains('hidden');
+        document.getElementById('math-mode-btn').click();
+        const after = document.getElementById('math-palette').classList.contains('hidden');
+        return { inert: before === after };
+    });
+    check('destroy() detaches UI handlers (toggle click is inert afterwards)', destroyProbe.inert, JSON.stringify(destroyProbe));
     await page.context().close();
 
     console.log('5j. Tablet/desktop editor width restored (768/800/1024) + narrow phone');

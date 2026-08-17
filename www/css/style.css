@@ -251,6 +251,12 @@ html, body {
     flex: 1;
     overflow: hidden;
     min-height: 0;   /* let the flex column shrink it below content size */
+    /* visual-viewport keyboard lift: the footer is translated UP by the
+       lift, so the app body must END at the lifted footer's top — this
+       margin absorbs exactly the lift (math_mode.js publishes it), which
+       is what makes "maximum scroll shows the last content" true even
+       while the layout viewport has not shrunk */
+    margin-bottom: var(--sci-vv-lift, 0px);
 }
 
 #repl-wrapper {

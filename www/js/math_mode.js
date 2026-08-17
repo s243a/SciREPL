@@ -30,26 +30,33 @@ class MathMode {
     init() {
         this.toggleBtn.setAttribute('aria-controls', 'math-palette');
         this.toggleBtn.setAttribute('aria-expanded', 'false');
-        this.toggleBtn.addEventListener('click', () => {
+        // every listener is NAMED so destroy() can remove it — recreating
+        // MathMode must never install duplicate handlers
+        this._onToggleClick = () => {
             this.syncContext();               // never open a stale palette
             if (this.context() === null) return;
             this.setOpen(this.palette.classList.contains('hidden'));
-        });
+        };
+        this.toggleBtn.addEventListener('click', this._onToggleClick);
 
-        this.palette.addEventListener('click', (e) => {
+        this._onPaletteClick = (e) => {
             if (e.target.tagName !== 'BUTTON') return;
             const text = e.target.getAttribute('data-insert');
             if (!text) return;
             if (e.target.getAttribute('data-mode') === 'latex') this.insertLatex(text);
             else this.insertText(text);
-        });
+        };
+        this.palette.addEventListener('click', this._onPaletteClick);
 
         // Central synchronization: programmatic context changes announce
         // themselves; direct user interactions are covered as a fallback
         // (deferred a tick so the app's own handlers update state first).
-        document.addEventListener('scirepl:composer-context-changed', () => this.syncContext());
-        if (this.langSelector) this.langSelector.addEventListener('change', () => setTimeout(() => this.syncContext(), 0));
-        if (this.cellTypeToggle) this.cellTypeToggle.addEventListener('click', () => setTimeout(() => this.syncContext(), 0));
+        this._onContextChanged = () => this.syncContext();
+        document.addEventListener('scirepl:composer-context-changed', this._onContextChanged);
+        this._onLangChange = () => setTimeout(() => this.syncContext(), 0);
+        if (this.langSelector) this.langSelector.addEventListener('change', this._onLangChange);
+        this._onCellTypeClick = () => setTimeout(() => this.syncContext(), 0);
+        if (this.cellTypeToggle) this.cellTypeToggle.addEventListener('click', this._onCellTypeClick);
         this._installGeometryObservers();
         this.syncContext();
     }
@@ -183,10 +190,16 @@ class MathMode {
         bar.style.setProperty('--sci-palette-max', paletteOpen ? paletteCap + 'px' : '32vh');
         // visual-viewport-only keyboard: the layout viewport (and the
         // sticky footer pinned to its bottom) does not shrink, so LIFT the
-        // footer above the overlaid keyboard by the covered amount.
+        // footer above the overlaid keyboard by the covered amount — and
+        // shrink the app body by the SAME amount, so the notebook scroller
+        // genuinely ends at the lifted footer's top and maximum scroll can
+        // always reveal the last content (padding alone cannot push
+        // content above the scroller's own top edge).
         const vv = window.visualViewport;
         const lift = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
         bar.style.transform = lift > 0 ? `translateY(-${lift}px)` : '';
+        const appBody = document.getElementById('app-body');
+        if (appBody) appBody.style.setProperty('--sci-vv-lift', lift + 'px');
     }
 
     _installGeometryObservers() {
@@ -223,7 +236,8 @@ class MathMode {
         }
     }
 
-    /** Lifecycle cleanup: detach every listener and observer. */
+    /** Lifecycle cleanup: detach EVERY listener and observer, so a
+     *  destroyed-then-recreated MathMode never doubles handlers. */
     destroy() {
         window.removeEventListener('resize', this._onViewportChange);
         if (this._vvTarget && this._vvTarget.removeEventListener) {
@@ -232,6 +246,11 @@ class MathMode {
         }
         this._vvTarget = null;
         if (this.input && this._onComposerInput) this.input.removeEventListener('input', this._onComposerInput);
+        if (this.toggleBtn && this._onToggleClick) this.toggleBtn.removeEventListener('click', this._onToggleClick);
+        if (this.palette && this._onPaletteClick) this.palette.removeEventListener('click', this._onPaletteClick);
+        if (this._onContextChanged) document.removeEventListener('scirepl:composer-context-changed', this._onContextChanged);
+        if (this.langSelector && this._onLangChange) this.langSelector.removeEventListener('change', this._onLangChange);
+        if (this.cellTypeToggle && this._onCellTypeClick) this.cellTypeToggle.removeEventListener('click', this._onCellTypeClick);
         if (this._insetObserver) this._insetObserver.disconnect();
         if (this._resizeObserver) this._resizeObserver.disconnect();
     }

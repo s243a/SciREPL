@@ -222,44 +222,93 @@
             if (raw.length > last) regions.push({ type: 'text', start: offset + last, end: offset + raw.length });
         };
 
-        const walkArray = (arr, base) => {
+        /** Line-wise mapped emit for stripped-prefix containers: builds a
+         *  rawIndex -> sourceIndex map (each line located WITHIN the
+         *  container's [cur, limit) bound, so a coincidental match inside
+         *  a later fence or sibling can never be claimed), then runs ONE
+         *  combined span analysis over the whole run — display math that
+         *  crosses lines keeps its identity and its in-progress state. */
+        const emitRunMapped = (raw, cur, limit) => {
+            const lines = raw.split('\n');
+            const map = new Array(raw.length + 1).fill(-1);
+            let rawPos = 0;
+            let c = cur;
+            let any = false;
+            for (const line of lines) {
+                if (line.trim()) {
+                    const at = s.indexOf(line, c);
+                    if (at !== -1 && at + line.length <= limit) {
+                        for (let k = 0; k <= line.length; k++) map[rawPos + k] = at + k;
+                        c = at + line.length;
+                        any = true;
+                    }
+                }
+                rawPos += line.length + 1;
+            }
+            if (!any) return c;
+            const spans = findMathSpans(raw);
+            const emitText = (a, b) => {
+                let segStart = -1;
+                for (let k = a; k <= b; k++) {
+                    const ok = k < b && map[k] !== -1;
+                    if (ok && segStart === -1) segStart = k;
+                    if (!ok && segStart !== -1) {
+                        regions.push({ type: 'text', start: map[segStart], end: map[k - 1] + 1 });
+                        segStart = -1;
+                    }
+                }
+            };
+            let last = 0;
+            for (const sp of spans) {
+                emitText(last, sp.start);
+                const a = map[sp.start], b = map[sp.end - 1];
+                if (a !== -1 && b !== -1) {
+                    const d = sp.display ? 2 : 1;
+                    regions.push({
+                        type: 'math', display: sp.display, start: a, end: b + 1,
+                        bodyStart: map[sp.start + d] !== -1 ? map[sp.start + d] : a + d,
+                        bodyEnd: map[sp.end - 1 - d] !== -1 ? map[sp.end - 1 - d] + 1 : b + 1 - d,
+                    });
+                }
+                last = sp.end;
+            }
+            emitText(last, raw.length);
+            return c;
+        };
+
+        const walkArray = (arr, base, limit) => {
             let cur = base;
             let i = 0;
+            const bounded = (raw, from) => {
+                const at = align(raw, from);
+                return (at !== -1 && at + raw.length <= limit) ? at : -1;
+            };
             while (i < arr.length) {
                 const t = arr[i];
                 if (isLeafText(t)) {
                     // gather the maximal leaf run's concatenated raw
                     let raw = '';
                     while (i < arr.length && isLeafText(arr[i])) { raw += arr[i].raw; i++; }
-                    const runStart = align(raw, cur);
+                    const runStart = bounded(raw, cur);
                     if (runStart !== -1) {
                         emitRun(raw, runStart);
                         cur = runStart + raw.length;
                     } else {
-                        // stripped-prefix container (multiline list item or
-                        // blockquote continuation): the token raw omits the
-                        // '> '/indent prefixes, so map LINE-WISE — inline
-                        // math never crosses a line, so each line can be
-                        // located and emitted at its own source offset
-                        let c = cur;
-                        for (const line of raw.split('\n')) {
-                            if (!line.trim()) continue;
-                            const at = s.indexOf(line, c);
-                            if (at === -1) continue;
-                            emitRun(line, at);
-                            c = at + line.length;
-                        }
-                        cur = c;
+                        cur = emitRunMapped(raw, cur, limit);
                     }
                     continue;
                 }
-                const start = align(t.raw, cur);
+                const start = bounded(t.raw, cur);
                 if (start === -1) {
                     // stripped-prefix container (its raw omits '> '/indent
-                    // prefixes and is not a verbatim substring): its
-                    // CHILDREN can still be located individually — leaf
-                    // runs then use the line-wise fallback
-                    if (Array.isArray(t.tokens)) cur = walkArray(t.tokens, cur);
+                    // prefixes): its CHILDREN can still be located, bounded
+                    // by the same container extent
+                    if (Array.isArray(t.tokens)) cur = walkArray(t.tokens, cur, limit);
+                    else if (Array.isArray(t.items)) {
+                        for (const it of t.items) {
+                            if (Array.isArray(it.tokens)) cur = walkArray(it.tokens, cur, limit);
+                        }
+                    }
                     i++;
                     continue;
                 }
@@ -296,7 +345,7 @@
                     pushCode(start, labelBase);
                     let labelEnd = labelBase;
                     if (Array.isArray(t.tokens) && t.tokens.length) {
-                        labelEnd = walkArray(t.tokens, labelBase);
+                        labelEnd = walkArray(t.tokens, labelBase, end);
                     } else if (typeof t.text === 'string') {
                         labelEnd = labelBase + t.text.length;
                         emitRun(s.slice(labelBase, labelEnd), labelBase);
@@ -311,13 +360,19 @@
                 default: {
                     // paragraph, heading, blockquote, list(+items), table,
                     // em/strong/del, generic containers
-                    if (Array.isArray(t.tokens)) { walkArray(t.tokens, start); return; }
+                    if (Array.isArray(t.tokens)) { walkArray(t.tokens, start, end); return; }
                     if (Array.isArray(t.items)) {
                         let cur = start;
                         for (const it of t.items) {
                             const a = align(it.raw, cur);
-                            if (a === -1) continue;
-                            if (Array.isArray(it.tokens)) walkArray(it.tokens, a);
+                            if (a === -1 || a + it.raw.length > end) {
+                                // NESTED item whose raw is prefix-stripped:
+                                // never skip it — walk its children bounded
+                                // by the list's own extent
+                                if (Array.isArray(it.tokens)) cur = walkArray(it.tokens, cur, end);
+                                continue;
+                            }
+                            if (Array.isArray(it.tokens)) walkArray(it.tokens, a, a + it.raw.length);
                             cur = a + it.raw.length;
                         }
                         return;
@@ -327,7 +382,7 @@
                         let cur = start;
                         for (const c of cells) {
                             if (!Array.isArray(c.tokens)) continue;
-                            cur = walkArray(c.tokens, cur);
+                            cur = walkArray(c.tokens, cur, end);
                         }
                         return;
                     }
