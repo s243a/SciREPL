@@ -305,6 +305,73 @@ try {
     // insertion after a $-bearing URL wraps correctly (parity preserved)
     check('insertion after a link with $ in its URL wraps correctly',
         (await insertAfter('[t](https://e.com/$x$/f) ')) === '[t](https://e.com/$x$/f) $\\sqrt{}$');
+
+    // ---- math may NEVER cross into a protected construct ----
+    const crossProbe = await page.evaluate(() => {
+        const one = (t) => {
+            const d = document.createElement('div');
+            d.innerHTML = window._appInternals.renderMarkdown(t);
+            const a = d.querySelector('a');
+            return { katex: d.querySelectorAll('.katex').length, text: d.textContent,
+                     href: a ? a.getAttribute('href') : null,
+                     anchorText: a ? a.textContent : null,
+                     spanTitle: d.querySelector('span[title]') ? d.querySelector('span[title]').getAttribute('title') : null };
+        };
+        return {
+            link: one('cost $5 [query](https://e.com/?$filter=x)'),
+            bareUrl: one('cost $5 https://e.com/?$filter=x done'),
+            autolink: one('pay $5 <https://e.com/$x> now'),
+            html: one('amt $5 <span title="a > $x">label</span>'),
+            refdef: one('[id]: https://e.com/$x$/f\n\nbody text'),
+        };
+    });
+    check("Sol's link case: $5 literal, anchor and href COMPLETE, zero katex",
+        crossProbe.link.katex === 0 && crossProbe.link.href === 'https://e.com/?$filter=x'
+        && crossProbe.link.anchorText === 'query' && crossProbe.link.text.includes('$5'),
+        JSON.stringify(crossProbe.link));
+    check('bare GFM URL survives a preceding $5 (whole href, zero katex)',
+        crossProbe.bareUrl.katex === 0 && crossProbe.bareUrl.href === 'https://e.com/?$filter=x',
+        JSON.stringify(crossProbe.bareUrl));
+    check('autolink survives a preceding $5',
+        crossProbe.autolink.katex === 0 && crossProbe.autolink.href === 'https://e.com/$x',
+        JSON.stringify(crossProbe.autolink));
+    check("raw HTML with '>' inside a quoted attribute survives a preceding $5",
+        crossProbe.html.katex === 0 && crossProbe.html.spanTitle === 'a > $x'
+        && crossProbe.html.text.includes('label'),
+        JSON.stringify(crossProbe.html));
+    check('reference definition line is consumed as a definition (no katex, no leak)',
+        crossProbe.refdef.katex === 0 && crossProbe.refdef.text.includes('body text')
+        && !crossProbe.refdef.text.includes('[id]'),
+        JSON.stringify(crossProbe.refdef.text));
+
+    // ---- insertion-PLUS-render: caret context and output agree ----
+    // Sol's reproduction: an unclosed $ before a newline must NOT leave the
+    // palette thinking it is inside math at EOF
+    await page.evaluate(() => {
+        const i = document.getElementById('code-input');
+        i.value = 'price $5\nnext line ';
+        i.selectionStart = i.selectionEnd = i.value.length;
+    });
+    await page.click('#math-palette button[title="Square root"]');
+    const nlValue = await page.evaluate(() => document.getElementById('code-input').value);
+    check('unclosed $ before a newline: insertion at EOF is WRAPPED',
+        nlValue === 'price $5\nnext line $\\sqrt{}$', JSON.stringify(nlValue));
+    await page.click('#run-btn');
+    await page.waitForSelector('.katex', { timeout: 30000 });
+    const nlRender = await page.evaluate(() => {
+        const cell = window._cells[window._cells.length - 1];
+        const out = (cell && cell.outputCard) || document.body;
+        return { katex: out.querySelectorAll('.katex').length, text: out.textContent };
+    });
+    check('...and it RENDERS: exactly one formula, $5 stays literal',
+        nlRender.katex === 1 && nlRender.text.includes('$5'), JSON.stringify(nlRender));
+    // protected-context insertions stay wrapped (never bare LaTeX)
+    check('insertion after a bare URL with $ wraps',
+        (await insertAfter('https://e.com/$x$/f ')) === 'https://e.com/$x$/f $\\sqrt{}$');
+    check('insertion after an HTML comment with $ wraps',
+        (await insertAfter('<!-- $x$ --> ')) === '<!-- $x$ --> $\\sqrt{}$');
+    check('insertion after a reference definition wraps',
+        (await insertAfter('[id]: https://e.com/$x$/f\n')) === '[id]: https://e.com/$x$/f\n$\\sqrt{}$');
     await page.context().close();
 
     console.log('4. Footer layout invariants');
@@ -543,30 +610,44 @@ try {
         JSON.stringify(lateInset));
     await page.context().close();
 
-    console.log('5i. SAFE-AREA BOUNDARY: every control above innerHeight - inset');
-    // helpers evaluate the REAL boundary (inset derived from the footer's
-    // resolved padding), and hit-test FULL rectangles (4 corners + center)
+    console.log('5i. SAFE-AREA BOUNDARY: every control above the TRUE usable boundary');
+    // boundary = min(innerHeight, visualViewport.offsetTop + height) - inset
+    // (inset from the footer's RESOLVED padding); notebook is measured as
+    // the VISIBLE intersection with #app-body, never a clipped child rect
     const boundaryProbe = () => page.evaluate(() => {
         const bar = document.getElementById('input-bar');
         const inset = Math.max(0, (parseFloat(getComputedStyle(bar).paddingBottom) || 0) - 10);
-        const boundary = innerHeight - inset;
+        const vv = window.visualViewport;
+        const usableBottom = vv ? Math.min(innerHeight, vv.offsetTop + vv.height) : innerHeight;
+        const boundary = usableBottom - inset;
         const headerBottom = document.getElementById('app-header').getBoundingClientRect().bottom;
         const within = (r) => r.top >= headerBottom - 1 && r.bottom <= boundary + 1;
         const input = document.getElementById('code-input').getBoundingClientRect();
         const run = document.getElementById('run-btn').getBoundingClientRect();
+        const appBody = document.getElementById('app-body').getBoundingClientRect();
         const scroller = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
+        let notebookVisible = 0;
+        if (scroller) {
+            const r = scroller.getBoundingClientRect();
+            notebookVisible = Math.max(0, Math.min(r.bottom, appBody.bottom) - Math.max(r.top, appBody.top));
+        }
+        const palette = document.getElementById('math-palette');
         return {
             boundary: Math.round(boundary),
             composerOk: within(input) && input.height >= 30,
             runOk: within(run) && run.height >= 20,
-            notebookH: scroller ? Math.round(scroller.getBoundingClientRect().height) : 0,
+            notebookVisible: Math.round(notebookVisible * 10) / 10,
+            paletteCollapsed: palette.classList.contains('space-collapsed'),
+            visibleButtons: [...palette.querySelectorAll('button')].filter(b => b.offsetParent !== null).length,
             inputBottom: Math.round(input.bottom), runBottom: Math.round(run.bottom),
         };
     });
     const paletteFullRect = () => page.evaluate(async () => {
         const bar = document.getElementById('input-bar');
         const inset = Math.max(0, (parseFloat(getComputedStyle(bar).paddingBottom) || 0) - 10);
-        const boundary = innerHeight - inset;
+        const vv = window.visualViewport;
+        const usableBottom = vv ? Math.min(innerHeight, vv.offsetTop + vv.height) : innerHeight;
+        const boundary = usableBottom - inset;
         const headerBottom = document.getElementById('app-header').getBoundingClientRect().bottom;
         const palette = document.getElementById('math-palette');
         const buttons = [...palette.querySelectorAll('button')]
@@ -594,8 +675,8 @@ try {
         i.dispatchEvent(new Event('input', { bubbles: true }));
     });
 
-    // config A: 320x240, RETAINED 48px inset, markdown palette open, grown
-    // composer — in BOTH directions
+    // configs A (320x240+48) and C (shrink to 220 with the inset RETAINED)
+    // in BOTH directions
     for (const dir of ['ltr', 'rtl']) {
         page = await freshPage({ viewport: { width: 320, height: 240 } });
         await enableFormula(page);
@@ -613,11 +694,22 @@ try {
         const aHits = await paletteFullRect();
         check(`320x240+48 (${dir}): all ${aHits.total} palette buttons full-rect hittable above the boundary`,
             aHits.total >= 10 && aHits.ok === aHits.total, JSON.stringify(aHits));
-        check(`320x240+48 (${dir}): nonzero notebook area`, a.notebookH > 0, String(a.notebookH));
+        // C: keyboard-style shrink, inset RETAINED — not even one full
+        // button row fits, so the palette must DELIBERATELY collapse
+        // (never a clipped strip) and the notebook becomes visible again
+        await page.setViewportSize({ width: 320, height: 220 });
+        await page.waitForTimeout(350);
+        const c = await boundaryProbe();
+        check(`320x220+48 (${dir}): composer and Run stay above the boundary`,
+            c.composerOk && c.runOk, JSON.stringify(c));
+        check(`320x220+48 (${dir}): palette deliberately collapsed, zero clipped buttons`,
+            c.paletteCollapsed && c.visibleButtons === 0, JSON.stringify(c));
+        check(`320x220+48 (${dir}): freed space is GENUINELY visible notebook`,
+            c.notebookVisible > 5, String(c.notebookVisible));
         await page.context().close();
     }
 
-    // config B: 320x320, retained inset — roomier, notebook must be real
+    // config B: 320x320+48 — everything plus a real notebook slice
     page = await freshPage({ viewport: { width: 320, height: 320 } });
     await enableFormula(page);
     await page.evaluate(() => document.documentElement.style.setProperty('--safe-area-inset-bottom', '48px'));
@@ -630,18 +722,31 @@ try {
     const bHits = await paletteFullRect();
     check(`320x320+48: all ${bHits.total} palette buttons full-rect hittable`,
         bHits.total >= 10 && bHits.ok === bHits.total, JSON.stringify(bHits));
-    check('320x320+48: notebook area at least 20px', b320.notebookH >= 20, String(b320.notebookH));
+    check('320x320+48: notebook slice GENUINELY visible (clipped intersection >= 20px)',
+        b320.notebookVisible >= 20, String(b320.notebookVisible));
 
-    // config C: keyboard-style shrink with the inset RETAINED (platforms
-    // that keep the nav-bar inset under the keyboard)
-    await page.setViewportSize({ width: 320, height: 220 });
+    // visual-viewport-ONLY keyboard shrink: innerHeight stays 320 while the
+    // visual viewport drops to 200 (common mobile-WebView keyboard mode) —
+    // the footer must LIFT above the overlaid keyboard
+    await page.evaluate(() => {
+        Object.defineProperty(window, 'visualViewport', {
+            configurable: true,
+            value: { height: 200, offsetTop: 0, width: innerWidth,
+                addEventListener() {}, removeEventListener() {} },
+        });
+        window.mathMode.publishPaletteSpace();
+    });
     await page.waitForTimeout(350);
-    const c220 = await boundaryProbe();
-    check('keyboard shrink to 220 with RETAINED 48px inset: composer and Run stay above the boundary',
-        c220.composerOk && c220.runOk, JSON.stringify(c220));
+    const vvProbe = await boundaryProbe();
+    check('visualViewport-only shrink to 200: composer and Run above the VISUAL boundary',
+        vvProbe.composerOk && vvProbe.runOk && vvProbe.runBottom <= 201,
+        JSON.stringify(vvProbe));
 
     // config D: keyboard shrink where the platform CLEARS the inset
-    await page.evaluate(() => document.documentElement.style.setProperty('--safe-area-inset-bottom', '0px'));
+    await page.evaluate(() => {
+        Object.defineProperty(window, 'visualViewport', { configurable: true, value: undefined });
+        document.documentElement.style.setProperty('--safe-area-inset-bottom', '0px');
+    });
     await page.setViewportSize({ width: 320, height: 180 });
     await page.waitForTimeout(350);
     const d180 = await boundaryProbe();

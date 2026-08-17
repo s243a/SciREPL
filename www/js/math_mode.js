@@ -139,9 +139,21 @@ class MathMode {
         const naturalRow = Math.max(rowMin,
             input ? Math.min(input.scrollHeight || 44, 200) : 44);
         const rowH = Math.min(naturalRow, rowCap);
+        const paletteCap = paletteOpen ? Math.max(0, content - rowH - gap) : 0;
+        // DELIBERATE collapse: when not even one full button row fits, the
+        // palette hides entirely instead of showing a clipped, unhittable
+        // strip; it reappears automatically when space returns.
+        if (this.palette) {
+            this.palette.classList.toggle('space-collapsed', paletteOpen && paletteCap < PALETTE_ROW);
+        }
         bar.style.setProperty('--sci-composer-max', rowCap + 'px');
-        bar.style.setProperty('--sci-palette-max',
-            paletteOpen ? Math.max(0, content - rowH - gap) + 'px' : '32vh');
+        bar.style.setProperty('--sci-palette-max', paletteOpen ? paletteCap + 'px' : '32vh');
+        // visual-viewport-only keyboard: the layout viewport (and the
+        // sticky footer pinned to its bottom) does not shrink, so LIFT the
+        // footer above the overlaid keyboard by the covered amount.
+        const vv = window.visualViewport;
+        const lift = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+        bar.style.transform = lift > 0 ? `translateY(-${lift}px)` : '';
     }
 
     _installGeometryObservers() {

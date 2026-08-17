@@ -1414,6 +1414,11 @@ html, body {
 /* Layout invariants (see test_math_palette.mjs): every visible button
    stays hittable even at 320x240 — the palette scrolls internally rather
    than pushing the composer off-screen. */
+.math-palette.space-collapsed {
+    /* the measured budget found no room for even one full button row:
+       hide deliberately rather than clip hit targets (math_mode.js) */
+    display: none !important;
+}
 .math-palette {
     max-height: 32vh;
     /* the measured footer budget caps the palette at whatever remains
