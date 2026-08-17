@@ -492,6 +492,35 @@ try {
     check('display math ACROSS lines in a list keeps display state', r9map.dispAcross === 'display', r9map.dispAcross);
     check('in-progress display math in a quote keeps display state', r9map.dispProgress === 'display', r9map.dispProgress);
     check('a fence whose text matches a list line is NEVER claimed as math', r9map.fenceSafe === 'code', r9map.fenceSafe);
+    // round 10: TAB indentation and fences inside items
+    const r10map = await page.evaluate(() => {
+        const st = (v, p) => window.MdMath.stateAt(v, p);
+        const tabList = '1. first\n\t- tabbed item $x$ end';
+        const tabCont = '- item\n\tcontinued $x$ here';
+        const itemFence = '- item text $a$\n\n  ```\n  item text $a$\n  ```';
+        return {
+            tabNested: st(tabList, tabList.indexOf('$x$') + 1),
+            tabCont: st(tabCont, tabCont.indexOf('$x$') + 1),
+            itemFenceInside: st(itemFence, itemFence.lastIndexOf('$a$') + 1),
+            itemMathOutside: st(itemFence, itemFence.indexOf('$a$') + 1),
+        };
+    });
+    check('TAB-indented nested list item math reports inline', r10map.tabNested === 'inline', r10map.tabNested);
+    check('TAB continuation line math reports inline', r10map.tabCont === 'inline', r10map.tabCont);
+    check('a fence INSIDE a list item is protected even when its text matches item text',
+        r10map.itemFenceInside === 'code', r10map.itemFenceInside);
+    check('...while the real item math before it still reports inline',
+        r10map.itemMathOutside === 'inline', r10map.itemMathOutside);
+    // insertion inside TAB-indented math stays bare
+    await page.evaluate(() => {
+        const i = document.getElementById('code-input');
+        i.value = '1. first\n\t- tabbed item $x$ end';
+        i.selectionStart = i.selectionEnd = i.value.indexOf('$x$') + 2;
+    });
+    await page.click('#math-palette button[title="Square root"]');
+    const tabInsert = await page.evaluate(() => document.getElementById('code-input').value);
+    check('insertion INSIDE tab-indented list math is bare (no corruption)',
+        tabInsert === '1. first\n\t- tabbed item $x\\sqrt{}$ end', JSON.stringify(tabInsert));
     // insertion inside a nested list item stays bare
     await page.evaluate(() => {
         const i = document.getElementById('code-input');
@@ -869,11 +898,23 @@ try {
         await page.context().close();
     }
 
-    // config B: 320x320+48 — everything plus a real notebook slice
+    // config B: 320x320+48 — everything plus a real notebook slice.
+    // The notebook gets REAL content including a TALL final cell, so the
+    // max-scroll tail assertions below never test an empty notebook.
     page = await freshPage({ viewport: { width: 320, height: 320 } });
     await enableFormula(page);
     await page.evaluate(() => document.documentElement.style.setProperty('--safe-area-inset-bottom', '48px'));
-    await page.click('#cell-type-toggle');
+    for (const md of ['# Intro\n\nshort', '# Tall final\n\n' + Array.from({ length: 25 }, (_, n) => 'line ' + n).join('\n\n')]) {
+        await page.evaluate((v) => {
+            const inp = document.getElementById('code-input');
+            inp.value = v;
+            inp.dispatchEvent(new Event('input', { bubbles: true }));
+        }, md);
+        const isMd = await page.evaluate(() => document.getElementById('cell-type-toggle').classList.contains('markdown-active'));
+        if (!isMd) await page.click('#cell-type-toggle');
+        await page.click('#run-btn');
+        await page.waitForTimeout(200);
+    }
     await page.click('#math-mode-btn');
     await growComposer();
     await page.waitForTimeout(350);
@@ -1057,11 +1098,23 @@ try {
             const barTop = document.getElementById('input-bar').getBoundingClientRect().top;
             const notebookH = document.getElementById('app-body').getBoundingClientRect().height;
             const lastBottom = last ? last.getBoundingClientRect().bottom : 0;
-            return { ok: lastBottom <= barTop + 1 || notebookH <= 1,
+            const cs = getComputedStyle(scroller);
+            const padFloor = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+            return { hasContent: !!last && scroller.children.length >= 2,
+                     ok: lastBottom <= barTop + 1 || notebookH <= 1,
+                     scrollerOverflow: Math.round(scroller.getBoundingClientRect().bottom
+                         - document.getElementById('app-body').getBoundingClientRect().bottom),
+                     padFloor,
                      gap: Math.round(lastBottom - barTop), notebookH: Math.round(notebookH) };
         });
-        check(`lifted footer @vv ${cfg[0]}/${cfg[1]}: max scroll never leaves content half-hidden`,
-            tail.ok, JSON.stringify(tail));
+        check(`lifted footer @vv ${cfg[0]}/${cfg[1]}: REAL tall content, tail never half-hidden at max scroll`,
+            tail.hasContent && tail.ok, JSON.stringify(tail));
+        // the scroller may exceed the app body only by its incompressible
+        // padding floor (a box can never shrink below its own padding);
+        // anything beyond that means the flex chain stopped shrinking —
+        // the wrapper bug that hid the tail on the previous head
+        check(`lifted footer @vv ${cfg[0]}/${cfg[1]}: scroller shrink-tracks the app body (padding floor only)`,
+            tail.scrollerOverflow <= tail.padFloor + 1, JSON.stringify({ o: tail.scrollerOverflow, floor: tail.padFloor }));
     }
 
 

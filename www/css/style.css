@@ -265,12 +265,18 @@ html, body {
     flex-direction: column;
     overflow: hidden;
     min-width: 0;
+    /* without this the wrapper refuses to shrink below its content in the
+       app-body flex column, so the scroller's box overflows the clipped
+       app-body and MAXIMUM SCROLL under-delivers by the overflow — hiding
+       the notebook tail behind the footer */
+    min-height: 0;
 }
 
 /* ===== REPL Output Stream ===== */
 
 #repl, .repl-container {
     flex: 1;
+    min-height: 0;   /* shrink WITH the app body — see #repl-wrapper */
     overflow-y: auto;
     /* bottom padding reserves the open Formula palette's height — the
        sticky footer overlays this scroller, so without it the tail of the

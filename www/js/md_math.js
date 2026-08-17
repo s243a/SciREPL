@@ -235,11 +235,23 @@
             let c = cur;
             let any = false;
             for (const line of lines) {
-                if (line.trim()) {
-                    const at = s.indexOf(line, c);
-                    if (at !== -1 && at + line.length <= limit) {
-                        for (let k = 0; k <= line.length; k++) map[rawPos + k] = at + k;
-                        c = at + line.length;
+                const trimmed = line.trim();
+                if (trimmed) {
+                    // exact first; then whitespace-trimmed (marked expands
+                    // TAB indentation to spaces in token raws, so the raw
+                    // line and the source line can differ in leading
+                    // whitespace only)
+                    let at = s.indexOf(line, c);
+                    let matched = line;
+                    let rawSkip = 0;
+                    if (at === -1 || at + line.length > limit) {
+                        at = s.indexOf(trimmed, c);
+                        matched = trimmed;
+                        rawSkip = line.indexOf(trimmed);
+                    }
+                    if (at !== -1 && at + matched.length <= limit) {
+                        for (let k = 0; k <= matched.length; k++) map[rawPos + rawSkip + k] = at + k;
+                        c = at + matched.length;
                         any = true;
                     }
                 }
@@ -300,6 +312,22 @@
                 }
                 const start = bounded(t.raw, cur);
                 if (start === -1) {
+                    // stripped-prefix PROTECTED block (fence/html/def inside
+                    // an indented container): protect its locatable extent
+                    if (t.type === 'code' || t.type === 'html' || t.type === 'def') {
+                        let firstAt = -1, c2 = cur;
+                        for (const line of t.raw.split('\n')) {
+                            const needle = line.trim();
+                            if (!needle) continue;
+                            const at = s.indexOf(needle, c2);
+                            if (at === -1 || at + needle.length > limit) continue;
+                            if (firstAt === -1) firstAt = at;
+                            c2 = at + needle.length;
+                        }
+                        if (firstAt !== -1) { pushCode(firstAt, c2); cur = c2; }
+                        i++;
+                        continue;
+                    }
                     // stripped-prefix container (its raw omits '> '/indent
                     // prefixes): its CHILDREN can still be located, bounded
                     // by the same container extent
@@ -403,8 +431,15 @@
             cur = start + t.raw.length;
         }
         if (cur < s.length) pushCode(cur, s.length);
-        regions.sort((a, b) => a.start - b.start);
-        return regions;
+        // CODE regions are authoritative: a text/math region produced by a
+        // fallback locate that overlaps one (e.g. a list line whose text
+        // coincides with fence content) is discarded — fenced code can
+        // never be classified as active math, regardless of walk order.
+        const codeRegions = regions.filter(r => r.type === 'code');
+        const filtered = regions.filter(r => r.type === 'code'
+            || !codeRegions.some(cr => r.start < cr.end && cr.start < r.end));
+        filtered.sort((a, b) => a.start - b.start);
+        return filtered;
     }
 
     /** Only the math regions of scan(). */
