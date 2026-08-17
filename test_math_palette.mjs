@@ -339,6 +339,69 @@ try {
         crossProbe.html.katex === 0 && crossProbe.html.spanTitle === 'a > $x'
         && crossProbe.html.text.includes('label'),
         JSON.stringify(crossProbe.html));
+    // ---- round 7: TOKEN-STRUCTURAL — math only in eligible text tokens ----
+    const tokProbe = await page.evaluate(() => {
+        const one = (t) => {
+            const d = document.createElement('div');
+            d.innerHTML = window._appInternals.renderMarkdown(t);
+            const a = d.querySelector('a');
+            return { katex: d.querySelectorAll('.katex').length, text: d.textContent,
+                     href: a ? a.getAttribute('href') : null,
+                     anchorHasKatex: a ? !!a.querySelector('.katex') : false,
+                     anchorText: a ? a.textContent : null };
+        };
+        return {
+            labelMixed: one('cost $5 [query $filter$](https://e.com/)'),
+            email: one('mail <foo$bar@example.com> now'),
+            emphasis: one('cost $5 *emph $x* done'),
+            refLink: one('see [label $a$][id]\n\n[id]: https://e.com/$x$/f'),
+            collapsedRef: one('see [label][]\n\n[label]: https://e.com/$q$'),
+            shortcutRef: one('see [label]\n\n[label]: https://e.com/$q$'),
+        };
+    });
+    check("Sol's case: $5 literal, anchor COMPLETE, $filter$ renders INSIDE the label",
+        tokProbe.labelMixed.katex === 1 && tokProbe.labelMixed.anchorHasKatex
+        && tokProbe.labelMixed.href === 'https://e.com/' && tokProbe.labelMixed.text.includes('$5'),
+        JSON.stringify(tokProbe.labelMixed));
+    check('email autolink with $ stays intact (mailto, zero katex)',
+        tokProbe.email.katex === 0 && tokProbe.email.href === 'mailto:foo$bar@example.com',
+        JSON.stringify(tokProbe.email));
+    check('unmatched $ before emphasis stays literal (math never crosses em)',
+        tokProbe.emphasis.katex === 0 && tokProbe.emphasis.text.includes('$5')
+        && tokProbe.emphasis.text.includes('$x'),
+        JSON.stringify(tokProbe.emphasis.text));
+    check('reference link: label math renders, href byte-intact',
+        tokProbe.refLink.katex === 1 && tokProbe.refLink.anchorHasKatex
+        && tokProbe.refLink.href === 'https://e.com/$x$/f',
+        JSON.stringify(tokProbe.refLink));
+    check('collapsed reference intact', tokProbe.collapsedRef.href === 'https://e.com/$q$'
+        && tokProbe.collapsedRef.katex === 0, JSON.stringify(tokProbe.collapsedRef));
+    check('shortcut reference intact', tokProbe.shortcutRef.href === 'https://e.com/$q$'
+        && tokProbe.shortcutRef.katex === 0, JSON.stringify(tokProbe.shortcutRef));
+    // palette context from the SAME tokenization
+    const tokCtx = await page.evaluate(() => {
+        const st = (v, p) => window.MdMath.stateAt(v, p);
+        return {
+            multilineDefTitle: st('[id]: https://e.com\n  "title $x$ line"', 32),
+            refId: st('see [label][id $x]\n\n[id $x]: https://e.com', 16),
+            htmlBlock: st('<div>\n$x$\n</div>', 8),
+            declaration: st('<!DOCTYPE html> $x', 8),
+            pi: st('<?php $x ?> end', 7),
+            cdata: st('<![CDATA[$x]]> end', 10),
+            upperHttps: st('HTTPS://E.COM/$x$/f end', 16),
+            upperWww: st('WWW.EXAMPLE.COM/$x$ end', 17),
+            emailAuto: st('<foo$bar@example.com> end', 6),
+            labelEligible: st('[t $x$ u](https://e.com/)', 5),
+        };
+    });
+    for (const [k, want] of [['multilineDefTitle', 'code'], ['refId', 'code'], ['htmlBlock', 'code'],
+        ['declaration', 'code'], ['pi', 'code'], ['cdata', 'code'], ['emailAuto', 'code'],
+        ['labelEligible', 'inline']]) {
+        check(`stateAt ${k} -> ${want}`, tokCtx[k] === want, tokCtx[k]);
+    }
+    check('stateAt uppercase HTTPS:// never inline', tokCtx.upperHttps !== 'inline' && tokCtx.upperHttps !== 'display', tokCtx.upperHttps);
+    check('stateAt uppercase WWW. never inline', tokCtx.upperWww !== 'inline' && tokCtx.upperWww !== 'display', tokCtx.upperWww);
+
     check('reference definition line is consumed as a definition (no katex, no leak)',
         crossProbe.refdef.katex === 0 && crossProbe.refdef.text.includes('body text')
         && !crossProbe.refdef.text.includes('[id]'),
@@ -626,10 +689,17 @@ try {
         const run = document.getElementById('run-btn').getBoundingClientRect();
         const appBody = document.getElementById('app-body').getBoundingClientRect();
         const scroller = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
+        // TRUTHFUL visible notebook: scroller ∩ #app-body ∩ the visual
+        // viewport band ∩ the area ABOVE the (possibly transformed) footer
         let notebookVisible = 0;
         if (scroller) {
             const r = scroller.getBoundingClientRect();
-            notebookVisible = Math.max(0, Math.min(r.bottom, appBody.bottom) - Math.max(r.top, appBody.top));
+            const barTop = bar.getBoundingClientRect().top;
+            const vvTop = vv ? vv.offsetTop : 0;
+            const vvBottom = vv ? Math.min(innerHeight, vv.offsetTop + vv.height) : innerHeight;
+            notebookVisible = Math.max(0,
+                Math.min(r.bottom, appBody.bottom, vvBottom, barTop)
+                - Math.max(r.top, appBody.top, vvTop));
         }
         const palette = document.getElementById('math-palette');
         return {
@@ -706,6 +776,26 @@ try {
             c.paletteCollapsed && c.visibleButtons === 0, JSON.stringify(c));
         check(`320x220+48 (${dir}): freed space is GENUINELY visible notebook`,
             c.notebookVisible > 5, String(c.notebookVisible));
+        // accessibility: a collapsed palette must not read as expanded,
+        // and the desired-open state must restore when space returns
+        const aria = await page.evaluate(() => ({
+            expanded: document.getElementById('math-mode-btn').getAttribute('aria-expanded'),
+            active: document.getElementById('math-mode-btn').classList.contains('active'),
+        }));
+        check(`320x220+48 (${dir}): collapsed palette NOT exposed as expanded/active`,
+            aria.expanded === 'false' && !aria.active, JSON.stringify(aria));
+        await page.setViewportSize({ width: 320, height: 320 });
+        await page.waitForTimeout(350);
+        const restored = await page.evaluate(() => ({
+            expanded: document.getElementById('math-mode-btn').getAttribute('aria-expanded'),
+            active: document.getElementById('math-mode-btn').classList.contains('active'),
+            collapsed: document.getElementById('math-palette').classList.contains('space-collapsed'),
+            visibleButtons: [...document.querySelectorAll('#math-palette button')]
+                .filter(b => b.offsetParent !== null).length,
+        }));
+        check(`restore to 320 (${dir}): palette visible again, aria-expanded true`,
+            restored.expanded === 'true' && restored.active && !restored.collapsed
+            && restored.visibleButtons >= 10, JSON.stringify(restored));
         await page.context().close();
     }
 
@@ -726,14 +816,15 @@ try {
         b320.notebookVisible >= 20, String(b320.notebookVisible));
 
     // visual-viewport-ONLY keyboard shrink: innerHeight stays 320 while the
-    // visual viewport drops to 200 (common mobile-WebView keyboard mode) —
-    // the footer must LIFT above the overlaid keyboard
+    // visual viewport drops to 200 — the footer must LIFT above the
+    // overlaid keyboard. The stub is a REAL EventTarget so the component's
+    // own 'scroll'/'resize' subscriptions are exercised.
     await page.evaluate(() => {
-        Object.defineProperty(window, 'visualViewport', {
-            configurable: true,
-            value: { height: 200, offsetTop: 0, width: innerWidth,
-                addEventListener() {}, removeEventListener() {} },
-        });
+        document.documentElement.style.setProperty('--safe-area-inset-bottom', '0px');
+        const stub = new EventTarget();
+        stub.height = 200; stub.offsetTop = 0; stub.width = innerWidth;
+        Object.defineProperty(window, 'visualViewport', { configurable: true, value: stub });
+        window.mathMode._attachVisualViewportListeners();
         window.mathMode.publishPaletteSpace();
     });
     await page.waitForTimeout(350);
@@ -741,6 +832,62 @@ try {
     check('visualViewport-only shrink to 200: composer and Run above the VISUAL boundary',
         vvProbe.composerOk && vvProbe.runOk && vvProbe.runBottom <= 201,
         JSON.stringify(vvProbe));
+    // truthful notebook: the naive child∩app-body rect measure would still
+    // report the area now covered by the LIFTED footer — the truthful
+    // measure may not (this assertion fails under the old measurement)
+    const truth = await page.evaluate(() => {
+        const bar = document.getElementById('input-bar');
+        const appBody = document.getElementById('app-body').getBoundingClientRect();
+        const scroller = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
+        const r = scroller.getBoundingClientRect();
+        const vv = window.visualViewport;
+        const vvBottom = Math.min(innerHeight, vv.offsetTop + vv.height);
+        const barTop = bar.getBoundingClientRect().top;
+        const naive = Math.max(0, Math.min(r.bottom, appBody.bottom) - Math.max(r.top, appBody.top));
+        const truthful = Math.max(0,
+            Math.min(r.bottom, appBody.bottom, vvBottom, barTop) - Math.max(r.top, appBody.top, vv.offsetTop));
+        return { naive: Math.round(naive), truthful: Math.round(truthful),
+                 barTop: Math.round(barTop), appBodyTop: Math.round(appBody.top) };
+    });
+    check('truthful notebook measure subtracts the lifted-footer overlap',
+        truth.truthful <= Math.max(0, truth.barTop - truth.appBodyTop) + 1
+        && truth.naive >= truth.truthful,
+        JSON.stringify(truth));
+    check('...and the naive rect measure WOULD have over-reported here',
+        truth.naive > truth.truthful, JSON.stringify(truth));
+    // EVENTFUL pan: ONLY offsetTop changes, and only 'scroll' is
+    // dispatched — the subscription itself must trigger the re-layout
+    const panProbe = async (offsetTop) => {
+        await page.evaluate((ot) => {
+            const vv = window.visualViewport;
+            vv.offsetTop = ot;
+            vv.dispatchEvent(new Event('scroll'));
+        }, offsetTop);
+        await page.waitForTimeout(300);
+        return page.evaluate(() => {
+            const vv = window.visualViewport;
+            const top = vv.offsetTop, bottom = vv.offsetTop + vv.height;
+            const input = document.getElementById('code-input').getBoundingClientRect();
+            const run = document.getElementById('run-btn').getBoundingClientRect();
+            const btns = [...document.querySelectorAll('#math-palette button')]
+                .filter(b => b.offsetParent !== null)
+                .map(b => b.getBoundingClientRect());
+            const inBand = (r) => r.top >= top - 1 && r.bottom <= bottom + 1;
+            return {
+                composerInBand: inBand(input), runInBand: inBand(run),
+                buttonsInBand: btns.every(inBand), buttons: btns.length,
+                band: [Math.round(top), Math.round(bottom)],
+            };
+        });
+    };
+    const panDown = await panProbe(60);
+    check('pan DOWN (offsetTop 60, scroll event only): controls within both visual boundaries',
+        panDown.composerInBand && panDown.runInBand && panDown.buttonsInBand,
+        JSON.stringify(panDown));
+    const panBack = await panProbe(0);
+    check('pan BACK (offsetTop 0, scroll event only): controls within both visual boundaries',
+        panBack.composerInBand && panBack.runInBand && panBack.buttonsInBand,
+        JSON.stringify(panBack));
 
     // config D: keyboard shrink where the platform CLEARS the inset
     await page.evaluate(() => {

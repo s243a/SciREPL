@@ -142,9 +142,19 @@ class MathMode {
         const paletteCap = paletteOpen ? Math.max(0, content - rowH - gap) : 0;
         // DELIBERATE collapse: when not even one full button row fits, the
         // palette hides entirely instead of showing a clipped, unhittable
-        // strip; it reappears automatically when space returns.
+        // strip; it reappears automatically when space returns. The
+        // DESIRED-open state lives in the 'hidden' class (untouched here);
+        // the toggle control must reflect what the user actually SEES:
+        // while collapsed, aria-expanded is false and the button is not
+        // presented as an active control.
         if (this.palette) {
-            this.palette.classList.toggle('space-collapsed', paletteOpen && paletteCap < PALETTE_ROW);
+            const collapsed = paletteOpen && paletteCap < PALETTE_ROW;
+            this.palette.classList.toggle('space-collapsed', collapsed);
+            if (this.toggleBtn) {
+                const effectiveOpen = paletteOpen && !collapsed;
+                this.toggleBtn.classList.toggle('active', effectiveOpen);
+                this.toggleBtn.setAttribute('aria-expanded', String(effectiveOpen));
+            }
         }
         bar.style.setProperty('--sci-composer-max', rowCap + 'px');
         bar.style.setProperty('--sci-palette-max', paletteOpen ? paletteCap + 'px' : '32vh');
@@ -161,15 +171,46 @@ class MathMode {
         this._resizeObserver = new ResizeObserver(() => this._measureFooterOverlay());
         const bar = document.getElementById('input-bar');
         if (bar) this._resizeObserver.observe(bar);
-        window.addEventListener('resize', () => this._measureFooterOverlay());
-        if (window.visualViewport) window.visualViewport.addEventListener('resize', () => this._measureFooterOverlay());
+        this._onViewportChange = () => this._measureFooterOverlay();
+        window.addEventListener('resize', this._onViewportChange);
+        this._attachVisualViewportListeners();
         // composer growth may be CAPPED (bar size unchanged -> no resize
         // event), and safe-area insets arrive as style mutations on the
         // document element — both must re-run the budget
-        if (this.input) this.input.addEventListener('input', () => this.publishPaletteSpace());
+        this._onComposerInput = () => this.publishPaletteSpace();
+        if (this.input) this.input.addEventListener('input', this._onComposerInput);
         this._insetObserver = new MutationObserver(() => this.publishPaletteSpace());
         this._insetObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
         this._measureFooterOverlay();
+    }
+
+    /** Subscribe to the CURRENT window.visualViewport — both 'resize' and
+     *  'scroll', because the footer lift depends on offsetTop, which
+     *  changes on visual-viewport PANNING without any resize. Re-invoked
+     *  by tests that substitute the visual viewport. */
+    _attachVisualViewportListeners() {
+        if (this._vvTarget && this._vvTarget.removeEventListener) {
+            this._vvTarget.removeEventListener('resize', this._onViewportChange);
+            this._vvTarget.removeEventListener('scroll', this._onViewportChange);
+        }
+        this._vvTarget = window.visualViewport || null;
+        if (this._vvTarget && this._vvTarget.addEventListener) {
+            this._vvTarget.addEventListener('resize', this._onViewportChange);
+            this._vvTarget.addEventListener('scroll', this._onViewportChange);
+        }
+    }
+
+    /** Lifecycle cleanup: detach every listener and observer. */
+    destroy() {
+        window.removeEventListener('resize', this._onViewportChange);
+        if (this._vvTarget && this._vvTarget.removeEventListener) {
+            this._vvTarget.removeEventListener('resize', this._onViewportChange);
+            this._vvTarget.removeEventListener('scroll', this._onViewportChange);
+        }
+        this._vvTarget = null;
+        if (this.input && this._onComposerInput) this.input.removeEventListener('input', this._onComposerInput);
+        if (this._insetObserver) this._insetObserver.disconnect();
+        if (this._resizeObserver) this._resizeObserver.disconnect();
     }
 
     /** Reflect the current composer context in the palette and its control. */
