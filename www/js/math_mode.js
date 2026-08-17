@@ -87,13 +87,21 @@ class MathMode {
         if (!bar) return;
         this._publishFooterBudget(bar);
         const barTop = bar.getBoundingClientRect().top;
+        const appBody = document.getElementById('app-body');
+        const clipBottom = appBody ? appBody.getBoundingClientRect().bottom : Infinity;
         for (const scroller of document.querySelectorAll('#repl, .repl-container')) {
             if (!this._observedScrollers.has(scroller)) {
                 this._observedScrollers.add(scroller);
                 this._resizeObserver.observe(scroller);
             }
             if (scroller.offsetParent === null) continue;   // hidden notebook
-            const overlap = Math.max(0, scroller.getBoundingClientRect().bottom - barTop);
+            // Clamp to the scroller's VISIBLE bottom (#app-body clips it).
+            // Without the clamp, the padding this sets can grow the
+            // scroller's own border box, which grows the next measurement —
+            // a feedback loop that inflated the reservation on every
+            // visual-viewport pan event while the footer was lifted.
+            const visibleBottom = Math.min(scroller.getBoundingClientRect().bottom, clipBottom);
+            const overlap = Math.max(0, visibleBottom - barTop);
             scroller.style.setProperty('--footer-overlay-local', Math.ceil(overlap) + 'px');
         }
     }
@@ -111,10 +119,17 @@ class MathMode {
         const cs = getComputedStyle(bar);
         const pads = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
         const gap = parseFloat(cs.rowGap || cs.gap) || 8;
-        const vh = window.visualViewport
-            ? Math.min(window.innerHeight, window.visualViewport.height)
+        // usable vertical band: from whichever is lower of the header
+        // bottom and the visual viewport's top (a pan that scrolls the
+        // header AWAY frees its space — the palette can then restore),
+        // down to the visual viewport's bottom
+        const vv0 = window.visualViewport;
+        const vvTop = vv0 ? vv0.offsetTop : 0;
+        const vvBottom = vv0
+            ? Math.min(window.innerHeight, vv0.offsetTop + vv0.height)
             : window.innerHeight;
         const headerBottom = header ? header.getBoundingClientRect().bottom : 0;
+        const usableTop = Math.max(headerBottom, vvTop);
         // measured minimum row height: the non-composer children (control
         // stack, Run) set the floor — at narrow widths the controls are
         // taller than the composer's single line
@@ -130,10 +145,11 @@ class MathMode {
                 + (parseFloat(palCs.borderTopWidth) || 0) + (parseFloat(palCs.borderBottomWidth) || 0)
             : 9;
         const PALETTE_ROW = 36 + palChrome;
+        const band = Math.max(0, vvBottom - usableTop);
         const minContent = rowMin + (paletteOpen ? gap + PALETTE_ROW : 0);
-        const leftover = vh - headerBottom - pads - minContent;
+        const leftover = band - pads - minContent;
         const notebookReserve = Math.max(0, Math.min(40, leftover));
-        const content = Math.max(0, vh - headerBottom - pads - notebookReserve);
+        const content = Math.max(0, band - pads - notebookReserve);
         const rowCap = Math.min(200, Math.max(rowMin, content - (paletteOpen ? gap + PALETTE_ROW : 0)));
         const input = this.input;
         const naturalRow = Math.max(rowMin,
@@ -149,6 +165,13 @@ class MathMode {
         // presented as an active control.
         if (this.palette) {
             const collapsed = paletteOpen && paletteCap < PALETTE_ROW;
+            // keyboard focus must never silently drop to <body>: if a
+            // palette button is focused as the palette collapses, move
+            // focus to the Formula toggle (the control that re-opens it)
+            if (collapsed && !this.palette.classList.contains('space-collapsed')
+                && this.palette.contains(document.activeElement) && this.toggleBtn) {
+                this.toggleBtn.focus();
+            }
             this.palette.classList.toggle('space-collapsed', collapsed);
             if (this.toggleBtn) {
                 const effectiveOpen = paletteOpen && !collapsed;

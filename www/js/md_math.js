@@ -118,10 +118,12 @@
     }
 
     function recurseContainers(t) {
+        // image "labels" are ALT TEXT — an HTML attribute that renders
+        // literally, so they are never mathified
+        if (t.type === 'image') return;
         // autolinks, email autolinks, and GFM bare-URL links: the visible
         // text IS the destination — never mathify it
-        if ((t.type === 'link' || t.type === 'image')
-            && !(t.raw.startsWith('[') || t.raw.startsWith('!['))) return;
+        if (t.type === 'link' && !t.raw.startsWith('[')) return;
         // never descend into code, codespan, or html — they have no .tokens
         if (Array.isArray(t.tokens)) transformInline(t.tokens);
         if (Array.isArray(t.items)) for (const it of t.items) if (Array.isArray(it.tokens)) transformInline(it.tokens);
@@ -226,22 +228,41 @@
             while (i < arr.length) {
                 const t = arr[i];
                 if (isLeafText(t)) {
-                    const runStart = align(t.raw, cur);
-                    if (runStart === -1) { i++; continue; }
-                    let runEnd = runStart;
+                    // gather the maximal leaf run's concatenated raw
                     let raw = '';
-                    while (i < arr.length && isLeafText(arr[i]) && s.startsWith(arr[i].raw, runEnd)) {
-                        raw += arr[i].raw;
-                        runEnd += arr[i].raw.length;
-                        i++;
+                    while (i < arr.length && isLeafText(arr[i])) { raw += arr[i].raw; i++; }
+                    const runStart = align(raw, cur);
+                    if (runStart !== -1) {
+                        emitRun(raw, runStart);
+                        cur = runStart + raw.length;
+                    } else {
+                        // stripped-prefix container (multiline list item or
+                        // blockquote continuation): the token raw omits the
+                        // '> '/indent prefixes, so map LINE-WISE — inline
+                        // math never crosses a line, so each line can be
+                        // located and emitted at its own source offset
+                        let c = cur;
+                        for (const line of raw.split('\n')) {
+                            if (!line.trim()) continue;
+                            const at = s.indexOf(line, c);
+                            if (at === -1) continue;
+                            emitRun(line, at);
+                            c = at + line.length;
+                        }
+                        cur = c;
                     }
-                    if (raw) emitRun(raw, runStart);
-                    else i++;
-                    cur = runEnd;
                     continue;
                 }
                 const start = align(t.raw, cur);
-                if (start === -1) { i++; continue; }
+                if (start === -1) {
+                    // stripped-prefix container (its raw omits '> '/indent
+                    // prefixes and is not a verbatim substring): its
+                    // CHILDREN can still be located individually — leaf
+                    // runs then use the line-wise fallback
+                    if (Array.isArray(t.tokens)) cur = walkArray(t.tokens, cur);
+                    i++;
+                    continue;
+                }
                 const end = start + t.raw.length;
                 visit(t, start, end);
                 cur = end;
@@ -258,14 +279,20 @@
                 case 'def':         // reference definitions incl. multiline titles
                     pushCode(start, end);
                     return;
-                case 'link':
-                case 'image': {
+                case 'image':
+                    // alt text renders LITERALLY (it becomes an attribute),
+                    // so the whole image token is protected — the palette
+                    // must agree with the renderer that $x$ in alt text is
+                    // not active math
+                    pushCode(start, end);
+                    return;
+                case 'link': {
                     // autolink, email autolink, or GFM bare URL: protected whole
-                    if (!(t.raw.startsWith('[') || t.raw.startsWith('!['))) { pushCode(start, end); return; }
-                    // '[label](dest)' / '![label](dest)' / '[label][id]' /
-                    // '[label][]' / '[label]': the label is eligible text,
-                    // everything else is protected
-                    const labelBase = start + (t.raw.startsWith('![') ? 2 : 1);
+                    if (!t.raw.startsWith('[')) { pushCode(start, end); return; }
+                    // '[label](dest)' / '[label][id]' / '[label][]' /
+                    // '[label]': the label is eligible text, everything
+                    // else is protected
+                    const labelBase = start + 1;
                     pushCode(start, labelBase);
                     let labelEnd = labelBase;
                     if (Array.isArray(t.tokens) && t.tokens.length) {

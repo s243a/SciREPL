@@ -433,6 +433,45 @@ try {
         (await insertAfter('https://e.com/$x$/f ')) === 'https://e.com/$x$/f $\\sqrt{}$');
     check('insertion after an HTML comment with $ wraps',
         (await insertAfter('<!-- $x$ --> ')) === '<!-- $x$ --> $\\sqrt{}$');
+    // multiline lists and quotations: palette agrees with the renderer
+    const mlProbe = await page.evaluate(() => {
+        const st = (v, p) => window.MdMath.stateAt(v, p);
+        const list2 = '1. first line\n   continued $x$ here';
+        const quote2 = '> line one $a$\n> line two $x$';
+        const img = '![alt $a$](https://e.com/i.png)';
+        const render = (t) => {
+            const d = document.createElement('div');
+            d.innerHTML = window._appInternals.renderMarkdown(t);
+            return { katex: d.querySelectorAll('.katex').length, text: d.textContent };
+        };
+        return {
+            listState: st(list2, list2.indexOf('$x$') + 1),
+            listRender: render(list2),
+            quoteState: st(quote2, quote2.indexOf('$x$') + 1),
+            quoteRender: render(quote2),
+            imgAltState: st(img, img.indexOf('$a$') + 1),
+            imgRender: render(img),
+        };
+    });
+    check('multiline list continuation: palette reports inline AND it renders',
+        mlProbe.listState === 'inline' && mlProbe.listRender.katex === 1, JSON.stringify({ s: mlProbe.listState, k: mlProbe.listRender.katex }));
+    check('multiline blockquote: palette reports inline AND it renders',
+        mlProbe.quoteState === 'inline' && mlProbe.quoteRender.katex === 2, JSON.stringify({ s: mlProbe.quoteState, k: mlProbe.quoteRender.katex }));
+    check('image ALT text: palette reports protected AND renderer keeps it literal',
+        mlProbe.imgAltState === 'code' && mlProbe.imgRender.katex === 0
+        && mlProbe.imgRender.text.indexOf('$a$') === -1 /* alt is an attribute, not text */,
+        JSON.stringify({ s: mlProbe.imgAltState, k: mlProbe.imgRender.katex }));
+    // insertion inside a multiline list item does NOT nest delimiters
+    await page.evaluate(() => {
+        const i = document.getElementById('code-input');
+        i.value = '1. first line\n   continued $x$ here';
+        i.selectionStart = i.selectionEnd = i.value.indexOf('$x$') + 2;   // inside the span
+    });
+    await page.click('#math-palette button[title="Square root"]');
+    const mlInsert = await page.evaluate(() => document.getElementById('code-input').value);
+    check('insertion INSIDE list-item math is bare (no nested delimiters)',
+        mlInsert === '1. first line\n   continued $x\\sqrt{}$ here', JSON.stringify(mlInsert));
+
     check('insertion after a reference definition wraps',
         (await insertAfter('[id]: https://e.com/$x$/f\n')) === '[id]: https://e.com/$x$/f\n$\\sqrt{}$');
     await page.context().close();
@@ -888,6 +927,80 @@ try {
     check('pan BACK (offsetTop 0, scroll event only): controls within both visual boundaries',
         panBack.composerInBand && panBack.runInBand && panBack.buttonsInBand,
         JSON.stringify(panBack));
+
+    // REPEATED pan events must not accumulate: 20 alternating scroll
+    // events, then the reservation and geometry must equal the value
+    // after the FIRST event (the old measurement fed its own padding back
+    // into the next measurement and grew without bound)
+    const reservationAfter = async (rounds) => {
+        for (let n = 0; n < rounds; n++) {
+            await page.evaluate((ot) => {
+                const vv = window.visualViewport;
+                vv.offsetTop = ot;
+                vv.dispatchEvent(new Event('scroll'));
+            }, n % 2 ? 60 : 0);
+            await page.waitForTimeout(60);
+        }
+        return page.evaluate(() => {
+            const scroller = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
+            return {
+                reserve: parseInt(scroller.style.getPropertyValue('--footer-overlay-local')) || 0,
+                appBodyH: Math.round(document.getElementById('app-body').getBoundingClientRect().height),
+                scrollerH: Math.round(scroller.getBoundingClientRect().height),
+            };
+        });
+    };
+    const after2 = await reservationAfter(2);
+    const after20 = await reservationAfter(18);   // 20 total
+    check('20 pan events: footer reservation does NOT grow (P1 accumulation fixed)',
+        after20.reserve === after2.reserve && after20.appBodyH === after2.appBodyH
+        && after20.scrollerH === after2.scrollerH,
+        JSON.stringify({ after2, after20 }));
+
+    // panning the HEADER out of the visual band frees its space: a
+    // palette collapsed for lack of room must RESTORE after the pan
+    await page.evaluate(() => {
+        const vv = window.visualViewport;
+        vv.height = 180; vv.offsetTop = 0;
+        vv.dispatchEvent(new Event('resize'));
+    });
+    await page.waitForTimeout(350);
+    const beforePan = await page.evaluate(() => ({
+        collapsed: document.getElementById('math-palette').classList.contains('space-collapsed'),
+    }));
+    check('vv 180 with header in band: palette collapsed (precondition)', beforePan.collapsed, JSON.stringify(beforePan));
+    await page.evaluate(() => {
+        const vv = window.visualViewport;
+        vv.offsetTop = 90;                        // header (bottom ~80) now above the band
+        vv.dispatchEvent(new Event('scroll'));
+    });
+    await page.waitForTimeout(350);
+    const afterPan = await page.evaluate(() => ({
+        collapsed: document.getElementById('math-palette').classList.contains('space-collapsed'),
+        expanded: document.getElementById('math-mode-btn').getAttribute('aria-expanded'),
+        visibleButtons: [...document.querySelectorAll('#math-palette button')].filter(b => b.offsetParent !== null).length,
+    }));
+    check('panning the header away RESTORES the palette (space is genuinely free)',
+        !afterPan.collapsed && afterPan.expanded === 'true' && afterPan.visibleButtons >= 10,
+        JSON.stringify(afterPan));
+
+    // focus rescue: collapsing while a palette button has keyboard focus
+    // must move focus to the Formula toggle, never drop it to <body>
+    await page.evaluate(() => {
+        [...document.querySelectorAll('#math-palette button')].find(b => b.offsetParent !== null).focus();
+        const vv = window.visualViewport;
+        vv.offsetTop = 0; vv.height = 180;        // back to the collapsing geometry
+        vv.dispatchEvent(new Event('resize'));
+    });
+    await page.waitForTimeout(350);
+    const focusProbe = await page.evaluate(() => ({
+        collapsed: document.getElementById('math-palette').classList.contains('space-collapsed'),
+        activeId: document.activeElement ? document.activeElement.id : null,
+        onBody: document.activeElement === document.body,
+    }));
+    check('collapse with a focused palette button moves focus to the Formula toggle',
+        focusProbe.collapsed && focusProbe.activeId === 'math-mode-btn' && !focusProbe.onBody,
+        JSON.stringify(focusProbe));
 
     // config D: keyboard shrink where the platform CLEARS the inset
     await page.evaluate(() => {
