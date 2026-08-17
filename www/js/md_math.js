@@ -18,6 +18,39 @@
 (function () {
     'use strict';
 
+    // CommonMark-shaped raw-HTML tag: attribute values must be quoted
+    // strings (which may contain '>' and '$') or unquoted spec tokens —
+    // '<b$ ok' is NOT a tag, so '$a<b$' stays math, while
+    // '<span title="a > $x$">' IS one.
+    const SPEC_TAG = /^<\/?[a-zA-Z][a-zA-Z0-9-]*(?:\s+[a-zA-Z_:][a-zA-Z0-9_.:-]*(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*\s*\/?>/;
+    const AUTOLINK = /^<[a-zA-Z][a-zA-Z0-9+.-]*:[^<>\s]*>/;
+
+    /** Length of the HTML construct (comment, autolink, or spec tag)
+     *  starting exactly at src[i], or 0. */
+    function htmlConstructAt(src, i) {
+        if (src[i] !== '<') return 0;
+        const rest = src.slice(i, i + 4096);
+        if (rest.startsWith('<!--')) {
+            const close = rest.indexOf('-->', 4);
+            return close === -1 ? rest.length : close + 3;
+        }
+        const auto = AUTOLINK.exec(rest);
+        if (auto) return auto[0].length;
+        const tag = SPEC_TAG.exec(rest);
+        return tag ? tag[0].length : 0;
+    }
+
+    /** A math span may never SWALLOW a construct Markdown would tokenize —
+     *  a '$' in ordinary text must not find its closing '$' inside a link
+     *  or image destination or a bare GFM URL. (Raw-HTML/autolink/comment
+     *  crossings are aborted during the scan itself, at the '<'.)
+     *  Fail-safe direction: a rare legitimate formula like '$f[x](y)$'
+     *  renders literally, never the other way around. */
+    function bodyCrossesProtected(body) {
+        return /\]\(/.test(body)                                   // into a link/image destination
+            || /(?:^|[^\w.+-])(?:https?:\/\/|www\.)/i.test(body);  // a bare GFM URL
+    }
+
     /** '$$body$$' at the start of src (display math): escape-aware, body
      *  non-empty, may span newlines within one inline run. */
     function matchDisplay(src) {
@@ -25,9 +58,12 @@
         let i = 2;
         while (i < src.length) {
             if (src[i] === '\\') { i += 2; continue; }
+            if (src[i] === '<' && htmlConstructAt(src, i) > 0) return null;
             if (src[i] === '$' && src[i + 1] === '$') {
                 if (i === 2) return null;                // empty body
-                return { raw: src.slice(0, i + 2), body: src.slice(2, i) };
+                const body = src.slice(2, i);
+                if (bodyCrossesProtected(body)) return null;
+                return { raw: src.slice(0, i + 2), body };
             }
             i++;
         }
@@ -35,16 +71,20 @@
     }
 
     /** '$body$' at the start of src (inline math): single line, non-empty,
-     *  escape-aware; a backtick aborts (the code span wins, as in marked). */
+     *  escape-aware; a backtick or an HTML construct aborts (those
+     *  tokenizations win, as in marked). */
     function matchInline(src) {
         if (src[0] !== '$' || src[1] === '$') return null;
         let i = 1;
         while (i < src.length && src[i] !== '\n') {
             if (src[i] === '\\') { i += 2; continue; }
             if (src[i] === '`') return null;
+            if (src[i] === '<' && htmlConstructAt(src, i) > 0) return null;
             if (src[i] === '$') {
                 if (i === 1) return null;                // empty body
-                return { raw: src.slice(0, i + 1), body: src.slice(1, i) };
+                const body = src.slice(1, i);
+                if (bodyCrossesProtected(body)) return null;
+                return { raw: src.slice(0, i + 1), body };
             }
             i++;
         }
@@ -126,6 +166,14 @@
                     i = end; textStart = i; atLineStart = false;
                     continue;
                 }
+                // reference definition: the whole line is protected
+                if (/^ {0,3}\[[^\]]*\]:\s?/.test(line)) {
+                    const end = nl === -1 ? len : nl;
+                    pushText(i);
+                    regions.push({ type: 'code', start: i, end });
+                    i = end; textStart = i; atLineStart = false;
+                    continue;
+                }
                 // indented code block: 4 spaces / tab after a blank line
                 if (/^(?: {4}|\t)/.test(line) && line.trim() !== '' && prevLineBlank(i)) {
                     let j = i, end = len;
@@ -149,10 +197,21 @@
             if (ch === '\\') { i += 2; continue; }       // escape consumes the next char
 
             if (ch === '<') {
-                // autolink or raw-HTML tag: the whole construct is protected
-                const rest = s.slice(i, i + 1024);
-                const m = /^<[a-zA-Z][a-zA-Z0-9+.-]*:[^<>\s]*>/.exec(rest)
-                    || /^<\/?[a-zA-Z][^<>]*>/.exec(rest);
+                // HTML comment, autolink, or spec-shaped raw-HTML tag
+                // (quoted attributes may contain '>'): protected in full
+                const consumed = htmlConstructAt(s, i);
+                if (consumed > 0) {
+                    pushText(i);
+                    regions.push({ type: 'code', start: i, end: i + consumed });
+                    i += consumed; textStart = i;
+                    continue;
+                }
+                i++; continue;
+            }
+
+            if ((ch === 'h' || ch === 'w') && (i === 0 || /[^\w.+-]/.test(s[i - 1]))) {
+                // bare GFM URL: protected in full
+                const m = /^(?:https?:\/\/|www\.)[^\s<]+/.exec(s.slice(i, i + 2048));
                 if (m) {
                     pushText(i);
                     regions.push({ type: 'code', start: i, end: i + m[0].length });
@@ -240,6 +299,9 @@
         for (let i = from; i < to; i++) {
             const c = s[i];
             if (c === '\\') { i++; continue; }
+            // inline math cannot cross a newline: an unfinished single-$
+            // span RESETS (display math intentionally persists)
+            if (c === '\n') { if (state === 'inline') state = 'outside'; continue; }
             if (c !== '$') continue;
             if (s[i + 1] === '$' && i + 1 < to) {
                 if (state === 'outside') state = 'display';
