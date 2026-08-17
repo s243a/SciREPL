@@ -3100,6 +3100,7 @@ class FileIO {
                 mainSel.value = meta[0].id;
                 if (window.kernelManager) window.kernelManager.setLanguage(meta[0].id);
             }
+            if (window.notifyComposerContextChanged) window.notifyComposerContextChanged();
         }
 
         // Cell-level dropdowns (existing cells in the DOM)

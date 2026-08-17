@@ -117,7 +117,7 @@
     "tour.progress": "{total} में से {current}",
     "help.showTour": "टूर फिर से दिखाएं",
     "help.showWhatsNew": "इस संस्करण में नया क्या है",
-    "help.headerShortcuts": "हेडर शॉर्टकट: 🧭 टूर और ∑ फ़ॉर्मूला बटन डिफ़ॉल्ट रूप से दिखते हैं। दिखावट → हेडर शॉर्टकट में किसी भी बटन को छिपाएँ या फिर से दिखाएँ।",
+    "help.headerShortcuts": "हेडर शॉर्टकट: 🧭 टूर बटन डिफ़ॉल्ट रूप से दिखता है। ∑ फ़ॉर्मूला बटन डिफ़ॉल्ट रूप से बंद रहता है — इसे दिखावट → हेडर शॉर्टकट में चालू करें। फ़ॉर्मूला Python कोड और Markdown सेल के लिए उपलब्ध है।",
     "help.openSourceLicenses": "ओपन-सोर्स लाइसेंस",
     "header.takeTourTitle": "टूर शुरू करें",
     "whatsNew.displayLanguage": "प्रदर्शन भाषा",
@@ -831,6 +831,16 @@
     "packageCatalog.item.typrIntroduction.name": "TypR परिचय",
     "packageCatalog.item.typrIntroduction.description": "टाइप्ड R सुपरसेट — वेरिएबल बाइंडिंग, फ़ंक्शंस, टाइप एनोटेशन, वरियाडिक कॉल्स और सोर्स/टाइप-चेक/ट्रांसपाइलर निर्देश। WASM के माध्यम से R में संकलित होता है।",
     "packageCatalog.item.prologGeneratesTypr.name": "Prolog से TypR उत्पन्न करना",
-    "packageCatalog.item.prologGeneratesTypr.description": "Prolog ट्रांज़िटिव-क्लोज़र प्रेडिकेट को टाइप्ड TypR में संकलित करें, फिर मूल वरियाडिक आउटपुट कॉल्स के साथ उत्पन्न कोड निष्पादित करें।"
+    "packageCatalog.item.prologGeneratesTypr.description": "Prolog ट्रांज़िटिव-क्लोज़र प्रेडिकेट को टाइप्ड TypR में संकलित करें, फिर मूल वरियाडिक आउटपुट कॉल्स के साथ उत्पन्न कोड निष्पादित करें।",
+    "mathPalette.mdFraction": "भिन्न",
+    "mathPalette.mdSquareRoot": "वर्गमूल",
+    "mathPalette.mdSuperscript": "ऊपरी सूचकांक",
+    "mathPalette.mdSubscript": "निचला सूचकांक",
+    "mathPalette.mdSum": "योग",
+    "mathPalette.mdIntegral": "समाकल",
+    "mathPalette.mdLimit": "सीमा",
+    "mathPalette.mdMatrix": "आव्यूह",
+    "mathPalette.mdNthRoot": "n-वाँ मूल",
+    "mathPalette.mdInfinity": "अनंत"
   }
 }

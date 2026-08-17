@@ -118,7 +118,7 @@
     "tour.progress": "{total} 中 {current}",
     "help.showTour": "ツアーを再表示",
     "help.showWhatsNew": "このバージョンの新機能",
-    "help.headerShortcuts": "ヘッダーのショートカット：🧭 ツアーと ∑ 数式のボタンはデフォルトで表示されます。外観 → ヘッダーのショートカットで、どちらも個別に非表示または再表示できます。",
+    "help.headerShortcuts": "ヘッダーのショートカット：🧭 ツアーのボタンはデフォルトで表示されます。∑ 数式のボタンはデフォルトでは無効です。外観 → ヘッダーのショートカットで有効にできます。数式は Python コードと Markdown セルで利用できます。",
     "help.openSourceLicenses": "オープンソースライセンス",
     "header.takeTourTitle": "ツアーを開始",
     "whatsNew.displayLanguage": "表示言語",
@@ -832,6 +832,16 @@
     "packageCatalog.item.typrIntroduction.name": "TypR 入門",
     "packageCatalog.item.typrIntroduction.description": "型付き R スーパーセット — 変数バインディング、関数、型注釈、可変長引数呼び出し、ソース/型チェック/トランスパイラ ディレクティブ。WASM 経由で R にコンパイル。",
     "packageCatalog.item.prologGeneratesTypr.name": "Prolog が TypR を生成",
-    "packageCatalog.item.prologGeneratesTypr.description": "Prolog の推移的閉包述語を型付き TypR にコンパイルし、ネイティブの可変長引数出力呼び出しを使用して生成されたコードを実行します。"
+    "packageCatalog.item.prologGeneratesTypr.description": "Prolog の推移的閉包述語を型付き TypR にコンパイルし、ネイティブの可変長引数出力呼び出しを使用して生成されたコードを実行します。",
+    "mathPalette.mdFraction": "分数",
+    "mathPalette.mdSquareRoot": "平方根",
+    "mathPalette.mdSuperscript": "上付き文字",
+    "mathPalette.mdSubscript": "下付き文字",
+    "mathPalette.mdSum": "総和",
+    "mathPalette.mdIntegral": "積分",
+    "mathPalette.mdLimit": "極限",
+    "mathPalette.mdMatrix": "行列",
+    "mathPalette.mdNthRoot": "n乗根",
+    "mathPalette.mdInfinity": "無限大"
   }
 }

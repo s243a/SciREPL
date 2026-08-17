@@ -31,11 +31,18 @@ jobs:
       - run: npm run privacy:check
       - run: node scripts/check-sw-shell.mjs
       - run: node test_sw_shell_guard.mjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m pip install 'packaging>=26'
+      - run: npm run test:pip-resolver
       - run: node server.js &
       - run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
       - run: node test_appearance.mjs
       - run: node test_onboarding.mjs
       - run: node test_whats_new.mjs
+      - run: npm run test:math-palette
+      - run: npm run test:pip-cell
       - run: node test_rtl_layout.mjs
       - run: node test_i18n_dynamic.mjs
       - run: npm run test:runtime-metadata

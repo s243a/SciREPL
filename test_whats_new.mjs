@@ -185,19 +185,19 @@ try {
     console.log('\n4. Optional header shortcuts');
     const prefs = await existingContext({ markCurrent: true });
     const { page: prefsPage, errors: prefsErrors } = await load(prefs);
-    check('Tour and Formula shortcuts are visible by default', await prefsPage.evaluate(() =>
+    check('Tour is visible and Formula is hidden by default (formula is opt-in)', await prefsPage.evaluate(() =>
         !document.getElementById('tour-shortcut-btn').classList.contains('header-shortcut-hidden')
-        && !document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
+        && document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
     await prefsPage.click('#menu-btn');
     await prefsPage.click('#btn-appearance');
-    check('Appearance exposes both visible-by-default checkboxes',
+    check('Appearance checkboxes reflect the defaults (tour on, formula off)',
         await prefsPage.isChecked('#appearance-show-tour-shortcut')
-        && await prefsPage.isChecked('#appearance-show-formula-shortcut'));
+        && !(await prefsPage.isChecked('#appearance-show-formula-shortcut')));
     await prefsPage.uncheck('#appearance-show-tour-shortcut');
-    await prefsPage.uncheck('#appearance-show-formula-shortcut');
+    await prefsPage.check('#appearance-show-formula-shortcut');
     check('the Appearance controls apply both choices immediately', await prefsPage.evaluate(() =>
         document.getElementById('tour-shortcut-btn').classList.contains('header-shortcut-hidden')
-        && document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
+        && !document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
     await prefsPage.press('#appearance-modal', 'Escape');
     await prefsPage.evaluate(() => window.appearance.setShowFormulaShortcut(true));
     await prefsPage.click('#math-mode-btn');
@@ -216,9 +216,9 @@ try {
         document.getElementById('tour-shortcut-btn').classList.contains('header-shortcut-hidden')
         && document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
     await prefsPage.evaluate(() => window.appearance.reset());
-    check('Reset restores both visible-by-default shortcuts', await prefsPage.evaluate(() =>
+    check('Reset restores the defaults (tour visible, formula hidden)', await prefsPage.evaluate(() =>
         !document.getElementById('tour-shortcut-btn').classList.contains('header-shortcut-hidden')
-        && !document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
+        && document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
     check('shortcut controls produce no page errors', prefsErrors.length === 0, prefsErrors.join(' | '));
     await prefs.close();
 
@@ -246,8 +246,8 @@ try {
             innerWidth,
         };
     });
-    check('both default shortcuts fit a 320px header without clipping',
-        compactHeader.tourVisible && compactHeader.formulaVisible
+    check('default header (tour visible, formula hidden) fits 320px without clipping',
+        compactHeader.tourVisible && !compactHeader.formulaVisible
         && compactHeader.withinViewport && compactHeader.scrollWidth <= compactHeader.innerWidth,
         JSON.stringify(compactHeader));
     await compact.close();

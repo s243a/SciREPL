@@ -266,7 +266,7 @@
   },
   "__literal": [
     "loading.sciRepl",
-      "help.scireplVersion",
+    "help.scireplVersion",
     "wbKernel.python",
     "wbKernel.prolog",
     "wbKernel.javascript",
@@ -360,7 +360,7 @@
     "tour.progress": "{current} of {total}",
     "help.showTour": "Show the tour again",
     "help.showWhatsNew": "What’s new in this version",
-    "help.headerShortcuts": "Header shortcuts: the 🧭 Tour and ∑ Formula buttons are shown by default. Hide or restore either under Appearance → Header shortcuts.",
+    "help.headerShortcuts": "Header shortcuts: the 🧭 Tour button is shown by default. The ∑ Formula button is off by default — enable it under Appearance → Header shortcuts. Formula appears for Python code and Markdown cells.",
     "help.openSourceLicenses": "Open-source licences",
     "header.takeTourTitle": "Take the tour",
     "whatsNew.displayLanguage": "Display language",
@@ -1074,6 +1074,16 @@
     "packageCatalog.item.typrIntroduction.name": "TypR Introduction",
     "packageCatalog.item.typrIntroduction.description": "Typed R superset — variable binding, functions, type annotations, variadic calls, and source/type-check/transpiler directives. Compiles to R via WASM.",
     "packageCatalog.item.prologGeneratesTypr.name": "Prolog Generates TypR",
-    "packageCatalog.item.prologGeneratesTypr.description": "Compile a Prolog transitive-closure predicate to typed TypR, then execute the generated code with native variadic output calls."
+    "packageCatalog.item.prologGeneratesTypr.description": "Compile a Prolog transitive-closure predicate to typed TypR, then execute the generated code with native variadic output calls.",
+    "mathPalette.mdFraction": "Fraction",
+    "mathPalette.mdSquareRoot": "Square root",
+    "mathPalette.mdSuperscript": "Superscript",
+    "mathPalette.mdSubscript": "Subscript",
+    "mathPalette.mdSum": "Sum",
+    "mathPalette.mdIntegral": "Integral",
+    "mathPalette.mdLimit": "Limit",
+    "mathPalette.mdMatrix": "Matrix",
+    "mathPalette.mdNthRoot": "Nth root",
+    "mathPalette.mdInfinity": "Infinity"
   }
 }

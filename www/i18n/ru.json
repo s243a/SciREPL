@@ -117,7 +117,7 @@
     "tour.progress": "{current} из {total}",
     "help.showTour": "Показать тур снова",
     "help.showWhatsNew": "Что нового в этой версии",
-    "help.headerShortcuts": "Ярлыки в заголовке: кнопки 🧭 Тур и ∑ Формулы отображаются по умолчанию. Скрыть или вернуть любую из них можно в разделе Внешний вид → Ярлыки в заголовке.",
+    "help.headerShortcuts": "Ярлыки в заголовке: кнопка 🧭 Тур отображается по умолчанию. Кнопка ∑ Формулы по умолчанию отключена — включить её можно в разделе Внешний вид → Ярлыки в заголовке. Формулы доступны для кода Python и ячеек Markdown.",
     "help.openSourceLicenses": "Лицензии открытого ПО",
     "header.takeTourTitle": "Начать тур",
     "whatsNew.displayLanguage": "Язык интерфейса",
@@ -831,6 +831,16 @@
     "packageCatalog.item.typrIntroduction.name": "Введение в TypR",
     "packageCatalog.item.typrIntroduction.description": "Типизированное расширение R — связывание переменных, функции, аннотации типов, функции с переменным числом аргументов и директивы компилятора. Компилируется в R через WASM.",
     "packageCatalog.item.prologGeneratesTypr.name": "Prolog генерирует TypR",
-    "packageCatalog.item.prologGeneratesTypr.description": "Компиляция предиката транзитивного замыкания Prolog в типизированный TypR с выполнением сгенерированного кода через нативные вариативные вызовы вывода."
+    "packageCatalog.item.prologGeneratesTypr.description": "Компиляция предиката транзитивного замыкания Prolog в типизированный TypR с выполнением сгенерированного кода через нативные вариативные вызовы вывода.",
+    "mathPalette.mdFraction": "Дробь",
+    "mathPalette.mdSquareRoot": "Квадратный корень",
+    "mathPalette.mdSuperscript": "Верхний индекс",
+    "mathPalette.mdSubscript": "Нижний индекс",
+    "mathPalette.mdSum": "Сумма",
+    "mathPalette.mdIntegral": "Интеграл",
+    "mathPalette.mdLimit": "Предел",
+    "mathPalette.mdMatrix": "Матрица",
+    "mathPalette.mdNthRoot": "Корень n-й степени",
+    "mathPalette.mdInfinity": "Бесконечность"
   }
 }

@@ -111,13 +111,17 @@
             return localStorage.getItem(KEYS.customCss) || '';
         }
 
-        /** Header shortcuts are opt-out: existing and new installs see both. */
+        /** Tour is opt-out: absent (or anything but '0') means visible. */
         getShowTourShortcut() {
             return localStorage.getItem(KEYS.showTourShortcut) !== '0';
         }
 
+        /** Formula palette is opt-in (off by default): its inserts are
+         *  SymPy-specific, and on phones the palette competes with the
+         *  composer for space — users who want it enable it once in
+         *  Appearance. (Owner decision, Play closed-testing feedback.) */
         getShowFormulaShortcut() {
-            return localStorage.getItem(KEYS.showFormulaShortcut) !== '0';
+            return localStorage.getItem(KEYS.showFormulaShortcut) === '1';
         }
 
         /* ---------------------------- writing ---------------------------- */
@@ -316,9 +320,13 @@
             // control. If it is hidden while the palette is open, close the
             // palette first so no floating UI is left without its control.
             if (id === 'math-mode-btn' && !show) {
-                button.classList.remove('active');
-                const palette = document.getElementById('math-palette');
-                if (palette) palette.classList.add('hidden');
+                if (window.mathMode && window.mathMode.setOpen) {
+                    window.mathMode.setOpen(false);
+                } else {
+                    button.classList.remove('active');
+                    const palette = document.getElementById('math-palette');
+                    if (palette) palette.classList.add('hidden');
+                }
             }
         }
 

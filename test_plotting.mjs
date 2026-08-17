@@ -34,6 +34,9 @@ const TIMEOUT = 180_000;
     await context.addInitScript(() => {
       localStorage.setItem('scirepl_privacy_accepted', '1');
       localStorage.setItem('scirepl_onboarding_seen', '1');
+      // Non-bundled kernels (R here) show a download-consent dialog that no
+      // one can click headlessly; without this ensureReady('r') never resolves.
+      localStorage.setItem('scirepl_auto_download', '1');
       addEventListener('DOMContentLoaded', () => localStorage.setItem(
           'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
     });
@@ -42,10 +45,14 @@ const TIMEOUT = 180_000;
 
     // Wait for Python
     console.log('   Waiting for Pyodide...');
+    // Kernels load lazily: start Python explicitly, then wait with the
+    // options object in Playwright's THIRD argument position (previously it
+    // sat in the arg slot, silently leaving the 30s default timeout).
+    await page.evaluate(() => { window.kernelManager.ensureReady('python'); });
     await page.waitForFunction(() => {
       const km = window.kernelManager;
       return km && km._instances && km._instances.python && km._instances.python.isReady();
-    }, { timeout: TIMEOUT });
+    }, null, { timeout: TIMEOUT });
 
     // ── Test: renderImage() exists ──
 
@@ -83,10 +90,10 @@ const TIMEOUT = 180_000;
 
     // Install matplotlib via micropip
     const installResult = await page.evaluate(async () => {
-      const km = window.kernelManager;
-      const pyodide = km.getKernel('python').getPyodide();
-      await pyodide.loadPackage('matplotlib');
-      return true;
+      // raw loadPackage() silently no-ops for packages outside the Free
+      // build's partial vendored bundle — use the app's healing installer
+      const r = await window.ensurePyodidePackage('matplotlib');
+      return r.ok === true;
     });
     testLog('matplotlib loaded in Pyodide', installResult === true);
 

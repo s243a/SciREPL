@@ -57,7 +57,7 @@
       "endonym": "Deutsch",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.997,
+      "completeness": 0.995,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -85,7 +85,7 @@
       "endonym": "Español",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.999,
+      "completeness": 0.997,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -101,7 +101,7 @@
       "endonym": "Français",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.999,
+      "completeness": 0.997,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -133,7 +133,7 @@
       "endonym": "Bahasa Indonesia",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.999,
+      "completeness": 0.996,
       "glossary": {
         "defined": 16,
         "total": 16
@@ -181,7 +181,7 @@
       "endonym": "Português (Brasil)",
       "dir": "ltr",
       "status": "draft",
-      "completeness": 0.999,
+      "completeness": 0.997,
       "glossary": {
         "defined": 16,
         "total": 16

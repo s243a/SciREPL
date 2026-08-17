@@ -125,7 +125,7 @@
     "tour.progress": "{current} dari {total}",
     "help.showTour": "Tampilkan tur lagi",
     "help.showWhatsNew": "Yang baru dalam versi ini",
-    "help.headerShortcuts": "Pintasan header: tombol 🧭 Tur dan ∑ Rumus ditampilkan secara default. Sembunyikan atau tampilkan kembali salah satunya melalui Tampilan → Pintasan header.",
+    "help.headerShortcuts": "Pintasan header: tombol 🧭 Tur ditampilkan secara default. Tombol ∑ Rumus nonaktif secara default — aktifkan melalui Tampilan → Pintasan header. Rumus muncul untuk kode Python dan sel Markdown.",
     "help.openSourceLicenses": "Lisensi sumber terbuka",
     "header.takeTourTitle": "Mulai tur",
     "whatsNew.displayLanguage": "Bahasa tampilan",
@@ -839,6 +839,16 @@
     "packageCatalog.item.typrIntroduction.name": "Pengenalan TypR",
     "packageCatalog.item.typrIntroduction.description": "Superset R bertipe — pengikatan variabel, fungsi, anotasi tipe, panggilan variadik, dan direktif sumber/pemeriksaan tipe/transpiler. Mengompilasi ke R melalui WASM.",
     "packageCatalog.item.prologGeneratesTypr.name": "Prolog Menghasilkan TypR",
-    "packageCatalog.item.prologGeneratesTypr.description": "Kompilasi predikat penutupan transitif Prolog ke TypR bertipe, lalu jalankan kode yang dihasilkan dengan panggilan output variadik native."
+    "packageCatalog.item.prologGeneratesTypr.description": "Kompilasi predikat penutupan transitif Prolog ke TypR bertipe, lalu jalankan kode yang dihasilkan dengan panggilan output variadik native.",
+    "mathPalette.mdFraction": "Pecahan",
+    "mathPalette.mdSquareRoot": "Akar kuadrat",
+    "mathPalette.mdSuperscript": "Superskrip",
+    "mathPalette.mdSubscript": "Subskrip",
+    "mathPalette.mdSum": "Jumlah",
+    "mathPalette.mdIntegral": "Integral",
+    "mathPalette.mdLimit": "Limit",
+    "mathPalette.mdMatrix": "Matriks",
+    "mathPalette.mdNthRoot": "Akar pangkat n",
+    "mathPalette.mdInfinity": "Tak hingga"
   }
 }

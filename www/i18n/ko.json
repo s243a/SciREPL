@@ -117,7 +117,7 @@
     "tour.progress": "{total} 중 {current}",
     "help.showTour": "둘러보기 다시 보기",
     "help.showWhatsNew": "이 버전의 새로운 기능",
-    "help.headerShortcuts": "헤더 바로가기: 🧭 둘러보기와 ∑ 수식 버튼은 기본적으로 표시됩니다. 모양 및 화면 → 헤더 바로가기에서 각 버튼을 숨기거나 다시 표시할 수 있습니다.",
+    "help.headerShortcuts": "헤더 바로가기: 🧭 둘러보기 버튼은 기본적으로 표시됩니다. ∑ 수식 버튼은 기본적으로 꺼져 있으며, 모양 및 화면 → 헤더 바로가기에서 켤 수 있습니다. 수식은 Python 코드와 Markdown 셀에서 사용할 수 있습니다.",
     "help.openSourceLicenses": "오픈 소스 라이선스",
     "header.takeTourTitle": "둘러보기 시작",
     "whatsNew.displayLanguage": "표시 언어",
@@ -831,6 +831,16 @@
     "packageCatalog.item.typrIntroduction.name": "TypR 소개",
     "packageCatalog.item.typrIntroduction.description": "타입이 지정된 R 상위 집합 — 변수 바인딩, 함수, 타입 주석, 가변 인자 호출 및 소스/타입 검사/트랜스파일러 지시문. WASM을 통해 R로 컴파일.",
     "packageCatalog.item.prologGeneratesTypr.name": "Prolog가 TypR 생성",
-    "packageCatalog.item.prologGeneratesTypr.description": "Prolog 이행 폐포 술어를 타입이 지정된 TypR로 컴파일한 다음 기본 가변 인자 출력 호출을 사용하여 생성된 코드를 실행합니다."
+    "packageCatalog.item.prologGeneratesTypr.description": "Prolog 이행 폐포 술어를 타입이 지정된 TypR로 컴파일한 다음 기본 가변 인자 출력 호출을 사용하여 생성된 코드를 실행합니다.",
+    "mathPalette.mdFraction": "분수",
+    "mathPalette.mdSquareRoot": "제곱근",
+    "mathPalette.mdSuperscript": "위 첨자",
+    "mathPalette.mdSubscript": "아래 첨자",
+    "mathPalette.mdSum": "합",
+    "mathPalette.mdIntegral": "적분",
+    "mathPalette.mdLimit": "극한",
+    "mathPalette.mdMatrix": "행렬",
+    "mathPalette.mdNthRoot": "n제곱근",
+    "mathPalette.mdInfinity": "무한대"
   }
 }

@@ -28,6 +28,14 @@
        distinct from unset. See www/js/appearance.js. */
     --app-top-margin: env(safe-area-inset-top, 28px);
 
+    /* Space reserved below the input bar so the composer does not sit under
+       the device navigation bar. targetSdk 36 enforces edge-to-edge on
+       Android, so 3-button navigation devices report a real inset here
+       (Play-testing screenshot: system back/home/recents drawn over the
+       composer); gesture navigation and desktop report ~0 and lose no
+       space. */
+    --app-bottom-margin: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+
     /* Multiplier for header icon buttons. 1 keeps the historical 28px. */
     --ui-btn-scale: 1;
     --icon-btn-size: 28px;
@@ -49,6 +57,13 @@
 
 html, body {
     height: 100%;
+    /* Column layout: header + app body + footer PARTICIPATE in layout, so
+       a taller footer (open Formula palette, runtime safe-area changes,
+       growing composer) shrinks the app body instead of overlaying it.
+       The previous #app-body height hardcoded a 100px footer — the root
+       cause of every palette/content overlap report. */
+    display: flex;
+    flex-direction: column;
     background: var(--bg-primary);
     color: var(--text-primary);
     font-family: var(--font-sans);
@@ -170,10 +185,17 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    /* The header must never shrink when the footer wants more room than the
+       viewport has (short-height + open palette + grown composer). */
+    flex-shrink: 0;
     /* The top padding carries the status-bar allowance. Without this the header
        draws underneath the clock and battery on edge-to-edge Android, which is
-       what testers reported. */
-    padding: calc(10px + var(--app-top-margin)) 16px 10px;
+       what testers reported. Left/right carry the PHYSICAL display-cutout
+       insets (landscape notch), like the footer already does. */
+    padding: calc(10px + var(--app-top-margin))
+             calc(16px + var(--safe-area-inset-right, env(safe-area-inset-right, 0px)))
+             10px
+             calc(16px + var(--safe-area-inset-left, env(safe-area-inset-left, 0px)));
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border);
 }
@@ -228,7 +250,13 @@ html, body {
     display: flex;
     flex: 1;
     overflow: hidden;
-    height: calc(100vh - 52px - 100px);
+    min-height: 0;   /* let the flex column shrink it below content size */
+    /* visual-viewport keyboard lift: the footer is translated UP by the
+       lift, so the app body must END at the lifted footer's top — this
+       margin absorbs exactly the lift (math_mode.js publishes it), which
+       is what makes "maximum scroll shows the last content" true even
+       while the layout viewport has not shrunk */
+    margin-bottom: var(--sci-vv-lift, 0px);
 }
 
 #repl-wrapper {
@@ -237,14 +265,23 @@ html, body {
     flex-direction: column;
     overflow: hidden;
     min-width: 0;
+    /* without this the wrapper refuses to shrink below its content in the
+       app-body flex column, so the scroller's box overflows the clipped
+       app-body and MAXIMUM SCROLL under-delivers by the overflow — hiding
+       the notebook tail behind the footer */
+    min-height: 0;
 }
 
 /* ===== REPL Output Stream ===== */
 
 #repl, .repl-container {
     flex: 1;
+    min-height: 0;   /* shrink WITH the app body — see #repl-wrapper */
     overflow-y: auto;
-    padding: 12px 12px 12px;
+    /* bottom padding reserves the open Formula palette's height — the
+       sticky footer overlays this scroller, so without it the tail of the
+       notebook hides beneath the expanded footer */
+    padding: 12px 12px calc(12px + var(--footer-overlay-local, 0px));
     scroll-behavior: smooth;
 }
 
@@ -416,7 +453,19 @@ html, body {
     bottom: 0;
     display: flex;
     gap: 8px;
-    padding: 10px 12px;
+    /* In the body flex column the footer may SHRINK below its natural
+       height when the viewport is short (320x240 + safe inset + open
+       palette + grown composer): the palette absorbs the shrink first and
+       scrolls internally (.math-palette min-height keeps one row usable),
+       while .input-row is pinned — so header, composer and Run always stay
+       on screen. */
+    flex-shrink: 1;
+    min-height: 0;
+    box-sizing: border-box;
+    padding: 10px
+             calc(12px + var(--safe-area-inset-right, env(safe-area-inset-right, 0px)))
+             calc(10px + var(--app-bottom-margin))
+             calc(12px + var(--safe-area-inset-left, env(safe-area-inset-left, 0px)));
     background: var(--bg-secondary);
     border-top: 1px solid var(--border);
     align-items: flex-end;
@@ -437,6 +486,9 @@ html, body {
     transition: border-color 0.2s;
     min-height: 44px;
     max-height: 200px;
+    /* short viewports: the measured footer budget (math_mode.js) caps the
+       composer so it can never push Run into the bottom safe-area zone */
+    max-height: min(200px, var(--sci-composer-max, 200px));
 }
 
 #code-input:focus {
@@ -483,10 +535,16 @@ html, body {
     #repl, .repl-container {
         max-width: 720px;
         margin: 0 auto;
-        padding: 20px;
+        /* keep the measured footer-overlay reservation at desktop widths */
+        padding: 20px 20px calc(20px + var(--footer-overlay-local, 0px));
     }
 
     #input-bar {
+        /* full available width up to the cap: as a body flex item with
+           cross-axis auto margins the footer otherwise shrinks to content
+           width (~387px at tablet sizes) and the editor collapses */
+        width: 100%;
+        box-sizing: border-box;
         max-width: 720px;
         margin: 0 auto;
     }
@@ -1322,31 +1380,86 @@ html, body {
 /* ===== Math Palette ===== */
 
 .math-palette {
-    position: fixed;
-    bottom: 65px; /* Above input bar */
-    inset-inline: 0;
+    /* In-flow row INSIDE the sticky input bar: reserves its own space, so
+       it can never cover the composer or Run button (Android tester report:
+       the old fixed overlay sat exactly on top of the input it inserts
+       into). */
     background: var(--bg-secondary);
-    border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
-    padding: 8px;
-    z-index: 90;
+    padding: 0 0 8px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    transition: transform 0.3s ease, opacity 0.3s ease;
     box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
 }
 
 .math-palette.hidden {
-    transform: translateY(20px);
-    opacity: 0;
-    pointer-events: none;
+    display: none;
+}
+
+/* Footer stacks the (optional) palette row above the composer row. */
+#input-bar {
+    flex-direction: column;
+    align-items: stretch;
+}
+#input-bar .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+/* The formula button hides when the composer language has no palette. */
+#math-mode-btn.lang-hidden {
+    display: none;
 }
 
 .math-row {
-    display: flex;
+    display: none;
     gap: 8px;
     justify-content: center;
+}
+/* Only the rows for the current composer context are visible. */
+.math-palette[data-context="python"] .math-row[data-context="python"],
+.math-palette[data-context="markdown"] .math-row[data-context="markdown"] {
+    display: flex;
+}
+/* Layout invariants (see test_math_palette.mjs): every visible button
+   stays hittable even at 320x240 — the palette scrolls internally rather
+   than pushing the composer off-screen. */
+.math-palette.space-collapsed {
+    /* the measured budget found no room for even one full button row:
+       hide deliberately rather than clip hit targets (math_mode.js) */
+    display: none !important;
+}
+.math-palette {
+    max-height: 32vh;
+    /* the measured footer budget caps the palette at whatever remains
+       after the composer row — it collapses to a scrollable strip (or
+       nothing) BEFORE composer or Run may cross the safe-area boundary */
+    max-height: min(32vh, var(--sci-palette-max, 32vh));
+    box-sizing: border-box;   /* the budget is in border-box pixels */
+    overflow-y: auto;
+    flex: 0 10 auto;
+    min-height: 0;
+}
+@media (max-height: 340px) {
+    /* extreme heights: the control stack flattens and palette chrome
+       compresses so one FULL button row still fits above the safe-area
+       boundary at 320x240 with a 48px inset */
+    #input-controls {
+        flex-direction: row;
+        align-self: flex-end;
+    }
+    .math-palette {
+        padding-bottom: 2px;
+    }
+}
+#input-bar .input-row {
+    flex-shrink: 0;
+}
+.math-row button {
+    min-height: 34px;
+    min-width: 44px;
 }
 
 .math-palette button {

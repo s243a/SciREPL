@@ -117,7 +117,7 @@
     "tour.progress": "{total}-এর মধ্যে {current}",
     "help.showTour": "ট্যুর আবার দেখুন",
     "help.showWhatsNew": "এই সংস্করণে নতুন কী",
-    "help.headerShortcuts": "হেডার শর্টকাট: 🧭 ট্যুর এবং ∑ ফর্মুলা বোতাম ডিফল্টভাবে দেখা যায়। চেহারা ও রূপ → হেডার শর্টকাট থেকে যেকোনোটিকে লুকান বা ফিরিয়ে আনুন।",
+    "help.headerShortcuts": "হেডার শর্টকাট: 🧭 ট্যুর বোতাম ডিফল্টভাবে দেখা যায়। ∑ ফর্মুলা বোতাম ডিফল্টভাবে বন্ধ থাকে — চেহারা ও রূপ → হেডার শর্টকাট থেকে চালু করুন। ফর্মুলা Python কোড ও Markdown সেলের জন্য উপলব্ধ।",
     "help.openSourceLicenses": "ওপেন-সোর্স লাইসেন্স",
     "header.takeTourTitle": "ট্যুর শুরু করুন",
     "whatsNew.displayLanguage": "ইন্টারফেসের ভাষা",
@@ -831,6 +831,16 @@
     "packageCatalog.item.typrIntroduction.name": "TypR পরিচিতি",
     "packageCatalog.item.typrIntroduction.description": "টাইপযুক্ত R সুপারসেট — চলক বাইন্ডিং, ফাংশন, টাইপ টীকা, ভ্যারিয়াডিক কল এবং সোর্স/টাইপ-চেক/ট্রান্সপিলার নির্দেশিকা। WASM-এর মাধ্যমে R-এ সংকলিত হয়।",
     "packageCatalog.item.prologGeneratesTypr.name": "Prolog উৎপন্ন করে TypR",
-    "packageCatalog.item.prologGeneratesTypr.description": "Prolog ট্রানজিটিভ-ক্লোজার প্রেডিকেটকে টাইপযুক্ত TypR-এ সংকলন করুন, তারপর নেটিভ ভ্যারিয়াডিক আউটপুট কলের মাধ্যমে উৎপন্ন কোডটি চালান।"
+    "packageCatalog.item.prologGeneratesTypr.description": "Prolog ট্রানজিটিভ-ক্লোজার প্রেডিকেটকে টাইপযুক্ত TypR-এ সংকলন করুন, তারপর নেটিভ ভ্যারিয়াডিক আউটপুট কলের মাধ্যমে উৎপন্ন কোডটি চালান।",
+    "mathPalette.mdFraction": "ভগ্নাংশ",
+    "mathPalette.mdSquareRoot": "বর্গমূল",
+    "mathPalette.mdSuperscript": "ঊর্ধ্বলিপি",
+    "mathPalette.mdSubscript": "নিম্নলিপি",
+    "mathPalette.mdSum": "সমষ্টি",
+    "mathPalette.mdIntegral": "সমাকল",
+    "mathPalette.mdLimit": "সীমা",
+    "mathPalette.mdMatrix": "ম্যাট্রিক্স",
+    "mathPalette.mdNthRoot": "n-তম মূল",
+    "mathPalette.mdInfinity": "অসীম"
   }
 }

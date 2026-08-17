@@ -117,7 +117,7 @@
     "tour.progress": "{current} من {total}",
     "help.showTour": "عرض الجولة مجددًا",
     "help.showWhatsNew": "الجديد في هذا الإصدار",
-    "help.headerShortcuts": "اختصارات شريط العنوان: يظهر زرا 🧭 الجولة و∑ الصيغ افتراضيًا. يمكنك إخفاء أي منهما أو استعادته من المظهر ← اختصارات شريط العنوان.",
+    "help.headerShortcuts": "اختصارات شريط العنوان: يظهر زر 🧭 الجولة افتراضيًا. زر ∑ الصيغ متوقف افتراضيًا — يمكن تفعيله من المظهر ← اختصارات شريط العنوان. تتوفر الصيغ لتعليمات Python البرمجية وخلايا Markdown.",
     "help.openSourceLicenses": "تراخيص البرمجيات مفتوحة المصدر",
     "header.takeTourTitle": "بدء الجولة الإرشادية",
     "whatsNew.displayLanguage": "لغة العرض",
@@ -831,6 +831,16 @@
     "packageCatalog.item.typrIntroduction.name": "مقدمة إلى TypR",
     "packageCatalog.item.typrIntroduction.description": "مجموعة عليا مكتوبة من R — ربط المتغيرات، والدوال، وتفسيرات الأنواع، واستدعاءات الوسائط المتغيرة، وتوجيهات المصدر/التحقق من الأنواع/المترجم. يترجم إلى R عبر WASM.",
     "packageCatalog.item.prologGeneratesTypr.name": "Prolog يولد TypR",
-    "packageCatalog.item.prologGeneratesTypr.description": "تجميع دالة الإغلاق المتعدي لـ Prolog إلى TypR مكتوب، ثم تنفيذ الكود المولد باستخدام استدعاءات إخراج الوسائط المتغيرة الأصلية."
+    "packageCatalog.item.prologGeneratesTypr.description": "تجميع دالة الإغلاق المتعدي لـ Prolog إلى TypR مكتوب، ثم تنفيذ الكود المولد باستخدام استدعاءات إخراج الوسائط المتغيرة الأصلية.",
+    "mathPalette.mdFraction": "كسر",
+    "mathPalette.mdSquareRoot": "جذر تربيعي",
+    "mathPalette.mdSuperscript": "أس علوي",
+    "mathPalette.mdSubscript": "رمز سفلي",
+    "mathPalette.mdSum": "مجموع",
+    "mathPalette.mdIntegral": "تكامل",
+    "mathPalette.mdLimit": "نهاية",
+    "mathPalette.mdMatrix": "مصفوفة",
+    "mathPalette.mdNthRoot": "جذر نوني",
+    "mathPalette.mdInfinity": "ما لا نهاية"
   }
 }

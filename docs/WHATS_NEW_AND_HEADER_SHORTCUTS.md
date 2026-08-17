@@ -47,7 +47,9 @@ the channel back to `development` before accumulating new highlights.
 
 ## Header shortcuts
 
-Tour (`🧭`) and Formula (`∑`) are visible by default. Users can hide either in
+Tour (`🧭`) is visible by default; Formula (`∑`) is off by default (its inserts
+are context-specific — SymPy for Python code, LaTeX templates for Markdown —
+and it hides entirely for other composer languages). Users can toggle either in
 **Menu → Appearance → Header shortcuts**. The first tour panel also carries a
 checked Tour-shortcut option, making that choice available before the user has
 learned the rest of the interface.
@@ -55,12 +57,17 @@ learned the rest of the interface.
 Hiding Formula closes the formula palette first, since its header button is the
 palette's toggle and close control. Hiding a shortcut never removes its stored
 setting or feature; both choices can be restored from Appearance, and **Reset
-to defaults** restores both shortcuts.
+to defaults** restores the defaults: Tour visible, Formula hidden.
 
 The relevant preferences are:
 
 - `scirepl_appearance_show_tour_shortcut`
 - `scirepl_appearance_show_formula_shortcut`
 
-The value `0` means hidden; absence means visible. This opt-out representation
-preserves the visible default for existing installations.
+Because Formula reads its own key, upgrading applies the new opt-in default
+to existing installations as well; an explicit earlier choice, stored under
+its own key, is preserved.
+
+Preference storage semantics: Tour is opt-out (`showTourShortcut` absent or
+any value other than `"0"` means visible); Formula is opt-in (`showFormulaShortcut`
+must be exactly `"1"` to be visible — absence means hidden).

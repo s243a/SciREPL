@@ -184,6 +184,7 @@
             setCodePlaceholder(getCurrentLanguage());
         }
         syncInputDirection();
+        if (window.notifyComposerContextChanged) window.notifyComposerContextChanged();
     });
 
     // ---- App startup (no kernel init — kernels load lazily) ----
@@ -211,6 +212,7 @@
                 window.kernelManager.setLanguage(defaultLang);
                 const sel = document.getElementById('lang-selector');
                 if (sel) sel.value = defaultLang;
+                if (window.notifyComposerContextChanged) window.notifyComposerContextChanged();
             } catch (_) { /* ignore if kernel not registered */ }
         }
 
@@ -236,38 +238,35 @@
      * Render markdown text to HTML with KaTeX math support.
      * Supports $inline$ and $$display$$ math blocks.
      */
+    // Math rendering is TOKEN-STRUCTURAL: the source is lexed by marked
+    // FIRST (links, labels, references, autolinks, raw HTML, emphasis, and
+    // all code forms become their own tokens), and math is then recognized
+    // ONLY inside eligible text/escape runs of that tree (md_math.js
+    // transformTokens) — so a '$' in ordinary text can never close inside
+    // any nested construct. The math tokens render via renderer-only
+    // extensions; no raw-source scanning, no placeholder strings, no
+    // whole-HTML String.replace.
+    let _mathExtensionsInstalled = false;
+    function _installMathExtensions() {
+        if (_mathExtensionsInstalled) return;
+        _mathExtensionsInstalled = true;
+        marked.use({
+            extensions: window.MdMath.markedExtensions((tex, display) => {
+                try {
+                    return katex.renderToString(tex, { throwOnError: false, displayMode: display });
+                } catch (e) {
+                    const esc = tex.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    return `<code>${esc}</code>`;
+                }
+            }),
+        });
+    }
+
     function renderMarkdown(text) {
-        const mathBlocks = [];
-
-        // Replace $$...$$ display math
-        let processed = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, tex) => {
-            const id = `%%MATH_BLOCK_${mathBlocks.length}%%`;
-            mathBlocks.push({ tex: tex.trim(), display: true });
-            return id;
-        });
-
-        // Replace $...$ inline math (not greedy, no newlines)
-        processed = processed.replace(/\$([^\$\n]+?)\$/g, (match, tex) => {
-            const id = `%%MATH_BLOCK_${mathBlocks.length}%%`;
-            mathBlocks.push({ tex: tex.trim(), display: false });
-            return id;
-        });
-
-        let html = marked.parse(processed);
-
-        mathBlocks.forEach((block, i) => {
-            const placeholder = `%%MATH_BLOCK_${i}%%`;
-            let rendered;
-            try {
-                rendered = katex.renderToString(block.tex, {
-                    throwOnError: false,
-                    displayMode: block.display
-                });
-            } catch (e) {
-                rendered = `<code>${block.tex}</code>`;
-            }
-            html = html.replace(placeholder, rendered);
-        });
+        _installMathExtensions();
+        const tokens = marked.lexer(text);
+        window.MdMath.transformTokens(tokens);
+        let html = marked.parser(tokens);
 
         // marked accepts raw HTML. Keep it inert across initial import,
         // session restore, and later markdown re-rendering.
@@ -609,6 +608,7 @@
             // Also update the main language selector
             if (langSelector) langSelector.value = newLang;
             if (window.kernelManager) window.kernelManager.setLanguage(newLang);
+            if (window.notifyComposerContextChanged) window.notifyComposerContextChanged();
             saveCellsToSession();
         });
 
@@ -822,55 +822,263 @@
      * Execute code using the appropriate kernel.
      * Renders output (stdout, result, errors) to the current output card.
      */
+    /**
+     * Ensure a Pyodide-distribution (or micropip-installed) package is
+     * genuinely importable, healing missing transitive dependencies from
+     * the OFFICIAL Pyodide lockfile for this interpreter version. Shared by
+     * the %pip magic, tests, and any future programmatic installer — raw
+     * pyodide.loadPackage() silently no-ops for packages outside the Free
+     * build's partial vendored bundle.
+     * @returns {ok, healed, message?}
+     */
+    window.ensurePyodidePackage = async function (requirementText) {
+        const km2 = window.kernelManager;
+        const kernel = km2 && km2.getKernel('python');
+        const pyodide = kernel && kernel.getPyodide();
+        if (!pyodide) return { ok: false, healed: 0, message: '%pip: python kernel not ready' };
+        const R = window.PipResolver;
+        let req;
+        try { req = R.parseRequirement(requirementText); }
+        catch (e) { return { ok: false, healed: 0, message: `%pip: ${e.message}` }; }
+        const cdnBase = `https://cdn.jsdelivr.net/pyodide/v${pyodide.version}/full/`;
+        const installedVersion = (dist) => {
+            try {
+                return pyodide.runPython(
+                    `(lambda: __import__('importlib.metadata', fromlist=['metadata']).version(${JSON.stringify(dist)}))()`);
+            } catch (_) { return null; }
+        };
+        const tryImport = (mod) => {
+            try {
+                pyodide.runPython(`import importlib; importlib.import_module(${JSON.stringify(mod)})`);
+                return { ok: true };
+            } catch (e) {
+                const text = String(e && e.message || e);
+                const mm = /No module named '([^']+)'/.exec(text);
+                return { ok: false, missing: mm ? mm[1].split('.')[0] : null, error: text.slice(0, 400) };
+            }
+        };
+        const loadFiles = async (files) => {
+            // lock file_name entries are CDN-relative; absolute URLs pass through
+            await pyodide.loadPackage(files.map(f => /^https?:\/\//i.test(f) ? f : cdnBase + f));
+            pyodide.runPython(`import importlib; importlib.invalidate_caches()`);
+        };
+        const version = installedVersion(req.name);
+        if (version && !R.versionSatisfies(version, req.specifiers)) {
+            return { ok: false, healed: 0, message:
+                `%pip: '${req.raw}' cannot be satisfied — this environment already has ${req.name} ${version}, ` +
+                `which does not match, and the Pyodide distribution pins one version per release.` };
+        }
+        let lock = null;
+        try {
+            if (!window._pyodideCdnLock) {
+                const resp = await fetch(cdnBase + 'pyodide-lock.json');
+                if (!resp.ok) throw new Error(`CDN lockfile HTTP ${resp.status}`);
+                window._pyodideCdnLock = await resp.json();
+            }
+            lock = window._pyodideCdnLock;
+        } catch (_) { /* verify without recovery below */ }
+        // "Present" = loaded in pyodide OR carrying importlib metadata (a
+        // PyPI/micropip install this call didn't make). Consulted during
+        // graph traversal so present wheels are never reloaded — and never
+        // downgraded to the lock's copy.
+        const presentNorms = () => {
+            const base = new Set(Object.keys(pyodide.loadedPackages).map(R.normName));
+            return { has: (n) => base.has(n) || installedVersion(n) !== null };
+        };
+        const entry = lock ? R.indexLock(lock)[req.norm] : null;
+        // The lock's pinned version gates ONLY when the lock is the SOURCE;
+        // a satisfying install from any origin (micropip/PyPI) takes
+        // precedence, and the lock then serves purely as a dependency graph.
+        if (!version) {
+            if (entry && !R.versionSatisfies(entry.version, req.specifiers)) {
+                return { ok: false, healed: 0, message:
+                    `%pip: '${req.raw}' cannot be satisfied: the Pyodide distribution provides ${req.name} ${entry.version} only.` };
+            }
+            if (entry) {
+                try { await loadFiles(R.resolveFromLock(lock, req, presentNorms()).files); }
+                catch (e) { return { ok: false, healed: 0, message: `%pip: ${e.message}` }; }
+            }
+        } else if (lock) {
+            // The root is already satisfied outside the lock, but installed
+            // metadata says NOTHING about the dependency closure (a directly
+            // loaded wheel brings none of its deps). Always walk the lock's
+            // declared dependencies and load the missing ones — without
+            // re-applying the lock's root version, which the satisfying
+            // installed version outranks.
+            try {
+                const depFiles = R.resolveDepsOf(lock, req.norm, presentNorms());
+                if (depFiles.length) await loadFiles(depFiles);
+            } catch (_) { /* the import verification below reports honestly */ }
+        }
+        // Authoritative import names: the lock's declared imports when the
+        // distribution is in the lock; otherwise the INSTALLED metadata
+        // (importlib.metadata.packages_distributions / top_level.txt). If
+        // neither yields a module name, fail CLOSED — installed metadata
+        // alone proves nothing about importability, and reporting an
+        // unverified install as ok once let a broken environment run user
+        // code against it.
+        const discoverModules = (dist) => {
+            try {
+                return JSON.parse(pyodide.runPython(`
+def _scirepl_modules_for(dist):
+    import importlib.metadata as md
+    import json, re
+    def norm(s):
+        return re.sub(r'[-_.]+', '-', s).lower()
+    mods = []
+    try:
+        for m, ds in (md.packages_distributions() or {}).items():
+            if any(norm(d) == norm(dist) for d in ds):
+                mods.append(m)
+    except Exception:
+        pass
+    if not mods:
+        try:
+            t = md.distribution(dist).read_text('top_level.txt')
+            if t:
+                mods = [l.strip() for l in t.splitlines() if l.strip()]
+        except Exception:
+            pass
+    return json.dumps(mods)
+
+_scirepl_modules_for(${JSON.stringify(dist)})
+`));
+            } catch (_) { return []; }
+        };
+        let candidates;
+        if (entry) {
+            candidates = R.importNamesOf(entry, req.name);
+        } else if (version) {
+            candidates = discoverModules(req.name);
+            if (!candidates.length) {
+                return { ok: false, healed: 0, message:
+                    `%pip: '${req.raw}': ${req.name} ${version} is installed, but no importable module name ` +
+                    `could be determined from its metadata — failing closed rather than reporting an unverified install.` };
+            }
+        } else {
+            // NO evidence of a distribution anywhere — not in the lock, no
+            // installed metadata. Guessing an import name here once let
+            // '%pip install sys' "succeed" because Python has a same-named
+            // BUILT-IN module, and the cell then ran as if an install had
+            // happened. Fail closed instead.
+            return { ok: false, healed: 0, message:
+                `%pip: '${req.raw}' could not be installed: '${req.name}' is not in the Pyodide distribution ` +
+                `and no installed distribution provides it.` };
+        }
+        const tryCandidates = () => {
+            let v = { ok: false, missing: null, error: 'no importable module name' };
+            for (const mod of candidates) {
+                v = tryImport(mod);
+                if (v.ok) return v;   // at least one authoritative import must succeed
+            }
+            return v;
+        };
+        let verdict = tryCandidates();
+        let healed = 0;
+        const impIdx = lock ? R.importIndex(lock) : {};
+        while (!verdict.ok && verdict.missing && healed < 6) {
+            const distNorm = impIdx[verdict.missing] || R.normName(verdict.missing);
+            let resolved;
+            try { resolved = R.resolveFromLock(lock || { packages: {} }, R.parseRequirement(distNorm), presentNorms()); }
+            catch (_) { break; }
+            if (!resolved.files.length) break;
+            try { await loadFiles(resolved.files); } catch (_) { break; }
+            healed++;
+            verdict = tryCandidates();
+        }
+        if (verdict.ok) {
+            const message = (!version || healed)
+                ? `  (${req.name}: ${healed ? healed + ' missing dependenc' + (healed > 1 ? 'ies' : 'y') + ' recovered from the Pyodide CDN' : 'fetched from the Pyodide CDN'})`
+                : null;
+            return { ok: true, healed, message };
+        }
+        return { ok: false, healed, message: `%pip: '${req.raw}' failed verification: ${verdict.error || 'not importable'}` };
+    };
+
     async function executeCode(code, language) {
         language = language || 'python';
         const km = window.kernelManager;
 
         if (!km) throw new Error(window.t('app.errors.kernelManagerUnavailable'));
 
-        // Handle %pip install magic (Jupyter-compatible)
-        // Run pip installs directly via pyodide first, then execute remaining code
-        // through executePythonLegacy so imports/plots/etc. work normally.
+        // Handle %pip install magic (Jupyter-compatible).
+        // Lines are parsed ATOMICALLY (PEP 508 subset, www/js/pip_resolver.js):
+        // any unsupported token rejects the whole line — nothing on it may be
+        // installed from a source the user did not request. Specifiers stay
+        // authoritative end to end; installs are verified by ACTUAL IMPORT,
+        // with missing transitive modules recovered from the official
+        // Pyodide lockfile (a top-level find_spec proves nothing about the
+        // dependency closure).
         if (language === 'python' && /^%pip\s+install\s+/m.test(code)) {
             const kernel = km.getKernel('python');
             const pyodide = kernel && kernel.getPyodide();
             if (pyodide) {
+                const R = window.PipResolver;
                 const lines = code.split('\n');
                 const remainingLines = [];
+                const requirements = [];
+                // A rejected or unverified %pip line FAILS THE CELL: the
+                // Python tail must never run against packages the user did
+                // not get (or pre-existing incompatible ones).
+                const failures = [];
                 for (const line of lines) {
                     const pm = line.match(/^%pip\s+install\s+(.+)$/);
-                    if (pm) {
-                        const packages = pm[1].trim().split(/\s+/);
-                        const pkgList = packages.map(p => `'${p.replace(/'/g, "\\'")}'`).join(', ');
-                        pyodide.runPython(`
+                    if (!pm) { remainingLines.push(line); continue; }
+                    let parsed;
+                    try {
+                        parsed = R.parsePipLine(pm[1]);
+                    } catch (e) {
+                        failures.push(e.message);
+                        window.renderText(`%pip: ${e.message} — nothing on this line was installed`, true);
+                        continue;
+                    }
+                    const withExtras = parsed.filter(r => r.extras.length);
+                    if (withExtras.length) {
+                        failures.push(`extras are not supported yet (${withExtras.map(r => r.raw).join(', ')})`);
+                        window.renderText(`%pip: extras are not supported yet (${withExtras.map(r => r.raw).join(', ')}) — nothing on this line was installed`, true);
+                        continue;
+                    }
+                    requirements.push(...parsed);
+                    const pkgList = parsed.map(r => `'${r.raw.replace(/'/g, "\\'")}'`).join(', ');
+                    pyodide.runPython(`
 import io, sys
 _pip_stdout = io.StringIO()
 _pip_old_stdout = sys.stdout
 sys.stdout = _pip_stdout
 `);
-                        await pyodide.runPythonAsync(`await pip_install(${pkgList})`);
-                        pyodide.runPython(`sys.stdout = _pip_old_stdout`);
-                        const pipOut = pyodide.runPython(`_pip_stdout.getvalue()`);
-                        if (pipOut) window.renderText(pipOut, false);
-                    } else {
-                        remainingLines.push(line);
-                    }
+                    await pyodide.runPythonAsync(`await pip_install(${pkgList})`);
+                    pyodide.runPython(`sys.stdout = _pip_old_stdout`);
+                    const pipOut = pyodide.runPython(`_pip_stdout.getvalue()`);
+                    if (pipOut) window.renderText(pipOut, false);
                 }
-                pyodide.runPython(`import importlib; importlib.invalidate_caches()`);
-                // Eagerly set up matplotlib hook if it's now available,
-                // so plt.show() works on the first call in the remaining code
+                pyodide.runPython(`import importlib, importlib.util, importlib.metadata; importlib.invalidate_caches()`);
+
+                for (const req of requirements) {
+                    const r = await window.ensurePyodidePackage(req.raw);
+                    if (r.message) window.renderText(r.message, !r.ok);
+                    if (!r.ok) failures.push(r.message || `'${req.raw}' failed`);
+                }
+
+                if (failures.length) {
+                    const summary = `%pip: install failed — the rest of this cell was not executed`;
+                    window.renderText(summary, true);
+                    return { stdout: '', result: null, error: summary };
+                }
+
+                // ---- matplotlib inline hook: MUST be live before the same
+                // cell's remaining code runs; failures are surfaced. Only
+                // reached when every requirement verified ok. ----
                 try {
                     pyodide.runPython(`
 if 'matplotlib' in sys.modules or importlib.util.find_spec('matplotlib'):
-    try:
-        import matplotlib
-        if not getattr(matplotlib, '_scirepl_hooked', False):
-            _setup_matplotlib_hook()
-            matplotlib._scirepl_hooked = True
-    except Exception:
-        pass
+    import matplotlib
+    if not getattr(matplotlib, '_scirepl_hooked', False):
+        _setup_matplotlib_hook()
+        matplotlib._scirepl_hooked = True
 `);
-                } catch (_) { }
+                } catch (e) {
+                    window.renderText(`%pip: matplotlib inline-plot hook failed to install: ${String(e && e.message || e).slice(0, 200)}`, true);
+                }
                 const remaining = remainingLines.join('\n').trim();
                 if (remaining) {
                     return executePythonLegacy(remaining);

@@ -117,7 +117,7 @@
     "tour.progress": "{current} / {total}",
     "help.showTour": "重新查看导览",
     "help.showWhatsNew": "此版本的新增功能",
-    "help.headerShortcuts": "页眉快捷方式：默认显示 🧭 导览和 ∑ 公式按钮。可在外观 → 页眉快捷方式中隐藏或恢复任一按钮。",
+    "help.headerShortcuts": "页眉快捷方式：默认显示 🧭 导览按钮。∑ 公式按钮默认关闭——可在外观 → 页眉快捷方式中启用。公式适用于 Python 代码和 Markdown 单元格。",
     "help.openSourceLicenses": "开源软件许可",
     "header.takeTourTitle": "开始导览",
     "whatsNew.displayLanguage": "显示语言",
@@ -831,6 +831,16 @@
     "packageCatalog.item.typrIntroduction.name": "TypR 简介",
     "packageCatalog.item.typrIntroduction.description": "带类型的 R 超集 — 变量绑定、函数、类型注解、可变参数调用以及源码/类型检查/转译器指令。通过 WASM 编译为 R。",
     "packageCatalog.item.prologGeneratesTypr.name": "Prolog 生成 TypR 代码",
-    "packageCatalog.item.prologGeneratesTypr.description": "将 Prolog 传递闭包谓词编译为带类型的 TypR，然后使用原生可变参数输出调用执行生成的代码。"
+    "packageCatalog.item.prologGeneratesTypr.description": "将 Prolog 传递闭包谓词编译为带类型的 TypR，然后使用原生可变参数输出调用执行生成的代码。",
+    "mathPalette.mdFraction": "分数",
+    "mathPalette.mdSquareRoot": "平方根",
+    "mathPalette.mdSuperscript": "上标",
+    "mathPalette.mdSubscript": "下标",
+    "mathPalette.mdSum": "求和",
+    "mathPalette.mdIntegral": "积分",
+    "mathPalette.mdLimit": "极限",
+    "mathPalette.mdMatrix": "矩阵",
+    "mathPalette.mdNthRoot": "n 次方根",
+    "mathPalette.mdInfinity": "无穷大"
   }
 }
