@@ -521,6 +521,44 @@ try {
     const tabInsert = await page.evaluate(() => document.getElementById('code-input').value);
     check('insertion INSIDE tab-indented list math is bare (no corruption)',
         tabInsert === '1. first\n\t- tabbed item $x\\sqrt{}$ end', JSON.stringify(tabInsert));
+    // round 11: identical text in a LATER fence must never steal the
+    // tabbed line's mapping — current physical line matches first
+    const r11map = await page.evaluate(() => {
+        const st = (v, p) => window.MdMath.stateAt(v, p);
+        const trap = '- item\n\tformula $x$ tail\n\n  ```\n  formula $x$ tail\n  ```';
+        const trap2 = '- item\n\tmath $y$ here\n\n      math $y$ here';
+        const trap3 = '- item\n\tval $z$ end\n\n<div>\nval $z$ end\n</div>';
+        return {
+            realTabbed: st(trap, trap.indexOf('$x$') + 1),
+            fenceCopy: st(trap, trap.lastIndexOf('$x$') + 1),
+            realTabbed2: st(trap2, trap2.indexOf('$y$') + 1),
+            indentedCopy: st(trap2, trap2.lastIndexOf('$y$') + 1),
+            realTabbed3: st(trap3, trap3.indexOf('$z$') + 1),
+            htmlCopy: st(trap3, trap3.lastIndexOf('$z$') + 1),
+        };
+    });
+    check('tabbed formula line reports inline (not stolen by the fence copy)',
+        r11map.realTabbed === 'inline', r11map.realTabbed);
+    check('IDENTICAL text inside the later fence reports code', r11map.fenceCopy === 'code', r11map.fenceCopy);
+    check('tab + indented-code combo: real line inline', r11map.realTabbed2 === 'inline', r11map.realTabbed2);
+    check('tab + indented-code combo: code copy never inline',
+        r11map.indentedCopy !== 'inline' && r11map.indentedCopy !== 'display', r11map.indentedCopy);
+    check('tab + HTML-block combo: real line inline', r11map.realTabbed3 === 'inline', r11map.realTabbed3);
+    check('tab + HTML-block combo: block copy reports code', r11map.htmlCopy === 'code', r11map.htmlCopy);
+    // clicking Formula INSIDE the fence copy must wrap (protected), never bare
+    await page.evaluate(() => {
+        const i = document.getElementById('code-input');
+        i.value = '- item\n\tformula $x$ tail\n\n  ```\n  formula $x$ tail\n  ```';
+        i.selectionStart = i.selectionEnd = i.value.lastIndexOf('$x$') + 2;
+    });
+    await page.click('#math-palette button[title="Square root"]');
+    const fenceInsert = await page.evaluate(() => document.getElementById('code-input').value);
+    // caret sat between 'x' and the closing '$' inside the fence: BARE
+    // insertion would splice into the pseudo-span ('$x\\sqrt{}$'); WRAPPED
+    // insertion produces '$x' + '$\\sqrt{}$' + '$'
+    check('insertion at the fence copy is WRAPPED (protected context, never bare)',
+        fenceInsert.includes('$x$\\sqrt{}$$ tail') && !fenceInsert.includes('$x\\sqrt{}$ tail'),
+        JSON.stringify(fenceInsert.slice(-40)));
     // insertion inside a nested list item stays bare
     await page.evaluate(() => {
         const i = document.getElementById('code-input');
@@ -1139,6 +1177,17 @@ try {
         return { inert: before === after };
     });
     check('destroy() detaches UI handlers (toggle click is inert afterwards)', destroyProbe.inert, JSON.stringify(destroyProbe));
+    // a publish queued right before destroy() must not fire afterwards
+    const frameProbe = await page.evaluate(async () => {
+        const scroller = [...document.querySelectorAll('#repl, .repl-container')].find(e => e.offsetParent !== null);
+        scroller.style.removeProperty('--footer-overlay-local');
+        window.mathMode._destroyed = false;           // re-arm publish for the probe
+        window.mathMode.publishPaletteSpace();        // queues a frame
+        window.mathMode.destroy();                    // must cancel it
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+        return { fired: scroller.style.getPropertyValue('--footer-overlay-local') !== '' };
+    });
+    check('a layout frame queued before destroy() never runs after it', !frameProbe.fired, JSON.stringify(frameProbe));
     await page.context().close();
 
     console.log('5j. Tablet/desktop editor width restored (768/800/1024) + narrow phone');

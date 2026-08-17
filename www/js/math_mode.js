@@ -86,7 +86,15 @@ class MathMode {
      *  autosize, safe-inset updates, viewport resize, notebook switches).
      *  Layout invariants: test_math_palette.mjs. */
     publishPaletteSpace() {
-        requestAnimationFrame(() => this._measureFooterOverlay());
+        // tracked and coalesced: destroy() cancels the pending frame, so a
+        // queued measurement can never run after teardown and re-attach
+        // the disconnected ResizeObserver to a new scroller
+        if (this._destroyed) return;
+        if (this._pendingFrame) cancelAnimationFrame(this._pendingFrame);
+        this._pendingFrame = requestAnimationFrame(() => {
+            this._pendingFrame = null;
+            if (!this._destroyed) this._measureFooterOverlay();
+        });
     }
 
     _measureFooterOverlay() {
@@ -239,6 +247,8 @@ class MathMode {
     /** Lifecycle cleanup: detach EVERY listener and observer, so a
      *  destroyed-then-recreated MathMode never doubles handlers. */
     destroy() {
+        this._destroyed = true;
+        if (this._pendingFrame) { cancelAnimationFrame(this._pendingFrame); this._pendingFrame = null; }
         window.removeEventListener('resize', this._onViewportChange);
         if (this._vvTarget && this._vvTarget.removeEventListener) {
             this._vvTarget.removeEventListener('resize', this._onViewportChange);

@@ -222,6 +222,36 @@
             if (raw.length > last) regions.push({ type: 'text', start: offset + last, end: offset + raw.length });
         };
 
+        /** Locate one raw line at/after position c, bounded by limit.
+         *  ORDER MATTERS (round 11): the CURRENT physical source line is
+         *  matched first, tab-aware (compared by trimmed content) — only
+         *  if the current line genuinely differs does the search move
+         *  ahead. Exact-anywhere-first could skip a tab-indented line and
+         *  select identical text later inside a fenced block, mislocating
+         *  both the text and the fence. Returns {at, len, rawSkip} or null. */
+        const locateLine = (line, c, limit) => {
+            const needle = line.trim();
+            if (!needle) return null;
+            // current physical line (skip inter-line whitespace/prefixes)
+            let p = c;
+            while (p < limit && (s[p] === ' ' || s[p] === '\t' || s[p] === '\n' || s[p] === '\r' || s[p] === '>')) p++;
+            if (p < limit) {
+                const nl = s.indexOf('\n', p);
+                const lineEnd = (nl === -1 || nl > limit) ? limit : nl;
+                if (s.slice(p, lineEnd).trim() === needle) {
+                    const at = s.indexOf(needle, p);
+                    if (at !== -1 && at + needle.length <= lineEnd) {
+                        return { at, len: needle.length, rawSkip: line.indexOf(needle) };
+                    }
+                }
+            }
+            let at = s.indexOf(line, c);
+            if (at !== -1 && at + line.length <= limit) return { at, len: line.length, rawSkip: 0 };
+            at = s.indexOf(needle, c);
+            if (at !== -1 && at + needle.length <= limit) return { at, len: needle.length, rawSkip: line.indexOf(needle) };
+            return null;
+        };
+
         /** Line-wise mapped emit for stripped-prefix containers: builds a
          *  rawIndex -> sourceIndex map (each line located WITHIN the
          *  container's [cur, limit) bound, so a coincidental match inside
@@ -235,25 +265,11 @@
             let c = cur;
             let any = false;
             for (const line of lines) {
-                const trimmed = line.trim();
-                if (trimmed) {
-                    // exact first; then whitespace-trimmed (marked expands
-                    // TAB indentation to spaces in token raws, so the raw
-                    // line and the source line can differ in leading
-                    // whitespace only)
-                    let at = s.indexOf(line, c);
-                    let matched = line;
-                    let rawSkip = 0;
-                    if (at === -1 || at + line.length > limit) {
-                        at = s.indexOf(trimmed, c);
-                        matched = trimmed;
-                        rawSkip = line.indexOf(trimmed);
-                    }
-                    if (at !== -1 && at + matched.length <= limit) {
-                        for (let k = 0; k <= matched.length; k++) map[rawPos + rawSkip + k] = at + k;
-                        c = at + matched.length;
-                        any = true;
-                    }
+                const loc = locateLine(line, c, limit);
+                if (loc) {
+                    for (let k = 0; k <= loc.len; k++) map[rawPos + loc.rawSkip + k] = loc.at + k;
+                    c = loc.at + loc.len;
+                    any = true;
                 }
                 rawPos += line.length + 1;
             }
@@ -317,12 +333,10 @@
                     if (t.type === 'code' || t.type === 'html' || t.type === 'def') {
                         let firstAt = -1, c2 = cur;
                         for (const line of t.raw.split('\n')) {
-                            const needle = line.trim();
-                            if (!needle) continue;
-                            const at = s.indexOf(needle, c2);
-                            if (at === -1 || at + needle.length > limit) continue;
-                            if (firstAt === -1) firstAt = at;
-                            c2 = at + needle.length;
+                            const loc = locateLine(line, c2, limit);
+                            if (!loc) continue;
+                            if (firstAt === -1) firstAt = loc.at;
+                            c2 = loc.at + loc.len;
                         }
                         if (firstAt !== -1) { pushCode(firstAt, c2); cur = c2; }
                         i++;
