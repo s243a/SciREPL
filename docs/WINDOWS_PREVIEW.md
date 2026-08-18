@@ -29,6 +29,17 @@ runs the bundled kernels, and keeps notebook/SharedVFS state across a restart.
 4. When it finishes, download the artifact named
    `SciREPL-windows-x64-preview-<commit>` from the run summary.
 
+Workflow artifacts are deleted fourteen days after the run.
+
+### Or take it from a tagged release
+
+Pushing a `v*` tag runs **Build Release (APK + PWA + Windows)**, which builds the
+same portable application and attaches
+`SciREPL-<tag>-windows-x64-portable.zip` to that tag's pre-release, next to the
+APK and the PWA zip. Release assets do not expire, so this is the copy to use for
+anything that needs to outlive a fortnight — sharing with a tester, or pointing
+someone at a specific version.
+
 ### Run it
 
 1. Extract the ZIP to a **local** folder — `C:\Users\<you>\SciREPL-preview` is
