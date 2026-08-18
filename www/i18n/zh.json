@@ -74,6 +74,7 @@
     "appearance.headerShortcuts": "页眉快捷方式",
     "appearance.headerShortcutsHelp": "将常用工具保留在页眉中。隐藏的快捷方式可随时在此重新启用。",
     "appearance.showTourShortcut": "显示导览快捷方式",
+    "appearance.showBrowseShortcut": "显示浏览快捷方式",
     "appearance.showFormulaShortcut": "显示公式快捷方式",
     "appearance.theme": "主题",
     "appearance.themeAuto": "跟随系统",

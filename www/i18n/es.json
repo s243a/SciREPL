@@ -83,6 +83,7 @@
     "appearance.headerShortcuts": "Accesos directos del encabezado",
     "appearance.headerShortcutsHelp": "Mantén en el encabezado las herramientas que utilizas con frecuencia. Puedes volver a activar aquí los accesos directos ocultos en cualquier momento.",
     "appearance.showTourShortcut": "Mostrar el acceso directo al recorrido",
+    "appearance.showBrowseShortcut": "Mostrar el acceso directo a Explorar",
     "appearance.showFormulaShortcut": "Mostrar el acceso directo a Fórmulas",
     "appearance.theme": "Tema",
     "appearance.themeAuto": "Igual que el sistema",

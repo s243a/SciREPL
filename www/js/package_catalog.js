@@ -351,6 +351,14 @@ class PackageCatalog {
             });
         }
 
+        // The header shortcut reaches the same catalogue without the menu hop.
+        // Appearance can hide it; hidden means tabIndex -1, so a keyboard user
+        // cannot reach a control they turned off.
+        const browseShortcut = document.getElementById('browse-shortcut-btn');
+        if (browseShortcut) {
+            browseShortcut.addEventListener('click', () => this._open());
+        }
+
         if (this.modal) {
             this.modal.addEventListener('click', (e) => {
                 if (e.target === this.modal || e.target.classList.contains('modal-close')) {

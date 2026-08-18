@@ -74,6 +74,7 @@
     "appearance.headerShortcuts": "اختصارات شريط العنوان",
     "appearance.headerShortcutsHelp": "احتفظ بالأدوات التي تستخدمها كثيرًا في شريط العنوان. ويمكنك إعادة تفعيل الاختصارات المخفية هنا في أي وقت.",
     "appearance.showTourShortcut": "إظهار اختصار الجولة",
+    "appearance.showBrowseShortcut": "إظهار اختصار التصفح",
     "appearance.showFormulaShortcut": "إظهار اختصار الصيغ",
     "appearance.theme": "السمة",
     "appearance.themeAuto": "مطابقة النظام",

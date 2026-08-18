@@ -89,6 +89,7 @@
     "appearance.headerShortcuts": "Verknüpfungen in der Kopfzeile",
     "appearance.headerShortcutsHelp": "Behalten Sie häufig verwendete Werkzeuge in der Kopfzeile. Ausgeblendete Verknüpfungen können Sie hier jederzeit wieder aktivieren.",
     "appearance.showTourShortcut": "Tour-Verknüpfung anzeigen",
+    "appearance.showBrowseShortcut": "Durchsuchen-Verknüpfung anzeigen",
     "appearance.showFormulaShortcut": "Formel-Verknüpfung anzeigen",
     "appearance.theme": "Design",
     "appearance.themeAuto": "Systemstandard",

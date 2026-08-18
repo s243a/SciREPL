@@ -82,6 +82,7 @@
     "appearance.headerShortcuts": "Pintasan header",
     "appearance.headerShortcutsHelp": "Simpan alat yang sering digunakan di header. Pintasan yang disembunyikan dapat diaktifkan kembali di sini kapan saja.",
     "appearance.showTourShortcut": "Tampilkan pintasan Tur",
+    "appearance.showBrowseShortcut": "Tampilkan pintasan Jelajahi",
     "appearance.showFormulaShortcut": "Tampilkan pintasan Rumus",
     "appearance.theme": "Tema",
     "appearance.themeAuto": "Ikuti sistem",

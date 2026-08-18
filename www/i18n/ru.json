@@ -74,6 +74,7 @@
     "appearance.headerShortcuts": "Ярлыки в заголовке",
     "appearance.headerShortcutsHelp": "Оставьте часто используемые инструменты в заголовке. Скрытые ярлыки можно снова включить здесь в любое время.",
     "appearance.showTourShortcut": "Показывать ярлык тура",
+    "appearance.showBrowseShortcut": "Показывать ярлык обзора",
     "appearance.showFormulaShortcut": "Показывать ярлык формул",
     "appearance.theme": "Тема",
     "appearance.themeAuto": "Как в системе",
