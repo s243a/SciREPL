@@ -210,18 +210,6 @@ try {
         document.getElementById('tour-shortcut-btn').classList.contains('header-shortcut-hidden')
         && !document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
     await prefsPage.press('#appearance-modal', 'Escape');
-    await prefsPage.click('#browse-shortcut-btn');
-    check('the Browse shortcut opens the package catalogue without the menu hop',
-        await prefsPage.evaluate(() =>
-            !document.getElementById('package-catalog-modal').classList.contains('hidden')));
-    // Dismiss directly rather than clicking: closing is pre-existing modal
-    // behaviour, and opening the catalogue starts a remote source load, which
-    // raises the download-consent modal. Both would otherwise sit over the
-    // header for the rest of this section.
-    await prefsPage.evaluate(() => {
-        document.getElementById('package-catalog-modal')?.classList.add('hidden');
-        document.getElementById('privacy-modal')?.classList.add('hidden');
-    });
     await prefsPage.evaluate(() => window.appearance.setShowFormulaShortcut(true));
     await prefsPage.click('#math-mode-btn');
     await prefsPage.evaluate(() => window.appearance.setShowFormulaShortcut(false));
@@ -245,6 +233,18 @@ try {
         && document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
     check('shortcut controls produce no page errors', prefsErrors.length === 0, prefsErrors.join(' | '));
     await prefs.close();
+
+    // Opening the catalogue starts a remote source load, which asynchronously
+    // raises the download-consent modal over the header. That modal would
+    // intercept any later click, and it arrives too late to dismiss inline, so
+    // this check owns a context that is closed the moment it is done.
+    const browseCtx = await existingContext({ markCurrent: true });
+    const { page: browsePage } = await load(browseCtx);
+    await browsePage.click('#browse-shortcut-btn');
+    check('the Browse shortcut opens the package catalogue without the menu hop',
+        await browsePage.evaluate(() =>
+            !document.getElementById('package-catalog-modal').classList.contains('hidden')));
+    await browseCtx.close();
 
     const compact = await browser.newContext({ viewport: { width: 320, height: 640 } });
     await compact.addInitScript(() => {
