@@ -1,4 +1,8 @@
-name: Build Release (APK + PWA)
+# A `v*` tag runs the branch gates, then builds the unsigned Android APK, the
+# PWA zip and the unsigned portable Windows application, and attaches all three
+# to a pre-release. Release assets do not expire; the workflow artifacts uploaded
+# by windows-portable-preview.yml are deleted after fourteen days.
+name: Build Release (APK + PWA + Windows)
 
 on:
   push:
@@ -53,8 +57,85 @@ jobs:
       - run: node test_notebook_vfs.mjs
       - run: npm run test:catalog:import
 
-  build:
+  # The unsigned portable Windows application. windows-portable-preview.yml
+  # builds the same thing on demand, but uploads it as a workflow artifact that
+  # GitHub deletes after fourteen days. A tagged build is meant to outlive that,
+  # so here it is handed to the release job and attached to the release itself,
+  # alongside the APK and the PWA zip.
+  windows-portable:
     needs: test
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Check committed component notices and release metadata
+        run: npm run licenses:check && npm run release:check
+
+      # The Free profile. build-portable.mjs refuses to package the `pro`
+      # profile or a tree containing the offline R runtime, so this is enforced
+      # rather than assumed.
+      - name: Configure the Free build profile
+        run: npm run configure
+
+      - name: Fetch the Free bundled runtimes
+        run: npm run fetch:bundles
+
+      - name: Verify completed bundle inventories and wheel notices
+        run: npm run verify:bundles
+
+      - name: Install Electron (isolated, pinned)
+        run: npm run windows:install
+
+      - name: Build the portable application
+        run: npm run package:windows
+
+      - name: Verify the packaged application
+        run: node desktop/electron/test/run-all.mjs packaged
+
+      - name: Zip the portable application
+        shell: pwsh
+        run: |
+          $tree = 'desktop/electron/out/SciREPL-win32-x64'
+          if (-not (Test-Path $tree)) { throw "packaging produced nothing at $tree" }
+          $zip = "SciREPL-${{ github.ref_name }}-windows-x64-portable.zip"
+          if (Get-Command 7z -ErrorAction SilentlyContinue) {
+            7z a -tzip -mx=5 "$zip" "$tree/*"
+            if ($LASTEXITCODE -ne 0) { throw "7z failed with $LASTEXITCODE" }
+          } else {
+            Compress-Archive -Path "$tree/*" -DestinationPath "$zip" -CompressionLevel Optimal
+          }
+          "{0} is {1:N0} bytes" -f $zip, (Get-Item $zip).Length
+
+      - name: Hand the zip to the release job
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-portable-zip
+          path: SciREPL-${{ github.ref_name }}-windows-x64-portable.zip
+          if-no-files-found: error
+          retention-days: 7
+          # Already a compressed archive; recompressing buys nothing.
+          compression-level: 0
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-portable-test-results
+          path: desktop/electron/test/results/
+          if-no-files-found: warn
+
+  build:
+    needs:
+      - test
+      - windows-portable
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -140,12 +221,18 @@ jobs:
             -x "*.DS_Store"
           cd ..
 
+      - name: Collect the Windows portable zip
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-portable-zip
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             android/app/build/outputs/apk/release/SciREPL-${{ github.ref_name }}-unsigned.apk
             SciREPL-${{ github.ref_name }}-pwa.zip
+            SciREPL-${{ github.ref_name }}-windows-x64-portable.zip
           prerelease: true
           body: |
             > **Pre-release** — unsigned APK for testing. After signing, upload `SciREPL-${{ github.ref_name }}.apk` and mark as latest release.
@@ -156,6 +243,21 @@ jobs:
             - **Android APK (unsigned):** `SciREPL-${{ github.ref_name }}-unsigned.apk` — requires signing before install (see below)
             - **PWA (zip):** `SciREPL-${{ github.ref_name }}-pwa.zip` — unzip and serve over HTTPS or localhost (service workers do not run from `file://`)
             - **PWA (live):** [https://s243a.github.io/SciREPL/](https://s243a.github.io/SciREPL/) — install from browser, no app store needed
+            - **Windows portable (unsigned, x64):** `SciREPL-${{ github.ref_name }}-windows-x64-portable.zip` — extract and run, no installer
+
+            ## Running the Windows portable build
+
+            Extract the zip to a local folder (not a network path) and run **SciREPL.exe**.
+            There is no installer and nothing is registered with the operating system.
+
+            The build is **unsigned**, so Windows SmartScreen shows "Windows protected
+            your PC" on first run — choose **More info → Run anyway**. That is expected
+            for an unsigned build and is not a sign of a problem.
+
+            Bash/Brush, ClojureScript/Scittle, SWI-Prolog and Python/Pyodide are bundled
+            and work offline. Lua and R download from their CDNs on first use, then run
+            offline from SciREPL's own runtime cache. Application data lives under
+            `%APPDATA%\SciREPL-Free-Electron`. See `docs/WINDOWS_PREVIEW.md`.
 
             ## Updating the PWA
 
