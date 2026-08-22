@@ -193,11 +193,6 @@
             const host = $('appearance-shortcut-list');
             if (!host || !window.appearance) return;
             const t = (key, fallback) => (window.t ? window.t(key) : null) || fallback;
-            const label = {
-                browse: t('appearance.showBrowseShortcut', 'Show Browse shortcut'),
-                formula: t('appearance.showFormulaShortcut', 'Show Formula shortcut'),
-                tour: t('appearance.showTourShortcut', 'Show Tour shortcut'),
-            };
             const modes = [
                 ['always', t('appearance.shortcutAlways', 'Always')],
                 ['auto', t('appearance.shortcutAuto', 'When there is room')],
@@ -211,7 +206,8 @@
 
                 const text = document.createElement('span');
                 text.className = 'appearance-shortcut-name';
-                text.textContent = label[name] || name;
+                const key = window.appearance.shortcutLabelKey(name);
+                text.textContent = (key && t(key, null)) || name;
                 row.appendChild(text);
 
                 const select = document.createElement('select');

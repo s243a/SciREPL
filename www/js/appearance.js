@@ -17,9 +17,9 @@
      *  first). Browse outranks Formula because it is on by default and used
      *  on every visit; Tour is last because it is mostly a first-run aid. */
     const SHORTCUTS = [
-        { name: 'browse',  key: 'showBrowseShortcut',  id: 'browse-shortcut-btn', fallback: 'auto'  },
-        { name: 'formula', key: 'showFormulaShortcut', id: 'math-mode-btn',       fallback: 'never' },
-        { name: 'tour',    key: 'showTourShortcut',    id: 'tour-shortcut-btn',   fallback: 'auto'  },
+        { name: 'browse',  key: 'showBrowseShortcut',  id: 'browse-shortcut-btn', fallback: 'auto',  labelKey: 'appearance.showBrowseShortcut' },
+        { name: 'formula', key: 'showFormulaShortcut', id: 'math-mode-btn',       fallback: 'never', labelKey: 'appearance.showFormulaShortcut' },
+        { name: 'tour',    key: 'showTourShortcut',    id: 'tour-shortcut-btn',   fallback: 'auto',  labelKey: 'appearance.showTourShortcut' },
     ];
     const MODES = ['always', 'auto', 'never'];
 
@@ -158,6 +158,13 @@
          *  one implementation honest in both rather than forking it. */
         presentShortcuts() {
             return SHORTCUTS.filter(s => document.getElementById(s.id));
+        }
+
+        /** The catalogue key naming this shortcut, so the settings UI does not
+         *  have to hard-code a key for a button this edition may not ship. */
+        shortcutLabelKey(name) {
+            const spec = SHORTCUTS.find(s => s.name === name);
+            return spec ? spec.labelKey : null;
         }
 
         /** Priority order, highest first. Unknown/missing names fall back to
