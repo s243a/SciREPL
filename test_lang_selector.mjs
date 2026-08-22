@@ -73,6 +73,13 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
             open.options.includes('R') && !open.options.includes('R - R'));
         check('Lua stays "Lua", not "Lua - Lua"',
             open.options.includes('Lua') && !open.options.includes('Lua - Lua'));
+        // Repo-agnostic form of the same rule: Pro also ships an AI entry whose
+        // abbreviation is its name, and any future one must not double either.
+        const doubled = open.options.filter(t => {
+            const parts = t.split(' - ');
+            return parts.length === 2 && parts[0] === parts[1];
+        });
+        check('no language is rendered as "X - X"', doubled.length === 0, doubled.join(','));
 
         console.log('4. The swap does not move the composer');
         check('control keeps its closed width while open',
