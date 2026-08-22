@@ -62,10 +62,13 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
         console.log('2. Opening the list');
         await page.dispatchEvent('#lang-selector', 'mousedown');
         const open = await state('#lang-selector');
-        check('Python reads "Py - Python"', open.options.includes('Py - Python'));
+        check('Prolog reads "PL - Prolog"', open.options.includes('PL - Prolog'));
         check('ClojureScript reads "CLJS - ClojureScript"', open.options.includes('CLJS - ClojureScript'));
-        check('every multi-word language gained its name',
-            ['Py - Python', 'PL - Prolog', 'Sh - Bash', 'JS - JavaScript', 'TyR - TypR']
+        // Python is the selected language on load, so it deliberately stays
+        // short — see section 4. Section 7 reopens the list with Prolog
+        // selected, which is where "Py - Python" is asserted.
+        check('every unselected multi-word language gained its name',
+            ['PL - Prolog', 'Sh - Bash', 'JS - JavaScript', 'TyR - TypR']
                 .every(t => open.options.includes(t)), open.options.join(','));
 
         console.log('3. A language whose abbreviation is its name is not doubled');
@@ -81,11 +84,22 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
         });
         check('no language is rendered as "X - X"', doubled.length === 0, doubled.join(','));
 
-        console.log('4. The swap does not move the composer');
+        console.log('4. The closed control never shows a truncated full name');
+        // Android's WebView keeps the closed control visible behind its native
+        // dialog, and a Back-button dismiss fires neither change nor focusout —
+        // so the selected option must never carry the long text in the first
+        // place, or the control is stranded reading "PL -".
+        check('the selected option stays short while the list is open',
+            !open.selectedText.includes(' - '), open.selectedText);
+        check('the other options are still expanded',
+            open.options.filter(t => t.includes(' - ')).length >= 4,
+            open.options.join(','));
+
+        console.log('5. The swap does not move the composer');
         check('control keeps its closed width while open',
             open.width === closed.width, `${closed.width} -> ${open.width}`);
 
-        console.log('5. Choosing a language collapses it again');
+        console.log('6. Choosing a language collapses it again');
         await page.selectOption('#lang-selector', 'prolog');
         const after = await state('#lang-selector');
         check('closed control is back to the abbreviation', after.selectedText === 'PL', after.selectedText);
@@ -93,7 +107,7 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
             after.options.every(t => !t.includes(' - ')), after.options.join(','));
         check('width is restored', after.width === closed.width, `${closed.width} -> ${after.width}`);
 
-        console.log('6. Escape collapses without choosing');
+        console.log('7. Escape collapses without choosing');
         await page.dispatchEvent('#lang-selector', 'mousedown');
         const reopened = await state('#lang-selector');
         check('reopened list expands again', reopened.options.includes('Py - Python'));
@@ -102,7 +116,7 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
         check('Escape restores the abbreviations',
             escaped.options.every(t => !t.includes(' - ')), escaped.options.join(','));
 
-        console.log('7. A cell dropdown built after load behaves the same');
+        console.log('8. A cell dropdown built after load behaves the same');
         // Put the composer back on Python (step 5 left it on Prolog) and make a
         // cell, then open its editor — the per-cell dropdown is built by
         // enterEditMode, so it does not exist until the pencil is clicked.
@@ -117,7 +131,12 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
             cellClosed.options.every(t => !t.includes(' - ')), cellClosed.options.join(','));
         await page.dispatchEvent('.cell-lang-switch', 'mousedown');
         const cellOpen = await state('.cell-lang-switch');
-        check('cell dropdown expands too', cellOpen.options.includes('Py - Python'), cellOpen.options.join(','));
+        // Python is this cell's selected language, so "Py" correctly stays short;
+        // the expansion is visible on the options the user is choosing between.
+        check('cell dropdown expands the unselected options',
+            cellOpen.options.filter(t => t.includes(' - ')).length >= 4, cellOpen.options.join(','));
+        check('cell dropdown leaves its selected option short',
+            !cellOpen.selectedText.includes(' - '), cellOpen.selectedText);
         check('cell dropdown keeps its width',
             cellOpen.width === cellClosed.width, `${cellClosed.width} -> ${cellOpen.width}`);
 

@@ -3108,6 +3108,16 @@ class FileIO {
         for (const opt of sel.options) {
             const meta = FileIO.LANGUAGE_META.find(l => l.id === opt.value);
             if (!meta) continue;                       // unknown id: leave alone
+            // The SELECTED option is deliberately left short. Its text is what
+            // the closed control renders, and Android's WebView opens a native
+            // dialog that leaves that control visible behind it — and dismissing
+            // that dialog with the Back button fires neither change nor
+            // focusout, so a collapse cannot be relied on to run. Expanding it
+            // would strand the control reading "PL -", clipped by the pinned
+            // width, with no event left to repair it. Verified on a Galaxy S24,
+            // Android 16; desktop browsers hide the control behind the popup,
+            // so this is invisible there.
+            if (opt.selected) continue;
             if (!opt.dataset.abbrev) opt.dataset.abbrev = opt.textContent;
             // "R - R" and "Lua - Lua" read as a mistake, so a language whose
             // abbreviation is already its name is shown once.
