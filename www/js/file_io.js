@@ -58,6 +58,9 @@ class FileIO {
     }
 
     init() {
+        // Language selectors: abbreviation when closed, full name when open.
+        this._wireLanguageSelectorNames();
+
         // Toggle Menu
         this.menuBtn.addEventListener('click', () => {
             this.menuModal.classList.remove('hidden');
@@ -3072,6 +3075,83 @@ class FileIO {
         }
         this._saveEnabledLanguages(enabled);
         this._rebuildLanguageDropdowns();
+    }
+
+    /**
+     * Language selectors show the abbreviation when closed and
+     * "Py - Python" once the list is open.
+     *
+     * A native <select> renders the same text in its closed control and in
+     * its open list, so there is no markup that says one thing in each. The
+     * option text is therefore swapped as the list opens and restored when it
+     * closes. Wiring is delegated from the document so selects built later —
+     * every new cell builds its own — need no registration, and the full name
+     * is looked up from LANGUAGE_META by option value, so it does not matter
+     * which of the construction paths produced the option.
+     */
+    _languageSelectFrom(target) {
+        return (target && target.closest)
+            ? target.closest('#lang-selector, .cell-lang-switch')
+            : null;
+    }
+
+    _expandLanguageSelect(sel) {
+        // Pin the closed width first. The control is sized to its widest
+        // option, so widening the text would push the composer controls
+        // sideways for as long as the list is open.
+        if (!sel.dataset.collapsedWidth) {
+            const w = Math.ceil(sel.getBoundingClientRect().width);
+            if (w > 0) sel.dataset.collapsedWidth = String(w);
+        }
+        if (sel.dataset.collapsedWidth) sel.style.width = `${sel.dataset.collapsedWidth}px`;
+
+        for (const opt of sel.options) {
+            const meta = FileIO.LANGUAGE_META.find(l => l.id === opt.value);
+            if (!meta) continue;                       // unknown id: leave alone
+            // The SELECTED option is deliberately left short. Its text is what
+            // the closed control renders, and Android's WebView opens a native
+            // dialog that leaves that control visible behind it — and dismissing
+            // that dialog with the Back button fires neither change nor
+            // focusout, so a collapse cannot be relied on to run. Expanding it
+            // would strand the control reading "PL -", clipped by the pinned
+            // width, with no event left to repair it. Verified on a Galaxy S24,
+            // Android 16; desktop browsers hide the control behind the popup,
+            // so this is invisible there.
+            if (opt.selected) continue;
+            if (!opt.dataset.abbrev) opt.dataset.abbrev = opt.textContent;
+            // "R - R" and "Lua - Lua" read as a mistake, so a language whose
+            // abbreviation is already its name is shown once.
+            opt.textContent = meta.abbrev === meta.label
+                ? meta.label
+                : `${meta.abbrev} - ${meta.label}`;
+        }
+    }
+
+    _collapseLanguageSelect(sel) {
+        for (const opt of sel.options) {
+            if (opt.dataset.abbrev) opt.textContent = opt.dataset.abbrev;
+        }
+        sel.style.width = '';
+    }
+
+    _wireLanguageSelectorNames() {
+        const expand = (e) => {
+            const sel = this._languageSelectFrom(e.target);
+            if (sel) this._expandLanguageSelect(sel);
+        };
+        const collapse = (e) => {
+            const sel = this._languageSelectFrom(e.target);
+            if (sel) this._collapseLanguageSelect(sel);
+        };
+        document.addEventListener('mousedown', expand, true);
+        document.addEventListener('touchstart', expand, { capture: true, passive: true });
+        document.addEventListener('keydown', (e) => {
+            // Escape and Tab close the list rather than open it.
+            if (e.key === 'Escape' || e.key === 'Tab') { collapse(e); return; }
+            expand(e);
+        }, true);
+        document.addEventListener('change', collapse, true);
+        document.addEventListener('focusout', collapse, true);
     }
 
     /**
