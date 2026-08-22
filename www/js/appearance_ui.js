@@ -203,7 +203,7 @@
                 ['auto', t('appearance.shortcutAuto', 'When there is room')],
                 ['never', t('appearance.shortcutNever', 'Never')],
             ];
-            const order = window.appearance.getShortcutPriority();
+            const order = window.appearance.getShortcutPriority();   // present buttons only
             host.textContent = '';
             order.forEach((name, index) => {
                 const row = document.createElement('div');

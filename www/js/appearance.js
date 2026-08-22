@@ -152,13 +152,21 @@
             return MODES.includes(raw) ? raw : spec.fallback;
         }
 
+        /** The registry entries whose button actually exists in this build.
+         *  The two editions do not ship the same header: Pro has no Browse
+         *  button yet, so its list is Formula and Tour. Filtering here keeps
+         *  one implementation honest in both rather than forking it. */
+        presentShortcuts() {
+            return SHORTCUTS.filter(s => document.getElementById(s.id));
+        }
+
         /** Priority order, highest first. Unknown/missing names fall back to
          *  the registry order, so a stored list can never strand a shortcut. */
         getShortcutPriority() {
             let stored = [];
             try { stored = JSON.parse(localStorage.getItem(KEYS.shortcutPriority) || '[]'); }
             catch (_) { stored = []; }
-            const known = SHORTCUTS.map(s => s.name);
+            const known = this.presentShortcuts().map(s => s.name);
             const order = stored.filter(n => known.includes(n));
             for (const n of known) if (!order.includes(n)) order.push(n);
             return order;
@@ -401,7 +409,7 @@
             this._fittingShortcuts = true;
             try {
                 const auto = [];
-                for (const spec of SHORTCUTS) {
+                for (const spec of this.presentShortcuts()) {
                     const mode = this.getShortcutMode(spec.name);
                     if (mode === 'never') { this._showHeaderShortcut(spec.id, false); continue; }
                     this._showHeaderShortcut(spec.id, true);
