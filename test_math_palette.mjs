@@ -31,7 +31,18 @@ async function freshPage(opts = {}) {
     await page.waitForFunction(() => window.__SCIREPL_APP_READY === true, null, { timeout: 120000 });
     return page;
 }
-const enableFormula = (page) => page.evaluate(() => window.appearance.setShowFormulaShortcut(true));
+// Turning Formula on also pins the other optional shortcut off. This suite
+// measures palette geometry, and at 320x240 the palette's available height is
+// whatever the header leaves it: six icon buttons plus the status badge do not
+// fit 320px in one row, so the header wraps and the palette correctly collapses.
+// Pinning header occupancy keeps these assertions about the palette rather than
+// about how many shortcuts happen to be enabled. The default configuration
+// (Browse on, Formula off) is five buttons on one row — test_whats_new.mjs
+// covers that it still fits 320px.
+const enableFormula = (page) => page.evaluate(() => {
+    window.appearance.setShowBrowseShortcut(false);
+    window.appearance.setShowFormulaShortcut(true);
+});
 const btnState = (page) => page.evaluate(() => {
     const b = document.getElementById('math-mode-btn');
     const p = document.getElementById('math-palette');

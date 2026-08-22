@@ -81,6 +81,7 @@
     "appearance.headerShortcuts": "Atalhos do cabeçalho",
     "appearance.headerShortcutsHelp": "Mantenha no cabeçalho as ferramentas usadas com frequência. Os atalhos ocultos podem ser reativados aqui a qualquer momento.",
     "appearance.showTourShortcut": "Mostrar atalho do tour",
+    "appearance.showBrowseShortcut": "Mostrar atalho de Navegar",
     "appearance.showFormulaShortcut": "Mostrar atalho de Fórmula",
     "appearance.theme": "Tema",
     "appearance.themeAuto": "Seguir sistema",

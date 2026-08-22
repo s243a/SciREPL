@@ -75,6 +75,7 @@
     "appearance.headerShortcuts": "ヘッダーのショートカット",
     "appearance.headerShortcutsHelp": "よく使うツールをヘッダーに表示します。非表示にしたショートカットも、ここからいつでも再表示できます。",
     "appearance.showTourShortcut": "ツアーのショートカットを表示",
+    "appearance.showBrowseShortcut": "参照のショートカットを表示",
     "appearance.showFormulaShortcut": "数式のショートカットを表示",
     "appearance.theme": "テーマ",
     "appearance.themeAuto": "システムに従う",

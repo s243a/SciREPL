@@ -185,14 +185,25 @@ try {
     console.log('\n4. Optional header shortcuts');
     const prefs = await existingContext({ markCurrent: true });
     const { page: prefsPage, errors: prefsErrors } = await load(prefs);
-    check('Tour is visible and Formula is hidden by default (formula is opt-in)', await prefsPage.evaluate(() =>
+    check('Tour and Browse are visible and Formula is hidden by default (formula is opt-in)', await prefsPage.evaluate(() =>
         !document.getElementById('tour-shortcut-btn').classList.contains('header-shortcut-hidden')
+        && !document.getElementById('browse-shortcut-btn').classList.contains('header-shortcut-hidden')
         && document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
     await prefsPage.click('#menu-btn');
     await prefsPage.click('#btn-appearance');
-    check('Appearance checkboxes reflect the defaults (tour on, formula off)',
+    check('Appearance checkboxes reflect the defaults (tour on, browse on, formula off)',
         await prefsPage.isChecked('#appearance-show-tour-shortcut')
+        && await prefsPage.isChecked('#appearance-show-browse-shortcut')
         && !(await prefsPage.isChecked('#appearance-show-formula-shortcut')));
+    await prefsPage.uncheck('#appearance-show-browse-shortcut');
+    check('unchecking Browse hides its shortcut and takes it out of the tab order',
+        await prefsPage.evaluate(() => {
+            const button = document.getElementById('browse-shortcut-btn');
+            return button.classList.contains('header-shortcut-hidden') && button.tabIndex === -1;
+        }));
+    await prefsPage.check('#appearance-show-browse-shortcut');
+    check('re-checking Browse restores it', await prefsPage.evaluate(() =>
+        !document.getElementById('browse-shortcut-btn').classList.contains('header-shortcut-hidden')));
     await prefsPage.uncheck('#appearance-show-tour-shortcut');
     await prefsPage.check('#appearance-show-formula-shortcut');
     check('the Appearance controls apply both choices immediately', await prefsPage.evaluate(() =>
@@ -216,11 +227,24 @@ try {
         document.getElementById('tour-shortcut-btn').classList.contains('header-shortcut-hidden')
         && document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
     await prefsPage.evaluate(() => window.appearance.reset());
-    check('Reset restores the defaults (tour visible, formula hidden)', await prefsPage.evaluate(() =>
+    check('Reset restores the defaults (tour visible, browse visible, formula hidden)', await prefsPage.evaluate(() =>
         !document.getElementById('tour-shortcut-btn').classList.contains('header-shortcut-hidden')
+        && !document.getElementById('browse-shortcut-btn').classList.contains('header-shortcut-hidden')
         && document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
     check('shortcut controls produce no page errors', prefsErrors.length === 0, prefsErrors.join(' | '));
     await prefs.close();
+
+    // Opening the catalogue starts a remote source load, which asynchronously
+    // raises the download-consent modal over the header. That modal would
+    // intercept any later click, and it arrives too late to dismiss inline, so
+    // this check owns a context that is closed the moment it is done.
+    const browseCtx = await existingContext({ markCurrent: true });
+    const { page: browsePage } = await load(browseCtx);
+    await browsePage.click('#browse-shortcut-btn');
+    check('the Browse shortcut opens the package catalogue without the menu hop',
+        await browsePage.evaluate(() =>
+            !document.getElementById('package-catalog-modal').classList.contains('hidden')));
+    await browseCtx.close();
 
     const compact = await browser.newContext({ viewport: { width: 320, height: 640 } });
     await compact.addInitScript(() => {
@@ -237,6 +261,7 @@ try {
             .filter((node) => getComputedStyle(node).display !== 'none');
         return {
             tourVisible: getComputedStyle(document.getElementById('tour-shortcut-btn')).display !== 'none',
+            browseVisible: getComputedStyle(document.getElementById('browse-shortcut-btn')).display !== 'none',
             formulaVisible: getComputedStyle(document.getElementById('math-mode-btn')).display !== 'none',
             withinViewport: buttons.every((node) => {
                 const rect = node.getBoundingClientRect();
@@ -246,8 +271,8 @@ try {
             innerWidth,
         };
     });
-    check('default header (tour visible, formula hidden) fits 320px without clipping',
-        compactHeader.tourVisible && !compactHeader.formulaVisible
+    check('default header (tour + browse visible, formula hidden) fits 320px without clipping',
+        compactHeader.tourVisible && compactHeader.browseVisible && !compactHeader.formulaVisible
         && compactHeader.withinViewport && compactHeader.scrollWidth <= compactHeader.innerWidth,
         JSON.stringify(compactHeader));
     await compact.close();

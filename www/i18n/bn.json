@@ -74,6 +74,7 @@
     "appearance.headerShortcuts": "হেডার শর্টকাট",
     "appearance.headerShortcutsHelp": "ঘন ঘন ব্যবহৃত সরঞ্জামগুলো হেডারে রাখুন। লুকানো শর্টকাটগুলো এখান থেকে যেকোনো সময় আবার চালু করা যাবে।",
     "appearance.showTourShortcut": "ট্যুর শর্টকাট দেখান",
+    "appearance.showBrowseShortcut": "ব্রাউজ শর্টকাট দেখান",
     "appearance.showFormulaShortcut": "ফর্মুলা শর্টকাট দেখান",
     "appearance.theme": "থিম",
     "appearance.themeAuto": "সিস্টেম অনুযায়ী",

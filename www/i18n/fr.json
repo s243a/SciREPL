@@ -86,6 +86,7 @@
     "appearance.headerShortcuts": "Raccourcis de l’en-tête",
     "appearance.headerShortcutsHelp": "Conservez les outils fréquemment utilisés dans l’en-tête. Vous pouvez réactiver ici les raccourcis masqués à tout moment.",
     "appearance.showTourShortcut": "Afficher le raccourci de la visite guidée",
+    "appearance.showBrowseShortcut": "Afficher le raccourci Parcourir",
     "appearance.showFormulaShortcut": "Afficher le raccourci Formule",
     "appearance.theme": "Thème",
     "appearance.themeAuto": "Selon le système",

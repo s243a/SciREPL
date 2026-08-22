@@ -20,6 +20,7 @@
         customTheme: 'scirepl_appearance_custom_theme',
         customCss: 'scirepl_appearance_custom_css',
         showTourShortcut: 'scirepl_appearance_show_tour_shortcut',
+        showBrowseShortcut: 'scirepl_appearance_show_browse_shortcut',
         showFormulaShortcut: 'scirepl_appearance_show_formula_shortcut',
         // CSS that was rolled back for hiding the way out of Appearance. Kept
         // rather than deleted: it is the user's work and may be one typo away
@@ -116,6 +117,13 @@
             return localStorage.getItem(KEYS.showTourShortcut) !== '0';
         }
 
+        /** Browse is opt-out: the catalogue is how packages, bundles and
+         *  workbooks are found at all, and reaching it through the menu costs
+         *  a tap on every visit. It fits because Formula is off by default. */
+        getShowBrowseShortcut() {
+            return localStorage.getItem(KEYS.showBrowseShortcut) !== '0';
+        }
+
         /** Formula palette is opt-in (off by default): its inserts are
          *  SymPy-specific, and on phones the palette competes with the
          *  composer for space — users who want it enable it once in
@@ -152,6 +160,11 @@
 
         setShowTourShortcut(show) {
             localStorage.setItem(KEYS.showTourShortcut, show ? '1' : '0');
+            this.apply();
+        }
+
+        setShowBrowseShortcut(show) {
+            localStorage.setItem(KEYS.showBrowseShortcut, show ? '1' : '0');
             this.apply();
         }
 
@@ -282,6 +295,7 @@
 
             // --- optional header shortcuts ---
             this._showHeaderShortcut('tour-shortcut-btn', this.getShowTourShortcut());
+            this._showHeaderShortcut('browse-shortcut-btn', this.getShowBrowseShortcut());
             this._showHeaderShortcut('math-mode-btn', this.getShowFormulaShortcut());
 
             // --- theme ---

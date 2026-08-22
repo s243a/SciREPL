@@ -71,6 +71,7 @@
             <button data-i18n-title="notebookSelector.findNotebookTitle" id="search-btn" class="icon-btn" title="Find in notebook">🔍</button>
             <button data-i18n-title="notebookSelector.mathModeTitle" data-i18n-aria-label="notebookSelector.mathModeTitle" id="math-mode-btn" class="icon-btn" title="Math Mode" aria-label="Math Mode">∑</button>
             <button data-i18n-title="header.takeTourTitle" id="tour-shortcut-btn" class="icon-btn" title="Take the tour">🧭</button>
+            <button data-i18n-title="packageCatalog.browsePackagesBundlesAmpWorkbooks" data-i18n-aria-label="packageCatalog.browsePackagesBundlesAmpWorkbooks" id="browse-shortcut-btn" class="icon-btn" title="Browse Packages, Bundles &amp; Workbooks" aria-label="Browse Packages, Bundles &amp; Workbooks">📦</button>
             <button data-i18n-title="menu.title" id="menu-btn" class="icon-btn" title="Menu">☰</button>
             <button data-i18n-title="tour.help.title" id="help-btn" class="icon-btn" title="Help">?</button>
             <span id="status-badge" data-i18n="status.loading">loading…</span>
@@ -96,7 +97,7 @@
 
             <p><button id="btn-show-tour" class="vfs-btn" data-i18n="help.showTour">Show the tour again</button></p>
             <p><button id="btn-show-whats-new" class="vfs-btn" data-i18n="help.showWhatsNew">What’s new in this version</button></p>
-            <p data-i18n="help.headerShortcuts">Header shortcuts: the 🧭 Tour button is shown by default. The ∑ Formula button is off by default — enable it under Appearance → Header shortcuts. Formula appears for Python code and Markdown cells.</p>
+            <p data-i18n="help.headerShortcuts">Header shortcuts: the 🧭 Tour and 📦 Browse shortcuts are shown by default. The ∑ Formula button is off by default — enable it under Appearance → Header shortcuts. Formula appears for Python code and Markdown cells.</p>
             <p><a class="vfs-btn" href="open-source-licenses.html" data-i18n="help.openSourceLicenses">Open-source licences</a></p>
 
             <h3 data-i18n="help.quickStartPython">Quick Start — Python</h3>
@@ -783,6 +784,12 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                 <label class="appearance-check">
                     <input type="checkbox" id="appearance-show-tour-shortcut">
                     <span data-i18n="appearance.showTourShortcut">Show Tour shortcut</span>
+                </label>
+            </div>
+            <div class="appearance-row appearance-shortcut-row">
+                <label class="appearance-check">
+                    <input type="checkbox" id="appearance-show-browse-shortcut">
+                    <span data-i18n="appearance.showBrowseShortcut">Show Browse shortcut</span>
                 </label>
             </div>
             <div class="appearance-row appearance-shortcut-row">

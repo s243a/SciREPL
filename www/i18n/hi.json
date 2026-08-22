@@ -74,6 +74,7 @@
     "appearance.headerShortcuts": "हेडर शॉर्टकट",
     "appearance.headerShortcutsHelp": "अक्सर उपयोग होने वाले टूल हेडर में रखें। छिपे हुए शॉर्टकट यहाँ से किसी भी समय फिर चालू किए जा सकते हैं।",
     "appearance.showTourShortcut": "टूर शॉर्टकट दिखाएँ",
+    "appearance.showBrowseShortcut": "ब्राउज़ शॉर्टकट दिखाएँ",
     "appearance.showFormulaShortcut": "फ़ॉर्मूला शॉर्टकट दिखाएँ",
     "appearance.theme": "थीम",
     "appearance.themeAuto": "सिस्टम के अनुसार",
