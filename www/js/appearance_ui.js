@@ -179,36 +179,81 @@
                 this._refreshButtonScale();
             });
 
-            const tour = $('appearance-show-tour-shortcut');
-            const browse = $('appearance-show-browse-shortcut');
-            const formula = $('appearance-show-formula-shortcut');
-            if (tour) {
-                tour.addEventListener('change', () => {
-                    window.appearance.setShowTourShortcut(tour.checked);
+            this._renderShortcutList();
+        }
+
+        /**
+         * One row per optional header button, in priority order.
+         *
+         * Rebuilt rather than toggled, because the ORDER is itself a setting:
+         * moving a button up the list is how the user says which one keeps its
+         * place when the header runs out of room.
+         */
+        _renderShortcutList() {
+            const host = $('appearance-shortcut-list');
+            if (!host || !window.appearance) return;
+            const t = (key, fallback) => (window.t ? window.t(key) : null) || fallback;
+            const label = {
+                browse: t('appearance.showBrowseShortcut', 'Show Browse shortcut'),
+                formula: t('appearance.showFormulaShortcut', 'Show Formula shortcut'),
+                tour: t('appearance.showTourShortcut', 'Show Tour shortcut'),
+            };
+            const modes = [
+                ['always', t('appearance.shortcutAlways', 'Always')],
+                ['auto', t('appearance.shortcutAuto', 'When there is room')],
+                ['never', t('appearance.shortcutNever', 'Never')],
+            ];
+            const order = window.appearance.getShortcutPriority();
+            host.textContent = '';
+            order.forEach((name, index) => {
+                const row = document.createElement('div');
+                row.className = 'appearance-row appearance-shortcut-row';
+
+                const text = document.createElement('span');
+                text.className = 'appearance-shortcut-name';
+                text.textContent = label[name] || name;
+                row.appendChild(text);
+
+                const select = document.createElement('select');
+                select.className = 'settings-select';
+                select.id = `appearance-shortcut-mode-${name}`;
+                for (const [value, caption] of modes) {
+                    const opt = document.createElement('option');
+                    opt.value = value;
+                    opt.textContent = caption;
+                    select.appendChild(opt);
+                }
+                select.value = window.appearance.getShortcutMode(name);
+                select.addEventListener('change', () => {
+                    window.appearance.setShortcutMode(name, select.value);
+                    this._renderShortcutList();
                 });
-            }
-            if (browse) {
-                browse.addEventListener('change', () => {
-                    window.appearance.setShowBrowseShortcut(browse.checked);
-                });
-            }
-            if (formula) {
-                formula.addEventListener('change', () => {
-                    window.appearance.setShowFormulaShortcut(formula.checked);
-                });
-            }
+                row.appendChild(select);
+
+                const move = (delta, caption, aria) => {
+                    const button = document.createElement('button');
+                    button.className = 'vfs-btn appearance-shortcut-move';
+                    button.textContent = caption;
+                    button.setAttribute('aria-label', aria);
+                    button.title = aria;
+                    button.disabled = delta < 0 ? index === 0 : index === order.length - 1;
+                    button.addEventListener('click', () => {
+                        window.appearance.moveShortcutPriority(name, delta);
+                        this._renderShortcutList();
+                    });
+                    return button;
+                };
+                row.appendChild(move(-1, '↑', t('appearance.shortcutRaise', 'Give up its place later')));
+                row.appendChild(move(1, '↓', t('appearance.shortcutLower', 'Give up its place sooner')));
+                host.appendChild(row);
+            });
         }
 
         _refreshButtonScale() {
             const scale = window.appearance.getButtonScale();
             $('appearance-btn-scale').value = String(scale);
             $('appearance-btn-scale-value').textContent = `${Math.round(scale * 100)}%`;
-            const tour = $('appearance-show-tour-shortcut');
-            const browse = $('appearance-show-browse-shortcut');
-            const formula = $('appearance-show-formula-shortcut');
-            if (tour) tour.checked = window.appearance.getShowTourShortcut();
-            if (browse) browse.checked = window.appearance.getShowBrowseShortcut();
-            if (formula) formula.checked = window.appearance.getShowFormulaShortcut();
+            this._renderShortcutList();
         }
 
         /* ------------------------------ theme ---------------------------- */

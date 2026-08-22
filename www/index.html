@@ -780,24 +780,12 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             <p class="appearance-note" data-i18n="appearance.headerShortcutsHelp">
                 Keep frequently used tools in the header. Hidden shortcuts can be re-enabled here at any time.
             </p>
-            <div class="appearance-row appearance-shortcut-row">
-                <label class="appearance-check">
-                    <input type="checkbox" id="appearance-show-tour-shortcut">
-                    <span data-i18n="appearance.showTourShortcut">Show Tour shortcut</span>
-                </label>
-            </div>
-            <div class="appearance-row appearance-shortcut-row">
-                <label class="appearance-check">
-                    <input type="checkbox" id="appearance-show-browse-shortcut">
-                    <span data-i18n="appearance.showBrowseShortcut">Show Browse shortcut</span>
-                </label>
-            </div>
-            <div class="appearance-row appearance-shortcut-row">
-                <label class="appearance-check">
-                    <input type="checkbox" id="appearance-show-formula-shortcut">
-                    <span data-i18n="appearance.showFormulaShortcut">Show Formula shortcut</span>
-                </label>
-            </div>
+            <!-- Rendered by appearance_ui.js: one row per optional button, in
+                 priority order, each with its own always / when-there-is-room /
+                 never choice. Priority decides which button gives up its place
+                 first when the header runs out of width. -->
+            <div id="appearance-shortcut-list" class="appearance-shortcut-list"></div>
+
 
             <div class="settings-section" data-i18n="appearance.theme">Theme</div>
             <div class="appearance-row">

@@ -581,6 +581,41 @@ html, body {
 /* Appearance can hide optional shortcuts without deleting their feature or
    preference; either shortcut can be restored from Appearance. `!important`
    wins over `.icon-btn`'s flex display and user-agent handling of `hidden`. */
+/* Header-shortcut settings: name, its three-state choice, and the two
+   priority controls that decide which button gives up its place first. */
+.appearance-shortcut-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.appearance-shortcut-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.appearance-shortcut-name {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.appearance-shortcut-row .settings-select {
+    flex: 0 1 auto;
+    max-width: 55%;
+}
+
+.appearance-shortcut-move {
+    flex: 0 0 auto;
+    min-width: 34px;
+    padding-inline: 8px;
+}
+
+.appearance-shortcut-move:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
 .header-shortcut-hidden {
     display: none !important;
 }

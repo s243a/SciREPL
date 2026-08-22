@@ -185,34 +185,56 @@ try {
     console.log('\n4. Optional header shortcuts');
     const prefs = await existingContext({ markCurrent: true });
     const { page: prefsPage, errors: prefsErrors } = await load(prefs);
+    // Desktop width, so "auto" has room and behaves like "always".
     check('Tour and Browse are visible and Formula is hidden by default (formula is opt-in)', await prefsPage.evaluate(() =>
         !document.getElementById('tour-shortcut-btn').classList.contains('header-shortcut-hidden')
         && !document.getElementById('browse-shortcut-btn').classList.contains('header-shortcut-hidden')
         && document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
+    check('the stored modes are the three-state defaults', await prefsPage.evaluate(() =>
+        window.appearance.getShortcutMode('browse') === 'auto'
+        && window.appearance.getShortcutMode('tour') === 'auto'
+        && window.appearance.getShortcutMode('formula') === 'never'));
     await prefsPage.click('#menu-btn');
     await prefsPage.click('#btn-appearance');
-    check('Appearance checkboxes reflect the defaults (tour on, browse on, formula off)',
-        await prefsPage.isChecked('#appearance-show-tour-shortcut')
-        && await prefsPage.isChecked('#appearance-show-browse-shortcut')
-        && !(await prefsPage.isChecked('#appearance-show-formula-shortcut')));
-    await prefsPage.uncheck('#appearance-show-browse-shortcut');
-    check('unchecking Browse hides its shortcut and takes it out of the tab order',
+    check('Appearance lists one row per shortcut, in priority order',
+        await prefsPage.evaluate(() =>
+            [...document.querySelectorAll('#appearance-shortcut-list .appearance-shortcut-row')].length === 3));
+    check('each row offers all three states',
+        await prefsPage.evaluate(() =>
+            [...document.querySelectorAll('#appearance-shortcut-mode-browse option')].map(o => o.value).join(',')
+            === 'always,auto,never'));
+    check('the selects reflect the stored modes',
+        await prefsPage.inputValue('#appearance-shortcut-mode-browse') === 'auto'
+        && await prefsPage.inputValue('#appearance-shortcut-mode-formula') === 'never');
+
+    await prefsPage.selectOption('#appearance-shortcut-mode-browse', 'never');
+    check('choosing Never hides Browse and takes it out of the tab order',
         await prefsPage.evaluate(() => {
             const button = document.getElementById('browse-shortcut-btn');
             return button.classList.contains('header-shortcut-hidden') && button.tabIndex === -1;
         }));
-    await prefsPage.check('#appearance-show-browse-shortcut');
-    check('re-checking Browse restores it', await prefsPage.evaluate(() =>
+    await prefsPage.selectOption('#appearance-shortcut-mode-browse', 'auto');
+    check('choosing When there is room restores it at this width', await prefsPage.evaluate(() =>
         !document.getElementById('browse-shortcut-btn').classList.contains('header-shortcut-hidden')));
-    await prefsPage.uncheck('#appearance-show-tour-shortcut');
-    await prefsPage.check('#appearance-show-formula-shortcut');
+
+    check('priority starts at the registry default', await prefsPage.evaluate(() =>
+        window.appearance.getShortcutPriority().join('>') === 'browse>formula>tour'));
+    await prefsPage.click('#appearance-shortcut-list .appearance-shortcut-row:nth-child(3) .appearance-shortcut-move:first-of-type');
+    check('the priority controls reorder the list', await prefsPage.evaluate(() =>
+        window.appearance.getShortcutPriority().join('>') === 'browse>tour>formula'));
+    await prefsPage.evaluate(() => window.appearance.setShortcutPriority(['browse', 'formula', 'tour']));
+
+    await prefsPage.selectOption('#appearance-shortcut-mode-tour', 'never');
+    await prefsPage.selectOption('#appearance-shortcut-mode-formula', 'always');
     check('the Appearance controls apply both choices immediately', await prefsPage.evaluate(() =>
         document.getElementById('tour-shortcut-btn').classList.contains('header-shortcut-hidden')
         && !document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
-    await prefsPage.press('#appearance-modal', 'Escape');
-    await prefsPage.evaluate(() => window.appearance.setShowFormulaShortcut(true));
+    // Close deterministically: focus now sits in a <select>, which swallows
+    // Escape before the modal sees it.
+    await prefsPage.evaluate(() => document.getElementById('appearance-modal').classList.add('hidden'));
+    await prefsPage.evaluate(() => window.appearance.setShortcutMode('formula', 'always'));
     await prefsPage.click('#math-mode-btn');
-    await prefsPage.evaluate(() => window.appearance.setShowFormulaShortcut(false));
+    await prefsPage.evaluate(() => window.appearance.setShortcutMode('formula', 'never'));
     check('hiding Formula also closes its open palette', await prefsPage.evaluate(() => {
         const button = document.getElementById('math-mode-btn');
         return button.classList.contains('header-shortcut-hidden')
@@ -227,10 +249,11 @@ try {
         document.getElementById('tour-shortcut-btn').classList.contains('header-shortcut-hidden')
         && document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
     await prefsPage.evaluate(() => window.appearance.reset());
-    check('Reset restores the defaults (tour visible, browse visible, formula hidden)', await prefsPage.evaluate(() =>
-        !document.getElementById('tour-shortcut-btn').classList.contains('header-shortcut-hidden')
-        && !document.getElementById('browse-shortcut-btn').classList.contains('header-shortcut-hidden')
-        && document.getElementById('math-mode-btn').classList.contains('header-shortcut-hidden')));
+    check('Reset restores the defaults (tour and browse auto, formula never)', await prefsPage.evaluate(() =>
+        window.appearance.getShortcutMode('browse') === 'auto'
+        && window.appearance.getShortcutMode('tour') === 'auto'
+        && window.appearance.getShortcutMode('formula') === 'never'
+        && !document.getElementById('browse-shortcut-btn').classList.contains('header-shortcut-hidden')));
     check('shortcut controls produce no page errors', prefsErrors.length === 0, prefsErrors.join(' | '));
     await prefs.close();
 
@@ -271,8 +294,14 @@ try {
             innerWidth,
         };
     });
-    check('default header (tour + browse visible, formula hidden) fits 320px without clipping',
-        compactHeader.tourVisible && compactHeader.browseVisible && !compactHeader.formulaVisible
+    // At 320px the header has room for the mandatory buttons and the status
+    // badge and nothing else — one optional button already wraps it. So the
+    // "auto" default correctly yields NO optional shortcuts here, and the
+    // header still occupies a single row. That is the whole point of the third
+    // state: the same settings give a different answer on a wider screen,
+    // which test_header_shortcuts.mjs pins across widths.
+    check('at 320px the auto shortcuts stand down and the header stays one row',
+        !compactHeader.tourVisible && !compactHeader.browseVisible && !compactHeader.formulaVisible
         && compactHeader.withinViewport && compactHeader.scrollWidth <= compactHeader.innerWidth,
         JSON.stringify(compactHeader));
     await compact.close();
