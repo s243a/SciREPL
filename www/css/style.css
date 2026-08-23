@@ -3252,13 +3252,41 @@ body.force-mobile .vfs-delete-btn {
 }
 
 .tour-language-shortcut {
+    /* Stacked, not a row: sharing one line left the select ~119px while the
+       French value needs ~139px, so the chosen mode was clipped on a 320px
+       first run. The label sits above and the control owns the width. */
     display: flex;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
     margin-top: 10px;
     color: var(--text-secondary);
     font-size: 13px;
     line-height: 1.4;
+}
+
+.tour-language-shortcut > label {
+    display: block;
+}
+
+.tour-language-shortcut .settings-select {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+}
+
+/* Room enough: label and control share a line again. */
+@media (min-width: 480px) {
+    .tour-language-shortcut {
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .tour-language-shortcut .settings-select {
+        width: auto;
+        flex: 1 1 auto;
+    }
 }
 
 /* ===== What's new ===== */

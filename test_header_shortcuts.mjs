@@ -36,11 +36,28 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
         return { ctx, page };
     };
 
-    // The header keeps moving after a viewport change: the fitter runs on the
-    // next frame, the status badge swaps "loading …" for "ready", and i18n may
-    // relabel. A fixed sleep either flakes or wastes time, so wait until two
-    // consecutive frames produce the same header signature.
-    const settle = (page) => page.waitForFunction(() => new Promise((resolve) => {
+    // Settling has two parts, and conflating them is what made this flaky.
+    //
+    // FIRST the app must reach its terminal startup state. Two identical frames
+    // prove nothing while the badge still says "loading …": the swap to "ready"
+    // arrives later, changes the badge width, and re-triggers the fitter after
+    // the assertion has already read the header. setStatus() writes the state
+    // onto the badge's className — ready | running | error — which is exact and
+    // locale-independent, unlike matching the visible text.
+    //
+    // THEN wait for layout to stop moving, since the fitter itself runs on a
+    // frame. No fixed sleeps in either half.
+    const terminal = (page) => page.waitForFunction(() => {
+        if (window.__SCIREPL_APP_READY !== true) return false;
+        const badge = document.getElementById('status-badge');
+        if (!badge) return false;
+        if (badge.className !== 'ready') return false;          // still running/erroring
+        // i18n may relabel the badge after it settles, which moves the header
+        // again; require the translated text to have been applied.
+        return !window.i18n || !window.i18n.applyToDom || badge.textContent.trim().length > 0;
+    }, null, { timeout: 60_000 });
+
+    const frames = (page) => page.waitForFunction(() => new Promise((resolve) => {
         const signature = () => {
             const bar = document.querySelector('.header-right');
             if (!bar) return 'none';
@@ -48,11 +65,14 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
                 el.id || el.className,
                 el.classList.contains('header-shortcut-hidden') ? 0 : 1,
                 Math.round(el.getBoundingClientRect().width),
-            ].join(':')).join('|') + '#' + Math.round(bar.getBoundingClientRect().height);
+            ].join(':')).join('|') + '#' + Math.round(bar.getBoundingClientRect().height)
+              + '#' + (document.getElementById('status-badge') || {}).className;
         };
         const before = signature();
         requestAnimationFrame(() => requestAnimationFrame(() => resolve(signature() === before)));
     }), null, { timeout: 30_000 });
+
+    const settle = async (page) => { await terminal(page); await frames(page); };
 
     const state = (page) => page.evaluate(() => {
         const vis = (id) => {
@@ -85,7 +105,10 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
 
         ({ ctx, page } = await open(412, 915));
         s = await state(page);
-        check('412px: both auto shortcuts fit, still one row',
+        // Explicitly a ONE-NOTEBOOK measurement: section 9 shows the same width
+        // holds fewer shortcuts once the selector is populated, so this must not
+        // be read as "412px is always enough".
+        check('412px with a single notebook: both auto shortcuts fit, still one row',
             s.browse && s.tour && s.rows === 1, JSON.stringify(s));
         await ctx.close();
 
@@ -245,7 +268,133 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
             narrow.ratio > 0.9, JSON.stringify(narrow));
         await ctx.close();
 
-        console.log('8. Legacy on/off values keep meaning what the user chose');
+        console.log('9. A populated notebook selector counts as "no room"');
+        // The selector is a flex sibling that gets squeezed as the right group
+        // grows: its buttons keep their size and overflow, so their centres
+        // hit-test to Search/Tour instead of themselves. Nothing resizes, so
+        // only a content observer notices — and dropping a low-priority auto
+        // candidate is what gives the selector its width back.
+        const hitTest = (page) => page.evaluate(() => {
+            const header = document.getElementById('app-header');
+            const bad = [];
+            for (const el of header.querySelectorAll('button, select')) {
+                const box = el.getBoundingClientRect();
+                if (box.width <= 0) continue;
+                const at = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+                if (!(at === el || el.contains(at))) {
+                    bad.push(`${el.id || el.className}→${(at && (at.id || at.className)) || 'null'}`);
+                }
+            }
+            const selector = document.getElementById('notebook-selector-container');
+            return {
+                misHits: bad,
+                controls: selector.querySelectorAll('button, select').length,
+                selectorW: Math.round(selector.getBoundingClientRect().width),
+            };
+        });
+        const addNotebook = (page, name) =>
+            page.evaluate((n) => window.notebookManager.createNotebook({ name: n }), name);
+
+        for (const width of [411, 412, 430]) {
+            ({ ctx, page } = await open(width, 915));
+            const before = await state(page);
+            await addNotebook(page, `Second ${width}`);
+            await settle(page);                       // no resize: the fitter must react to content
+            const hits = await hitTest(page);
+            check(`${width}px + 2 notebooks: every header control hits itself`,
+                hits.misHits.length === 0, JSON.stringify(hits));
+            const after = await state(page);
+            check(`${width}px: an auto candidate stood down to make the room`,
+                (before.browse && !after.browse) || hits.misHits.length === 0,
+                `before=${before.browse} after=${after.browse}`);
+
+            // ...and it comes back when the pressure goes away again.
+            await page.evaluate(() => {
+                const list = window.notebookManager.getNotebooks();
+                const id = list.length > 1 ? list[list.length - 1].id : null;
+                if (!id) throw new Error('expected a second notebook to remove');
+                window.notebookManager.removeNotebook(id);
+            });
+            await settle(page);
+            const restored = await state(page);
+            check(`${width}px: removing the notebook gives the shortcut back`,
+                restored.browse === before.browse, `${before.browse} -> ${restored.browse}`);
+            await ctx.close();
+        }
+
+        console.log('10. Renaming counts too, and RTL is not assumed left-to-right');
+        ({ ctx, page } = await open(412, 915));
+        await addNotebook(page, 'N2');
+        await settle(page);
+        await page.evaluate(() => {
+            const list = window.notebookManager.getNotebooks();
+            const id = list.length ? list[list.length - 1].id : null;
+            if (!id) throw new Error('expected a notebook to rename');
+            window.notebookManager.renameNotebook(id,
+                'A considerably longer notebook name than before');
+        });
+        await settle(page);
+        const renamed = await hitTest(page);
+        check('a rename that widens the selector keeps every control hittable',
+            renamed.misHits.length === 0, JSON.stringify(renamed));
+        await ctx.close();
+
+        ({ ctx, page } = await open(412, 915));
+        await page.evaluate(() => { document.documentElement.dir = 'rtl'; });
+        await addNotebook(page, 'RTL second');
+        await settle(page);
+        const rtl = await hitTest(page);
+        check('RTL: the groups swap sides and controls still hit themselves',
+            rtl.misHits.length === 0, JSON.stringify(rtl));
+        await ctx.close();
+
+        console.log('11. The first-run control is readable in long locales and RTL');
+        // The onboarding select shares the tour panel with its label. On a 320px
+        // first run the French value ("Quand il y a de la place") needs more
+        // width than a shared row leaves it, so the selected mode was clipped —
+        // and an unstyled native select is only about 19px high.
+        for (const [locale, dir] of [['fr', 'ltr'], ['es', 'ltr'], ['ar', 'rtl']]) {
+            const first = await browser.newContext({ viewport: { width: 320, height: 915 } });
+            await first.addInitScript((loc) => {
+                localStorage.setItem('scirepl_privacy_accepted', '1');
+                localStorage.setItem('scirepl_language', loc);
+            }, locale);
+            const fp = await first.newPage();
+            await fp.goto(APP_URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+            await fp.waitForSelector('#tour-show-shortcut', { timeout: TIMEOUT });
+            const box = await fp.evaluate(() => {
+                const select = document.getElementById('tour-show-shortcut');
+                const rect = select.getBoundingClientRect();
+                const style = getComputedStyle(select);
+                // Measure the chosen option the way the browser will draw it.
+                const canvas = document.createElement('canvas').getContext('2d');
+                canvas.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+                const text = select.options[select.selectedIndex].textContent;
+                const padding = parseFloat(style.paddingInlineStart || 0)
+                    + parseFloat(style.paddingInlineEnd || 0);
+                const panel = select.closest('.tour-panel, #tour-overlay, body')
+                    .getBoundingClientRect();
+                return {
+                    text,
+                    needs: Math.ceil(canvas.measureText(text).width + padding + 24),
+                    has: Math.round(rect.width),
+                    height: Math.round(rect.height),
+                    withinPanel: rect.left >= panel.left - 1 && rect.right <= panel.right + 1,
+                    dir: document.documentElement.dir || 'ltr',
+                };
+            });
+            check(`${locale} first run: the selected mode fits the control`,
+                box.has >= box.needs, JSON.stringify(box));
+            check(`${locale} first run: the control is a comfortable height`,
+                box.height >= 36, String(box.height));
+            check(`${locale} first run: it stays inside the panel`, box.withinPanel, JSON.stringify(box));
+            if (dir === 'rtl') {
+                check('ar first run: the document really is RTL', box.dir === 'rtl', box.dir);
+            }
+            await first.close();
+        }
+
+        console.log('12. Legacy on/off values keep meaning what the user chose');
         ({ ctx, page } = await open(800, 400), await 0);
         await page.evaluate(() => {
             localStorage.setItem('scirepl_appearance_show_browse_shortcut', '0');

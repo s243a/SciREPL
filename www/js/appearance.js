@@ -414,6 +414,11 @@
             const bar = document.querySelector('.header-right');
             if (!bar || this._fittingShortcuts) return;
             this._fittingShortcuts = true;
+            // Hiding a shortcut gives the selector its width back, which the
+            // observers below would report as a change and call us again.
+            // Detach for the duration: the pass already re-reads everything.
+            if (this._selectorObserver) this._selectorObserver.disconnect();
+            if (this._selectorSizeObserver) this._selectorSizeObserver.disconnect();
             try {
                 const auto = [];
                 for (const spec of this.presentShortcuts()) {
@@ -424,7 +429,7 @@
                 }
                 const order = this.getShortcutPriority();
                 auto.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
-                for (let i = auto.length - 1; i >= 0 && this._headerWraps(bar); i--) {
+                for (let i = auto.length - 1; i >= 0 && this._headerCrowded(bar); i--) {
                     this._showHeaderShortcut(auto[i].id, false);
                 }
                 // Record what the measurement decided, so the Appearance panel
@@ -436,7 +441,54 @@
                     }).length);
             } finally {
                 this._fittingShortcuts = false;
+                const selector = document.getElementById('notebook-selector-container');
+                if (selector && this._selectorObserver) {
+                    this._selectorObserver.observe(selector, {
+                        childList: true, subtree: true, characterData: true, attributes: true,
+                    });
+                }
+                if (selector && this._selectorSizeObserver) this._selectorSizeObserver.observe(selector);
             }
+        }
+
+        /** The header is crowded when the optional buttons make it wrap OR when
+         *  they squeeze a sibling badly enough that its content spills into
+         *  them. Both are "there is not room", and only the second was missing. */
+        _headerCrowded(bar) {
+            return this._headerWraps(bar) || this._headerCollides(bar);
+        }
+
+        /**
+         * True when the notebook selector's CONTENT reaches into the right-hand
+         * controls.
+         *
+         * The selector is a flex sibling: as the right group grows it is
+         * squeezed — 30px at 411px with a second notebook — while its buttons
+         * keep their size and simply overflow, so nothing about its own box
+         * changes and a size observer never fires. The result is a Delete
+         * button whose centre hit-tests to Search. Giving the shortcuts back
+         * lets the selector have its width again, which is why dropping a
+         * low-priority `auto` candidate genuinely fixes it here.
+         *
+         * Rectangle intersection rather than left/right comparisons, so this
+         * reads the same in RTL, where the two groups swap sides.
+         */
+        _headerCollides(bar) {
+            const selector = document.getElementById('notebook-selector-container');
+            if (!selector) return false;
+            let left = Infinity;
+            let right = -Infinity;
+            for (const child of selector.querySelectorAll('*')) {
+                if (child.offsetParent === null) continue;
+                const box = child.getBoundingClientRect();
+                if (box.width <= 0) continue;
+                left = Math.min(left, box.left);
+                right = Math.max(right, box.right);
+            }
+            if (right === -Infinity) return false;
+            const group = bar.getBoundingClientRect();
+            // 1px of slack: adjacent boxes may share an edge without overlapping.
+            return right > group.left + 1 && left < group.right - 1;
         }
 
         /** The group wraps when it is taller than its tallest child. */
@@ -481,8 +533,21 @@
                 });
             }
             const selector = document.getElementById('notebook-selector-container');
-            if (selector && typeof ResizeObserver === 'function') {
-                new ResizeObserver(refit).observe(selector);
+            if (selector) {
+                // Content, not just size: adding, removing or renaming a
+                // notebook changes what the selector needs without changing the
+                // box it is allowed to occupy, so a ResizeObserver alone never
+                // fires for the case that actually collides.
+                if (typeof MutationObserver === 'function') {
+                    this._selectorObserver = new MutationObserver(refit);
+                    this._selectorObserver.observe(selector, {
+                        childList: true, subtree: true, characterData: true, attributes: true,
+                    });
+                }
+                if (typeof ResizeObserver === 'function') {
+                    this._selectorSizeObserver = new ResizeObserver(refit);
+                    this._selectorSizeObserver.observe(selector);
+                }
             }
         }
 

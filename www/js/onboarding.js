@@ -411,6 +411,10 @@
                 label.setAttribute('for', id);
                 label.textContent = t('tour.language.showTourShortcut');
                 const select = document.createElement('select');
+                // Same styling as the language select above it: without this the
+                // native control renders about 19px high and clips its own value
+                // in the longer locales ("Quand il y a de la place").
+                select.className = 'settings-select';
                 select.id = id;
                 for (const [value, key, fallback] of [
                     ['always', 'appearance.shortcutAlways', 'Always'],

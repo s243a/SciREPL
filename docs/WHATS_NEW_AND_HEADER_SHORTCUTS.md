@@ -66,8 +66,33 @@ a measurement, not a preference: what constrains the header is the width left
 after the title, the notebook selector, the mandatory buttons and the status
 badge, and that changes with the viewport, the button scale and the locale. The
 same settings therefore give a different header in portrait and in landscape.
-Measured on the default settings at the shipped button scale: nothing fits at
-320px, one shortcut fits at about 379px, and both fit from roughly 412px up.
+
+Fit also depends on what the rest of the header needs, not only on the viewport.
+The notebook selector is a flex sibling: with a second notebook its buttons need
+about 120px, and if the shortcuts have taken the width it is squeezed to 30-49px
+and its buttons overflow into them — a Delete button whose centre hit-tests to
+Search. That counts as "no room", so a low-priority `auto` candidate stands down
+and the selector gets its width back.
+
+Measured figures below are **with both candidates set to `auto`** (Formula
+defaults to `never`, so a default install has one candidate fewer) at the
+shipped button scale:
+
+| scenario | result |
+| --- | --- |
+| 320px, one notebook | no candidate fits |
+| ~379px, one notebook | exactly one candidate fits |
+| 412px, one notebook | both candidates fit |
+| 411-430px, two notebooks | one candidate stands down so the selector fits |
+
+A single-notebook measurement is not a safe guide once the selector is
+populated: the same width holds fewer shortcuts.
+
+**Known limitation.** At 320px with a populated selector the collision remains,
+because the selector's buttons then overlap Search, Menu and Help — mandatory
+controls the fitter may never hide. Standing down every optional shortcut does
+not resolve it. That case needs a change to the selector's own layout and is
+tracked separately; do not expect the fitter to fix it.
 
 ### Priority
 
