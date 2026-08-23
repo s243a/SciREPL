@@ -582,38 +582,90 @@ html, body {
    preference; either shortcut can be restored from Appearance. `!important`
    wins over `.icon-btn`'s flex display and user-agent handling of `hidden`. */
 /* Header-shortcut settings: name, its three-state choice, and the two
-   priority controls that decide which button gives up its place first. */
+   priority controls that decide which button gives up its place first.
+
+   Grid rather than a flex row: at 320px a side-by-side row squeezed the select
+   to ~50px and clipped "When there is room" — and the longest translations are
+   longer still. The name takes a full row, the select the next, so the chosen
+   mode stays readable in every locale. Arrow targets are 44px, the minimum
+   comfortable touch size. */
 .appearance-shortcut-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
 }
 
-.appearance-shortcut-row {
-    display: flex;
+/* Two classes deliberately: these rows are also .appearance-row, whose
+   display:flex is declared later in this file and would otherwise win on
+   source order at equal specificity. */
+.appearance-row.appearance-shortcut-row {
+    display: grid;
+    /* Narrowest: three stacked rows, so the select owns the full width and the
+       longest translation of "When there is room" is never clipped. Sharing the
+       line with two 44px arrows left it about 112px, which truncates. */
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "name"
+        "mode"
+        "controls";
     align-items: center;
-    gap: 8px;
+    gap: 6px 8px;
 }
 
 .appearance-shortcut-name {
-    flex: 1 1 auto;
+    grid-area: name;
     min-width: 0;
+    font-weight: 600;
 }
 
-.appearance-shortcut-row .settings-select {
-    flex: 0 1 auto;
-    max-width: 55%;
+.appearance-row.appearance-shortcut-row .settings-select {
+    grid-area: mode;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+}
+
+.appearance-shortcut-controls {
+    grid-area: controls;
+    display: flex;
+    gap: 6px;
 }
 
 .appearance-shortcut-move {
     flex: 0 0 auto;
-    min-width: 34px;
-    padding-inline: 8px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    font-size: 16px;
+    line-height: 1;
 }
 
 .appearance-shortcut-move:disabled {
     opacity: 0.4;
     cursor: default;
+}
+
+/* Wider dialogs have room for the classic single line. */
+.appearance-shortcut-controls {
+    justify-self: end;
+}
+
+/* A little more width: name above, select and arrows share the second line. */
+@media (min-width: 380px) {
+    .appearance-row.appearance-shortcut-row {
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "name     name"
+            "mode     controls";
+    }
+}
+
+/* Wider dialogs have room for the classic single line. */
+@media (min-width: 560px) {
+    .appearance-row.appearance-shortcut-row {
+        grid-template-columns: 1fr minmax(12em, auto) auto;
+        grid-template-areas: "name mode controls";
+    }
 }
 
 .header-shortcut-hidden {
@@ -3074,9 +3126,6 @@ body.force-mobile .vfs-delete-btn {
     line-height: 1.5;
 }
 
-.appearance-shortcut-row {
-    padding-block: 6px;
-}
 
 .appearance-shortcut-row .appearance-check {
     display: flex;

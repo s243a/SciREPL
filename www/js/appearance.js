@@ -464,6 +464,26 @@
             window.addEventListener('resize', refit);
             window.addEventListener('orientationchange', refit);
             document.addEventListener('i18n:changed', refit);
+
+            // The header also changes width on its own: the status badge grows
+            // from "ready" to "loading ClojureScript…" and shrinks back, and the
+            // notebook selector grows as notebooks are added or renamed. Both
+            // change how much room the shortcuts have, in both directions.
+            //
+            // Deliberately NOT observing .header-right: hiding a button changes
+            // its size, which would re-enter this and could oscillate. These two
+            // sources change independently of the fit, so watching them cannot
+            // feed back.
+            const badge = document.getElementById('status-badge');
+            if (badge && typeof MutationObserver === 'function') {
+                new MutationObserver(refit).observe(badge, {
+                    childList: true, characterData: true, subtree: true,
+                });
+            }
+            const selector = document.getElementById('notebook-selector-container');
+            if (selector && typeof ResizeObserver === 'function') {
+                new ResizeObserver(refit).observe(selector);
+            }
         }
 
         _showHeaderShortcut(id, show) {

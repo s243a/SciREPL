@@ -396,20 +396,38 @@
             // header space on a phone. Put the choice in the very first tour
             // panel so a newcomer can decide before the shortcut is introduced;
             // Appearance offers the same setting later.
-            if (window.appearance) {
+            if (window.appearance && window.appearance.getShortcutMode) {
+                // Three states, not a tick box. A checkbox cannot say "when
+                // there is room", so it used to report the default as ON while
+                // the header had actually stood the shortcut down for lack of
+                // width — and ticking it back rewrote `auto` to `always`,
+                // silently opting the user into a wrapped header they never
+                // asked for. The select says what is really stored.
+                const t = window.t || ((k) => k);
+                const row = document.createElement('div');
+                row.className = 'tour-language-shortcut';
+                const id = 'tour-show-shortcut';
                 const label = document.createElement('label');
-                label.className = 'tour-language-shortcut';
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.id = 'tour-show-shortcut';
-                checkbox.checked = window.appearance.getShowTourShortcut();
-                checkbox.addEventListener('change', () => {
-                    window.appearance.setShowTourShortcut(checkbox.checked);
+                label.setAttribute('for', id);
+                label.textContent = t('tour.language.showTourShortcut');
+                const select = document.createElement('select');
+                select.id = id;
+                for (const [value, key, fallback] of [
+                    ['always', 'appearance.shortcutAlways', 'Always'],
+                    ['auto', 'appearance.shortcutAuto', 'When there is room'],
+                    ['never', 'appearance.shortcutNever', 'Never'],
+                ]) {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = t(key) || fallback;
+                    select.appendChild(option);
+                }
+                select.value = window.appearance.getShortcutMode('tour');
+                select.addEventListener('change', () => {
+                    window.appearance.setShortcutMode('tour', select.value);
                 });
-                const text = document.createElement('span');
-                text.textContent = (window.t || ((k) => k))('tour.language.showTourShortcut');
-                label.append(checkbox, text);
-                wrap.appendChild(label);
+                row.append(label, select);
+                wrap.appendChild(row);
             }
             return wrap;
         }

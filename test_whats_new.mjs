@@ -153,10 +153,20 @@ try {
     await first.addInitScript(() => localStorage.setItem('scirepl_privacy_accepted', '1'));
     const { page: firstPage, errors: firstErrors } = await load(first);
     await firstPage.waitForSelector('#tour-overlay', { timeout: 10_000 });
-    check('the Tour shortcut option starts checked', await firstPage.isChecked('#tour-show-shortcut'));
-    await firstPage.uncheck('#tour-show-shortcut');
+    // The first-run control is a three-state select, not a tick box: a tick box
+    // reported the default as ON while `auto` had stood the shortcut down for
+    // lack of width, and ticking it back rewrote the choice to `always`.
+    check('the first-run control shows the real default, not a Boolean',
+        await firstPage.inputValue('#tour-show-shortcut') === 'auto',
+        await firstPage.inputValue('#tour-show-shortcut'));
+    await firstPage.selectOption('#tour-show-shortcut', 'never');
     check('the first tour panel can hide the Tour shortcut', await firstPage.evaluate(() =>
         document.getElementById('tour-shortcut-btn').classList.contains('header-shortcut-hidden')));
+    check('choosing Never stores never, not a Boolean', await firstPage.evaluate(() =>
+        window.appearance.getShortcutMode('tour') === 'never'));
+    await firstPage.selectOption('#tour-show-shortcut', 'auto');
+    check('choosing When there is room restores auto rather than always',
+        await firstPage.evaluate(() => window.appearance.getShortcutMode('tour') === 'auto'));
     await firstPage.evaluate(() => {
         const tour = window.onboarding;
         while (tour.el && tour.index < tour.steps.length - 1) tour.go(1);
