@@ -71,19 +71,20 @@ Fit also depends on what the rest of the header needs, not only on the viewport.
 The notebook selector is a flex sibling: with a second notebook its buttons need
 about 120px, and if the shortcuts have taken the width it is squeezed to 30-49px
 and its buttons overflow into them — a Delete button whose centre hit-tests to
-Search. That counts as "no room", so a low-priority `auto` candidate stands down
-and the selector gets its width back.
+Search. That counts as "no room", so `auto` candidates stand down — lowest
+priority first, and as many as it takes — until the selector has its width back.
+At 411-430px with a second notebook that is BOTH of them, not one.
 
-Measured figures below are **with both candidates set to `auto`** (Formula
-defaults to `never`, so a default install has one candidate fewer) at the
-shipped button scale:
+Measured figures below are **with Browse and Tour at `auto`** — which IS the
+default: Browse and Tour default to `auto` and Formula to `never`, so a default
+install matches this table exactly. Measured at the shipped button scale:
 
 | scenario | result |
 | --- | --- |
 | 320px, one notebook | no candidate fits |
 | ~379px, one notebook | exactly one candidate fits |
 | 412px, one notebook | both candidates fit |
-| 411-430px, two notebooks | one candidate stands down so the selector fits |
+| 411-430px, two notebooks | both candidates stand down (`shortcutsDropped="2"`) so the selector fits |
 
 A single-notebook measurement is not a safe guide once the selector is
 populated: the same width holds fewer shortcuts.

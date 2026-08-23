@@ -3275,19 +3275,11 @@ body.force-mobile .vfs-delete-btn {
     min-height: 40px;
 }
 
-/* Room enough: label and control share a line again. */
-@media (min-width: 480px) {
-    .tour-language-shortcut {
-        flex-direction: row;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .tour-language-shortcut .settings-select {
-        width: auto;
-        flex: 1 1 auto;
-    }
-}
+/* Stacked at EVERY width. A viewport breakpoint is the wrong signal here:
+   the tour card caps its own width (~340px), so a wide window does not give
+   this row any more room — at 480px the shared-line layout left the French
+   value 151px when it needs 176px. The card, not the viewport, is the
+   constraint, and within the card the stacked column always fits. */
 
 /* ===== What's new ===== */
 

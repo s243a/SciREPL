@@ -38,23 +38,22 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
 
     // Settling has two parts, and conflating them is what made this flaky.
     //
-    // FIRST the app must reach its terminal startup state. Two identical frames
-    // prove nothing while the badge still says "loading …": the swap to "ready"
-    // arrives later, changes the badge width, and re-triggers the fitter after
-    // the assertion has already read the header. setStatus() writes the state
-    // onto the badge's className — ready | running | error — which is exact and
-    // locale-independent, unlike matching the visible text.
+    // FIRST the app must reach its terminal startup state: the badge className
+    // says "ready" (exact, locale-independent) AND localization has actually
+    // finished. The latter must be i18n's own init() promise — the badge keeps
+    // its untranslated "loading…" fallback TEXT after its className has already
+    // flipped to "ready", so "class is ready and the text is nonempty" accepts
+    // a header that i18n is still about to relabel, which moves the layout
+    // after the assertion has read it. No inferring readiness from visible
+    // text, and no sleeps.
     //
     // THEN wait for layout to stop moving, since the fitter itself runs on a
-    // frame. No fixed sleeps in either half.
-    const terminal = (page) => page.waitForFunction(() => {
+    // frame.
+    const terminal = (page) => page.waitForFunction(async () => {
         if (window.__SCIREPL_APP_READY !== true) return false;
+        if (window.i18n && window.i18n.init) await window.i18n.init().catch(() => {});
         const badge = document.getElementById('status-badge');
-        if (!badge) return false;
-        if (badge.className !== 'ready') return false;          // still running/erroring
-        // i18n may relabel the badge after it settles, which moves the header
-        // again; require the translated text to have been applied.
-        return !window.i18n || !window.i18n.applyToDom || badge.textContent.trim().length > 0;
+        return !!badge && badge.className === 'ready';
     }, null, { timeout: 60_000 });
 
     const frames = (page) => page.waitForFunction(() => new Promise((resolve) => {
@@ -73,6 +72,58 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
     }), null, { timeout: 30_000 });
 
     const settle = async (page) => { await terminal(page); await frames(page); };
+
+    const hitTest = (page) => page.evaluate(() => {
+        const header = document.getElementById('app-header');
+        const bad = [];
+        for (const el of header.querySelectorAll('button, select')) {
+            const box = el.getBoundingClientRect();
+            if (box.width <= 0) continue;
+            const at = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+            if (!(at === el || el.contains(at))) {
+                bad.push(`${el.id || el.className}→${(at && (at.id || at.className)) || 'null'}`);
+            }
+        }
+        const selector = document.getElementById('notebook-selector-container');
+        return {
+            misHits: bad,
+            controls: selector.querySelectorAll('button, select').length,
+            selectorW: Math.round(selector.getBoundingClientRect().width),
+        };
+    });
+    const addNotebook = (page, name) =>
+        page.evaluate((n) => window.notebookManager.createNotebook({ name: n }), name);
+    const dropped = (page) => page.evaluate(() =>
+        document.querySelector('.header-right').dataset.shortcutsDropped);
+
+    // Fit-pass instrumentation for the quiescence and delivery checks: count
+    // every _fitHeaderShortcuts() call without changing what it does.
+    const instrument = (page) => page.evaluate(() => {
+        const m = window.appearance;
+        if (!m.__origFit) {
+            m.__origFit = m._fitHeaderShortcuts.bind(m);
+            m._fitHeaderShortcuts = (...a) => { m.__fitCount += 1; return m.__origFit(...a); };
+        }
+        m.__fitCount = 0;
+    });
+    const resetFits = (page) => page.evaluate(() => { window.appearance.__fitCount = 0; });
+    const readFits = (page) => page.evaluate(() => window.appearance.__fitCount);
+    const fitsOver = (page, frames) => page.evaluate((n) => new Promise((resolve) => {
+        const start = window.appearance.__fitCount;
+        let i = 0;
+        const step = () => (++i >= n)
+            ? resolve(window.appearance.__fitCount - start)
+            : requestAnimationFrame(step);
+        requestAnimationFrame(step);
+    }), frames);
+    // A bounded pass straight after a change is legitimate (the selector's size
+    // observer reports the width the fit itself gave back); drain those frames
+    // so the measurement window that follows must be COMPLETELY silent.
+    const drainFrames = (page) => page.evaluate(() => new Promise((resolve) => {
+        let i = 0;
+        const step = () => (++i >= 10) ? resolve() : requestAnimationFrame(step);
+        requestAnimationFrame(step);
+    }));
 
     const state = (page) => page.evaluate(() => {
         const vis = (id) => {
@@ -268,47 +319,69 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
             narrow.ratio > 0.9, JSON.stringify(narrow));
         await ctx.close();
 
+        console.log('8. The fitter goes quiet once the header is settled');
+        // Round 3: re-observing the ResizeObserver target after every pass
+        // scheduled a fresh INITIAL delivery, which queued another pass —
+        // about 60 complete fits per second on an idle page, forever. The
+        // observers now stay attached, so once the header has settled nothing
+        // may run until a real change arrives.
+        ({ ctx, page } = await open(412, 915));
+        await instrument(page);
+        await drainFrames(page);
+        await resetFits(page);
+        let idleFits = await fitsOver(page, 30);
+        check('one notebook: zero fit passes across 30 idle frames',
+            idleFits === 0, `fits=${idleFits}`);
+        await addNotebook(page, 'Quiescence 2');
+        await settle(page);
+        const afterMutation = await readFits(page);
+        check('a real selector mutation reaches the fitter',
+            afterMutation > 0, `fits=${afterMutation}`);
+        await drainFrames(page);
+        await resetFits(page);
+        idleFits = await fitsOver(page, 30);
+        check('two notebooks: quiet again once the change is handled',
+            idleFits === 0, `fits=${idleFits}`);
+        await page.setViewportSize({ width: 800, height: 400 });
+        await settle(page);
+        const afterResize = await readFits(page);
+        check('a real resize reaches the fitter', afterResize > 0, `fits=${afterResize}`);
+        await drainFrames(page);
+        await resetFits(page);
+        idleFits = await fitsOver(page, 30);
+        check('and it goes quiet after the resize too', idleFits === 0, `fits=${idleFits}`);
+        await ctx.close();
+
         console.log('9. A populated notebook selector counts as "no room"');
         // The selector is a flex sibling that gets squeezed as the right group
         // grows: its buttons keep their size and overflow, so their centres
         // hit-test to Search/Tour instead of themselves. Nothing resizes, so
-        // only a content observer notices — and dropping a low-priority auto
-        // candidate is what gives the selector its width back.
-        const hitTest = (page) => page.evaluate(() => {
-            const header = document.getElementById('app-header');
-            const bad = [];
-            for (const el of header.querySelectorAll('button, select')) {
-                const box = el.getBoundingClientRect();
-                if (box.width <= 0) continue;
-                const at = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
-                if (!(at === el || el.contains(at))) {
-                    bad.push(`${el.id || el.className}→${(at && (at.id || at.className)) || 'null'}`);
-                }
-            }
-            const selector = document.getElementById('notebook-selector-container');
-            return {
-                misHits: bad,
-                controls: selector.querySelectorAll('button, select').length,
-                selectorW: Math.round(selector.getBoundingClientRect().width),
-            };
-        });
-        const addNotebook = (page, name) =>
-            page.evaluate((n) => window.notebookManager.createNotebook({ name: n }), name);
-
+        // only a content observer notices — and dropping auto candidates is
+        // what gives the selector its width back. At these widths BOTH default
+        // candidates must stand down (measured `shortcutsDropped="2"`); round 2
+        // wrongly claimed one, behind an assertion that could never fail.
         for (const width of [411, 412, 430]) {
             ({ ctx, page } = await open(width, 915));
             const before = await state(page);
+            const droppedBefore = await dropped(page);
+            check(`${width}px, one notebook: Browse and Tour both fit, none dropped`,
+                before.browse && before.tour && droppedBefore === '0',
+                JSON.stringify({ ...before, dropped: droppedBefore }));
             await addNotebook(page, `Second ${width}`);
             await settle(page);                       // no resize: the fitter must react to content
             const hits = await hitTest(page);
+            const after = await state(page);
+            const droppedAfter = await dropped(page);
+            check(`${width}px + 2 notebooks: both auto candidates stand down`,
+                !after.browse && !after.tour && droppedAfter === '2',
+                JSON.stringify({ ...after, dropped: droppedAfter }));
+            check(`${width}px + 2 notebooks: the selector shows its 4 controls`,
+                hits.controls === 4, JSON.stringify(hits));
             check(`${width}px + 2 notebooks: every header control hits itself`,
                 hits.misHits.length === 0, JSON.stringify(hits));
-            const after = await state(page);
-            check(`${width}px: an auto candidate stood down to make the room`,
-                (before.browse && !after.browse) || hits.misHits.length === 0,
-                `before=${before.browse} after=${after.browse}`);
 
-            // ...and it comes back when the pressure goes away again.
+            // ...and removal must restore the EXACT starting state, not merely
+            // one remembered boolean.
             await page.evaluate(() => {
                 const list = window.notebookManager.getNotebooks();
                 const id = list.length > 1 ? list[list.length - 1].id : null;
@@ -317,15 +390,25 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
             });
             await settle(page);
             const restored = await state(page);
-            check(`${width}px: removing the notebook gives the shortcut back`,
-                restored.browse === before.browse, `${before.browse} -> ${restored.browse}`);
+            const droppedRestored = await dropped(page);
+            check(`${width}px: removal restores the exact starting state`,
+                restored.browse === before.browse && restored.tour === before.tour
+                    && droppedRestored === '0',
+                JSON.stringify({ ...restored, dropped: droppedRestored }));
             await ctx.close();
         }
 
-        console.log('10. Renaming counts too, and RTL is not assumed left-to-right');
+        console.log('10. Renaming re-runs the fitter, and RTL is not assumed left-to-right');
+        // The selector draws a short and a long name at identical widths, so a
+        // rename cannot prove width growth here — round 2 claimed it did. What
+        // it MUST prove is delivery: the rerender reaches the fitter through
+        // the content observer, and the header stays fully hittable after it.
         ({ ctx, page } = await open(412, 915));
         await addNotebook(page, 'N2');
         await settle(page);
+        await instrument(page);
+        await drainFrames(page);
+        await resetFits(page);
         await page.evaluate(() => {
             const list = window.notebookManager.getNotebooks();
             const id = list.length ? list[list.length - 1].id : null;
@@ -334,13 +417,23 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
                 'A considerably longer notebook name than before');
         });
         await settle(page);
+        const renameFits = await readFits(page);
+        check('a rename reaches the fitter through the content observer',
+            renameFits > 0, `fits=${renameFits}`);
         const renamed = await hitTest(page);
-        check('a rename that widens the selector keeps every control hittable',
+        check('and every control stays hittable after the rename',
             renamed.misHits.length === 0, JSON.stringify(renamed));
         await ctx.close();
 
         ({ ctx, page } = await open(412, 915));
-        await page.evaluate(() => { document.documentElement.dir = 'rtl'; });
+        // A real RTL locale, awaited to completion — assigning
+        // documentElement.dir directly can be overwritten by localization that
+        // has not finished, which is exactly the race terminal() exists for.
+        await page.evaluate(() => window.i18n.activate('ar'));
+        await settle(page);
+        const dirNow = await page.evaluate(() => document.documentElement.getAttribute('dir'));
+        check('activating Arabic really flips the document to RTL',
+            dirNow === 'rtl', String(dirNow));
         await addNotebook(page, 'RTL second');
         await settle(page);
         const rtl = await hitTest(page);
@@ -352,46 +445,50 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
         // The onboarding select shares the tour panel with its label. On a 320px
         // first run the French value ("Quand il y a de la place") needs more
         // width than a shared row leaves it, so the selected mode was clipped —
-        // and an unstyled native select is only about 19px high.
+        // and an unstyled native select is only about 19px high. Round 3 added
+        // 479/480/600: a viewport breakpoint at 480px re-clipped French and
+        // Spanish because the tour card caps its own width, so a wider window
+        // never gave the row more room. The control stays stacked at EVERY
+        // width now, and these widths prove it.
         for (const [locale, dir] of [['fr', 'ltr'], ['es', 'ltr'], ['ar', 'rtl']]) {
-            const first = await browser.newContext({ viewport: { width: 320, height: 915 } });
-            await first.addInitScript((loc) => {
-                localStorage.setItem('scirepl_privacy_accepted', '1');
-                localStorage.setItem('scirepl_language', loc);
-            }, locale);
-            const fp = await first.newPage();
-            await fp.goto(APP_URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
-            await fp.waitForSelector('#tour-show-shortcut', { timeout: TIMEOUT });
-            const box = await fp.evaluate(() => {
-                const select = document.getElementById('tour-show-shortcut');
-                const rect = select.getBoundingClientRect();
-                const style = getComputedStyle(select);
-                // Measure the chosen option the way the browser will draw it.
-                const canvas = document.createElement('canvas').getContext('2d');
-                canvas.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-                const text = select.options[select.selectedIndex].textContent;
-                const padding = parseFloat(style.paddingInlineStart || 0)
-                    + parseFloat(style.paddingInlineEnd || 0);
-                const panel = select.closest('.tour-panel, #tour-overlay, body')
-                    .getBoundingClientRect();
-                return {
-                    text,
-                    needs: Math.ceil(canvas.measureText(text).width + padding + 24),
-                    has: Math.round(rect.width),
-                    height: Math.round(rect.height),
-                    withinPanel: rect.left >= panel.left - 1 && rect.right <= panel.right + 1,
-                    dir: document.documentElement.dir || 'ltr',
-                };
-            });
-            check(`${locale} first run: the selected mode fits the control`,
-                box.has >= box.needs, JSON.stringify(box));
-            check(`${locale} first run: the control is a comfortable height`,
-                box.height >= 36, String(box.height));
-            check(`${locale} first run: it stays inside the panel`, box.withinPanel, JSON.stringify(box));
-            if (dir === 'rtl') {
-                check('ar first run: the document really is RTL', box.dir === 'rtl', box.dir);
+            for (const width of [320, 479, 480, 600]) {
+                const first = await browser.newContext({ viewport: { width, height: 915 } });
+                await first.addInitScript((loc) => {
+                    localStorage.setItem('scirepl_privacy_accepted', '1');
+                    localStorage.setItem('scirepl_language', loc);
+                }, locale);
+                const fp = await first.newPage();
+                await fp.goto(APP_URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+                await fp.waitForSelector('#tour-show-shortcut', { timeout: TIMEOUT });
+                const box = await fp.evaluate(() => {
+                    const select = document.getElementById('tour-show-shortcut');
+                    const rect = select.getBoundingClientRect();
+                    const style = getComputedStyle(select);
+                    // Measure the chosen option the way the browser will draw it.
+                    const canvas = document.createElement('canvas').getContext('2d');
+                    canvas.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+                    const text = select.options[select.selectedIndex].textContent;
+                    const padding = parseFloat(style.paddingInlineStart || 0)
+                        + parseFloat(style.paddingInlineEnd || 0);
+                    const panel = select.closest('.tour-panel, #tour-overlay, body')
+                        .getBoundingClientRect();
+                    return {
+                        text,
+                        needs: Math.ceil(canvas.measureText(text).width + padding + 24),
+                        has: Math.round(rect.width),
+                        height: Math.round(rect.height),
+                        withinPanel: rect.left >= panel.left - 1 && rect.right <= panel.right + 1,
+                        dir: document.documentElement.dir || 'ltr',
+                    };
+                });
+                check(`${locale}@${width}px first run: mode fits, comfortable, inside the panel`,
+                    box.has >= box.needs && box.height >= 36 && box.withinPanel,
+                    JSON.stringify(box));
+                if (dir === 'rtl' && width === 320) {
+                    check('ar first run: the document really is RTL', box.dir === 'rtl', box.dir);
+                }
+                await first.close();
             }
-            await first.close();
         }
 
         console.log('12. Legacy on/off values keep meaning what the user chose');

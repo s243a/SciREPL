@@ -414,11 +414,15 @@
             const bar = document.querySelector('.header-right');
             if (!bar || this._fittingShortcuts) return;
             this._fittingShortcuts = true;
-            // Hiding a shortcut gives the selector its width back, which the
-            // observers below would report as a change and call us again.
-            // Detach for the duration: the pass already re-reads everything.
-            if (this._selectorObserver) this._selectorObserver.disconnect();
-            if (this._selectorSizeObserver) this._selectorSizeObserver.disconnect();
+            // The observers below stay attached throughout. Detaching and
+            // re-observing here looks tidy but re-observing a ResizeObserver
+            // target schedules a fresh INITIAL delivery every pass, which
+            // queues another pass forever (~60 idle fits/s). Attached, the
+            // worst case is one bounded extra pass: this pass only mutates
+            // the shortcut buttons, never the selector's subtree, so the
+            // MutationObserver stays silent, and the ResizeObserver only
+            // fires when the selector's box actually changed — after which
+            // the extra pass changes nothing and everything goes quiet.
             try {
                 const auto = [];
                 for (const spec of this.presentShortcuts()) {
@@ -441,13 +445,6 @@
                     }).length);
             } finally {
                 this._fittingShortcuts = false;
-                const selector = document.getElementById('notebook-selector-container');
-                if (selector && this._selectorObserver) {
-                    this._selectorObserver.observe(selector, {
-                        childList: true, subtree: true, characterData: true, attributes: true,
-                    });
-                }
-                if (selector && this._selectorSizeObserver) this._selectorSizeObserver.observe(selector);
             }
         }
 
