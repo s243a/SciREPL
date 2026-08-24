@@ -89,11 +89,14 @@ install matches this table exactly. Measured at the shipped button scale:
 A single-notebook measurement is not a safe guide once the selector is
 populated: the same width holds fewer shortcuts.
 
-**Known limitation.** At 320px with a populated selector the collision remains,
-because the selector's buttons then overlap Search, Menu and Help — mandatory
-controls the fitter may never hide. Standing down every optional shortcut does
-not resolve it. That case needs a change to the selector's own layout and is
-tracked separately; do not expect the fitter to fix it.
+**Known limitation.** From roughly 320px up to about 400px, a populated
+selector still collides with the mandatory controls: both optional shortcuts
+are already dropped (`shortcutsDropped="2"`), yet the selector's buttons
+overlap Search, Menu and Help — controls the fitter may never hide. Probed at
+~10px steps with two notebooks, mis-hits persist through 400px and clear by
+405px, so this includes common phone widths, not just 320px. It is
+pre-existing baseline behaviour that needs a change to the selector's own
+layout — tracked separately; do not expect the fitter to fix it.
 
 ### Priority
 

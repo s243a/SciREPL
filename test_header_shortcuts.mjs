@@ -51,7 +51,9 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
     // frame.
     const terminal = (page) => page.waitForFunction(async () => {
         if (window.__SCIREPL_APP_READY !== true) return false;
-        if (window.i18n && window.i18n.init) await window.i18n.init().catch(() => {});
+        // A localization initialization failure must FAIL the run loudly, not
+        // quietly degrade into measuring an untranslated header.
+        if (window.i18n && window.i18n.init) await window.i18n.init();
         const badge = document.getElementById('status-badge');
         return !!badge && badge.className === 'ready';
     }, null, { timeout: 60_000 });
@@ -442,53 +444,115 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
         await ctx.close();
 
         console.log('11. The first-run control is readable in long locales and RTL');
-        // The onboarding select shares the tour panel with its label. On a 320px
+        // The onboarding select shares the tour card with its label. On a 320px
         // first run the French value ("Quand il y a de la place") needs more
         // width than a shared row leaves it, so the selected mode was clipped —
-        // and an unstyled native select is only about 19px high. Round 3 added
-        // 479/480/600: a viewport breakpoint at 480px re-clipped French and
-        // Spanish because the tour card caps its own width, so a wider window
-        // never gave the row more room. The control stays stacked at EVERY
-        // width now, and these widths prove it.
+        // and an unstyled native select is only about 19px high.
+        //
+        // Round 4 made this section AUTHORITATIVE. The old version measured as
+        // soon as #tour-show-shortcut existed, which is before localization:
+        // with i18n fetches delayed it happily measured the raw key
+        // 'appearance.shortcutAuto' in an English document and called that
+        // French. It also bounded the select against
+        // `.tour-panel, #tour-overlay, body` — `.tour-panel` does not exist, so
+        // the "panel" was the full-screen overlay and containment was vacuous.
+        // Now: await i18n.init() (a rejection FAILS the run), wait for the
+        // requested locale to actually be active, assert the hard-coded
+        // localized value, and bound against the real #tour-card in both axes.
+        //
+        // Geometry: the card is NOT capped at the stylesheet's 340px —
+        // onboarding's _position() sets an inline max-width of viewport minus
+        // 16px, so the card grows with the window (304px at 320, 584px at 600).
+        // The clipping risk was always the SHARED LINE giving the select only
+        // what the label left; stacked, the select gets the full card width at
+        // every viewport.
+        const LOCALIZED_AUTO = {
+            fr: 'Quand il y a de la place',
+            es: 'Cuando haya espacio',
+            ar: 'عند توفر مساحة',
+        };
+        const firstRunBox = async (width, locale, routeDelayMs) => {
+            const first = await browser.newContext({ viewport: { width, height: 915 } });
+            if (routeDelayMs) {
+                await first.route('**/i18n/**', async (route) => {
+                    await new Promise((r) => setTimeout(r, routeDelayMs));
+                    await route.continue();
+                });
+            }
+            await first.addInitScript((loc) => {
+                localStorage.setItem('scirepl_privacy_accepted', '1');
+                localStorage.setItem('scirepl_language', loc);
+            }, locale);
+            const fp = await first.newPage();
+            await fp.goto(APP_URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+            await fp.waitForSelector('#tour-show-shortcut', { timeout: TIMEOUT });
+            // What the OLD test measured: the select exists before localization.
+            const early = await fp.evaluate(() => {
+                const select = document.getElementById('tour-show-shortcut');
+                return { text: select.options[select.selectedIndex].textContent,
+                         lang: document.documentElement.lang };
+            });
+            // Localization readiness — an init() rejection fails the run.
+            await fp.evaluate(() => window.i18n.init());
+            await fp.waitForFunction((loc) => document.documentElement.lang === loc,
+                locale, { timeout: TIMEOUT });
+            const box = await fp.evaluate(() => {
+                const select = document.getElementById('tour-show-shortcut');
+                const card = select.closest('#tour-card');
+                const rect = select.getBoundingClientRect();
+                const style = getComputedStyle(select);
+                // Measure the chosen option the way the browser will draw it.
+                const canvas = document.createElement('canvas').getContext('2d');
+                canvas.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+                const text = select.options[select.selectedIndex].textContent;
+                const padding = parseFloat(style.paddingInlineStart || 0)
+                    + parseFloat(style.paddingInlineEnd || 0);
+                const c = card ? card.getBoundingClientRect() : null;
+                return {
+                    text,
+                    lang: document.documentElement.lang,
+                    needs: Math.ceil(canvas.measureText(text).width + padding + 24),
+                    has: Math.round(rect.width),
+                    height: Math.round(rect.height),
+                    cardFound: !!card,
+                    cardW: c && Math.round(c.width),
+                    withinCard: !!c
+                        && rect.left >= c.left - 1 && rect.right <= c.right + 1
+                        && rect.top >= c.top - 1 && rect.bottom <= c.bottom + 1,
+                    dir: document.documentElement.dir || 'ltr',
+                };
+            });
+            await first.close();
+            return { early, box };
+        };
         for (const [locale, dir] of [['fr', 'ltr'], ['es', 'ltr'], ['ar', 'rtl']]) {
             for (const width of [320, 479, 480, 600]) {
-                const first = await browser.newContext({ viewport: { width, height: 915 } });
-                await first.addInitScript((loc) => {
-                    localStorage.setItem('scirepl_privacy_accepted', '1');
-                    localStorage.setItem('scirepl_language', loc);
-                }, locale);
-                const fp = await first.newPage();
-                await fp.goto(APP_URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
-                await fp.waitForSelector('#tour-show-shortcut', { timeout: TIMEOUT });
-                const box = await fp.evaluate(() => {
-                    const select = document.getElementById('tour-show-shortcut');
-                    const rect = select.getBoundingClientRect();
-                    const style = getComputedStyle(select);
-                    // Measure the chosen option the way the browser will draw it.
-                    const canvas = document.createElement('canvas').getContext('2d');
-                    canvas.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-                    const text = select.options[select.selectedIndex].textContent;
-                    const padding = parseFloat(style.paddingInlineStart || 0)
-                        + parseFloat(style.paddingInlineEnd || 0);
-                    const panel = select.closest('.tour-panel, #tour-overlay, body')
-                        .getBoundingClientRect();
-                    return {
-                        text,
-                        needs: Math.ceil(canvas.measureText(text).width + padding + 24),
-                        has: Math.round(rect.width),
-                        height: Math.round(rect.height),
-                        withinPanel: rect.left >= panel.left - 1 && rect.right <= panel.right + 1,
-                        dir: document.documentElement.dir || 'ltr',
-                    };
-                });
-                check(`${locale}@${width}px first run: mode fits, comfortable, inside the panel`,
-                    box.has >= box.needs && box.height >= 36 && box.withinPanel,
+                const { box } = await firstRunBox(width, locale);
+                check(`${locale}@${width}px first run: the ${locale} value is really active`,
+                    box.lang === locale && box.text === LOCALIZED_AUTO[locale],
+                    JSON.stringify({ lang: box.lang, text: box.text }));
+                check(`${locale}@${width}px first run: mode fits, comfortable, inside #tour-card`,
+                    box.cardFound && box.has >= box.needs && box.height >= 36 && box.withinCard,
                     JSON.stringify(box));
                 if (dir === 'rtl' && width === 320) {
                     check('ar first run: the document really is RTL', box.dir === 'rtl', box.dir);
                 }
-                await first.close();
             }
+        }
+
+        // Delayed-manifest regression: hold every i18n fetch back 4s. The
+        // select exists long before that, showing the raw key in an English
+        // document — the exact frame the old test measured and passed on. The
+        // authoritative sequence must (a) prove that frame is real and (b)
+        // still end up measuring genuine French.
+        {
+            const { early, box } = await firstRunBox(320, 'fr', 4000);
+            check('delayed manifest: the untranslated frame is real (raw key before init)',
+                early.text === 'appearance.shortcutAuto' && early.lang !== 'fr',
+                JSON.stringify(early));
+            check('delayed manifest: the measurement is genuine French, not the raw key',
+                box.lang === 'fr' && box.text === LOCALIZED_AUTO.fr && box.withinCard,
+                JSON.stringify({ lang: box.lang, text: box.text, withinCard: box.withinCard }));
         }
 
         console.log('12. Legacy on/off values keep meaning what the user chose');

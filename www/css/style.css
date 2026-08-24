@@ -3275,11 +3275,15 @@ body.force-mobile .vfs-delete-btn {
     min-height: 40px;
 }
 
-/* Stacked at EVERY width. A viewport breakpoint is the wrong signal here:
-   the tour card caps its own width (~340px), so a wide window does not give
-   this row any more room — at 480px the shared-line layout left the French
-   value 151px when it needs 176px. The card, not the viewport, is the
-   constraint, and within the card the stacked column always fits. */
+/* Stacked at EVERY width. The stylesheet's 340px cap on #tour-card above is
+   overridden at runtime: onboarding's _position() sets an inline max-width of
+   viewport minus 16px, so the card — and this row — grow with the window
+   (304px card at a 320px viewport, 584px at 600px). What clipped the select
+   was never the card: a SHARED LINE gives the select only what the label
+   leaves, and a long locale's label left French 151px of a 464px card at a
+   480px viewport when its value needs 176px. Stacked, the select gets the
+   full card width at every viewport, so no breakpoint is needed and no
+   locale can be squeezed. */
 
 /* ===== What's new ===== */
 
