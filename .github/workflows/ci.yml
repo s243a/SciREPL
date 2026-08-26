@@ -11,6 +11,7 @@ on:
       - main
       - 'feat/**'
       - 'fix/**'
+      - 'codex/**'
 
 jobs:
   test:
