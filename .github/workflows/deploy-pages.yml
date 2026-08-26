@@ -163,6 +163,14 @@ jobs:
       - name: Run onboarding tour tests
         run: node test_onboarding.mjs
 
+      - name: Run Android hardware Back tests (when present on this tag)
+        run: |
+          if test -f test_android_back.mjs; then
+            npm run test:android-back
+          else
+            echo "test_android_back.mjs absent on this ref; skipping"
+          fi
+
       - name: Run What's New and header-shortcut tests
         # Older tags predate test_header_shortcuts.mjs; the explicit if/else
         # keeps them deployable while a FAILING suite still fails the step —

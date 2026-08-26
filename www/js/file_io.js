@@ -1043,7 +1043,6 @@ class FileIO {
         const AUTO_COLLAPSE_THRESHOLD = 5;
         // Folders unchecked by default (redundant with notebooks/ .ipynb exports)
         const UNCHECKED_DIRS = new Set(['shared/notebooks']);
-
         for (const [dir, files] of groups) {
             const defaultChecked = !UNCHECKED_DIRS.has(dir);
             const group = document.createElement('div');
@@ -1064,11 +1063,20 @@ class FileIO {
             folderCb.type = 'checkbox';
             folderCb.checked = defaultChecked;
             folderCb.dataset.dir = dir;
+            const folderName = dir === '.' ? 'notebooks/' : `${dir}/`;
+            if (typeof window.setI18nAttr === 'function') {
+                window.setI18nAttr(folderCb, 'aria-label', 'fileIo.includeFolderAria', {
+                    folder: folderName,
+                });
+            } else {
+                folderCb.setAttribute('aria-label', this._t(
+                    'fileIo.includeFolderAria', 'Include folder {folder}', { folder: folderName }));
+            }
             folderRow.appendChild(folderCb);
 
             // Folder name + file count
             const nameSpan = document.createElement('span');
-            nameSpan.textContent = (dir === '.' ? 'notebooks/' : dir + '/');
+            nameSpan.textContent = folderName;
             folderRow.appendChild(nameSpan);
             const countSpan = document.createElement('span');
             countSpan.className = 'pkg-tree-size';

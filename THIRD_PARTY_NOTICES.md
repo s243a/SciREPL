@@ -272,7 +272,7 @@ SciREPL Free downloads this runtime on first R use; it is not embedded in the Fr
 
 ## Capacitor and official plugins
 
-- **Version:** core/android 8.0.2; browser/share 8.0.1; filesystem 8.1.2
+- **Version:** core/android 8.0.2; app 8.1.1; browser/share 8.0.1; filesystem 8.1.2
 - **Delivery:** Android-specific bundle
 - **Licence:** MIT
 - **Source:** https://github.com/ionic-team/capacitor
@@ -282,6 +282,7 @@ SciREPL Free downloads this runtime on first R use; it is not embedded in the Fr
 | Package | Version | Licence | Source |
 |---|---:|---|---|
 | @capacitor/android | 8.0.2 | MIT | https://github.com/ionic-team/capacitor/tree/8.0.2 |
+| @capacitor/app | 8.1.1 | MIT | https://github.com/ionic-team/capacitor-plugins/tree/%40capacitor/app%408.1.1/app |
 | @capacitor/core | 8.0.2 | MIT | https://github.com/ionic-team/capacitor/tree/8.0.2 |
 | @capacitor/browser | 8.0.1 | MIT | https://github.com/ionic-team/capacitor-plugins/tree/%40capacitor/browser%408.0.1/browser |
 | @capacitor/filesystem | 8.1.2 | MIT | https://github.com/ionic-team/capacitor-plugins/tree/%40capacitor/filesystem%408.1.2/filesystem |

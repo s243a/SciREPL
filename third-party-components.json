@@ -421,7 +421,7 @@
     {
       "id": "capacitor",
       "name": "Capacitor and official plugins",
-      "version": "core/android 8.0.2; browser/share 8.0.1; filesystem 8.1.2",
+      "version": "core/android 8.0.2; app 8.1.1; browser/share 8.0.1; filesystem 8.1.2",
       "licenseExpression": "MIT",
       "licenseDocuments": ["MIT"],
       "copyright": "Copyright (c) 2017-present Drifty Co. and contributors",
@@ -429,6 +429,7 @@
       "delivery": { "kind": "platform", "platform": "Android" },
       "packages": [
         { "name": "@capacitor/android", "packageName": "@capacitor/android", "version": "8.0.2", "licenseExpression": "MIT", "sourceUrl": "https://github.com/ionic-team/capacitor/tree/8.0.2" },
+        { "name": "@capacitor/app", "packageName": "@capacitor/app", "version": "8.1.1", "licenseExpression": "MIT", "sourceUrl": "https://github.com/ionic-team/capacitor-plugins/tree/%40capacitor/app%408.1.1/app" },
         { "name": "@capacitor/core", "packageName": "@capacitor/core", "version": "8.0.2", "licenseExpression": "MIT", "sourceUrl": "https://github.com/ionic-team/capacitor/tree/8.0.2" },
         { "name": "@capacitor/browser", "packageName": "@capacitor/browser", "version": "8.0.1", "licenseExpression": "MIT", "sourceUrl": "https://github.com/ionic-team/capacitor-plugins/tree/%40capacitor/browser%408.0.1/browser" },
         { "name": "@capacitor/filesystem", "packageName": "@capacitor/filesystem", "version": "8.1.2", "licenseExpression": "MIT", "sourceUrl": "https://github.com/ionic-team/capacitor-plugins/tree/%40capacitor/filesystem%408.1.2/filesystem" },

@@ -590,6 +590,7 @@
     "fileIo.downloadDialogTitle": "تنزيل {filename}",
     "fileIo.unknownExportFormat": "تنسيق تصدير غير معروف: {format}",
     "fileIo.noFilesToExport": "لا توجد ملفات للتصدير.",
+    "fileIo.includeFolderAria": "تضمين المجلد {folder}",
     "fileIo.noNotebooksAvailable": "لا توجد دفاتر ملاحظات متوفرة.",
     "fileIo.noActiveNotebook": "لا يوجد دفتر ملاحظات نشط.",
     "fileIo.noNotebooksWithCells": "لا توجد دفاتر ملاحظات تحتوي على خلايا لتصديرها.",

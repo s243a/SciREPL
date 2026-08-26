@@ -590,6 +590,7 @@
     "fileIo.downloadDialogTitle": "{filename} ডাউনলোড করুন",
     "fileIo.unknownExportFormat": "অজানা এক্সপোর্ট ফরম্যাট: {format}",
     "fileIo.noFilesToExport": "এক্সপোর্ট করার মতো কোনো ফাইল নেই।",
+    "fileIo.includeFolderAria": "ফোল্ডার {folder} অন্তর্ভুক্ত করুন",
     "fileIo.noNotebooksAvailable": "কোনো নোটবুক উপলব্ধ নেই।",
     "fileIo.noActiveNotebook": "কোনো সক্রিয় নোটবুক নেই।",
     "fileIo.noNotebooksWithCells": "এক্সপোর্টের জন্য সেলযুক্ত কোনো নোটবুক নেই।",

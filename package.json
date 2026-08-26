@@ -42,6 +42,7 @@
     "test:pip-resolver": "node test_pip_resolver.mjs",
     "test:pip-cell": "node test_pip_cell.mjs",
     "test:header-shortcuts": "node test_header_shortcuts.mjs",
+    "test:android-back": "node test_android_back.mjs",
     "test:lang-selector": "node test_lang_selector.mjs",
     "test:math-palette": "node test_math_palette.mjs"
   },
@@ -59,6 +60,7 @@
   "license": "MIT",
   "dependencies": {
     "@capacitor/android": "^8.0.2",
+    "@capacitor/app": "^8.1.1",
     "@capacitor/browser": "^8.0.1",
     "@capacitor/core": "^8.0.2",
     "@capacitor/filesystem": "^8.1.2",

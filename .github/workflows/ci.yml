@@ -91,6 +91,9 @@ jobs:
       - name: Onboarding tour
         run: node test_onboarding.mjs
 
+      - name: Android hardware Back routing
+        run: npm run test:android-back
+
       - name: What's New and header shortcuts
         run: node test_whats_new.mjs
 

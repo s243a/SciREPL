@@ -833,6 +833,7 @@
     "fileIo.downloadDialogTitle": "Download {filename}",
     "fileIo.unknownExportFormat": "Unknown export format: {format}",
     "fileIo.noFilesToExport": "No files to export.",
+    "fileIo.includeFolderAria": "Include folder {folder}",
     "fileIo.noNotebooksAvailable": "No notebooks available.",
     "fileIo.noActiveNotebook": "No active notebook.",
     "fileIo.noNotebooksWithCells": "No notebooks with cells to export.",

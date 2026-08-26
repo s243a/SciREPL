@@ -602,6 +602,7 @@
     "fileIo.downloadDialogTitle": "Télécharger {filename}",
     "fileIo.unknownExportFormat": "Format d'exportation inconnu : {format}",
     "fileIo.noFilesToExport": "Aucun fichier à exporter.",
+    "fileIo.includeFolderAria": "Inclure le dossier {folder}",
     "fileIo.noNotebooksAvailable": "Aucun carnet disponible.",
     "fileIo.noActiveNotebook": "Aucun carnet actif.",
     "fileIo.noNotebooksWithCells": "Aucun carnet contenant des cellules à exporter.",
