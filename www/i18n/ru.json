@@ -590,6 +590,7 @@
     "fileIo.downloadDialogTitle": "Скачать {filename}",
     "fileIo.unknownExportFormat": "Неизвестный формат экспорта: {format}",
     "fileIo.noFilesToExport": "Нет файлов для экспорта.",
+    "fileIo.includeFolderAria": "Включить папку {folder}",
     "fileIo.noNotebooksAvailable": "Нет доступных блокнотов.",
     "fileIo.noActiveNotebook": "Нет активного блокнота.",
     "fileIo.noNotebooksWithCells": "Нет блокнотов с ячейками для экспорта.",

@@ -599,6 +599,7 @@
     "fileIo.downloadDialogTitle": "Descargar {filename}",
     "fileIo.unknownExportFormat": "Formato de exportación desconocido: {format}",
     "fileIo.noFilesToExport": "No hay archivos para exportar.",
+    "fileIo.includeFolderAria": "Incluir la carpeta {folder}",
     "fileIo.noNotebooksAvailable": "No hay cuadernos disponibles.",
     "fileIo.noActiveNotebook": "Ningún cuaderno activo.",
     "fileIo.noNotebooksWithCells": "No hay cuadernos con celdas para exportar.",

@@ -590,6 +590,7 @@
     "fileIo.downloadDialogTitle": "下载 {filename}",
     "fileIo.unknownExportFormat": "未知的导出格式：{format}",
     "fileIo.noFilesToExport": "没有可导出的文件。",
+    "fileIo.includeFolderAria": "包含文件夹 {folder}",
     "fileIo.noNotebooksAvailable": "没有可用的笔记本。",
     "fileIo.noActiveNotebook": "没有活动笔记本。",
     "fileIo.noNotebooksWithCells": "没有包含单元格的笔记本可供导出。",

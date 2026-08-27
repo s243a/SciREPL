@@ -18,7 +18,7 @@ const goodWorkbookBytes = encodeJson({
     version: 1,
     notebook: {
         name: 'Cálculo de Pi (catálogo)',
-        kernelLanguage: 'python',
+        kernelLanguage: 'prolog',
         cells: [{
             id: 1,
             type: 'markdown',
@@ -26,6 +26,12 @@ const goodWorkbookBytes = encodeJson({
             code: '# Cálculo de Pi (catálogo)\n\nContenido verificado en español.',
         }, {
             id: 2,
+            type: 'code',
+            language: 'prolog',
+            name: 'load_unifyweaver_dependency',
+            code: "['/user/init.pl'].",
+        }, {
+            id: 3,
             type: 'code',
             language: 'javascript',
             name: 'must_not_auto_execute',
@@ -77,7 +83,8 @@ const catalogIndexBytes = encodeJson({
             name: 'Cálculo de Pi (catálogo)',
             description: 'Libro oficial verificado en español.',
             type: 'workbook',
-            kernels: ['python'],
+            kernels: ['prolog', 'javascript'],
+            requires: ['unifyweaver-scirepl'],
             locales: ['es'],
             format: 'srwb',
             path: 'workbooks/es/compute-pi-browser.srwb',
@@ -195,10 +202,7 @@ const catalogRoutes = new Map([
                 addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version);
                 }, { once: true });
-                localStorage.setItem('scirepl_installed_packages', JSON.stringify([{
-                    name: 'UnifyWeaver SciREPL',
-                    pages_url: 'packages/unifyweaver_scirepl.zip'
-                }]));
+                localStorage.removeItem('scirepl_installed_packages');
             }
         }, { privacyRevision: PRIVACY_REVISION });
 
@@ -287,8 +291,8 @@ const catalogRoutes = new Map([
         const callGraphEntry = cards.find(c => c.name === 'Call Graph Analysis and SCC Detection');
 
         testLog('Package entry exists', !!packageEntry);
-        testLog('Previously installed package is labelled Installed',
-            packageEntry?.buttonText === 'Installed' && packageEntry?.buttonDisabled,
+        testLog('Clean profile offers the dependency package for installation',
+            packageEntry?.buttonText === 'Install' && !packageEntry?.buttonDisabled,
             `${packageEntry?.buttonText}, disabled=${packageEntry?.buttonDisabled}`);
         testLog('UnifyWeaver bundle entry exists', !!bundleEntry);
         testLog('UnifyWeaver bundle advertises four workbooks', bundleEntry?.contents === '4 workbooks', bundleEntry?.contents);
@@ -601,6 +605,48 @@ const catalogRoutes = new Map([
                     && strictSpanish.showBuiltins === false,
                 JSON.stringify(strictSpanish));
 
+            const invalidDependency = await page.evaluate(async () => {
+                localStorage.setItem('scirepl_auto_switch_workbook', '0');
+                const catalog = window.packageCatalog;
+                const originalFetch = catalog._fetchCatalogItem.bind(catalog);
+                let artifactFetches = 0;
+                catalog._fetchCatalogItem = async (...args) => {
+                    artifactFetches++;
+                    return originalFetch(...args);
+                };
+                const notebooksBefore = window.notebookManager.getNotebooks().length;
+                const installedBefore = localStorage.getItem('scirepl_installed_packages');
+                const invalid = {
+                    ...catalog._remoteEntries[0],
+                    id: 'runtime-mutated-dependency',
+                    catalogKey: 'scirepl-catalog:runtime-mutated-dependency',
+                    requires: ['unknown-package'],
+                };
+                catalog._remoteEntries.push(invalid);
+                const button = document.createElement('button');
+                button.dataset.catalogKey = invalid.catalogKey;
+                try {
+                    await catalog._install(button);
+                    return {
+                        artifactFetches,
+                        button: button.textContent.trim(),
+                        installedChanged: localStorage.getItem('scirepl_installed_packages')
+                            !== installedBefore,
+                        notebookDelta: window.notebookManager.getNotebooks().length
+                            - notebooksBefore,
+                    };
+                } finally {
+                    catalog._remoteEntries = catalog._remoteEntries.filter(item => item !== invalid);
+                    catalog._fetchCatalogItem = originalFetch;
+                }
+            });
+            testLog('Unknown remote dependency fails before fetch or notebook/package mutation',
+                invalidDependency.button === 'Failed'
+                    && invalidDependency.artifactFetches === 0
+                    && !invalidDependency.installedChanged
+                    && invalidDependency.notebookDelta === 0,
+                JSON.stringify(invalidDependency));
+
             await page.evaluate(() => {
                 delete window.__catalogRemoteAutoExecuted;
                 window.__catalogRemoteEnsureReadyCalls = 0;
@@ -608,6 +654,16 @@ const catalogRoutes = new Map([
                 window.kernelManager.ensureReady = function (...args) {
                     window.__catalogRemoteEnsureReadyCalls++;
                     return window.__catalogRemoteOriginalEnsureReady.apply(this, args);
+                };
+                window.__catalogRemoteOriginalDoImport =
+                    window.packageCatalog._doImport.bind(window.packageCatalog);
+                window.__catalogRemoteImportEnsureDeltas = {};
+                window.packageCatalog._doImport = async function (pkg, blob) {
+                    const before = window.__catalogRemoteEnsureReadyCalls;
+                    const result = await window.__catalogRemoteOriginalDoImport(pkg, blob);
+                    window.__catalogRemoteImportEnsureDeltas[pkg.id] =
+                        window.__catalogRemoteEnsureReadyCalls - before;
+                    return result;
                 };
             });
             await page.click(
@@ -636,6 +692,13 @@ const catalogRoutes = new Map([
                             && cell.code.includes('__catalogRemoteAutoExecuted')),
                     sentinelExecuted: window.__catalogRemoteAutoExecuted === true,
                     ensureReadyCalls: window.__catalogRemoteEnsureReadyCalls,
+                    workbookEnsureReadyCalls:
+                        window.__catalogRemoteImportEnsureDeltas?.['compute-pi-es-browser'],
+                    requires: entry?.requires,
+                    dependencyInstalled: window.packageCatalog._isInstalled(
+                        window.packageCatalog.packages.find(item => item.id === 'unifyweaver-scirepl')),
+                    rememberedDependencies: JSON.parse(
+                        localStorage.getItem('scirepl_installed_packages') || '[]'),
                 };
             });
             testLog('Official remote workbook installs through the normal import path',
@@ -655,8 +718,115 @@ const catalogRoutes = new Map([
                 installedRemote.autoExecuteEnabled
                     && installedRemote.sentinelPresent
                     && !installedRemote.sentinelExecuted
-                    && installedRemote.ensureReadyCalls === 0,
+                    && installedRemote.workbookEnsureReadyCalls === 0,
                 JSON.stringify(installedRemote));
+            testLog('Remote dependency metadata installs UnifyWeaver from a clean profile',
+                installedRemote.requires?.join('|') === 'unifyweaver-scirepl'
+                    && installedRemote.dependencyInstalled
+                    && installedRemote.rememberedDependencies.some(item =>
+                        item?.id === 'unifyweaver-scirepl'),
+                JSON.stringify(installedRemote));
+
+            const dependencyRepair = await page.evaluate(async () => {
+                const catalog = window.packageCatalog;
+                const key = 'scirepl-catalog:compute-pi-es-browser';
+                const entry = catalog.packages.find(item => item.catalogKey === key);
+                const button = document.querySelector(
+                    '.pkg-card[data-catalog-key="' + key + '"] .pkg-install-btn');
+                const notebooksBefore = window.notebookManager.getNotebooks().slice();
+                const originalFetch = catalog._fetchCatalogItem;
+                const originalImport = catalog._doImport;
+                const originalSetTimeout = window.setTimeout;
+                const fetched = { failure: [], success: [] };
+                const workbookImports = { failure: 0, success: 0 };
+                let phase = 'failure';
+                let result;
+                catalog._fetchCatalogItem = async function (pkg) {
+                    fetched[phase].push(pkg?.id || '');
+                    if (phase === 'failure' && pkg?.id === 'unifyweaver-scirepl') {
+                        throw new Error('deliberate dependency repair failure');
+                    }
+                    return originalFetch.call(this, pkg);
+                };
+                catalog._doImport = async function (pkg, blob) {
+                    if (pkg?.id === 'compute-pi-es-browser') workbookImports[phase]++;
+                    return originalImport.call(this, pkg, blob);
+                };
+                // Keep the deliberate failure's three-second label-reset timer
+                // from racing the immediate success phase of this regression.
+                window.setTimeout = function (callback, delay, ...args) {
+                    if (delay === 3000) return 0;
+                    return originalSetTimeout(callback, delay, ...args);
+                };
+                try {
+                    localStorage.removeItem('scirepl_installed_packages');
+                    catalog._syncInstallButtons();
+                    const initial = {
+                        state: catalog._installState(entry),
+                        label: button?.textContent?.trim(),
+                        expected: window.t('packageCatalog.update'),
+                        disabled: button?.disabled,
+                    };
+
+                    const failureButton = document.createElement('button');
+                    failureButton.dataset.catalogKey = key;
+                    await catalog._install(failureButton);
+                    const failure = {
+                        state: catalog._installState(entry),
+                        label: failureButton.textContent.trim(),
+                        expected: window.t('packageCatalog.failed'),
+                        disabled: failureButton.disabled,
+                    };
+
+                    phase = 'success';
+                    await catalog._install(button);
+                    const notebooksAfter = window.notebookManager.getNotebooks();
+                    result = {
+                        initial,
+                        failure,
+                        success: {
+                            state: catalog._installState(entry),
+                            label: button?.textContent?.trim(),
+                            expected: window.t('packageCatalog.installed'),
+                            disabled: button?.disabled,
+                            dependencyInstalled: catalog._isInstalled(
+                                catalog.packages.find(item => item.id === 'unifyweaver-scirepl')),
+                        },
+                        fetched,
+                        workbookImports,
+                        sameNotebooks: notebooksAfter.length === notebooksBefore.length
+                            && notebooksAfter.every((notebook, index) =>
+                                notebook === notebooksBefore[index]),
+                    };
+                } finally {
+                    catalog._fetchCatalogItem = originalFetch;
+                    catalog._doImport = originalImport;
+                    window.setTimeout = originalSetTimeout;
+                }
+                return result;
+            });
+            testLog('Current workbook with a missing dependency exposes an Update repair',
+                dependencyRepair.initial.state === 'outdated'
+                    && dependencyRepair.initial.label === dependencyRepair.initial.expected
+                    && !dependencyRepair.initial.disabled,
+                JSON.stringify(dependencyRepair));
+            testLog('Failed dependency-only repair stays actionable without touching the workbook',
+                dependencyRepair.failure.state === 'outdated'
+                    && dependencyRepair.failure.label === dependencyRepair.failure.expected
+                    && !dependencyRepair.failure.disabled
+                    && dependencyRepair.fetched.failure.join('|') === 'unifyweaver-scirepl'
+                    && dependencyRepair.workbookImports.failure === 0
+                    && dependencyRepair.sameNotebooks,
+                JSON.stringify(dependencyRepair));
+            testLog('Dependency-only repair installs the package without refetching or reimporting the workbook',
+                dependencyRepair.success.state === 'current'
+                    && dependencyRepair.success.label === dependencyRepair.success.expected
+                    && dependencyRepair.success.disabled
+                    && dependencyRepair.success.dependencyInstalled
+                    && dependencyRepair.fetched.success.join('|') === 'unifyweaver-scirepl'
+                    && dependencyRepair.workbookImports.success === 0
+                    && dependencyRepair.sameNotebooks,
+                JSON.stringify(dependencyRepair));
 
             await page.evaluate(() => { delete window.__catalogRemoteIpynbExecuted; });
             await page.click(
@@ -674,6 +844,8 @@ const catalogRoutes = new Map([
                             && cell.code.includes('__catalogRemoteIpynbExecuted')),
                     sentinelExecuted: window.__catalogRemoteIpynbExecuted === true,
                     ensureReadyCalls: window.__catalogRemoteEnsureReadyCalls,
+                    workbookEnsureReadyCalls:
+                        window.__catalogRemoteImportEnsureDeltas?.['ipynb-es-browser'],
                     sha256: notebook?.catalogSha256,
                 };
             });
@@ -681,17 +853,41 @@ const catalogRoutes = new Map([
                 installedIpynb.present
                     && installedIpynb.sentinelPresent
                     && !installedIpynb.sentinelExecuted
-                    && installedIpynb.ensureReadyCalls === 0
+                    && installedIpynb.workbookEnsureReadyCalls === 0
                     && installedIpynb.sha256 === sha256(goodIpynbBytes),
                 JSON.stringify(installedIpynb));
             await page.evaluate(() => {
                 if (window.__catalogRemoteOriginalEnsureReady) {
                     window.kernelManager.ensureReady = window.__catalogRemoteOriginalEnsureReady;
                 }
+                if (window.__catalogRemoteOriginalDoImport) {
+                    window.packageCatalog._doImport = window.__catalogRemoteOriginalDoImport;
+                }
                 delete window.__catalogRemoteOriginalEnsureReady;
                 delete window.__catalogRemoteEnsureReadyCalls;
+                delete window.__catalogRemoteOriginalDoImport;
+                delete window.__catalogRemoteImportEnsureDeltas;
                 localStorage.setItem('scirepl_auto_execute', '0');
+                localStorage.removeItem('scirepl_auto_switch_workbook');
             });
+
+            const dependencyRun = await page.evaluate(async () => {
+                const notebook = window.notebookManager.getNotebooks().find(item =>
+                    item.catalogId === 'scirepl-catalog:compute-pi-es-browser');
+                const cell = notebook?.cells?.find(item =>
+                    item.name === 'load_unifyweaver_dependency');
+                if (!cell) return { cell: false };
+                const result = await window.kernelManager.execute(cell.code, cell.language);
+                return {
+                    cell: true,
+                    stdout: result?.stdout || '',
+                    error: result?.error || '',
+                };
+            });
+            testLog('Clean-profile remote workbook runs after its dependency is installed',
+                dependencyRun.cell && !dependencyRun.error
+                    && /true\./.test(dependencyRun.stdout),
+                JSON.stringify(dependencyRun));
 
             const tamperedResult = await page.evaluate(async () => {
                 const catalog = window.packageCatalog;
@@ -719,6 +915,9 @@ const catalogRoutes = new Map([
             const requestCountBeforeReload = remoteCatalogRequests.length;
             await page.reload({ waitUntil: 'domcontentloaded' });
             await page.waitForSelector('#run-btn:not([disabled])');
+            await page.waitForFunction(() => window.notebookManager?.getNotebooks().some(notebook =>
+                notebook.catalogId === 'scirepl-catalog:compute-pi-es-browser'),
+            null, { timeout: 10_000 });
             const persistedRemote = await page.evaluate(() => {
                 const notebook = window.notebookManager.getNotebooks().find(item =>
                     item.catalogId === 'scirepl-catalog:compute-pi-es-browser');

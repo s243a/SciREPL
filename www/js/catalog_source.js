@@ -26,6 +26,7 @@
     const MAX_DESCRIPTOR_BYTES = 64 * 1024;
     const MAX_INDEX_BYTES = 1024 * 1024;
     const MAX_ITEMS = 500;
+    const MAX_REQUIRES = 8;
     const MAX_ARTIFACT_BYTES = 8 * 1024 * 1024;
     const SHA_RE = /^[0-9a-f]{64}$/;
     const COMMIT_RE = /^[0-9a-f]{40}$/;
@@ -38,6 +39,11 @@
     ]);
     const LOCALE_RE = /^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/;
     const UNSAFE_TEXT_RE = /[\p{Cc}\p{Cs}\p{Bidi_Control}\u2028\u2029]/u;
+    // A remote workbook may only request packages the app already knows how
+    // to obtain. Keep this explicit: arbitrary ids would turn a catalogue
+    // entry into an unreviewed package-fetch request.
+    const KNOWN_DEPENDENCIES = Object.freeze(['unifyweaver-scirepl']);
+    const KNOWN_DEPENDENCY_SET = new Set(KNOWN_DEPENDENCIES);
 
     const DEFAULT_CONFIG = Object.freeze({
         mode: 'stable',
@@ -273,6 +279,24 @@
         return out;
     }
 
+    function validateRequires(value, itemId) {
+        if (!Array.isArray(value) || value.length < 1 || value.length > MAX_REQUIRES) {
+            throw new Error(`Workbook dependencies are invalid for ${itemId}.`);
+        }
+        const seen = new Set();
+        const out = [];
+        for (const raw of value) {
+            const dependency = cleanString(raw, 'Dependency id', 128);
+            if (!ID_RE.test(dependency) || seen.has(dependency)
+                || !KNOWN_DEPENDENCY_SET.has(dependency)) {
+                throw new Error(`Unknown or invalid package dependency: ${dependency}`);
+            }
+            seen.add(dependency);
+            out.push(dependency);
+        }
+        return Object.freeze(out);
+    }
+
     function formatBytes(size) {
         if (size < 1024) return `${size} B`;
         if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
@@ -308,12 +332,12 @@
             if (item.type !== 'workbook') {
                 throw new Error(`Unsupported remote catalogue item type for ${id}.`);
             }
-            const format = String(item.format || '').toLowerCase();
+            const format = cleanString(item.format, 'Workbook format', 16);
             if (!['srwb', 'ipynb'].includes(format)) {
                 throw new Error(`Unsupported workbook format for ${id}.`);
             }
             const path = safeRelativePath(item.path);
-            if (!path.toLowerCase().endsWith(`.${format}`)) {
+            if (!path.endsWith(`.${format}`)) {
                 throw new Error(`Workbook path does not match its format for ${id}.`);
             }
             const size = Number(item.size);
@@ -328,12 +352,14 @@
                 throw new Error(`Workbook kernels are invalid for ${id}.`);
             }
             const kernels = item.kernels.map(kernel => {
-                const normalized = cleanString(kernel, 'Kernel id', 32).toLowerCase();
+                const normalized = cleanString(kernel, 'Kernel id', 32);
                 if (!KERNEL_RE.test(normalized) || !SUPPORTED_KERNELS.has(normalized)) {
                     throw new Error(`Unsupported kernel id: ${kernel}`);
                 }
                 return normalized;
             });
+            const requires = Object.prototype.hasOwnProperty.call(item, 'requires')
+                ? validateRequires(item.requires, id) : null;
             const locales = validateLocales(item.locales, defaults);
             const itemName = cleanString(item.name, 'Workbook name', 512);
             const description = cleanString(item.description, 'Workbook description', 4096, {
@@ -342,7 +368,7 @@
             const catalogKey = `${SOURCE_ID}:${id}`;
             const artifactUrl = joinBase(provenance.artifactBaseUrl, path);
             const rawUrl = joinBase(provenance.rawBase, path);
-            return {
+            const entry = {
                 id,
                 catalogKey,
                 sourceId: SOURCE_ID,
@@ -374,6 +400,8 @@
                     rawUrl,
                 }),
             };
+            if (requires) entry.requires = requires;
+            return entry;
         });
         return { name, source, locales: defaults, entries };
     }
@@ -912,6 +940,8 @@
         MAX_DESCRIPTOR_BYTES,
         MAX_INDEX_BYTES,
         MAX_ITEMS,
+        MAX_REQUIRES,
+        KNOWN_DEPENDENCIES,
         MAX_ARTIFACT_BYTES,
         DEFAULT_CONFIG,
         normalizeBaseUrl,

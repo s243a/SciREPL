@@ -598,6 +598,7 @@
     "fileIo.downloadDialogTitle": "Unduh {filename}",
     "fileIo.unknownExportFormat": "Format ekspor tidak dikenal: {format}",
     "fileIo.noFilesToExport": "Tidak ada berkas untuk diekspor.",
+    "fileIo.includeFolderAria": "Sertakan folder {folder}",
     "fileIo.noNotebooksAvailable": "Tidak ada buku catatan yang tersedia.",
     "fileIo.noActiveNotebook": "Tidak ada buku catatan yang aktif.",
     "fileIo.noNotebooksWithCells": "Tidak ada buku catatan dengan sel untuk diekspor.",

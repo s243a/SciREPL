@@ -6,6 +6,9 @@ const PORT = process.env.PORT || 8085;
 const URL = `http://localhost:${PORT}/index.html`;
 const TIMEOUT = 60_000;
 const PRIVACY_REVISION = '2026-08-catalog-sources-v1';
+const SUPPORTED_LOCALES = [
+    'en', 'ar', 'bn', 'de', 'es', 'fr', 'hi', 'id', 'ja', 'ko', 'pt-BR', 'ru', 'zh',
+];
 
 let failures = 0;
 const check = (name, passed, detail = '') => {
@@ -152,6 +155,12 @@ try {
     check('generated default notebook name is localized', state.notebook === state.notebookWant && state.notebook !== 'Notebook 1', JSON.stringify(state));
     check('generated code placeholder is localized', state.placeholder === state.placeholderWant && !state.placeholder.startsWith('Type '), JSON.stringify(state));
     check('generated ready status is localized', state.ready === state.readyWant && state.ready !== 'ready', JSON.stringify(state));
+    state = await page.evaluate(() => ({
+        label: document.getElementById('rename-cell-input')?.labels?.[0]?.textContent?.trim(),
+        want: window.t('renameCell.enterNameCellEmptyClear'),
+    }));
+    check('cell rename input is associated with its localized prompt',
+        state.label === state.want && !state.label.startsWith('Enter a name'), JSON.stringify(state));
 
     await page.selectOption('#lang-selector', 'javascript');
     await page.locator('#lang-selector').dispatchEvent('change');
@@ -381,6 +390,44 @@ try {
         !sectionState['wb-scope-section'] && !sectionState['wb-kernel-section']
         && sectionState['wb-archive-section'] && sectionState['wb-filetree-section'],
     JSON.stringify(sectionState));
+    state = await page.evaluate(() => [...document.querySelectorAll(
+        '#wb-filetree .pkg-tree-folder input[type="checkbox"]')].map((checkbox) => {
+        const folder = checkbox.parentElement?.querySelector('span:not(.pkg-tree-arrow)')
+            ?.textContent?.trim() || '';
+        return {
+            label: checkbox.getAttribute('aria-label') || '',
+            want: window.t('fileIo.includeFolderAria', { folder }),
+            folder,
+        };
+    }));
+    check('generated package-folder checkboxes expose localized folder actions',
+        state.length > 0 && state.every((item) => item.folder
+            && item.label === item.want), JSON.stringify(state));
+    const accessibilityFailures = [];
+    for (const locale of SUPPORTED_LOCALES) {
+        await activate(locale);
+        const localized = await page.evaluate(() => {
+            const plain = (value) => String(value || '').replace(/[\u2066-\u2069]/g, '');
+            const rename = document.getElementById('rename-cell-input');
+            const folder = document.querySelector(
+                '#wb-filetree .pkg-tree-folder input[type="checkbox"]');
+            const folderName = folder?.parentElement?.querySelector(
+                'span:not(.pkg-tree-arrow)')?.textContent?.trim() || '';
+            return {
+                rename: plain(rename?.labels?.[0]?.textContent?.trim()),
+                renameWant: plain(window.t('renameCell.enterNameCellEmptyClear')),
+                folder: plain(folder?.getAttribute('aria-label')),
+                folderWant: plain(window.t('fileIo.includeFolderAria', { folder: folderName })),
+            };
+        });
+        if (!localized.rename || localized.rename !== localized.renameWant
+            || !localized.folder || localized.folder !== localized.folderWant) {
+            accessibilityFailures.push({ locale, ...localized });
+        }
+    }
+    check('rename and folder controls remain localized in every supported locale',
+        accessibilityFailures.length === 0, JSON.stringify(accessibilityFailures));
+    await activate('fr');
 
     await openFromMenu('#btn-memory', '#memory-modal');
     await page.locator('#memory-kernel-list .memory-kernel-status').first()
@@ -557,7 +604,7 @@ try {
     const editorLayoutFailures = [];
     for (const width of [320, 360, 411]) {
         await page.setViewportSize({ width, height: 800 });
-        for (const locale of ['en', 'ar', 'bn', 'de', 'es', 'fr', 'hi', 'id', 'ja', 'ko', 'pt-BR', 'ru', 'zh']) {
+        for (const locale of SUPPORTED_LOCALES) {
             await activate(locale);
             await page.waitForTimeout(25);
             const layout = await page.evaluate(() => {

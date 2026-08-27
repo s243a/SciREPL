@@ -590,6 +590,7 @@
     "fileIo.downloadDialogTitle": "{filename} डाउनलोड करें",
     "fileIo.unknownExportFormat": "अज्ञात निर्यात प्रारूप: {format}",
     "fileIo.noFilesToExport": "निर्यात करने के लिए कोई फ़ाइल नहीं है।",
+    "fileIo.includeFolderAria": "फ़ोल्डर {folder} शामिल करें",
     "fileIo.noNotebooksAvailable": "कोई नोटबुक उपलब्ध नहीं है।",
     "fileIo.noActiveNotebook": "कोई सक्रिय नोटबुक नहीं है।",
     "fileIo.noNotebooksWithCells": "निर्यात के लिए सेल युक्त कोई नोटबुक नहीं है।",

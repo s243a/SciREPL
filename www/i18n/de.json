@@ -605,6 +605,7 @@
     "fileIo.downloadDialogTitle": "{filename} herunterladen",
     "fileIo.unknownExportFormat": "Unbekanntes Exportformat: {format}",
     "fileIo.noFilesToExport": "Keine Dateien zum Exportieren.",
+    "fileIo.includeFolderAria": "Ordner {folder} einschließen",
     "fileIo.noNotebooksAvailable": "Keine Notebooks verfügbar.",
     "fileIo.noActiveNotebook": "Kein aktives Notebook.",
     "fileIo.noNotebooksWithCells": "Keine Notebooks mit exportierbaren Zellen.",

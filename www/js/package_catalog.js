@@ -1134,6 +1134,32 @@ class PackageCatalog {
         return this._installState(pkg) === 'current';
     }
 
+    /** Workbook bytes/notebook state, deliberately independent of dependencies. */
+    _workbookContentState(pkg) {
+        const notebooks = window.notebookManager?.getNotebooks?.() || [];
+        const expectedName = pkg.notebookName || pkg.name;
+        const catalogId = this._catalogId(pkg);
+        let matches = notebooks.filter(nb => nb && nb.catalogId === catalogId);
+        if (matches.length === 0) matches = notebooks.filter(nb => nb && nb.name === expectedName);
+        if (matches.length === 0) return 'missing';
+        if (pkg.revision == null) return 'current';
+        return matches.some(nb =>
+            nb.catalogId === catalogId
+            && String(nb.catalogRevision) === String(pkg.revision)
+            && (!pkg._catalog || nb.catalogSha256 === pkg._catalog.sha256)
+        ) ? 'current' : 'outdated';
+    }
+
+    /** Invalid or missing dependencies keep an otherwise-current item actionable. */
+    _dependenciesInstalled(pkg) {
+        try {
+            return this._resolveDependencies(pkg).every(dependency =>
+                this._isInstalled(dependency));
+        } catch (_) {
+            return false;
+        }
+    }
+
     _installState(pkg) {
         if (!pkg) return 'missing';
 
@@ -1143,18 +1169,11 @@ class PackageCatalog {
         }
 
         if (pkg.type === 'workbook') {
-            const notebooks = window.notebookManager?.getNotebooks?.() || [];
-            const expectedName = pkg.notebookName || pkg.name;
-            const catalogId = this._catalogId(pkg);
-            let matches = notebooks.filter(nb => nb && nb.catalogId === catalogId);
-            if (matches.length === 0) matches = notebooks.filter(nb => nb && nb.name === expectedName);
-            if (matches.length === 0) return 'missing';
-            if (pkg.revision == null) return 'current';
-            return matches.some(nb =>
-                nb.catalogId === catalogId
-                && String(nb.catalogRevision) === String(pkg.revision)
-                && (!pkg._catalog || nb.catalogSha256 === pkg._catalog.sha256)
-            ) ? 'current' : 'outdated';
+            const contentState = this._workbookContentState(pkg);
+            if (contentState === 'current' && !this._dependenciesInstalled(pkg)) {
+                return 'outdated';
+            }
+            return contentState;
         }
 
         if (pkg.type === 'bundle') {
@@ -1230,13 +1249,34 @@ class PackageCatalog {
         const key = btn.dataset.catalogKey;
         const pkg = this.packages.find(item => this._catalogId(item) === key);
         if (!pkg) return;
+
+        // Validate the complete dependency/bundle graph before fetching even
+        // the requested workbook. Unknown remote dependencies must have zero
+        // download or notebook/package side effects.
+        try {
+            this._preflightInstall(pkg);
+        } catch (err) {
+            console.error('[PackageCatalog] Preflight failed:', err);
+            this._setButtonLabel(btn, 'packageCatalog.failed', 'Failed');
+            btn.disabled = false;
+            setTimeout(() => this._syncInstallButtons(), 3000);
+            return;
+        }
+
         if (this._isInstalled(pkg)) {
             this._syncInstallButtons();
             return;
         }
 
+        // A workbook installed before dependency metadata existed may already
+        // have the exact current bytes. Repair only its missing packages: do
+        // not download/import the workbook again or create a backup notebook.
+        const dependenciesOnly = pkg.type === 'workbook'
+            && this._workbookContentState(pkg) === 'current'
+            && !this._dependenciesInstalled(pkg);
+
         btn.disabled = true;
-        if (pkg.type === 'bundle') {
+        if (pkg.type === 'bundle' || dependenciesOnly) {
             this._setButtonLabel(btn, 'packageCatalog.preparing', 'Preparing...');
         } else {
             this._setButtonLabel(btn, 'packageCatalog.downloading', 'Downloading...');
@@ -1247,15 +1287,16 @@ class PackageCatalog {
         //    Pro build it's the up-to-date one); fall back to the remote release
         //    URL only if there's no bundled copy or it fails.
         let blob = null;
-        try {
-            blob = await this._fetchCatalogItem(pkg);
-        } catch (err) {
-            console.error('[PackageCatalog] Download failed:', err);
-            this._setButtonLabel(btn, 'packageCatalog.failed', 'Failed');
-            btn.disabled = false;
-            setTimeout(() => this._setButtonLabel(
-                btn, 'packageCatalog.install', 'Install'), 3000);
-            return;
+        if (!dependenciesOnly) {
+            try {
+                blob = await this._fetchCatalogItem(pkg);
+            } catch (err) {
+                console.error('[PackageCatalog] Download failed:', err);
+                this._setButtonLabel(btn, 'packageCatalog.failed', 'Failed');
+                btn.disabled = false;
+                setTimeout(() => this._syncInstallButtons(), 3000);
+                return;
+            }
         }
 
         // 2. Queue the import (sequential — avoids notebook state races)
@@ -1265,18 +1306,22 @@ class PackageCatalog {
         } else {
             this._setButtonLabel(btn, 'packageCatalog.importing', 'Importing...');
         }
-        this._importQueue.push({ btn, pkg, blob });
+        this._importQueue.push({ btn, pkg, blob, dependenciesOnly });
 
         if (this._importRunning) return; // will be processed in order
         this._importRunning = true;
 
         while (this._importQueue.length > 0) {
             const job = this._importQueue.shift();
-            this._setButtonLabel(job.btn, 'packageCatalog.importing', 'Importing...');
+            this._setButtonLabel(job.btn,
+                job.dependenciesOnly ? 'packageCatalog.preparing' : 'packageCatalog.importing',
+                job.dependenciesOnly ? 'Preparing...' : 'Importing...');
             try {
                 await this._ensureDependencies(job.pkg);
-                await this._doImport(job.pkg, job.blob);
-                this._rememberInstalled(job.pkg);
+                if (!job.dependenciesOnly) {
+                    await this._doImport(job.pkg, job.blob);
+                    this._rememberInstalled(job.pkg);
+                }
                 this._syncInstallButtons();
             } catch (err) {
                 console.error('[PackageCatalog] Import failed:', err);
@@ -1322,14 +1367,9 @@ class PackageCatalog {
      * starts, so they do not need to be downloaded again here.
      */
     async _ensureDependencies(pkg) {
-        if (!pkg || !Array.isArray(pkg.requires)) return;
+        const dependencies = this._resolveDependencies(pkg);
 
-        for (const ref of pkg.requires) {
-            const dependency = this._findEntry(ref);
-            if (!dependency || (dependency.type || 'package') !== 'package') {
-                throw new Error(this._t('packageCatalog.unknownDependency',
-                    'Unknown package dependency: {reference}', { reference: ref }));
-            }
+        for (const dependency of dependencies) {
             if (this._isInstalled(dependency)) continue;
 
             const blob = await this._fetchCatalogItem(dependency);
@@ -1338,6 +1378,57 @@ class PackageCatalog {
             this._rememberInstalled(dependency);
             this._syncInstallButtons();
             console.log('[PackageCatalog] installed dependency:', dependency.name);
+        }
+    }
+
+    /** Resolve every declared dependency without performing side effects. */
+    _resolveDependencies(pkg) {
+        if (!pkg || !Object.prototype.hasOwnProperty.call(pkg, 'requires')) return [];
+        const maxRequires = typeof CatalogSource !== 'undefined'
+            ? CatalogSource.MAX_REQUIRES : 8;
+        if (!Array.isArray(pkg.requires) || pkg.requires.length < 1
+            || pkg.requires.length > maxRequires) {
+            throw new Error(this._t('packageCatalog.unknownDependency',
+                'Unknown package dependency: {reference}', { reference: 'invalid list' }));
+        }
+        const seen = new Set();
+        const dependencies = [];
+        const remoteAllowlist = pkg.sourceId && typeof CatalogSource !== 'undefined'
+            ? new Set(CatalogSource.KNOWN_DEPENDENCIES || []) : null;
+        for (const ref of pkg.requires) {
+            const validReference = typeof ref === 'string' && ref.length > 0
+                && !seen.has(ref) && (!remoteAllowlist || remoteAllowlist.has(ref));
+            const dependency = validReference ? this._findEntry(ref) : null;
+            if (!dependency || (dependency.type || 'package') !== 'package') {
+                throw new Error(this._t('packageCatalog.unknownDependency',
+                    'Unknown package dependency: {reference}', { reference: String(ref) }));
+            }
+            seen.add(ref);
+            dependencies.push(dependency);
+        }
+        return dependencies;
+    }
+
+    /** Validate an entire install graph without downloading or importing. */
+    _preflightInstall(pkg, seen = new Set()) {
+        if (!pkg) throw new Error(this._t(
+            'packageCatalog.noDownloadSource', 'No download source for {name}', { name: '' }));
+        const key = this._catalogId(pkg);
+        if (seen.has(key)) return;
+        seen.add(key);
+        this._resolveDependencies(pkg);
+        if (pkg.type !== 'bundle') return;
+        if (!Array.isArray(pkg.items)) {
+            throw new Error(this._t('packageCatalog.unknownWorkbook',
+                'Unknown workbook in bundle: {reference}', { reference: 'invalid list' }));
+        }
+        for (const ref of pkg.items) {
+            const item = this._findEntry(ref);
+            if (!item || item.type !== 'workbook') {
+                throw new Error(this._t('packageCatalog.unknownWorkbook',
+                    'Unknown workbook in bundle: {reference}', { reference: ref }));
+            }
+            this._preflightInstall(item, seen);
         }
     }
 
@@ -1391,12 +1482,18 @@ class PackageCatalog {
      * Returns a promise that resolves when the import is fully complete.
      */
     async _doImport(pkg, blob) {
+        this._preflightInstall(pkg);
         if (pkg.type === 'bundle') {
             for (const ref of pkg.items || []) {
                 const item = this._findEntry(ref);
                 if (!item || item.type !== 'workbook') {
                     throw new Error(this._t('packageCatalog.unknownWorkbook',
                         'Unknown workbook in bundle: {reference}', { reference: ref }));
+                }
+                if (this._workbookContentState(item) === 'current') {
+                    await this._ensureDependencies(item);
+                    this._syncInstallButtons();
+                    continue;
                 }
                 if (this._isInstalled(item)) continue;
 

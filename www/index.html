@@ -447,7 +447,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
         <div class="modal-content" style="max-width:360px">
             <button class="modal-close" data-i18n-aria-label="common.close" data-i18n-title="common.close" aria-label="Close" title="Close">&times;</button>
             <h2 data-i18n="renameCell.cellName">Cell Name</h2>
-            <p data-i18n="renameCell.enterNameCellEmptyClear" style="margin:0 0 12px;font-size:13px;color:var(--text-muted)">Enter a name for this cell (empty to clear):</p>
+            <label for="rename-cell-input" data-i18n="renameCell.enterNameCellEmptyClear" style="display:block;margin:0 0 12px;font-size:13px;color:var(--text-muted)">Enter a name for this cell (empty to clear):</label>
             <input type="text" id="rename-cell-input" autocomplete="off" spellcheck="false"
                    style="width:100%;padding:10px;font-size:15px;border-radius:6px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);box-sizing:border-box">
             <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end">
@@ -1248,6 +1248,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <script src="js/release_highlights.js"></script>
     <script src="js/whats_new.js"></script>
     <script src="js/onboarding.js"></script>
+    <script src="js/android_back.js"></script>
     <script src="js/kernel_manager.js"></script>
     <script src="js/shared_vfs.js"></script>
     <script src="js/notebook_vfs.js"></script>

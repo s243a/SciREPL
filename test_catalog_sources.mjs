@@ -348,7 +348,8 @@ await test('descriptor rejects schema, tag, commit, path, raw-base, and index li
 });
 
 await test('index produces official, namespaced, immutable workbook entries', () => {
-    const fixture = makeRelease();
+    const requires = ['unifyweaver-scirepl'];
+    const fixture = makeRelease({ item: { requires } });
     const validated = C.validateIndex(fixture.indexObject, provenanceFor(fixture));
     assert.equal(validated.entries.length, 1);
     const entry = validated.entries[0];
@@ -359,6 +360,9 @@ await test('index produces official, namespaced, immutable workbook entries', ()
     assert.deepEqual(entry.locales, ['es']);
     assert.equal(entry.pages_url, fixture.artifactUrl);
     assert.equal(entry.url, fixture.rawArtifactUrl);
+    assert.deepEqual(entry.requires, ['unifyweaver-scirepl']);
+    assert.notEqual(entry.requires, requires);
+    assert(Object.isFrozen(entry.requires));
     assert.equal(entry._catalog.commit, COMMIT_A);
     assert.equal(entry._catalog.sha256, digest(fixture.artifact));
 });
@@ -373,7 +377,9 @@ await test('index rejects malformed, duplicate, unsupported, and dishonest items
         value => { value.items[0].id = '../pi'; },
         value => { value.items[0].type = 'package'; },
         value => { value.items[0].format = 'zip'; },
+        value => { value.items[0].format = 'SRWB'; },
         value => { value.items[0].path = 'workbooks/es/pi.ipynb'; },
+        value => { value.items[0].path = 'workbooks/es/compute-pi-workbook.SRWB'; },
         value => { value.items[0].sha256 = 'short'; },
         value => { value.items[0].size = 0; },
         value => { value.items[0].size = C.MAX_ARTIFACT_BYTES + 1; },
@@ -382,8 +388,21 @@ await test('index rejects malformed, duplicate, unsupported, and dishonest items
         value => { value.items[0].kernels = ['not valid']; },
         value => { value.items[0].kernels = ['fortran']; },
         value => { value.items[0].kernels = ['ai']; },
+        value => { value.items[0].kernels = ['Python']; },
         value => { value.items[0].locales = ['not_a_locale']; },
         value => { value.items[0].name = 'bad\u202ename'; },
+        value => { value.items[0].requires = null; },
+        value => { value.items[0].requires = 'unifyweaver-scirepl'; },
+        value => { value.items[0].requires = []; },
+        value => { value.items[0].requires = [42]; },
+        value => { value.items[0].requires = ['../package']; },
+        value => { value.items[0].requires = ['unknown-package']; },
+        value => { value.items[0].requires = ['bad\u202ename']; },
+        value => { value.items[0].requires = ['unifyweaver-scirepl', 'unifyweaver-scirepl']; },
+        value => {
+            value.items[0].requires = Array.from(
+                { length: C.MAX_REQUIRES + 1 }, (_, index) => `package-${index}`);
+        },
     ];
     for (const mutate of cases) {
         const candidate = clone(fixture.indexObject);

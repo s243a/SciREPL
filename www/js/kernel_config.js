@@ -299,7 +299,7 @@ window.KERNEL_CONFIG = {
       ]
     },
     "capacitor": {
-      "version": "core/android 8.0.2; browser/share 8.0.1; filesystem 8.1.2",
+      "version": "core/android 8.0.2; app 8.1.1; browser/share 8.0.1; filesystem 8.1.2",
       "licenseExpression": "MIT",
       "sourceUrl": "https://github.com/ionic-team/capacitor",
       "delivery": {

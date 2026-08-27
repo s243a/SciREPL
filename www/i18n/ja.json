@@ -591,6 +591,7 @@
     "fileIo.downloadDialogTitle": "{filename} をダウンロード",
     "fileIo.unknownExportFormat": "不明なエクスポート形式: {format}",
     "fileIo.noFilesToExport": "エクスポートするファイルがありません。",
+    "fileIo.includeFolderAria": "フォルダー {folder} を含める",
     "fileIo.noNotebooksAvailable": "利用可能なノートブックがありません。",
     "fileIo.noActiveNotebook": "アクティブなノートブックがありません。",
     "fileIo.noNotebooksWithCells": "エクスポート対象のセルを含むノートブックがありません。",
