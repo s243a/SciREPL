@@ -4,13 +4,13 @@ This file is generated from `third-party-components.json`. Do not edit it by han
 
 **Inventory scope:** Direct browser libraries, language runtimes, named bundled Pyodide wheels, major command suites embedded in brush, and platform containers distributed by SciREPL Free. User-installed Python, R, Prolog, or other packages are not shipped-component entries and retain their own licences. This is not yet a complete crate-by-crate or Android transitive SBOM.
 
-**Resolved build:** SciREPL 1.2.0, profile `full`, 24 components.
+**Resolved build:** SciREPL 1.3.0, profile `full`, 24 components.
 
 Versions below are the exact pinned defaults. A user-configured runtime version or source override can intentionally load a different upstream artifact.
 
 ## SciREPL
 
-- **Version:** 1.2.0
+- **Version:** 1.3.0
 - **Delivery:** SciREPL application
 - **Licence:** MIT
 - **Source:** https://github.com/s243a/SciREPL

@@ -57,7 +57,7 @@ If signing properties are present, the bundle is signed and ready for Play Conso
 - Free: `com.unifyweaver.scirepl`
 - Pro: `com.unifyweaver.scirepl.pro`
 
-These must stay distinct in Play Console. Each app also needs a monotonically increasing `versionCode` in `android/app/build.gradle` for every uploaded release.
+These must stay distinct in Play Console. Each app also needs a monotonically increasing `android.versionCode` in `package.json` for every uploaded release; the Android Gradle build reads it from there.
 
 ## APK side-loading
 
