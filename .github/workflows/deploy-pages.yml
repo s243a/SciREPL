@@ -164,7 +164,16 @@ jobs:
         run: node test_onboarding.mjs
 
       - name: Run What's New and header-shortcut tests
-        run: node test_whats_new.mjs
+        # Older tags predate test_header_shortcuts.mjs; the explicit if/else
+        # keeps them deployable while a FAILING suite still fails the step —
+        # `test -f && node || echo` would swallow the node exit code.
+        run: |
+          node test_whats_new.mjs
+          if test -f test_header_shortcuts.mjs; then
+            npm run test:header-shortcuts
+          else
+            echo "test_header_shortcuts.mjs absent on this ref; skipping"
+          fi
 
       - name: Run right-to-left layout tests
         run: node test_rtl_layout.mjs

@@ -13,6 +13,16 @@
 (function () {
     'use strict';
 
+    /** The optional header buttons, in DEFAULT priority order (highest
+     *  first). Browse outranks Formula because it is on by default and used
+     *  on every visit; Tour is last because it is mostly a first-run aid. */
+    const SHORTCUTS = [
+        { name: 'browse',  key: 'showBrowseShortcut',  id: 'browse-shortcut-btn', fallback: 'auto',  labelKey: 'appearance.showBrowseShortcut' },
+        { name: 'formula', key: 'showFormulaShortcut', id: 'math-mode-btn',       fallback: 'never', labelKey: 'appearance.showFormulaShortcut' },
+        { name: 'tour',    key: 'showTourShortcut',    id: 'tour-shortcut-btn',   fallback: 'auto',  labelKey: 'appearance.showTourShortcut' },
+    ];
+    const MODES = ['always', 'auto', 'never'];
+
     const KEYS = {
         topMargin: 'scirepl_appearance_top_margin',   // '' = auto, else integer px
         btnScale: 'scirepl_appearance_btn_scale',
@@ -22,6 +32,7 @@
         showTourShortcut: 'scirepl_appearance_show_tour_shortcut',
         showBrowseShortcut: 'scirepl_appearance_show_browse_shortcut',
         showFormulaShortcut: 'scirepl_appearance_show_formula_shortcut',
+        shortcutPriority: 'scirepl_appearance_shortcut_priority',
         // CSS that was rolled back for hiding the way out of Appearance. Kept
         // rather than deleted: it is the user's work and may be one typo away
         // from what they wanted.
@@ -112,25 +123,67 @@
             return localStorage.getItem(KEYS.customCss) || '';
         }
 
-        /** Tour is opt-out: absent (or anything but '0') means visible. */
-        getShowTourShortcut() {
-            return localStorage.getItem(KEYS.showTourShortcut) !== '0';
+        /* ------------------------ header shortcuts ------------------------
+         * Each optional header button has THREE states, not two:
+         *
+         *   always  — keep it, even if the header has to wrap to two rows
+         *   auto    — keep it only while it fits on one row (the default)
+         *   never   — hide it
+         *
+         * `auto` exists because "does it fit" is a property of the viewport,
+         * not of the user's preference: the same phone has room in landscape
+         * and not in portrait. Measuring beats guessing from an orientation
+         * media query, because the real constraint is the width left over
+         * after the title, the notebook selector, the mandatory buttons and
+         * the status badge — and that changes with button scale and locale.
+         *
+         * When they do not all fit, the LOWEST priority `auto` button drops
+         * first, so the user decides what survives rather than the DOM order.
+         */
+        getShortcutMode(name) {
+            const spec = SHORTCUTS.find(s => s.name === name);
+            if (!spec) return 'never';
+            const raw = localStorage.getItem(KEYS[spec.key]);
+            if (raw === null) return spec.fallback;
+            // Legacy booleans predate the third state and must keep meaning
+            // what the user chose: an explicit on/off stays explicit.
+            if (raw === '1') return 'always';
+            if (raw === '0') return 'never';
+            return MODES.includes(raw) ? raw : spec.fallback;
         }
 
-        /** Browse is opt-out: the catalogue is how packages, bundles and
-         *  workbooks are found at all, and reaching it through the menu costs
-         *  a tap on every visit. It fits because Formula is off by default. */
-        getShowBrowseShortcut() {
-            return localStorage.getItem(KEYS.showBrowseShortcut) !== '0';
+        /** The registry entries whose button actually exists in this build.
+         *  The two editions do not ship the same header: Pro has no Browse
+         *  button yet, so its list is Formula and Tour. Filtering here keeps
+         *  one implementation honest in both rather than forking it. */
+        presentShortcuts() {
+            return SHORTCUTS.filter(s => document.getElementById(s.id));
         }
 
-        /** Formula palette is opt-in (off by default): its inserts are
-         *  SymPy-specific, and on phones the palette competes with the
-         *  composer for space — users who want it enable it once in
-         *  Appearance. (Owner decision, Play closed-testing feedback.) */
-        getShowFormulaShortcut() {
-            return localStorage.getItem(KEYS.showFormulaShortcut) === '1';
+        /** The catalogue key naming this shortcut, so the settings UI does not
+         *  have to hard-code a key for a button this edition may not ship. */
+        shortcutLabelKey(name) {
+            const spec = SHORTCUTS.find(s => s.name === name);
+            return spec ? spec.labelKey : null;
         }
+
+        /** Priority order, highest first. Unknown/missing names fall back to
+         *  the registry order, so a stored list can never strand a shortcut. */
+        getShortcutPriority() {
+            let stored = [];
+            try { stored = JSON.parse(localStorage.getItem(KEYS.shortcutPriority) || '[]'); }
+            catch (_) { stored = []; }
+            const known = this.presentShortcuts().map(s => s.name);
+            const order = stored.filter(n => known.includes(n));
+            for (const n of known) if (!order.includes(n)) order.push(n);
+            return order;
+        }
+
+        /* Back-compat: callers and tests that predate the third state still
+         * ask a yes/no question, which now means "is it enabled at all". */
+        getShowTourShortcut() { return this.getShortcutMode('tour') !== 'never'; }
+        getShowBrowseShortcut() { return this.getShortcutMode('browse') !== 'never'; }
+        getShowFormulaShortcut() { return this.getShortcutMode('formula') !== 'never'; }
 
         /* ---------------------------- writing ---------------------------- */
 
@@ -166,6 +219,32 @@
         setShowBrowseShortcut(show) {
             localStorage.setItem(KEYS.showBrowseShortcut, show ? '1' : '0');
             this.apply();
+        }
+
+        /** @param {'always'|'auto'|'never'} mode */
+        setShortcutMode(name, mode) {
+            const spec = SHORTCUTS.find(s => s.name === name);
+            if (!spec || !MODES.includes(mode)) return;
+            localStorage.setItem(KEYS[spec.key], mode);
+            this.apply();
+        }
+
+        setShortcutPriority(order) {
+            const known = SHORTCUTS.map(s => s.name);
+            const clean = (order || []).filter(n => known.includes(n));
+            for (const n of known) if (!clean.includes(n)) clean.push(n);
+            localStorage.setItem(KEYS.shortcutPriority, JSON.stringify(clean));
+            this.apply();
+        }
+
+        /** Move one shortcut up (-1) or down (+1) the priority order. */
+        moveShortcutPriority(name, delta) {
+            const order = this.getShortcutPriority();
+            const i = order.indexOf(name);
+            const j = i + delta;
+            if (i === -1 || j < 0 || j >= order.length) return;
+            order.splice(j, 0, order.splice(i, 1)[0]);
+            this.setShortcutPriority(order);
         }
 
         setShowFormulaShortcut(show) {
@@ -294,9 +373,8 @@
             root.style.setProperty('--ui-btn-scale', String(this.getButtonScale()));
 
             // --- optional header shortcuts ---
-            this._showHeaderShortcut('tour-shortcut-btn', this.getShowTourShortcut());
-            this._showHeaderShortcut('browse-shortcut-btn', this.getShowBrowseShortcut());
-            this._showHeaderShortcut('math-mode-btn', this.getShowFormulaShortcut());
+            this._fitHeaderShortcuts();
+            this._installHeaderFitObservers();
 
             // --- theme ---
             const theme = this.safeMode() ? DEFAULT_THEME : this.getTheme();
@@ -322,6 +400,152 @@
 
             this._applyCustomCss();
             this._watchSystemTheme(theme === 'auto');
+        }
+
+        /**
+         * Decide which optional buttons are on screen right now.
+         *
+         * `always` and `never` are settings; `auto` is a measurement. Show
+         * every candidate first, then drop `auto` ones from the lowest
+         * priority up until the header stops wrapping. Two or three reflows
+         * at most, and only when something actually changed.
+         */
+        _fitHeaderShortcuts() {
+            const bar = document.querySelector('.header-right');
+            if (!bar || this._fittingShortcuts) return;
+            this._fittingShortcuts = true;
+            // The observers below stay attached throughout. Detaching and
+            // re-observing here looks tidy but re-observing a ResizeObserver
+            // target schedules a fresh INITIAL delivery every pass, which
+            // queues another pass forever (~60 idle fits/s). Attached, the
+            // worst case is one bounded extra pass: this pass only mutates
+            // the shortcut buttons, never the selector's subtree, so the
+            // MutationObserver stays silent, and the ResizeObserver only
+            // fires when the selector's box actually changed — after which
+            // the extra pass changes nothing and everything goes quiet.
+            try {
+                const auto = [];
+                for (const spec of this.presentShortcuts()) {
+                    const mode = this.getShortcutMode(spec.name);
+                    if (mode === 'never') { this._showHeaderShortcut(spec.id, false); continue; }
+                    this._showHeaderShortcut(spec.id, true);
+                    if (mode === 'auto') auto.push(spec);
+                }
+                const order = this.getShortcutPriority();
+                auto.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name));
+                for (let i = auto.length - 1; i >= 0 && this._headerCrowded(bar); i--) {
+                    this._showHeaderShortcut(auto[i].id, false);
+                }
+                // Record what the measurement decided, so the Appearance panel
+                // can say "hidden — no room" rather than looking broken.
+                bar.dataset.shortcutsDropped = String(
+                    auto.filter(s => {
+                        const el = document.getElementById(s.id);
+                        return el && el.classList.contains('header-shortcut-hidden');
+                    }).length);
+            } finally {
+                this._fittingShortcuts = false;
+            }
+        }
+
+        /** The header is crowded when the optional buttons make it wrap OR when
+         *  they squeeze a sibling badly enough that its content spills into
+         *  them. Both are "there is not room", and only the second was missing. */
+        _headerCrowded(bar) {
+            return this._headerWraps(bar) || this._headerCollides(bar);
+        }
+
+        /**
+         * True when the notebook selector's CONTENT reaches into the right-hand
+         * controls.
+         *
+         * The selector is a flex sibling: as the right group grows it is
+         * squeezed — 30px at 411px with a second notebook — while its buttons
+         * keep their size and simply overflow, so nothing about its own box
+         * changes and a size observer never fires. The result is a Delete
+         * button whose centre hit-tests to Search. Giving the shortcuts back
+         * lets the selector have its width again, which is why dropping a
+         * low-priority `auto` candidate genuinely fixes it here.
+         *
+         * Rectangle intersection rather than left/right comparisons, so this
+         * reads the same in RTL, where the two groups swap sides.
+         */
+        _headerCollides(bar) {
+            const selector = document.getElementById('notebook-selector-container');
+            if (!selector) return false;
+            let left = Infinity;
+            let right = -Infinity;
+            for (const child of selector.querySelectorAll('*')) {
+                if (child.offsetParent === null) continue;
+                const box = child.getBoundingClientRect();
+                if (box.width <= 0) continue;
+                left = Math.min(left, box.left);
+                right = Math.max(right, box.right);
+            }
+            if (right === -Infinity) return false;
+            const group = bar.getBoundingClientRect();
+            // 1px of slack: adjacent boxes may share an edge without overlapping.
+            return right > group.left + 1 && left < group.right - 1;
+        }
+
+        /** The group wraps when it is taller than its tallest child. */
+        _headerWraps(bar) {
+            let tallest = 0;
+            for (const el of bar.children) {
+                if (el.offsetParent === null) continue;
+                tallest = Math.max(tallest, el.getBoundingClientRect().height);
+            }
+            return tallest > 0 && bar.getBoundingClientRect().height > tallest + 2;
+        }
+
+        _installHeaderFitObservers() {
+            if (this._fitObserversInstalled) return;
+            this._fitObserversInstalled = true;
+            let queued = false;
+            const refit = () => {
+                if (queued) return;
+                queued = true;
+                requestAnimationFrame(() => { queued = false; this._fitHeaderShortcuts(); });
+            };
+            // Rotation is the case this feature exists for; resize covers a
+            // desktop window and the on-screen keyboard, and a locale change
+            // can lengthen the status badge enough to matter.
+            window.addEventListener('resize', refit);
+            window.addEventListener('orientationchange', refit);
+            document.addEventListener('i18n:changed', refit);
+
+            // The header also changes width on its own: the status badge grows
+            // from "ready" to "loading ClojureScript…" and shrinks back, and the
+            // notebook selector grows as notebooks are added or renamed. Both
+            // change how much room the shortcuts have, in both directions.
+            //
+            // Deliberately NOT observing .header-right: hiding a button changes
+            // its size, which would re-enter this and could oscillate. These two
+            // sources change independently of the fit, so watching them cannot
+            // feed back.
+            const badge = document.getElementById('status-badge');
+            if (badge && typeof MutationObserver === 'function') {
+                new MutationObserver(refit).observe(badge, {
+                    childList: true, characterData: true, subtree: true,
+                });
+            }
+            const selector = document.getElementById('notebook-selector-container');
+            if (selector) {
+                // Content, not just size: adding, removing or renaming a
+                // notebook changes what the selector needs without changing the
+                // box it is allowed to occupy, so a ResizeObserver alone never
+                // fires for the case that actually collides.
+                if (typeof MutationObserver === 'function') {
+                    this._selectorObserver = new MutationObserver(refit);
+                    this._selectorObserver.observe(selector, {
+                        childList: true, subtree: true, characterData: true, attributes: true,
+                    });
+                }
+                if (typeof ResizeObserver === 'function') {
+                    this._selectorSizeObserver = new ResizeObserver(refit);
+                    this._selectorSizeObserver.observe(selector);
+                }
+            }
         }
 
         _showHeaderShortcut(id, show) {

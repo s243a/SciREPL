@@ -47,27 +47,93 @@ the channel back to `development` before accumulating new highlights.
 
 ## Header shortcuts
 
-Tour (`🧭`) is visible by default; Formula (`∑`) is off by default (its inserts
-are context-specific — SymPy for Python code, LaTeX templates for Markdown —
-and it hides entirely for other composer languages). Users can toggle either in
-**Menu → Appearance → Header shortcuts**. The first tour panel also carries a
-checked Tour-shortcut option, making that choice available before the user has
-learned the rest of the interface.
+The header carries three optional buttons in Free — Browse (`📦`), Formula (`∑`)
+and Tour (`🧭`) — and two in Pro, which does not yet ship Browse. Each has
+**three** states, chosen in **Menu → Appearance → Header shortcuts**:
+
+| state | meaning |
+| --- | --- |
+| `always` | keep it, even if the header has to wrap to a second row |
+| `auto` | keep it only while it fits on one row |
+| `never` | hide it |
+
+Defaults: Browse `auto`, Tour `auto`, Formula `never`. Formula stays opt-in
+because its inserts are context-specific — SymPy for Python code, LaTeX
+templates for Markdown — and it hides entirely for other composer languages.
+
+**`auto` means the button can be absent without anyone having hidden it.** It is
+a measurement, not a preference: what constrains the header is the width left
+after the title, the notebook selector, the mandatory buttons and the status
+badge, and that changes with the viewport, the button scale and the locale. The
+same settings therefore give a different header in portrait and in landscape.
+
+Fit also depends on what the rest of the header needs, not only on the viewport.
+The notebook selector is a flex sibling: with a second notebook its buttons need
+about 120px, and if the shortcuts have taken the width it is squeezed to 30-49px
+and its buttons overflow into them — a Delete button whose centre hit-tests to
+Search. That counts as "no room", so `auto` candidates stand down — lowest
+priority first, and as many as it takes — until the selector has its width back.
+At 411-430px with a second notebook that is BOTH of them, not one.
+
+Measured figures below are **with Browse and Tour at `auto`** — which IS the
+default: Browse and Tour default to `auto` and Formula to `never`, so a default
+install matches this table exactly. Measured at the shipped button scale:
+
+| scenario | result |
+| --- | --- |
+| 320px, one notebook | no candidate fits |
+| ~379px, one notebook | exactly one candidate fits |
+| 412px, one notebook | both candidates fit |
+| 411-430px, two notebooks | both candidates stand down (`shortcutsDropped="2"`) so the selector fits |
+
+A single-notebook measurement is not a safe guide once the selector is
+populated: the same width holds fewer shortcuts.
+
+**Known limitation.** From roughly 320px up to about 400px, a populated
+selector still collides with the mandatory controls: both optional shortcuts
+are already dropped (`shortcutsDropped="2"`), yet the selector's buttons
+overlap Search, Menu and Help — controls the fitter may never hide. Probed at
+~10px steps with two notebooks, mis-hits persist through 400px and clear by
+405px, so this includes common phone widths, not just 320px. It is
+pre-existing baseline behaviour that needs a change to the selector's own
+layout — tracked separately; do not expect the fitter to fix it.
+
+### Priority
+
+When the `auto` shortcuts cannot all fit, the one **lowest** in the priority
+order stands down first. The default order is Browse, Formula, Tour — Browse is
+used on every visit, Tour is mostly a first-run aid. Users reorder it with the
+arrow controls beside each row, and each row's arrows name their own shortcut so
+the order can be changed without sight.
 
 Hiding Formula closes the formula palette first, since its header button is the
-palette's toggle and close control. Hiding a shortcut never removes its stored
-setting or feature; both choices can be restored from Appearance, and **Reset
-to defaults** restores the defaults: Tour visible, Formula hidden.
+palette's toggle and close control. Standing a shortcut down never removes its
+stored setting or feature, and **Reset to defaults** restores Browse `auto`,
+Tour `auto`, Formula `never`.
+
+The first tour panel carries the same three-state control for Tour, so the
+choice is available before the user has learned the rest of the interface. It is
+a select rather than a checkbox deliberately: a checkbox reported the default as
+"on" while `auto` had stood the shortcut down for lack of width, and ticking it
+back rewrote the choice to `always`, opting the user into a wrapped header they
+never asked for.
+
+### Storage and migration
 
 The relevant preferences are:
 
-- `scirepl_appearance_show_tour_shortcut`
+- `scirepl_appearance_show_browse_shortcut` (Free only)
 - `scirepl_appearance_show_formula_shortcut`
+- `scirepl_appearance_show_tour_shortcut`
+- `scirepl_appearance_shortcut_priority` — a JSON array, highest priority first
 
-Because Formula reads its own key, upgrading applies the new opt-in default
-to existing installations as well; an explicit earlier choice, stored under
-its own key, is preserved.
+Each shortcut key stores `"always"`, `"auto"` or `"never"`. **Legacy Boolean
+values keep their original meaning**: `"1"` reads as `always` and `"0"` as
+`never`, so anyone who made an explicit choice before the third state existed
+keeps exactly that choice, and only installations still on the default move to
+`auto`. An absent key means the shortcut's default.
 
-Preference storage semantics: Tour is opt-out (`showTourShortcut` absent or
-any value other than `"0"` means visible); Formula is opt-in (`showFormulaShortcut`
-must be exactly `"1"` to be visible — absence means hidden).
+Unknown or missing names in the priority array fall back to the registry order,
+so a stored list can never strand a shortcut, and shortcuts whose button this
+edition does not ship are filtered out — which is how one implementation serves
+both Free and Pro.

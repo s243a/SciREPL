@@ -581,6 +581,93 @@ html, body {
 /* Appearance can hide optional shortcuts without deleting their feature or
    preference; either shortcut can be restored from Appearance. `!important`
    wins over `.icon-btn`'s flex display and user-agent handling of `hidden`. */
+/* Header-shortcut settings: name, its three-state choice, and the two
+   priority controls that decide which button gives up its place first.
+
+   Grid rather than a flex row: at 320px a side-by-side row squeezed the select
+   to ~50px and clipped "When there is room" — and the longest translations are
+   longer still. The name takes a full row, the select the next, so the chosen
+   mode stays readable in every locale. Arrow targets are 44px, the minimum
+   comfortable touch size. */
+.appearance-shortcut-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Two classes deliberately: these rows are also .appearance-row, whose
+   display:flex is declared later in this file and would otherwise win on
+   source order at equal specificity. */
+.appearance-row.appearance-shortcut-row {
+    display: grid;
+    /* Narrowest: three stacked rows, so the select owns the full width and the
+       longest translation of "When there is room" is never clipped. Sharing the
+       line with two 44px arrows left it about 112px, which truncates. */
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "name"
+        "mode"
+        "controls";
+    align-items: center;
+    gap: 6px 8px;
+}
+
+.appearance-shortcut-name {
+    grid-area: name;
+    min-width: 0;
+    font-weight: 600;
+}
+
+.appearance-row.appearance-shortcut-row .settings-select {
+    grid-area: mode;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+}
+
+.appearance-shortcut-controls {
+    grid-area: controls;
+    display: flex;
+    gap: 6px;
+}
+
+.appearance-shortcut-move {
+    flex: 0 0 auto;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.appearance-shortcut-move:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* Wider dialogs have room for the classic single line. */
+.appearance-shortcut-controls {
+    justify-self: end;
+}
+
+/* A little more width: name above, select and arrows share the second line. */
+@media (min-width: 380px) {
+    .appearance-row.appearance-shortcut-row {
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "name     name"
+            "mode     controls";
+    }
+}
+
+/* Wider dialogs have room for the classic single line. */
+@media (min-width: 560px) {
+    .appearance-row.appearance-shortcut-row {
+        grid-template-columns: 1fr minmax(12em, auto) auto;
+        grid-template-areas: "name mode controls";
+    }
+}
+
 .header-shortcut-hidden {
     display: none !important;
 }
@@ -3039,9 +3126,6 @@ body.force-mobile .vfs-delete-btn {
     line-height: 1.5;
 }
 
-.appearance-shortcut-row {
-    padding-block: 6px;
-}
 
 .appearance-shortcut-row .appearance-check {
     display: flex;
@@ -3168,14 +3252,38 @@ body.force-mobile .vfs-delete-btn {
 }
 
 .tour-language-shortcut {
+    /* Stacked, not a row: sharing one line left the select ~119px while the
+       French value needs ~139px, so the chosen mode was clipped on a 320px
+       first run. The label sits above and the control owns the width. */
     display: flex;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
     margin-top: 10px;
     color: var(--text-secondary);
     font-size: 13px;
     line-height: 1.4;
 }
+
+.tour-language-shortcut > label {
+    display: block;
+}
+
+.tour-language-shortcut .settings-select {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+}
+
+/* Stacked at EVERY width. The stylesheet's 340px cap on #tour-card above is
+   overridden at runtime: onboarding's _position() sets an inline max-width of
+   viewport minus 16px, so the card — and this row — grow with the window
+   (304px card at a 320px viewport, 584px at 600px). What clipped the select
+   was never the card: a SHARED LINE gives the select only what the label
+   leaves, and a long locale's label left French 151px of a 464px card at a
+   480px viewport when its value needs 176px. Stacked, the select gets the
+   full card width at every viewport, so no breakpoint is needed and no
+   locale can be squeezed. */
 
 /* ===== What's new ===== */
 

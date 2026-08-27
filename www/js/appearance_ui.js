@@ -179,23 +179,110 @@
                 this._refreshButtonScale();
             });
 
-            const tour = $('appearance-show-tour-shortcut');
-            const browse = $('appearance-show-browse-shortcut');
-            const formula = $('appearance-show-formula-shortcut');
-            if (tour) {
-                tour.addEventListener('change', () => {
-                    window.appearance.setShowTourShortcut(tour.checked);
+            this._renderShortcutList();
+        }
+
+        /**
+         * One row per optional header button, in priority order.
+         *
+         * Rebuilt rather than toggled, because the ORDER is itself a setting:
+         * moving a button up the list is how the user says which one keeps its
+         * place when the header runs out of room.
+         */
+        _renderShortcutList() {
+            const host = $('appearance-shortcut-list');
+            if (!host || !window.appearance) return;
+            const t = (key, fallback) => (window.t ? window.t(key) : null) || fallback;
+
+            // Rebuilding drops the focused node, which would throw focus to
+            // <body> — outside the modal's focus trap — every time a select is
+            // changed or a row is moved. Remember what had focus and put it
+            // back on the control that replaces it.
+            const active = document.activeElement;
+            const restore = active && host.contains(active)
+                ? { name: active.dataset.shortcut, role: active.dataset.role }
+                : null;
+
+            const modes = [
+                ['always', t('appearance.shortcutAlways', 'Always')],
+                ['auto', t('appearance.shortcutAuto', 'When there is room')],
+                ['never', t('appearance.shortcutNever', 'Never')],
+            ];
+            const order = window.appearance.getShortcutPriority();   // present buttons only
+            host.textContent = '';
+            host.setAttribute('role', 'group');
+            host.setAttribute('aria-label', t('appearance.headerShortcuts', 'Header shortcuts'));
+
+            order.forEach((name, index) => {
+                const key = window.appearance.shortcutLabelKey(name);
+                const shortcutName = (key && t(key, null)) || name;
+                const row = document.createElement('div');
+                row.className = 'appearance-row appearance-shortcut-row';
+                row.setAttribute('role', 'group');
+                row.setAttribute('aria-label', shortcutName);
+
+                const selectId = `appearance-shortcut-mode-${name}`;
+                const label = document.createElement('label');
+                label.className = 'appearance-shortcut-name';
+                label.setAttribute('for', selectId);
+                label.id = `${selectId}-label`;
+                label.textContent = shortcutName;
+                row.appendChild(label);
+
+                const select = document.createElement('select');
+                select.className = 'settings-select';
+                select.id = selectId;
+                select.dataset.shortcut = name;
+                select.dataset.role = 'mode';
+                for (const [value, caption] of modes) {
+                    const opt = document.createElement('option');
+                    opt.value = value;
+                    opt.textContent = caption;
+                    select.appendChild(opt);
+                }
+                select.value = window.appearance.getShortcutMode(name);
+                select.addEventListener('change', () => {
+                    window.appearance.setShortcutMode(name, select.value);
+                    this._renderShortcutList();
                 });
-            }
-            if (browse) {
-                browse.addEventListener('change', () => {
-                    window.appearance.setShowBrowseShortcut(browse.checked);
-                });
-            }
-            if (formula) {
-                formula.addEventListener('change', () => {
-                    window.appearance.setShowFormulaShortcut(formula.checked);
-                });
+                row.appendChild(select);
+
+                // Arrow names must say WHICH shortcut they move: a screen reader
+                // reading three identical "Give up its place sooner" buttons
+                // cannot tell them apart.
+                const controls = document.createElement('div');
+                controls.className = 'appearance-shortcut-controls';
+                const move = (delta, caption, key2, fallback) => {
+                    const button = document.createElement('button');
+                    button.className = 'vfs-btn appearance-shortcut-move';
+                    button.textContent = caption;
+                    button.dataset.shortcut = name;
+                    button.dataset.role = delta < 0 ? 'up' : 'down';
+                    const accessible = t(key2, fallback).replace('{name}', shortcutName);
+                    button.setAttribute('aria-label', accessible);
+                    button.title = accessible;
+                    button.disabled = delta < 0 ? index === 0 : index === order.length - 1;
+                    button.addEventListener('click', () => {
+                        window.appearance.moveShortcutPriority(name, delta);
+                        this._renderShortcutList();
+                    });
+                    return button;
+                };
+                controls.appendChild(move(-1, '↑', 'appearance.shortcutRaiseNamed',
+                    '{name}: give up its place later'));
+                controls.appendChild(move(1, '↓', 'appearance.shortcutLowerNamed',
+                    '{name}: give up its place sooner'));
+                row.appendChild(controls);
+                host.appendChild(row);
+            });
+
+            if (restore && restore.name) {
+                const back = host.querySelector(
+                    `[data-shortcut="${restore.name}"][data-role="${restore.role}"]`);
+                // A disabled arrow cannot take focus; fall back to that row's
+                // select so focus stays inside the dialog either way.
+                if (back && !back.disabled) back.focus();
+                else host.querySelector(`[data-shortcut="${restore.name}"][data-role="mode"]`)?.focus();
             }
         }
 
@@ -203,12 +290,7 @@
             const scale = window.appearance.getButtonScale();
             $('appearance-btn-scale').value = String(scale);
             $('appearance-btn-scale-value').textContent = `${Math.round(scale * 100)}%`;
-            const tour = $('appearance-show-tour-shortcut');
-            const browse = $('appearance-show-browse-shortcut');
-            const formula = $('appearance-show-formula-shortcut');
-            if (tour) tour.checked = window.appearance.getShowTourShortcut();
-            if (browse) browse.checked = window.appearance.getShowBrowseShortcut();
-            if (formula) formula.checked = window.appearance.getShowFormulaShortcut();
+            this._renderShortcutList();
         }
 
         /* ------------------------------ theme ---------------------------- */
