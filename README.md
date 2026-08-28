@@ -207,7 +207,7 @@ JSON.stringify({pi: Math.PI, e: Math.E}, null, 2)
 | **Package ecosystem** | `%pip install` (pure-Python PyPI) | Full pip | Full pip |
 | **Performance** | WASM (slower for heavy compute) | Native Python | Native + free GPU/TPU |
 | **Collaboration** | Single user | JupyterHub | Real-time multi-user |
-| **Code completion** | Not yet | Extensions available | Built-in |
+| **Code completion** | Local Python keywords + live namespace | Extensions available | Built-in |
 | **WASM FFI** | Call Rust WASM from any kernel | No | No |
 | **Size** | ~2MB app + CDN runtimes | ~500MB with Anaconda | Cloud-based |
 
@@ -376,7 +376,7 @@ Near-term items to make R and cross-language features demo-ready:
 - [x] **Memory & Storage panel** — Per-kernel WASM heap usage, storage quota breakdown, kernel unload, clear VFS/cache
 - [ ] **Cell output collapse/expand** — Toggle long outputs with a click, especially useful on mobile
 - [ ] **Execution counter** — `In [N]` / `Out [N]` numbering like Jupyter to track execution order
-- [ ] **Basic tab-completion** — Keyword/variable completion in the input textarea
+- [x] **Basic tab-completion** — Offline Python keyword/namespace ghost text in the composer and editable cells
 - [ ] **Variable inspector** — Panel showing current variables and types across kernels
 - [ ] **Undo delete cell** — Undo stack to recover accidentally deleted cells
 - [ ] **Dark/light theme toggle** — Light theme option for classrooms/sunlight

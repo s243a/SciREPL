@@ -170,6 +170,7 @@ class FileIO {
                 const autoExec = document.getElementById('setting-auto-execute');
                 const autoSwitch = document.getElementById('setting-auto-switch');
                 const confirmDel = document.getElementById('setting-confirm-delete');
+                const localCompletion = document.getElementById('setting-local-completion');
                 const autoDl = document.getElementById('setting-auto-download');
                 const rPrewarm = document.getElementById('setting-r-prewarm');
                 const largeTouch = document.getElementById('setting-large-touch');
@@ -179,6 +180,9 @@ class FileIO {
                 if (autoExec) autoExec.checked = localStorage.getItem('scirepl_auto_execute') === '1';
                 if (autoSwitch) autoSwitch.checked = localStorage.getItem('scirepl_auto_switch_workbook') !== '0';
                 if (confirmDel) confirmDel.checked = localStorage.getItem('scirepl_confirm_delete') !== '0';
+                if (localCompletion) localCompletion.value = window.localCompletion
+                    ? window.localCompletion.getPreference()
+                    : (localStorage.getItem('scirepl_local_completion') || 'auto');
                 if (autoDl) autoDl.checked = localStorage.getItem('scirepl_auto_download') === '1';
                 if (rPrewarm) rPrewarm.checked = localStorage.getItem('scirepl_r_prewarm') === 'yes';
                 if (largeTouch) largeTouch.checked = localStorage.getItem('scirepl_mobile_emulation') === '1';
@@ -207,6 +211,10 @@ class FileIO {
                     localStorage.setItem('scirepl_auto_execute', e.target.checked ? '1' : '0');
                 } else if (id === 'setting-confirm-delete') {
                     localStorage.setItem('scirepl_confirm_delete', e.target.checked ? '1' : '0');
+                } else if (id === 'setting-local-completion') {
+                    if (window.localCompletion) window.localCompletion.setPreference(e.target.value);
+                    else if (e.target.value === 'auto') localStorage.removeItem('scirepl_local_completion');
+                    else localStorage.setItem('scirepl_local_completion', e.target.value);
                 } else if (id === 'setting-auto-download') {
                     localStorage.setItem('scirepl_auto_download', e.target.checked ? '1' : '0');
                 } else if (id === 'setting-r-prewarm') {
@@ -215,6 +223,10 @@ class FileIO {
                 } else if (id === 'setting-large-touch') {
                     localStorage.setItem('scirepl_mobile_emulation', e.target.checked ? '1' : '0');
                     document.body.classList.toggle('force-mobile', e.target.checked);
+                    // Auto completion eligibility depends on the effective mobile
+                    // profile.  Re-evaluate existing editors immediately instead
+                    // of waiting for the user to type again.
+                    if (window.localCompletion) window.localCompletion.refreshAll();
                 } else if (id === 'setting-default-language') {
                     localStorage.setItem('scirepl_default_language', e.target.value);
                 } else if (id === 'setting-export-format') {
@@ -1999,6 +2011,9 @@ class FileIO {
         if (!notebook) return;
         const cells = notebook.isActive ? (window._cells || []) : (notebook.cells || []);
         for (const cell of cells) {
+            if (cell.inputCard && window.localCompletion) {
+                window.localCompletion.destroyWithin(cell.inputCard);
+            }
             if (cell.inputCard && cell.inputCard.remove) cell.inputCard.remove();
             if (cell.outputCard && cell.outputCard.remove) cell.outputCard.remove();
         }
@@ -3193,20 +3208,29 @@ class FileIO {
 
         // Cell-level dropdowns (existing cells in the DOM)
         document.querySelectorAll('.cell-lang-switch').forEach(sel => {
-            const curVal = sel.value;
+            const card = sel.closest('.card-input');
+            const cellId = Number(card?.dataset.cellId);
+            const cell = (window._cells || []).find(item => item.id === cellId);
+            // A workbook cell keeps its authoritative language even when the
+            // user removes that language from the new-cell profile.  This
+            // mirrors enterEditMode(), which always includes a cell's current
+            // language, and avoids silently changing source semantics.
+            const curVal = cell?.language || sel.value;
+            const options = [...meta];
+            if (!enabled.has(curVal)) {
+                options.unshift(FileIO.LANGUAGE_META.find(l => l.id === curVal)
+                    || { id: curVal, abbrev: curVal });
+            }
             sel.innerHTML = '';
-            for (const l of meta) {
+            for (const l of options) {
                 const opt = document.createElement('option');
                 opt.value = l.id;
                 opt.textContent = l.abbrev;
                 sel.appendChild(opt);
             }
-            if (enabled.has(curVal)) {
-                sel.value = curVal;
-            } else {
-                sel.value = meta[0].id;
-            }
+            sel.value = curVal;
         });
+        if (window.localCompletion) window.localCompletion.refreshAll();
     }
 }
 

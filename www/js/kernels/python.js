@@ -88,6 +88,22 @@ if _pkg_dir not in sys.path:
 del _pkg_dir
 `);
 
+        // Capture the genuine globals dictionary and trusted helpers before
+        // user code can shadow names such as globals, str, or json. Calling
+        // this later reads bounded dictionary KEYS only: no dir(obj), repr,
+        // value access, or user-defined descriptor can run while refreshing
+        // the completion snapshot.
+        this._completionNames = this._pyodide.runPython(`
+(lambda _g=globals(), _dumps=__import__('json').dumps,
+        _islice=__import__('itertools').islice,
+        _type=type, _str=str, _len=len, _list=list:
+  lambda: _dumps(_list(_islice(
+    (_n for _n in _g
+      if _type(_n) is _str and _len(_n) <= 128 and _str.isidentifier(_n)),
+    4096)), ensure_ascii=False)
+)()
+`);
+
         this._ready = true;
         if (km?.markRuntimeCacheComplete) {
             await km.markRuntimeCacheComplete('python');
@@ -346,6 +362,12 @@ sys.stdout = _sci_repl_stdout
         return this._pyodide;
     }
 
+    /** Cached-completion refresh hook. Never called from the typing path. */
+    completionSymbols() {
+        if (!this._ready || !this._completionNames) return [];
+        return JSON.parse(String(this._completionNames()));
+    }
+
     /**
      * VFS adapter — exposes Pyodide's Emscripten FS with the same interface
      * as PrologVFS so the Files & Storage panel can browse it.
@@ -411,6 +433,10 @@ sys.stdout = _sci_repl_stdout
     }
 
     async destroy() {
+        if (this._completionNames && typeof this._completionNames.destroy === 'function') {
+            this._completionNames.destroy();
+        }
+        this._completionNames = null;
         this._pyodide = null;
         this._ready = false;
     }

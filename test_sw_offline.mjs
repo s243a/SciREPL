@@ -113,6 +113,10 @@ try {
         missingPrivacy.length ? `missing: ${missingPrivacy.join(', ')}` : 'all present');
 
     check('the manifest is precached', (cached || []).some((p) => p.endsWith('/i18n/manifest.json')));
+    const missingCompletion = ['completion_surface.js', 'local_completion.js'].filter(
+        (name) => !(cached || []).some((p) => p.endsWith('/js/' + name)));
+    check('the mandatory local-completion modules are precached',
+        missingCompletion.length === 0, missingCompletion.join(', '));
 
     console.log('\n2. One bad entry does not cost the whole offline experience');
 

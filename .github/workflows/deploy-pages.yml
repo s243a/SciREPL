@@ -145,6 +145,22 @@ jobs:
             echo "suite not on this tag — skipped"
           fi
 
+      - name: Local completion core regressions (when present on this tag)
+        run: |
+          if test -f test_autocomplete_core.mjs; then
+            node test_autocomplete_core.mjs
+          else
+            echo "suite not on this tag — skipped"
+          fi
+
+      - name: Local completion browser regressions (when present on this tag)
+        run: |
+          if test -f test_autocomplete.mjs; then
+            node test_autocomplete.mjs
+          else
+            echo "suite not on this tag — skipped"
+          fi
+
       - name: Run cell operations tests
         run: node test_cell_ops.mjs
 

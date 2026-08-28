@@ -182,6 +182,7 @@ class NotebookVFS {
                 return true;
             case '.type':
                 cell.type = typeof value === 'string' ? value.trim() : new TextDecoder().decode(value).trim();
+                this._updateCellUI(index, 'type');
                 return true;
             case '.name':
                 return this._setCellName(index, typeof value === 'string' ? value.trim() : new TextDecoder().decode(value).trim());
@@ -241,6 +242,16 @@ class NotebookVFS {
         const cell = cells[index];
 
         if (changedProp === 'code' && cell.inputCard) {
+            const editor = cell.inputCard.querySelector('.cell-editor');
+            if (editor && editor.value !== cell.code) {
+                const caret = Math.min(editor.selectionStart, cell.code.length);
+                editor.value = cell.code;
+                editor.selectionStart = editor.selectionEnd = caret;
+                // The VFS write is authoritative.  Reuse the editor's normal
+                // input path so height, source-of-truth, and completion state
+                // are synchronized together.
+                editor.dispatchEvent(new Event('input', { bubbles: true }));
+            }
             const pre = cell.inputCard.querySelector('pre');
             if (pre) {
                 if (window._appInternals && window._appInternals.setPreHighlighted) {
@@ -272,19 +283,72 @@ class NotebookVFS {
         }
 
         if (changedProp === 'language' && cell.inputCard) {
+            const selector = cell.inputCard.querySelector('.cell-lang-switch');
+            if (selector && selector.value !== cell.language) selector.value = cell.language;
             const badge = cell.inputCard.querySelector('.lang-badge');
-            if (badge) {
+            if (badge && cell.type !== 'markdown') {
                 badge.textContent = cell.language;
                 badge.className = 'lang-badge lang-' + cell.language;
+            } else if (!badge && cell.type !== 'markdown') {
+                const created = document.createElement('span');
+                created.className = 'lang-badge lang-' + cell.language;
+                created.textContent = cell.language;
+                cell.inputCard.querySelector('.prompt-icon')?.insertAdjacentElement('afterend', created);
             }
             cell.inputCard.dataset.language = cell.language;
         }
 
-        if (['code', 'language'].includes(changedProp) &&
+        if (changedProp === 'type' && cell.inputCard) {
+            const markdown = cell.type === 'markdown';
+            const editor = cell.inputCard.querySelector('.cell-editor');
+            const pre = cell.inputCard.querySelector('pre');
+            const typeSwitch = cell.inputCard.querySelector('.cell-type-switch-btn');
+            const prompt = cell.inputCard.querySelector('.prompt-icon');
+            const badge = cell.inputCard.querySelector('.lang-badge');
+
+            cell.inputCard.dataset.cellType = cell.type;
+            cell.inputCard.classList.toggle('card-markdown', markdown);
+            cell.outputCard?.classList.toggle('card-markdown-output', markdown);
+            if (editor) {
+                editor.dir = markdown ? 'auto' : 'ltr';
+                editor.spellcheck = markdown;
+            }
+            if (pre) {
+                pre.dir = markdown ? 'auto' : 'ltr';
+                pre.classList.toggle('md-source', markdown);
+                if (window._appInternals?.setPreHighlighted) {
+                    window._appInternals.setPreHighlighted(
+                        pre, cell.code, cell.language || 'python', markdown
+                    );
+                }
+            }
+            if (typeSwitch) {
+                typeSwitch.classList.toggle('markdown-active', markdown);
+                if (markdown) {
+                    typeSwitch.textContent = 'Md';
+                    typeSwitch.removeAttribute('data-i18n');
+                } else if (window.setI18nText) {
+                    window.setI18nText(typeSwitch, 'inputControls.code');
+                }
+            }
+            if (prompt) prompt.textContent = `${markdown ? 'Md' : 'In'} [${cell.id}]`;
+            if (markdown) badge?.remove();
+            else if (!badge) {
+                const created = document.createElement('span');
+                created.className = 'lang-badge lang-' + (cell.language || 'python');
+                created.textContent = cell.language || 'python';
+                prompt?.insertAdjacentElement('afterend', created);
+            }
+        }
+
+        if (['code', 'language', 'type'].includes(changedProp) &&
             cell.inputCard && window._appInternals?.updateSourceOnlyIndicator) {
             window._appInternals.updateSourceOnlyIndicator(
                 cell.inputCard, cell.code, cell.type, cell.language || 'python'
             );
+        }
+        if (['code', 'language', 'type'].includes(changedProp) && window.localCompletion) {
+            window.localCompletion.refreshAll();
         }
     }
 
@@ -365,6 +429,9 @@ class NotebookVFS {
         const cell = cells[index];
 
         // Remove DOM cards
+        if (cell.inputCard && window.localCompletion) {
+            window.localCompletion.destroyWithin(cell.inputCard);
+        }
         if (cell.inputCard) cell.inputCard.remove();
         if (cell.outputCard) cell.outputCard.remove();
 

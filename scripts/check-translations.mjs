@@ -38,7 +38,7 @@ const IDENTIFIERS = [
 ];
 
 /** Inline markup the renderer keeps; anything else is stripped at runtime. */
-const ALLOWED_TAGS = new Set(['code', 'strong', 'em', 'b', 'i', 'br', 'a', 'span']);
+const ALLOWED_TAGS = new Set(['code', 'kbd', 'strong', 'em', 'b', 'i', 'br', 'a', 'span']);
 
 /** Sentence terminators across the scripts we ship. */
 const TERMINATORS = /[.!?。！？।॥؟…]+/g;

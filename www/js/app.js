@@ -32,10 +32,28 @@
     let editActionLayoutFrame = 0;
 
     function editActionRowCount(actions) {
+        // Completion temporarily swaps the two Run actions for Accept on
+        // phones.  Measure the toolbar's normal control set so an i18n/resize
+        // pass while Accept is visible cannot leave the restored toolbar
+        // accidentally un-compacted.
+        const completionVisible = actions.classList.contains('completion-visible');
+        const accept = actions.querySelector('.completion-accept-btn');
+        const acceptWasHidden = accept?.hidden;
+        if (completionVisible) actions.classList.remove('completion-visible');
+        if (accept && !acceptWasHidden) accept.hidden = true;
         const rows = [];
-        for (const control of actions.querySelectorAll(':scope > button, :scope > select')) {
-            const top = control.getBoundingClientRect().top;
-            if (!rows.some((known) => Math.abs(known - top) < 1)) rows.push(top);
+        try {
+            for (const control of actions.querySelectorAll(
+                ':scope > button:not(.completion-accept-btn), :scope > select'
+            )) {
+                const rect = control.getBoundingClientRect();
+                if (rect.width === 0 || rect.height === 0) continue;
+                const center = rect.top + rect.height / 2;
+                if (!rows.some((known) => Math.abs(known - center) < 1)) rows.push(center);
+            }
+        } finally {
+            if (accept && !acceptWasHidden) accept.hidden = false;
+            if (completionVisible) actions.classList.add('completion-visible');
         }
         return rows.length;
     }
@@ -126,6 +144,24 @@
         return langSelector ? langSelector.value : 'python';
     }
 
+    // One provider-neutral surface serves both the persistent new-cell
+    // composer and every independently editable existing cell. Context is read
+    // lazily so programmatic language/notebook changes cannot leave it stale.
+    const composerCompletion = window.localCompletion
+        ? window.localCompletion.attach(input, {
+            surface: 'composer',
+            editorId: 'composer',
+            acceptHost: runBtn.closest('.composer-primary-action'),
+            acceptBefore: runBtn,
+            getContext: () => ({
+                surface: 'composer',
+                notebookId: window.notebookManager?.getActiveNotebook()?.id || 'default',
+                cellId: null,
+                cellType: currentCellType,
+                language: getCurrentLanguage()
+            })
+        }) : null;
+
     // Derive label/placeholder from FileIO.LANGUAGE_META so new languages
     // can't drift out of these maps again.
     function langLabel(lang) {
@@ -165,6 +201,7 @@
             if (currentCellType === 'code') {
                 setCodePlaceholder(lang);
             }
+            if (composerCompletion) composerCompletion.refresh();
         });
     }
 
@@ -579,8 +616,28 @@
 
         // Cell language switch
         const langSwitch = actions.querySelector('.cell-lang-switch');
+        const editorNotebookId = window.notebookManager?.getActiveNotebook()?.id || 'default';
+        const editorCompletion = window.localCompletion
+            ? window.localCompletion.attach(textarea, {
+                surface: 'cell',
+                editorId: `${editorNotebookId}:${cellId}`,
+                acceptHost: actions,
+                acceptBefore: actions.querySelector('.cell-cancel-btn'),
+                getContext: () => ({
+                    surface: 'cell',
+                    notebookId: editorNotebookId,
+                    cellId,
+                    cellType: cell ? cell.type : cellType,
+                    language: cell ? (cell.language || langSwitch.value) : langSwitch.value
+                })
+            }) : null;
         function updateCellLangBadge(targetCell, newLang) {
             targetCell.language = newLang;
+            const openEditorLanguage = targetCell.inputCard
+                ?.querySelector('.cell-lang-switch');
+            if (openEditorLanguage && openEditorLanguage.value !== newLang) {
+                openEditorLanguage.value = newLang;
+            }
             targetCell.inputCard.dataset.language = newLang;
             const existingBadge = targetCell.inputCard.querySelector('.lang-badge');
             if (existingBadge) existingBadge.remove();
@@ -595,6 +652,7 @@
         }
         langSwitch.addEventListener('change', () => {
             if (cell) updateCellLangBadge(cell, langSwitch.value);
+            if (editorCompletion) editorCompletion.refresh();
         });
 
         // Apply language to all code cells (skip cells with %% magic)
@@ -610,6 +668,7 @@
             if (window.kernelManager) window.kernelManager.setLanguage(newLang);
             if (window.notifyComposerContextChanged) window.notifyComposerContextChanged();
             saveCellsToSession();
+            if (window.localCompletion) window.localCompletion.refreshAll();
         });
 
         // Type switch button
@@ -626,6 +685,7 @@
                 textarea.spellcheck = cell.type === 'markdown';
                 textarea.dir = cell.type === 'markdown' ? 'auto' : 'ltr';
                 updateSourceOnlyIndicator(inputCard, textarea.value, cell.type, langSwitch.value);
+                if (editorCompletion) editorCompletion.refresh();
             }
         });
         typeSwitch.classList.toggle('markdown-active', cellType === 'markdown');
@@ -653,12 +713,13 @@
             if (e.key === 'Escape') {
                 exitEditMode(inputCard, cellId, currentCode, false);
             }
-            if (e.key === 'Tab') {
+            if (e.key === 'Tab' && !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey) {
                 e.preventDefault();
                 const start = textarea.selectionStart;
                 const end = textarea.selectionEnd;
                 textarea.value = textarea.value.substring(0, start) + '    ' + textarea.value.substring(end);
                 textarea.selectionStart = textarea.selectionEnd = start + 4;
+                textarea.dispatchEvent(new Event('input', { bubbles: true }));
             }
         });
 
@@ -677,6 +738,7 @@
         inputCard.classList.toggle('card-markdown', cellType === 'markdown');
 
         const textarea = inputCard.querySelector('.cell-editor');
+        if (textarea && window.localCompletion) window.localCompletion.detach(textarea);
         const pre = document.createElement('pre');
         pre.dir = cellType === 'markdown' ? 'auto' : 'ltr';
         if (cellType === 'markdown') pre.className = 'md-source';
@@ -700,6 +762,7 @@
         const idx = window._cells.findIndex(c => c.id === cellId);
         if (idx === -1) return;
         const cell = window._cells[idx];
+        if (cell.inputCard && window.localCompletion) window.localCompletion.destroyWithin(cell.inputCard);
         if (cell.inputCard) cell.inputCard.remove();
         if (cell.outputCard) cell.outputCard.remove();
         window._cells.splice(idx, 1);
@@ -1001,6 +1064,32 @@ _scirepl_modules_for(${JSON.stringify(dist)})
 
         if (!km) throw new Error(window.t('app.errors.kernelManagerUnavailable'));
 
+        // Resolve %%language before tracking so lifecycle consumers refresh
+        // the kernel that actually ran, not merely the cell selector's value.
+        const magicMatch = code.match(/^%%(\w+)\s*\n([\s\S]*)$/);
+        if (magicMatch) {
+            const magicLang = magicMatch[1].toLowerCase();
+            if (km._registry && km._registry[magicLang]) {
+                return executeCode(magicMatch[2], magicLang);
+            }
+        }
+
+        // Python's UI bridge intentionally bypasses KernelManager.execute for
+        // plots/tables. Put the WHOLE Python path (%pip included) inside the
+        // same lifecycle envelope used by standard kernels so cached namespace
+        // completion refreshes after success, returned error, or throw.
+        if (language === 'python' && typeof km.trackExecution === 'function') {
+            return km.trackExecution('python', () => executeCodeUntracked(code, language), {
+                origin: 'app-python'
+            });
+        }
+        return executeCodeUntracked(code, language);
+    }
+
+    async function executeCodeUntracked(code, language) {
+        language = language || 'python';
+        const km = window.kernelManager;
+
         // Handle %pip install magic (Jupyter-compatible).
         // Lines are parsed ATOMICALLY (PEP 508 subset, www/js/pip_resolver.js):
         // any unsupported token rejects the whole line — nothing on it may be
@@ -1095,17 +1184,6 @@ if 'matplotlib' in sys.modules or importlib.util.find_spec('matplotlib'):
             if (kernel && kernel.installPackages) {
                 const msg = await kernel.installPackages(packages);
                 return { stdout: msg, result: null, error: null };
-            }
-        }
-
-        // Handle %%language magic commands (e.g., %%bash, %%python, %%prolog)
-        // Strips the magic line and routes to the specified kernel.
-        const magicMatch = code.match(/^%%(\w+)\s*\n([\s\S]*)$/);
-        if (magicMatch) {
-            const magicLang = magicMatch[1].toLowerCase();
-            let magicCode = magicMatch[2];
-            if (km._registry && km._registry[magicLang]) {
-                return executeCode(magicCode, magicLang);
             }
         }
 
@@ -1804,6 +1882,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
     async function runCode() {
         const code = input.value.trim();
         if (!code) return;
+        if (composerCompletion) composerCompletion.dismiss();
 
         const language = getCurrentLanguage();
         const km = window.kernelManager;
@@ -1907,6 +1986,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
         runBtn.disabled = false;
         input.value = '';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
         if (window.sessionManager) {
             window.sessionManager.session.historyIndex = -1;
         }
@@ -1941,6 +2021,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                     if (idx >= 0) {
                         input.value = session.history[idx];
                         autoResize();
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
                     }
                 }
             }
@@ -1958,15 +2039,17 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                         input.value = session.history[idx];
                     }
                     autoResize();
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
                 }
             }
         }
-        if (e.key === 'Tab') {
+        if (e.key === 'Tab' && !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey) {
             e.preventDefault();
             const start = input.selectionStart;
             const end = input.selectionEnd;
             input.value = input.value.substring(0, start) + '    ' + input.value.substring(end);
             input.selectionStart = input.selectionEnd = start + 4;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
         }
     });
 
@@ -2169,6 +2252,26 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         goToCurrentMatch();
     }
 
+    function syncCellSourceAfterProgrammaticWrite(cell) {
+        if (!cell?.inputCard) return;
+        const editor = cell.inputCard.querySelector('.cell-editor');
+        if (editor) {
+            const caret = Math.min(editor.selectionStart, cell.code.length);
+            editor.value = cell.code;
+            editor.selectionStart = editor.selectionEnd = caret;
+            editor.dispatchEvent(new Event('input', { bubbles: true }));
+        } else {
+            const pre = cell.inputCard.querySelector('pre');
+            if (pre) setPreHighlighted(
+                pre, cell.code, cell.language || 'python', cell.type === 'markdown'
+            );
+        }
+        updateSourceOnlyIndicator(
+            cell.inputCard, cell.code, cell.type, cell.language || 'python'
+        );
+        if (window.localCompletion) window.localCompletion.refreshAll();
+    }
+
     function replaceCurrentMatch() {
         if (_searchCurrentIdx < 0 || _searchCurrentIdx >= _searchFlatMatches.length) return;
 
@@ -2181,9 +2284,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         const cell = match.cell;
         cell.code = cell.code.slice(0, match.startIdx) + replacement + cell.code.slice(match.startIdx + query.length);
 
-        // Re-render the card's code
-        const pre = cell.inputCard.querySelector('pre');
-        if (pre) setPreHighlighted(pre, cell.code, cell.language || 'python', cell.type === 'markdown');
+        syncCellSourceAfterProgrammaticWrite(cell);
 
         saveCellsToSession();
         runSearch();
@@ -2203,8 +2304,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         }
 
         for (const cell of affectedCells) {
-            const pre = cell.inputCard.querySelector('pre');
-            if (pre) setPreHighlighted(pre, cell.code, cell.language || 'python', cell.type === 'markdown');
+            syncCellSourceAfterProgrammaticWrite(cell);
         }
 
         saveCellsToSession();

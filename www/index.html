@@ -395,6 +395,8 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             <p data-i18n-html="help.openMenuLanguagesShowHide">Open <strong>Menu → Languages</strong> to show or hide languages in the cell dropdown. Unchecking a language removes it from the selector but doesn't unload its runtime. All languages are enabled by default. Your preferences are saved across sessions.</p>
             <p data-i18n-html="help.runtimeVersions"><strong>Runtime versions:</strong> R and Prolog show the tested default, latest available, current selection, and successfully loaded session source separately. Leave the version and source fields blank to use the exact tested default. R accepts a webR tag such as <code>v0.5.4</code>; <code>latest</code> is rolling and unverified. Prolog accepts a compatible npm-swipl-wasm selector such as <code>3/8/2</code>; its global <code>latest</code> is an incompatible package line and is rejected, so use <strong>Check latest</strong> for the newest compatible 3.x release. Changes require a reload.</p>
 
+            <p data-i18n-html="help.localCompletionGuide"><strong>Local Python completion:</strong> SciREPL suggests Python keywords and names from the current session, locally and offline. Press <kbd>Tab</kbd> or use <strong>Accept</strong> to insert a visible suggestion; <kbd>Esc</kbd> dismisses it. Auto mode enables completion on desktop and disables it on touch devices; change it under <strong>Menu → Settings</strong>.</p>
+
             <h3 data-i18n="help.keyboardShortcuts">Keyboard Shortcuts</h3>
             <ul>
                 <li><kbd>Shift+Enter</kbd> <span data-i18n="help.shortcutOr">or</span> <kbd>Ctrl+Enter</kbd> — <span data-i18n="help.shortcutRunCode">Run code</span></li>
@@ -682,6 +684,14 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                 </label>
                 <label class="settings-item">
                     <input type="checkbox" id="setting-confirm-delete" checked> <span data-i18n="export.confirmBeforeDeletingFiles">Confirm before deleting files</span>
+                </label>
+                <label class="settings-item">
+                    <span data-i18n="autocomplete.localCompletion">Local code completion:</span>
+                    <select id="setting-local-completion" class="settings-select">
+                        <option value="auto" data-i18n="autocomplete.modeAuto">Auto (desktop on, touch off)</option>
+                        <option value="on" data-i18n="autocomplete.modeOn">On</option>
+                        <option value="off" data-i18n="autocomplete.modeOff">Off</option>
+                    </select>
                 </label>
                 <label class="settings-item">
                     <span data-i18n="export.exportFormat">Export format:</span>
@@ -1224,7 +1234,9 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
         </div>
         <textarea id="code-input" rows="3" data-i18n-placeholder="app.input.codePlaceholder" data-i18n-placeholder-vars='{"language":"Python"}' placeholder="Type Python here…" spellcheck="false" autocapitalize="off"
             autocomplete="off"></textarea>
-        <button data-i18n="inputControls.run" id="run-btn" disabled>▶ Run</button>
+        <div class="composer-primary-action">
+            <button data-i18n="inputControls.run" id="run-btn" disabled>▶ Run</button>
+        </div>
         </div>
     </footer>
 
@@ -1268,6 +1280,8 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <script src="js/package_catalog.js"></script>
     <script src="js/prolog_settings.js"></script>
     <script src="js/notebook_manager.js"></script>
+    <script src="js/completion_surface.js"></script>
+    <script src="js/local_completion.js"></script>
     <script src="vendor/hljs/highlight.min.js"></script>
     <script src="vendor/hljs/lua.min.js"></script>
     <script src="js/export.js"></script>

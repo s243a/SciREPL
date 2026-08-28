@@ -44,7 +44,9 @@
     "test:header-shortcuts": "node test_header_shortcuts.mjs",
     "test:android-back": "node test_android_back.mjs",
     "test:lang-selector": "node test_lang_selector.mjs",
-    "test:math-palette": "node test_math_palette.mjs"
+    "test:math-palette": "node test_math_palette.mjs",
+    "test:autocomplete-core": "node test_autocomplete_core.mjs",
+    "test:autocomplete": "node test_autocomplete.mjs"
   },
   "keywords": [
     "python",

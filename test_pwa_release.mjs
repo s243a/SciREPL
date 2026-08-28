@@ -263,6 +263,9 @@ try {
     for (const relative of requiredCatalogPaths) {
         assert(cacheState.paths.includes(PREFIX + relative), `pre-cache contains ${relative}`);
     }
+    for (const relative of ['js/completion_surface.js', 'js/local_completion.js']) {
+        assert(cacheState.paths.includes(PREFIX + relative), `pre-cache contains ${relative}`);
+    }
 
     console.log('2b. Keeping catalog metadata and no-store requests outside the app cache...');
     const dynamicCacheState = await page.evaluate(async ({
@@ -424,6 +427,29 @@ try {
     assert(offlineReload.controlled, 'offline reload remains service-worker controlled');
     assert(!offlineReload.online, 'browser remained offline during reload');
     assert(offlineReload.title === 'Sci REPL', 'offline app shell rendered', offlineReload.title);
+    const offlineCompletion = await page.evaluate(async () => {
+        localStorage.setItem('scirepl_local_completion', 'on');
+        window.localCompletion.refreshAll();
+        const input = document.getElementById('code-input');
+        input.focus();
+        input.value = 'pri';
+        input.selectionStart = input.selectionEnd = input.value.length;
+        input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const shell = document.querySelector('.completion-editor-composer');
+        input.dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'Tab', bubbles: true, cancelable: true
+        }));
+        return {
+            globals: !!window.CompletionSurface && !!window.LocalCompletion && !!window.localCompletion,
+            hadGhost: shell?.querySelector('.completion-ghost-suffix')?.textContent === 'nt'
+                || input.value === 'print',
+            accepted: input.value === 'print'
+        };
+    });
+    assert(offlineCompletion.globals, 'offline app loaded the local-completion modules');
+    assert(offlineCompletion.hadGhost && offlineCompletion.accepted,
+        'offline local completion renders and accepts without a request', JSON.stringify(offlineCompletion));
     assert(pageErrors.length === 0, 'offline app reload raises no uncaught page errors', pageErrors.join(' | '));
 
     console.log('7. Restarting the bundled Prolog kernel while still offline...');
