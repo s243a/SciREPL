@@ -185,6 +185,7 @@ class NotebookManager {
 
         // Remove DOM container
         if (nb.replContainer && nb.replContainer.parentNode) {
+            if (window.localCompletion) window.localCompletion.destroyWithin(nb.replContainer);
             nb.replContainer.parentNode.removeChild(nb.replContainer);
         }
 
@@ -298,6 +299,9 @@ class NotebookManager {
 
         this.renderSelector();
         this.saveState();
+        window.dispatchEvent(new CustomEvent('scirepl:notebook-changed', {
+            detail: { from: current ? current.id : null, to: target.id }
+        }));
     }
 
     // ---- Package integration ----

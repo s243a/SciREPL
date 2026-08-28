@@ -112,7 +112,7 @@
      * enough for a code sample, an emphasis and a documentation link, and
      * nothing that can execute or load anything.
      */
-    const INLINE_TAGS = new Set(['CODE', 'STRONG', 'EM', 'B', 'I', 'BR', 'A', 'SPAN']);
+    const INLINE_TAGS = new Set(['CODE', 'KBD', 'STRONG', 'EM', 'B', 'I', 'BR', 'A', 'SPAN']);
 
     // Elements dropped whole rather than unwrapped: their text content is not
     // safe display prose (script source, style rules, raw template markup).

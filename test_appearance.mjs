@@ -566,7 +566,7 @@ try {
         document.body.appendChild(host);
         const cat = window.i18n.catalogues[window.i18n.current]
             = window.i18n.catalogues[window.i18n.current] || {};
-        cat.__keepprobe = 'Use <code>%pip install</code> or see '
+        cat.__keepprobe = 'Use <code>%pip install</code>, press <kbd>Tab</kbd>, or see '
             + '<a href="https://example.com">docs</a> <strong>now</strong>.';
         window.i18n.applyToDom(document.body);
         const rendered = host.innerHTML;
@@ -575,7 +575,8 @@ try {
         return rendered;
     });
     check('safe inline markup is preserved',
-        /<code>%pip install<\/code>/.test(kept) && /<strong>now<\/strong>/.test(kept)
+        /<code>%pip install<\/code>/.test(kept) && /<kbd>Tab<\/kbd>/.test(kept)
+        && /<strong>now<\/strong>/.test(kept)
         && /href="https:\/\/example\.com"/.test(kept), kept.slice(0, 100));
 
     /* --------- applying CSS through the visibly-open dialog ------------- */

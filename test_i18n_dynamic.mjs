@@ -581,10 +581,11 @@ try {
             return {
                 text: control.textContent,
                 top: Math.round(rect.top),
+                width: rect.width,
                 height: Math.round(rect.height),
                 clipped: rect.left < -0.5 || rect.right > document.documentElement.clientWidth + 0.5,
             };
-        });
+        }).filter((control) => control.width > 0 && control.height > 0);
         return {
             editorDir: editor?.dir,
             editorComputedDir: editor ? getComputedStyle(editor).direction : null,
@@ -613,9 +614,9 @@ try {
                 const barRect = bar?.getBoundingClientRect();
                 const controls = [...(bar?.querySelectorAll('button, select') || [])].map((control) => {
                     const rect = control.getBoundingClientRect();
-                    return { top: Math.round(rect.top), height: rect.height,
+                    return { top: Math.round(rect.top), width: rect.width, height: rect.height,
                         left: rect.left, right: rect.right };
-                });
+                }).filter((control) => control.width > 0 && control.height > 0);
                 return {
                     rows: new Set(controls.map((control) => control.top)).size,
                     controls,

@@ -79,6 +79,9 @@ jobs:
       - name: Pip resolver unit tests (deterministic, fixture lockfile)
         run: node test_pip_resolver.mjs
 
+      - name: Local completion core
+        run: npm run test:autocomplete-core
+
       - name: Start dev server
         run: node server.js &
 
@@ -106,6 +109,9 @@ jobs:
 
       - name: Math palette, contexts, layout invariants
         run: node test_math_palette.mjs
+
+      - name: Local completion — composer and existing cells
+        run: npm run test:autocomplete
 
       - name: Pip cell semantics (failed installs stop the cell; dep healing)
         run: node test_pip_cell.mjs

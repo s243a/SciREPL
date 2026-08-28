@@ -18,6 +18,13 @@ class KernelManager {
         this._instances = {};
         // In-flight init promises: language id → Promise (guards concurrent init)
         this._initPromises = {};
+        // Completion and other lifecycle consumers need identities, not source
+        // code. Generations invalidate state across unload/re-init; execution
+        // ids make late asynchronous refreshes harmless.
+        this._kernelGenerations = {};
+        this._executionSequence = 0;
+        this._latestExecutionIds = {};
+        this._activeExecutions = {};
         // Successful runtime source for this page session.  This is deliberately
         // not persisted: the Languages screen must report what actually loaded
         // now, rather than implying that a previous session's fallback is live.
@@ -124,8 +131,74 @@ class KernelManager {
         }
         if (!this._instances[language]) {
             this._instances[language] = new this._registry[language]();
+            this._kernelGenerations[language] = (this._kernelGenerations[language] || 0) + 1;
+            this._dispatchKernelEvent('scirepl:kernel-created', {
+                language,
+                kernelGeneration: this._kernelGenerations[language]
+            });
         }
         return this._instances[language];
+    }
+
+    /** Read an existing kernel without constructing or initializing one. */
+    peekKernel(language) {
+        return this._instances[language] || null;
+    }
+
+    getKernelGeneration(language) {
+        return this._kernelGenerations[language] || 0;
+    }
+
+    getLatestExecutionId(language) {
+        return this._latestExecutionIds[language] || 0;
+    }
+
+    isExecutionActive(language) {
+        return (this._activeExecutions[language] || 0) > 0;
+    }
+
+    _dispatchKernelEvent(name, detail) {
+        if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function'
+            && typeof CustomEvent === 'function') {
+            window.dispatchEvent(new CustomEvent(name, { detail }));
+        }
+    }
+
+    /**
+     * Track a real kernel execution without exposing its code or result in the
+     * DOM event. Every settled attempt is reported, including returned errors
+     * and thrown exceptions, because user state may change before either one.
+     */
+    async trackExecution(language, fn, meta = {}) {
+        const executionId = ++this._executionSequence;
+        const startedAt = Date.now();
+        this._latestExecutionIds[language] = executionId;
+        this._activeExecutions[language] = (this._activeExecutions[language] || 0) + 1;
+        const base = {
+            executionId,
+            language,
+            origin: String(meta.origin || 'kernel-manager'),
+            kernelGeneration: this.getKernelGeneration(language),
+            startedAt
+        };
+        this._dispatchKernelEvent('scirepl:kernel-execution-started', base);
+        let outcome = 'ok';
+        try {
+            const result = await fn();
+            if (result && result.error) outcome = 'reported-error';
+            return result;
+        } catch (error) {
+            outcome = 'threw';
+            throw error;
+        } finally {
+            this._activeExecutions[language] = Math.max(0,
+                (this._activeExecutions[language] || 1) - 1);
+            this._dispatchKernelEvent('scirepl:kernel-execution-settled', {
+                ...base,
+                outcome,
+                settledAt: Date.now()
+            });
+        }
     }
 
     /**
@@ -964,7 +1037,9 @@ class KernelManager {
     async execute(code, language) {
         language = language || this.currentLanguage;
         const kernel = await this.ensureReady(language);
-        return kernel.execute(code);
+        return this.trackExecution(language, () => kernel.execute(code), {
+            origin: 'kernel-manager'
+        });
     }
 
     /**
@@ -1000,10 +1075,17 @@ class KernelManager {
      */
     async destroyKernel(language) {
         const instance = this._instances[language];
+        // Invalidate synchronously: an in-flight namespace refresh must not be
+        // able to publish while a slow runtime teardown is still pending.
+        delete this._instances[language];
+        this._kernelGenerations[language] = (this._kernelGenerations[language] || 0) + 1;
+        this._dispatchKernelEvent('scirepl:kernel-invalidated', {
+            language,
+            kernelGeneration: this._kernelGenerations[language]
+        });
         if (instance && instance.destroy) {
             await instance.destroy();
         }
-        delete this._instances[language];
     }
 
     /**

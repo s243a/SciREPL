@@ -40,6 +40,7 @@ jobs:
           python-version: '3.12'
       - run: python3 -m pip install 'packaging>=26'
       - run: npm run test:pip-resolver
+      - run: npm run test:autocomplete-core
       - run: node server.js &
       - run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
       - run: node test_appearance.mjs
@@ -48,6 +49,7 @@ jobs:
       - run: node test_whats_new.mjs
       - run: npm run test:header-shortcuts
       - run: npm run test:math-palette
+      - run: npm run test:autocomplete
       - run: npm run test:pip-cell
       - run: node test_rtl_layout.mjs
       - run: node test_i18n_dynamic.mjs

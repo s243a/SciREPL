@@ -500,6 +500,160 @@ html, body {
     color: var(--text-muted);
 }
 
+/* ===== Local completion =====
+   The textarea remains the editable/source layer. A pointer-inert mirror above
+   it renders only the untyped suffix; its prefix is transparent. */
+.completion-editor {
+    position: relative;
+    min-width: 0;
+}
+
+.completion-editor-composer {
+    flex: 1 1 auto;
+    align-self: flex-end;
+}
+
+.completion-editor-composer #code-input,
+.completion-editor-cell .cell-editor {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.completion-editor-cell {
+    width: 100%;
+}
+
+.completion-ghost {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: none;
+    margin: 0;
+    pointer-events: none;
+    overflow: hidden;
+    white-space: pre-wrap;
+    color: transparent;
+    background: transparent;
+}
+
+.completion-editor.has-completion .completion-ghost {
+    display: block;
+}
+
+.completion-ghost-prefix {
+    color: transparent;
+}
+
+.completion-ghost-suffix {
+    /* This is the only visual representation of the proposal. The secondary
+       text pair stays above 4.5:1 in the built-in dark and light themes. */
+    color: var(--text-secondary);
+    opacity: 1;
+}
+
+.completion-accept-btn {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 6px 9px;
+    border: 1px solid var(--accent);
+    border-radius: 7px;
+    background: var(--bg-card);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.completion-accept-overlay {
+    position: absolute;
+    z-index: 3;
+    inset-block-start: 4px;
+    inset-inline-end: 4px;
+}
+
+.completion-accept-btn[hidden] {
+    display: none;
+}
+
+/* Run and Accept share one stable grid cell. Both intrinsic widths contribute
+   even while Accept is hidden, so showing a suggestion never narrows/reflows
+   the textarea or moves its caret. */
+.composer-primary-action {
+    display: grid;
+    flex: 0 0 auto;
+    align-self: flex-start;
+}
+
+.composer-primary-action > button {
+    grid-area: 1 / 1;
+}
+
+.composer-primary-action > .completion-accept-btn[hidden] {
+    display: block;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* The cell toolbar's compact-phone rule otherwise wins later in this file and
+   shrinks the completion action below the app's 44px touch target. */
+.cell-edit-actions .completion-accept-btn {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+/* Author-level display on the button otherwise overrides the browser's
+   built-in [hidden] rule and leaves an inactive Accept slot in every legacy
+   cell toolbar. The composer has its own intentional stable-slot rule. */
+.cell-edit-actions > .completion-accept-btn[hidden] {
+    display: none;
+}
+
+/* On a phone the composer already has only enough width for its mandatory
+   controls. While a completion is visible, Accept deliberately occupies Run's
+   slot; accepting or moving focus restores Run immediately. This keeps both
+   controls fully hittable instead of laying a chip over the textarea. */
+.cell-edit-actions.completion-visible .cell-run-btn,
+.cell-edit-actions.completion-visible .cell-run-below-btn {
+    display: none;
+}
+
+.composer-primary-action.completion-visible #run-btn {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+@media (max-width: 360px) {
+    /* Long translated labels can make the already-dense cell toolbar grow to
+       three rows. Keep the localized accessible name/title, but use the same
+       compact checkmark convention as the other icon-only cell actions. */
+    .completion-accept-btn {
+        width: 44px;
+        padding-inline: 0;
+        font-size: 0;
+    }
+
+    .completion-accept-btn::before {
+        content: '✓';
+        font-size: 18px;
+    }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+    .cell-edit-actions .completion-accept-btn {
+        width: 44px;
+        padding-inline: 0;
+        font-size: 0;
+    }
+
+    .cell-edit-actions .completion-accept-btn::before {
+        content: '✓';
+        font-size: 18px;
+    }
+}
+
 #run-btn {
     flex-shrink: 0;
     align-self: flex-start;
@@ -511,7 +665,8 @@ html, body {
     font-weight: 700;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease,
+                opacity 0.2s ease, background 0.2s ease;
     min-height: 44px;
 }
 
