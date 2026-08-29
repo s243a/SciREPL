@@ -37,6 +37,17 @@ async function seed(context, { mockAndroid = false } = {}) {
             exitCalls: 0,
             removed: 0,
         };
+        window.__webVersionMock = {
+            browserUrls: [],
+            bridgeCalls: 0,
+            bridgeInstalled: false,
+            confirmResult: true,
+            prompts: [],
+        };
+        window.confirm = (message) => {
+            window.__webVersionMock.prompts.push(String(message));
+            return window.__webVersionMock.confirmResult;
+        };
         const app = {
             addListener(name, listener) {
                 window.__appPluginMock.listenerNames.push(name);
@@ -52,7 +63,19 @@ async function seed(context, { mockAndroid = false } = {}) {
         window.Capacitor = {
             getPlatform: () => 'android',
             isNativePlatform: () => true,
-            Plugins: { App: app },
+            isPluginAvailable: (name) => name === 'App'
+                || name === 'Browser'
+                || (name === 'SciReplBrowserBridge'
+                    && window.__webVersionMock.bridgeInstalled),
+            Plugins: {
+                App: app,
+                Browser: {
+                    async open({ url }) { window.__webVersionMock.browserUrls.push(url); },
+                },
+                SciReplBrowserBridge: {
+                    async open() { window.__webVersionMock.bridgeCalls++; },
+                },
+            },
         };
         window.__pressAndroidBack = (event = { canGoBack: false }) => {
             const listener = window.__appPluginMock.listener;
@@ -84,6 +107,9 @@ try {
     const { page: webPage, errors: webErrors } = await load(webContext);
     check('ordinary web pages do not install a native Back listener',
         await webPage.evaluate(() => window.SciReplAndroidBack.installed === false));
+    check('the hosted/browser build hides its redundant Open Web Version action',
+        await webPage.evaluate(() => getComputedStyle(
+            document.getElementById('btn-open-browser')).display === 'none'));
     check('loading without Capacitor produces no page error', webErrors.length === 0,
         webErrors.join(' | '));
     await webContext.close();
@@ -132,6 +158,57 @@ try {
     await page.waitForFunction(() => Boolean(window.SciReplAndroidBack.listenerHandle));
     check('the plugin listener handle is retained', await page.evaluate(() =>
         Boolean(window.SciReplAndroidBack.listenerHandle)));
+    check('native menu labels and describes the fallback as a separate web version',
+        await page.evaluate(() => {
+            const button = document.getElementById('btn-open-browser');
+            return button?.textContent.includes('Open Web Version')
+                && /hosted SciREPL web version/i.test(button.title);
+        }));
+
+    await page.click('#menu-btn');
+    await page.evaluate(() => { window.__webVersionMock.confirmResult = false; });
+    await page.click('#btn-open-browser');
+    const declinedWeb = await page.evaluate(() => ({
+        browserCalls: window.__webVersionMock.browserUrls.length,
+        menuOpen: !document.getElementById('menu-modal').classList.contains('hidden'),
+    }));
+    check('declining the separate-session warning keeps the menu open and makes no request',
+        declinedWeb.browserCalls === 0 && declinedWeb.menuOpen, JSON.stringify(declinedWeb));
+
+    await page.evaluate(() => { window.__webVersionMock.confirmResult = true; });
+    await page.click('#btn-open-browser');
+    await page.waitForFunction(() => window.__webVersionMock.browserUrls.length === 1);
+    const webFallback = await page.evaluate(() => ({
+        url: window.__webVersionMock.browserUrls[0],
+        prompt: window.__webVersionMock.prompts[0],
+        menuClosed: document.getElementById('menu-modal').classList.contains('hidden'),
+    }));
+    check('the fallback opens the canonical GitHub Pages PWA',
+        webFallback.url === 'https://s243a.github.io/SciREPL/', JSON.stringify(webFallback));
+    check('the fallback warns about separate data, a second installed app, and first-use network',
+        /separate notebooks and settings/i.test(webFallback.prompt)
+        && /second SciREPL app/i.test(webFallback.prompt)
+        && /first visit requires an internet connection/i.test(webFallback.prompt),
+        JSON.stringify(webFallback));
+    check('opening the web version closes the menu', webFallback.menuClosed,
+        JSON.stringify(webFallback));
+
+    const bridge = await page.evaluate(async () => {
+        const beforePrompts = window.__webVersionMock.prompts.length;
+        const beforeBrowser = window.__webVersionMock.browserUrls.length;
+        window.__webVersionMock.bridgeInstalled = true;
+        document.getElementById('menu-modal').classList.remove('hidden');
+        document.getElementById('btn-open-browser').click();
+        await new Promise(resolve => setTimeout(resolve, 0));
+        return {
+            calls: window.__webVersionMock.bridgeCalls,
+            promptDelta: window.__webVersionMock.prompts.length - beforePrompts,
+            browserDelta: window.__webVersionMock.browserUrls.length - beforeBrowser,
+        };
+    });
+    check('an installed Browser Bridge overrides the hosted fallback without a second prompt',
+        bridge.calls === 1 && bridge.promptDelta === 0 && bridge.browserDelta === 0,
+        JSON.stringify(bridge));
     await page.addScriptTag({ url: `${URL.replace(/index\.html$/, '')}js/android_back.js` });
     check('a duplicate script evaluation does not register twice', await page.evaluate(() =>
         window.__appPluginMock.listenerNames.join(',') === 'backButton'));

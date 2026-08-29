@@ -123,20 +123,46 @@ class FileIO {
             location.reload();
         });
 
-        // Open in Browser — open app URL in system browser (useful on Android)
+        // A future native Browser Bridge plugin can serve this installation on
+        // loopback and take priority here. Until then, offer the hosted PWA and
+        // state explicitly that it has a separate browser storage/session.
         const openBrowserBtn = document.getElementById('btn-open-browser');
         if (openBrowserBtn) {
-            if (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.Browser) {
+            const webAppUrl = 'https://s243a.github.io/SciREPL/';
+            const capacitor = window.Capacitor;
+            const browserPlugin = capacitor?.Plugins?.Browser;
+            const bridgeAvailable = () => Boolean(
+                capacitor?.isPluginAvailable?.('SciReplBrowserBridge')
+                && capacitor?.Plugins?.SciReplBrowserBridge?.open);
+
+            if (browserPlugin?.open || bridgeAvailable()) {
                 openBrowserBtn.addEventListener('click', async () => {
+                    if (bridgeAvailable()) {
+                        try {
+                            this.menuModal.classList.add('hidden');
+                            await capacitor.Plugins.SciReplBrowserBridge.open({
+                                fallbackUrl: webAppUrl,
+                            });
+                            return;
+                        } catch (error) {
+                            console.warn('Browser Bridge failed; offering the hosted web version:', error);
+                        }
+                    }
+
+                    const proceed = confirm(this._t(
+                        'fileIo.openWebVersionConfirm',
+                        'This opens the hosted SciREPL web version in your browser. It uses separate notebooks and settings from this installed app. If installed, it appears as a second SciREPL app. The first visit requires an internet connection. Continue?'));
+                    if (!proceed) return;
+
                     this.menuModal.classList.add('hidden');
                     try {
-                        await Capacitor.Plugins.Browser.open({ url: window.location.href });
-                    } catch (e) {
-                        console.warn('Failed to open browser:', e);
+                        await browserPlugin.open({ url: webAppUrl });
+                    } catch (error) {
+                        console.warn('Failed to open the hosted web version:', error);
                     }
                 });
             } else {
-                // Not on Capacitor — hide the button
+                // The action is native-only; the browser is already the web version.
                 openBrowserBtn.style.display = 'none';
             }
         }
