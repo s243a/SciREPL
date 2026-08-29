@@ -47,6 +47,7 @@ jobs:
       - run: npm run test:android-back
       - run: node test_whats_new.mjs
       - run: npm run test:header-shortcuts
+      - run: npm run test:lang-selector
       - run: npm run test:math-palette
       - run: npm run test:pip-cell
       - run: node test_rtl_layout.mjs

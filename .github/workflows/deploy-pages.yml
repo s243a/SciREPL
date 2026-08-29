@@ -183,6 +183,14 @@ jobs:
             echo "test_header_shortcuts.mjs absent on this ref; skipping"
           fi
 
+      - name: Run language-selector tests (when present on this tag)
+        run: |
+          if test -f test_lang_selector.mjs; then
+            npm run test:lang-selector
+          else
+            echo "test_lang_selector.mjs absent on this ref; skipping"
+          fi
+
       - name: Run right-to-left layout tests
         run: node test_rtl_layout.mjs
 

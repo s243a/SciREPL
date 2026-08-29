@@ -898,6 +898,12 @@ html, body {
 
 /* ===== Language Selector ===== */
 
+.language-selector-shell {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+}
+
 #lang-selector {
     padding: 4px 8px;
     border: 1px solid var(--border);
@@ -916,6 +922,37 @@ html, body {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238b949e'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 6px center;
+}
+
+/* Native Android pickers can snapshot their choices before a touch handler
+   mutates the DOM. Keep every OPTION permanently descriptive, hide only the
+   closed control's selected text, and draw the compact abbreviation above it.
+   The real SELECT remains the hit target and accessibility surface. */
+.language-selector-shell > select {
+    width: 56px;
+    color: transparent !important;
+}
+
+.language-selector-shell > select option {
+    color: var(--text-primary) !important;
+    -webkit-text-fill-color: var(--text-primary);
+}
+
+.language-selector-abbrev {
+    position: absolute;
+    inset-inline-start: 8px;
+    inset-inline-end: 18px;
+    top: 50%;
+    overflow: hidden;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    pointer-events: none;
+    text-overflow: clip;
+    transform: translateY(-50%);
+    white-space: nowrap;
 }
 
 #lang-selector:focus {
@@ -984,6 +1021,24 @@ html, body {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2363b132'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 6px center;
+}
+
+#lang-selector.prolog-active + .language-selector-abbrev { color: #f0883e; }
+#lang-selector.bash-active + .language-selector-abbrev { color: #4ec9b0; }
+#lang-selector.javascript-active + .language-selector-abbrev { color: #f0d050; }
+#lang-selector.r-active + .language-selector-abbrev { color: #4E7FB4; }
+#lang-selector.lua-active + .language-selector-abbrev { color: #7b68ee; }
+#lang-selector.typr-active + .language-selector-abbrev { color: #58a6ff; }
+#lang-selector.clojurescript-active + .language-selector-abbrev { color: #63b132; }
+
+@media (forced-colors: active) {
+    .language-selector-shell > select {
+        width: auto;
+        color: ButtonText !important;
+    }
+    .language-selector-abbrev {
+        display: none;
+    }
 }
 
 /* Language badge in cell labels */
@@ -1388,7 +1443,8 @@ html, body {
     }
 
     .cell-edit-actions > button,
-    .cell-edit-actions > select {
+    .cell-edit-actions > select,
+    .cell-edit-actions > .language-selector-shell {
         flex: 0 0 auto;
         min-height: 32px;
         white-space: nowrap;
