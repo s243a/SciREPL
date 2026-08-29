@@ -3115,7 +3115,7 @@ class FileIO {
             if (event.target?.matches?.('#lang-selector, .cell-lang-switch')) {
                 this._syncLanguageAbbrev(event.target);
             }
-        });
+        }, true);
         document.addEventListener('scirepl:composer-context-changed', () => this._syncMainLanguageAbbrev());
         this._syncMainLanguageAbbrev();
     }

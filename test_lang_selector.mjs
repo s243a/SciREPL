@@ -132,6 +132,18 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
         check('every compact abbreviation fits without clipping',
             compactFits.every(item => item.scrollWidth <= item.clientWidth), JSON.stringify(compactFits));
         await page.evaluate(() => {
+            const select = document.getElementById('lang-selector');
+            select.value = 'prolog';
+            // Notebook restoration and switching deliberately dispatch this
+            // non-bubbling event. The delegated compact-label listener must
+            // observe it during capture, just as the selector's own handler does.
+            select.dispatchEvent(new Event('change'));
+        });
+        const restoredNotebook = await state('#lang-selector');
+        check('restored-notebook non-bubbling change updates the compact label',
+            restoredNotebook.selectedText === 'PL - Prolog' && restoredNotebook.compactText === 'PL',
+            `${restoredNotebook.selectedText} / ${restoredNotebook.compactText}`);
+        await page.evaluate(() => {
             document.getElementById('lang-selector').value = 'javascript';
             window.notifyComposerContextChanged();
         });
