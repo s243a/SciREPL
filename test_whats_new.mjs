@@ -84,6 +84,16 @@ try {
             'whatsNew.highlightOffline',
             'whatsNew.highlightDesktop',
         ]), JSON.stringify(release.frozen110));
+    check('1.3.1 summarizes the complete update since 1.2.0', await page.evaluate(() => {
+        const keys = window.SCIREPL_RELEASE_HIGHLIGHTS['1.3.1'] || [];
+        return keys.join(',') === [
+            'whatsNew.highlightCatalogBrowse',
+            'whatsNew.highlightFormulaContexts',
+            'whatsNew.highlightPipPackages',
+            'whatsNew.highlightLanguageAndHeader',
+            'whatsNew.highlightAndroidAndWindows',
+        ].join(',') && document.querySelector('[data-i18n="whatsNew.intro"]')?.textContent.includes('1.2.0');
+    }));
     check('the release link remains valid before a tag exists', /\/releases\/?$/.test(release.href), release.href);
     check('focus moves into the modal', release.focusInside);
     check('the display-language picker is above the release title', release.languageBeforeTitle);

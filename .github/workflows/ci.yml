@@ -98,7 +98,7 @@ jobs:
       - name: What's New and header shortcuts
         run: node test_whats_new.mjs
 
-      - name: Language selector shows full names when open
+      - name: Language selectors expose full native option names
         run: node test_lang_selector.mjs
 
       - name: Header shortcuts — three states, priority and fit

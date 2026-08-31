@@ -478,7 +478,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                 <button id="btn-show-tour-menu" data-i18n="menu.showTour">🧭 Take the Tour</button>
                 <button data-i18n="menu.settings2" id="btn-settings">⚙ Settings</button>
                 <button data-i18n="menu.clearHistory" id="btn-clear-session" class="danger">🗑 Clear History</button>
-                <button data-i18n="menu.openBrowser" id="btn-open-browser">🌐 Open in Browser</button>
+                <button data-i18n="menu.openWebVersion" data-i18n-title="menu.openWebVersionTitle" id="btn-open-browser" title="Open the hosted SciREPL web version in your browser">🌐 Open Web Version</button>
                 <button data-i18n="menu.reloadApp" id="btn-reload-app">🔄 Reload App</button>
             </div>
         </div>
@@ -1210,16 +1210,19 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
         </div>
         <div class="input-row">
         <div id="input-controls">
-            <select data-i18n-title="editor.programmingLanguageTitle" id="lang-selector" title="Programming language">
-                <option value="python" selected>Py</option>
-                <option value="prolog">PL</option>
-                <option value="bash">Sh</option>
-                <option value="javascript">JS</option>
+            <span class="language-selector-shell">
+            <select data-i18n-title="editor.programmingLanguageTitle" data-i18n-aria-label="editor.programmingLanguageTitle" id="lang-selector" title="Programming language" aria-label="Programming language" dir="ltr">
+                <option value="python" selected>Py - Python</option>
+                <option value="prolog">PL - Prolog</option>
+                <option value="bash">Sh - Bash</option>
+                <option value="javascript">JS - JavaScript</option>
                 <option value="r">R</option>
                 <option data-i18n="inputControls.lua" value="lua">Lua</option>
-                <option data-i18n="inputControls.tyr" value="typr">TyR</option>
-                <option data-i18n="inputControls.cljs" value="clojurescript">CLJS</option>
+                <option value="typr">TyR - TypR</option>
+                <option value="clojurescript">CLJS - ClojureScript</option>
             </select>
+            <span id="lang-selector-abbrev" class="language-selector-abbrev" aria-hidden="true">Py</span>
+            </span>
             <button data-i18n-title="inputControls.toggleCellTypeTitle" data-i18n="inputControls.code" id="cell-type-toggle" class="cell-type-btn" title="Toggle cell type">Code</button>
         </div>
         <textarea id="code-input" rows="3" data-i18n-placeholder="app.input.codePlaceholder" data-i18n-placeholder-vars='{"language":"Python"}' placeholder="Type Python here…" spellcheck="false" autocapitalize="off"

@@ -26,6 +26,13 @@
             'whatsNew.highlightCatalogSources',
             'whatsNew.highlightShortcuts',
         ]),
+        '1.3.1': Object.freeze([
+            'whatsNew.highlightCatalogBrowse',
+            'whatsNew.highlightFormulaContexts',
+            'whatsNew.highlightPipPackages',
+            'whatsNew.highlightLanguageAndHeader',
+            'whatsNew.highlightAndroidAndWindows',
+        ]),
         unreleased: Object.freeze([]),
     });
 })();

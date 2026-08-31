@@ -33,7 +33,8 @@
 
     function editActionRowCount(actions) {
         const rows = [];
-        for (const control of actions.querySelectorAll(':scope > button, :scope > select')) {
+        for (const control of actions.querySelectorAll(
+            ':scope > button, :scope > select, :scope > .language-selector-shell')) {
             const top = control.getBoundingClientRect().top;
             if (!rows.some((known) => Math.abs(known - top) < 1)) rows.push(top);
         }
@@ -537,17 +538,25 @@
         // enabled set below (which may include CDN languages the profile doesn't
         // enable by default).
         const _langMeta = (window.fileIO && window.fileIO.constructor.LANGUAGE_META) || [
-            {id:'python',abbrev:'Py'},{id:'r',abbrev:'R'},{id:'prolog',abbrev:'PL'},
-            {id:'bash',abbrev:'Sh'},{id:'javascript',abbrev:'JS'},{id:'lua',abbrev:'Lua'}
+            {id:'python',label:'Python',abbrev:'Py'},{id:'r',label:'R',abbrev:'R'},
+            {id:'prolog',label:'Prolog',abbrev:'PL'},{id:'bash',label:'Bash',abbrev:'Sh'},
+            {id:'javascript',label:'JavaScript',abbrev:'JS'},{id:'lua',label:'Lua',abbrev:'Lua'}
         ];
         const _enabled = window.fileIO ? window.fileIO._getEnabledLanguages() : new Set(_langMeta.map(l=>l.id));
         const _langOpts = _langMeta
             .filter(l => _enabled.has(l.id) || l.id === cellLang) // always include current cell's lang
-            .map(l => `<option value="${l.id}"${cellLang === l.id ? ' selected' : ''}>${l.abbrev}</option>`)
+            .map(l => {
+                const text = l.abbrev === l.label ? l.label : `${l.abbrev} - ${l.label}`;
+                return `<option value="${l.id}"${cellLang === l.id ? ' selected' : ''}>${text}</option>`;
+            })
             .join('');
+        const _cellLangMeta = _langMeta.find(l => l.id === cellLang) || _langMeta[0];
         actions.innerHTML = `
             <button class="cell-type-switch-btn"></button>
-            <select class="cell-lang-switch">${_langOpts}</select>
+            <span class="language-selector-shell cell-language-selector-shell">
+                <select class="cell-lang-switch" dir="ltr">${_langOpts}</select>
+                <span class="language-selector-abbrev" aria-hidden="true">${_cellLangMeta?.abbrev || ''}</span>
+            </span>
             <button class="cell-lang-apply-all"></button>
             <button class="cell-run-btn"></button>
             <button class="cell-run-below-btn">
@@ -567,6 +576,7 @@
             setUiText(typeSwitch, 'inputControls.code');
         }
         setUiAttr(actions.querySelector('.cell-lang-switch'), 'title', 'app.cell.actions.languageTitle');
+        setUiAttr(actions.querySelector('.cell-lang-switch'), 'aria-label', 'app.cell.actions.languageTitle');
         setUiText(actions.querySelector('.cell-lang-apply-all'), 'app.cell.actions.applyLanguageAllShort');
         setUiAttr(actions.querySelector('.cell-lang-apply-all'), 'title', 'app.cell.actions.applyLanguageAllTitle');
         setUiText(actions.querySelector('.cell-run-btn'), 'inputControls.run');
