@@ -465,6 +465,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             <div class="menu-grid">
                 <button data-i18n="menu.runAllCells" id="btn-run-all">▶ Run All Cells</button>
                 <button data-i18n="menu.newNotebook2" id="btn-new-notebook">+ New Notebook</button>
+                <button id="btn-close-notebook" class="danger"><span aria-hidden="true">×</span> <span data-i18n="notebookManager.actions.closeTitle">Close notebook</span></button>
                 <button data-i18n="menu.saveSession" id="btn-save-session">💾 Save Session</button>
                 <button data-i18n="menu.exportDocument" id="btn-export">📤 Export Document</button>
                 <button data-i18n="menu.exportWorkbooksAmpPackages" id="btn-export-workbook">📦 Export Workbooks &amp; Packages</button>
@@ -480,6 +481,23 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                 <button data-i18n="menu.clearHistory" id="btn-clear-session" class="danger">🗑 Clear History</button>
                 <button data-i18n="menu.openWebVersion" data-i18n-title="menu.openWebVersionTitle" id="btn-open-browser" title="Open the hosted SciREPL web version in your browser">🌐 Open Web Version</button>
                 <button data-i18n="menu.reloadApp" id="btn-reload-app">🔄 Reload App</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final-workbook close warning -->
+    <div id="close-final-notebook-modal" class="modal hidden">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="close-final-notebook-title" style="max-width:430px">
+            <button id="close-final-notebook-x" class="modal-close" data-i18n-aria-label="common.close" data-i18n-title="common.close" aria-label="Close" title="Close">&times;</button>
+            <h2 id="close-final-notebook-title" data-i18n="notebookManager.closeWarning.title">Close final workbook?</h2>
+            <p id="close-final-notebook-body"></p>
+            <label class="settings-item">
+                <input type="checkbox" id="close-final-notebook-dont-show">
+                <span data-i18n="notebookManager.closeWarning.dontShowAgain">Don’t show this explanation again</span>
+            </label>
+            <div class="export-modal-actions">
+                <button id="close-final-notebook-cancel" class="vfs-btn" data-i18n="common.cancel">Cancel</button>
+                <button id="close-final-notebook-confirm" class="export-action-btn danger" data-i18n="notebookManager.actions.closeTitle">Close notebook</button>
             </div>
         </div>
     </div>
@@ -682,6 +700,9 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                 </label>
                 <label class="settings-item">
                     <input type="checkbox" id="setting-confirm-delete" checked> <span data-i18n="export.confirmBeforeDeletingFiles">Confirm before deleting files</span>
+                </label>
+                <label class="settings-item">
+                    <input type="checkbox" id="setting-explain-close-final" checked> <span data-i18n="settings.explainCloseFinalWorkbook">Explain before closing the final workbook</span>
                 </label>
                 <label class="settings-item">
                     <span data-i18n="export.exportFormat">Export format:</span>

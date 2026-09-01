@@ -1,9 +1,9 @@
 {
   "name": "sci-repl",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "releaseChannel": "release",
   "android": {
-    "versionCode": 14
+    "versionCode": 15
   },
   "description": "Mobile Scientific REPL \u2014 Python + Pyodide + Plotly.js",
   "main": "index.js",
@@ -43,6 +43,7 @@
     "test:pip-cell": "node test_pip_cell.mjs",
     "test:header-shortcuts": "node test_header_shortcuts.mjs",
     "test:android-back": "node test_android_back.mjs",
+    "test:workbook-close-import": "node test_workbook_close_import_picker.mjs",
     "test:lang-selector": "node test_lang_selector.mjs",
     "test:math-palette": "node test_math_palette.mjs"
   },

@@ -16,7 +16,7 @@
 window.KERNEL_CONFIG = {
   "app": {
     "name": "SciREPL",
-    "version": "1.3.1",
+    "version": "1.3.2",
     "releaseChannel": "release",
     "releaseUrl": "https://github.com/s243a/SciREPL/releases",
     "repository": "https://github.com/s243a/SciREPL",
@@ -25,7 +25,7 @@ window.KERNEL_CONFIG = {
   "profile": "full",
   "components": {
     "scirepl": {
-      "version": "1.3.1",
+      "version": "1.3.2",
       "licenseExpression": "MIT",
       "sourceUrl": "https://github.com/s243a/SciREPL",
       "delivery": {

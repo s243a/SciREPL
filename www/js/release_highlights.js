@@ -33,6 +33,13 @@
             'whatsNew.highlightLanguageAndHeader',
             'whatsNew.highlightAndroidAndWindows',
         ]),
+        '1.3.2': Object.freeze([
+            'whatsNew.highlightCatalogBrowse',
+            'whatsNew.highlightFormulaContexts',
+            'whatsNew.highlightPipPackages',
+            'whatsNew.highlightLanguageAndHeader',
+            'whatsNew.highlightAndroidFilesAndWindows',
+        ]),
         unreleased: Object.freeze([]),
     });
 })();

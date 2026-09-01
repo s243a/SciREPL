@@ -197,6 +197,59 @@ class NotebookManager {
         this.saveState();
     }
 
+    /**
+     * Close a notebook while preserving the app's one-notebook minimum.
+     * Closing the last notebook replaces it with a fresh blank Notebook 1 so
+     * workbook identity/provenance cannot leak into the next session.
+     */
+    async closeNotebook(id) {
+        const nb = this.getNotebook(id);
+        if (!nb) return false;
+
+        const vfs = window.sharedVFS;
+        let synchronizedBefore = [];
+        try {
+            synchronizedBefore = (vfs?.listDir('/shared/notebooks') || [])
+                .map(name => `/shared/notebooks/${name}`);
+        } catch (_) { }
+        const persistClose = async () => {
+            if (!window.sessionManager?.saveSharedState) return;
+            const deletedPaths = synchronizedBefore.filter(path => {
+                try { return !vfs?.exists(path); } catch (_) { return false; }
+            });
+            await window.sessionManager.saveSharedState({ deletedPaths });
+        };
+
+        if (this._notebooks.length > 1) {
+            this.removeNotebook(id);
+            const removed = !this.getNotebook(id);
+            if (removed) await persistClose();
+            return removed;
+        }
+
+        const replacement = new Notebook({ autoNameNumber: 1 });
+        const container = nb.replContainer || document.getElementById('repl');
+        if (container) {
+            container.replaceChildren();
+            container.style.display = '';
+        }
+
+        nb.isActive = false;
+        nb.replContainer = null;
+        replacement.isActive = true;
+        replacement.replContainer = container;
+        this._notebooks = [replacement];
+        this._activeIndex = 0;
+        window._cells = replacement.cells;
+        window._cellCounter = 0;
+        window._currentOutputCard = null;
+
+        this.renderSelector();
+        this.saveState();
+        await persistClose();
+        return true;
+    }
+
     renameNotebook(id, newName) {
         const nb = this._notebooks.find(n => n.id === id);
         if (!nb || !newName || !newName.trim()) return;
@@ -423,7 +476,21 @@ class NotebookManager {
             }
             return nb.toJSON();
         });
-        const activeId = this.getActiveNotebook() ? this.getActiveNotebook().id : null;
+        const active = this.getActiveNotebook();
+        const activeId = active ? active.id : null;
+
+        // Keep the legacy single-notebook snapshot aligned. Restore still
+        // reads it for old installations, so stale cells here must never
+        // resurrect a workbook that was explicitly closed.
+        if (active) {
+            window.sessionManager.session.cells = active.cells.map(c => ({
+                code: c.code,
+                type: c.type,
+                language: c.language || 'python',
+                name: c.name || ''
+            }));
+            window.sessionManager.session.cellCounter = active.cellCounter || 0;
+        }
         window.sessionManager.saveNotebooks(notebooks, activeId);
         this._syncToSharedVFS(notebooks);
     }
