@@ -45,6 +45,7 @@ jobs:
       - run: node test_appearance.mjs
       - run: node test_onboarding.mjs
       - run: npm run test:android-back
+      - run: npm run test:workbook-close-import
       - run: node test_whats_new.mjs
       - run: npm run test:header-shortcuts
       - run: npm run test:lang-selector

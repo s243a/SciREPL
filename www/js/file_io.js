@@ -21,7 +21,38 @@ class FileIO {
         window.addEventListener('scirepl:runtime-source-loaded', this._onRuntimeSourceLoaded);
         window.addEventListener('i18n:changed', this._onRuntimeLocaleChanged);
 
+        this._configureAndroidFilePickerTypes();
         this.init();
+    }
+
+    /**
+     * Android document providers filter by MIME type, not just extension.
+     * Dropbox commonly exposes SciREPL's unregistered .srwb extension as the
+     * generic binary type, so include that type without broadening web pickers.
+     */
+    _configureAndroidFilePickerTypes() {
+        const capacitor = window.Capacitor;
+        if (!capacitor || typeof capacitor.getPlatform !== 'function'
+            || capacitor.getPlatform() !== 'android') return;
+
+        const extraTypes = [
+            'application/json',
+            'application/octet-stream',
+            'text/plain',
+            'text/csv',
+            'application/zip',
+            'application/x-zip-compressed',
+            'application/gzip',
+            'application/x-tar'
+        ];
+        for (const id of ['file-input', 'package-input']) {
+            const input = document.getElementById(id);
+            if (!input) continue;
+            const types = new Set(String(input.accept || '').split(',')
+                .map(value => value.trim()).filter(Boolean));
+            extraTypes.forEach(type => types.add(type));
+            input.accept = [...types].join(',');
+        }
     }
 
     /** Translate with an English fallback while catalogues are being upgraded. */
@@ -55,6 +86,64 @@ class FileIO {
         } else {
             element.title = this._t(key, fallback, vars);
         }
+    }
+
+    _showFinalNotebookCloseWarning(name) {
+        const modal = document.getElementById('close-final-notebook-modal');
+        if (!modal) return Promise.resolve(confirm(this._t(
+            'notebookManager.confirm.closeNamed', 'Close “{name}”?', { name })));
+
+        const closeBtn = document.getElementById('close-final-notebook-x');
+        const cancelBtn = document.getElementById('close-final-notebook-cancel');
+        const confirmBtn = document.getElementById('close-final-notebook-confirm');
+        const dontShow = document.getElementById('close-final-notebook-dont-show');
+        this._setText(document.getElementById('close-final-notebook-body'),
+            'notebookManager.closeWarning.body',
+            'SciREPL auto-saves open workbooks, but closing “{name}” removes it from this app. Export it first if you want to keep a file copy.',
+            { name });
+        if (dontShow) dontShow.checked = false;
+
+        return new Promise(resolve => {
+            let settled = false;
+            const cleanup = () => {
+                closeBtn?.removeEventListener('click', onCancel);
+                cancelBtn?.removeEventListener('click', onCancel);
+                confirmBtn?.removeEventListener('click', onConfirm);
+                modal.removeEventListener('click', onBackdrop);
+                modal.removeEventListener('keydown', onKey);
+            };
+            const finish = accepted => {
+                if (settled) return;
+                settled = true;
+                if (accepted && dontShow?.checked) {
+                    localStorage.setItem('scirepl_explain_close_final_workbook', '0');
+                }
+                modal.classList.add('hidden');
+                cleanup();
+                resolve(accepted);
+            };
+            const onCancel = () => finish(false);
+            const onConfirm = () => finish(true);
+            const onBackdrop = event => {
+                if (event.target === modal) finish(false);
+            };
+            const onKey = event => {
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    finish(false);
+                }
+            };
+
+            closeBtn?.addEventListener('click', onCancel);
+            cancelBtn?.addEventListener('click', onCancel);
+            confirmBtn?.addEventListener('click', onConfirm);
+            modal.addEventListener('click', onBackdrop);
+            modal.addEventListener('keydown', onKey);
+            modal.classList.remove('hidden');
+            modal.inert = false;
+            modal.removeAttribute('aria-hidden');
+            requestAnimationFrame(() => cancelBtn?.focus());
+        });
     }
 
     init() {
@@ -197,6 +286,7 @@ class FileIO {
                 const autoExec = document.getElementById('setting-auto-execute');
                 const autoSwitch = document.getElementById('setting-auto-switch');
                 const confirmDel = document.getElementById('setting-confirm-delete');
+                const explainCloseFinal = document.getElementById('setting-explain-close-final');
                 const autoDl = document.getElementById('setting-auto-download');
                 const rPrewarm = document.getElementById('setting-r-prewarm');
                 const largeTouch = document.getElementById('setting-large-touch');
@@ -206,6 +296,8 @@ class FileIO {
                 if (autoExec) autoExec.checked = localStorage.getItem('scirepl_auto_execute') === '1';
                 if (autoSwitch) autoSwitch.checked = localStorage.getItem('scirepl_auto_switch_workbook') !== '0';
                 if (confirmDel) confirmDel.checked = localStorage.getItem('scirepl_confirm_delete') !== '0';
+                if (explainCloseFinal) explainCloseFinal.checked =
+                    localStorage.getItem('scirepl_explain_close_final_workbook') !== '0';
                 if (autoDl) autoDl.checked = localStorage.getItem('scirepl_auto_download') === '1';
                 if (rPrewarm) rPrewarm.checked = localStorage.getItem('scirepl_r_prewarm') === 'yes';
                 if (largeTouch) largeTouch.checked = localStorage.getItem('scirepl_mobile_emulation') === '1';
@@ -234,6 +326,9 @@ class FileIO {
                     localStorage.setItem('scirepl_auto_execute', e.target.checked ? '1' : '0');
                 } else if (id === 'setting-confirm-delete') {
                     localStorage.setItem('scirepl_confirm_delete', e.target.checked ? '1' : '0');
+                } else if (id === 'setting-explain-close-final') {
+                    localStorage.setItem('scirepl_explain_close_final_workbook',
+                        e.target.checked ? '1' : '0');
                 } else if (id === 'setting-auto-download') {
                     localStorage.setItem('scirepl_auto_download', e.target.checked ? '1' : '0');
                 } else if (id === 'setting-r-prewarm') {
@@ -407,6 +502,34 @@ class FileIO {
             });
         }
 
+        // Close Current Notebook. The manager replaces the final notebook with
+        // a fresh blank one, rather than leaving the app with no active surface.
+        const closeNotebookBtn = document.getElementById('btn-close-notebook');
+        if (closeNotebookBtn) {
+            closeNotebookBtn.addEventListener('click', async () => {
+                const nm = window.notebookManager;
+                const active = nm && nm.getActiveNotebook();
+                if (!active) return;
+                closeNotebookBtn.disabled = true;
+                let accepted = false;
+                try {
+                    if (nm.getNotebooks().length === 1
+                        && localStorage.getItem('scirepl_explain_close_final_workbook') !== '0') {
+                        accepted = await this._showFinalNotebookCloseWarning(active.name);
+                    } else {
+                        accepted = confirm((window.tNative || window.t)(
+                            'notebookManager.confirm.closeNamed', { name: active.name }));
+                    }
+                    if (accepted) {
+                        await nm.closeNotebook(active.id);
+                        this.menuModal.classList.add('hidden');
+                    }
+                } finally {
+                    closeNotebookBtn.disabled = false;
+                }
+            });
+        }
+
         // (Export Package removed — merged into Export Workbooks & Packages modal)
 
         // Export Modal
@@ -499,8 +622,9 @@ class FileIO {
      */
     async _handlePackageImport(file) {
         if (!file) return;
+        const filename = String(file.name || '').toLowerCase();
         // Redirect .srwb files to the workbook importer
-        if (file.name.endsWith('.srwb')) {
+        if (filename.endsWith('.srwb')) {
             const reader = new FileReader();
             reader.onload = (e) => this.importSrwb(e.target.result);
             reader.readAsText(file);
@@ -1714,21 +1838,22 @@ class FileIO {
 
     handleFileUpload(file) {
         if (!file) return;
+        const filename = String(file.name || '').toLowerCase();
 
         // Handle .zip files — smart detection: package vs VFS
-        if (file.name.endsWith('.zip')) {
+        if (filename.endsWith('.zip')) {
             this._handleSmartZip(file);
             return;
         }
 
         // Handle .tar.gz / .rar — always treat as package
-        if (file.name.endsWith('.tar.gz') || file.name.endsWith('.tgz') || file.name.endsWith('.rar')) {
+        if (filename.endsWith('.tar.gz') || filename.endsWith('.tgz') || filename.endsWith('.rar')) {
             this._handlePackageImport(file);
             return;
         }
 
         // SciREPL workbook files
-        if (file.name.endsWith('.srwb')) {
+        if (filename.endsWith('.srwb')) {
             const reader = new FileReader();
             reader.onload = (e) => this.importSrwb(e.target.result);
             reader.readAsText(file);
@@ -1736,19 +1861,19 @@ class FileIO {
         }
 
         // Notebook/code files: import as cells
-        if (file.name.endsWith('.ipynb')) {
+        if (filename.endsWith('.ipynb')) {
             const reader = new FileReader();
             reader.onload = (e) => this.importIpynb(e.target.result);
             reader.readAsText(file);
             return;
         }
-        if (file.name.endsWith('.pl') || file.name.endsWith('.pro')) {
+        if (filename.endsWith('.pl') || filename.endsWith('.pro')) {
             const reader = new FileReader();
             reader.onload = (e) => this.importProlog(e.target.result);
             reader.readAsText(file);
             return;
         }
-        if (file.name.endsWith('.py')) {
+        if (filename.endsWith('.py')) {
             const reader = new FileReader();
             reader.onload = (e) => this.importPython(e.target.result);
             reader.readAsText(file);

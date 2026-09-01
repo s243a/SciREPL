@@ -95,6 +95,9 @@ jobs:
       - name: Android hardware Back routing
         run: npm run test:android-back
 
+      - name: Workbook close and Android cloud-file import
+        run: npm run test:workbook-close-import
+
       - name: What's New and header shortcuts
         run: node test_whats_new.mjs
 

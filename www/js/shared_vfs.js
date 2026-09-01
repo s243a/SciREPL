@@ -667,9 +667,15 @@ class SharedVFS {
                 });
             } else if (entry.content instanceof Uint8Array && entry.size < 512 * 1024) {
                 // Small binary: base64 encode
+                let binary = '';
+                const chunkSize = 0x8000;
+                for (let offset = 0; offset < entry.content.length; offset += chunkSize) {
+                    binary += String.fromCharCode(
+                        ...entry.content.subarray(offset, offset + chunkSize));
+                }
                 files.push({
                     path,
-                    content: btoa(String.fromCharCode(...entry.content)),
+                    content: btoa(binary),
                     origin: entry.origin,
                     binary: true
                 });

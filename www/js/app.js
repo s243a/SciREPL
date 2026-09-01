@@ -1404,7 +1404,13 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         if (window.notebookManager && window.notebookManager.hasStoredState()) {
             const nm = window.notebookManager;
             const activeCells = nm.restoreState();
-            if (activeCells && activeCells.length > 0) {
+            // New snapshots explicitly own the empty state. Older multi-
+            // notebook snapshots do too; otherwise an empty active notebook
+            // prevents populated inactive notebooks from being rendered. Only
+            // a legacy singleton empty snapshot may fall back to session.cells.
+            const notebookStateIsAuthoritative = nm.getNotebooks().length > 1
+                || Number(window.sessionManager.session.notebookStateVersion) >= 1;
+            if (activeCells && (activeCells.length > 0 || notebookStateIsAuthoritative)) {
                 setStatus('app.status.restoring', undefined, 'running');
 
                 // Render cells for ALL notebooks (not just the active one)
@@ -1609,8 +1615,10 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
             // Save SharedVFS state for cross-kernel file persistence
             window.sessionManager.saveSharedState();
         }
-        // Also save multi-notebook state if applicable
-        if (window.notebookManager && window.notebookManager.hasMultipleNotebooks()) {
+        // Keep an existing notebook snapshot authoritative even after the
+        // collection returns to one notebook (for example after Close).
+        if (window.notebookManager && (window.notebookManager.hasMultipleNotebooks()
+            || window.notebookManager.hasStoredState())) {
             window.notebookManager.saveState();
         }
     }

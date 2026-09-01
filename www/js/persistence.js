@@ -55,8 +55,10 @@ class SessionManager {
             prologFiles: [],       // VFS file contents: [{path, content}] (for session restore)
             notebooks: [],         // Multi-notebook state: [{id, name, cells, ...}]
             activeNotebookId: null,// Currently active notebook ID
+            notebookStateVersion: 0,// 1 = notebooks are authoritative even when active is empty
             notebookUIMode: 'auto',// 'auto' | 'dropdown' | 'sidebar' | 'tabs'
-            sharedVFS: null        // SharedVFS snapshot for cross-kernel file persistence
+            sharedVFS: null,       // SharedVFS snapshot for cross-kernel file persistence
+            sharedVFSDeletedPaths: [] // Tombstones when an awaited destructive flush fails
         };
     }
 
@@ -76,8 +78,11 @@ class SessionManager {
                 prologFiles: this.session.prologFiles || [],
                 notebooks: this.session.notebooks || [],
                 activeNotebookId: this.session.activeNotebookId || null,
+                notebookStateVersion: Number(this.session.notebookStateVersion) || 0,
                 notebookUIMode: this.session.notebookUIMode || 'auto',
-                sharedVFS: this.session.sharedVFS || null
+                sharedVFS: this.session.sharedVFS || null,
+                sharedVFSDeletedPaths: Array.isArray(this.session.sharedVFSDeletedPaths)
+                    ? this.session.sharedVFSDeletedPaths : []
             };
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(toSave));
         } catch (e) {
@@ -136,6 +141,7 @@ class SessionManager {
     saveNotebooks(notebooks, activeId) {
         this.session.notebooks = notebooks || [];
         this.session.activeNotebookId = activeId || null;
+        this.session.notebookStateVersion = 1;
         this.save();
     }
 
@@ -205,28 +211,53 @@ class SessionManager {
      * Save SharedVFS state for cross-kernel file persistence.
      * Uses IndexedDB as primary (no size limit), localStorage snapshot as fallback.
      */
-    saveSharedState() {
-        if (!window.sharedVFS) return;
+    async saveSharedState({ deletedPaths = [] } = {}) {
+        if (!window.sharedVFS) return false;
+        const validDeletedPaths = (Array.isArray(deletedPaths) ? deletedPaths : [])
+            .filter(path => typeof path === 'string'
+                && /^\/shared\/notebooks\/[^/]+\.srwb$/.test(path));
+        const rememberFallback = () => {
+            this.session.sharedVFSDeletedPaths = [...new Set([
+                ...(this.session.sharedVFSDeletedPaths || []),
+                ...validDeletedPaths
+            ])];
+            // Tombstones are safety-critical and must survive even if an
+            // unrelated file cannot be represented in the compact snapshot.
+            try {
+                this.session.sharedVFS = window.sharedVFS.snapshot();
+            } catch (e) {
+                console.warn('[SessionManager] SharedVFS fallback snapshot failed:', e);
+            }
+            this.save();
+        };
         try {
-            // Fire-and-forget: IndexedDB transaction commits even on page unload
-            window.sharedVFS.saveToIndexedDB().then(() => {
-                // Clear localStorage copy if migration complete
-                if (this.session.sharedVFS) {
+            // Callers may ignore this Promise (for example beforeunload), but
+            // destructive workbook operations await it so deleted synchronized
+            // files cannot reappear after an immediate hard restart.
+            const saved = await window.sharedVFS.saveToIndexedDB();
+            if (saved) {
+                // Clear fallback data only after the authoritative disk state
+                // (including any requested deletions) has committed.
+                if (this.session.sharedVFS
+                    || (this.session.sharedVFSDeletedPaths || []).length > 0) {
                     this.session.sharedVFS = null;
+                    this.session.sharedVFSDeletedPaths = [];
                     this.save();
                 }
-            }).catch(e => {
-                console.warn('[SessionManager] IndexedDB SharedVFS save failed, using localStorage:', e);
-                // Fallback: localStorage snapshot
-                try {
-                    this.session.sharedVFS = window.sharedVFS.snapshot();
-                    this.save();
-                } catch (e2) {
-                    console.warn('Failed to save SharedVFS state:', e2);
-                }
-            });
+                return true;
+            }
+            // IndexedDB may not be ready yet. Preserve the same state in the
+            // existing localStorage fallback rather than reporting success.
+            rememberFallback();
+            return false;
         } catch (e) {
-            console.warn('Failed to save SharedVFS state:', e);
+            console.warn('[SessionManager] IndexedDB SharedVFS save failed, using localStorage:', e);
+            try {
+                rememberFallback();
+            } catch (e2) {
+                console.warn('Failed to save SharedVFS state:', e2);
+            }
+            return false;
         }
     }
 
@@ -236,6 +267,27 @@ class SessionManager {
      */
     async restoreSharedState() {
         if (!window.sharedVFS) return;
+
+        const snap = this.session.sharedVFS;
+        const deletedPaths = Array.isArray(this.session.sharedVFSDeletedPaths)
+            ? this.session.sharedVFSDeletedPaths.filter(path => typeof path === 'string'
+                && /^\/shared\/notebooks\/[^/]+\.srwb$/.test(path)) : [];
+        const applyFallback = () => {
+            if (snap) window.sharedVFS.restore(snap);
+            // Snapshot restore is intentionally a merge so large binaries that
+            // cannot fit in localStorage survive. Tombstones make destructive
+            // changes authoritative without discarding those unrelated files.
+            for (const path of deletedPaths) {
+                try {
+                    if (window.sharedVFS.exists(path)) window.sharedVFS.unlink(path);
+                } catch (_) { }
+            }
+        };
+        const clearPersistedFallback = () => {
+            this.session.sharedVFS = null;
+            this.session.sharedVFSDeletedPaths = [];
+            this.save();
+        };
 
         // Ensure vfsStore is ready
         const store = window.vfsStore;
@@ -249,15 +301,14 @@ class SessionManager {
         if (store && store.isReady()) {
             try {
                 const restored = await window.sharedVFS.restoreFromIndexedDB();
-                if (restored) {
-                    // Migrate any leftover localStorage data
-                    if (this.session.sharedVFS) {
-                        console.log('[SessionManager] Migrating localStorage SharedVFS → IndexedDB');
-                        window.sharedVFS.restore(this.session.sharedVFS);
-                        window.sharedVFS.saveToIndexedDB().catch(() => {});
-                        this.session.sharedVFS = null;
-                        this.save();
-                    }
+                if (restored && !snap && deletedPaths.length === 0) {
+                    return;
+                }
+                if (snap || deletedPaths.length > 0) {
+                    console.log('[SessionManager] Applying localStorage SharedVFS fallback');
+                    applyFallback();
+                    const saved = await window.sharedVFS.saveToIndexedDB();
+                    if (saved) clearPersistedFallback();
                     return;
                 }
             } catch (e) {
@@ -266,18 +317,18 @@ class SessionManager {
         }
 
         // Fallback: localStorage snapshot
-        const snap = this.session.sharedVFS;
-        if (!snap) return;
+        if (!snap && deletedPaths.length === 0) return;
         try {
-            window.sharedVFS.restore(snap);
+            applyFallback();
             console.log('[SessionManager] Restored SharedVFS from localStorage');
 
             // Migrate to IndexedDB for next time
             if (store && store.isReady()) {
-                window.sharedVFS.saveToIndexedDB().then(() => {
-                    this.session.sharedVFS = null;
-                    this.save();
-                    console.log('[SessionManager] Migrated SharedVFS to IndexedDB');
+                window.sharedVFS.saveToIndexedDB().then((saved) => {
+                    if (saved) {
+                        clearPersistedFallback();
+                        console.log('[SessionManager] Migrated SharedVFS to IndexedDB');
+                    }
                 }).catch(() => {});
             }
         } catch (e) {
