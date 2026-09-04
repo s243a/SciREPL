@@ -692,7 +692,7 @@ class NotebookManager {
         deleteBtn.textContent = '\u00D7';
         window.setI18nAttr(deleteBtn, 'title', 'notebookManager.actions.deleteTitle');
         deleteBtn.style.color = 'var(--red, #f85149)';
-        deleteBtn.addEventListener('click', () => {
+        deleteBtn.addEventListener('click', async () => {
             const active = this.getActiveNotebook();
             if (!active) return;
             if (this._notebooks.length <= 1) {
@@ -700,7 +700,12 @@ class NotebookManager {
                 return;
             }
             if (confirm((window.tNative || window.t)('notebookManager.confirm.deleteNamed', { name: active.name }))) {
-                this.removeNotebook(active.id);
+                deleteBtn.disabled = true;
+                try {
+                    await this.closeNotebook(active.id);
+                } finally {
+                    if (deleteBtn.isConnected) deleteBtn.disabled = false;
+                }
             }
         });
 
@@ -789,10 +794,15 @@ class NotebookManager {
                 closeBtn.className = 'sidebar-nb-close';
                 closeBtn.textContent = '\u00D7';
                 window.setI18nAttr(closeBtn, 'title', 'notebookManager.actions.closeTitle');
-                closeBtn.addEventListener('click', (e) => {
+                closeBtn.addEventListener('click', async (e) => {
                     e.stopPropagation();
                     if (confirm((window.tNative || window.t)('notebookManager.confirm.closeNamed', { name: nb.name }))) {
-                        this.removeNotebook(nb.id);
+                        closeBtn.disabled = true;
+                        try {
+                            await this.closeNotebook(nb.id);
+                        } finally {
+                            if (closeBtn.isConnected) closeBtn.disabled = false;
+                        }
                     }
                 });
                 item.appendChild(closeBtn);
@@ -853,10 +863,15 @@ class NotebookManager {
                 closeBtn.className = 'tab-close';
                 closeBtn.textContent = '\u00D7';
                 window.setI18nAttr(closeBtn, 'title', 'notebookManager.actions.closeTitle');
-                closeBtn.addEventListener('click', (e) => {
+                closeBtn.addEventListener('click', async (e) => {
                     e.stopPropagation();
                     if (confirm((window.tNative || window.t)('notebookManager.confirm.closeNamed', { name: nb.name }))) {
-                        this.removeNotebook(nb.id);
+                        closeBtn.disabled = true;
+                        try {
+                            await this.closeNotebook(nb.id);
+                        } finally {
+                            if (closeBtn.isConnected) closeBtn.disabled = false;
+                        }
                     }
                 });
                 tab.appendChild(closeBtn);

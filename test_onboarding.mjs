@@ -43,6 +43,20 @@ try {
     check('it opens on the display-language step',
         await page.evaluate(() => !!document.getElementById('tour-language-select')));
 
+    const languageName = await page.evaluate(() => {
+        const select = document.getElementById('tour-language-select');
+        const label = select?.labels?.[0];
+        return {
+            labelFor: label?.htmlFor,
+            label: label?.textContent,
+            want: window.t('whatsNew.displayLanguage'),
+        };
+    });
+    check('the Tour display-language picker has a real translated label',
+        languageName.labelFor === 'tour-language-select'
+        && languageName.label === languageName.want,
+    JSON.stringify(languageName));
+
     // The distinction that makes this tour worth having.
     const titles = await page.evaluate(() =>
         window.onboarding.steps.map((s) => window.t(s.titleKey)));
@@ -106,6 +120,13 @@ try {
     await page.waitForTimeout(500);
     check('changing language re-renders the tour in that language',
         (await titleNow()) === 'Elige el idioma de la interfaz', await titleNow());
+    check('the Tour language picker label re-renders in the selected locale',
+        await page.evaluate(() => {
+            const select = document.getElementById('tour-language-select');
+            const label = select?.labels?.[0];
+            return label?.textContent === window.t('whatsNew.displayLanguage')
+                && label.textContent !== 'Display language';
+        }));
     await page.evaluate(async () => {
         const es = window.i18n.LOCALES.find((l) => l.code === 'es');
         if (es) { es.status = 'draft'; es.completeness = 0.17; }

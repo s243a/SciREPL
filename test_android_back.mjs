@@ -238,6 +238,27 @@ try {
     check('closing a dialog does not exit', appearance.exits === 0,
         JSON.stringify(appearance));
 
+    const finalWorkbookId = await page.evaluate(() =>
+        window.notebookManager.getActiveNotebook()?.id);
+    await page.click('#menu-btn');
+    await page.click('#btn-close-notebook');
+    await page.waitForSelector('#close-final-notebook-modal:not(.hidden)');
+    await page.waitForFunction(() => document.activeElement?.id
+        === 'close-final-notebook-cancel');
+    await press(page);
+    await page.waitForFunction(() => document.getElementById(
+        'close-final-notebook-modal').classList.contains('hidden'));
+    const finalWorkbookBack = await page.evaluate((id) => ({
+        kept: Boolean(window.notebookManager.getNotebook(id)),
+        focus: document.activeElement?.id,
+        exits: window.__appPluginMock.exitCalls,
+    }), finalWorkbookId);
+    check('Back cancels the final-workbook warning through its real X action',
+        finalWorkbookBack.kept && finalWorkbookBack.focus === 'btn-close-notebook',
+        JSON.stringify(finalWorkbookBack));
+    check('cancelling the final-workbook warning does not exit',
+        finalWorkbookBack.exits === 0, JSON.stringify(finalWorkbookBack));
+
     // Same-z-index dialogs paint in DOM order. Only the visually topmost one
     // should close on a press.
     await page.evaluate(() => {

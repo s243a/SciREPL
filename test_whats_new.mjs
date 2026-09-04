@@ -92,19 +92,25 @@ try {
             'whatsNew.highlightPipPackages',
             'whatsNew.highlightLanguageAndHeader',
             'whatsNew.highlightAndroidAndWindows',
-        ].join(',') && document.querySelector('[data-i18n="whatsNew.intro"]')?.textContent.includes('1.2.0');
+        ].join(',');
     }));
-    check('1.3.2 preserves that summary and adds the Android file-safety fixes',
+    check('1.3.2 contains only its focused closing, import, and accessibility delta',
         await page.evaluate(() => {
             const keys = window.SCIREPL_RELEASE_HIGHLIGHTS['1.3.2'] || [];
             return keys.join(',') === [
-                'whatsNew.highlightCatalogBrowse',
-                'whatsNew.highlightFormulaContexts',
-                'whatsNew.highlightPipPackages',
-                'whatsNew.highlightLanguageAndHeader',
-                'whatsNew.highlightAndroidFilesAndWindows',
+                'whatsNew.highlightWorkbookClosing',
+                'whatsNew.highlightAndroidCloudImport',
+                'whatsNew.highlightAccessibility',
             ].join(',') && document.querySelector('[data-i18n="whatsNew.intro"]')
-                ?.textContent.includes('1.2.0');
+                ?.textContent === window.t('whatsNew.intro');
+        }));
+    check('1.3.2 explains durable closing, the resettable warning, and cloud-file import',
+        await page.evaluate(() => {
+            const closing = window.t('whatsNew.highlightWorkbookClosing');
+            const importing = window.t('whatsNew.highlightAndroidCloudImport');
+            return /stay closed after a restart/i.test(closing)
+                && /restore.*in Settings/i.test(closing)
+                && /generic binary/i.test(importing);
         }));
     check('the release link remains valid before a tag exists', /\/releases\/?$/.test(release.href), release.href);
     check('focus moves into the modal', release.focusInside);

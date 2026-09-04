@@ -8,10 +8,11 @@
 // xyzservices etc. from the real lock and make bokeh.embed/io/plotting work.
 import { chromium } from 'playwright';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, rmSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync } from 'node:fs';
 
 const TIMEOUT = 180_000;
-const BASE = 'http://localhost:8085';
+const BASE = (process.env.SCIREPL_TEST_BASE || 'http://localhost:8085').replace(/\/+$/, '');
+const APP_VERSION = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version;
 const FIXDIR = new URL('./www/test_fixtures/wheels/', import.meta.url).pathname;
 const RUN_LIVE = process.env.RUN_LIVE_CDN === '1';
 
@@ -87,15 +88,16 @@ const FIXTURE_LOCK = {
   try {
     console.log('1. Navigating to SciREPL...');
     const context = browser.contexts()[0];
-    await context.addInitScript(() => {
+    await context.addInitScript((appVersion) => {
       localStorage.setItem('scirepl_privacy_accepted', '1');
       localStorage.setItem('scirepl_onboarding_seen', '1');
       localStorage.setItem('scirepl_auto_download', '1');
-      addEventListener('DOMContentLoaded', () => localStorage.setItem(
-          'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
-    });
+      localStorage.setItem('scirepl_whats_new_seen_version', appVersion);
+    }, APP_VERSION);
     await page.goto(BASE + '/', { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
     console.log('   Waiting for Pyodide...');
+    await page.waitForFunction(() => window.kernelManager
+      && typeof window.kernelManager.ensureReady === 'function', null, { timeout: TIMEOUT });
     await page.evaluate(() => { window.kernelManager.ensureReady('python'); });
     await page.waitForFunction(() => {
       const km = window.kernelManager;

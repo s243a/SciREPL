@@ -155,6 +155,28 @@ try {
     check('generated default notebook name is localized', state.notebook === state.notebookWant && state.notebook !== 'Notebook 1', JSON.stringify(state));
     check('generated code placeholder is localized', state.placeholder === state.placeholderWant && !state.placeholder.startsWith('Type '), JSON.stringify(state));
     check('generated ready status is localized', state.ready === state.readyWant && state.ready !== 'ready', JSON.stringify(state));
+    state = await page.evaluate(() => {
+        const keys = {
+            'search-btn': 'notebookSelector.findNotebookTitle',
+            'tour-shortcut-btn': 'header.takeTourTitle',
+            'menu-btn': 'menu.title',
+            'help-btn': 'tour.help.title',
+        };
+        return Object.entries(keys).map(([id, key]) => {
+            const button = document.getElementById(id);
+            return {
+                id,
+                key,
+                name: button?.getAttribute('aria-label'),
+                title: button?.title,
+                want: window.t(key),
+                tagged: button?.getAttribute('data-i18n-aria-label') === key,
+            };
+        });
+    });
+    check('header glyph buttons expose localized names and retain their i18n bindings',
+        state.every((item) => item.tagged && item.name === item.want
+            && item.title === item.want && item.name.length > 1), JSON.stringify(state));
     state = await page.evaluate(() => ({
         label: document.getElementById('rename-cell-input')?.labels?.[0]?.textContent?.trim(),
         want: window.t('renameCell.enterNameCellEmptyClear'),
@@ -201,6 +223,15 @@ try {
     // Generated nodes retain their key/variables, so changing locale while the
     // panel is open must update it in place rather than requiring a close/reopen.
     await activate('fr');
+    state = await page.evaluate(() => ({
+        search: document.getElementById('search-btn')?.getAttribute('aria-label'),
+        searchWant: window.t('notebookSelector.findNotebookTitle'),
+        menu: document.getElementById('menu-btn')?.getAttribute('aria-label'),
+        menuWant: window.t('menu.title'),
+    }));
+    check('header accessible names resynchronize after a programmatic locale change',
+        state.search === state.searchWant && state.menu === state.menuWant
+        && state.search !== 'Find in notebook', JSON.stringify(state));
     state = await page.evaluate(() => ({
         description: document.querySelector('[data-catalog-key="unifyweaver-scirepl"] .pkg-description')?.textContent,
         want: window.t('packageCatalog.item.unifyweaverScirepl.description'),
