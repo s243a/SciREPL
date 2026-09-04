@@ -53,7 +53,7 @@
 <body>
 <main>
     <h1>SciREPL Pro Privacy Policy</h1>
-    <p class="updated">Last updated: August 14, 2026</p>
+    <p class="updated">Last updated: September 3, 2026</p>
 
     <h2>Who this policy covers</h2>
     <p>This policy applies to <strong>SciREPL Pro</strong> on Android and in the Windows/Electron desktop container, developed by <a href="https://github.com/s243a" target="_blank" rel="noopener noreferrer">s243a</a>. The free SciREPL application has a <a href="../privacy.html">separate privacy policy</a>.</p>
@@ -63,6 +63,15 @@
         <p>SciREPL Pro is designed primarily for on-device use. Notebook language runtimes execute on your device. The current app has no SciREPL-operated account system, analytics service, advertising SDK, crash-reporting service, or server that receives your notebooks.</p>
         <p><strong>Some optional features send data off your device.</strong> Direct AI sends prompts and notebook context to the AI endpoint you select. Remote MCP, remote-agent chat, and terminal features send data through the broker you configure. Package installation, runtime fallback, external support links, exports, and notebook code can also make network requests. These transfers are described below.</p>
     </div>
+
+    <h2>Google Play Data Safety summary</h2>
+    <p>For Google Play's Data Safety disclosure, SciREPL Pro declares the following data as optionally collected and shared for <strong>app functionality</strong> when you choose to use Direct AI, AI Prompt cells, remote broker, remote-agent or terminal features, permitted workbook or file tools, or an export or sharing destination:</p>
+    <ul>
+        <li><strong>Other in-app messages:</strong> prompts, Direct AI and remote-agent chat, conversation content, and tool exchanges.</li>
+        <li><strong>Files and docs:</strong> virtual files and complete workbooks when the relevant permission or user action allows them to be sent.</li>
+        <li><strong>Other user-generated content:</strong> cell source, names, languages, previews, outputs, execution results, and remote-terminal input and output.</li>
+    </ul>
+    <p>These optional transfers go to the AI endpoint, broker, remote agent, model provider, or sharing destination you select. They are not received through a SciREPL-operated account or collection server. Data kept only in the app remains on your device and is not included in these Google Play categories.</p>
 
     <h2>Data stored on your device</h2>
     <p>Depending on the features you use, SciREPL Pro stores the following locally:</p>
@@ -81,6 +90,7 @@
 
     <h2>Retention and deletion</h2>
     <p>Local data remains on the device until you remove it or clear the platform-specific application profile.</p>
+    <p>SciREPL's developer does not provide a developer-side deletion-request service because SciREPL has no account or server that stores this content. You can remove local data using the controls below. Data already sent to a third party must be managed under that recipient's deletion practices.</p>
     <ul>
         <li><strong>Menu &gt; Clear History</strong> clears saved notebook/session history, the installed-package record, and virtual-filesystem data. It does <strong>not</strong> clear every preference, cache, AI API key, or remote broker credential.</li>
         <li><strong>AI panel &gt; Clear</strong> clears the current in-memory AI conversation. If conversation mirroring was enabled, mirrored cells remain in the workbook until you delete them.</li>
@@ -96,8 +106,8 @@
     <p>Python, R, Prolog, ClojureScript, Bash, JavaScript, Lua, and TypR notebook code runs on your device through WebAssembly or browser-based runtimes. Local execution does not mean that executed code is unable to use the network or read locally available data. Code you run can make requests to destinations chosen by that code. Remote AI inference, remote-agent sessions, and broker-host terminal sessions are not local notebook execution and are covered separately below.</p>
 
     <h2 id="direct-ai-services">Direct AI services</h2>
-    <p>Direct AI is optional and is used only after you configure it and send a message. SciREPL Pro can connect directly from your device to Anthropic, OpenAI, OpenRouter, an Ollama-compatible endpoint, or another OpenAI-compatible endpoint you enter. SciREPL's developer does not proxy these requests.</p>
-    <p>When you send a new Direct AI message, the request can include:</p>
+    <p>Direct AI and AI Prompt cells are optional. They send data only after you configure an endpoint, accept the Direct AI disclosure, and either send a message or explicitly run an AI Prompt cell. SciREPL Pro can connect directly from your device to Anthropic, OpenAI, OpenRouter, an Ollama-compatible endpoint, or another OpenAI-compatible endpoint you enter. SciREPL's developer does not proxy these requests.</p>
+    <p>When you send a Direct AI message or explicitly run an AI Prompt cell, the request can include:</p>
     <ul>
         <li>Your message and the app's system instructions.</li>
         <li>The selected provider, model, model settings, and tool descriptions.</li>
@@ -114,7 +124,7 @@
     <ul>
         <li><strong>Full control</strong> allows permitted AI tools, project-source browsing, notebook writes, and language-kernel execution without routine prompts. While selected, it overrides the separate source-browsing and Agent writes scope settings. It does not override Review mode, remote-data consent, the global JavaScript-kernel disable, explicit per-tool or per-kernel <strong>Ask</strong> or <strong>Deny</strong> rules, or the app's virtual-filesystem path and sensitive-data protections.</li>
         <li><strong>Open</strong> allows ordinary notebook tools and kernel execution without routine prompts, but it continues to respect the separate source-browsing and Agent writes scope settings, as well as explicit tool and kernel rules.</li>
-        <li><strong>Per-kernel execution rules</strong> are available through <strong>Menu &gt; Languages &gt; AI Kernel Access</strong> and <strong>AI Settings &gt; Kernels</strong>. <strong>Default</strong> inherits the overall security level; <strong>Allow</strong> runs without a kernel prompt; <strong>Ask</strong> requests confirmation; and <strong>Deny</strong> blocks AI-initiated execution. TypR compiles to and executes R, so a TypR run requires permission for both the TypR and R kernels; the more restrictive result applies.</li>
+        <li><strong>Per-kernel execution rules</strong> are available through <strong>Menu &gt; Languages &amp; modes &gt; AI Kernel Access</strong> and <strong>AI Settings &gt; Kernels</strong>. <strong>Default</strong> inherits the overall security level; <strong>Allow</strong> runs without a kernel prompt; <strong>Ask</strong> requests confirmation; and <strong>Deny</strong> blocks AI-initiated execution. TypR compiles to and executes R, so a TypR run requires permission for both the TypR and R kernels; the more restrictive result applies.</li>
         <li><strong>Review mode remains authoritative</strong> even when Full control is selected: it blocks kernel execution and ordinary edits or deletion. The separately enabled option to append review notes writes only to the dedicated AI Review worksheet.</li>
         <li><strong>Workbook import/export is a separate permission</strong> that starts Off and does not inherit Full control, Open, or Agent writes. Ask requests approval for every call. Review mode always blocks workbook import; explicitly permitted export can still send the complete active notebook.</li>
         <li><strong>Remote-data consent is separate</strong> from the security level. The app requires it when opening or restoring a broker connection and again before handling a remote tool request. Selecting Full control does not grant remote consent. Direct AI consent and the automatic notebook previews described above are also separate from tool permissions.</li>
@@ -139,7 +149,7 @@
     <ul>
         <li>Lua runtime files from jsDelivr or unpkg.</li>
         <li>Fallback runtime files and optional Python or R packages from their configured repositories or mirrors.</li>
-        <li>After you accept the current network disclosure, opening Languages may query <code>data.jsdelivr.com</code> for R and Prolog package-version metadata. If consent has not yet been given, choosing <strong>Check latest</strong> opens this privacy dialog; no metadata request is sent unless you accept. The lookup does not download or activate a runtime.</li>
+        <li>After you accept the current network disclosure, opening Languages &amp; modes may query <code>data.jsdelivr.com</code> for R and Prolog package-version metadata. If consent has not yet been given, choosing <strong>Check latest</strong> opens this privacy dialog; no metadata request is sent unless you accept. The lookup does not download or activate a runtime.</li>
         <li>When you open Browse after accepting the current disclosure, verified SciREPL Catalog release metadata from the configured static catalogue host (by default <code>s243a.github.io</code>) and immutable catalogue or workbook bytes from <code>raw.githubusercontent.com</code>. These requests do not intentionally include notebook content, search text, spoken-language choices, fallback preferences, or kernel filters. Selecting a development branch additionally asks <code>api.github.com</code> to resolve that branch to an exact commit.</li>
         <li>The DOCX export library (docx@9.6.0) from jsDelivr when DOCX export is requested.</li>
         <li>Ko-fi when you choose the external support link.</li>
