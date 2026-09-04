@@ -11,6 +11,10 @@
     --text-muted: #484f58;
     --accent: #58a6ff;
     --accent-glow: rgba(88, 166, 255, 0.15);
+    /* Dedicated action colours keep white button text at WCAG AA contrast
+       without darkening links, focus rings, or other uses of --accent. */
+    --primary-action: #1f6feb;
+    --primary-action-end: #8250df;
     --green: #3fb950;
     --orange: #d29922;
     --red: #f85149;
@@ -370,7 +374,7 @@ html, body {
     gap: 6px;
     padding: 6px 12px;
     font-size: 11px;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-family: var(--font-mono);
     border-bottom: 1px solid var(--border);
 }
@@ -506,7 +510,7 @@ html, body {
     padding: 10px 20px;
     border: none;
     border-radius: 8px;
-    background: linear-gradient(135deg, var(--accent), #a371f7);
+    background: linear-gradient(135deg, var(--primary-action), var(--primary-action-end));
     color: #fff;
     font-weight: 700;
     font-size: 14px;
@@ -3115,6 +3119,8 @@ body.force-mobile .vfs-delete-btn {
     --text-muted: #818b98;
     --accent: #0969da;
     --accent-glow: rgba(9, 105, 218, 0.12);
+    --primary-action: #0969da;
+    --primary-action-end: #8250df;
     --green: #1a7f37;
     --orange: #9a6700;
     --red: #cf222e;
@@ -3307,6 +3313,13 @@ body.force-mobile .vfs-delete-btn {
     width: 100%;
 }
 
+.tour-language > label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
 .tour-language-shortcut {
     /* Stacked, not a row: sharing one line left the select ~119px while the
        French value needs ~139px, so the chosen mode was clipped on a 320px
@@ -3449,7 +3462,7 @@ body.force-mobile .vfs-delete-btn {
 }
 
 #tour-progress {
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-size: 12px;
     font-variant-numeric: tabular-nums;
 }
@@ -3471,8 +3484,8 @@ body.force-mobile .vfs-delete-btn {
 }
 
 .tour-btn {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--primary-action);
+    border-color: var(--primary-action);
     color: #fff;
     font-weight: 600;
 }

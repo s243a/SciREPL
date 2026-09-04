@@ -243,6 +243,67 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
             warning.body.includes(warning.name) && /export/i.test(warning.body)
                 && warning.nativeConfirms === 0 && warning.settingDefault === null,
             JSON.stringify(warning));
+
+        await page.waitForFunction(() => document.activeElement?.id
+            === 'close-final-notebook-cancel');
+        check('the warning moves focus to its safe Cancel action',
+            await page.evaluate(() => document.activeElement?.id
+                === 'close-final-notebook-cancel'));
+
+        await page.focus('#close-final-notebook-x');
+        await page.keyboard.press('Shift+Tab');
+        const reverseWrappedTo = await page.evaluate(() => document.activeElement?.id);
+        await page.keyboard.press('Tab');
+        const forwardWrappedTo = await page.evaluate(() => document.activeElement?.id);
+        check('Tab and Shift+Tab stay inside the warning',
+            reverseWrappedTo === 'close-final-notebook-confirm'
+                && forwardWrappedTo === 'close-final-notebook-x',
+            JSON.stringify({ reverseWrappedTo, forwardWrappedTo }));
+
+        await page.evaluate(() => {
+            window.__closeWarningEscapes = 0;
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape') window.__closeWarningEscapes++;
+            });
+        });
+        await page.focus('#close-final-notebook-cancel');
+        await page.keyboard.press('Escape');
+        await page.waitForFunction(() => document.getElementById(
+            'close-final-notebook-modal')?.classList.contains('hidden'));
+        const escaped = await page.evaluate(oldId => ({
+            bubbles: window.__closeWarningEscapes,
+            focus: document.activeElement?.id,
+            stillOpen: Boolean(window.notebookManager.getNotebook(oldId))
+        }), seeded.id);
+        check('Escape cancels only the warning and restores its opener',
+            escaped.bubbles === 0 && escaped.focus === 'btn-close-notebook'
+                && escaped.stillOpen,
+            JSON.stringify(escaped));
+
+        // Open and close in the same frame. A stale queued focus callback must
+        // not move focus back into the now-hidden modal.
+        await page.evaluate(() => {
+            const opener = document.getElementById('btn-close-notebook');
+            opener.focus();
+            opener.click();
+            document.getElementById('close-final-notebook-x').click();
+        });
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(
+            () => requestAnimationFrame(resolve))));
+        const immediateCancel = await page.evaluate(oldId => ({
+            hidden: document.getElementById('close-final-notebook-modal')
+                .classList.contains('hidden'),
+            focus: document.activeElement?.id,
+            stillOpen: Boolean(window.notebookManager.getNotebook(oldId))
+        }), seeded.id);
+        check('closing before the focus frame cancels that queued work',
+            immediateCancel.hidden && immediateCancel.focus === 'btn-close-notebook'
+                && immediateCancel.stillOpen,
+            JSON.stringify(immediateCancel));
+
+        await page.waitForFunction(() => !document.getElementById('btn-close-notebook')?.disabled);
+        await page.click('#btn-close-notebook');
+        await page.waitForSelector('#close-final-notebook-modal:not(.hidden)');
         const backResult = await page.evaluate(() => {
             const back = window.SciReplAndroidBack;
             return (back?.dismissTopmostUi || back?.dismissTopmost)?.call(back);
@@ -251,7 +312,8 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
             'close-final-notebook-modal')?.classList.contains('hidden'));
         check('Android Back cancels the explanation and leaves the workbook open',
             backResult === 'modal'
-                && await page.evaluate(oldId => !!window.notebookManager.getNotebook(oldId), seeded.id),
+                && await page.evaluate(oldId => !!window.notebookManager.getNotebook(oldId)
+                    && document.activeElement?.id === 'btn-close-notebook', seeded.id),
             String(backResult));
 
         await page.waitForFunction(() => !document.getElementById('btn-close-notebook')?.disabled);
@@ -426,7 +488,152 @@ const APP_URL = process.env.SCIREPL_TEST_BASE || 'http://localhost:8085/';
                 && multiple.originalKept && multiple.secondGone && multiple.secondDiskGone,
             JSON.stringify(multiple));
 
-        console.log('6. Failed destructive flushes retain deletion tombstones');
+        console.log('6. Every visible notebook × uses the durable close path');
+        // The existing mandatory-control collision below roughly 405px is a
+        // separate selector-layout follow-up. Exercise each close control at a
+        // width where its full hit target is actually available.
+        await page.setViewportSize({ width: 1024, height: 800 });
+        const exerciseSelectorClose = async (mode, selector, name) => {
+            const prepared = await page.evaluate(async ({ mode, name }) => {
+                const nm = window.notebookManager;
+                document.getElementById('menu-modal')?.classList.add('hidden');
+                if (nm.getNotebooks().length !== 1) {
+                    throw new Error(`Expected one keeper notebook, found ${nm.getNotebooks().length}`);
+                }
+                const target = nm.createNotebook({ name });
+                nm.switchTo(target.id);
+                window._cells = [{
+                    id: 1,
+                    code: `${name}_SENTINEL`,
+                    type: 'markdown',
+                    language: 'markdown',
+                    name: '',
+                    inputCard: null,
+                    outputCard: null
+                }];
+                window._cellCounter = 1;
+                nm.setUIMode(mode);
+                nm.saveState();
+                await window.sessionManager.saveSharedState();
+                const beforeDisk = await window.vfsStore.loadSharedFiles();
+                const oldPath = beforeDisk.find(file => file.path
+                    .startsWith('/shared/notebooks/')
+                    && file.path.includes(name))?.path || '';
+
+                const prototypeClose = Object.getPrototypeOf(nm).closeNotebook;
+                window.__selectorClose = { calls: [], settled: null };
+                nm.closeNotebook = async function (id) {
+                    window.__selectorClose.calls.push(id);
+                    const result = await prototypeClose.call(this, id);
+                    window.__selectorClose.settled = id;
+                    return result;
+                };
+                window.confirm = () => true;
+                return { id: target.id, oldPath };
+            }, { mode, name });
+
+            await page.locator(selector).click();
+            await page.waitForFunction(id => window.__selectorClose?.settled === id,
+                prepared.id);
+            const closedFromSource = await page.evaluate(async ({ id, oldPath }) => {
+                const diskFiles = await window.vfsStore.loadSharedFiles();
+                return {
+                    calls: [...window.__selectorClose.calls],
+                    gone: !window.notebookManager.getNotebook(id),
+                    diskGone: !diskFiles.some(file => file.path === oldPath)
+                };
+            }, prepared);
+
+            const restart = await context.newPage();
+            await restart.goto(APP_URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+            await ready(restart);
+            const afterRestart = await restart.evaluate(({ id, oldPath }) => {
+                let names = [];
+                try { names = window.sharedVFS.listDir('/shared/notebooks'); } catch (_) { }
+                return window.vfsStore.loadSharedFiles().then(files => ({
+                    notebookGone: !window.notebookManager.getNotebook(id),
+                    memoryGone: !names.some(name => oldPath.endsWith('/' + name)),
+                    diskGone: !files.some(file => file.path === oldPath)
+                }));
+            }, prepared);
+            await restart.close();
+            return { prepared, closedFromSource, afterRestart };
+        };
+
+        for (const testCase of [{
+            mode: 'dropdown',
+            selector: '#notebook-selector-container .notebook-add-btn:nth-of-type(2)',
+            name: 'CLOSE_DROPDOWN'
+        }, {
+            mode: 'sidebar',
+            selector: '#sidebar-notebook-list .sidebar-notebook-item.active .sidebar-nb-close',
+            name: 'CLOSE_SIDEBAR'
+        }, {
+            mode: 'tabs',
+            selector: '#notebook-selector-container .notebook-tab.active .tab-close',
+            name: 'CLOSE_TABS'
+        }]) {
+            const route = await exerciseSelectorClose(
+                testCase.mode, testCase.selector, testCase.name);
+            check(`${testCase.mode} × awaits closeNotebook and its disk flush`,
+                route.prepared.oldPath
+                    && route.closedFromSource.calls.join('|') === route.prepared.id
+                    && route.closedFromSource.gone && route.closedFromSource.diskGone,
+                JSON.stringify(route));
+            check(`${testCase.mode} × cannot resurrect its workbook after restart`,
+                route.afterRestart.notebookGone && route.afterRestart.memoryGone
+                    && route.afterRestart.diskGone,
+                JSON.stringify(route));
+        }
+
+        const importRollback = await page.evaluate(async () => {
+            const nm = window.notebookManager;
+            const fio = window.fileIO;
+            const app = window._appInternals;
+            const beforeIds = nm.getNotebooks().map(notebook => notebook.id);
+            const originalCreateInputCard = app.createInputCard;
+            const prototypeClose = Object.getPrototypeOf(nm).closeNotebook;
+            let closeCalls = 0;
+            nm.closeNotebook = async function (id) {
+                closeCalls++;
+                return prototypeClose.call(this, id);
+            };
+            app.createInputCard = () => {
+                throw new Error('forced create-import render failure');
+            };
+            let error = '';
+            try {
+                await fio.importWorkbook(JSON.stringify({
+                    format: 'srwb',
+                    format_version: '1.0',
+                    notebook: {
+                        name: 'TRANSIENT_IMPORT',
+                        cells: [{ code: 'never committed', type: 'markdown' }]
+                    }
+                }), { format: 'srwb', mode: 'create' });
+            } catch (caught) {
+                error = String(caught?.message || caught);
+            } finally {
+                app.createInputCard = originalCreateInputCard;
+            }
+            return {
+                error,
+                closeCalls,
+                beforeIds,
+                afterIds: nm.getNotebooks().map(notebook => notebook.id),
+                transientGone: !nm.getNotebooks().some(notebook =>
+                    notebook.name === 'TRANSIENT_IMPORT')
+            };
+        });
+        check('failed create-import rollback remains internal and non-destructive',
+            /forced create-import render failure/.test(importRollback.error)
+                && importRollback.closeCalls === 0
+                && importRollback.transientGone
+                && JSON.stringify(importRollback.afterIds)
+                    === JSON.stringify(importRollback.beforeIds),
+            JSON.stringify(importRollback));
+
+        console.log('7. Failed destructive flushes retain deletion tombstones');
         const exerciseFailedFlush = async (sourcePage, name, failureMode) => {
             const prepared = await sourcePage.evaluate(async ({ name, failureMode }) => {
                 const nm = window.notebookManager;

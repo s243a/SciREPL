@@ -102,10 +102,26 @@ class FileIO {
             'SciREPL auto-saves open workbooks, but closing “{name}” removes it from this app. Export it first if you want to keep a file copy.',
             { name });
         if (dontShow) dontShow.checked = false;
+        const opener = document.activeElement;
 
         return new Promise(resolve => {
             let settled = false;
+            let focusFrame = null;
+            const focusable = () => [...modal.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+                .filter(element => !element.disabled && element.offsetParent !== null);
+            const visible = element => {
+                if (!element || !document.contains(element)) return false;
+                if (element.disabled || element.closest?.('.modal.hidden')) return false;
+                const style = getComputedStyle(element);
+                return style.display !== 'none' && style.visibility !== 'hidden'
+                    && element.getBoundingClientRect().width > 0;
+            };
             const cleanup = () => {
+                if (focusFrame !== null) {
+                    cancelAnimationFrame(focusFrame);
+                    focusFrame = null;
+                }
                 closeBtn?.removeEventListener('click', onCancel);
                 cancelBtn?.removeEventListener('click', onCancel);
                 confirmBtn?.removeEventListener('click', onConfirm);
@@ -120,6 +136,8 @@ class FileIO {
                 }
                 modal.classList.add('hidden');
                 cleanup();
+                const returnTarget = visible(opener) ? opener : this.menuBtn;
+                returnTarget?.focus();
                 resolve(accepted);
             };
             const onCancel = () => finish(false);
@@ -130,7 +148,23 @@ class FileIO {
             const onKey = event => {
                 if (event.key === 'Escape') {
                     event.preventDefault();
+                    event.stopPropagation();
                     finish(false);
+                    return;
+                }
+                if (event.key !== 'Tab') return;
+                const nodes = focusable();
+                if (!nodes.length) return;
+                const first = nodes[0];
+                const last = nodes[nodes.length - 1];
+                const active = document.activeElement;
+                if (event.shiftKey && (active === first || !modal.contains(active))) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey
+                    && (active === last || !modal.contains(active))) {
+                    event.preventDefault();
+                    first.focus();
                 }
             };
 
@@ -142,7 +176,10 @@ class FileIO {
             modal.classList.remove('hidden');
             modal.inert = false;
             modal.removeAttribute('aria-hidden');
-            requestAnimationFrame(() => cancelBtn?.focus());
+            focusFrame = requestAnimationFrame(() => {
+                focusFrame = null;
+                if (!settled) (cancelBtn || focusable()[0])?.focus();
+            });
         });
     }
 
@@ -510,7 +547,6 @@ class FileIO {
                 const nm = window.notebookManager;
                 const active = nm && nm.getActiveNotebook();
                 if (!active) return;
-                closeNotebookBtn.disabled = true;
                 let accepted = false;
                 try {
                     if (nm.getNotebooks().length === 1
@@ -521,8 +557,10 @@ class FileIO {
                             'notebookManager.confirm.closeNamed', { name: active.name }));
                     }
                     if (accepted) {
+                        closeNotebookBtn.disabled = true;
                         await nm.closeNotebook(active.id);
                         this.menuModal.classList.add('hidden');
+                        this.menuBtn?.focus();
                     }
                 } finally {
                     closeNotebookBtn.disabled = false;
@@ -2419,6 +2457,9 @@ class FileIO {
             try {
                 if (created && target) {
                     if (previous) nm.switchTo(previous.id);
+                    // This target was never committed as an imported workbook.
+                    // Roll it back in memory without recording a user-close
+                    // tombstone or performing a destructive persistence flush.
                     if (nm.getNotebooks().length > 1) nm.removeNotebook(target.id);
                 } else if (snapshot && previous) {
                     this._renderImportedNotebook(

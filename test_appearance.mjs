@@ -132,6 +132,83 @@ try {
         await page.evaluate(() => getComputedStyle(document.documentElement)
             .getPropertyValue('--accent').trim()) === '#58a6ff');
 
+    /* ---------------------- essential text contrast ------------------- */
+    console.log('\n3a. Essential control and label contrast');
+
+    const contrast = [];
+    for (const theme of ['dark', 'light']) {
+        contrast.push(await page.evaluate((selectedTheme) => {
+            window.appearance.setTheme(selectedTheme);
+
+            const resolveColor = (value) => {
+                const probe = document.createElement('span');
+                probe.style.color = value;
+                document.body.appendChild(probe);
+                const resolved = getComputedStyle(probe).color;
+                probe.remove();
+                return resolved;
+            };
+            const components = (value) => {
+                const values = resolveColor(value).match(/[\d.]+/g)?.slice(0, 3).map(Number) || [];
+                return values.map((component) => component / 255);
+            };
+            const luminance = (value) => {
+                const [r, g, b] = components(value).map((component) => component <= 0.04045
+                    ? component / 12.92 : ((component + 0.055) / 1.055) ** 2.4);
+                return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            };
+            const ratio = (foreground, background) => {
+                const a = luminance(foreground);
+                const b = luminance(background);
+                return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+            };
+            const output = document.createElement('section');
+            output.className = 'card card-output';
+            output.innerHTML = '<div class="card-label">Output</div>';
+            document.getElementById('repl').appendChild(output);
+            const outputLabel = output.querySelector('.card-label');
+            const outputStyle = getComputedStyle(outputLabel);
+            const outputRatio = ratio(outputStyle.color, getComputedStyle(output).backgroundColor);
+
+            window.onboarding.start();
+            const progressStyle = getComputedStyle(document.getElementById('tour-progress'));
+            const tourCardBackground = getComputedStyle(document.getElementById('tour-card')).backgroundColor;
+            const nextStyle = getComputedStyle(document.getElementById('tour-next'));
+            const progressRatio = ratio(progressStyle.color, tourCardBackground);
+            const nextRatio = ratio(nextStyle.color, nextStyle.backgroundColor);
+
+            const run = document.getElementById('run-btn');
+            run.disabled = false;
+            const runStyle = getComputedStyle(run);
+            const runColor = runStyle.color;
+            // Inspect what the button actually paints. Reading the custom
+            // properties instead would be vacuous: the test could stay green
+            // if #run-btn stopped using them.
+            const runEndpoints = [...runStyle.backgroundImage.matchAll(/rgba?\([^)]+\)/g)]
+                .map((match) => match[0]);
+            const runRatios = runEndpoints.map((endpoint) => ratio(runColor, endpoint));
+
+            window.onboarding.finish();
+            output.remove();
+            run.disabled = true;
+            return {
+                theme: selectedTheme,
+                output: outputRatio,
+                progress: progressRatio,
+                next: nextRatio,
+                runEndpoints: runEndpoints.length,
+                runStart: runRatios[0] || 0,
+                runEnd: runRatios[1] || 0,
+            };
+        }, theme));
+    }
+    check('output labels, Tour progress/Next, and Run meet 4.5:1 in dark and light themes',
+        contrast.every((theme) => theme.runEndpoints >= 2
+            && ['output', 'progress', 'next', 'runStart', 'runEnd']
+            .every((key) => theme[key] >= 4.5)), JSON.stringify(contrast));
+
+    await page.evaluate(() => window.appearance.setTheme('dark'));
+
     /* ------------------- dark is the product default -------------------- */
     console.log('\n3b. Dark is the default, on a light-mode device');
 

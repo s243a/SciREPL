@@ -347,6 +347,9 @@
         _languagePicker() {
             const wrap = document.createElement('div');
             wrap.className = 'tour-language';
+            const languageLabel = document.createElement('label');
+            languageLabel.setAttribute('for', 'tour-language-select');
+            languageLabel.textContent = (window.t || ((k) => k))('whatsNew.displayLanguage');
             const select = document.createElement('select');
             select.className = 'settings-select';
             select.id = 'tour-language-select';
@@ -390,7 +393,7 @@
                 if (fresh) fresh.focus();
             });
 
-            wrap.appendChild(select);
+            wrap.append(languageLabel, select);
 
             // The Tour shortcut is useful while learning, but it costs scarce
             // header space on a phone. Put the choice in the very first tour
