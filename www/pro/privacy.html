@@ -53,7 +53,7 @@
 <body>
 <main>
     <h1>SciREPL Pro Privacy Policy</h1>
-    <p class="updated">Last updated: September 3, 2026</p>
+    <p class="updated">Last updated: September 6, 2026</p>
 
     <h2>Who this policy covers</h2>
     <p>This policy applies to <strong>SciREPL Pro</strong> on Android and in the Windows/Electron desktop container, developed by <a href="https://github.com/s243a" target="_blank" rel="noopener noreferrer">s243a</a>. The free SciREPL application has a <a href="../privacy.html">separate privacy policy</a>.</p>
@@ -156,6 +156,11 @@
         <li>Files or URLs explicitly requested by notebook code or file-fetching features.</li>
     </ul>
     <p>These services receive ordinary request metadata, including your IP address, request time, device or browser headers, and the requested URL. Runtime and library requests do not intentionally contain notebook content, but URLs or requests created by notebook code may contain whatever information that code supplies.</p>
+
+    <h2 id="optional-network-guardrail">Optional experimental network guardrail</h2>
+    <p>The network guardrail is optional, experimental, and off by default. If you enable it under <strong>Menu &gt; Security</strong> and reload, SciREPL Pro checks network requests it can observe from notebook code and code run through app-mediated agent actions against host rules you control. Same-origin and local requests, and configured runtime downloads, have limited built-in rules. If only manual notebook code or only an agent has run since the page loaded, the app uses that scope's lists. After both have run, every observed request must satisfy both scopes' lists until the app reloads. Depending on your settings and the request type, an unlisted request is blocked or asks you for approval.</p>
+    <p>On Android, if you separately enable the isolated connection, eligible approved HTTPS requests can use an app-owned native connection that does not send or store WebView cookies and enforces a response-size limit. Automatic redirects are disabled in that connection; SciREPL Pro rechecks each redirect destination before separately following the next hop.</p>
+    <p>This feature is a best-effort guardrail against mistakes, not a sandbox or security boundary. Notebook runtimes share parts of the app's browser context, so code that is allowed to run may be able to alter or bypass app-level network checks. The guardrail switches, host lists, and saved answers are stored locally in the app. SciREPL's developer does not receive them.</p>
 
     <h2>Exports and sharing</h2>
     <p>Notebook and workbook exports are created on your device. If you use the browser download interface, Android share sheet, Windows file handling, email, cloud drive, or another destination, the receiving application or service receives the file you selected. SciREPL's developer does not choose or monitor that destination.</p>
