@@ -607,6 +607,48 @@ footer p {
     font-size: 0.92rem;
 }
 
+.release-main {
+    max-width: 900px;
+    padding-bottom: 100px;
+}
+
+.release-intro {
+    padding: 90px 0 72px;
+}
+
+.release-intro h1 {
+    font-size: clamp(3rem, 7vw, 5.5rem);
+}
+
+.release-section {
+    padding: 42px 0;
+    border-top: 1px solid var(--line);
+}
+
+.release-section h2 {
+    margin: 0 0 20px;
+    font-size: clamp(1.7rem, 3.5vw, 2.5rem);
+    letter-spacing: -0.04em;
+    line-height: 1.15;
+}
+
+.release-section ul {
+    display: grid;
+    gap: 13px;
+    margin: 0;
+    padding-left: 1.4em;
+    color: var(--muted);
+}
+
+.release-section li::marker {
+    color: var(--cyan);
+}
+
+.release-note {
+    margin: 25px 0 0;
+    color: var(--muted);
+}
+
 .testing-hero {
     max-width: 900px;
     padding: 96px 0 72px;
@@ -890,6 +932,14 @@ footer p {
 
     .site-header {
         min-height: 72px;
+    }
+
+    .release-intro {
+        padding: 58px 0 48px;
+    }
+
+    .release-section {
+        padding: 34px 0;
     }
 
     .brand img {
