@@ -39,9 +39,9 @@
         <section class="release-section" aria-labelledby="prompt-title">
             <h2 id="prompt-title">Review AI Prompt context before sending</h2>
             <ul>
-                <li>Choose source from previous cells, a selected range, or the current workbook to include with an AI Prompt. The preview shows the selected source; cell outputs are not included.</li>
+                <li>Choose source from previous cells, a selected range, or the current workbook to include with an AI Prompt. The preview shows that source with legacy /key lines redacted; cell outputs are not included.</li>
                 <li>Before a run sends selected cell context to your configured AI provider, review it and confirm the request. Configuring the selection alone sends nothing.</li>
-                <li>When a prompt targets a cell for replacement, its source is included in the request. Generated or replaced code also gets a short guide to the selected language's runtime and package commands; review its dependencies before running it.</li>
+                <li>Generated or replaced code also gets a short guide to the selected language's runtime and package commands; review its dependencies before running it.</li>
             </ul>
         </section>
 
@@ -49,7 +49,7 @@
             <h2 id="placement-title">Choose where AI Prompt answers go</h2>
             <ul>
                 <li>Keep the answer in the prompt cell's output, create or update a linked result cell, or preview a replacement for another cell. Configure this before the first run or while editing the prompt.</li>
-                <li>Replacement previews show the before and after source and need a separate Apply. If the target changed, make a new preview; an applied replacement can be undone.</li>
+                <li>Review the target's exact source before every replacement request; it may contain credentials, and Cancel sends nothing. Generated code then gets a separate before-and-after preview and Apply step. Changed targets need a new preview; applied replacements can be undone.</li>
                 <li>Generated result cells do not run automatically, so you can inspect and edit their source first.</li>
             </ul>
         </section>
