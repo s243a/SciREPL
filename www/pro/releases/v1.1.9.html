@@ -39,7 +39,7 @@
         <section class="release-section" aria-labelledby="prompt-title">
             <h2 id="prompt-title">Review AI Prompt context before sending</h2>
             <ul>
-                <li>Choose source from previous cells, a selected range, or the current workbook to include with an AI Prompt. The preview shows that source with legacy /key lines redacted; cell outputs are not included.</li>
+                <li>Choose source from previous cells, a selected range, or the current workbook to include with an AI Prompt. New context selections include saved output text by default, such as an earlier AI Prompt answer for staged work; use the visible switch to exclude outputs. Existing source-only selections remain source-only. Output text can include text extracted from rich HTML or SVG output. No image is attached and no raw rich-output markup is added automatically, although selected source or text may itself contain such data. The preview shows the selected context with legacy /key lines redacted.</li>
                 <li>Before a run sends selected cell context to your configured AI provider, review it and confirm the request. Configuring the selection alone sends nothing.</li>
                 <li>Generated or replaced code also gets a short guide to the selected language's runtime and package commands; review its dependencies before running it.</li>
             </ul>
