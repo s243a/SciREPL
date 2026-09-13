@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="What's new in SciREPL Pro v1.1.9 for Android: reviewed AI Prompt context and result placement, collapsible cell source, and clearer first-run loading.">
+    <meta name="theme-color" content="#071c36">
+    <link rel="canonical" href="https://s243a.github.io/SciREPL/pro/releases/v1.1.9.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="SciREPL Pro v1.1.9 — What's new">
+    <meta property="og:description" content="Choose and review AI Prompt context and results, collapse cell source, and follow first-run loading in SciREPL Pro v1.1.9.">
+    <meta property="og:url" content="https://s243a.github.io/SciREPL/pro/releases/v1.1.9.html">
+    <link rel="icon" type="image/png" href="../assets/SciREPL-Pro-app-icon-512.png">
+    <link rel="stylesheet" href="../styles.css">
+    <title>SciREPL Pro v1.1.9 — What's new</title>
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+        <a class="brand" href="../" aria-label="SciREPL Pro home">
+            <img src="../assets/SciREPL-Pro-app-icon-512.png" alt="" width="44" height="44">
+            <span>sci<span>REPL</span> <b>PRO</b></span>
+        </a>
+        <nav aria-label="Primary navigation">
+            <a href="../">Pro overview</a>
+            <a href="../privacy.html">Privacy</a>
+            <a class="nav-cta" href="../../">Try free PWA</a>
+        </nav>
+    </header>
+
+    <main id="main" class="release-main">
+        <header class="release-intro">
+            <p class="eyebrow">Android Pro · v1.1.9</p>
+            <h1>SciREPL Pro <span>v1.1.9</span></h1>
+            <p class="lede">This update gives you more control over what AI Prompt cells receive and where their answers go, while making notebook editing and first-run loading clearer. These are the changes since v1.1.8.</p>
+        </header>
+
+        <section class="release-section" aria-labelledby="prompt-title">
+            <h2 id="prompt-title">Review AI Prompt context before sending</h2>
+            <ul>
+                <li>Choose source from previous cells, a selected range, or the current workbook to include with an AI Prompt. The preview shows the selected source; cell outputs are not included.</li>
+                <li>Before a run sends selected cell context to your configured AI provider, review it and confirm the request. Configuring the selection alone sends nothing.</li>
+                <li>When a prompt targets a cell for replacement, its source is included in the request. Generated or replaced code also gets a short guide to the selected language's runtime and package commands; review its dependencies before running it.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="placement-title">
+            <h2 id="placement-title">Choose where AI Prompt answers go</h2>
+            <ul>
+                <li>Keep the answer in the prompt cell's output, create or update a linked result cell, or preview a replacement for another cell. Configure this before the first run or while editing the prompt.</li>
+                <li>Replacement previews show the before and after source and need a separate Apply. If the target changed, make a new preview; an applied replacement can be undone.</li>
+                <li>Generated result cells do not run automatically, so you can inspect and edit their source first.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="notebook-title">
+            <h2 id="notebook-title">A tidier notebook and clearer loading</h2>
+            <ul>
+                <li>Collapse a cell's source to make room for its output, then expand it again when needed. The source remains saved, exportable, editable, and runnable while collapsed.</li>
+                <li>Cold-start progress stays with the cell that requested the run. Downloading a missing bundled Python package now requires network consent, and optional R package preparation waits until after the first R result.</li>
+            </ul>
+        </section>
+
+        <p class="release-note">AI Settings now shows separate model choices for the Assistant and AI Prompt cells, plus an Autocomplete setting. Independent AI Prompt models and local autocomplete are previews only in v1.1.9: AI Prompt cells still use the Assistant model, and the autocomplete choice does not change the editor yet.</p>
+        <div class="hero-actions">
+            <a class="button button-primary" href="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl.pro" target="_blank" rel="noopener noreferrer">Open SciREPL Pro on Google Play</a>
+            <a class="button button-secondary" href="../">Back to Pro overview</a>
+        </div>
+    </main>
+
+    <footer>
+        <a class="brand footer-brand" href="../" aria-label="SciREPL Pro home">
+            <img src="../assets/SciREPL-Pro-app-icon-512.png" alt="" width="36" height="36">
+            <span>sci<span>REPL</span> <b>PRO</b></span>
+        </a>
+        <div>
+            <a href="../privacy.html">Privacy</a>
+            <a href="../../">Free PWA</a>
+        </div>
+        <p>© 2026 SciREPL</p>
+    </footer>
+</body>
+</html>
