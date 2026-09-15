@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="What's new in SciREPL Pro v1.2.0 for Android: offline Python completion that knows installed modules and attributes, suggestion chips, an optional extra-keys row, and landscape accessory rows that step aside.">
+    <meta name="theme-color" content="#071c36">
+    <link rel="canonical" href="https://s243a.github.io/SciREPL/pro/releases/v1.2.0.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="SciREPL Pro v1.2.0 — What's new">
+    <meta property="og:description" content="Offline Python completion with attributes and aliases, tappable suggestion chips, an optional extra-keys row, and landscape accessory rows that step aside in SciREPL Pro v1.2.0.">
+    <meta property="og:url" content="https://s243a.github.io/SciREPL/pro/releases/v1.2.0.html">
+    <link rel="icon" type="image/png" href="../assets/SciREPL-Pro-app-icon-512.png">
+    <link rel="stylesheet" href="../styles.css">
+    <title>SciREPL Pro v1.2.0 — What's new</title>
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+        <a class="brand" href="../" aria-label="SciREPL Pro home">
+            <img src="../assets/SciREPL-Pro-app-icon-512.png" alt="" width="44" height="44">
+            <span>sci<span>REPL</span> <b>PRO</b></span>
+        </a>
+        <nav aria-label="Primary navigation">
+            <a href="../">Pro overview</a>
+            <a href="../privacy.html">Privacy</a>
+            <a class="nav-cta" href="../../">Try free PWA</a>
+        </nav>
+    </header>
+
+    <main id="main" class="release-main">
+        <header class="release-intro">
+            <p class="eyebrow">Android Pro · v1.2.0</p>
+            <h1>SciREPL Pro <span>v1.2.0</span></h1>
+            <p class="lede">This update makes editing Python on a phone faster: completion now knows your installed modules and their attributes, ambiguous prefixes become tappable chips, and an optional row of extra keys sits above the keyboard. Everything runs on the device and works offline. These are the changes since v1.1.9.</p>
+        </header>
+
+        <section class="release-section" aria-labelledby="completion-title">
+            <h2 id="completion-title">Completion that knows your session</h2>
+            <ul>
+                <li>Python completion suggests keywords, installed module names, and names and attributes from the current session. After a cell has run, <code>np.</code> completes numpy attributes such as <code>np.linalg</code>.</li>
+                <li>Aliases from <code>import numpy as np</code> are understood even in cells that have not run yet, so completion works while you draft.</li>
+                <li>Decline a suggestion by tapping the editor, pressing Back, or pressing Esc. The Accept button no longer sits over Run.</li>
+                <li>Nothing leaves the device: completion is local, offline, and independent of any AI provider setting.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="chips-title">
+            <h2 id="chips-title">Suggestion chips and extra keys</h2>
+            <ul>
+                <li>When several names fit what you typed, they appear as tappable chips above the keyboard, best first, ranked from what this workbook already uses. Tap a chip to complete that name.</li>
+                <li>Where there is no room for the chip row, the most likely name is offered as ghost text instead.</li>
+                <li>An optional extra-keys row adds Esc, Tab, indent removal, arrows, Home, End, Run, and Python punctuation. Turn it on under Menu → Settings; it is off by default.</li>
+                <li>Choose whether chips take their own row or replace the extra keys, separately for portrait and landscape.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="landscape-title">
+            <h2 id="landscape-title">Landscape rows that step aside</h2>
+            <ul>
+                <li>In landscape, accessory rows can be Off, shown when there is room, or always shown. The default shows them only when at least eight code lines stay visible; the minimum is adjustable.</li>
+                <li>Importing a workbook from a tool while editing a cell no longer leaves the composer hidden.</li>
+            </ul>
+        </section>
+
+        <p class="release-note">Completion ranking learns from names used in your workbooks and keeps that table on the device only. Clear History in Settings resets it. AI-assisted completion is not part of this release.</p>
+        <div class="hero-actions">
+            <a class="button button-primary" href="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl.pro" target="_blank" rel="noopener noreferrer">Open SciREPL Pro on Google Play</a>
+            <a class="button button-secondary" href="../">Back to Pro overview</a>
+        </div>
+    </main>
+
+    <footer>
+        <a class="brand footer-brand" href="../" aria-label="SciREPL Pro home">
+            <img src="../assets/SciREPL-Pro-app-icon-512.png" alt="" width="36" height="36">
+            <span>sci<span>REPL</span> <b>PRO</b></span>
+        </a>
+        <div>
+            <a href="../privacy.html">Privacy</a>
+            <a href="../../">Free PWA</a>
+        </div>
+        <p>© 2026 SciREPL</p>
+    </footer>
+</body>
+</html>
