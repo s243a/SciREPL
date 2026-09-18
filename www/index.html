@@ -796,6 +796,14 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                 <button class="icon-btn" type="button" tabindex="-1">🔍</button>
                 <button class="icon-btn" type="button" tabindex="-1">?</button>
             </div>
+            <div class="appearance-row">
+                <label for="appearance-run-button" data-i18n="appearance.runButton">Run button</label>
+                <select id="appearance-run-button" class="settings-select">
+                    <option value="auto" data-i18n="appearance.runButtonAuto">Auto (icon only when space is tight)</option>
+                    <option value="compact" data-i18n="appearance.runButtonCompact">Icon only</option>
+                    <option value="full" data-i18n="appearance.runButtonFull">Always show the label</option>
+                </select>
+            </div>
 
             <div class="settings-section" data-i18n="appearance.headerShortcuts">Header shortcuts</div>
             <p class="appearance-note" data-i18n="appearance.headerShortcutsHelp">
@@ -1267,6 +1275,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <script src="js/math_mode.js"></script>
     <script src="js/bridge.js"></script>
     <script src="js/i18n.js"></script>
+    <script src="js/composer_fit.js"></script>
     <script src="js/appearance.js"></script>
     <script src="js/appearance_ui.js"></script>
     <script src="js/release_highlights.js"></script>

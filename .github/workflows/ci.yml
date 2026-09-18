@@ -116,6 +116,9 @@ jobs:
       - name: Right-to-left layout
         run: node test_rtl_layout.mjs
 
+      - name: Composer Run button fits long-label locales
+        run: npm run test:composer-fit
+
       - name: Generated and dynamic localization
         run: node test_i18n_dynamic.mjs
 

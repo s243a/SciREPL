@@ -515,8 +515,12 @@ html, body {
     font-weight: 700;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    /* Not `all`: composer_fit.js measures the label's width synchronously and
+       an animating font-size would be sampled mid-transition. */
+    transition: transform 0.2s ease, box-shadow 0.2s ease,
+                opacity 0.2s ease, background 0.2s ease;
     min-height: 44px;
+    min-width: 44px;
 }
 
 #run-btn:hover:not(:disabled) {
@@ -3532,4 +3536,19 @@ body.force-mobile .vfs-delete-btn {
     color: #1c1c1c !important;
     font: 500 14px/1.45 system-ui, sans-serif !important;
     pointer-events: auto !important;
+}
+
+/* Compact Run (composer_fit.js): the translated label stays in the DOM for
+   screen readers; only the icon is painted. Applies when Appearance says
+   "Icon only", or in Auto when the code field would be too narrow. */
+#input-bar.run-compact #run-btn {
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding-inline: 0;
+    font-size: 0;
+}
+#input-bar.run-compact #run-btn::before {
+    content: '\25B6';
+    font-size: 16px;
 }
