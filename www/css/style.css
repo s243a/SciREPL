@@ -3552,3 +3552,66 @@ body.force-mobile .vfs-delete-btn {
     content: '\25B6';
     font-size: 16px;
 }
+
+.help-keyboard-list {
+    display: grid;
+    gap: 12px;
+    margin: 10px 0 12px;
+    padding: 0;
+    list-style: none;
+}
+.help-keyboard-list li {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+}
+.help-keyboard-link {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    min-height: 44px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+}
+.keyboard-trust-notice {
+    padding: 10px 12px;
+    border-inline-start: 3px solid var(--orange);
+    border-radius: 6px;
+    background: rgba(210, 153, 34, 0.10);
+}
+
+/* Help: on-screen keyboard guidance */
+.help-keyboard-group {
+    margin: 12px 0 4px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.help-keyboard-table-wrap {
+    overflow-x: auto;
+    margin: 6px 0 12px;
+}
+.help-keyboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+.help-keyboard-table th,
+.help-keyboard-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+    text-align: start;
+    vertical-align: top;
+}
+.help-keyboard-table th[scope="row"] {
+    font-weight: 500;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+}
+.help-keyboard-table td {
+    white-space: nowrap;
+    width: 1%;
+}
