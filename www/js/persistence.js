@@ -112,7 +112,11 @@ class SessionManager {
             code: c.code,
             type: c.type,
             language: c.language || 'python',
-            name: c.name || ''
+            name: c.name || '',
+            // Outputs restore with the code so a relaunch does not show every
+            // cell as never run. Restore sanitizes the HTML before rendering.
+            lastOutput: c.lastOutput || '',
+            lastOutputHtml: c.lastOutputHtml || ''
         }));
         this.save();
     }

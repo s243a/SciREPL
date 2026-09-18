@@ -487,7 +487,9 @@ class NotebookManager {
                 code: c.code,
                 type: c.type,
                 language: c.language || 'python',
-                name: c.name || ''
+                name: c.name || '',
+                lastOutput: c.lastOutput || '',
+                lastOutputHtml: c.lastOutputHtml || ''
             }));
             window.sessionManager.session.cellCounter = active.cellCounter || 0;
         }
