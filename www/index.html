@@ -97,6 +97,69 @@
 
             <p><button id="btn-show-tour" class="vfs-btn" data-i18n="help.showTour">Show the tour again</button></p>
             <p><button id="btn-show-whats-new" class="vfs-btn" data-i18n="help.showWhatsNew">What’s new in this version</button></p>
+            <h3 data-i18n="help.landscapeKeyboards">On-screen keyboards</h3>
+            <p data-i18n="help.landscapeKeyboardsIntro">The default keyboard works, but a coding keyboard gives you Tab, brackets and arrow keys without switching layers, and a shorter keyboard leaves more room for code. Suggestions by orientation:</p>
+            <p class="help-keyboard-group" data-i18n="help.keyboardGroupPortrait">Portrait</p>
+            <ul class="help-keyboard-list">
+                <li>
+                    <a class="vfs-btn help-keyboard-link"
+                       href="https://play.google.com/store/apps/details?id=juloo.keyboard2"
+                       target="_blank" rel="noopener noreferrer"
+                       data-i18n="help.keyboardUnexpectedLink">Unexpected Keyboard — Google Play / F-Droid</a>
+                    <span data-i18n="help.keyboardUnexpectedBody">Coding-focused and compact. Symbols and modifiers sit on corner swipes of each key, heights are adjustable per orientation, and it leaves room for the navigation bar.</span>
+                </li>
+                <li>
+                    <a class="vfs-btn help-keyboard-link"
+                       href="https://play.google.com/store/apps/details?id=com.gazlaws.codeboard"
+                       target="_blank" rel="noopener noreferrer"
+                       data-i18n="help.keyboardCodeBoardLink">CodeBoard — Google Play</a>
+                    <span data-i18n="help.keyboardCodeBoardBody">Tab, every bracket and the common symbols on the main layer, with cut, copy and paste keys. Small and ad-free.</span>
+                </li>
+            </ul>
+            <p class="help-keyboard-group" data-i18n="help.keyboardGroupLandscape">Landscape</p>
+            <ul class="help-keyboard-list">
+                <li>
+                    <a class="vfs-btn help-keyboard-link"
+                       href="https://f-droid.org/packages/org.pocketworkstation.pckeyboard/"
+                       target="_blank" rel="noopener noreferrer"
+                       data-i18n="help.keyboardHackersLink">Hacker’s Keyboard — F-Droid (legacy)</a>
+                    <span data-i18n="help.keyboardHackersBody">A five-row PC layout with Ctrl, Esc and arrows, and the most vertically compact choice for landscape; a four-row layout is available too. To reach its settings, long-press the ?123 key and choose the gear. It is no longer on Google Play; F-Droid carries the latest build, last released in 2018, before gesture navigation. With three-button navigation the bar covers its outer keys in landscape, so switch to gesture navigation (Settings → System → Navigation mode; on Samsung, Settings → Display → Navigation bar → Swipe gestures).</span>
+                </li>
+            </ul>
+            <p class="help-keyboard-group" data-i18n="help.keyboardGroupGeneral">General</p>
+            <ul class="help-keyboard-list">
+                <li>
+                    <a class="vfs-btn help-keyboard-link"
+                       href="https://f-droid.org/packages/helium314.keyboard/"
+                       target="_blank" rel="noopener noreferrer"
+                       data-i18n="help.keyboardHeliBoardLink">HeliBoard — F-Droid</a>
+                    <span data-i18n="help.keyboardHeliBoardBody">Actively maintained general-purpose keyboard with separate height controls for portrait and landscape.</span>
+                </li>
+                <li>
+                    <a class="vfs-btn help-keyboard-link"
+                       href="https://play.google.com/store/apps/details?id=rkr.simplekeyboard.inputmethod"
+                       target="_blank" rel="noopener noreferrer"
+                       data-i18n="help.keyboardSimpleLink">Simple Keyboard — Google Play</a>
+                    <span data-i18n="help.keyboardSimpleBody">Minimal, with an adjustable height.</span>
+                </li>
+            </ul>
+            <p class="help-keyboard-group" data-i18n="help.keyboardTableTitle">Where to get them</p>
+            <div class="help-keyboard-table-wrap">
+                <table class="help-keyboard-table">
+                    <thead><tr><th scope="col" data-i18n="help.keyboardTableKeyboard">Keyboard</th><th scope="col" data-i18n="help.keyboardTablePlay">Google Play</th><th scope="col" data-i18n="help.keyboardTableFDroid">F-Droid</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row">Unexpected Keyboard</th><td data-i18n="help.keyboardYes">Yes</td><td data-i18n="help.keyboardYes">Yes</td></tr>
+                        <tr><th scope="row">CodeBoard</th><td data-i18n="help.keyboardYes">Yes</td><td data-i18n="help.keyboardNo">No</td></tr>
+                        <tr><th scope="row">Hacker’s Keyboard</th><td data-i18n="help.keyboardNo">No</td><td data-i18n="help.keyboardYes">Yes</td></tr>
+                        <tr><th scope="row">HeliBoard</th><td data-i18n="help.keyboardNo">No</td><td data-i18n="help.keyboardYes">Yes</td></tr>
+                        <tr><th scope="row">Simple Keyboard</th><td data-i18n="help.keyboardYes">Yes</td><td data-i18n="help.keyboardNo">No</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="help-keyboard-group" data-i18n="help.keyboardNavBar">Navigation bar</p>
+            <p data-i18n="help.keyboardNavBarBody">Android keeps the three-button bar on screen while any keyboard is open, so tools that hide the bar do not help while typing. Gesture navigation removes the bar and gives every keyboard the full screen. Samsung’s three-zone “Swipe from bottom” gestures, enabled through Good Lock → NavStar, keep a button-like layout without a bar.</p>
+            <p class="keyboard-trust-notice" data-i18n="help.keyboardTrustNotice">SciREPL is not affiliated with these projects. Keyboard apps can read everything you type, including passwords and API keys. Install only a keyboard you trust, review its permissions, and keep it updated.</p>
+
             <p data-i18n="help.headerShortcuts">Header shortcuts: 📦 Browse and 🧭 Tour appear when there is room for them, so a narrow screen may leave them out; ∑ Formula is off by default. Choose Always, When there is room, or Never for each under Appearance → Header shortcuts, and set which one gives up its place first. Formula appears for Python code and Markdown cells.</p>
             <p><a class="vfs-btn" href="open-source-licenses.html" data-i18n="help.openSourceLicenses">Open-source licences</a></p>
 
