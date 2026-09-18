@@ -1526,14 +1526,18 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
             const inputCard = createInputCard(saved.code, cellId, saved.type, language);
             const outputCard = createOutputCard(cellId, saved.type);
 
+            const lastOutput = String(saved.lastOutput || '');
+            const lastOutputHtml = window.fileIO && window.fileIO._sanitizeImportedHtml
+                ? window.fileIO._sanitizeImportedHtml(saved.lastOutputHtml || '')
+                : '';
             const cell = {
                 id: cellId,
                 code: saved.code,
                 type: saved.type,
                 language: language,
                 name: saved.name || '',
-                lastOutput: saved.lastOutput || '',
-                lastOutputHtml: saved.lastOutputHtml || '',
+                lastOutput,
+                lastOutputHtml,
                 inputCard: inputCard,
                 outputCard: outputCard
             };
@@ -1549,9 +1553,14 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 body.innerHTML = renderMarkdown(saved.code);
                 const pre = inputCard.querySelector('pre');
                 if (pre) pre.style.display = 'none';
+            } else if (lastOutputHtml || lastOutput) {
+                // Show the last saved output without re-executing; kernels
+                // still load lazily on the first user-initiated run.
+                const body = outputCard.querySelector('.card-body');
+                if (lastOutputHtml) body.innerHTML = lastOutputHtml;
+                else body.textContent = lastOutput;
             } else {
-                // Code cells: just render the input card, don't re-execute.
-                // Kernels load lazily on first user-initiated execution.
+                // Code cells that never ran: just render the input card.
                 outputCard.remove();
                 cell.outputCard = null;
             }

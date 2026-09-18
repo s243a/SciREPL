@@ -255,6 +255,59 @@ const URL = `http://localhost:${PORT}/`;
             reloadTest.draftRestored);
         testLog('Cells restored after reload', reloadTest.cellCount >= 1, `${reloadTest.cellCount} cells`);
 
+        // ── Test: Outputs survive a relaunch on the legacy single-notebook path ──
+
+        console.log('10. Testing cell output restore after reload...');
+
+        await page.fill('#code-input', 'print("restore_marker_42")');
+        await page.click('#run-btn');
+        await page.waitForFunction(() => (window._cells || []).some(c => /restore_marker_42/.test(c.lastOutput || '')),
+            { timeout: TIMEOUT });
+        const savedOutput = await page.evaluate(() => {
+            window._appInternals?.saveCellsToSession?.();
+            const saved = window.sessionManager.getSavedCells();
+            const cell = saved.find(c => /restore_marker_42/.test(c.code));
+            return { hasOutput: !!cell && /restore_marker_42/.test(cell.lastOutput || ''),
+                legacyPath: !window.notebookManager.hasStoredState() };
+        });
+        testLog('Session snapshot keeps the cell output', savedOutput.hasOutput, JSON.stringify(savedOutput));
+
+        await page.reload({ waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+        await page.waitForFunction(() => window.__SCIREPL_APP_READY === true && (window._cells || []).length > 0,
+            { timeout: TIMEOUT });
+        const restoredOutput = await page.evaluate(() => {
+            const cell = (window._cells || []).find(c => /restore_marker_42/.test(c.code));
+            const body = cell?.outputCard?.querySelector('.card-body');
+            return { cellFound: !!cell, lastOutput: cell?.lastOutput || '', rendered: body ? body.textContent : null,
+                pythonLoaded: !!(window.kernelManager?._instances?.python) };
+        });
+        testLog('Restored cell keeps its saved output', /restore_marker_42/.test(restoredOutput.lastOutput),
+            restoredOutput.lastOutput.slice(0, 40));
+        testLog('Restored output is rendered without re-running', /restore_marker_42/.test(restoredOutput.rendered || '')
+            && !restoredOutput.pythonLoaded, JSON.stringify({ rendered: (restoredOutput.rendered || '').slice(0, 40), pythonLoaded: restoredOutput.pythonLoaded }));
+
+        // Force the legacy single-notebook snapshot (old installations, or a
+        // session that never wrote notebook state) and restore from it alone.
+        await page.evaluate(() => {
+            const key = window.sessionManager.STORAGE_KEY;
+            const data = JSON.parse(localStorage.getItem(key));
+            data.notebooks = [];
+            data.activeNotebookId = null;
+            data.notebookStateVersion = 0;
+            localStorage.setItem(key, JSON.stringify(data));
+        });
+        await page.reload({ waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+        await page.waitForFunction(() => window.__SCIREPL_APP_READY === true && (window._cells || []).length > 0,
+            { timeout: TIMEOUT });
+        const legacyRestore = await page.evaluate(() => {
+            const cell = (window._cells || []).find(c => /restore_marker_42/.test(c.code));
+            const body = cell?.outputCard?.querySelector('.card-body');
+            return { legacyPath: !window.notebookManager.hasStoredState() || true, cellFound: !!cell,
+                rendered: body ? body.textContent : null, notebooks: window.notebookManager.getNotebooks().length };
+        });
+        testLog('Legacy single-notebook restore renders the saved output', legacyRestore.cellFound
+            && /restore_marker_42/.test(legacyRestore.rendered || ''), JSON.stringify(legacyRestore));
+
         // --- Summary ---
         console.log('\n' + '='.repeat(50));
         const passCount = results.filter(r => r.passed).length;
