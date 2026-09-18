@@ -139,7 +139,7 @@
     "help.keyboardCodeBoardLink": "CodeBoard — Google Play",
     "help.keyboardCodeBoardBody": "主按键层即配有 Tab、各种括号和常用符号，并提供剪切、复制与粘贴按键。体积小巧且无广告。",
     "help.keyboardHackersLink": "Hacker’s Keyboard — F-Droid (旧版)",
-    "help.keyboardHackersBody": "具备 Ctrl、Esc 和方向键的五行 PC 布局，是横屏下纵向最为紧凑的选择；同时还提供四行布局。若要进入其设置，长按 ?123 键并选择齿轮图标。该应用已不再上架 Google Play；F-Droid 保留了最新构建版本，最后发布于 2018 年（早于手势导航）。在三键导航下，横屏时导航栏会遮挡其外侧按键，因此请切换到手势导航（设置 → 系统 → 导航模式；在 Samsung 设备上：设置 → 显示 → 导航条 → 滑动手势）。",
+    "help.keyboardHackersBody": "具备 Ctrl、Esc 和方向键的五行 PC 布局，是横屏下纵向最为紧凑的选择；同时还提供四行布局。若要进入其设置，按 Fn，然后点击麦克风键正下方的设置键。该应用已不再上架 Google Play；F-Droid 保留了最新构建版本，最后发布于 2018 年（早于手势导航）。在三键导航下，横屏时导航栏会遮挡其外侧按键，因此请切换到手势导航（设置 → 系统 → 导航模式；在 Samsung 设备上：设置 → 显示 → 导航条 → 滑动手势）。",
     "help.keyboardHeliBoardLink": "HeliBoard — F-Droid",
     "help.keyboardHeliBoardBody": "维护活跃的通用键盘，支持分别调节竖屏和横屏的高度。",
     "help.keyboardSimpleLink": "Simple Keyboard — Google Play",

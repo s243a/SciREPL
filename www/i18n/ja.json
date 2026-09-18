@@ -140,7 +140,7 @@
     "help.keyboardCodeBoardLink": "CodeBoard — Google Play",
     "help.keyboardCodeBoardBody": "メインレイヤーにTab、各種括弧、一般的な記号が配置されており、切り取り、コピー、貼り付けキーも搭載。コンパクトで広告もありません。",
     "help.keyboardHackersLink": "Hacker’s Keyboard — F-Droid (レガシー)",
-    "help.keyboardHackersBody": "Ctrl、Esc、矢印キーを備えた5行のPCレイアウトで、横向きにおいて縦方向に最もコンパクトな選択肢です。4行レイアウトも利用できます。設定を開くには、?123 キーを長押しして歯車アイコンを選択します。現在はGoogle Playで配信されておらず、ジェスチャーナビゲーション導入前の2018年にリリースされた最新ビルドがF-Droidで提供されています。3ボタンナビゲーションでは横向き時にバーが外側のキーと重なってしまうため、ジェスチャーナビゲーションに切り替えてください（設定 → システム → ナビゲーション モード。Samsungでは、設定 → ディスプレイ → ナビゲーションバー → スワイプジェスチャー）。",
+    "help.keyboardHackersBody": "Ctrl、Esc、矢印キーを備えた5行のPCレイアウトで、横向きにおいて縦方向に最もコンパクトな選択肢です。4行レイアウトも利用できます。設定を開くには、Fnを押してから、マイクキーのすぐ下にある設定キーをタップします。現在はGoogle Playで配信されておらず、ジェスチャーナビゲーション導入前の2018年にリリースされた最新ビルドがF-Droidで提供されています。3ボタンナビゲーションでは横向き時にバーが外側のキーと重なってしまうため、ジェスチャーナビゲーションに切り替えてください（設定 → システム → ナビゲーション モード。Samsungでは、設定 → ディスプレイ → ナビゲーションバー → スワイプジェスチャー）。",
     "help.keyboardHeliBoardLink": "HeliBoard — F-Droid",
     "help.keyboardHeliBoardBody": "活発にメンテナンスされている汎用キーボードで、縦向きと横向きで個別に高さを調整できます。",
     "help.keyboardSimpleLink": "Simple Keyboard — Google Play",

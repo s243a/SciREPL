@@ -139,7 +139,7 @@
     "help.keyboardCodeBoardLink": "CodeBoard — Google Play",
     "help.keyboardCodeBoardBody": "메인 레이어에 Tab, 모든 괄호 및 자주 사용하는 기호가 있으며, 잘라내기, 복사, 붙여넣기 키가 포함되어 있습니다. 크기가 작고 광고가 없습니다.",
     "help.keyboardHackersLink": "Hacker’s Keyboard — F-Droid (레거시)",
-    "help.keyboardHackersBody": "Ctrl, Esc, 방향키가 포함된 5열 PC 레이아웃으로 가로 모드에서 세로 공간을 가장 적게 차지하는 선택지이며, 4열 레이아웃도 제공됩니다. 설정으로 이동하려면 ?123 키를 길게 누른 후 톱니바퀴를 선택하세요. 현재 Google Play에서는 제공되지 않으며, F-Droid에서 제스처 탐색 도입 이전인 2018년에 마지막으로 출시된 최신 빌드를 제공합니다. 3버튼 내비게이션을 사용하면 가로 모드에서 바가 바깥쪽 키를 가리므로 제스처 탐색으로 전환하세요(설정 → 시스템 → 탐색 모드; Samsung의 경우 설정 → 디스플레이 → 내비게이션 바 → 스와이프 제스처).",
+    "help.keyboardHackersBody": "Ctrl, Esc, 방향키가 포함된 5열 PC 레이아웃으로 가로 모드에서 세로 공간을 가장 적게 차지하는 선택지이며, 4열 레이아웃도 제공됩니다. 설정으로 이동하려면 Fn을 누른 후 마이크 키 바로 아래의 설정 키를 탭하세요. 현재 Google Play에서는 제공되지 않으며, F-Droid에서 제스처 탐색 도입 이전인 2018년에 마지막으로 출시된 최신 빌드를 제공합니다. 3버튼 내비게이션을 사용하면 가로 모드에서 바가 바깥쪽 키를 가리므로 제스처 탐색으로 전환하세요(설정 → 시스템 → 탐색 모드; Samsung의 경우 설정 → 디스플레이 → 내비게이션 바 → 스와이프 제스처).",
     "help.keyboardHeliBoardLink": "HeliBoard — F-Droid",
     "help.keyboardHeliBoardBody": "활발히 유지 관리되는 범용 키보드로, 세로 모드와 가로 모드의 높이를 각각 조절할 수 있습니다.",
     "help.keyboardSimpleLink": "Simple Keyboard — Google Play",
