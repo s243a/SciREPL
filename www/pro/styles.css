@@ -649,6 +649,34 @@ footer p {
     color: var(--muted);
 }
 
+/* Status callout for a version that is tagged but not yet on Google Play for
+   everyone. Remove it (or change the wording) when the release goes live. */
+.release-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 14px;
+    margin: 26px 0 0;
+    padding: 14px 18px;
+    border: 1px solid rgba(255, 200, 87, 0.4);
+    border-radius: 14px;
+    background: rgba(255, 200, 87, 0.08);
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.release-status strong {
+    color: var(--gold);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.release-status a {
+    color: var(--cyan);
+}
+
 .testing-hero {
     max-width: 900px;
     padding: 96px 0 72px;
