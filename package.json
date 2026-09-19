@@ -11,6 +11,7 @@
     "serve": "node server.js",
     "configure": "node scripts/configure-build.mjs",
     "fetch:bundles": "node scripts/fetch-bundles.mjs",
+    "test:header-scaling": "node test_header_scaling.mjs",
     "test:composer-fit": "node test_composer_fit.mjs",
     "test:catalog": "node test_catalog_filter.mjs && node test_catalog_sources.mjs",
     "test:catalog:import": "node test_catalog_import.mjs",
