@@ -42,10 +42,11 @@
 
     /* Multiplier for header icon buttons. 1 keeps the historical 28px. */
     --ui-btn-scale: 1;
-    /* Header icon buttons are sized in em so the box follows the text: the
-       Button size setting and the system font scale (Android WebView zooms px
-       text, not px boxes) both grow glyph and circle together. 2em × 14px = 28px. */
-    --icon-btn-size: 2em;
+    --icon-btn-size: 28px;
+    /* Platform text zoom (Android system font scale), published by
+       text_zoom.js. WebView paints px text zoomed but resolves px/em lengths
+       unzoomed, so boxes that hold text multiply this in explicitly. */
+    --ui-text-zoom: 1;
 }
 
 * {
@@ -218,9 +219,9 @@ html, body {
 
 #status-badge {
     font-size: 11px;
-    /* em padding: the pill grows with its text under system font scaling. */
-    padding: 0.27em 0.9em;
-    border-radius: 1.1em;
+    /* The pill grows with its zoomed text (text_zoom.js). */
+    padding: calc(3px * var(--ui-text-zoom)) calc(10px * var(--ui-text-zoom));
+    border-radius: calc(12px * var(--ui-text-zoom));
     white-space: nowrap;
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -566,8 +567,8 @@ html, body {
 /* ===== Help Button ===== */
 
 .icon-btn {
-    width: var(--icon-btn-size);
-    height: var(--icon-btn-size);
+    width: calc(var(--icon-btn-size) * var(--ui-btn-scale) * var(--ui-text-zoom));
+    height: calc(var(--icon-btn-size) * var(--ui-btn-scale) * var(--ui-text-zoom));
     font-size: calc(14px * var(--ui-btn-scale));
     line-height: 1;
     /* Emoji fonts have tall ink boxes; never let a glyph reach a neighbour. */
@@ -582,7 +583,10 @@ html, body {
     color: var(--accent);
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    /* Not `all`: box sizes follow --ui-btn-scale and --ui-text-zoom and
+       layout code measures them synchronously. */
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease,
+                border-color 0.2s ease, opacity 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;

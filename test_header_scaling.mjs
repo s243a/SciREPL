@@ -26,7 +26,7 @@ try {
         const errors = [];
         page.on('pageerror', (e) => errors.push(String(e)));
         await page.goto(APP_URL, { waitUntil: 'domcontentloaded' });
-        await page.waitForFunction(async () => { if (window.i18n?.init) await window.i18n.init(); return window.__SCIREPL_APP_READY === true && !!window.appearance && !!window.notebookManager; }, null, { timeout: 120_000 });
+        await page.waitForFunction(async () => { if (window.i18n?.init) await window.i18n.init(); return window.__SCIREPL_APP_READY === true && !!window.appearance && !!window.notebookManager && !!window.uiTextZoom; }, null, { timeout: 120_000 });
         await page.evaluate(() => { for (const m of document.querySelectorAll('.modal')) m.classList.add('hidden'); });
         // A second workbook so the selector is present and can be squeezed.
         await page.evaluate(() => { try { window.notebookManager.createNotebook({ name: 'Second workbook with a long name' }); } catch (e) { /* older API */ } });
@@ -64,6 +64,26 @@ try {
             // Selector width under squeeze is tracked separately (docs/HEADER_TEXT_ZOOM.md §4).
         }
         await page.evaluate(() => window.appearance.setButtonScale(1));
+        // Platform text zoom: desktop Chromium reports 1; simulate the WebView
+        // factor text_zoom.js would publish and check the boxes follow it.
+        for (const zoom of [1.3, 1.5]) {
+            await page.evaluate((z) => window.uiTextZoom.apply(z), zoom);
+            await page.waitForTimeout(300);
+            const z = await page.evaluate((zoom) => {
+                const btn = document.getElementById('menu-btn');
+                const badge = document.getElementById('status-badge');
+                const bcs = getComputedStyle(badge);
+                const ids = ['notebook-sidebar-toggle', 'search-btn', 'math-mode-btn', 'tour-shortcut-btn', 'menu-btn', 'help-btn', 'status-badge'];
+                const rects = ids.map((id) => document.getElementById(id)).filter((e) => e && e.getBoundingClientRect().width > 0 && getComputedStyle(e).visibility !== 'hidden').map((e) => e.getBoundingClientRect());
+                let overlaps = 0;
+                for (let i = 0; i < rects.length; i++) for (let j = i + 1; j < rects.length; j++) { const a = rects[i], c = rects[j]; if (Math.min(a.right, c.right) - Math.max(a.left, c.left) > 1 && Math.min(a.bottom, c.bottom) - Math.max(a.top, c.top) > 1) overlaps++; }
+                return { factor: window.uiTextZoom.factor(), cssVar: getComputedStyle(document.documentElement).getPropertyValue('--ui-text-zoom').trim(), btn: Math.round(btn.getBoundingClientRect().width), expected: Math.round(28 * zoom), padTop: parseFloat(bcs.paddingTop), overlaps };
+            }, zoom);
+            check(`text zoom ${zoom}: icon boxes grow to ${z.expected}px and the badge pads by the same factor`, Math.abs(z.btn - z.expected) <= 1 && Math.abs(z.padTop - 3 * zoom) < 0.3 && z.overlaps === 0, JSON.stringify(z));
+        }
+        await page.evaluate(() => window.uiTextZoom.apply(1));
+        const back = await page.evaluate(() => Math.round(document.getElementById('menu-btn').getBoundingClientRect().width));
+        check('zoom 1 restores 28px buttons', back === 28, `${back}px`);
         check(`${width}px: no page errors`, errors.length === 0, errors.join(' | '));
         await context.close();
     }
