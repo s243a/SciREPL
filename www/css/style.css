@@ -42,7 +42,10 @@
 
     /* Multiplier for header icon buttons. 1 keeps the historical 28px. */
     --ui-btn-scale: 1;
-    --icon-btn-size: 28px;
+    /* Header icon buttons are sized in em so the box follows the text: the
+       Button size setting and the system font scale (Android WebView zooms px
+       text, not px boxes) both grow glyph and circle together. 2em × 14px = 28px. */
+    --icon-btn-size: 2em;
 }
 
 * {
@@ -215,8 +218,10 @@ html, body {
 
 #status-badge {
     font-size: 11px;
-    padding: 3px 10px;
-    border-radius: 12px;
+    /* em padding: the pill grows with its text under system font scaling. */
+    padding: 0.27em 0.9em;
+    border-radius: 1.1em;
+    white-space: nowrap;
     background: var(--bg-card);
     border: 1px solid var(--border);
     color: var(--text-muted);
@@ -561,9 +566,12 @@ html, body {
 /* ===== Help Button ===== */
 
 .icon-btn {
-    width: calc(var(--icon-btn-size) * var(--ui-btn-scale));
-    height: calc(var(--icon-btn-size) * var(--ui-btn-scale));
+    width: var(--icon-btn-size);
+    height: var(--icon-btn-size);
     font-size: calc(14px * var(--ui-btn-scale));
+    line-height: 1;
+    /* Emoji fonts have tall ink boxes; never let a glyph reach a neighbour. */
+    overflow: hidden;
     /* Never shrink. These are flex items in a header that runs out of room, and
        the default flex-shrink:1 silently compressed them back to their original
        size — which made the button-size setting appear to do nothing. */
