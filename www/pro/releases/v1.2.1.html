@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="What's new in SciREPL Pro v1.2.1 for Android: full-screen editing for cells and the composer, syntax colours while typing, cell outputs restored after a restart, and layout fixes for long labels and large system fonts.">
+    <meta name="theme-color" content="#071c36">
+    <link rel="canonical" href="https://s243a.github.io/SciREPL/pro/releases/v1.2.1.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="SciREPL Pro v1.2.1 — What's new">
+    <meta property="og:description" content="Full-screen editing, syntax colours while typing, outputs that survive a restart, and layout fixes for long labels and large fonts in SciREPL Pro v1.2.1.">
+    <meta property="og:url" content="https://s243a.github.io/SciREPL/pro/releases/v1.2.1.html">
+    <link rel="icon" type="image/png" href="../assets/SciREPL-Pro-app-icon-512.png">
+    <link rel="stylesheet" href="../styles.css">
+    <title>SciREPL Pro v1.2.1 — What's new</title>
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+        <a class="brand" href="../" aria-label="SciREPL Pro home">
+            <img src="../assets/SciREPL-Pro-app-icon-512.png" alt="" width="44" height="44">
+            <span>sci<span>REPL</span> <b>PRO</b></span>
+        </a>
+        <nav aria-label="Primary navigation">
+            <a href="../">Pro overview</a>
+            <a href="../privacy.html">Privacy</a>
+            <a class="nav-cta" href="../../">Try free PWA</a>
+        </nav>
+    </header>
+
+    <main id="main" class="release-main">
+        <header class="release-intro">
+            <p class="eyebrow">Android Pro · v1.2.1</p>
+            <h1>SciREPL Pro <span>v1.2.1</span></h1>
+            <p class="lede">This update gives the editor room to breathe on a phone: a cell or the new-cell field can take the whole screen, code is coloured as you type, and outputs survive a restart. It also fixes two layout problems that testers reported. These are the changes since v1.2.0.</p>
+        </header>
+
+        <section class="release-section" aria-labelledby="fullscreen-title">
+            <h2 id="fullscreen-title">Full-screen editing</h2>
+            <ul>
+                <li>Tap <strong>⤢</strong> beside the language selector, or in a cell's edit toolbar, to give the editor the whole screen above the keyboard. The frame keeps only a label, Done and Cancel.</li>
+                <li>Suggestion chips and the extra-keys row move into the frame with the editor, so completion and Run keep working there.</li>
+                <li>Back, the cell label, or <kbd>Esc</kbd> return to the workbook with your edit still open; <strong>Done</strong> applies it and <strong>Cancel</strong> discards it. On a keyboard, <kbd>Ctrl+Shift+F</kbd> toggles full screen.</li>
+                <li>In landscape, full screen bypasses the accessory-row limits, since the editor already has the space.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="highlighting-title">
+            <h2 id="highlighting-title">Syntax colours while typing</h2>
+            <ul>
+                <li>Keywords, strings and comments are coloured in the code field as you type, in the new-cell field and while editing a cell, for Python, JavaScript, R, TypR, Bash, Prolog and Lua.</li>
+                <li>The Appearance setting offers Auto, On and Off. Auto is on in desktop browsers and off on phones, where colouring costs some typing speed on slower devices. Cells longer than 6000 characters stay uncoloured.</li>
+                <li>Ghost-text completion and the caret line up with the coloured text.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="restore-title">
+            <h2 id="restore-title">Outputs survive a restart</h2>
+            <ul>
+                <li>Text output, tables and rendered images come back after you close and reopen the app, so a workbook no longer looks unrun after a restart. Interactive plots still need a re-run. AI Prompt cells keep their text output.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="layout-title">
+            <h2 id="layout-title">Layout fixes from tester reports</h2>
+            <ul>
+                <li>When the translated Run label would leave too little room for the code field, Run shrinks to an icon. The label stays available to screen readers, and an Appearance setting forces either form.</li>
+                <li>Header buttons and the status badge now scale with the Android system font size, so a large font no longer makes them overlap.</li>
+                <li>Help gains an on-screen keyboard section organised by orientation, with a Play/F-Droid availability table and the setting for the extra-keys row.</li>
+            </ul>
+        </section>
+
+        <p class="release-note">Colouring and full-screen editing are local presentation features and send nothing anywhere. ClojureScript cells are not yet coloured; that is planned for a later update.</p>
+        <div class="hero-actions">
+            <a class="button button-primary" href="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl.pro" target="_blank" rel="noopener noreferrer">Open SciREPL Pro on Google Play</a>
+            <a class="button button-secondary" href="../">Back to Pro overview</a>
+        </div>
+    </main>
+
+    <footer>
+        <a class="brand footer-brand" href="../" aria-label="SciREPL Pro home">
+            <img src="../assets/SciREPL-Pro-app-icon-512.png" alt="" width="36" height="36">
+            <span>sci<span>REPL</span> <b>PRO</b></span>
+        </a>
+        <div>
+            <a href="../privacy.html">Privacy</a>
+            <a href="../../">Free PWA</a>
+        </div>
+        <p>© 2026 SciREPL</p>
+    </footer>
+</body>
+</html>
