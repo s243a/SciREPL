@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="What's new in SciREPL Pro v1.3.0 for Android: saved AI conversations, reviewed Ask and Edit workflows in the full-screen editor, and Agent mode with tools that edit the open draft.">
+    <meta name="theme-color" content="#071c36">
+    <link rel="canonical" href="https://s243a.github.io/SciREPL/pro/releases/v1.3.0.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="SciREPL Pro v1.3.0 — What's new">
+    <meta property="og:description" content="Saved AI conversations and reviewed Ask, Edit, and Agent workflows in SciREPL Pro's full-screen editor.">
+    <meta property="og:url" content="https://s243a.github.io/SciREPL/pro/releases/v1.3.0.html">
+    <link rel="icon" type="image/png" href="../assets/SciREPL-Pro-app-icon-512.png">
+    <link rel="stylesheet" href="../styles.css">
+    <title>SciREPL Pro v1.3.0 — What's new (in testing)</title>
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+        <a class="brand" href="../" aria-label="SciREPL Pro home">
+            <img src="../assets/SciREPL-Pro-app-icon-512.png" alt="" width="44" height="44">
+            <span>sci<span>REPL</span> <b>PRO</b></span>
+        </a>
+        <nav aria-label="Primary navigation">
+            <a href="../">Pro overview</a>
+            <a href="../privacy.html">Privacy</a>
+            <a class="nav-cta" href="../../">Try free PWA</a>
+        </nav>
+    </header>
+
+    <main id="main" class="release-main">
+        <header class="release-intro">
+            <p class="eyebrow">Android Pro · v1.3.0 · In testing</p>
+            <h1>SciREPL Pro <span>v1.3.0</span></h1>
+            <p class="lede">This update brings the AI Assistant into full-screen editing without hiding what it sees or changes. Conversations can survive a restart, Ask and Edit use reviewed context, and Agent mode can revise the open draft through a small set of editor tools.</p>
+            <p class="release-status"><strong>In testing</strong> <span>This version is being prepared for the SciREPL tester group. The current public release is v1.2.1. <a href="../testing.html">Join the testers</a> for access when the rollout begins.</span></p>
+        </header>
+
+        <section class="release-section" aria-labelledby="conversation-title">
+            <h2 id="conversation-title">AI conversations are saved</h2>
+            <ul>
+                <li>The AI Assistant keeps one bounded, text-only conversation with each workbook and a separate Global conversation. Both survive closing and reopening the app.</li>
+                <li>A selector in the Assistant chooses which conversation is active, and <strong>Clear</strong> deletes only the selected conversation.</li>
+                <li>Workbook exports omit the conversation by default. Select <strong>Include AI conversation</strong> when you deliberately want the workbook-scoped record included; the Global conversation is never exported with a workbook.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="ask-edit-title">
+            <h2 id="ask-edit-title">Ask and Edit from the full-screen editor</h2>
+            <ul>
+                <li><strong>Ask</strong> can answer a question about the open draft using the context you choose. <strong>Edit</strong> can propose a replacement for the draft.</li>
+                <li>Before a request is sent, SciREPL shows the exact selected cell context, any included saved output text, and the destination selected for that request.</li>
+                <li>Edit results remain a proposal until you press <strong>Apply</strong>. Generated code is not run automatically.</li>
+                <li>The exchange is recorded in the selected AI Assistant conversation, so a later question can continue from it.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="agent-title">
+            <h2 id="agent-title">Agent mode can work on the open draft</h2>
+            <ul>
+                <li>Agent mode gives the in-app Assistant nine focused editor tools to inspect state, read numbered lines, find text, select a range, replace exact text or lines, insert text, replace the selection, or replace the whole source.</li>
+                <li>Changes appear live in the editor. The frame reports how many edits the Agent made, and <strong>Undo agent edits</strong> restores the snapshot from the start of that run.</li>
+                <li>The tools exist only during that full-screen Agent run and are bound to that editor session and cell. Stopping or leaving the session prevents a late tool result from editing another cell.</li>
+                <li>Draft text and tool receipts sent to the provider use the same credential redaction as reviewed context.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="remote-title">
+            <h2 id="remote-title">Remote Agent limitation</h2>
+            <ul>
+                <li>Full-screen <strong>Agent</strong> mode currently uses the direct, in-app Assistant only. It is unavailable while Remote mode is on because the Remote route cannot yet carry the reviewed editor context and draft-only tools without silently changing the safety model.</li>
+                <li>Ordinary Remote Assistant chat and its existing permitted notebook tools still work. Turn Remote off when you want to use full-screen Agent mode.</li>
+            </ul>
+        </section>
+
+        <p class="release-note">AI requests still use the provider, model, permissions, and review controls you configure. Saved conversations remain on your device unless you send their content to a provider or explicitly include a workbook-scoped conversation in an export.</p>
+        <div class="hero-actions">
+            <a class="button button-primary" href="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl.pro" target="_blank" rel="noopener noreferrer">Open SciREPL Pro on Google Play</a>
+            <a class="button button-secondary" href="../">Back to Pro overview</a>
+        </div>
+    </main>
+
+    <footer>
+        <a class="brand footer-brand" href="../" aria-label="SciREPL Pro home">
+            <img src="../assets/SciREPL-Pro-app-icon-512.png" alt="" width="36" height="36">
+            <span>sci<span>REPL</span> <b>PRO</b></span>
+        </a>
+        <div>
+            <a href="../privacy.html">Privacy</a>
+            <a href="../../">Free PWA</a>
+        </div>
+        <p>© 2026 SciREPL</p>
+    </footer>
+</body>
+</html>

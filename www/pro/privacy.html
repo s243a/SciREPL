@@ -53,7 +53,7 @@
 <body>
 <main>
     <h1>SciREPL Pro Privacy Policy</h1>
-    <p class="updated">Last updated: September 13, 2026</p>
+    <p class="updated">Last updated: September 20, 2026</p>
 
     <h2>Who this policy covers</h2>
     <p>This policy applies to <strong>SciREPL Pro</strong> on Android and in the Windows/Electron desktop container, developed by <a href="https://github.com/s243a" target="_blank" rel="noopener noreferrer">s243a</a>. The free SciREPL application has a <a href="../privacy.html">separate privacy policy</a>.</p>
@@ -81,6 +81,7 @@
         <li>Installed-package records, runtime source and version choices, and cached application and runtime assets.</li>
         <li>A temporary draft of the current input while the app reloads.</li>
         <li>AI settings, including the selected provider, model, custom endpoint, permissions, and an API key when you save one.</li>
+        <li>Text-only AI Assistant conversations saved separately with each workbook and in a Global conversation. Each conversation is bounded to 200 entries and each entry to 4,000 characters. They remain on the device across restarts.</li>
         <li>Remote-connection settings, including broker URLs, pairing tokens, profile names, and auto-connect preferences.</li>
     </ul>
     <p>This information is stored using browser-style localStorage, sessionStorage, IndexedDB, and Cache Storage. Android stores it inside the app's WebView data. The Electron container stores it in its Chromium profile, normally under <code>%APPDATA%\SciREPL-Pro-Electron</code> on Windows. Exported files are written to the destination you select through the operating system.</p>
@@ -92,8 +93,8 @@
     <p>Local data remains on the device until you remove it or clear the platform-specific application profile.</p>
     <p>SciREPL's developer does not provide a developer-side deletion-request service because SciREPL has no account or server that stores this content. You can remove local data using the controls below. Data already sent to a third party must be managed under that recipient's deletion practices.</p>
     <ul>
-        <li><strong>Menu &gt; Clear History</strong> clears saved notebook/session history, the installed-package record, and virtual-filesystem data. It does <strong>not</strong> clear every preference, cache, AI API key, or remote broker credential.</li>
-        <li><strong>AI panel &gt; Clear</strong> clears the current in-memory AI conversation. If conversation mirroring was enabled, mirrored cells remain in the workbook until you delete them.</li>
+        <li><strong>Menu &gt; Clear History</strong> clears saved notebook/session history, including workbook-scoped AI conversations, as well as the installed-package record and virtual-filesystem data. It does <strong>not</strong> clear the separate Global AI conversation, every preference or cache, an AI API key, or a remote broker credential.</li>
+        <li><strong>AI panel &gt; Clear</strong> deletes the currently selected saved conversation (the active workbook's conversation or Global). Other saved conversations remain until you select and clear them, clear the corresponding workbook data, or clear the app's storage. Any separate copy previously mirrored into workbook cells remains until you delete those cells or their workbook data.</li>
         <li><strong>AI Settings &gt; Advanced &gt; Reset All</strong> removes locally saved Direct AI settings, including the saved AI API key.</li>
         <li>Saved remote profiles can be deleted in Remote bridge settings. Deleting the active profile also removes its live broker URL, pairing token, and auto-connect setting.</li>
     </ul>
@@ -112,7 +113,7 @@
         <li>Your message and the app's system instructions.</li>
         <li>The selected provider, model, model settings, and tool descriptions.</li>
         <li><strong>Automatically, up to the first 500 characters of every cell in the current notebook</strong>, together with each cell's number, name when present, and language.</li>
-        <li>Earlier conversation content retained for the current AI session.</li>
+        <li>Earlier bounded, text-only content from the selected saved workbook or Global conversation.</li>
         <li>Results of tools that the model is permitted to use. These results can include full cell source, cell names and types, textual or structured cell output, namespace metadata, execution results, files from permitted virtual-filesystem locations, and—only when the separate Workbook import/export permission is enabled—the complete serialized active notebook.</li>
     </ul>
     <p>The 500-character cell preview is added to AI Assistant messages before tool permissions are evaluated. Review mode and other tool permissions govern later tool calls; they do not remove those automatic previews.</p>
@@ -165,7 +166,7 @@
     <p>This feature is a best-effort guardrail against mistakes, not a sandbox or security boundary. Notebook runtimes share parts of the app's browser context, so code that is allowed to run may be able to alter or bypass app-level network checks. The guardrail switches, host lists, and saved answers are stored locally in the app. SciREPL's developer does not receive them.</p>
 
     <h2>Exports and sharing</h2>
-    <p>Notebook and workbook exports are created on your device. If you use the browser download interface, Android share sheet, Windows file handling, email, cloud drive, or another destination, the receiving application or service receives the file you selected. SciREPL's developer does not choose or monitor that destination.</p>
+    <p>Notebook and workbook exports are created on your device. Workbook-scoped AI conversation text is omitted unless you explicitly select <strong>Include AI conversation</strong>; the Global conversation is never included in a workbook export. If you use the browser download interface, Android share sheet, Windows file handling, email, cloud drive, or another destination, the receiving application or service receives the file you selected. SciREPL's developer does not choose or monitor that destination.</p>
 
     <h2>Analytics, advertising, and developer access</h2>
     <p>The current version of SciREPL Pro does not include developer-operated analytics, advertising, crash reporting, or behavioral-tracking SDKs. It does not require a SciREPL account. The developer does not receive your notebooks, AI API keys, broker tokens, or AI conversations through a SciREPL-operated server. Third-party services described above may independently log requests made to them.</p>
