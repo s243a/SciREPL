@@ -41,7 +41,7 @@
             <h2 id="conversation-title">AI conversations are saved</h2>
             <ul>
                 <li>The AI Assistant keeps one bounded, text-only conversation with each workbook and a separate Global conversation. Both survive closing and reopening the app.</li>
-                <li>A selector in the Assistant chooses which conversation is active, and <strong>Clear</strong> deletes only the selected conversation.</li>
+                <li>A selector in the Assistant chooses which conversation is active. In Direct mode, <strong>Clear</strong> deletes only the selected conversation. If Remote context may exist, Clear asks for a second confirmation and waits for a compatible broker to acknowledge resetting its app-global session before it deletes every workbook and Global conversation; otherwise it keeps the saved conversations.</li>
                 <li>Workbook exports omit the conversation by default. Select <strong>Include AI conversation</strong> when you deliberately want the workbook-scoped record included; the Global conversation is never exported with a workbook.</li>
             </ul>
         </section>
