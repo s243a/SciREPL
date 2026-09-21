@@ -53,7 +53,7 @@
 <body>
 <main>
     <h1>SciREPL Pro Privacy Policy</h1>
-    <p class="updated">Last updated: September 20, 2026</p>
+    <p class="updated">Last updated: September 21, 2026</p>
 
     <h2>Who this policy covers</h2>
     <p>This policy applies to <strong>SciREPL Pro</strong> on Android and in the Windows/Electron desktop container, developed by <a href="https://github.com/s243a" target="_blank" rel="noopener noreferrer">s243a</a>. The free SciREPL application has a <a href="../privacy.html">separate privacy policy</a>.</p>
@@ -94,7 +94,7 @@
     <p>SciREPL's developer does not provide a developer-side deletion-request service because SciREPL has no account or server that stores this content. You can remove local data using the controls below. Data already sent to a third party must be managed under that recipient's deletion practices.</p>
     <ul>
         <li><strong>Menu &gt; Clear History</strong> clears saved notebook/session history, including workbook-scoped AI conversations, as well as the installed-package record and virtual-filesystem data. It does <strong>not</strong> clear the separate Global AI conversation, every preference or cache, an AI API key, or a remote broker credential.</li>
-        <li><strong>AI panel &gt; Clear</strong> deletes the currently selected saved conversation (the active workbook's conversation or Global). Other saved conversations remain until you select and clear them, clear the corresponding workbook data, or clear the app's storage. Any separate copy previously mirrored into workbook cells remains until you delete those cells or their workbook data.</li>
+        <li>In <strong>Direct</strong> mode, <strong>AI panel &gt; Clear</strong> deletes only the currently selected saved conversation (the active workbook's conversation or Global). If Remote context may exist, Clear requires a second confirmation and acknowledgement from a compatible, updated broker; it then resets that broker session and deletes every workbook and Global conversation. If the broker is old, unavailable, or refuses the reset, the saved conversations stay. Any separate copy previously mirrored into workbook cells remains until you delete those cells or their workbook data.</li>
         <li><strong>AI Settings &gt; Advanced &gt; Reset All</strong> removes locally saved Direct AI settings, including the saved AI API key.</li>
         <li>Saved remote profiles can be deleted in Remote bridge settings. Deleting the active profile also removes its live broker URL, pairing token, and auto-connect setting.</li>
     </ul>
