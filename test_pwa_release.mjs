@@ -23,6 +23,8 @@ const ORIGIN = `http://${HOST}:${PORT}`;
 const BASE_URL = `${ORIGIN}${PREFIX}`;
 const OUT_OF_SCOPE_CATALOG_PATH = '/SciREPL-Catalog/stable.json';
 const IN_SCOPE_NO_STORE_PATH = `${PREFIX}catalog-no-store.json`;
+const HELP_CACHE_PROBE_PATH = `${PREFIX}help/cache-probe.json`;
+const PRO_CACHE_PROBE_PATH = `${PREFIX}pro/cache-probe.json`;
 const WWW = resolve('www');
 const TIMEOUT = 120_000;
 const PRIVACY_REVISION = '2026-08-catalog-sources-v1';
@@ -66,6 +68,8 @@ function startStaticServer() {
     const dynamicHits = {
         outOfScopeCatalog: 0,
         inScopeNoStore: 0,
+        help: 0,
+        pro: 0,
     };
     const server = createServer(async (req, res) => {
         try {
@@ -86,6 +90,16 @@ function startStaticServer() {
                     'Cache-Control': 'no-store',
                 });
                 res.end(JSON.stringify({ sequence: dynamicHits.inScopeNoStore }));
+                return;
+            }
+            if (url.pathname === HELP_CACHE_PROBE_PATH || url.pathname === PRO_CACHE_PROBE_PATH) {
+                const key = url.pathname === HELP_CACHE_PROBE_PATH ? 'help' : 'pro';
+                dynamicHits[key]++;
+                res.writeHead(200, {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'public, max-age=0',
+                });
+                res.end(JSON.stringify({ sequence: dynamicHits[key] }));
                 return;
             }
             if (url.pathname === PREFIX.slice(0, -1)) {
@@ -264,11 +278,13 @@ try {
         assert(cacheState.paths.includes(PREFIX + relative), `pre-cache contains ${relative}`);
     }
 
-    console.log('2b. Keeping catalog metadata and no-store requests outside the app cache...');
+    console.log('2b. Keeping catalog metadata, public pages, and no-store requests outside the app cache...');
     const dynamicCacheState = await page.evaluate(async ({
         appCacheName,
         outOfScopeUrl,
         inScopeNoStoreUrl,
+        helpUrl,
+        proUrl,
     }) => {
         const fetchSequence = async (url, options) => {
             // Fully consume each response before issuing the next request so
@@ -282,17 +298,25 @@ try {
             inScopeNoStoreUrl,
             { cache: 'no-store' },
         );
+        const helpSequence = await fetchSequence(helpUrl);
+        const proSequence = await fetchSequence(proUrl);
         const appCache = await caches.open(appCacheName);
         return {
             outOfScopeSequence,
             inScopeNoStoreSequence,
+            helpSequence,
+            proSequence,
             outOfScopeCached: !!(await appCache.match(outOfScopeUrl)),
             inScopeNoStoreCached: !!(await appCache.match(inScopeNoStoreUrl)),
+            helpCached: !!(await appCache.match(helpUrl)),
+            proCached: !!(await appCache.match(proUrl)),
         };
     }, {
         appCacheName: APP_CACHE_NAME,
         outOfScopeUrl: `${ORIGIN}${OUT_OF_SCOPE_CATALOG_PATH}`,
         inScopeNoStoreUrl: `${ORIGIN}${IN_SCOPE_NO_STORE_PATH}`,
+        helpUrl: `${ORIGIN}${HELP_CACHE_PROBE_PATH}`,
+        proUrl: `${ORIGIN}${PRO_CACHE_PROBE_PATH}`,
     });
     assert(
         dynamicCacheState.outOfScopeSequence.join(',') === '1,2' &&
@@ -320,6 +344,18 @@ try {
         !dynamicCacheState.inScopeNoStoreCached,
         'in-scope no-store responses are not inserted into the app cache',
     );
+    assert(
+        dynamicCacheState.helpSequence.join(',') === '1,2' && dynamicHits.help === 2,
+        'public help pages stay fresh under the PWA scope',
+        JSON.stringify({ sequence: dynamicCacheState.helpSequence, serverHits: dynamicHits.help }),
+    );
+    assert(!dynamicCacheState.helpCached, 'public help pages are not inserted into the app cache');
+    assert(
+        dynamicCacheState.proSequence.join(',') === '1,2' && dynamicHits.pro === 2,
+        'public Pro pages stay fresh under the PWA scope',
+        JSON.stringify({ sequence: dynamicCacheState.proSequence, serverHits: dynamicHits.pro }),
+    );
+    assert(!dynamicCacheState.proCached, 'public Pro pages are not inserted into the app cache');
 
     console.log('3. Loading the bundled Prolog runtime while its CDN fallback is blocked...');
     await withTimeout(
