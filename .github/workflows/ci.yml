@@ -85,6 +85,9 @@ jobs:
       - name: Wait for server
         run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
 
+      - name: Public help links, metadata and narrow layouts
+        run: npm run test:help
+
       # Browser suites. These need the bundled runtimes fetched above.
       - name: Appearance and localization
         run: node test_appearance.mjs

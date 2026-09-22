@@ -1,7 +1,7 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v215';
+const CACHE_VERSION = 'v216';
 
 // Marker entry recording whether an app cache finished installing. Stored in
 // the cache itself so the answer travels with it and survives a restart.
@@ -171,6 +171,11 @@ const BUNDLED_RUNTIME_PATH_PREFIXES = [
   'vendor/pyodide/',
   'vendor/swipl/',
 ];
+
+// Public documentation and policy/marketing pages publish independently of a
+// Free app release. They must never be trapped behind the PWA shell's
+// cache-first lifecycle.
+const PUBLIC_PAGE_ROOTS = ['pro', 'help'];
 
 function isCDNRequest(url) {
   return CDN_DOMAINS.includes(url.hostname.toLowerCase());
@@ -471,7 +476,7 @@ self.addEventListener('fetch', (event) => {
   // of our long-lived caches for such a request.
   if (event.request.cache === 'no-store') return;
 
-  // The public Pro landing and privacy pages are not part of the PWA app shell.
+  // Public help plus the Pro landing/privacy pages are not part of the PWA app shell.
   // Always let the browser fetch them normally so marketing/policy edits are not
   // held behind the app's cache-first lifecycle.
   const appScopePath = new URL(self.registration.scope).pathname;
@@ -485,7 +490,9 @@ self.addEventListener('fetch', (event) => {
     ['GET', 'HEAD'].includes(event.request.method) && BUNDLED_RUNTIME_PATH_PREFIXES.some(
       (prefix) => scopedAppPath.startsWith(prefix),
     );
-  if (isScopedAppRequest && url.pathname.startsWith(`${appScopePath}pro/`)) {
+  if (isScopedAppRequest && PUBLIC_PAGE_ROOTS.some(
+    (root) => scopedAppPath === root || scopedAppPath.startsWith(`${root}/`),
+  )) {
     return;
   }
 

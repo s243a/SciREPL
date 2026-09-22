@@ -4,6 +4,10 @@ A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, 
 
 ![Status](https://img.shields.io/badge/status-beta-green) ![License](https://img.shields.io/badge/license-MIT-blue)
 
+## Help and documentation
+
+Start with the public [SciREPL Help](https://s243a.github.io/SciREPL/help/). Shared Free-and-Pro topics come first; Pro-only extensions are grouped and labelled separately. This README continues with developer-oriented build and architecture details.
+
 ## Features
 
 - **Multi-language notebooks** — Python, R, Prolog, Bash, and JavaScript in the same notebook, with per-cell language tracking
