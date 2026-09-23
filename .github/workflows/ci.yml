@@ -68,7 +68,7 @@ jobs:
         run: node scripts/check-sw-shell.mjs
 
       - name: Service worker — shell-guard cannot be bypassed
-        run: node test_sw_shell_guard.mjs
+        run: node tests/test_sw_shell_guard.mjs
 
       - name: Python packaging >=26 for the specifier differential
         uses: actions/setup-python@v5
@@ -77,7 +77,7 @@ jobs:
       - name: Install packaging for the differential oracle
         run: python3 -m pip install 'packaging>=26'
       - name: Pip resolver unit tests (deterministic, fixture lockfile)
-        run: node test_pip_resolver.mjs
+        run: node tests/test_pip_resolver.mjs
 
       - name: Start dev server
         run: node server.js &
@@ -90,10 +90,10 @@ jobs:
 
       # Browser suites. These need the bundled runtimes fetched above.
       - name: Appearance and localization
-        run: node test_appearance.mjs
+        run: node tests/test_appearance.mjs
 
       - name: Onboarding tour
-        run: node test_onboarding.mjs
+        run: node tests/test_onboarding.mjs
 
       - name: Android hardware Back routing
         run: npm run test:android-back
@@ -102,22 +102,22 @@ jobs:
         run: npm run test:workbook-close-import
 
       - name: What's New and header shortcuts
-        run: node test_whats_new.mjs
+        run: node tests/test_whats_new.mjs
 
       - name: Language selectors expose full native option names
-        run: node test_lang_selector.mjs
+        run: node tests/test_lang_selector.mjs
 
       - name: Header shortcuts — three states, priority and fit
-        run: node test_header_shortcuts.mjs
+        run: node tests/test_header_shortcuts.mjs
 
       - name: Math palette, contexts, layout invariants
-        run: node test_math_palette.mjs
+        run: node tests/test_math_palette.mjs
 
       - name: Pip cell semantics (failed installs stop the cell; dep healing)
-        run: node test_pip_cell.mjs
+        run: node tests/test_pip_cell.mjs
 
       - name: Right-to-left layout
-        run: node test_rtl_layout.mjs
+        run: node tests/test_rtl_layout.mjs
 
       - name: Composer Run button fits long-label locales
         run: npm run test:composer-fit
@@ -126,31 +126,31 @@ jobs:
         run: npm run test:header-scaling
 
       - name: Generated and dynamic localization
-        run: node test_i18n_dynamic.mjs
+        run: node tests/test_i18n_dynamic.mjs
 
       - name: Runtime provenance and version controls
         run: npm run test:runtime-metadata
 
       - name: Service worker offline and upgrade coherence
-        run: node test_sw_offline.mjs
+        run: node tests/test_sw_offline.mjs
 
       - name: Auto-save and crash recovery
-        run: node test_autosave.mjs
+        run: node tests/test_autosave.mjs
 
       - name: Cell operations
-        run: node test_cell_ops.mjs
+        run: node tests/test_cell_ops.mjs
 
       - name: JavaScript kernel
-        run: node test_js_kernel.mjs
+        run: node tests/test_js_kernel.mjs
 
       - name: Notebook VFS
-        run: node test_notebook_vfs.mjs
+        run: node tests/test_notebook_vfs.mjs
 
       - name: Package, bundle and workbook catalogue
-        run: node test_browse_catalog.mjs
+        run: node tests/test_browse_catalog.mjs
 
       - name: N-Queens Prolog-to-ClojureScript workbook
-        run: node test_nqueens_workbook.mjs
+        run: node tests/test_nqueens_workbook.mjs
 
       - name: Verified catalogue workbook import
         run: npm run test:catalog:import
@@ -173,4 +173,4 @@ jobs:
       - run: npm run verify:bundles
       - run: npx playwright install chromium
       - name: PWA offline/release regression
-        run: node test_pwa_release.mjs
+        run: node tests/test_pwa_release.mjs

@@ -8,7 +8,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-OUTPUT_DIR="${1:-$(dirname "$(dirname "$SCRIPT_DIR")")}"
+OUTPUT_DIR="${1:-$(dirname "$SCRIPT_DIR")}"
 
 echo "=== Building sci_math WASM ==="
 cd "$SCRIPT_DIR"

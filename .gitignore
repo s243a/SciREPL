@@ -50,5 +50,5 @@ desktop/electron/test/results/
 __pycache__/
 *.pyc
 
-# Built at test time by test_pip_cell.mjs
+# Built at test time by tests/test_pip_cell.mjs
 www/test_fixtures/

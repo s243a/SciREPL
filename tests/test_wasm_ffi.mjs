@@ -1,7 +1,8 @@
 // Playwright test: verify WASM JSON FFI — load sci_math package, call from JS/Python/Prolog
 import { chromium } from 'playwright';
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 
 const TIMEOUT = 120_000;
 
@@ -56,7 +57,7 @@ const TIMEOUT = 120_000;
 
     console.log('2. Loading sci_math WASM package...');
 
-    const zipPath = resolve('test_wasm_pkg.zip');
+    const zipPath = resolve(dirname(fileURLToPath(import.meta.url)), 'test_wasm_pkg.zip');
     const zipBytes = readFileSync(zipPath);
     const zipBase64 = zipBytes.toString('base64');
 

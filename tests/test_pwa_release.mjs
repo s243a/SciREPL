@@ -6,13 +6,14 @@
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { extname, resolve, sep } from 'node:path';
 import { chromium } from 'playwright';
 
 // Derived from sw.js, not hardcoded — the cache version bumps whenever an
 // app-shell asset changes (enforced by scripts/check-sw-shell.mjs), and this
 // test must track it rather than pinning a number that goes stale each release.
-const CACHE_VERSION = (readFileSync(new URL('./www/sw.js', import.meta.url), 'utf8')
+const CACHE_VERSION = (readFileSync(new URL('../www/sw.js', import.meta.url), 'utf8')
     .match(/const CACHE_VERSION = '([^']+)'/) || [])[1];
 const APP_CACHE_NAME = `scirepl-app-${CACHE_VERSION}`;
 
@@ -25,7 +26,7 @@ const OUT_OF_SCOPE_CATALOG_PATH = '/SciREPL-Catalog/stable.json';
 const IN_SCOPE_NO_STORE_PATH = `${PREFIX}catalog-no-store.json`;
 const HELP_CACHE_PROBE_PATH = `${PREFIX}help/cache-probe.json`;
 const PRO_CACHE_PROBE_PATH = `${PREFIX}pro/cache-probe.json`;
-const WWW = resolve('www');
+const WWW = fileURLToPath(new URL('../www', import.meta.url));
 const TIMEOUT = 120_000;
 const PRIVACY_REVISION = '2026-08-catalog-sources-v1';
 

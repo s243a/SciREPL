@@ -224,7 +224,7 @@ With the dev server running:
 
 ```bash
 node server.js
-node test_appearance.mjs
+node tests/test_appearance.mjs
 ```
 
 In the app's console:

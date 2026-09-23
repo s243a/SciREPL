@@ -2,7 +2,7 @@
 // network, no live CDN): fixture lockfile only. See www/js/pip_resolver.js.
 import { readFileSync } from 'node:fs';
 
-new Function(readFileSync(new URL('./www/js/pip_resolver.js', import.meta.url), 'utf8'))();
+new Function(readFileSync(new URL('../www/js/pip_resolver.js', import.meta.url), 'utf8'))();
 const R = globalThis.PipResolver;
 
 let failures = 0;

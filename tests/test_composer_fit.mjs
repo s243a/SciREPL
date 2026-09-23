@@ -9,7 +9,7 @@ const APP_URL = `http://localhost:${PORT}/index.html`;
 const TIMEOUT = 60_000;
 const LOCALES = ['en', 'ar', 'bn', 'de', 'es', 'fr', 'hi', 'id', 'ja', 'ko', 'pt-BR', 'ru', 'zh'];
 const STRINGS = Object.fromEntries(LOCALES.map((l) => [l,
-    JSON.parse(readFileSync(new URL(`./www/i18n/${l}.json`, import.meta.url), 'utf8')).strings]));
+    JSON.parse(readFileSync(new URL(`../www/i18n/${l}.json`, import.meta.url), 'utf8')).strings]));
 
 let failures = 0;
 let checks = 0;

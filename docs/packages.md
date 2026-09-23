@@ -539,6 +539,6 @@ A bundle groups existing workbook entries and declares any package dependencies.
 | `www/js/kernels/bash.js` | Bash kernel — brush-wasm (coreutils, findutils, grep) |
 | `www/js/prelude.py` | Python prelude — `wasm_call()` helper |
 | `www/js/file_io.js` | Import/export UI, v2.0 package export |
-| `test_pkg_v2.mjs` | Playwright test suite — package system v2 (15 tests) |
-| `test_js_kernel.mjs` | Playwright test suite — JavaScript kernel (13 tests) |
-| `test_wasm_ffi.mjs` | Playwright test suite — WASM JSON FFI from JS + Python (11 tests) |
+| `tests/test_pkg_v2.mjs` | Playwright test suite — package system v2 (15 tests) |
+| `tests/test_js_kernel.mjs` | Playwright test suite — JavaScript kernel (13 tests) |
+| `tests/test_wasm_ffi.mjs` | Playwright test suite — WASM JSON FFI from JS + Python (11 tests) |
