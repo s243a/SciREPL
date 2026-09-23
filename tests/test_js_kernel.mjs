@@ -1,7 +1,8 @@
 // Playwright test: verify JavaScript kernel — execution, console capture, async, SharedVFS, WASM access
 import { chromium } from 'playwright';
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 
 const TIMEOUT = 120_000;
 const PORT = process.env.PORT || 8085;
@@ -175,7 +176,7 @@ const URL = `http://localhost:${PORT}/`;
 
     console.log('6. Testing package + JS integration...');
 
-    const zipPath = resolve('test_pkg_v2.zip');
+    const zipPath = resolve(dirname(fileURLToPath(import.meta.url)), 'test_pkg_v2.zip');
     const zipBytes = readFileSync(zipPath);
     const zipBase64 = zipBytes.toString('base64');
 

@@ -403,7 +403,7 @@ npm run serve
 
 # Run all VFS tests
 npx playwright install chromium   # first time only
-node test_help_vfs_examples.mjs
+node tests/test_help_vfs_examples.mjs
 ```
 
 #### WSL2 Memory Requirements

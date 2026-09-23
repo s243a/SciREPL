@@ -5,7 +5,7 @@ import { chromium } from 'playwright';
 
 const PORT = process.env.PORT || 8085;
 const APP_URL = `http://localhost:${PORT}/index.html`;
-const PACKAGE = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
+const PACKAGE = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const PACKAGE_VERSION = PACKAGE.version;
 const RELEASE_CHANNEL = PACKAGE.releaseChannel;
 

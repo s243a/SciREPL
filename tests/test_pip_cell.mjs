@@ -12,8 +12,8 @@ import { mkdirSync, readFileSync, rmSync } from 'node:fs';
 
 const TIMEOUT = 180_000;
 const BASE = (process.env.SCIREPL_TEST_BASE || 'http://localhost:8085').replace(/\/+$/, '');
-const APP_VERSION = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version;
-const FIXDIR = new URL('./www/test_fixtures/wheels/', import.meta.url).pathname;
+const APP_VERSION = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
+const FIXDIR = new URL('../www/test_fixtures/wheels/', import.meta.url).pathname;
 const RUN_LIVE = process.env.RUN_LIVE_CDN === '1';
 
 // ---- build fixture wheels (python3 zipfile; proper RECORD hashes) ----
@@ -300,7 +300,7 @@ const FIXTURE_LOCK = {
     console.error('Console logs:', consoleLogs.slice(-15).join('\n'));
     allPassed = false;
   } finally {
-    rmSync(new URL('./www/test_fixtures/', import.meta.url).pathname, { recursive: true, force: true });
+    rmSync(new URL('../www/test_fixtures/', import.meta.url).pathname, { recursive: true, force: true });
     await browser.close();
     process.exit(allPassed ? 0 : 1);
   }

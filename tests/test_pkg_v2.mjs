@@ -1,7 +1,8 @@
 // Playwright test: verify package system v2 — target routing, SharedVFS, Python bridge
 import { chromium } from 'playwright';
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 
 const TIMEOUT = 120_000;
 
@@ -52,7 +53,7 @@ const TIMEOUT = 120_000;
     console.log('2. Loading test package v2...');
 
     // Read the test zip and load it via PackageLoader
-    const zipPath = resolve('test_pkg_v2.zip');
+    const zipPath = resolve(dirname(fileURLToPath(import.meta.url)), 'test_pkg_v2.zip');
     const zipBytes = readFileSync(zipPath);
     const zipBase64 = zipBytes.toString('base64');
 

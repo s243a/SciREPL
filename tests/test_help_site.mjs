@@ -5,9 +5,9 @@ import { chromium } from 'playwright';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { preparePublicPagesServiceWorker } from './scripts/prepare-public-pages-sw.mjs';
+import { preparePublicPagesServiceWorker } from '../scripts/prepare-public-pages-sw.mjs';
 
-const ROOT = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WWW = path.join(ROOT, 'www');
 const ORIGIN = 'https://s243a.github.io';
 const BASE_PATH = '/SciREPL/';

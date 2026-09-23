@@ -34,7 +34,7 @@ jobs:
       - run: npm run test:catalog
       - run: npm run privacy:check
       - run: node scripts/check-sw-shell.mjs
-      - run: node test_sw_shell_guard.mjs
+      - run: node tests/test_sw_shell_guard.mjs
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -42,23 +42,23 @@ jobs:
       - run: npm run test:pip-resolver
       - run: node server.js &
       - run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
-      - run: node test_appearance.mjs
-      - run: node test_onboarding.mjs
+      - run: node tests/test_appearance.mjs
+      - run: node tests/test_onboarding.mjs
       - run: npm run test:android-back
       - run: npm run test:workbook-close-import
-      - run: node test_whats_new.mjs
+      - run: node tests/test_whats_new.mjs
       - run: npm run test:header-shortcuts
       - run: npm run test:lang-selector
       - run: npm run test:math-palette
       - run: npm run test:pip-cell
-      - run: node test_rtl_layout.mjs
-      - run: node test_i18n_dynamic.mjs
+      - run: node tests/test_rtl_layout.mjs
+      - run: node tests/test_i18n_dynamic.mjs
       - run: npm run test:runtime-metadata
-      - run: node test_sw_offline.mjs
-      - run: node test_autosave.mjs
-      - run: node test_cell_ops.mjs
-      - run: node test_js_kernel.mjs
-      - run: node test_notebook_vfs.mjs
+      - run: node tests/test_sw_offline.mjs
+      - run: node tests/test_autosave.mjs
+      - run: node tests/test_cell_ops.mjs
+      - run: node tests/test_js_kernel.mjs
+      - run: node tests/test_notebook_vfs.mjs
       - run: npm run test:catalog:import
 
   # The unsigned portable Windows application. windows-portable-preview.yml
@@ -188,17 +188,17 @@ jobs:
         run: npm run test:sources
 
       - name: Run package catalog tests
-        run: node test_browse_catalog.mjs
+        run: node tests/test_browse_catalog.mjs
 
       - name: Run N-Queens workbook tests
-        run: node test_nqueens_workbook.mjs
+        run: node tests/test_nqueens_workbook.mjs
 
       - name: Run TypR workbook tests
-        run: node test_typr_workbooks.mjs
+        run: node tests/test_typr_workbooks.mjs
 
       - name: Run PWA offline catalog tests
         timeout-minutes: 15
-        run: node test_pwa_release.mjs
+        run: node tests/test_pwa_release.mjs
       
       - name: Add Android platform
         run: npx cap add android || echo "Android platform already exists"

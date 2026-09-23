@@ -44,8 +44,8 @@ jobs:
           mkdir -p "${pages_overlay}/pro" "${pages_overlay}/help" "${pages_overlay}/scripts"
           cp -a www/pro/. "${pages_overlay}/pro/"
           cp -a www/help/. "${pages_overlay}/help/"
-          cp test_help_site.mjs "${pages_overlay}/test_help_site.mjs"
-          cp test_pwa_release.mjs "${pages_overlay}/test_pwa_release.mjs"
+          cp tests/test_help_site.mjs "${pages_overlay}/test_help_site.mjs"
+          cp tests/test_pwa_release.mjs "${pages_overlay}/test_pwa_release.mjs"
           cp scripts/prepare-public-pages-sw.mjs "${pages_overlay}/scripts/prepare-public-pages-sw.mjs"
 
           stable_tag=""
@@ -66,11 +66,31 @@ jobs:
           mkdir -p www/pro www/help
           cp -a "${pages_overlay}/pro/." www/pro/
           cp -a "${pages_overlay}/help/." www/help/
-          cp "${pages_overlay}/test_help_site.mjs" test_help_site.mjs
-          cp "${pages_overlay}/test_pwa_release.mjs" test_pwa_release.mjs
+          # The overlaid suites resolve www/ and scripts/ as ../ from tests/,
+          # so they live in tests/ even when the stable tag predates that
+          # layout (its own suites then stay at the root; see TEST_DIR below).
+          mkdir -p tests
+          cp "${pages_overlay}/test_help_site.mjs" tests/test_help_site.mjs
+          cp "${pages_overlay}/test_pwa_release.mjs" tests/test_pwa_release.mjs
           mkdir -p scripts
           cp "${pages_overlay}/scripts/prepare-public-pages-sw.mjs" scripts/prepare-public-pages-sw.mjs
           echo "Publishing public pages over stable Free release ${stable_tag} ($(git rev-parse HEAD))."
+
+      - name: Locate the test suites for this ref
+        # Tags from before the suites moved into tests/ keep them at the root.
+        # test_help_site.mjs and test_pwa_release.mjs are overlaid into tests/
+        # on the main path, so they are located separately.
+        run: |
+          if test -f tests/test_cell_ops.mjs; then
+            echo "TEST_DIR=tests" >> "$GITHUB_ENV"
+          else
+            echo "TEST_DIR=." >> "$GITHUB_ENV"
+          fi
+          if test -f tests/test_help_site.mjs; then
+            echo "PAGES_TEST_DIR=tests" >> "$GITHUB_ENV"
+          else
+            echo "PAGES_TEST_DIR=." >> "$GITHUB_ENV"
+          fi
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -106,7 +126,7 @@ jobs:
         run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
 
       - name: Public help links, metadata and narrow layouts
-        run: node test_help_site.mjs
+        run: node "$PAGES_TEST_DIR/test_help_site.mjs"
 
       # i18n gates. These are cheap and catch classes of bug that no runtime
       # test will: a catalogue that drifts from the manifest, a locale that is
@@ -140,49 +160,49 @@ jobs:
         run: python3 -m pip install 'packaging>=26'
       - name: Pip resolver unit tests (when present on this tag)
         run: |
-          if test -f test_pip_resolver.mjs; then
-            node test_pip_resolver.mjs
+          if test -f "$TEST_DIR/test_pip_resolver.mjs"; then
+            node "$TEST_DIR/test_pip_resolver.mjs"
           else
             echo "suite not on this tag — skipped"
           fi
 
       - name: Pip cell regressions (when present on this tag)
         run: |
-          if test -f test_pip_cell.mjs; then
-            node test_pip_cell.mjs
+          if test -f "$TEST_DIR/test_pip_cell.mjs"; then
+            node "$TEST_DIR/test_pip_cell.mjs"
           else
             echo "suite not on this tag — skipped"
           fi
 
       - name: Math palette regressions (when present on this tag)
         run: |
-          if test -f test_math_palette.mjs; then
-            node test_math_palette.mjs
+          if test -f "$TEST_DIR/test_math_palette.mjs"; then
+            node "$TEST_DIR/test_math_palette.mjs"
           else
             echo "suite not on this tag — skipped"
           fi
 
       - name: Run cell operations tests
-        run: node test_cell_ops.mjs
+        run: node "$TEST_DIR/test_cell_ops.mjs"
 
       - name: Run JavaScript kernel tests
-        run: node test_js_kernel.mjs
+        run: node "$TEST_DIR/test_js_kernel.mjs"
 
       - name: Run notebook VFS tests
-        run: node test_notebook_vfs.mjs
+        run: node "$TEST_DIR/test_notebook_vfs.mjs"
 
       - name: Run WASM FFI tests
-        run: node test_wasm_ffi.mjs
+        run: node "$TEST_DIR/test_wasm_ffi.mjs"
 
       - name: Run appearance and localization tests
-        run: node test_appearance.mjs
+        run: node "$TEST_DIR/test_appearance.mjs"
 
       - name: Run onboarding tour tests
-        run: node test_onboarding.mjs
+        run: node "$TEST_DIR/test_onboarding.mjs"
 
       - name: Run Android hardware Back tests (when present on this tag)
         run: |
-          if test -f test_android_back.mjs; then
+          if test -f "$TEST_DIR/test_android_back.mjs"; then
             npm run test:android-back
           else
             echo "test_android_back.mjs absent on this ref; skipping"
@@ -190,7 +210,7 @@ jobs:
 
       - name: Run workbook-close and Android cloud-import tests (when present on this tag)
         run: |
-          if test -f test_workbook_close_import_picker.mjs; then
+          if test -f "$TEST_DIR/test_workbook_close_import_picker.mjs"; then
             npm run test:workbook-close-import
           else
             echo "test_workbook_close_import_picker.mjs absent on this ref; skipping"
@@ -201,8 +221,8 @@ jobs:
         # keeps them deployable while a FAILING suite still fails the step —
         # `test -f && node || echo` would swallow the node exit code.
         run: |
-          node test_whats_new.mjs
-          if test -f test_header_shortcuts.mjs; then
+          node "$TEST_DIR/test_whats_new.mjs"
+          if test -f "$TEST_DIR/test_header_shortcuts.mjs"; then
             npm run test:header-shortcuts
           else
             echo "test_header_shortcuts.mjs absent on this ref; skipping"
@@ -210,43 +230,43 @@ jobs:
 
       - name: Run language-selector tests (when present on this tag)
         run: |
-          if test -f test_lang_selector.mjs; then
+          if test -f "$TEST_DIR/test_lang_selector.mjs"; then
             npm run test:lang-selector
           else
             echo "test_lang_selector.mjs absent on this ref; skipping"
           fi
 
       - name: Run right-to-left layout tests
-        run: node test_rtl_layout.mjs
+        run: node "$TEST_DIR/test_rtl_layout.mjs"
 
       - name: Run generated and dynamic localization tests
-        run: node test_i18n_dynamic.mjs
+        run: node "$TEST_DIR/test_i18n_dynamic.mjs"
 
       - name: Run runtime provenance and version-control tests
         run: npm run test:runtime-metadata
 
       - name: Run service worker offline tests
-        run: node test_sw_offline.mjs
+        run: node "$TEST_DIR/test_sw_offline.mjs"
 
       - name: Run auto-save and restore tests
-        run: node test_autosave.mjs
+        run: node "$TEST_DIR/test_autosave.mjs"
 
       - name: Run kernel source-selection tests
         run: npm run test:sources
 
       - name: Run package catalog tests
-        run: node test_browse_catalog.mjs
+        run: node "$TEST_DIR/test_browse_catalog.mjs"
 
       - name: Run N-Queens workbook tests
         if: startsWith(github.ref, 'refs/tags/')
-        run: node test_nqueens_workbook.mjs
+        run: node "$TEST_DIR/test_nqueens_workbook.mjs"
 
       - name: Run TypR workbook tests
-        run: node test_typr_workbooks.mjs
+        run: node "$TEST_DIR/test_typr_workbooks.mjs"
 
       - name: Run PWA offline catalog tests
         timeout-minutes: 15
-        run: node test_pwa_release.mjs
+        run: node "$PAGES_TEST_DIR/test_pwa_release.mjs"
 
       # Upload the exact prepared www/ tree that passed the tests above.
       # A fresh checkout here would omit the generated, gitignored runtimes.

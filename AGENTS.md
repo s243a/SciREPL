@@ -5,12 +5,12 @@
 SciREPL is a **mobile-first, fully client-side scientific notebook/REPL**. There is **no backend or database** — every language kernel (Python/Pyodide, R/webR, Prolog, Bash, JavaScript, Lua, TypR, ClojureScript) runs in-browser via WebAssembly. `server.js` is only a static file server for `www/` plus a narrow CORS proxy (`/proxy?url=...`) restricted to GitHub release downloads. The Android (Capacitor) and Electron (Windows) wrappers just load the same `www/` bundle.
 
 ### Scope on a headless Linux VM
-- In scope: the **web PWA** (`node server.js` on port 8085) and the root `test_*.mjs` Playwright suites. This is the full core product.
+- In scope: the **web PWA** (`node server.js` on port 8085) and the `tests/test_*.mjs` Playwright suites. This is the full core product.
 - Out of scope here: the **Android/Capacitor build** (needs Android SDK + emulator) and the **Electron desktop app** (Windows-targeted, needs a display). The Electron node-only unit subset (`npm run test:windows:unit`) can run but only covers the desktop shell, not the product.
 
 ### Running and testing
 - Dev server: `npm run serve` (= `node server.js`) → http://localhost:8085. Standard scripts live in `package.json`; CI steps are in `.github/workflows/ci.yml`.
-- Playwright tests are standalone scripts run directly with node, e.g. `node test_help_vfs_examples.mjs`, `node test_js_kernel.mjs`. They expect the dev server already running on :8085. `node server.js` serves static files with `Cache-Control: no-cache`, so edits to `www/` are picked up on the next request — no server restart needed.
+- Playwright tests are standalone scripts run directly with node, e.g. `node tests/test_help_vfs_examples.mjs`, `node tests/test_js_kernel.mjs` (run from the repo root). They expect the dev server already running on :8085. `node server.js` serves static files with `Cache-Control: no-cache`, so edits to `www/` are picked up on the next request — no server restart needed.
 - **Two suites do not honour `PORT`.** `test_runtime_metadata.mjs` and `test_browse_catalog.mjs` read `SCIREPL_TEST_BASE` (a full URL) instead. Running them with only `PORT` set silently points them at :8085 and they fail against whatever is there — which looks like a product bug but is not.
 - `test_pwa_release.mjs` starts its **own** server on **:8086** (override with `PORT`), so it can run alongside the shared dev server without a port conflict.
 - Static gates, all node-only and fast — run before committing, because CI enforces every one:

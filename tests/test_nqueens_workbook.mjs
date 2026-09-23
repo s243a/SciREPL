@@ -3,7 +3,7 @@ import { chromium } from 'playwright';
 
 const BASE = process.env.SCIREPL_BASE_URL || 'http://localhost:8085/';
 const workbook = JSON.parse(readFileSync(
-    new URL('./www/workbooks/nqueens-transpile.ipynb', import.meta.url),
+    new URL('../www/workbooks/nqueens-transpile.ipynb', import.meta.url),
     'utf8'));
 
 function source(cell) {
