@@ -24,6 +24,7 @@ const expected = [
   'help/index.html',
   'help/getting-started/index.html',
   'help/interface/index.html',
+  'help/interface/tutorial/index.html',
   'help/workbooks/index.html',
   'help/languages-packages/index.html',
   'help/files-export/index.html',
