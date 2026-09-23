@@ -34,7 +34,7 @@ Start with the public [SciREPL Help](https://s243a.github.io/SciREPL/help/). Sha
 - **Rich output** — LaTeX math rendering, interactive Plotly charts, tables
 - **Hybrid plotting** — Python `plot()` → Plotly.js (pinch-zoom, pan, hover), R `plotly()` → interactive Plotly charts
 - **Matplotlib support** — `import matplotlib.pyplot as plt; plt.show()` renders inline PNG images
-- **Syntax highlighting** — Code cells display with keyword coloring via highlight.js (Python, JavaScript, R, Bash, Prolog)
+- **Syntax highlighting** — Code cells display with keyword coloring via highlight.js (Python, JavaScript, R, Bash, Prolog, Lua, TypR)
 - **Find & Replace** — `Ctrl+F` / `Cmd+F` or header search button (mobile-friendly) to search across all cells with match navigation and replace
 - **Editable cells** — Click the pencil icon to edit and re-run any cell
 - **Delete cells** — Remove individual cells with one click
@@ -197,7 +197,7 @@ const x = Array.from({length: 50}, (_, i) => i * 0.1);
 const y = x.map(v => Math.sin(v));
 
 // Access SharedVFS
-window.sharedVFS.write('/shared/hello.txt', 'from JS');
+window.sharedVFS.writeFile('/shared/hello.txt', 'from JS', 'javascript');
 
 // Use any browser API
 JSON.stringify({pi: Math.PI, e: Math.E}, null, 2)
@@ -326,7 +326,7 @@ The feature list above describes the Free edition in this repository. For shippe
 
 ### Playwright Tests
 
-SciREPL includes Playwright tests that verify cross-cell communication (Notebook VFS) examples across all six kernels.
+SciREPL includes Playwright tests that verify cross-cell communication (Notebook VFS) examples across the kernels.
 
 ```bash
 # Start local server
