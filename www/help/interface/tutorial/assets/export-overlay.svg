@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 2340" aria-hidden="true">
+  <!-- The viewBox matches phone-export.png. -->
+  <g fill="none" stroke="#ffd166" stroke-width="9" stroke-linejoin="round">
+    <rect x="100" y="933" width="782" height="105" rx="22"/>
+    <rect x="100" y="1322" width="770" height="97" rx="22"/>
+    <rect x="705" y="1543" width="263" height="112" rx="22"/>
+  </g>
+</svg>
