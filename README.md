@@ -1,8 +1,16 @@
 # SciREPL — Mobile Multi-Language Scientific REPL
 
-A **mobile-first** scientific REPL powered by WebAssembly runtimes + Capacitor, with Jupyter-style notebook features. Supports **Python** (Pyodide), **R** (webR), **Prolog** (swipl-wasm), **Bash** (brush-wasm), **JavaScript** (native), **Lua** (Fengari), **TypR**, and **ClojureScript** (Scittle).
+A mobile-first, multi-language scientific notebook powered by browser and WebAssembly runtimes. The Free edition supports **Python** (Pyodide), **R** (webR), **Prolog** (swipl-wasm), **Bash** (brush-wasm), **JavaScript**, **Lua** (Fengari), **TypR**, and **ClojureScript** (Scittle).
 
-![Status](https://img.shields.io/badge/status-beta-green) ![License](https://img.shields.io/badge/license-MIT-blue)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
+## Editions and downloads
+
+- **SciREPL Free for Android:** [Google Play](https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl) or the [Free GitHub releases](https://github.com/s243a/SciREPL/releases). The same Free notebook is available as an [installable browser app (PWA)](https://s243a.github.io/SciREPL/).
+- **SciREPL Pro for Android:** [Google Play](https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl.pro). Pro adds optional AI and remote-agent features. The [Pro website](https://s243a.github.io/SciREPL/pro/) has information and release notes; it is **not** a hosted Pro app.
+- **Free Windows portable preview:** see [setup and limitations](docs/WINDOWS_PREVIEW.md).
+
+Access to Play test builds may require joining the tester group; see the [Android testing instructions for both editions](https://s243a.github.io/SciREPL/pro/testing.html).
 
 ## Help and documentation
 
@@ -10,7 +18,7 @@ Start with the public [SciREPL Help](https://s243a.github.io/SciREPL/help/). Sha
 
 ## Features
 
-- **Multi-language notebooks** — Python, R, Prolog, Bash, and JavaScript in the same notebook, with per-cell language tracking
+- **Multi-language notebooks** — Python, R, Prolog, Bash, JavaScript, Lua, TypR, and ClojureScript in the same notebook, with per-cell language tracking
 - **Offline Python** via Pyodide (WASM) — NumPy + SymPy preloaded, `%pip install` for PyPI packages
 - **SWI-Prolog kernel** — Full SWI-Prolog via bundled swipl-wasm, available offline in the standard Free release
 - **Bash kernel** — Unix shell via brush-wasm with coreutils, findutils, grep (all Rust reimplementations)
@@ -25,8 +33,8 @@ Start with the public [SciREPL Help](https://s243a.github.io/SciREPL/help/). Sha
 - **Cross-kernel WASM FFI** — Package and distribute pre-compiled Rust WASM libraries callable from JavaScript, Python, and Prolog
 - **Rich output** — LaTeX math rendering, interactive Plotly charts, tables
 - **Hybrid plotting** — Python `plot()` → Plotly.js (pinch-zoom, pan, hover), R `plotly()` → interactive Plotly charts
-- **Matplotlib support** — `import matplotlib.pyplot as plt; plt.show()` renders inline PNG images (dark theme)
-- **Syntax highlighting** — Code cells display with keyword coloring via highlight.js (Python, JavaScript, R, Bash, Prolog)
+- **Matplotlib support** — `import matplotlib.pyplot as plt; plt.show()` renders inline PNG images
+- **Syntax highlighting** — Code cells display with keyword coloring via highlight.js (Python, JavaScript, R, Bash, Prolog, Lua, TypR)
 - **Find & Replace** — `Ctrl+F` / `Cmd+F` or header search button (mobile-friendly) to search across all cells with match navigation and replace
 - **Editable cells** — Click the pencil icon to edit and re-run any cell
 - **Delete cells** — Remove individual cells with one click
@@ -47,35 +55,31 @@ Start with the public [SciREPL Help](https://s243a.github.io/SciREPL/help/). Sha
 - **Variable persistence** across cells (like Jupyter)
 - **Semicolon suppression** (MATLAB/IPython-style)
 - **Command history** — Arrow keys to recall previous inputs
-- **Mobile-first UI** — Dark theme, touch-friendly
-- **Installable PWA** — Install from browser as a desktop or mobile app, works offline after first load
-- **Privacy-first** — Bundled rendering libraries, lazy CDN loading with consent prompt on first use
-- **Lazy kernel loading** — App starts instantly; Python, R, and Prolog runtimes download only when first used
+- **Mobile-first UI** — Touch-friendly controls with system, dark, light, and custom themes
+- **Installable PWA** — Install from a browser on desktop or mobile; bundled and previously cached components work offline
+- **Network choices** — Core Free runtimes are bundled in standard releases; R, Lua, package downloads, catalogue access, and network calls made by notebook code can require a connection. See the [privacy policy](www/privacy.html).
+- **Lazy kernel initialization** — Kernels start when needed. The standard Free release bundles Python, Prolog, ClojureScript, Bash, and TypR; R and Lua download on first use.
 - **Settings menu** — Configure auto-execute on import, delete confirmation, export format (.zip/.tar/.tar.gz), auto-download runtimes, auto-switch workbook on install, large touch targets, default language
-
-### Future Features
-
-*Some of these may be offered as part of a Pro version.*
 
 ## Quick Start
 
 ### Run Locally
 
 ```bash
+npm ci
 npm run serve
 ```
 
-Open http://localhost:8085. The app loads instantly — runtimes download on first use.
+Open http://localhost:8085. For offline testing that matches the standard Free release, run `npm run fetch:bundles` before starting the server; an unprepared checkout can fall back to the network for large runtimes.
 
 ### Build for Android
 
 ```bash
-npm install
-npx cap sync
-cd android && ./gradlew assembleDebug
+npm ci
+npm run build:debug
 ```
 
-APK output: `android/app/build/outputs/apk/debug/app-debug.apk`
+This requires the Android SDK and Java toolchain. The build command prepares the bundled runtimes and Capacitor project before Gradle runs. APK output: `android/app/build/outputs/apk/debug/app-debug.apk`.
 
 ### Install via ADB
 
@@ -92,7 +96,7 @@ Visit [https://s243a.github.io/SciREPL/](https://s243a.github.io/SciREPL/) in yo
 - **Edge:** Click the install icon in the address bar, or Menu > Apps > "Install this site as an app"
 - **Safari (iOS):** Share button > "Add to Home Screen"
 
-Once installed, it runs in its own window and works offline.
+Once installed, it runs in its own window. The app shell and bundled or cached runtimes work offline; first use of R or Lua and optional network features still requires a connection.
 
 ## Try It
 
@@ -193,31 +197,17 @@ const x = Array.from({length: 50}, (_, i) => i * 0.1);
 const y = x.map(v => Math.sin(v));
 
 // Access SharedVFS
-window.sharedVFS.write('/shared/hello.txt', 'from JS');
+window.sharedVFS.writeFile('/shared/hello.txt', 'from JS', 'javascript');
 
 // Use any browser API
 JSON.stringify({pi: Math.PI, e: Math.E}, null, 2)
 ```
 
-## How Does SciREPL Compare to Jupyter / Colab?
+## What to expect
 
-| | SciREPL | Jupyter Notebook | Google Colab |
-|---|---|---|---|
-| **Setup** | Zero — visit a URL or install APK | Install Python + pip | Google account |
-| **Languages per notebook** | Python, R, Prolog, Bash, JS (per cell) | One kernel per notebook | Python only |
-| **Runs offline** | Yes (PWA + WASM) | Needs local server | No |
-| **Privacy** | All execution local | Local | Google servers |
-| **Mobile support** | Mobile-first + Android app | Not optimized | Usable but not native |
-| **Package ecosystem** | `%pip install` (pure-Python PyPI) | Full pip | Full pip |
-| **Performance** | WASM (slower for heavy compute) | Native Python | Native + free GPU/TPU |
-| **Collaboration** | Single user | JupyterHub | Real-time multi-user |
-| **Code completion** | Not yet | Extensions available | Built-in |
-| **WASM FFI** | Call Rust WASM from any kernel | No | No |
-| **Size** | ~2MB app + CDN runtimes | ~500MB with Anaconda | Cloud-based |
+SciREPL lets you mix languages cell by cell on a phone or in a browser. Notebook kernels execute locally, and saved workbooks and virtual files stay on the device unless you choose to export them or use a network feature. The Free PWA, Android app, and Windows preview share the notebook interface, though platform-specific file and sharing features differ.
 
-**Why SciREPL?** It's **250x smaller** than a typical Jupyter install (~2MB vs ~500MB), the **only notebook with multi-language cells** (Python, Prolog, Bash, JS in one notebook), and **built for mobile** — not just adapted for it. All with zero setup: visit a URL and go.
-
-**Trade-offs:** WASM Python is slower than native for heavy compute. `%pip install` works for pure-Python packages; C-extension packages need pre-compiled WASM wheels. Not ideal for GPU-accelerated ML training or large datasets.
+WebAssembly runtimes can be slower than native tools for heavy computation. `%pip install` supports packages compatible with Pyodide; packages that need native extensions require compatible WebAssembly wheels. R and Lua need a first-use download, while catalogue access, package installs, and network calls made by notebook code can also use the network. See [platform and offline details](https://s243a.github.io/SciREPL/help/) before relying on the app without a connection.
 
 ## Architecture
 
@@ -281,7 +271,7 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 ### File Structure
 
 - **[www/index.html](www/index.html)** — App shell, language selector, modals, deferred CDN loading
-- **[www/css/style.css](www/css/style.css)** — Dark theme, mobile-first layout, language badges
+- **[www/css/style.css](www/css/style.css)** — Mobile-first layout, themes, language badges
 - **[www/js/app.js](www/js/app.js)** — REPL loop, cell management, multi-language execution
 - **[www/js/kernel_manager.js](www/js/kernel_manager.js)** — Kernel registry, lazy loading, language switching
 - **[www/js/kernels/python.js](www/js/kernels/python.js)** — Python kernel (Pyodide + sharedfs bridge)
@@ -303,7 +293,7 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 - **[www/js/export.js](www/js/export.js)** — HTML, Markdown, PDF, DOCX, and LaTeX export with DOM scraping and syntax highlighting
 - **[www/js/file_io.js](www/js/file_io.js)** — Import/export (.ipynb with output preservation, .py, .pl, packages) via Capacitor plugins
 - **[www/js/math_mode.js](www/js/math_mode.js)** — Math palette UI
-- **[www/vendor/](www/vendor/)** — Bundled KaTeX, Plotly.js, marked.js, highlight.js (~2.7MB)
+- **[www/vendor/](www/vendor/)** — Bundled rendering libraries and selected language runtimes; large WASM bundles are fetched during release preparation
 - **[docs/packages.md](docs/packages.md)** — Package system v2 documentation
 
 ### Capacitor Plugins
@@ -328,74 +318,15 @@ Runtime-version metadata is checked separately through jsDelivr only after the
 current network privacy policy has been accepted. A version check does not
 download or activate the runtime.
 
-## Roadmap
+## Development status
 
-- [x] Multi-language support (Python + Prolog + Bash)
-- [x] Kernel abstraction layer
-- [x] Privacy-first CDN loading (consent before download)
-- [x] Bundled rendering libraries
-- [x] Package system v2 — target routing, binary support, SharedVFS
-- [x] Python SharedVFS bridge (`import sharedfs`)
-- [x] R SharedVFS bridge (`sharedfs_read`, `sharedfs_write`) + `install.packages()` support
-- [x] Cross-kernel WASM FFI (Python + Prolog can call WASM modules)
-- [x] Package catalog with one-click install
-- [x] JavaScript kernel (native browser, zero download)
-- [x] PWA — installable as desktop/mobile app, offline support, WASM runtime caching
-- [x] R kernel via webR (lazy-loaded, plotting, SharedVFS, package install)
-- [x] Matplotlib inline backend (`plt.show()` renders PNG images)
-- [x] Interactive R plots via `plotly()` / `mplotly()` helpers
-- [x] Rich export — HTML, Markdown, PDF, DOCX, LaTeX with Export modal (theme, page background, image handling)
-- [x] .ipynb export with outputs (text, images, LaTeX, tables)
-- [x] .ipynb import with output preservation (no re-execution needed)
-- [x] Syntax highlighting in exports (HTML, DOCX) via highlight.js
-- [x] In-app syntax highlighting for code cells
-- [x] Find & Replace across notebook cells (Ctrl+F)
-- [x] IndexedDB persistence for SharedVFS (files survive page reloads)
-- [x] Unified file browser with mount-point view (/shared + /mnt/pyodide + /mnt/prolog)
-- [x] File browser: folder selection, download files/folders, create folders, zip extraction
-- [x] Multi-notebook tabs with rename support
-- [x] Workbook import creates new tab (auto-named from heading)
-- [x] Additional languages (Lua and TypR)
-- [x] Cell reordering (drag-and-drop + move arrows)
-- [x] Delete individual cells
-
-### Showcase Polish
-
-Near-term items to make R and cross-language features demo-ready:
-
-- [x] **ggplot2 support** — `theme_scirepl()` dark theme, auto-applied when ggplot2 loads
-- [x] **webR download modal** — Styled modal with progress phases replaces native confirm()
-- [x] **R workbook: ggplot2 showcase** — Scatter, bar, density, box, and heatmap charts
-- [x] **R workbook: tidyverse data wrangling** — dplyr/tidyr pipeline with Python↔R SharedVFS sharing
-- [x] **R workbook: statistics** — t-test, chi-squared, regression, ANOVA with base R
-- [x] **Mobile touch targets** — Larger tap areas, better contrast for file browser buttons
-- [ ] **Screenshots & GIF** — Visual assets showing R plots, cross-language data flow, mobile UI
-- [x] **R package pre-warming** — Prompt to install ggplot2 + dplyr after R init, persists preference
-
-### Future Improvements
-
-- [x] **Settings menu** — Auto-execute, confirm-delete, export format, auto-download, auto-switch workbook, R pre-warm, large touch targets, default language
-- [x] **Lazy kernel loading** — App starts instantly; privacy consent + download confirmation on first CDN kernel use
-- [x] **tar/tar.gz export** — Export packages as .tar or .tar.gz (selectable in Settings), using browser-native CompressionStream
-- [x] **Memory & Storage panel** — Per-kernel WASM heap usage, storage quota breakdown, kernel unload, clear VFS/cache
-- [ ] **Cell output collapse/expand** — Toggle long outputs with a click, especially useful on mobile
-- [ ] **Execution counter** — `In [N]` / `Out [N]` numbering like Jupyter to track execution order
-- [ ] **Basic tab-completion** — Keyword/variable completion in the input textarea
-- [ ] **Variable inspector** — Panel showing current variables and types across kernels
-- [ ] **Undo delete cell** — Undo stack to recover accidentally deleted cells
-- [ ] **Dark/light theme toggle** — Light theme option for classrooms/sunlight
-- [ ] **Notebook sharing via URL** — Encode small notebooks as base64 URL fragments or gist links
-- [x] **Lua kernel** — Fengari (Lua in WASM, ~500KB)
-- [x] **TypR kernel** — Typed R superset (typr-wasm, ~2.5 MB) transpiles to R via webR
-- [ ] **Capacitor WebView media query investigation** — `@media (hover: none) and (pointer: coarse)` may not trigger in Android WebView; determine cause and fix
-- [ ] **Byte-level download progress** — Track actual download progress via Service Worker interception or ReadableStream
-- [ ] **Background package installs** — Install packages/workbooks without switching to the target notebook tab; requires notebook-aware card creation
+The feature list above describes the Free edition in this repository. For shipped changes, see the [Free releases](https://github.com/s243a/SciREPL/releases). [Open pull requests](https://github.com/s243a/SciREPL/pulls) may contain experimental work; they are not promises about the next release. Earlier, unprioritized ideas are preserved in [docs/IDEAS.md](docs/IDEAS.md). The public [Help site](https://s243a.github.io/SciREPL/help/) distinguishes shared features from Pro-only features.
 
 ## Testing
 
 ### Playwright Tests
 
-SciREPL includes Playwright tests that verify cross-cell communication (Notebook VFS) examples across all six kernels.
+SciREPL includes Playwright tests that verify cross-cell communication (Notebook VFS) examples across the kernels.
 
 ```bash
 # Start local server
@@ -456,7 +387,7 @@ await page.waitForFunction(
 const result = JSON.parse(await page.getAttribute('body', 'data-result'));
 ```
 
-This pattern is used in `test_help_vfs_examples.mjs` for all CDN kernel interactions.
+This pattern is used in `tests/test_help_vfs_examples.mjs` for large-kernel tests.
 
 ## License
 
