@@ -8,6 +8,7 @@ The previous README mixed completed features and possible future work in one roa
 - Local keyword and variable completion in the cell editor.
 - A variable inspector across supported kernels.
 - Undo for deleted cells.
+- Consider porting Pro's touch double-tap-to-edit shortcut for saved code cells to Free, while preserving normal text selection on desktop.
 - Sharing small notebooks through a URL or gist.
 - Revisit Capacitor WebView pointer and hover media-query behavior.
 - Byte-level download progress for large runtimes and packages.
