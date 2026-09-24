@@ -32,6 +32,10 @@ const TIMEOUT = 120_000;
     });
 
     await page.goto('http://localhost:8085/', { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+    await page.waitForFunction(() => window.kernelManager);
+    await page.evaluate(() => localStorage.setItem(
+      'scirepl_privacy_accepted_revision',
+      window.kernelManager.constructor.PRIVACY_POLICY_REVISION));
 
     // Wait for Python kernel to be fully ready (including micropip)
     console.log('   Waiting for Pyodide + micropip...');

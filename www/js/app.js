@@ -1048,6 +1048,13 @@ _scirepl_modules_for(${JSON.stringify(dist)})
                         window.renderText(`%pip: extras are not supported yet (${withExtras.map(r => r.raw).join(', ')}) — nothing on this line was installed`, true);
                         continue;
                     }
+                    // Even an apparently installed package can make micropip
+                    // or the verification helper contact a package index/CDN.
+                    // Obtain the current network disclosure before either runs.
+                    await km.ensureNetworkConsent();
+                    if (!km.hasCurrentPrivacyConsent()) {
+                        throw new Error(window.t('kernelManager.privacyRequired'));
+                    }
                     requirements.push(...parsed);
                     const pkgList = parsed.map(r => `'${r.raw.replace(/'/g, "\\'")}'`).join(', ');
                     pyodide.runPython(`

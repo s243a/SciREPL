@@ -98,6 +98,9 @@ const FIXTURE_LOCK = {
     console.log('   Waiting for Pyodide...');
     await page.waitForFunction(() => window.kernelManager
       && typeof window.kernelManager.ensureReady === 'function', null, { timeout: TIMEOUT });
+    await page.evaluate(() => localStorage.setItem(
+      'scirepl_privacy_accepted_revision',
+      window.kernelManager.constructor.PRIVACY_POLICY_REVISION));
     await page.evaluate(() => { window.kernelManager.ensureReady('python'); });
     await page.waitForFunction(() => {
       const km = window.kernelManager;
@@ -244,6 +247,90 @@ const FIXTURE_LOCK = {
 
     const tOk = await runCell('%pip install fixture-depa\nprint("TAIL_OK")', 'TAIL_OK');
     testLog('control: a SUCCESSFUL install still runs the tail', tOk.includes('TAIL_OK'), tOk.slice(-160));
+
+    // ---- 4b. %pip asks before its first possible package request ----
+    console.log('4b. Network consent precedes a valid %pip install...');
+    await page.evaluate(() => {
+      const pyodide = window.kernelManager.getKernel('python').getPyodide();
+      const original = pyodide.runPythonAsync.bind(pyodide);
+      window._pipInstallCalls = 0;
+      pyodide.runPythonAsync = function (source, ...args) {
+        if (String(source).startsWith('await pip_install(')) window._pipInstallCalls++;
+        return original(source, ...args);
+      };
+      localStorage.removeItem('scirepl_privacy_accepted');
+      localStorage.removeItem('scirepl_privacy_accepted_revision');
+    });
+    const startPipCell = async (code) => page.evaluate((source) => {
+      const input = document.getElementById('code-input');
+      const langSel = document.getElementById('lang-selector');
+      langSel.value = 'python';
+      langSel.dispatchEvent(new Event('change'));
+      input.value = source;
+      input.dispatchEvent(new Event('input'));
+      document.getElementById('run-btn').click();
+    }, code);
+    const waitForPipCell = async (needle) => {
+      await page.waitForFunction((text) => {
+        const cell = window._cells[window._cells.length - 1];
+        return cell && cell.outputCard && cell.outputCard.textContent.includes(text)
+          && !document.getElementById('run-btn').disabled;
+      }, needle, { timeout: 60_000 });
+      return page.evaluate(() => window._cells[window._cells.length - 1].outputCard.textContent);
+    };
+
+    await startPipCell('%pip install -r requirements.txt\nprint("INVALID_TAIL")');
+    const invalidWithoutConsent = await waitForPipCell('the rest of this cell was not executed');
+    testLog('invalid %pip does not prompt or call the installer',
+      await page.evaluate(() => document.getElementById('privacy-modal').classList.contains('hidden')
+        && window._pipInstallCalls === 0)
+        && !invalidWithoutConsent.includes('INVALID_TAIL'));
+
+    await startPipCell('%pip install fixture-depa\nprint("DENIED_TAIL")');
+    await page.waitForFunction(() => !document.getElementById('privacy-modal').classList.contains('hidden'));
+    testLog('unconsented %pip opens privacy notice before installer call',
+      await page.evaluate(() => window._pipInstallCalls === 0));
+    await page.locator('#privacy-modal .modal-close').click();
+    const deniedOutput = await waitForPipCell('Privacy policy must be accepted');
+    testLog('dismissing privacy notice prevents install and cell tail',
+      await page.evaluate(() => window._pipInstallCalls === 0)
+        && !deniedOutput.includes('DENIED_TAIL'));
+
+    // Fail closed if a future consent implementation resolves without
+    // recording acceptance (for example, after a UI race or bad stub).
+    await page.evaluate(() => {
+      window._realEnsureNetworkConsent = window.kernelManager.ensureNetworkConsent;
+      window.kernelManager.ensureNetworkConsent = async () => {};
+    });
+    await startPipCell('%pip install fixture-depa\nprint("NOOP_TAIL")');
+    const noopOutput = await waitForPipCell('Privacy policy must be accepted');
+    testLog('resolving consent without acceptance cannot start pip',
+      await page.evaluate(() => window._pipInstallCalls === 0)
+        && !noopOutput.includes('NOOP_TAIL'));
+    await page.evaluate(() => {
+      window.kernelManager.ensureNetworkConsent = window._realEnsureNetworkConsent;
+      delete window._realEnsureNetworkConsent;
+    });
+
+    // A consent flag from an older disclosure is not enough for this
+    // app-managed package request; the current revision must be accepted.
+    await page.evaluate(() => localStorage.setItem('scirepl_privacy_accepted', '1'));
+    await startPipCell('%pip install fixture-depa\nprint("CONSENT_TAIL")');
+    await page.waitForFunction(() => !document.getElementById('privacy-modal').classList.contains('hidden'));
+    testLog('legacy consent without current revision still waits for consent',
+      await page.evaluate(() => window._pipInstallCalls === 0));
+    await page.locator('#privacy-accept-btn').click();
+    const acceptedOutput = await waitForPipCell('CONSENT_TAIL');
+    testLog('accepting current notice installs then runs cell tail',
+      await page.evaluate(() => window._pipInstallCalls === 1
+        && window.kernelManager.hasCurrentPrivacyConsent())
+        && acceptedOutput.includes('CONSENT_TAIL'));
+
+    const repeated = await runCell('%pip install fixture-depa\nprint("CONSENT_REPEAT")', 'CONSENT_REPEAT');
+    testLog('current consent runs later %pip without another notice',
+      repeated.includes('CONSENT_REPEAT')
+        && await page.evaluate(() => window._pipInstallCalls === 2
+          && document.getElementById('privacy-modal').classList.contains('hidden')));
 
     testLog('deterministic sections made ZERO CDN requests',
       cdnRequests.length === cdnBaselineAfterBoot,
