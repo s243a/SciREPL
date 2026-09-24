@@ -91,20 +91,23 @@
         <p class="step-label">Step 3</p>
         <h2>Edit the saved cell</h2>
         <ol class="lesson-steps">
-          <li>Use the saved cell's <strong>Edit</strong> control. This is different from typing in the new-cell panel, which creates another cell.</li>
+          <li>Tap the pencil <strong>✎</strong> in the saved cell's own header, at the upper right just left of <strong>✕</strong>. It opens that cell for editing; typing in the new-cell panel would create another cell.</li>
           <li>Change <code>Hello from SciREPL</code> to <code>Hello again</code>.</li>
           <li>Choose <strong>Run</strong> to save and run the change. You should now see <code>Hello again</code> below that cell.</li>
         </ol>
         <figure class="phone-figure">
-          <div class="shot-window shot-window--editing" role="img" aria-label="Saved-cell editor containing print Hello again, with its Run button outlined in yellow. The previous output still says Hello from SciREPL until Run is tapped.">
+          <div class="shot-window shot-window--editing" role="img" aria-label="Saved-cell editor containing print Hello again. Yellow outlines mark the saved cell's pencil at the upper right, the editable code field, and its Run button. The previous output still says Hello from SciREPL until Run is tapped.">
             <div class="shot-stage">
               <img src="assets/phone-edit-draft.png" alt="" loading="lazy" decoding="async">
               <img src="assets/edit-draft-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
             </div>
           </div>
-          <figcaption>The saved cell is in edit mode. Its <strong>Run</strong> button saves and executes the revised code; the old output remains visible until then.</figcaption>
+          <figcaption>The yellow outlines show where the saved cell's <strong>✎ pencil</strong> sits, the code you are editing, and that cell's <strong>Run</strong> button. The pencil is dim in this screenshot because edit mode is already open. Run saves and executes the revision; the old output remains visible until then.</figcaption>
           <a class="full-shot-link" href="assets/phone-edit-draft.png">View the complete phone screenshot, including keyboard</a>
         </figure>
+        <aside class="callout">
+          <p><strong>Pro shortcut:</strong> On a touch screen, double-tap the saved cell's code to edit it. Free currently uses the <strong>✎</strong> button.</p>
+        </aside>
         <figure class="phone-figure">
           <div class="shot-window shot-window--result" role="img" aria-label="Saved Python cell containing print Hello again, followed by highlighted output Hello again.">
             <div class="shot-stage">
@@ -115,7 +118,7 @@
           <figcaption>After <strong>Run</strong>, the output beneath the saved cell reads <code>Hello again</code>.</figcaption>
           <a class="full-shot-link" href="assets/phone-rerun.png">View the complete phone screenshot</a>
         </figure>
-        <p>If you open the editor by mistake, use <strong>Cancel</strong> to leave the saved code unchanged. The language selector inside a saved cell changes that cell; the new-cell selector does not.</p>
+        <p>If you open the editor by mistake, use <strong>Cancel</strong> to close it without running. The language selector inside a saved cell changes that cell; the new-cell selector does not.</p>
       </section>
 
       <section id="save-a-copy">
