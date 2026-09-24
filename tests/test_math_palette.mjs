@@ -29,6 +29,9 @@ async function freshPage(opts = {}) {
     }, opts.storage || {});
     await page.goto(APP_URL, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.__SCIREPL_APP_READY === true, null, { timeout: 120000 });
+    await page.evaluate(() => localStorage.setItem(
+        'scirepl_privacy_accepted_revision',
+        window.kernelManager.constructor.PRIVACY_POLICY_REVISION));
     return page;
 }
 // Turning Formula on also pins the other optional shortcut off. This suite
