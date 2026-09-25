@@ -1,0 +1,8 @@
+.shot-window--browse-menu { aspect-ratio: 1080 / 400; --shift: -58.8%; }
+.shot-window--catalog { aspect-ratio: 1080 / 1100; --shift: -44%; }
+.shot-window--csv-output { aspect-ratio: 1080 / 600; --shift: -18%; }
+.shot-window--csv-export { aspect-ratio: 1080 / 690; --shift: -40.5%; }
+
+@media (max-width: 600px) {
+  .lesson-steps pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+}

@@ -1,0 +1,37 @@
+{
+  "format": "srwb",
+  "version": "1.0",
+  "notebook": {
+    "name": "CSV Basics: Seedling Heights",
+    "cells": [
+      {
+        "type": "markdown",
+        "language": "markdown",
+        "code": "# CSV Basics: Seedling Heights\n\nThis beginner workbook uses **fictional** seedling measurements. Run the three Python cells in order: create a local CSV file, read it back, then compare group averages. It needs only Python's standard library: no account, AI key, package install, or dataset download.\n\nA CSV is a plain-text table. Each row is one seedling; the columns are its group and height in centimetres. These six made-up measurements are for learning, not evidence that one growing condition causes a difference."
+      },
+      {
+        "type": "code",
+        "language": "python",
+        "name": "create_csv",
+        "code": "import csv\nfrom pathlib import Path\n\npath = Path('/shared/data/seedling-heights.csv')\npath.parent.mkdir(parents=True, exist_ok=True)\nmeasurements = [\n    {'group': 'light', 'height_cm': 12},\n    {'group': 'light', 'height_cm': 14},\n    {'group': 'light', 'height_cm': 13},\n    {'group': 'shade', 'height_cm': 7},\n    {'group': 'shade', 'height_cm': 9},\n    {'group': 'shade', 'height_cm': 8},\n]\nwith path.open('w', newline='', encoding='utf-8') as file:\n    writer = csv.DictWriter(file, fieldnames=['group', 'height_cm'])\n    writer.writeheader()\n    writer.writerows(measurements)\nprint(f'Saved {len(measurements)} fictional rows to {path}')"
+      },
+      {
+        "type": "code",
+        "language": "python",
+        "name": "read_csv",
+        "code": "import csv\nfrom pathlib import Path\n\npath = Path('/shared/data/seedling-heights.csv')\nwith path.open(newline='', encoding='utf-8') as file:\n    rows = list(csv.DictReader(file))\nprint(f'Read {len(rows)} rows from {path.name}')\nfor row in rows:\n    print(f\"{row['group']:>5}: {row['height_cm']} cm\")"
+      },
+      {
+        "type": "code",
+        "language": "python",
+        "name": "compare_groups",
+        "code": "import csv\nfrom pathlib import Path\nfrom statistics import mean\n\npath = Path('/shared/data/seedling-heights.csv')\nwith path.open(newline='', encoding='utf-8') as file:\n    rows = list(csv.DictReader(file))\nlight = [float(row['height_cm']) for row in rows if row['group'] == 'light']\nshade = [float(row['height_cm']) for row in rows if row['group'] == 'shade']\nprint(f'Light mean: {mean(light):.1f} cm')\nprint(f'Shade mean: {mean(shade):.1f} cm')\nprint(f'Difference: {mean(light) - mean(shade):.1f} cm')"
+      },
+      {
+        "type": "markdown",
+        "language": "markdown",
+        "code": "## Try a change\n\nEdit the first code cell: change one height, then run it again. Run the reading and comparison cells again to see the new results. The file at `/shared/data/seedling-heights.csv` persists in SciREPL's local virtual filesystem.\n\nYou can also import a different CSV through **Menu → Import File**. It will appear under `/shared/data/`; change the `path` in the reading cells to its exact filename. Do not assume an exported `.srwb` includes the separate CSV file: choose **Package (archive)** and select both the workbook and CSV when you need to move them together."
+      }
+    ]
+  }
+}

@@ -16,6 +16,7 @@
     "test:composer-fit": "node tests/test_composer_fit.mjs",
     "test:catalog": "node tests/test_catalog_filter.mjs && node tests/test_catalog_sources.mjs",
     "test:catalog:import": "node tests/test_catalog_import.mjs",
+    "test:csv-workbook": "node tests/test_csv_workbook.mjs",
     "test:sources": "node scripts/test-kernel-sources.mjs && node scripts/test-bundle-staging.mjs",
     "verify:bundles": "node scripts/verify-bundled-runtimes.mjs",
     "test:runtime-metadata": "node tests/test_runtime_metadata.mjs",

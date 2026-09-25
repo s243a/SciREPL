@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Install a CSV workbook from SciREPL Browse, run its cells, import a CSV, and export the workbook with its data.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/files-export/tutorial/">
+  <link rel="stylesheet" href="../../styles.css">
+  <link rel="stylesheet" href="../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="tutorial.css">
+  <title>CSV workbook walkthrough · SciREPL Help</title>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="../../">sci<span>REPL</span> Help</a>
+    <nav aria-label="Primary navigation">
+      <a href="../">Files &amp; export</a>
+      <a href="../../">All help</a>
+      <a href="../../../">Open Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <p class="breadcrumbs"><a href="../../">Help</a> / <a href="../">Files &amp; export</a> / CSV walkthrough</p>
+    <article>
+      <p class="eyebrow">Learn by doing</p>
+      <h1>Explore a CSV in a workbook</h1>
+      <p class="lede">Start in <strong>Browse Packages, Bundles &amp; Workbooks</strong>. Install a small example, run its cells, make one change, then import and export a CSV file. The data is fictional and the Python code needs no extra packages or AI account.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Android steps</li>
+        <li class="chip">About 10 minutes</li>
+      </ul>
+      <p class="screen-note">Screenshots show the Free interface on a Samsung Galaxy S24-series phone. In Pro, you can use the direct workbook download and Import File path below; the surrounding controls may differ, and this new Browse entry may not be present there.</p>
+      <p class="callout"><strong>Don't see this workbook in Browse yet?</strong> The example is new and may not be in your installed app or the hosted PWA until the next stable Free release. <a download="csv-basics-seedlings.srwb" href="assets/csv-basics-seedlings.srwb">Download the workbook directly</a>, then use <strong>Menu → Import File</strong> to open it. You can follow the rest of this lesson now.</p>
+      <nav class="lesson-nav" aria-label="CSV walkthrough steps">
+        <strong>In this lesson</strong>
+        <ol>
+          <li><a href="#install">Install the example from Browse</a></li>
+          <li><a href="#run">Run its Python cells</a></li>
+          <li><a href="#change">Change a measurement</a></li>
+          <li><a href="#import">Import a CSV file</a></li>
+          <li><a href="#export">Export the workbook and data</a></li>
+        </ol>
+      </nav>
+
+      <section id="install">
+        <p class="step-label">Step 1</p>
+        <h2>Find the workbook in Browse</h2>
+        <ol class="lesson-steps">
+          <li>Open <strong>Menu → Browse Packages, Bundles &amp; Workbooks</strong>. The optional 📦 header shortcut opens the same screen if it is visible.</li>
+          <li>Search for <strong>CSV Basics</strong>. Under <strong>Workbooks</strong>, find <strong>CSV Basics: Seedling Heights</strong>. It is a built-in English example, not a package that needs installing into Python.</li>
+          <li>Tap <strong>Install</strong>. The workbook normally becomes the selected tab. If you turned off automatic switching, use the workbook selector to choose it.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse-menu" role="img" aria-label="SciREPL Menu with Browse Packages, Bundles and Workbooks outlined in yellow.">
+            <div class="shot-stage">
+              <img src="../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>The yellow outline marks <strong>Browse Packages, Bundles &amp; Workbooks</strong> in Menu.</figcaption>
+          <a class="full-shot-link" href="../../interface/tutorial/assets/phone-menu.png">View the complete Menu screenshot</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--catalog" role="img" aria-label="Browse screen filtered to CSV Basics, with the search field and Install button outlined in yellow.">
+            <div class="shot-stage">
+              <img src="assets/phone-catalog.png" alt="" loading="lazy" decoding="async">
+              <img src="assets/catalog-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Search for <strong>CSV Basics</strong>, then use <strong>Install</strong> on the workbook card. The remote catalogue was unavailable in this capture; built-in items still appeared.</figcaption>
+          <a class="full-shot-link" href="assets/phone-catalog.png">View the complete Browse screenshot</a>
+        </figure>
+        <p class="callout"><strong>If a Privacy Policy appears:</strong> Browse may check the verified catalogue online. Read the disclosure, scroll <em>inside the dialog</em> to the bottom, and tap <strong>I Understand</strong> only if you agree. You may instead close the notice and still use built-in entries; the remote catalogue will be unavailable. This example itself needs no external dataset or Python package.</p>
+        <p>Installing a workbook adds its cells; it does <em>not</em> run them. That lets you inspect code before executing it.</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">Step 2</p>
+        <h2>Run the cells in order</h2>
+        <p>The opening text explains the sample. The three Python cells each have a name: <code>create_csv</code>, <code>read_csv</code>, and <code>compare_groups</code>. For a saved cell, tap its <strong>✎ pencil</strong> to open the editor, then tap that cell’s <strong>Run</strong>. In Pro you can also double-tap the cell’s code to edit it.</p>
+        <ol class="lesson-steps">
+          <li>Run <code>create_csv</code>. It writes six fictional rows to <code>/shared/data/seedling-heights.csv</code>. You should see <code>Saved 6 fictional rows</code>.</li>
+          <li>Run <code>read_csv</code>. It opens the file just created and prints all six rows.</li>
+          <li>Run <code>compare_groups</code>. It prints a light mean of <strong>13.0 cm</strong>, a shade mean of <strong>8.0 cm</strong>, and a difference of <strong>5.0 cm</strong>.</li>
+        </ol>
+        <p>The final output should look like this:</p>
+        <pre><code>Light mean: 13.0 cm
+Shade mean: 8.0 cm
+Difference: 5.0 cm</code></pre>
+        <p class="callout"><strong>First run slower?</strong> Python may take a moment to initialize. Wait for the status badge to say <strong>ready</strong> before judging whether a cell finished. Later cells normally reuse the loaded runtime. If a runtime download needs consent, read the privacy notice before accepting; this workbook does not call <code>%pip install</code>.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--csv-output" role="img" aria-label="SciREPL output showing light mean 13.0 centimetres, shade mean 8.0 centimetres, and difference 5.0 centimetres.">
+            <div class="shot-stage">
+              <img src="assets/phone-output.png" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>The third cell's output on the phone after running the sample workbook.</figcaption>
+          <a class="full-shot-link" href="assets/phone-output.png">View the complete output screenshot</a>
+        </figure>
+        <p>These made-up values illustrate reading and calculating, not a scientific conclusion about light and plant growth.</p>
+      </section>
+
+      <section id="change">
+        <p class="step-label">Step 3</p>
+        <h2>Change one value and rerun</h2>
+        <p>Open <code>create_csv</code> with its <strong>✎ pencil</strong>. In the list of measurements, change one light height from <code>14</code> to <code>15</code>, then tap <strong>Run</strong>. Run <code>read_csv</code> and <code>compare_groups</code> again. The light mean is now about <strong>13.3 cm</strong> and the difference about <strong>5.3 cm</strong>.</p>
+        <p>Why rerun the later cells? Their saved output is a record of the previous execution; changing a file does not automatically recalculate earlier results. Each cell reads the file when you run it.</p>
+      </section>
+
+      <section id="import">
+        <p class="step-label">Step 4</p>
+        <h2>Import the original CSV</h2>
+        <ol class="lesson-steps">
+          <li><a download="seedling-heights.csv" href="assets/seedling-heights.csv">Download the original sample CSV</a> to a folder your device’s file picker can open.</li>
+          <li>In SciREPL, choose <strong>Menu → Import File</strong> and select <code>seedling-heights.csv</code>. The confirmation should say it was uploaded to <code>/shared/data/seedling-heights.csv</code>.</li>
+          <li>This replaces the changed local file with the original six rows. Rerun <code>read_csv</code> and <code>compare_groups</code>; the two means should return to <strong>13.0</strong> and <strong>8.0 cm</strong>.</li>
+        </ol>
+        <p class="callout"><strong>Important:</strong> Do not rerun <code>create_csv</code> after importing a different file with the same name unless you intend to overwrite it. For your own CSV, note the exact confirmation path and change the <code>path</code> in the reading cells to that filename. The file picker may show Android Downloads, a cloud provider, or both.</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">Step 5</p>
+        <h2>Save a portable copy</h2>
+        <p>Open <strong>Menu → Export Workbooks &amp; Packages</strong>. If you want only the cells, choose <strong>Workbook (.srwb)</strong> and <strong>Current tab only</strong>. An <code>.srwb</code> does <strong>not</strong> include the separate CSV in SharedVFS.</p>
+        <p>To move the workbook <em>with its data</em>, choose <strong>Package (archive)</strong>, keep <strong>.zip</strong>, and select the CSV and the workbook in the contents tree. Then tap <strong>Export</strong> and choose a destination you control. The package exporter can include other tabs and files, so check the selection before sharing.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--csv-export" role="img" aria-label="Export Workbooks and Packages dialog with Package archive option outlined in yellow.">
+            <div class="shot-stage">
+              <img src="../../interface/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="assets/package-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Choose <strong>Package (archive)</strong> for a workbook-plus-CSV copy; the picture shows the option <em>before</em> it is selected.</figcaption>
+          <a class="full-shot-link" href="../../interface/tutorial/assets/phone-export.png">View the complete export dialog screenshot</a>
+        </figure>
+        <p class="callout"><strong>Local recovery is not a backup.</strong> Android app storage, the PWA in Chrome, and another browser do not automatically share these files. Keep the exported copy somewhere you control. See <a href="../">Files, import, and export</a> for other formats.</p>
+      </section>
+
+      <section id="what-next">
+        <h2>What next?</h2>
+        <p>Try a CSV of your own. Keep the columns <code>group</code> and <code>height_cm</code>, use numeric heights, and include at least one <code>light</code> and one <code>shade</code> row—or adapt the two group filters in <code>compare_groups</code>. You can inspect the local file under <strong>Menu → Files &amp; Storage</strong>. For the phone controls used here, see the <a href="../../interface/tutorial/">first-workbook interface walkthrough</a>.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL Help</span><nav aria-label="Footer navigation"><a href="../">Files &amp; export</a><a href="../../">All help</a></nav></footer>
+</body>
+</html>

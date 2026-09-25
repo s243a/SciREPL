@@ -25,6 +25,7 @@ const expected = [
   'help/getting-started/index.html',
   'help/interface/index.html',
   'help/interface/tutorial/index.html',
+  'help/files-export/tutorial/index.html',
   'help/workbooks/index.html',
   'help/languages-packages/index.html',
   'help/files-export/index.html',
@@ -68,6 +69,15 @@ for (const rel of contentPages) {
 const rootHelp = readFileSync(path.join(WWW, 'help/index.html'), 'utf8');
 check('Free/shared contents precede Pro contents',
   rootHelp.indexOf('Free and shared notebook help') < rootHelp.indexOf('Optional Pro extensions'));
+
+const csvTutorial = readFileSync(path.join(WWW, 'help/files-export/tutorial/index.html'), 'utf8');
+check('CSV tutorial begins in Browse', csvTutorial.indexOf('Browse Packages, Bundles &amp; Workbooks')
+  < csvTutorial.indexOf('Run the cells in order'));
+check('CSV tutorial distinguishes workbook from data export',
+  csvTutorial.includes('does <strong>not</strong> include the separate CSV')
+    && csvTutorial.includes('Package (archive)'));
+check('CSV tutorial offers a downloadable workbook before the next app release',
+  /<a\s+download="csv-basics-seedlings\.srwb"\s+href="assets\/csv-basics-seedlings\.srwb"/.test(csvTutorial));
 
 const alias = readFileSync(path.join(WWW, 'pro/help/index.html'), 'utf8');
 check('compatibility alias is noindex', /name=["']robots["']\s+content=["']noindex["']/i.test(alias));
