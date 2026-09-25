@@ -76,6 +76,10 @@ check('CSV tutorial begins in Browse', csvTutorial.indexOf('Browse Packages, Bun
 check('CSV tutorial distinguishes workbook from data export',
   csvTutorial.includes('does <strong>not</strong> include the separate CSV')
     && csvTutorial.includes('Package (archive)'));
+check('CSV tutorial shows how to inspect and edit the created file',
+  csvTutorial.includes('Menu → Files &amp; Storage')
+    && csvTutorial.includes('/shared/data/seedling-heights.csv')
+    && csvTutorial.includes('preview has <strong>Edit</strong> and <strong>Save</strong>'));
 check('CSV tutorial offers a downloadable workbook before the next app release',
   /<a\s+download="csv-basics-seedlings\.srwb"\s+href="assets\/csv-basics-seedlings\.srwb"/.test(csvTutorial));
 

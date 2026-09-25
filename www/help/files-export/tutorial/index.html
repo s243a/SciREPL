@@ -85,6 +85,7 @@
           <li>Run <code>read_csv</code>. It opens the file just created and prints all six rows.</li>
           <li>Run <code>compare_groups</code>. It prints a light mean of <strong>13.0 cm</strong>, a shade mean of <strong>8.0 cm</strong>, and a difference of <strong>5.0 cm</strong>.</li>
         </ol>
+        <p>To view or edit the file itself, open <strong>Menu → Files &amp; Storage</strong>, choose <strong>/ (Persistent Storage)</strong> or <strong>All Filesystems</strong>, then scroll to <code>/shared/data/seedling-heights.csv</code> and tap its name. The preview has <strong>Edit</strong> and <strong>Save</strong> controls. Rerun the reading and comparison cells after saving a change.</p>
         <p>The final output should look like this:</p>
         <pre><code>Light mean: 13.0 cm
 Shade mean: 8.0 cm
@@ -106,6 +107,7 @@ Difference: 5.0 cm</code></pre>
         <p class="step-label">Step 3</p>
         <h2>Change one value and rerun</h2>
         <p>Open <code>create_csv</code> with its <strong>✎ pencil</strong>. In the list of measurements, change one light height from <code>14</code> to <code>15</code>, then tap <strong>Run</strong>. Run <code>read_csv</code> and <code>compare_groups</code> again. The light mean is now about <strong>13.3 cm</strong> and the difference about <strong>5.3 cm</strong>.</p>
+        <p>You can instead change the value directly in <strong>Files &amp; Storage</strong>. Save the CSV and rerun only <code>read_csv</code> and <code>compare_groups</code>; rerunning <code>create_csv</code> would overwrite your file edit.</p>
         <p>Why rerun the later cells? Their saved output is a record of the previous execution; changing a file does not automatically recalculate earlier results. Each cell reads the file when you run it.</p>
       </section>
 
