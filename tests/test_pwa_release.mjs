@@ -5,7 +5,7 @@
  */
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { extname, resolve, sep } from 'node:path';
 import { chromium } from 'playwright';
@@ -161,6 +161,12 @@ const requiredCatalogPaths = [
     'workbooks/typr-intro.srwb',
     'workbooks/prolog-generates-typr.srwb',
 ];
+// Main's public-help deployment overlays this newer test onto the last stable
+// app tag. Only require the new built-in workbook when that app tag contains it.
+const HAS_CSV_STARTER = existsSync(new URL('../www/workbooks/csv-basics-seedlings.srwb', import.meta.url));
+if (HAS_CSV_STARTER) {
+    requiredCatalogPaths.push('workbooks/csv-basics-seedlings.srwb');
+}
 
 function inspectCallGraphStructure(workbook) {
     const codeCells = (workbook.cells || [])
@@ -398,6 +404,28 @@ try {
         'Prolog Generates R: Compiler Demo',
     ]) {
         assert(offlineInstall.notebooks.includes(name), `offline bundle contains ${name}`);
+    }
+
+    if (HAS_CSV_STARTER) {
+        const csvInstall = await page.evaluate(async () => {
+            const catalog = window.packageCatalog;
+            const starter = catalog.builtinPackages.find(item => item.id === 'csv-basics-seedlings');
+            if (!starter) return { found: false };
+            const button = document.querySelector(
+                `.pkg-install-btn[data-catalog-key="${catalog._catalogId(starter)}"]`);
+            if (!button) return { found: true, buttonFound: false };
+            await catalog._install(button);
+            return {
+                found: true,
+                buttonFound: true,
+                installed: catalog._isInstalled(starter),
+                notebooks: window.notebookManager.getNotebooks().map(notebook => notebook.name),
+            };
+        });
+        assert(csvInstall.found && csvInstall.buttonFound && csvInstall.installed,
+            'CSV starter installs through Browse while offline');
+        assert(csvInstall.notebooks.includes('CSV Basics: Seedling Heights'),
+            'offline Browse install adds the CSV starter workbook');
     }
 
     console.log('5. Running the Call Graph workbook while offline...');
