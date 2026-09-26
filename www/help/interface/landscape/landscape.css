@@ -10,6 +10,16 @@
 .space-workbook { background: #fff; color: #17212b; }
 .space-keyboard { background: #d7dbe0; color: #17212b; }
 .space-figure figcaption { margin-top: 8px; color: var(--quiet); font-size: .92rem; }
+.landscape-figure { max-width: 860px; }
+.landscape-shot { max-width: 100%; overflow-x: auto; border: 2px solid #526170; border-radius: 9px; background: #121820; }
+.landscape-shot img { display: block; width: 100%; min-width: 650px; height: auto; }
+.landscape-figure figcaption { max-width: 760px; }
+.landscape-pair .phone-figure { margin-top: 20px; }
+
+@media print {
+  .landscape-shot { overflow: visible; }
+  .landscape-shot img { min-width: 0; }
+}
 
 @media (max-width: 480px) {
   .pro-step { padding-left: 12px; }
