@@ -96,7 +96,7 @@ check('landscape walkthrough distinguishes Android bars and Free padding',
 check('landscape walkthrough warns about keyboard trust',
   landscapeTutorial.includes('A third-party keyboard can read what you type'));
 check('landscape walkthrough includes genuine Free and Pro phone examples',
-  ['free-keyboard-open.png', 'pro-status-bar-setting.png', 'pro-panel-folded.png', 'pro-expand-editor.png', 'pro-full-screen-editor.png']
+  ['free-keyboard-open.png', 'free-compact-keyboard.png', 'pro-status-bar-setting.png', 'pro-panel-folded.png', 'pro-expand-editor.png', 'pro-full-screen-editor.png']
     .every((name) => landscapeTutorial.includes(`assets/${name}`)
       && existsSync(path.join(WWW, 'help/interface/landscape/assets', name))));
 

@@ -3,6 +3,7 @@
 These are unedited 3040 × 1440 Android screenshots captured over ADB on a Samsung SM-G975W. They show only temporary, synthetic JavaScript examples created for the tutorial. The Free screenshot is from SciREPL Free 1.3.2; the Pro screenshots are from a 1.3.0 development build. Pro control placement may change in later versions.
 
 - `free-keyboard-open.png`: ordinary landscape keyboard consuming the Free workbook area.
+- `free-compact-keyboard.png`: the same Free draft with Hacker's Keyboard at five rows; its optional four-row layout was not changed for the capture.
 - `pro-status-bar-setting.png`: Pro Appearance setting for hiding the top Android status bar in landscape.
 - `pro-panel-folded.png`: Pro workbook after folding the new-cell panel and workbook list.
 - `pro-expand-editor.png`: saved-cell editing with the full-screen entry button visible.
