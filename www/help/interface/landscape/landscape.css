@@ -1,0 +1,17 @@
+.chip-pro { color: var(--pro); border-color: var(--pro); }
+.pro-step { border-left: 4px solid #ded2ed; padding-left: 16px; }
+.pro-step .step-label { color: var(--pro); }
+.space-figure { max-width: 690px; margin: 24px 0; }
+.space-map { display: grid; grid-template-rows: .55fr .8fr 2fr .85fr 1.6fr .5fr; width: 100%; box-sizing: border-box; aspect-ratio: 18 / 9; min-height: 260px; overflow: hidden; border: 3px solid #283744; border-radius: 18px; text-align: center; font-size: .9rem; font-weight: 700; }
+.space-map > div { display: grid; place-items: center; padding: 2px 8px; border-bottom: 1px solid #526170; }
+.space-map > div:last-child { border-bottom: 0; }
+.space-system { background: #164a72; color: #fff; }
+.space-app { background: #e6f0e9; color: #173721; }
+.space-workbook { background: #fff; color: #17212b; }
+.space-keyboard { background: #d7dbe0; color: #17212b; }
+.space-figure figcaption { margin-top: 8px; color: var(--quiet); font-size: .92rem; }
+
+@media (max-width: 480px) {
+  .pro-step { padding-left: 12px; }
+  .space-map { aspect-ratio: auto; height: 240px; min-height: 0; font-size: .75rem; }
+}
