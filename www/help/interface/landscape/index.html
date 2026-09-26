@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Make more room for code in SciREPL's Android landscape view, with separate Free and Pro steps.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/interface/landscape/">
+  <link rel="stylesheet" href="../../styles.css">
+  <link rel="stylesheet" href="../tutorial/tutorial.css">
+  <link rel="stylesheet" href="landscape.css">
+  <title>Make room for code in landscape · SciREPL Help</title>
+</head>
+<body data-editions="free pro" data-platforms="android">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="../../">sci<span>REPL</span> Help</a>
+    <nav aria-label="Primary navigation">
+      <a href="../">Interface reference</a>
+      <a href="../../">All help</a>
+      <a href="../../../">Open Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <p class="breadcrumbs"><a href="../../">Help</a> / <a href="../">Interface</a> / Landscape</p>
+    <article>
+      <p class="eyebrow">A little more room to work</p>
+      <h1>Make room for code in landscape</h1>
+      <p class="lede">A landscape phone is wide but short. The keyboard, Android's bars, and SciREPL's own controls all compete for the same vertical space. Start with the keyboard; Pro has a few extra ways to reclaim space inside the app.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro: keyboard advice</li>
+        <li class="chip chip-pro">Pro: in-app space controls</li>
+        <li class="chip">Android phones</li>
+      </ul>
+      <p class="screen-note">The phone examples show Free 1.3.2 and a Pro 1.3.0 development build on Android 12. Your keyboard and control positions may differ.</p>
+      <nav class="lesson-nav" aria-label="Landscape lesson steps">
+        <strong>In this lesson</strong>
+        <ol>
+          <li><a href="#identify-space">See where the space goes</a></li>
+          <li><a href="#keyboard">Choose a compact keyboard</a></li>
+          <li><a href="#status-bar">Hide the top Android status bar (Pro)</a></li>
+          <li><a href="#panels">Fold the new-cell panel or workbook list (Pro)</a></li>
+          <li><a href="#full-screen">Edit a cell full screen (Pro)</a></li>
+          <li><a href="#accessory-rows">Choose when accessory rows appear (Pro)</a></li>
+        </ol>
+      </nav>
+
+      <section id="identify-space">
+        <p class="step-label">Step 1 · Free + Pro</p>
+        <h2>See where the space goes</h2>
+        <p>Rotate the phone while a workbook is open. From top to bottom you may see the <strong>Android status bar</strong>, SciREPL's header and workbook controls, the workbook itself, the new-cell panel, the keyboard, and Android's bottom navigation or gesture area. These are different pieces: hiding the top status bar will <em>not</em> remove the bottom navigation bar.</p>
+        <figure class="space-figure">
+          <div class="space-map" aria-hidden="true">
+            <div class="space-system">Android status bar</div>
+            <div class="space-app">SciREPL header</div>
+            <div class="space-workbook">Workbook and code</div>
+            <div class="space-app">New-cell panel</div>
+            <div class="space-keyboard">On-screen keyboard</div>
+            <div class="space-system">Android navigation</div>
+          </div>
+          <figcaption>Space on a landscape phone, shown schematically rather than as a screenshot. The blue bands belong to Android; the pale bands belong to SciREPL. The keyboard height varies.</figcaption>
+        </figure>
+        <p>Landscape is most useful when you can still see the code you are editing and some workbook output. If only a couple of lines remain, try the following steps one at a time. Return to portrait whenever you want the taller notebook view.</p>
+      </section>
+
+      <section id="keyboard">
+        <p class="step-label">Step 2 · Free + Pro</p>
+        <h2>Choose a compact keyboard</h2>
+        <figure class="phone-figure landscape-figure">
+          <div class="landscape-shot"><img src="assets/free-keyboard-open.png" alt="SciREPL Free in landscape: the on-screen keyboard fills most of the display, leaving only the header and one-line new-cell editor visible" loading="lazy" width="3040" height="1440"></div>
+          <figcaption>Free with the phone's Samsung keyboard open. There is little room left for workbook code. <a class="full-shot-link" href="assets/free-keyboard-open.png">Open the full-size screenshot</a>.</figcaption>
+        </figure>
+        <p>The on-screen keyboard often takes more height than all the app controls combined. In your keyboard's own settings, look for a shorter height or fewer rows for landscape. For example, if you already use Hacker's Keyboard, it has a four-row layout and adjustable height. A smaller layout makes code more visible, but can make keys harder to hit.</p>
+        <figure class="phone-figure landscape-figure">
+          <div class="landscape-shot"><img src="assets/free-compact-keyboard.png" alt="The same SciREPL Free new-cell draft above Hacker's Keyboard in landscape; its five compact rows leave a multi-line editor visible" loading="lazy" width="3040" height="1440"></div>
+          <figcaption>On the same phone, Hacker's Keyboard at five rows leaves more editor space than the previous keyboard. Its optional four-row layout can save more. <a class="full-shot-link" href="assets/free-compact-keyboard.png">Open the full-size screenshot</a>.</figcaption>
+        </figure>
+        <p>The <a href="../">interface reference lists other coding keyboards</a>. Their layout options vary, so choose a size you can type on comfortably. Android's gesture navigation may save room compared with a three-button navigation bar, but that is a phone-wide Android setting, not a SciREPL switch.</p>
+        <aside class="callout"><strong>Choose a keyboard you trust.</strong> A third-party keyboard can read what you type, including API keys and passwords. You do not need to install another keyboard to use SciREPL.</aside>
+      </section>
+
+      <section id="status-bar" class="pro-step">
+        <p class="step-label">Step 3 · Pro on Android</p>
+        <h2>Hide the top Android status bar</h2>
+        <ol class="lesson-steps">
+          <li>In SciREPL Pro, open <strong>Menu → Appearance</strong>.</li>
+          <li>Turn on <strong>Hide Android status bar in landscape</strong>.</li>
+          <li>Return to the workbook and rotate the phone. The top system bar disappears in landscape and returns in portrait or when you switch the option off.</li>
+        </ol>
+        <figure class="phone-figure landscape-figure">
+          <div class="landscape-shot"><img src="assets/pro-status-bar-setting.png" alt="SciREPL Pro Appearance dialog with Hide Android status bar in landscape checked" loading="lazy" width="3040" height="1440"></div>
+          <figcaption>Pro's Appearance setting. This hides the top status bar, not Android's navigation controls at the right edge of this landscape screenshot. <a class="full-shot-link" href="assets/pro-status-bar-setting.png">Open the full-size screenshot</a>.</figcaption>
+        </figure>
+        <p>This is the bar with time, battery, and notification icons. It does not hide Android's bottom navigation/gesture area or the SciREPL header. The switch appears in the installed Android Pro app, not in Free or the browser PWA. Free's <strong>Top margin</strong> setting changes app padding; it does not hide Android's status bar.</p>
+      </section>
+
+      <section id="panels" class="pro-step">
+        <p class="step-label">Step 4 · Pro</p>
+        <h2>Fold controls you are not using</h2>
+        <p>On a short landscape screen, tap <strong>⌄</strong> on the new-cell panel to fold it away when you are reading a saved cell. Tap <strong>⌃</strong> in the header to bring it back, or swipe up from the bottom edge of the app. It starts open. SciREPL hides the panel automatically while you edit an existing cell and restores its previous state when that edit ends.</p>
+        <figure class="phone-figure landscape-figure">
+          <div class="landscape-shot"><img src="assets/pro-panel-folded.png" alt="SciREPL Pro landscape workbook with the new-cell panel folded, its restore arrow in the header, and a saved JavaScript cell and output visible" loading="lazy" width="3040" height="1440"></div>
+          <figcaption>With the new-cell panel folded, the saved code and its result have more room. The <strong>⌃</strong> restore button is beside “Sci REPL” in the header. <a class="full-shot-link" href="assets/pro-panel-folded.png">Open the full-size screenshot</a>.</figcaption>
+        </figure>
+        <p>If the workbook list is shown as a sidebar and you have more than one workbook, tap <strong>Sci REPL</strong> in the header to fold or restore that list. This saves <em>width</em>, which can be useful beside the keyboard, rather than much height. These controls appear only when their layout is applicable; you may not see a fold button on a taller tablet.</p>
+      </section>
+
+      <section id="full-screen" class="pro-step">
+        <p class="step-label">Step 5 · Pro</p>
+        <h2>Edit a cell full screen</h2>
+        <ol class="lesson-steps">
+          <li>Open a saved cell with its <strong>✎</strong> edit button, or double-tap its code.</li>
+          <li>Tap the <strong>⤢</strong> expand icon in the corner of that cell's code editor. It is named <strong>Full screen</strong> for screen readers. The code gets the app's editing area, without the rest of the workbook crowding it.</li>
+          <li>Use <strong>Done</strong> to apply the edited draft or <strong>Cancel</strong> to discard that saved-cell edit.</li>
+        </ol>
+        <div class="landscape-pair">
+          <figure class="phone-figure landscape-figure">
+            <div class="landscape-shot"><img src="assets/pro-expand-editor.png" alt="Saved-cell editor in SciREPL Pro with the Full screen expand icon at the lower-right corner of the code area" loading="lazy" width="3040" height="1440"></div>
+            <figcaption>The <strong>⤢</strong> button is at the lower-right corner of the saved cell's code area. <a class="full-shot-link" href="assets/pro-expand-editor.png">Open the full-size screenshot</a>.</figcaption>
+          </figure>
+          <figure class="phone-figure landscape-figure">
+            <div class="landscape-shot"><img src="assets/pro-full-screen-editor.png" alt="SciREPL Pro full-screen editor in landscape with the code above the Android keyboard and Done and Cancel in the top bar" loading="lazy" width="3040" height="1440"></div>
+            <figcaption>Full-screen editing leaves the code above the keyboard, with <strong>Done</strong> and <strong>Cancel</strong> at the top. <a class="full-shot-link" href="assets/pro-full-screen-editor.png">Open the full-size screenshot</a>.</figcaption>
+          </figure>
+        </div>
+        <p>Full screen is a larger <em>SciREPL editor</em>; it is separate from the Android status-bar setting and does not hide system bars by itself. You can also open the new-cell draft in full screen, but leaving that editor keeps its draft in the new-cell panel; it does not create or run a cell.</p>
+      </section>
+
+      <section id="accessory-rows" class="pro-step">
+        <p class="step-label">Step 6 · Pro</p>
+        <h2>Choose when editing aids take a row</h2>
+        <p>Pro's extra keys and suggestion chips can help with brackets, navigation and completion, but a row of controls costs height. In released Pro 1.3.0, open <strong>Menu → Settings</strong>, then scroll to <strong>Accessory rows in landscape</strong> and select <strong>When there is room</strong>. Its <strong>Minimum visible code lines</strong> setting starts at eight; optional rows hide when the current keyboard leaves too little code space. Choose <strong>Off</strong> for the most room, or <strong>Always</strong> if you prefer those controls even on a short screen. The extra keys or chips must also be enabled in their own settings.</p>
+        <p>In newer development builds, these options moved to <strong>Menu → Completion → Landscape</strong>. The full-screen editor can show enabled rows even when the ordinary editor's landscape space rule hides them.</p>
+        <aside class="callout"><strong>Try a combination.</strong> A shorter keyboard, the Pro status-bar switch, a folded new-cell panel, and full-screen editing solve different parts of the space problem. You can turn any of them back off independently.</aside>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL Help</span><nav aria-label="Footer navigation"><a href="../">Interface reference</a><a href="../../">All help</a></nav></footer>
+</body>
+</html>

@@ -25,6 +25,7 @@ const expected = [
   'help/getting-started/index.html',
   'help/interface/index.html',
   'help/interface/tutorial/index.html',
+  'help/interface/landscape/index.html',
   'help/files-export/tutorial/index.html',
   'help/workbooks/index.html',
   'help/languages-packages/index.html',
@@ -82,6 +83,22 @@ check('CSV tutorial shows how to inspect and edit the created file',
     && csvTutorial.includes('preview has <strong>Edit</strong> and <strong>Save</strong>'));
 check('CSV tutorial offers a downloadable workbook before the next app release',
   /<a\s+download="csv-basics-seedlings\.srwb"\s+href="assets\/csv-basics-seedlings\.srwb"/.test(csvTutorial));
+
+const landscapeTutorial = readFileSync(path.join(WWW, 'help/interface/landscape/index.html'), 'utf8');
+check('landscape walkthrough labels Pro-only controls',
+  landscapeTutorial.includes('Step 3 · Pro on Android')
+    && landscapeTutorial.includes('Step 4 · Pro')
+    && landscapeTutorial.includes('Step 5 · Pro')
+    && landscapeTutorial.includes('Step 6 · Pro'));
+check('landscape walkthrough distinguishes Android bars and Free padding',
+  landscapeTutorial.includes('bottom navigation bar')
+    && landscapeTutorial.includes('Free\'s <strong>Top margin</strong>'));
+check('landscape walkthrough warns about keyboard trust',
+  landscapeTutorial.includes('A third-party keyboard can read what you type'));
+check('landscape walkthrough includes genuine Free and Pro phone examples',
+  ['free-keyboard-open.png', 'free-compact-keyboard.png', 'pro-status-bar-setting.png', 'pro-panel-folded.png', 'pro-expand-editor.png', 'pro-full-screen-editor.png']
+    .every((name) => landscapeTutorial.includes(`assets/${name}`)
+      && existsSync(path.join(WWW, 'help/interface/landscape/assets', name))));
 
 const alias = readFileSync(path.join(WWW, 'pro/help/index.html'), 'utf8');
 check('compatibility alias is noindex', /name=["']robots["']\s+content=["']noindex["']/i.test(alias));
