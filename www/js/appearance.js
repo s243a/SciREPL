@@ -23,6 +23,14 @@
     ];
     const MODES = ['always', 'auto', 'never'];
 
+    /** How long a status bar the user revealed (a swipe from the top) stays
+     *  up before SciREPL hides it again under a hide mode: long enough to
+     *  read the clock and notifications. */
+    const STATUS_BAR_REVEAL_HOLD_MS = 5000;
+    /** A hold may be restarted by later reveals at most this many times, so
+     *  a reveal hold always ends within (1 + this) holds. */
+    const STATUS_BAR_REVEAL_MAX_RESTARTS = 2;
+
     const KEYS = {
         topMargin: 'scirepl_appearance_top_margin',   // '' = auto, else integer px
         btnScale: 'scirepl_appearance_btn_scale',
@@ -33,6 +41,7 @@
         showBrowseShortcut: 'scirepl_appearance_show_browse_shortcut',
         showFormulaShortcut: 'scirepl_appearance_show_formula_shortcut',
         shortcutPriority: 'scirepl_appearance_shortcut_priority',
+        statusBarMode: 'scirepl_appearance_status_bar_mode', // never | landscape | always
         // CSS that was rolled back for hiding the way out of Appearance. Kept
         // rather than deleted: it is the user's work and may be one typo away
         // from what they wanted.
@@ -50,7 +59,8 @@
      * On desktop the inset is 0, so `auto` costs nothing there — which is why
      * this is not simply a constant.
      */
-    const AUTO_TOP_MARGIN = 'env(safe-area-inset-top, 28px)';
+    const AUTO_TOP_MARGIN = 'var(--safe-area-inset-top, env(safe-area-inset-top, 28px))';
+    const STATUS_BAR_MODES = ['never', 'landscape', 'always'];
 
     /** Bounds for the button scale. 1 is the historical 28px button. */
     const SCALE = { min: 0.75, max: 2.5, step: 0.05, default: 1 };
@@ -81,6 +91,38 @@
     class Appearance {
         constructor() {
             this._mediaQuery = null;
+            this._landscapeQuery = null;
+            this._systemBarTarget = null;
+            this._systemBarRevision = 0;
+            // A dispatched hide may already have changed native state even if
+            // its bridge promise has not settled. Remember that ownership so
+            // disabling the preference can restore the bar without issuing a
+            // gratuitous show() on every default-off startup.
+            this._systemBarMayBeHidden = false;
+            // Native visibility calls are serialized. Revisions discard work
+            // made stale while it was waiting, and each queue slot is bounded
+            // so a broken native promise cannot prevent a newer rotation or
+            // preference change from being reconciled.
+            this._systemBarQueue = Promise.resolve();
+            this._systemBarCallTimeoutMs = 750;
+            // Re-hide fallback (see _watchStatusBarReshow): trailing debounce,
+            // how long a user-revealed bar is held up, and the window in which
+            // a hide SciREPL just requested (or a prompt signal) already
+            // covers an event. Instance fields so tests can shorten them.
+            this._statusBarRehideDebounceMs = 250;
+            this._statusBarRevealHoldMs = STATUS_BAR_REVEAL_HOLD_MS;
+            this._statusBarRehideCoverMs = 1000;
+            this._revealHoldTimer = null;
+            this._revealHoldStartedAt = 0;
+            this._revealHoldRestarts = 0;
+            this._lastPromptSignalAt = -Infinity;
+            this._statusBarScrim = null;
+            this._statusBarScrimTimer = null;
+            this._revealHoldCertain = false;
+            this._systemBarStyle = null;
+            this._lastStatusBarHideAt = -Infinity; // performance.now() timeline
+            this._lastStatusBarHideDeferred = false;
+            this._reshowDeferTimer = null;
         }
 
         /* ---------------------------- reading ---------------------------- */
@@ -121,6 +163,31 @@
 
         getCustomCss() {
             return localStorage.getItem(KEYS.customCss) || '';
+        }
+
+        /** When SciREPL hides Android's status bar: 'never' (the default),
+         *  'landscape', or 'always'. */
+        getStatusBarMode() {
+            const mode = localStorage.getItem(KEYS.statusBarMode);
+            return STATUS_BAR_MODES.includes(mode) ? mode : 'never';
+        }
+
+        setStatusBarMode(mode) {
+            const next = STATUS_BAR_MODES.includes(mode) ? mode : 'never';
+            localStorage.setItem(KEYS.statusBarMode, next);
+            this._syncLandscapeStatusBar(true);
+        }
+
+
+        supportsLandscapeStatusBar() {
+            const cap = window.Capacitor;
+            const platform = cap && typeof cap.getPlatform === 'function'
+                ? cap.getPlatform() : null;
+            const native = cap && typeof cap.isNativePlatform === 'function'
+                ? cap.isNativePlatform() : platform === 'android';
+            const bars = cap && cap.Plugins && cap.Plugins.SystemBars;
+            return !!(native && platform === 'android' && bars
+                && typeof bars.hide === 'function' && typeof bars.show === 'function');
         }
 
         /* ------------------------ header shortcuts ------------------------
@@ -376,6 +443,10 @@
             this._fitHeaderShortcuts();
             this._installHeaderFitObservers();
 
+            // --- optional Android landscape fullscreen ---
+            this._watchLandscapeStatusBar();
+            this._syncLandscapeStatusBar();
+
             // --- theme ---
             const theme = this.safeMode() ? DEFAULT_THEME : this.getTheme();
             const custom = theme === 'custom' ? this.getCustomTheme() : null;
@@ -399,7 +470,508 @@
             }
 
             this._applyCustomCss();
+            this._syncStatusBarStyle();
             this._watchSystemTheme(theme === 'auto');
+        }
+
+        /**
+         * Hide only Android's STATUS bar, never its navigation/gesture bar.
+         * SystemBars is bundled with Capacitor 8 and needs no Android runtime
+         * permission.  The preference is deliberately explicit: Never (the
+         * default), In landscape (the bar returns in portrait) or Always.
+         * With the bar hidden, the auto top allowance collapses on its own:
+         * Capacitor's SystemBars re-injects --safe-area-inset-top from the
+         * visible system bars (a display cutout still counts).
+         */
+        _landscapeStatusTarget() {
+            const mode = this.getStatusBarMode();
+            const enabled = mode !== 'never';
+            // Read the viewport itself rather than trusting delivery timing of
+            // the MediaQueryList change event. During a fast rotation Chromium
+            // can update these dimensions before that event reaches us.
+            const landscape = Number.isFinite(window.innerWidth)
+                && Number.isFinite(window.innerHeight)
+                ? window.innerWidth > window.innerHeight
+                : !!(this._landscapeQuery && this._landscapeQuery.matches);
+            const shouldHide = mode === 'always' || (mode === 'landscape' && landscape);
+            // Portrait with the preference enabled must repair native state
+            // left hidden by a prior landscape/activity instance. With the
+            // preference off, however, SciREPL only restores a bar it may have
+            // hidden itself; default-off startup therefore makes no native call.
+            const shouldShow = !shouldHide && (enabled || this._systemBarMayBeHidden);
+            return shouldHide ? 'hidden' : shouldShow ? 'shown' : null;
+        }
+
+        _syncLandscapeStatusBar(force = false) {
+            if (!this.supportsLandscapeStatusBar()) return;
+            if (!this._landscapeQuery && window.matchMedia) {
+                this._landscapeQuery = window.matchMedia('(orientation: landscape)');
+            }
+            const target = this._landscapeStatusTarget();
+
+            if (!target) {
+                // Invalidate a hide/show that is still waiting in the queue.
+                // An already-dispatched hide sets _systemBarMayBeHidden before
+                // reaching here and therefore takes the restoration path above.
+                this._endStatusBarRevealHold();
+                if (this._systemBarTarget !== null) {
+                    this._systemBarTarget = null;
+                    this._systemBarRevision += 1;
+                }
+                return;
+            }
+            if (!force && target === this._systemBarTarget) return;
+            // A forced sync (orientation, resume, preference change, the end
+            // of a hold) or a new target settles the bar now: a reveal hold in
+            // progress is over, and so is its scrim (a hide keeps a scrim that
+            // is already waiting for the bar to go).
+            this._endStatusBarRevealHold(target === 'hidden');
+
+            this._systemBarTarget = target;
+            if (target === 'hidden') {
+                this._lastStatusBarHideAt = performance.now();
+                this._lastStatusBarHideDeferred = false;
+                // This hide is newer than any signal the echo guard dropped,
+                // so it already covers that signal.
+                clearTimeout(this._reshowDeferTimer);
+                this._reshowDeferTimer = null;
+            }
+            const revision = ++this._systemBarRevision;
+            this._systemBarQueue = this._systemBarQueue
+                .catch(() => undefined)
+                .then(async () => {
+                    // A newer orientation/preference event superseded this
+                    // request while it waited behind the previous native call.
+                    if (revision !== this._systemBarRevision
+                            || target !== this._systemBarTarget) return;
+
+                    // Media-query notification can lag the viewport itself.
+                    // Reconcile instead of dispatching an action computed for
+                    // the orientation the device has already left.
+                    if (target !== this._landscapeStatusTarget()) {
+                        this._syncLandscapeStatusBar(true);
+                        return;
+                    }
+
+                    let timer = null;
+                    const call = Promise.resolve()
+                        .then(() => {
+                            // Resolve the plugin at dispatch time: a WebView
+                            // teardown can remove the proxy after support was
+                            // checked but before this queue slot runs.
+                            const bars = window.Capacitor?.Plugins?.SystemBars;
+                            const action = target === 'hidden' ? bars?.hide : bars?.show;
+                            if (typeof action !== 'function') {
+                                throw new Error('SystemBars plugin became unavailable');
+                            }
+                            if (target === 'hidden') this._systemBarMayBeHidden = true;
+                            return action.call(bars, { bar: 'StatusBar' });
+                        })
+                        .then(
+                            () => ({ ok: true }),
+                            error => ({ ok: false, error })
+                        );
+                    const timeout = new Promise(resolve => {
+                        timer = setTimeout(() => resolve({ timeout: true }),
+                            this._systemBarCallTimeoutMs);
+                    });
+                    const result = await Promise.race([call, timeout]);
+                    if (timer !== null) clearTimeout(timer);
+
+                    if (result.timeout) {
+                        // The native operation may still complete later, but
+                        // this bounded queue slot lets the newest revision run.
+                        // `call` already maps rejection, so a late result cannot
+                        // become an unhandled promise rejection.
+                        return;
+                    }
+                    if (!result.ok) {
+                        if (revision === this._systemBarRevision) {
+                            this._systemBarTarget = null;
+                        }
+                        console.warn('[appearance] Could not update Android status bar:',
+                            result.error);
+                        return;
+                    }
+                    // Only the currently desired successful show relinquishes
+                    // ownership. A stale completion cannot erase knowledge of
+                    // a newer hide that still needs a future restoration.
+                    if (revision === this._systemBarRevision && target === 'shown') {
+                        this._systemBarMayBeHidden = false;
+                    }
+                });
+        }
+
+        _watchLandscapeStatusBar() {
+            if (!this.supportsLandscapeStatusBar() || this._landscapeStatusWatchInstalled) return;
+            this._landscapeStatusWatchInstalled = true;
+            if (!this._landscapeQuery && window.matchMedia) {
+                this._landscapeQuery = window.matchMedia('(orientation: landscape)');
+            }
+            this._onLandscapeStatusChange = () => this._syncLandscapeStatusBar(true);
+            if (this._landscapeQuery) {
+                if (this._landscapeQuery.addEventListener) {
+                    this._landscapeQuery.addEventListener('change', this._onLandscapeStatusChange);
+                } else if (this._landscapeQuery.addListener) {
+                    this._landscapeQuery.addListener(this._onLandscapeStatusChange);
+                }
+            }
+            this._onStatusVisibility = () => {
+                if (document.visibilityState !== 'visible') return;
+                // Returning to SciREPL: prompt, like focus and resume.
+                this._lastPromptSignalAt = performance.now();
+                this._syncLandscapeStatusBar(true);
+            };
+            document.addEventListener('visibilitychange', this._onStatusVisibility);
+            this._watchStatusBarReshow();
+        }
+
+        /**
+         * A swipe from the top re-shows Android's status bar for good, not
+         * for a moment: Capacitor 8's SystemBars.hide() calls
+         * WindowInsetsControllerCompat.hide(statusBars()) and never sets
+         * BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE (API 30+ keeps the default,
+         * persistent reveal; below 30 androidx sets only
+         * SYSTEM_UI_FLAG_FULLSCREEN, which a swipe clears). So while the mode
+         * wants the bar hidden, SciREPL re-applies the hide on several cheap
+         * signals, none of them sufficient alone. They come in two kinds.
+         *
+         * REVEAL signals mean the user brought the bar back on purpose, so
+         * it is held up for STATUS_BAR_REVEAL_HOLD_MS (5 s) to be read
+         * (_holdStatusBarReveal), with a scrim behind it on edge-to-edge:
+         *   - --safe-area-inset-top grows (SystemBars injects it only on
+         *     API 35+, and a cutout can keep it unchanged);
+         *   - window resize / visualViewport resize (a non-edge-to-edge
+         *     WebView shrinks when the bar returns);
+         *   - a touch near the top edge.
+         * PROMPT signals mean the user came back to SciREPL, so the bar is
+         * hidden again after the short debounce and any hold is cut short:
+         *   - window focus (pulling the shade blurs the window);
+         *   - App 'resume' (visibilitychange and orientation already re-sync
+         *     at once in _watchLandscapeStatusBar, as does the initial apply).
+         * A reveal signal within a second of a prompt signal is part of that
+         * return (the app switcher's resize), not a swipe, and stays prompt.
+         *
+         * No polling and no loop: each signal is an event; prompt signals
+         * share one trailing-debounced timer, reveals share one hold timer
+         * that later reveals restart at most STATUS_BAR_REVEAL_MAX_RESTARTS
+         * times, and both end in the revisioned native queue. A signal other
+         * than a grown inset is ignored when a hide was requested within the
+         * last second (the resize that SciREPL's own hide causes, or the one
+         * an orientation change's immediate re-sync already covers), except
+         * for one deferred re-check after that second (_deferStatusBarRehide).
+         * A hide of an already hidden bar is a no-op natively.
+         */
+        _watchStatusBarReshow() {
+            if (this._reshowWatchInstalled) return;
+            this._reshowWatchInstalled = true;
+            this._lastInsetTop = this._statusBarInsetTop();
+            const onInset = () => {
+                const now = this._statusBarInsetTop();
+                const grew = now > this._lastInsetTop + 0.5;
+                this._lastInsetTop = now;
+                if (this._statusBarScrim) this._sizeStatusBarScrim(now);
+                // Only while SciREPL's own last request was a hide: the inset
+                // SciREPL's own show raises is not a swipe. A grown inset is
+                // never an echo of SciREPL's own hide (a hide lowers it), so
+                // it bypasses the one-second cover, and it is the one signal
+                // that proves the bar now draws over the app (the scrim).
+                if (grew && this._systemBarTarget === 'hidden') {
+                    this._holdStatusBarReveal(true);
+                }
+            };
+            if (typeof MutationObserver === 'function') {
+                new MutationObserver(onInset).observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+            }
+            const reveal = () => { onInset(); this._holdStatusBarReveal(false); };
+            const prompt = () => {
+                this._lastPromptSignalAt = performance.now();
+                this._endStatusBarRevealHold();
+                this._scheduleStatusBarRehide();
+            };
+            window.addEventListener('resize', reveal);
+            window.visualViewport?.addEventListener?.('resize', reveal);
+            window.addEventListener('focus', prompt);
+            const app = window.Capacitor?.Plugins?.App;
+            if (app && typeof app.addListener === 'function') {
+                try {
+                    Promise.resolve(app.addListener('resume', prompt)).catch(() => undefined);
+                } catch (_) { /* resume is one signal among several */ }
+            }
+            window.addEventListener('pointerdown', (event) => {
+                const edge = Math.max(48, this._lastInsetTop || 0);
+                if (event.clientY <= edge) this._holdStatusBarReveal(false);
+            }, { capture: true, passive: true });
+        }
+
+        _statusBarInsetTop() {
+            return parseFloat(getComputedStyle(document.documentElement)
+                .getPropertyValue('--safe-area-inset-top')) || 0;
+        }
+
+        /**
+         * A reveal signal: keep the bar up for the hold, then hide it once.
+         * `certain` (the inset grew) bypasses the echo guard and shows the
+         * scrim. Bounded: signals within a second of the hold's start are the
+         * same reveal, and later ones restart it at most
+         * STATUS_BAR_REVEAL_MAX_RESTARTS times. No native call until it ends.
+         */
+        _holdStatusBarReveal(certain) {
+            if (this._landscapeStatusTarget() !== 'hidden') return;
+            const now = performance.now();
+            // Returning to SciREPL (resume, focus) hides promptly; a resize
+            // that comes with it is part of the return, not a swipe.
+            if (now - this._lastPromptSignalAt < this._statusBarRehideCoverMs) {
+                this._scheduleStatusBarRehide(this._statusBarRehideDebounceMs, certain);
+                return;
+            }
+            // The resize SciREPL's own hide causes is not a reveal: the echo
+            // guard drops it, with its one deferred re-check per hide.
+            const sinceHide = now - this._lastStatusBarHideAt;
+            if (!certain && !this._revealHoldTimer && sinceHide < this._statusBarRehideCoverMs) {
+                this._deferStatusBarRehide(this._statusBarRehideCoverMs - sinceHide);
+                return;
+            }
+            if (certain) this._showStatusBarScrim();
+            if (this._revealHoldTimer) {
+                if (!certain) {
+                    // Uncertain signals (a header tap counts as a top-edge
+                    // touch) restart the hold a bounded number of times.
+                    if (now - this._revealHoldStartedAt < this._statusBarRehideCoverMs
+                            || this._revealHoldRestarts >= STATUS_BAR_REVEAL_MAX_RESTARTS) return;
+                    this._revealHoldRestarts += 1;
+                } else if (!this._revealHoldCertain) {
+                    // A real swipe (the inset grew) during a hold that taps
+                    // started gets its full hold and a fresh budget.
+                    this._revealHoldRestarts = 0;
+                }
+                // A grown inset always restarts the hold. Self-limiting: the
+                // inset can grow at most once per hide.
+                clearTimeout(this._revealHoldTimer);
+                this._revealHoldCertain = this._revealHoldCertain || certain;
+            } else {
+                this._revealHoldRestarts = 0;
+                this._revealHoldCertain = certain;
+            }
+            this._revealHoldStartedAt = now;
+            this._revealHoldTimer = setTimeout(() => {
+                this._revealHoldTimer = null;
+                this._revealHoldCertain = false;
+                if (this._landscapeStatusTarget() !== 'hidden') {
+                    this._removeStatusBarScrim();
+                    return;
+                }
+                // Keep the scrim until the bar has actually gone (the inset
+                // drops), so the icons never sit over bare content.
+                this._releaseStatusBarScrimOnHide();
+                this._syncLandscapeStatusBar(true);
+            }, this._statusBarRevealHoldMs);
+        }
+
+        /**
+         * Cancel a reveal hold (the bar is being settled some other way).
+         * With `hiding`, a scrim already waiting for the hold's hide stays
+         * until the inset drops (or its fallback timer fires).
+         */
+        _endStatusBarRevealHold(hiding = false) {
+            if (this._revealHoldTimer) {
+                clearTimeout(this._revealHoldTimer);
+                this._revealHoldTimer = null;
+                this._revealHoldCertain = false;
+            }
+            if (hiding && this._statusBarScrimTimer) return;
+            this._removeStatusBarScrim();
+        }
+
+        /**
+         * While a revealed status bar draws over the app (edge-to-edge: the
+         * WebView reports a top inset), a band in the header colour sits
+         * behind it so the clock and icons stay readable. Where the bar has
+         * its own background (no inset), nothing is drawn. The icons follow
+         * the app theme too (_syncStatusBarStyle), so they contrast with it.
+         */
+        _showStatusBarScrim() {
+            const inset = this._statusBarInsetTop();
+            if (!(inset > 0) || !document.body) return;
+            // The bar came back while a scrim was waiting for it to go.
+            clearTimeout(this._statusBarScrimTimer);
+            this._statusBarScrimTimer = null;
+            if (!this._statusBarScrim) {
+                const scrim = document.createElement('div');
+                scrim.className = 'status-bar-scrim';
+                scrim.setAttribute('aria-hidden', 'true');
+                document.body.appendChild(scrim);
+                this._statusBarScrim = scrim;
+                // Next frame, so the opacity transition runs.
+                requestAnimationFrame(() => {
+                    if (this._statusBarScrim === scrim) scrim.classList.add('is-visible');
+                });
+            }
+            this._sizeStatusBarScrim(inset);
+        }
+
+        /** The hold's hide is on its way: drop the scrim once the inset
+         *  falls, or after one native-call timeout if it never does. */
+        _releaseStatusBarScrimOnHide() {
+            if (!this._statusBarScrim) return;
+            clearTimeout(this._statusBarScrimTimer);
+            this._statusBarScrimTimer = setTimeout(() => {
+                this._statusBarScrimTimer = null;
+                this._removeStatusBarScrim();
+            }, this._systemBarCallTimeoutMs);
+        }
+
+        _sizeStatusBarScrim(inset) {
+            if (!this._statusBarScrim) return;
+            const prev = parseFloat(this._statusBarScrim.style.blockSize) || 0;
+            // Waiting for the hide: any fall of the inset means it happened
+            // (a display cutout can keep part of it).
+            if (inset <= 0 || (this._statusBarScrimTimer && inset < prev)) {
+                this._removeStatusBarScrim();
+                return;
+            }
+            this._statusBarScrim.style.blockSize = `${inset}px`;
+        }
+
+        _removeStatusBarScrim() {
+            clearTimeout(this._statusBarScrimTimer);
+            this._statusBarScrimTimer = null;
+            const scrim = this._statusBarScrim;
+            if (!scrim) return;
+            this._statusBarScrim = null;
+            const reduce = window.matchMedia
+                && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (reduce || !scrim.classList.contains('is-visible')) {
+                scrim.remove();
+                return;
+            }
+            // Fade out (the CSS transition), then leave the DOM.
+            scrim.classList.remove('is-visible');
+            scrim.classList.add('is-leaving');
+            setTimeout(() => scrim.remove(), 140);
+        }
+
+        /**
+         * Status-bar icons follow the app theme, not the system one: dark
+         * app colours get light icons. SystemBars.setStyle 'DARK' means a
+         * dark bar background, so light icons (setAppearanceLightStatusBars
+         * false); 'LIGHT' means dark icons. The tone is read from the
+         * resolved --bg-secondary (the header and scrim colour), so built-in,
+         * auto and custom themes, and custom CSS, are all covered. Only on
+         * Android, through the native queue, and only when it changes.
+         */
+        _syncStatusBarStyle() {
+            if (!this.supportsLandscapeStatusBar()) return;
+            const bars = window.Capacitor?.Plugins?.SystemBars;
+            if (typeof bars?.setStyle !== 'function') return;
+            const style = this._statusBarStyleForTheme();
+            if (style === this._systemBarStyle) return;
+            this._systemBarStyle = style;
+            this._systemBarQueue = this._systemBarQueue
+                .catch(() => undefined)
+                .then(async () => {
+                    if (style !== this._systemBarStyle) return; // superseded
+                    let timer = null;
+                    const call = Promise.resolve()
+                        .then(() => {
+                            const plugin = window.Capacitor?.Plugins?.SystemBars;
+                            if (typeof plugin?.setStyle !== 'function') {
+                                throw new Error('SystemBars plugin became unavailable');
+                            }
+                            return plugin.setStyle({ style, bar: 'StatusBar' });
+                        })
+                        .then(() => ({ ok: true }), error => ({ ok: false, error }));
+                    const timeout = new Promise(resolve => {
+                        timer = setTimeout(() => resolve({ timeout: true }),
+                            this._systemBarCallTimeoutMs);
+                    });
+                    const result = await Promise.race([call, timeout]);
+                    if (timer !== null) clearTimeout(timer);
+                    if (!result.timeout && !result.ok) {
+                        // Let the next apply() retry.
+                        if (style === this._systemBarStyle) this._systemBarStyle = null;
+                        console.warn('[appearance] Could not set Android status-bar style:',
+                            result.error);
+                    }
+                });
+        }
+
+        _statusBarStyleForTheme() {
+            const raw = getComputedStyle(document.documentElement)
+                .getPropertyValue('--bg-secondary').trim();
+            const rgb = this._parseRgb(raw);
+            if (!rgb) {
+                return document.documentElement.getAttribute('data-theme') === 'light' ? 'LIGHT' : 'DARK';
+            }
+            const lin = (c) => {
+                const v = c / 255;
+                return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+            };
+            const luminance = 0.2126 * lin(rgb[0]) + 0.7152 * lin(rgb[1]) + 0.0722 * lin(rgb[2]);
+            // Above ~0.18, dark icons contrast better than white ones.
+            return luminance > 0.179 ? 'LIGHT' : 'DARK';
+        }
+
+        /** Any CSS colour → [r, g, b], via the canvas colour parser. */
+        _parseRgb(value) {
+            if (!value) return null;
+            try {
+                if (!this._colourCtx) {
+                    this._colourCtx = document.createElement('canvas').getContext('2d');
+                }
+                const ctx = this._colourCtx;
+                if (!ctx) return null;
+                ctx.fillStyle = '#010203';
+                ctx.fillStyle = value;
+                const out = String(ctx.fillStyle);
+                if (out === '#010203' && !/^#010203$/i.test(value)) return null;
+                let m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(out);
+                if (m) return [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)];
+                m = /^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i.exec(out);
+                if (m) return [Number(m[1]), Number(m[2]), Number(m[3])];
+            } catch (_) { /* fall back to data-theme */ }
+            return null;
+        }
+
+        _scheduleStatusBarRehide(delay = this._statusBarRehideDebounceMs, certain = false) {
+            if (this._landscapeStatusTarget() !== 'hidden') return;
+            clearTimeout(this._reshowTimer);
+            this._reshowCertain = !!(certain || (this._reshowTimer && this._reshowCertain));
+            this._reshowTimer = setTimeout(() => {
+                const sure = this._reshowCertain;
+                this._reshowTimer = null;
+                this._reshowCertain = false;
+                if (this._landscapeStatusTarget() !== 'hidden') return;
+                // A reveal hold that began meanwhile owns the timing.
+                if (this._revealHoldTimer) return;
+                const sinceHide = performance.now() - this._lastStatusBarHideAt;
+                if (!sure && sinceHide < this._statusBarRehideCoverMs) {
+                    this._deferStatusBarRehide(this._statusBarRehideCoverMs - sinceHide);
+                    return;
+                }
+                this._syncLandscapeStatusBar(true);
+            }, delay);
+        }
+
+        /**
+         * The echo guard cannot tell the resize SciREPL's own hide causes
+         * from a genuine re-show that lands inside the same second, so a
+         * dropped signal gets one re-check just after the window. SystemBars
+         * offers no visibility query, so the re-check hides once. Bounded:
+         * at most one pending re-check; a newer hide request cancels it (it
+         * already covers the signal); and a signal dropped in the window of a
+         * deferred hide does not arm another, so it never chains.
+         */
+        _deferStatusBarRehide(remaining) {
+            if (this._reshowDeferTimer || this._lastStatusBarHideDeferred) return;
+            this._reshowDeferTimer = setTimeout(() => {
+                this._reshowDeferTimer = null;
+                if (this._landscapeStatusTarget() !== 'hidden') return;
+                // A reveal hold that began meanwhile owns the timing.
+                if (this._revealHoldTimer) return;
+                this._syncLandscapeStatusBar(true);
+                this._lastStatusBarHideDeferred = true;
+            }, Math.max(0, remaining) + 50);
         }
 
         /**

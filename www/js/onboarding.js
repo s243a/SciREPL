@@ -459,18 +459,28 @@
             const vw = vv ? vv.width : window.innerWidth;
             const vh = vv ? vv.height : window.innerHeight;
             const margin = 8;
+            // The card keeps the header's status-bar allowance (Appearance →
+            // Top margin), so it never draws under a visible status bar.
+            // Resolved through a probe: the property may hold var()/env().
+            const topProbe = document.createElement('span');
+            topProbe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;padding-block-start:var(--app-top-margin, 0px)';
+            this.el.appendChild(topProbe);
+            const topInset = parseFloat(getComputedStyle(topProbe).paddingTop) || 0;
+            topProbe.remove();
+            const safeTop = oy + Math.min(topInset, Math.max(0, vh - margin * 2));
+            const safeHeight = oy + vh - safeTop;
 
             card.classList.remove('tour-card-docked');
             // No floor above the viewport: on a 320x120 visual viewport the card
             // must be at most ~104px tall (and scroll inside), never 160.
             card.style.maxWidth = `${Math.max(120, vw - margin * 2)}px`;
-            card.style.maxHeight = `${Math.max(80, vh - margin * 2)}px`;
+            card.style.maxHeight = `${Math.max(80, safeHeight - margin * 2)}px`;
             card.style.transform = 'none';
 
             const place = (left, top) => {
                 const cr = card.getBoundingClientRect();
                 left = Math.max(ox + margin, Math.min(left, ox + vw - cr.width - margin));
-                top = Math.max(oy + margin, Math.min(top, oy + vh - cr.height - margin));
+                top = Math.max(safeTop + margin, Math.min(top, oy + vh - cr.height - margin));
                 card.style.left = `${left}px`;
                 card.style.top = `${top}px`;
             };
@@ -479,7 +489,7 @@
                 spotlight.style.display = 'none';
                 // Centre within the visible region, not the layout viewport.
                 const cr = card.getBoundingClientRect();
-                place(ox + (vw - cr.width) / 2, oy + (vh - cr.height) / 2);
+                place(ox + (vw - cr.width) / 2, safeTop + (safeHeight - cr.height) / 2);
                 return;
             }
 
@@ -494,7 +504,7 @@
             const cardRect = card.getBoundingClientRect();
             const gap = 14;
             const below = (oy + vh) - r.bottom - gap;
-            const above = r.top - (oy + gap);
+            const above = r.top - (safeTop + gap);
 
             // No room above or below within the visible region: dock to the
             // bottom edge of the VISIBLE area rather than pushing off-screen.
