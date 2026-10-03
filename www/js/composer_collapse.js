@@ -194,8 +194,10 @@
             this.collapsed = next;
             this.content.hidden = next;
             this.bar.classList.toggle('composer-collapsed', next);
+            // A keyboard-driven collapse keeps the title: the restore control
+            // stays hidden then (see _syncControls), so nothing replaces it.
             document.getElementById('app-header')?.classList.toggle(
-                'composer-is-collapsed', next);
+                'composer-is-collapsed', next && options.reason !== 'ime');
             this.toggle.setAttribute('aria-expanded', String(!next));
             this.restore.setAttribute('aria-expanded', String(!next));
             this._syncControls(this.isEligible());
@@ -296,14 +298,22 @@
 
         _syncControls(eligible = this.isEligible()) {
             this.toggle.hidden = !eligible || this.collapsed;
-            this.restore.hidden = !eligible || !this.collapsed;
+            // While an existing-cell editor's keyboard owns the space, a lone
+            // restore control would only blur that editor mid-edit.
+            this.restore.hidden = !eligible || !this.collapsed || this._imeAutoCollapsed;
             document.dispatchEvent(new CustomEvent('scirepl:header-controls-changed'));
+        }
+
+        _translate(key, fallback) {
+            // Before the catalogue loads, t() echoes the key; never show it.
+            const translated = window.t && window.t(key);
+            return translated && translated !== key ? translated : fallback;
         }
 
         _refreshLabel() {
             const key = this.collapsed ? 'composer.expand' : 'composer.collapse';
             const fallback = this.collapsed ? 'Show new-cell panel' : 'Hide new-cell panel';
-            const text = (window.t && window.t(key)) || fallback;
+            const text = this._translate(key, fallback);
             this.toggle.setAttribute('data-i18n-title', key);
             this.toggle.setAttribute('data-i18n-aria-label', key);
             this.toggle.setAttribute('title', text);
@@ -317,10 +327,9 @@
             if (glyph) glyph.textContent = this.collapsed ? '⌃' : '⌄';
             this.restore.setAttribute('data-i18n-title', 'composer.expand');
             this.restore.setAttribute('data-i18n-aria-label', 'composer.expand');
-            this.restore.setAttribute('title', (window.t && window.t('composer.expand'))
-                || 'Show new-cell panel');
-            this.restore.setAttribute('aria-label', (window.t && window.t('composer.expand'))
-                || 'Show new-cell panel');
+            const expand = this._translate('composer.expand', 'Show new-cell panel');
+            this.restore.setAttribute('title', expand);
+            this.restore.setAttribute('aria-label', expand);
         }
 
         _edgeBottom() {

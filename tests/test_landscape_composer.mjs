@@ -199,6 +199,23 @@ try {
     check('the expanded toggle has synchronized accessible text',
         before.label === before.expectedCollapse && before.title === before.expectedCollapse,
         `${before.label} / ${before.expectedCollapse}`);
+    const rawKeyLabels = await page.evaluate(() => {
+        const realT = window.t;
+        window.t = key => key;   // catalogue not loaded yet
+        try {
+            window.landscapeComposer._refreshLabel();
+            return {
+                toggle: document.getElementById('composer-toggle').getAttribute('aria-label'),
+                restore: document.getElementById('composer-restore-btn').getAttribute('title'),
+            };
+        } finally {
+            window.t = realT;
+            window.landscapeComposer._refreshLabel();
+        }
+    });
+    check('an unloaded catalogue falls back to English rather than raw keys',
+        rawKeyLabels.toggle === 'Hide new-cell panel'
+        && rawKeyLabels.restore === 'Show new-cell panel', JSON.stringify(rawKeyLabels));
     check('the toggle is a complete on-screen touch target',
         before.toggleBox.height >= 44 && before.toggleBox.left >= 0
         && before.toggleBox.right <= 844 && before.toggleBox.top >= 0
@@ -636,6 +653,8 @@ try {
         start: document.activeElement?.selectionStart,
         end: document.activeElement?.selectionEnd,
         barHeight: document.getElementById('input-bar').getBoundingClientRect().height,
+        restoreVisible: document.getElementById('composer-restore-btn').offsetParent !== null,
+        titleVisible: document.querySelector('#app-header .app-title-text').offsetParent !== null,
         footerOverlay: parseFloat(getComputedStyle(
             [...document.querySelectorAll('#repl, .repl-container')]
                 .find(element => element.offsetParent !== null))
@@ -650,6 +669,10 @@ try {
         && imeCollapsed.barHeight === 0
         && imeCollapsed.footerOverlay === 0 && imeCollapsed.viewportLift === 0,
         JSON.stringify(imeCollapsed));
+    // Free deliberately differs from Pro here: a lone restore control would
+    // blur the editor and dismiss the keyboard mid-edit, so the title stays.
+    check('the keyboard collapse keeps the title and offers no restore control',
+        !imeCollapsed.restoreVisible && imeCollapsed.titleVisible, JSON.stringify(imeCollapsed));
 
     await imePage.evaluate(() => {
         window.__imeViewport.height = innerHeight;
@@ -664,6 +687,9 @@ try {
         end: document.activeElement?.selectionEnd,
         draft: document.getElementById('code-input').value,
         barHeight: document.getElementById('input-bar').getBoundingClientRect().height,
+        restoreVisible: document.getElementById('composer-restore-btn').offsetParent !== null,
+        titleVisible: document.querySelector('#app-header .app-title-text').offsetParent !== null,
+        toggleVisible: document.getElementById('composer-toggle').offsetParent !== null,
     }));
     // Free keeps the composer visible during an existing-cell edit, so once
     // the keyboard closes the auto-collapsed footer simply returns.
@@ -673,6 +699,9 @@ try {
         && imeRestored.start === 7 && imeRestored.end === 14
         && imeRestored.draft === 'preserved new-cell draft'
         && imeRestored.barHeight > 0,
+        JSON.stringify(imeRestored));
+    check('after the keyboard closes the title and footer toggle are back, restore still hidden',
+        imeRestored.titleVisible && imeRestored.toggleVisible && !imeRestored.restoreVisible,
         JSON.stringify(imeRestored));
 
     await imePage.evaluate(() => {
@@ -714,6 +743,10 @@ try {
     check('a manually hidden composer stays hidden across a viewport change',
         await imePage.evaluate(() => window.landscapeComposer.collapsed
             && !window.landscapeComposer._imeAutoCollapsed));
+    check('a manual collapse still swaps the title for the restore control',
+        await imePage.evaluate(() => document.getElementById('composer-restore-btn')
+            .offsetParent !== null
+            && document.querySelector('#app-header .app-title-text').offsetParent === null));
     await imePage.click('#composer-restore-btn');
 
     await imeCard.locator('.cell-delete-btn').click({ force: true });
