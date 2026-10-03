@@ -124,6 +124,9 @@ jobs:
       - name: Composer Run button fits long-label locales
         run: npm run test:composer-fit
 
+      - name: Short-landscape composer collapse
+        run: npm run test:landscape-composer
+
       - name: Header controls follow scaled text
         run: npm run test:header-scaling
 

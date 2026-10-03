@@ -64,6 +64,8 @@
     "appearance.layout": "布局",
     "appearance.topMargin": "顶部边距",
     "appearance.topMarginAuto": "自动",
+    "composer.collapse": "隐藏新建单元格面板",
+    "composer.expand": "显示新建单元格面板",
     "appearance.topMarginHelp": "标题栏上方的间距，避免应用被设备状态栏遮挡。自动模式遵循设备报告的安全区域。设为 0 可完全移除。",
     "appearance.topMarginAutoValue": "自动 ({pixels} 像素)",
     "appearance.reset": "恢复默认设置",

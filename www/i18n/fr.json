@@ -76,6 +76,8 @@
     "appearance.layout": "Disposition",
     "appearance.topMargin": "Marge supérieure",
     "appearance.topMarginAuto": "Automatique",
+    "composer.collapse": "Masquer le panneau de nouvelle cellule",
+    "composer.expand": "Afficher le panneau de nouvelle cellule",
     "appearance.topMarginHelp": "Espace au-dessus de l'en-tête pour éviter la barre d'état de l'appareil. Le mode automatique suit la zone sécurisée de l'appareil. Définir à 0 pour supprimer totalement.",
     "appearance.topMarginAutoValue": "Automatique ({pixels}px)",
     "appearance.reset": "Rétablir les valeurs par défaut",

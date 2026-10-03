@@ -100,6 +100,22 @@ class MathMode {
     _measureFooterOverlay() {
         const bar = document.getElementById('input-bar');
         if (!bar) return;
+        // LandscapeComposer can remove the entire footer from layout while its
+        // restore control lives in the header. A display-none rectangle has
+        // top=0; treating that as a real footer would reserve nearly the whole
+        // notebook and retain a stale keyboard lift. Publish the true zero
+        // footprint instead, then measure normally when the footer returns.
+        if (getComputedStyle(bar).display === 'none') {
+            for (const scroller of document.querySelectorAll('#repl, .repl-container')) {
+                scroller.style.setProperty('--footer-overlay-local', '0px');
+            }
+            bar.style.removeProperty('--sci-composer-max');
+            bar.style.removeProperty('--sci-palette-max');
+            bar.style.transform = '';
+            const appBody = document.getElementById('app-body');
+            if (appBody) appBody.style.setProperty('--sci-vv-lift', '0px');
+            return;
+        }
         this._publishFooterBudget(bar);
         const barTop = bar.getBoundingClientRect().top;
         const appBody = document.getElementById('app-body');

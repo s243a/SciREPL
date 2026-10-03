@@ -71,6 +71,8 @@
     "appearance.layout": "Layout",
     "appearance.topMargin": "Margem superior",
     "appearance.topMarginAuto": "Automático",
+    "composer.collapse": "Ocultar painel de nova célula",
+    "composer.expand": "Mostrar painel de nova célula",
     "appearance.topMarginHelp": "Espaço acima do cabeçalho para evitar sobreposição pela barra de status do dispositivo. O modo automático segue a área segura do dispositivo. Defina como 0 para remover completamente.",
     "appearance.topMarginAutoValue": "Automático ({pixels}px)",
     "appearance.reset": "Restaurar padrões",

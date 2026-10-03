@@ -79,6 +79,8 @@
     "appearance.layout": "Layout",
     "appearance.topMargin": "Oberer Rand",
     "appearance.topMarginAuto": "Automatisch",
+    "composer.collapse": "Bereich für neue Zellen ausblenden",
+    "composer.expand": "Bereich für neue Zellen einblenden",
     "appearance.topMarginHelp": "Abstand über der Kopfzeile, damit die App nicht von der Statusleiste des Geräts verdeckt wird. Der automatische Modus folgt dem sicheren Bereich des Geräts. Auf 0 setzen, um ihn vollständig zu entfernen.",
     "appearance.topMarginAutoValue": "Automatisch ({pixels}px)",
     "appearance.reset": "Auf Standard zurücksetzen",

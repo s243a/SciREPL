@@ -14,6 +14,7 @@
     "test:header-scaling": "node tests/test_header_scaling.mjs",
     "test:help": "node tests/test_help_site.mjs",
     "test:composer-fit": "node tests/test_composer_fit.mjs",
+    "test:landscape-composer": "node tests/test_landscape_composer.mjs",
     "test:catalog": "node tests/test_catalog_filter.mjs && node tests/test_catalog_sources.mjs",
     "test:catalog:import": "node tests/test_catalog_import.mjs",
     "test:csv-workbook": "node tests/test_csv_workbook.mjs",

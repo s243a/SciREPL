@@ -1,7 +1,7 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v219';
+const CACHE_VERSION = 'v221';
 
 // Marker entry recording whether an app cache finished installing. Stored in
 // the cache itself so the answer travels with it and survives a restart.
@@ -94,6 +94,7 @@ const APP_SHELL = [
   './js/math_mode.js',
   './js/text_zoom.js',
   './js/composer_fit.js',
+  './js/composer_collapse.js',
   './js/notebook_manager.js',
   './js/prolog_settings.js',
   './js/prolog_vfs.js',

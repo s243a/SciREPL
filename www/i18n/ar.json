@@ -64,6 +64,8 @@
     "appearance.layout": "التخطيط",
     "appearance.topMargin": "الهامش العلوي",
     "appearance.topMarginAuto": "تلقائي",
+    "composer.collapse": "إخفاء لوحة الخلية الجديدة",
+    "composer.expand": "إظهار لوحة الخلية الجديدة",
     "appearance.topMarginHelp": "المسافة فوق شريط العنوان لتجنب التداخل مع شريط حالة الجهاز. يتبع الوضع التلقائي المنطقة الآمنة للجهاز. اضبط على 0 للإزالة تمامًا.",
     "appearance.topMarginAutoValue": "تلقائي ({pixels} بكسل)",
     "appearance.reset": "استعادة الإعدادات الافتراضية",

@@ -64,6 +64,8 @@
     "appearance.layout": "Макет",
     "appearance.topMargin": "Верхний отступ",
     "appearance.topMarginAuto": "Авто",
+    "composer.collapse": "Скрыть панель новой ячейки",
+    "composer.expand": "Показать панель новой ячейки",
     "appearance.topMarginHelp": "Пространство над заголовком для предотвращения перекрытия строкой состояния устройства. Автоматический режим следует безопасной зоне устройства. Установите 0, чтобы полностью убрать.",
     "appearance.topMarginAutoValue": "Авто ({pixels}px)",
     "appearance.reset": "Сбросить по умолчанию",

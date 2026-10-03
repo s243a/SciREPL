@@ -64,6 +64,8 @@
     "appearance.layout": "लेआउट",
     "appearance.topMargin": "शीर्ष मार्जिन",
     "appearance.topMarginAuto": "स्वचालित",
+    "composer.collapse": "नई सेल का पैनल छिपाएँ",
+    "composer.expand": "नई सेल का पैनल दिखाएँ",
     "appearance.topMarginHelp": "शीर्ष लेख के ऊपर स्थान ताकि ऐप डिवाइस के स्टेटस बार के नीचे न दबे। स्वचालित मोड डिवाइस के सुरक्षित क्षेत्र का पालन करता है। पूरी तरह हटाने के लिए 0 सेट करें।",
     "appearance.topMarginAutoValue": "स्वचालित ({pixels} पिक्सेल)",
     "appearance.reset": "डिफ़ॉल्ट पर रीसेट करें",

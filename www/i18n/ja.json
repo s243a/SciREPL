@@ -65,6 +65,8 @@
     "appearance.layout": "レイアウト",
     "appearance.topMargin": "上部マージン",
     "appearance.topMarginAuto": "自動",
+    "composer.collapse": "新規セルパネルを隠す",
+    "composer.expand": "新規セルパネルを表示",
     "appearance.topMarginHelp": "ヘッダー上部の余白。端末のステータスバーと重なるのを防ぎます。自動モードは端末のセーフエリアに従います。完全に削除するには0に設定してください。",
     "appearance.topMarginAutoValue": "自動 ({pixels}px)",
     "appearance.reset": "デフォルトに戻す",

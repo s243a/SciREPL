@@ -64,6 +64,8 @@
     "appearance.layout": "레이아웃",
     "appearance.topMargin": "상단 여백",
     "appearance.topMarginAuto": "자동",
+    "composer.collapse": "새 셀 패널 숨기기",
+    "composer.expand": "새 셀 패널 표시",
     "appearance.topMarginHelp": "헤더 상단 여백으로 기기 상태 표시줄과의 겹침을 방지합니다. 자동 모드는 기기의 안전 영역을 따릅니다. 완전히 제거하려면 0으로 설정하세요.",
     "appearance.topMarginAutoValue": "자동 ({pixels}px)",
     "appearance.reset": "기본값으로 복원",

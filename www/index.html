@@ -65,7 +65,14 @@
 
     <!-- App header -->
     <header id="app-header">
-        <h1 data-i18n="loading.sciRepl" data-i18n-dir="ltr">Sci REPL</h1>
+        <h1 data-i18n-aria-label="loading.sciRepl" aria-label="Sci REPL">
+            <span class="app-title-text" data-i18n="loading.sciRepl" data-i18n-dir="ltr">Sci REPL</span>
+            <button id="composer-restore-btn" type="button" class="icon-btn" hidden
+                    aria-controls="composer-content" aria-expanded="false"
+                    data-i18n-title="composer.expand"
+                    data-i18n-aria-label="composer.expand"
+                    title="Show new-cell panel" aria-label="Show new-cell panel">⌃</button>
+        </h1>
         <div id="notebook-selector-container" class="notebook-selector-container"></div>
         <div class="header-right">
             <button data-i18n-title="notebookSelector.findNotebookTitle" data-i18n-aria-label="notebookSelector.findNotebookTitle" id="search-btn" class="icon-btn" title="Find in notebook" aria-label="Find in notebook">🔍</button>
@@ -1301,6 +1308,14 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
             </div>
         </div>
         <div class="input-row">
+        <button id="composer-toggle" type="button" hidden aria-controls="composer-content"
+                aria-expanded="true" data-i18n-title="composer.collapse"
+                data-i18n-aria-label="composer.collapse" title="Hide new-cell panel"
+                aria-label="Hide new-cell panel">
+            <span class="composer-toggle-glyph" aria-hidden="true">⌄</span>
+            <span class="composer-toggle-label" data-i18n="composer.collapse">Hide new-cell panel</span>
+        </button>
+        <div id="composer-content">
         <div id="input-controls">
             <span class="language-selector-shell">
             <select data-i18n-title="editor.programmingLanguageTitle" data-i18n-aria-label="editor.programmingLanguageTitle" id="lang-selector" title="Programming language" aria-label="Programming language" dir="ltr">
@@ -1321,6 +1336,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
             autocomplete="off"></textarea>
         <button data-i18n="inputControls.run" id="run-btn" disabled>▶ Run</button>
         </div>
+        </div>
     </footer>
 
     <!-- Pyodide loaded dynamically after privacy acceptance — see below -->
@@ -1340,6 +1356,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <script src="js/i18n.js"></script>
     <script src="js/text_zoom.js"></script>
     <script src="js/composer_fit.js"></script>
+    <script src="js/composer_collapse.js"></script>
     <script src="js/appearance.js"></script>
     <script src="js/appearance_ui.js"></script>
     <script src="js/release_highlights.js"></script>

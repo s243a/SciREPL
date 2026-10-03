@@ -64,6 +64,8 @@
     "appearance.layout": "লেআউট",
     "appearance.topMargin": "উপরের মার্জিন",
     "appearance.topMarginAuto": "স্বয়ংক্রিয়",
+    "composer.collapse": "নতুন সেলের প্যানেল লুকান",
+    "composer.expand": "নতুন সেলের প্যানেল দেখান",
     "appearance.topMarginHelp": "ডিভাইসের স্ট্যাটাস বারের সাথে যাতে মিশে না যায় সেজন্য হেডারের উপরে স্থান রাখুন। স্বয়ংক্রিয় মোড ডিভাইসের নিরাপদ অঞ্চল অনুসরণ করে। সম্পূর্ণ দূর করতে ০ সেট করুন।",
     "appearance.topMarginAutoValue": "স্বয়ংক্রিয় ({pixels}px)",
     "appearance.reset": "ডিফল্ট পুনরুদ্ধার করুন",

@@ -73,6 +73,8 @@
     "appearance.layout": "Diseño",
     "appearance.topMargin": "Margen superior",
     "appearance.topMarginAuto": "Automático",
+    "composer.collapse": "Ocultar el panel de nueva celda",
+    "composer.expand": "Mostrar el panel de nueva celda",
     "appearance.topMarginHelp": "Espacio encima de la cabecera, para que la aplicación no quede debajo de la barra de estado del dispositivo. El modo automático usa el área segura que informa el dispositivo. Usa 0 para eliminarlo por completo.",
     "appearance.topMarginAutoValue": "Automático ({pixels} px)",
     "appearance.reset": "Restablecer valores predeterminados",
