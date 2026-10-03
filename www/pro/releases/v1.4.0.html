@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="What's new in SciREPL Pro v1.4.0 for Android: an optional on-device code model, reviewed AI suggestions with spending caps, refreshed model lists, a reorganized Completion screen, and status-bar and saved-key controls.">
+    <meta name="theme-color" content="#071c36">
+    <link rel="canonical" href="https://s243a.github.io/SciREPL/pro/releases/v1.4.0.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="SciREPL Pro v1.4.0 — What's new">
+    <meta property="og:description" content="An on-device code model, reviewed AI suggestions with spending caps, refreshed model lists, and a reorganized Completion screen in SciREPL Pro.">
+    <meta property="og:url" content="https://s243a.github.io/SciREPL/pro/releases/v1.4.0.html">
+    <link rel="icon" type="image/png" href="../assets/SciREPL-Pro-app-icon-512.png">
+    <link rel="stylesheet" href="../styles.css">
+    <title>SciREPL Pro v1.4.0 — What's new (in testing)</title>
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+        <a class="brand" href="../" aria-label="SciREPL Pro home">
+            <img src="../assets/SciREPL-Pro-app-icon-512.png" alt="" width="44" height="44">
+            <span>sci<span>REPL</span> <b>PRO</b></span>
+        </a>
+        <nav aria-label="Primary navigation">
+            <a href="../">Pro overview</a>
+            <a href="../privacy.html">Privacy</a>
+            <a class="nav-cta" href="../../">Try free PWA</a>
+        </nav>
+    </header>
+
+    <main id="main" class="release-main">
+        <header class="release-intro">
+            <p class="eyebrow">Android Pro · v1.4.0 · In testing</p>
+            <h1>SciREPL Pro <span>v1.4.0</span></h1>
+            <p class="lede">This update makes code completion smarter in two ways you choose between: an optional code model that runs on your phone, and AI suggestions from your own provider that are reviewed before they are sent and capped in cost. It also refreshes the model lists, reorganizes the Completion screen, and adds control over Android's status bar. These are the changes since v1.3.0.</p>
+            <p class="release-status"><strong>In testing</strong> <span>This version is being prepared for the SciREPL tester group. The current public release is v1.3.0. <a href="../testing.html">Join the testers</a> for access when the rollout begins.</span></p>
+        </header>
+
+        <section class="release-section" aria-labelledby="local-model-title">
+            <h2 id="local-model-title">A local code model on your phone</h2>
+            <ul>
+                <li>An optional small code model (Qwen2.5-Coder 0.5B) runs on your phone through a native llama.cpp engine and suggests the next word when the built-in suggestions are unsure.</li>
+                <li>It works offline. Suggestions are computed on the device, and nothing you type is sent anywhere.</li>
+                <li>Install it under <strong>Menu → Completion → Local model</strong>. Google Play delivers the engine and the model (about 400 MB) when you tap <strong>Install</strong>, like an app update; <strong>Delete</strong> removes them again.</li>
+                <li>It needs a 64-bit ARM (arm64) phone with at least 4 GB of memory. On other devices the Completion screen shows why it is unavailable.</li>
+                <li><strong>The model is available only when SciREPL Pro is installed from Google Play.</strong> The sideload APKs do not contain it and cannot download it; the Completion screen says "this install cannot download it". Everything else in this release, including the built-in suggestions and AI suggestions through your own provider, works in sideloaded installs.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="ai-suggestions-title">
+            <h2 id="ai-suggestions-title">AI suggestions, reviewed and capped</h2>
+            <ul>
+                <li>Tap <strong>…</strong> at the end of the suggestion row, the <strong>…AI</strong> extra key, or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Space</kbd> for five alternatives at the cursor; tap again for five more. Nothing is sent until you ask.</li>
+                <li>Suggestions come from the AI Assistant's provider and model by default, or from a separate provider and model you choose for suggestions, using the API key you saved for it.</li>
+                <li>Each request is shown, exactly as it will be sent, before it goes. Choosing <strong>Always allow</strong> skips that review only for the same provider, endpoint and model; changing any of them asks again.</li>
+                <li>Daily and monthly spending caps apply (USD 0.25 a day and USD 5 a month by default). They fail closed: if a model's price is unknown, no request is sent.</li>
+                <li>Suggestions that could not start the next line are dropped, and accepting one adds a missing <code>,</code> or <code>:</code> in the same undoable edit.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="models-title">
+            <h2 id="models-title">Refreshed model lists</h2>
+            <ul>
+                <li>Fast, low-cost models come first in the suggestion picker, the agent picker hides lite models, and <strong>Show all models</strong> lists the rest.</li>
+                <li>The suggestion model can also be chosen in AI Settings.</li>
+                <li>Temperature now follows each model's catalogue entry, and GPT-6 Luna is the default model for direct OpenAI.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="completion-title">
+            <h2 id="completion-title">Completion knows your variables</h2>
+            <ul>
+                <li>Completion knows what your variables hold before a cell runs: after <code>x = np.linspace(…)</code>, typing <code>x.</code> offers array attributes.</li>
+                <li><strong>Menu → Completion</strong> is split into <strong>General</strong>, <strong>AI suggestions</strong> and <strong>Local model</strong> sections, so each kind of suggestion has its own settings.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="status-bar-title">
+            <h2 id="status-bar-title">Status bar and saved keys</h2>
+            <ul>
+                <li><strong>Menu → Appearance → Hide Android status bar</strong> offers Never, In landscape, or Always.</li>
+                <li>Panels and dialogs keep the status-bar space. A status bar you swipe back stays for 5 seconds over a readable scrim, and its icons follow the app theme.</li>
+                <li>API keys are saved per provider under <strong>AI Settings → Saved keys</strong>, so switching provider never sends one provider's key to another.</li>
+            </ul>
+        </section>
+
+        <p class="release-note">The local model sends nothing off the device. AI suggestions go directly from your device to the provider you choose, with your own API key; the <a href="../privacy.html#ai-suggestions">privacy policy</a> lists exactly what a request contains.</p>
+        <div class="hero-actions">
+            <a class="button button-primary" href="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl.pro" target="_blank" rel="noopener noreferrer">Open SciREPL Pro on Google Play</a>
+            <a class="button button-secondary" href="../">Back to Pro overview</a>
+        </div>
+    </main>
+
+    <footer>
+        <a class="brand footer-brand" href="../" aria-label="SciREPL Pro home">
+            <img src="../assets/SciREPL-Pro-app-icon-512.png" alt="" width="36" height="36">
+            <span>sci<span>REPL</span> <b>PRO</b></span>
+        </a>
+        <div>
+            <a href="../privacy.html">Privacy</a>
+            <a href="../../">Free PWA</a>
+        </div>
+        <p>© 2026 SciREPL</p>
+    </footer>
+</body>
+</html>
