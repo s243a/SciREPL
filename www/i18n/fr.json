@@ -198,6 +198,7 @@
     "whatsNew.highlightStatusBar": "Android peut masquer la barre d’état pour gagner de la place : choisissez Jamais, En mode paysage ou Toujours dans Menu → Apparence → Masquer la barre d’état Android. La barre de navigation n’est jamais masquée.",
     "whatsNew.highlightShortLandscapeComposer": "En paysage de faible hauteur, masquez le panneau de nouvelle cellule pour donner toute la hauteur au carnet. Faites-le réapparaître avec le bouton de l’en-tête ou en balayant vers le haut à la fin du carnet ; il se masque aussi tant que le clavier est ouvert pour une cellule en cours d’édition.",
     "whatsNew.highlightHelpExamples": "Les exemples de l’Aide disposent de boutons Copier et Insérer. Insérer ajoute l’exemple comme nouvelle cellule à la fin du carnet, sans l’exécuter.",
+    "whatsNew.highlightPipConsent": "%pip install vous demande désormais d’accepter la politique de confidentialité actuelle avant de pouvoir contacter un index de paquets ou un CDN, même pour un paquet qui semble déjà installé.",
     "whatsNew.releaseNotes": "Lire les notes de version complètes",
     "menu.showTour": "🧭 Faire la visite guidée",
     "searchReplaceRow.replace": "Remplacer",

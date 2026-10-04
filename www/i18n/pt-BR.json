@@ -193,6 +193,7 @@
     "whatsNew.highlightStatusBar": "O Android pode ocultar a barra de status para ganhar espaço: escolha Nunca, No modo paisagem ou Sempre em Menu → Aparência → Ocultar a barra de status do Android. A barra de navegação nunca é ocultada.",
     "whatsNew.highlightShortLandscapeComposer": "Em paisagem com pouca altura, oculte o painel de nova célula para que o caderno use toda a altura. Traga-o de volta pelo botão do cabeçalho ou deslizando para cima no fim do caderno; ele também se oculta enquanto o teclado está aberto para editar uma célula.",
     "whatsNew.highlightHelpExamples": "Os exemplos da Ajuda agora têm os botões Copiar e Inserir. Inserir adiciona o exemplo como nova célula no fim do caderno, sem executá-lo.",
+    "whatsNew.highlightPipConsent": "%pip install agora pede que você aceite a política de privacidade atual antes de acessar um índice de pacotes ou o CDN, mesmo para um pacote que já pareça instalado.",
     "whatsNew.releaseNotes": "Ler as notas de lançamento completas",
     "menu.showTour": "🧭 Fazer o tour",
     "searchReplaceRow.replace": "Substituir",

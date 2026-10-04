@@ -208,6 +208,22 @@ jobs:
       - name: Run onboarding tour tests
         run: node "$TEST_DIR/test_onboarding.mjs"
 
+      - name: Run Android status-bar tests (when present on this tag)
+        run: |
+          if test -f "$TEST_DIR/test_status_bar.mjs"; then
+            node "$TEST_DIR/test_status_bar.mjs"
+          else
+            echo "test_status_bar.mjs absent on this ref; skipping"
+          fi
+
+      - name: Run short-landscape composer tests (when present on this tag)
+        run: |
+          if test -f "$TEST_DIR/test_landscape_composer.mjs"; then
+            node "$TEST_DIR/test_landscape_composer.mjs"
+          else
+            echo "test_landscape_composer.mjs absent on this ref; skipping"
+          fi
+
       - name: Run Android hardware Back tests (when present on this tag)
         run: |
           if test -f "$TEST_DIR/test_android_back.mjs"; then

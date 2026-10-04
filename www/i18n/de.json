@@ -201,6 +201,7 @@
     "whatsNew.highlightStatusBar": "Android kann die Statusleiste für mehr Platz ausblenden: Wählen Sie unter Menü → Erscheinungsbild → Android-Statusleiste ausblenden „Nie“, „Im Querformat“ oder „Immer“. Die Navigationsleiste wird nie ausgeblendet.",
     "whatsNew.highlightShortLandscapeComposer": "Im flachen Querformat blenden Sie den Bereich für neue Zellen aus, damit das Notebook die volle Höhe nutzt. Über die Schaltfläche in der Kopfzeile oder durch Wischen nach oben am Ende des Notebooks blenden Sie ihn wieder ein; während die Tastatur für eine Zelle geöffnet ist, die Sie bearbeiten, wird er ebenfalls ausgeblendet.",
     "whatsNew.highlightHelpExamples": "Hilfe-Beispiele haben jetzt die Schaltflächen „Kopieren“ und „Einfügen“. „Einfügen“ fügt das Beispiel als neue Zelle am Ende des Notebooks hinzu, ohne es auszuführen.",
+    "whatsNew.highlightPipConsent": "%pip install fordert Sie jetzt auf, die aktuelle Datenschutzerklärung zu akzeptieren, bevor ein Paketindex oder CDN kontaktiert werden kann, selbst bei einem Paket, das bereits installiert zu sein scheint.",
     "whatsNew.releaseNotes": "Vollständige Versionshinweise lesen",
     "menu.showTour": "🧭 Tour starten",
     "searchReplaceRow.replace": "Ersetzen",
