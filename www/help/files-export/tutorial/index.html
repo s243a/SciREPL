@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Install a CSV workbook from SciREPL Browse, run its cells, import a CSV, and export the workbook with its data.">
+  <meta name="description" content="Install a CSV workbook, run and edit its data in Files & Storage, then export and reopen a workbook-plus-CSV package. Includes Pro's optional file highlighting.">
   <link rel="canonical" href="https://s243a.github.io/SciREPL/help/files-export/tutorial/">
   <link rel="stylesheet" href="../../styles.css">
   <link rel="stylesheet" href="../../interface/tutorial/tutorial.css">
@@ -25,22 +25,23 @@
     <article>
       <p class="eyebrow">Learn by doing</p>
       <h1>Explore a CSV in a workbook</h1>
-      <p class="lede">Start in <strong>Browse Packages, Bundles &amp; Workbooks</strong>. Install a small example, run its cells, make one change, then import and export a CSV file. The data is fictional and the Python code needs no extra packages or AI account.</p>
+      <p class="lede">Start in <strong>Browse Packages, Bundles &amp; Workbooks</strong>. Install a small example, run its cells, edit its CSV, then export and reopen the workbook with its data. The data is fictional and the Python code needs no extra packages or AI account.</p>
       <ul class="meta">
         <li class="chip chip-free">Free + Pro</li>
         <li class="chip">Android steps</li>
-        <li class="chip">About 10 minutes</li>
+        <li class="chip">About 15 minutes</li>
       </ul>
-      <p class="screen-note">Screenshots show the Free interface on a Samsung Galaxy S24-series phone. In Pro, you can use the direct workbook download and Import File path below; the surrounding controls may differ, and this new Browse entry may not be present there.</p>
+      <p class="screen-note">Screenshots were captured on a Samsung Galaxy S24-series phone. The Browse and initial-output pictures show Free; the new file-editor and package-selection pictures show Pro 1.4.0 and are labelled below. In Pro, you can use the direct workbook download and Import File path; the surrounding controls may differ, and this new Browse entry may not be present there.</p>
       <p class="callout"><strong>Don't see this workbook in Browse yet?</strong> The example is new and may not be in your installed app or the hosted PWA until the next stable Free release. <a download="csv-basics-seedlings.srwb" href="assets/csv-basics-seedlings.srwb">Download the workbook directly</a>, then use <strong>Menu → Import File</strong> to open it. You can follow the rest of this lesson now.</p>
       <nav class="lesson-nav" aria-label="CSV walkthrough steps">
         <strong>In this lesson</strong>
         <ol>
           <li><a href="#install">Install the example from Browse</a></li>
           <li><a href="#run">Run its Python cells</a></li>
-          <li><a href="#change">Change a measurement</a></li>
+          <li><a href="#change">Change a measurement in Files &amp; Storage</a></li>
           <li><a href="#import">Import a CSV file</a></li>
           <li><a href="#export">Export the workbook and data</a></li>
+          <li><a href="#reopen">Reopen the package and check its data</a></li>
         </ol>
       </nav>
 
@@ -85,7 +86,7 @@
           <li>Run <code>read_csv</code>. It opens the file just created and prints all six rows.</li>
           <li>Run <code>compare_groups</code>. It prints a light mean of <strong>13.0 cm</strong>, a shade mean of <strong>8.0 cm</strong>, and a difference of <strong>5.0 cm</strong>.</li>
         </ol>
-        <p>To view or edit the file itself, open <strong>Menu → Files &amp; Storage</strong>, choose <strong>/ (Persistent Storage)</strong> or <strong>All Filesystems</strong>, then scroll to <code>/shared/data/seedling-heights.csv</code> and tap its name. The preview has <strong>Edit</strong> and <strong>Save</strong> controls. Rerun the reading and comparison cells after saving a change.</p>
+        <p>The file is also visible in <strong>Menu → Files &amp; Storage</strong>. You can read it there, or use <strong>Edit</strong> and <strong>Save</strong> to change it directly. <a href="#edit-file">The next step shows how.</a></p>
         <p>The final output should look like this:</p>
         <pre><code>Light mean: 13.0 cm
 Shade mean: 8.0 cm
@@ -106,9 +107,45 @@ Difference: 5.0 cm</code></pre>
       <section id="change">
         <p class="step-label">Step 3</p>
         <h2>Change one value and rerun</h2>
-        <p>Open <code>create_csv</code> with its <strong>✎ pencil</strong>. In the list of measurements, change one light height from <code>14</code> to <code>15</code>, then tap <strong>Run</strong>. Run <code>read_csv</code> and <code>compare_groups</code> again. The light mean is now about <strong>13.3 cm</strong> and the difference about <strong>5.3 cm</strong>.</p>
-        <p>You can instead change the value directly in <strong>Files &amp; Storage</strong>. Save the CSV and rerun only <code>read_csv</code> and <code>compare_groups</code>; rerunning <code>create_csv</code> would overwrite your file edit.</p>
+        <div id="edit-file">
+          <p>You do not have to edit the Python cell to change its data. Open the CSV itself:</p>
+          <ol class="lesson-steps">
+            <li>Choose <strong>Menu → Files &amp; Storage</strong> (the menu may add <strong>VFS / Paths</strong> to the name).</li>
+            <li>Choose <strong>/ (Persistent Storage)</strong> or <strong>All Filesystems</strong>. Scroll to <code>/shared/data/seedling-heights.csv</code> and tap the filename, not its download or remove icon.</li>
+            <li>Tap <strong>Edit</strong>. Change the row <code>light,14</code> to <code>light,15</code>. Keep the header <code>group,height_cm</code>, commas, and other rows unchanged.</li>
+            <li>Tap <strong>Save</strong>, then close Files &amp; Storage. Saving a file does not run any code.</li>
+          </ol>
+          <figure class="phone-figure">
+            <div class="shot-window shot-window--file-edit" role="img" aria-label="CSV file being edited in Files and Storage, with Save outlined in yellow. Pro also shows Full screen.">
+              <div class="shot-stage">
+                <img src="assets/phone-file-edit.png" alt="" loading="lazy" decoding="async">
+                <img src="assets/file-edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              </div>
+            </div>
+            <figcaption><strong>Pro 1.4.0:</strong> the CSV is open in the file preview's editor. The yellow outline marks <strong>Save</strong>. Free also has the preview's Edit/Save controls; <strong>Full screen</strong> is Pro-only.</figcaption>
+            <a class="full-shot-link" href="assets/phone-file-edit.png">View the complete Files &amp; Storage editing screenshot</a>
+          </figure>
+        </div>
+        <p>Rerun only <code>read_csv</code> and <code>compare_groups</code>. The light mean is now about <strong>13.3 cm</strong> and the difference about <strong>5.3 cm</strong>. Do <strong>not</strong> rerun <code>create_csv</code>: it would overwrite your file edit with the values still in that cell.</p>
+        <p>Alternatively, edit <code>create_csv</code> with its <strong>✎ pencil</strong>, change its measurement <code>14</code> to <code>15</code>, and run all three Python cells in order. This changes the code that generates the file, rather than just the file.</p>
         <p>Why rerun the later cells? Their saved output is a record of the previous execution; changing a file does not automatically recalculate earlier results. Each cell reads the file when you run it.</p>
+        <aside class="callout" id="pro-syntax-highlighting" data-editions="pro">
+          <h3>Pro: full-screen file editing and optional highlighting</h3>
+          <p>In the file preview, tap <strong>Full screen</strong> for a larger editor. The CSV stays <strong>Plain text</strong>, so its <strong>Syntax highlighting</strong> checkbox is disabled.</p>
+          <p>For supported code files, syntax highlighting is optional and <strong>off by default</strong>. Turn it on using the checkbox in this file editor, not the notebook's appearance settings. The extension chooses the language: for example <code>.py</code> is Python, <code>.js</code> is JavaScript, <code>.R</code> is R, and <code>.pl</code> is <strong>Prolog</strong>, not Perl. Unknown extensions remain plain text.</p>
+          <figure class="phone-figure">
+            <div class="shot-window shot-window--file-highlight" role="img" aria-label="Pro full-screen Python file editor with Syntax highlighting selected and coloured Python code. Save and Close are in the toolbar.">
+              <div class="shot-stage">
+                <img src="assets/phone-python-highlight.png" alt="" loading="lazy" decoding="async">
+                <img src="assets/file-highlight-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              </div>
+            </div>
+            <figcaption><strong>Pro 1.4.0:</strong> a separate <code>seedling-summary.py</code> demonstration file containing the comparison code, with highlighting enabled. This optional file is not needed for the CSV lesson. Long lines can be scrolled horizontally.</figcaption>
+            <a class="full-shot-link" href="assets/phone-python-highlight.png">View the complete highlighted file-editor screenshot</a>
+          </figure>
+          <p><strong>Save</strong> writes the file and keeps the editor open. Use <strong>× Close</strong> to return to Files &amp; Storage; it asks before discarding unsaved changes. Editing or saving the file never executes it.</p>
+          <p><a href="assets/phone-csv-fullscreen.png">See the same full-screen editor with the CSV open as plain text.</a></p>
+        </aside>
       </section>
 
       <section id="import">
@@ -126,18 +163,47 @@ Difference: 5.0 cm</code></pre>
         <p class="step-label">Step 5</p>
         <h2>Save a portable copy</h2>
         <p>Open <strong>Menu → Export Workbooks &amp; Packages</strong>. If you want only the cells, choose <strong>Workbook (.srwb)</strong> and <strong>Current tab only</strong>. An <code>.srwb</code> does <strong>not</strong> include the separate CSV in SharedVFS.</p>
-        <p>To move the workbook <em>with its data</em>, choose <strong>Package (archive)</strong>, keep <strong>.zip</strong>, and select the CSV and the workbook in the contents tree. Then tap <strong>Export</strong> and choose a destination you control. The package exporter can include other tabs and files, so check the selection before sharing.</p>
+        <p>To move the workbook <em>with its data</em>, choose <strong>Package (archive)</strong> and keep <strong>.zip</strong>. In the <strong>Contents</strong> tree, select:</p>
+        <ul>
+          <li>The workbook <code>CSV_Basics__Seedling_Heights.ipynb</code> under <strong>notebooks/</strong>. Package export stores the cells in Jupyter notebook format.</li>
+          <li>The file <code>seedling-heights.csv</code> under <strong>shared/data/</strong>.</li>
+        </ul>
+        <p>Uncheck unrelated workbooks and files. Expand folders with their arrow if needed; do not assume <strong>Current tab only</strong> limits a package's contents. You do not need the extra <strong>shared/notebooks/</strong> copies for this lesson. In Pro, leave <strong>Include AI conversation</strong> unchecked unless you deliberately want to share it.</p>
+        <p>Tap <strong>Export</strong>. On Android this opens the share sheet: save the archive somewhere you can find again, such as your own drive or a file manager's save destination. In a browser it downloads a file. The suggested filename is <code>scirepl_package.zip</code>; renaming it <code>seedling-project.zip</code> makes it easier to recognize.</p>
         <figure class="phone-figure">
-          <div class="shot-window shot-window--csv-export" role="img" aria-label="Export Workbooks and Packages dialog with Package archive option outlined in yellow.">
+          <div class="shot-window shot-window--package-selection" role="img" aria-label="Pro package export with Package archive selected and only the CSV Basics workbook and seedling-heights CSV checked. Yellow outlines mark those two files.">
             <div class="shot-stage">
-              <img src="../../interface/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
-              <img src="assets/package-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              <img src="assets/phone-package-selection.png" alt="" loading="lazy" decoding="async">
+              <img src="assets/package-selection-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
             </div>
           </div>
-          <figcaption>Choose <strong>Package (archive)</strong> for a workbook-plus-CSV copy; the picture shows the option <em>before</em> it is selected.</figcaption>
-          <a class="full-shot-link" href="../../interface/tutorial/assets/phone-export.png">View the complete export dialog screenshot</a>
+          <figcaption><strong>Pro 1.4.0:</strong> Package is selected, and the two yellow-outlined entries are checked. Other workbooks, the optional Python demonstration file, and saved workbook copies are not included. Free uses the same workbook-and-data selection, without the AI-conversation option.</figcaption>
+          <a class="full-shot-link" href="assets/phone-package-selection.png">View the complete package-selection screenshot</a>
         </figure>
         <p class="callout"><strong>Local recovery is not a backup.</strong> Android app storage, the PWA in Chrome, and another browser do not automatically share these files. Keep the exported copy somewhere you control. See <a href="../">Files, import, and export</a> for other formats.</p>
+      </section>
+
+      <section id="reopen">
+        <p class="step-label">Step 6</p>
+        <h2>Reopen the package and check both parts</h2>
+        <p>Before trusting a backup, check that you can open it. You can do this in another SciREPL installation or browser profile. Importing here adds another workbook; it also replaces files at the package's destination paths, so keep a separate copy of any newer file before importing an older package.</p>
+        <ol class="lesson-steps">
+          <li>Choose <strong>Menu → Import Package (.zip / .tar.gz)</strong> and select the archive you saved. For this lesson it is a <code>.zip</code>, not the separate CSV or <code>.srwb</code> download.</li>
+          <li>Choose the newly imported <strong>CSV Basics: Seedling Heights</strong> workbook if it is not selected automatically. If you imported into the same app, the old and new tabs may have the same name.</li>
+          <li>Open <strong>Menu → Files &amp; Storage</strong> and check <code>/shared/data/seedling-heights.csv</code>. Its six rows should match the file you exported. Close the preview after checking.</li>
+          <li>Run the <strong>second Python cell</strong> (the <code>read_csv</code> code), then the <strong>third Python cell</strong> (the <code>compare_groups</code> code). Package export uses Jupyter format and may not preserve the cell names; identify these by their order and code. After Step 4's original CSV, expect <strong>13.0 cm</strong>, <strong>8.0 cm</strong>, and <strong>5.0 cm</strong>. If you exported the edited <code>light,15</code> file instead, expect <strong>13.3 cm</strong>, <strong>8.0 cm</strong>, and <strong>5.3 cm</strong>.</li>
+        </ol>
+        <p class="callout"><strong>Do not rerun <code>create_csv</code> for this restore check.</strong> It overwrites the imported data with the values in its code. Reading the restored CSV first proves the data travelled with the workbook; old saved output alone does not prove that.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--restored-output" role="img" aria-label="Fresh output after restoring the package and running its comparison cell: light mean 13.0 centimetres, shade mean 8.0, difference 5.0.">
+            <div class="shot-stage">
+              <img src="assets/phone-restored-output.png" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pro 1.4.0:</strong> fresh output on the phone after importing the exported archive and running only its reading and comparison cells. The CSV restored the original six rows.</figcaption>
+          <a class="full-shot-link" href="assets/phone-restored-output.png">View the complete restored-output screenshot</a>
+        </figure>
+        <p>If the file is missing, or the workbook is absent, return to Step 5 and check that <em>both</em> entries were selected. A plain workbook export cannot carry the CSV for you.</p>
       </section>
 
       <section id="what-next">
