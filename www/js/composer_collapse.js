@@ -18,6 +18,9 @@
     const VERTICAL_RATIO = 1.5;
     const BOTTOM_EDGE_PX = 72;
     const IME_MIN_INSET_PX = 80;
+    // After an edit ends (Cancel, Apply, blur) the footer may stay hidden
+    // only this long while a soft keyboard finishes dismissing.
+    const IME_EXIT_GRACE_MS = 400;
 
     class LandscapeComposer {
         constructor() {
@@ -36,6 +39,9 @@
             this._imeSyncFrame = 0;
             this._vvTarget = null;
             this._viewportBaseline = 0;
+            this._baselineInnerHeight = 0;
+            this._imeExitTimer = 0;
+            this._editWatch = null;
             this._wasEligible = false;
             this._destroyed = false;
             if (this.bar && this.content && this.toggle && this.restore) this.init();
@@ -161,6 +167,7 @@
             const eligible = this.isEligible();
             if (eligible && !this._wasEligible) {
                 this._viewportBaseline = Number(window.visualViewport?.height) || window.innerHeight;
+                this._baselineInnerHeight = window.innerHeight;
             } else if (!eligible) {
                 this._viewportBaseline = 0;
             }
@@ -182,7 +189,11 @@
 
         setCollapsed(collapsed, options = {}) {
             if (this._destroyed) return false;
-            if (options.reason !== 'ime') this._imeAutoCollapsed = false;
+            if (options.reason !== 'ime') {
+                this._imeAutoCollapsed = false;
+                this._clearImeExit();
+                this._watchEditEnd(false);
+            }
             const next = !!collapsed;
             if (next && !this.isEligible() && !options.force) return false;
 
@@ -253,7 +264,18 @@
             return false;
         }
 
+        /** Only a device that can have a soft keyboard may be judged to have
+         *  one. A desktop window resized short (no touch, fine pointer) is a
+         *  real resize, never an IME. */
+        _imeCapable() {
+            if (this._isNativeApp()) return true;
+            if (Number(navigator.maxTouchPoints) > 0) return true;
+            return !!(window.matchMedia
+                && window.matchMedia('(pointer: coarse), (any-pointer: coarse)').matches);
+        }
+
         _imeIsVisible() {
+            if (!this._imeCapable()) return false;
             const viewport = window.visualViewport;
             if (!viewport || !Number.isFinite(viewport.height)) return false;
             const baselineInset = Math.max(0, this._viewportBaseline - viewport.height);
@@ -271,29 +293,77 @@
             this._attachVisualViewportListeners();
             const eligible = this.isEligible();
             const viewportHeight = Number(window.visualViewport?.height);
+            const editing = this._cellEditorHasFocus();
+            // A real window resize re-learns the baseline: the layout height
+            // changed while no editor could have summoned a keyboard. (With an
+            // editor focused, a layout change is Android's resize-mode IME.)
+            if (eligible && window.innerHeight !== this._baselineInnerHeight && !editing
+                && Number.isFinite(viewportHeight)) {
+                this._viewportBaseline = viewportHeight;
+                this._baselineInnerHeight = window.innerHeight;
+            }
             if (eligible && !this._imeAutoCollapsed && Number.isFinite(viewportHeight)) {
                 this._viewportBaseline = Math.max(this._viewportBaseline, viewportHeight);
             }
             const imeVisible = eligible && this._imeIsVisible();
-            const shouldAutoCollapse = imeVisible && this._cellEditorHasFocus();
-            if (shouldAutoCollapse) {
+            if (imeVisible && editing) {
                 // Never claim a panel that the user had already hidden. That
                 // state must remain hidden after the keyboard closes.
                 if (!this.collapsed) {
                     this._imeAutoCollapsed = true;
                     this.setCollapsed(true, { reason: 'ime' });
                 }
+                if (this._imeAutoCollapsed) {
+                    this._clearImeExit();
+                    this._watchEditEnd(true);
+                }
                 return;
             }
-            // If an Apply/Cancel action removes the editor before Android has
-            // finished dismissing its keyboard, keep the footer out of the way
-            // until the visual viewport actually recovers. Explicit Show is
-            // still immediate because its ordinary setCollapsed() call clears
-            // _imeAutoCollapsed first.
-            if (this._imeAutoCollapsed && (!imeVisible || !eligible)) {
-                this._imeAutoCollapsed = false;
-                this.setCollapsed(false, { reason: 'ime', focus: false });
+            if (!this._imeAutoCollapsed) return;
+            if (!imeVisible || !eligible) {
+                this._endImeCollapse();
+                return;
             }
+            // The edit ended (Cancel, Apply, blur) while the viewport still
+            // looks keyboard-sized. Android may still be dismissing it, so
+            // avoid flashing the footer over it, but only briefly: an
+            // auto-collapse must never outlive its edit, or the composer and
+            // its (hidden) restore control would both be gone.
+            if (!this._imeExitTimer) {
+                this._imeExitTimer = setTimeout(() => {
+                    this._imeExitTimer = 0;
+                    if (this._imeAutoCollapsed && !this._cellEditorHasFocus()) {
+                        this._endImeCollapse();
+                    }
+                }, IME_EXIT_GRACE_MS);
+            }
+        }
+
+        _endImeCollapse() {
+            this._clearImeExit();
+            this._watchEditEnd(false);
+            this._imeAutoCollapsed = false;
+            this.setCollapsed(false, { reason: 'ime', focus: false });
+        }
+
+        _clearImeExit() {
+            if (this._imeExitTimer) clearTimeout(this._imeExitTimer);
+            this._imeExitTimer = 0;
+        }
+
+        /** While an auto-collapse is active, notice the edit ending however it
+         *  ends: removing a focused editor need not fire focusout. */
+        _watchEditEnd(on) {
+            if (!on) {
+                if (this._editWatch) this._editWatch.disconnect();
+                this._editWatch = null;
+                return;
+            }
+            if (this._editWatch || typeof MutationObserver !== 'function') return;
+            this._editWatch = new MutationObserver(() => this._queueImeSync());
+            this._editWatch.observe(document.body, {
+                childList: true, subtree: true, attributes: true, attributeFilter: ['class'],
+            });
         }
 
         _syncControls(eligible = this.isEligible()) {
@@ -444,6 +514,8 @@
             this._vvTarget = null;
             if (this._imeSyncFrame) cancelAnimationFrame(this._imeSyncFrame);
             this._imeSyncFrame = 0;
+            this._clearImeExit();
+            this._watchEditEnd(false);
             document.removeEventListener('pointerdown', this._onEdgePointerDown, true);
             document.removeEventListener('pointerup', this._onEdgePointerUp, true);
             document.removeEventListener('pointercancel', this._onEdgePointerCancel, true);

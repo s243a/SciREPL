@@ -559,7 +559,10 @@ try {
     await context.close();
 
     console.log('9. Existing-cell keyboards automatically reclaim landscape space');
-    const imeContext = await browser.newContext({ viewport: { width: 844, height: 390 } });
+    // A soft keyboard is only inferred on a device that can have one.
+    const imeContext = await browser.newContext({
+        viewport: { width: 844, height: 390 }, hasTouch: true,
+    });
     await imeContext.addInitScript(installPrelude);
     // Install the mutable viewport BEFORE production scripts initialize so the
     // test exercises their real startup baseline and listener attachment.
@@ -763,6 +766,90 @@ try {
     check('keyboard-focused interactions produced no page errors', imeErrors.length === 0,
         imeErrors.join(' | '));
     await imeContext.close();
+
+    console.log('10. A short window is not a keyboard, and an auto-collapse never outlives its edit');
+    // Shared helpers: open a page, create a Markdown cell and enter its editor.
+    async function openEditing(contextOptions) {
+        const ctx = await browser.newContext({ viewport: { width: 844, height: 390 }, ...contextOptions });
+        await ctx.addInitScript(installPrelude);
+        const pg = await ctx.newPage();
+        const errors = [];
+        pg.on('pageerror', error => errors.push(error.message));
+        await pg.goto(APP_URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
+        await pg.waitForFunction(() => window.__SCIREPL_APP_READY === true
+            && window.landscapeComposer && window.mathMode, null, { timeout: TIMEOUT });
+        if (!await pg.evaluate(() => document.getElementById('cell-type-toggle')
+            .classList.contains('markdown-active'))) {
+            await pg.click('#cell-type-toggle');
+        }
+        await pg.fill('#code-input', 'resize fixture');
+        await pg.click('#run-btn');
+        const id = await pg.locator('.card-input').filter({ hasText: 'resize fixture' })
+            .last().getAttribute('data-cell-id');
+        const card = pg.locator(`.card-input[data-cell-id="${id}"]`);
+        await card.locator('.cell-edit-btn').click();
+        await card.locator('.cell-editor').focus();
+        await settle(pg);
+        return { ctx, pg, card, errors };
+    }
+    const recoverable = pg => pg.evaluate(() => {
+        const visible = el => !!el && !el.hidden && el.offsetParent !== null;
+        return {
+            collapsed: window.landscapeComposer.collapsed,
+            composerVisible: visible(document.getElementById('code-input')),
+            restoreVisible: visible(document.getElementById('composer-restore-btn')),
+            toggleVisible: visible(document.getElementById('composer-toggle')),
+        };
+    });
+
+    // Sol's scenario: a desktop window (no touch) shrunk mid-edit, then Cancel.
+    let run = await openEditing({});
+    await run.pg.setViewportSize({ width: 844, height: 280 });
+    await settle(run.pg);
+    await settle(run.pg);
+    let st = await recoverable(run.pg);
+    check('desktop: shrinking the window mid-edit is not mistaken for a keyboard',
+        !st.collapsed && st.composerVisible, JSON.stringify(st));
+    await run.card.locator('.cell-cancel-btn').click();
+    await run.pg.waitForTimeout(600);
+    st = await recoverable(run.pg);
+    check('desktop: after Cancel the composer (or a restore control) is reachable',
+        st.composerVisible || st.restoreVisible, JSON.stringify(st));
+    check('desktop resize scenario produced no page errors', run.errors.length === 0,
+        run.errors.join(' | '));
+    await run.ctx.close();
+
+    // The same scenario on a touch device looks like a resize-mode keyboard
+    // while the editor is focused, so it may collapse; Cancel must undo it.
+    run = await openEditing({ hasTouch: true });
+    await run.pg.setViewportSize({ width: 844, height: 280 });
+    await run.pg.waitForFunction(() => window.landscapeComposer._imeAutoCollapsed);
+    await run.card.locator('.cell-cancel-btn').click();
+    await run.pg.waitForFunction(() => !window.landscapeComposer.collapsed, null, { timeout: 3000 });
+    st = await recoverable(run.pg);
+    check('touch: Cancel ends the auto-collapse even though the window stays short',
+        !st.collapsed && st.composerVisible && st.toggleVisible, JSON.stringify(st));
+    // The short window is now the baseline: editing again is not a keyboard.
+    await run.card.locator('.cell-edit-btn').click();
+    await run.card.locator('.cell-editor').focus();
+    await settle(run.pg);
+    await settle(run.pg);
+    check('touch: the baseline is re-learned after a real window resize',
+        !(await recoverable(run.pg)).collapsed);
+    await run.ctx.close();
+
+    // Blur without Cancel: the keyboard-sized viewport persists, focus leaves.
+    run = await openEditing({ hasTouch: true });
+    await run.pg.setViewportSize({ width: 844, height: 280 });
+    await run.pg.waitForFunction(() => window.landscapeComposer._imeAutoCollapsed);
+    await run.pg.evaluate(() => document.querySelector('.card-input.editing .cell-editor').blur());
+    await run.pg.waitForFunction(() => !window.landscapeComposer.collapsed, null, { timeout: 3000 });
+    st = await recoverable(run.pg);
+    check('touch: blurring the editor without Cancel restores the composer',
+        !st.collapsed && st.composerVisible, JSON.stringify(st));
+    check('every collapsed, eligible state left a way back', !st.collapsed || st.restoreVisible);
+    check('touch scenarios produced no page errors', run.errors.length === 0, run.errors.join(' | '));
+    await run.ctx.close();
 } finally {
     await browser.close();
 }
