@@ -71,15 +71,66 @@ check('Free/shared contents precede Pro contents',
   rootHelp.indexOf('Free and shared notebook help') < rootHelp.indexOf('Optional Pro extensions'));
 
 const csvTutorial = readFileSync(path.join(WWW, 'help/files-export/tutorial/index.html'), 'utf8');
+// Check the lesson's meaning without depending on emphasis tags or line wrapping.
+const helpText = html => html.replace(/<[^>]*>/g, ' ')
+  .replace(/&amp;/gi, '&').replace(/&nbsp;|&#160;/gi, ' ')
+  .replace(/&#39;|&apos;/gi, "'").replace(/&quot;/gi, '"')
+  .replace(/\s+/g, ' ').trim();
+const csvSection = id => (csvTutorial.match(new RegExp(
+  `<section\\b[^>]*\\bid=["']${id}["'][^>]*>([\\s\\S]*?)<\\/section>`, 'i')) || [])[1] || '';
+const csvText = helpText(csvTutorial);
+const csvChange = csvSection('change');
+const csvEdit = (csvChange.match(
+  /<div\b[^>]*\bid=["']edit-file["'][^>]*>([\s\S]*?)<\/div>/i) || [])[1] || '';
+const csvEditText = helpText(csvEdit);
+const csvExport = helpText(csvSection('export'));
+const csvReopen = csvSection('reopen');
+const csvReopenText = helpText(csvReopen);
+const proHighlighting = csvTutorial.match(
+  /<aside\b([^>]*\bid=["']pro-syntax-highlighting["'][^>]*)>([\s\S]*?)<\/aside>/i);
+const proHighlightingText = helpText(proHighlighting?.[2] || '');
 check('CSV tutorial begins in Browse', csvTutorial.indexOf('Browse Packages, Bundles &amp; Workbooks')
   < csvTutorial.indexOf('Run the cells in order'));
 check('CSV tutorial distinguishes workbook from data export',
-  csvTutorial.includes('does <strong>not</strong> include the separate CSV')
-    && csvTutorial.includes('Package (archive)'));
+  /does not include the separate CSV/i.test(csvExport)
+    && /Package\s*\(archive\)/i.test(csvExport));
 check('CSV tutorial shows how to inspect and edit the created file',
-  csvTutorial.includes('Menu → Files &amp; Storage')
-    && csvTutorial.includes('/shared/data/seedling-heights.csv')
-    && csvTutorial.includes('preview has <strong>Edit</strong> and <strong>Save</strong>'));
+  /Files\s*&\s*Storage/i.test(csvText)
+    && csvText.includes('/shared/data/seedling-heights.csv')
+    && /\bEdit\b/.test(csvText) && /\bSave\b/.test(csvText));
+check('CSV tutorial illustrates editing the CSV in Files & Storage',
+  /Files\s*&\s*Storage/i.test(csvEditText)
+    && csvEditText.includes('/shared/data/seedling-heights.csv')
+    && /\bEdit\b/.test(csvEditText) && /\bSave\b/.test(csvEditText)
+    && /<figure\b[\s\S]*?<img\b[^>]*\bsrc=["'][^"']+["']/i.test(csvEdit));
+check('CSV tutorial keeps optional syntax highlighting a Pro-only feature',
+  /\bdata-editions=["']pro["']/i.test(proHighlighting?.[1] || '')
+    && /Full[- ]screen/i.test(proHighlightingText)
+    && /Syntax highlighting/i.test(proHighlightingText)
+    && /optional/i.test(proHighlightingText)
+    && /(?:off|unchecked|disabled)\s+by default/i.test(proHighlightingText));
+check('CSV tutorial leaves CSV plain text and names supported Pro script extensions',
+  /\bCSV\b.{0,100}\bplain text\b|\bplain text\b.{0,100}\bCSV\b/i.test(proHighlightingText)
+    && ['.py', '.js', '.R', '.pl'].every(extension => proHighlightingText.includes(extension))
+    && /\.pl\b.{0,50}\bProlog\b|\bProlog\b.{0,50}\.pl\b/i.test(proHighlightingText));
+check('CSV tutorial packages both the workbook and CSV in a .zip archive',
+  /Package\s*\(archive\)/i.test(csvExport) && /\.zip\b/i.test(csvExport)
+    && /\bselect\b/i.test(csvExport) && /\bworkbook\b/i.test(csvExport)
+    && /\bCSV\b/i.test(csvExport) && /contents tree/i.test(csvExport));
+check('CSV tutorial links to reopening the package through Import Package',
+  !!csvReopen && /\bhref=["']#reopen["']/i.test(csvTutorial)
+    && /Import Package/i.test(csvReopenText) && /\.zip\b/i.test(csvReopenText));
+check('CSV tutorial verifies the imported data before rerunning its reading cells',
+  /Files\s*&\s*Storage/i.test(csvReopenText)
+    && csvReopenText.includes('/shared/data/seedling-heights.csv')
+    && /\b(?:check|inspect|verify|confirm|open)\b/i.test(csvReopenText)
+    && /\b(?:rerun|run)\b/i.test(csvReopenText)
+    && csvReopenText.indexOf('read_csv') >= 0
+    && csvReopenText.indexOf('/shared/data/seedling-heights.csv') < csvReopenText.indexOf('read_csv')
+    && csvReopenText.indexOf('read_csv') < csvReopenText.indexOf('compare_groups'));
+check('CSV tutorial warns against overwriting imported edits with create_csv',
+  /\b(?:do not|don['’]t|avoid|skip)\b.{0,180}\bcreate_csv\b/i.test(csvReopenText)
+    && /overwrit/i.test(csvReopenText));
 check('CSV tutorial offers a downloadable workbook before the next app release',
   /<a\s+download="csv-basics-seedlings\.srwb"\s+href="assets\/csv-basics-seedlings\.srwb"/.test(csvTutorial));
 
