@@ -195,6 +195,7 @@
     "whatsNew.highlightStatusBar": "Android puede ocultar la barra de estado para ganar espacio: elige Nunca, En horizontal o Siempre en Menú → Apariencia → Ocultar la barra de estado de Android. La barra de navegación nunca se oculta.",
     "whatsNew.highlightShortLandscapeComposer": "En horizontal con poca altura, oculta el panel de nueva celda para que el cuaderno use toda la altura. Vuelve a mostrarlo con el botón del encabezado o deslizando hacia arriba al final del cuaderno; también se oculta mientras el teclado está abierto al editar una celda.",
     "whatsNew.highlightHelpExamples": "Los ejemplos de la Ayuda tienen botones Copiar e Insertar. Insertar añade el ejemplo como una celda nueva al final del cuaderno sin ejecutarlo.",
+    "whatsNew.highlightPipConsent": "%pip install ahora pide aceptar la política de privacidad actual antes de poder conectarse a un índice de paquetes o al CDN, incluso para un paquete que ya parece instalado.",
     "whatsNew.releaseNotes": "Leer las notas de la versión completas",
     "menu.showTour": "🧭 Ver la guía",
     "searchReplaceRow.replace": "Reemplazar",

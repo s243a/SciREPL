@@ -112,6 +112,17 @@ try {
                 && /restore.*in Settings/i.test(closing)
                 && /generic binary/i.test(importing);
         }));
+    check('1.4.0 freezes the status-bar, landscape-composer, Help-example and %pip consent highlights',
+        await page.evaluate(() => {
+            const keys = window.SCIREPL_RELEASE_HIGHLIGHTS['1.4.0'] || [];
+            return keys.join(',') === [
+                'whatsNew.highlightStatusBar',
+                'whatsNew.highlightShortLandscapeComposer',
+                'whatsNew.highlightHelpExamples',
+                'whatsNew.highlightPipConsent',
+            ].join(',') && /%pip install/.test(window.t('whatsNew.highlightPipConsent'))
+                && /privacy policy/i.test(window.t('whatsNew.highlightPipConsent'));
+        }));
     check('the release link remains valid before a tag exists', /\/releases\/?$/.test(release.href), release.href);
     check('focus moves into the modal', release.focusInside);
     check('the display-language picker is above the release title', release.languageBeforeTitle);

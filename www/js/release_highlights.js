@@ -38,10 +38,12 @@
             'whatsNew.highlightAndroidCloudImport',
             'whatsNew.highlightAccessibility',
         ]),
-        unreleased: Object.freeze([
+        '1.4.0': Object.freeze([
             'whatsNew.highlightStatusBar',
             'whatsNew.highlightShortLandscapeComposer',
             'whatsNew.highlightHelpExamples',
+            'whatsNew.highlightPipConsent',
         ]),
+        unreleased: Object.freeze([]),
     });
 })();

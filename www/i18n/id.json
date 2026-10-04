@@ -194,6 +194,7 @@
     "whatsNew.highlightStatusBar": "Android dapat menyembunyikan bilah status agar layar lebih luas: pilih Tidak pernah, Dalam mode lanskap, atau Selalu di Menu → Tampilan → Sembunyikan bilah status Android. Bilah navigasi tidak pernah disembunyikan.",
     "whatsNew.highlightShortLandscapeComposer": "Pada layar lanskap pendek, sembunyikan panel sel baru agar buku catatan mendapat tinggi penuh. Munculkan kembali dengan tombol di header atau dengan menggeser ke atas di akhir buku catatan; panel juga tersembunyi saat papan ketik terbuka untuk sel yang sedang Anda edit.",
     "whatsNew.highlightHelpExamples": "Contoh di Bantuan kini memiliki tombol Salin dan Sisipkan. Sisipkan menambahkan contoh sebagai sel baru di akhir buku catatan tanpa menjalankannya.",
+    "whatsNew.highlightPipConsent": "%pip install kini meminta Anda menerima kebijakan privasi saat ini sebelum dapat mengakses indeks paket atau CDN, bahkan untuk paket yang tampak sudah terinstal.",
     "whatsNew.releaseNotes": "Baca catatan rilis lengkap",
     "menu.showTour": "🧭 Ikuti tur",
     "searchReplaceRow.replace": "Ganti",

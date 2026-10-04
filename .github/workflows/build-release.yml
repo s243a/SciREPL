@@ -46,6 +46,8 @@ jobs:
       - run: node tests/test_appearance.mjs
       - run: node tests/test_onboarding.mjs
       - run: npm run test:status-bar
+      - run: npm run test:landscape-composer
+      - run: node tests/test_help_examples.mjs
       - run: npm run test:android-back
       - run: npm run test:workbook-close-import
       - run: node tests/test_whats_new.mjs
