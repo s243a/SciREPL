@@ -303,38 +303,91 @@ try {
     await page.locator(`${bashBar} .help-example-undo`).click();
     await page.waitForTimeout(150);
     state = await page.evaluate(() => document.querySelector('#help-modal .help-examples-live').textContent);
-    check('Undo for an already-deleted cell announces nothing new',
-        state === liveBeforeUndo && !/removed/i.test(state), JSON.stringify({ liveBeforeUndo, state }));
+    check('Undo for an already-deleted cell deletes nothing and says so instead of "removed"',
+        state !== liveBeforeUndo && /^Not removed/.test(state), JSON.stringify({ liveBeforeUndo, state }));
 
-    /* --------------------- insert while a cell runs --------------------- */
-    console.log('\n4b. Insert while a cell is running');
-    await page.evaluate(() => {
-        // Simulate runCode()'s busy state: Run disabled, status "running".
-        document.getElementById('run-btn').disabled = true;
-        window.setI18nText(document.getElementById('status-badge'), 'app.status.running');
-        document.getElementById('status-badge').className = 'running';
+    /* ---------------- run state while cells execute --------------------- */
+    console.log('\n4b. Run state stays truthful while cells execute');
+    await page.evaluate(async () => {
+        const km = window.kernelManager;
+        await km.ensureReady('javascript');
+        // Hold any execution whose code contains HOLD_<name> until released.
+        window.__holds = {};
+        const original = km.execute.bind(km);
+        km.execute = (code, language) => {
+            const m = /HOLD_(\w+)/.exec(code);
+            if (!m) return original(code, language);
+            return new Promise((resolve) => {
+                window.__holds[m[1]] = () => resolve({ stdout: '', result: null, error: null });
+            });
+        };
+        const sel = document.getElementById('lang-selector');
+        sel.value = 'javascript';
+        sel.dispatchEvent(new Event('change'));
     });
+    const runState = () => page.evaluate(() => ({
+        runDisabled: document.getElementById('run-btn').disabled,
+        status: document.getElementById('status-badge').getAttribute('data-i18n'),
+    }));
+    const startHeldRun = async (name) => {
+        await page.evaluate(() => document.getElementById('help-modal').classList.add('hidden'));
+        await page.fill('#code-input', `// HOLD_${name}`);
+        await page.click('#run-btn');
+        await page.waitForFunction((k) => Boolean(window.__holds[k]), name, { timeout: TIMEOUT });
+    };
+
+    // (a) A cell is running while an example is inserted.
+    await startHeldRun('a');
+    await openHelp(page);
     n = await page.evaluate(() => window._cells.length);
     await page.locator('#help-modal .help-example:has(> pre[data-example-lang="r"]) .help-example-insert').first().click();
     await page.waitForFunction((c) => window._cells.length === c + 1, n, { timeout: TIMEOUT });
     await page.waitForTimeout(100);
-    state = await page.evaluate(() => {
-        const badge = document.getElementById('status-badge');
+    state = await runState();
+    check('(a) Insert during a running cell leaves Run disabled and the status running',
+        state.runDisabled && state.status === 'app.status.running', JSON.stringify(state));
+    await page.evaluate(() => window.__holds.a());
+    await page.waitForFunction(() => !document.getElementById('run-btn').disabled, null, { timeout: TIMEOUT });
+    state = await runState();
+    check('(a) when that cell finishes, Run is enabled and Ready', !state.runDisabled
+        && state.status === 'status.ready', JSON.stringify(state));
+
+    // (b) An executing import ends enabled and Ready.
+    state = await page.evaluate(async () => {
+        await window.importCells([{ code: '1 + 1', type: 'code', language: 'javascript' }],
+            { autoExecute: true });
         return {
             runDisabled: document.getElementById('run-btn').disabled,
-            statusKey: badge.getAttribute('data-i18n'),
-            statusClass: badge.className,
+            status: document.getElementById('status-badge').getAttribute('data-i18n'),
         };
     });
-    check('Insert during a running cell leaves Run disabled', state.runDisabled, JSON.stringify(state));
-    check('Insert during a running cell does not claim Ready',
-        state.statusKey !== 'status.ready' && state.statusClass === 'running', JSON.stringify(state));
+    check('(b) an autoExecute import ends with Run enabled and Ready',
+        !state.runDisabled && state.status === 'status.ready', JSON.stringify(state));
+
+    // (c) A running cell finishes while an import is still in flight.
+    await startHeldRun('c1');
     await page.evaluate(() => {
-        document.getElementById('run-btn').disabled = false;
-        window.setI18nText(document.getElementById('status-badge'), 'status.ready');
-        document.getElementById('status-badge').className = 'ready';
+        window.__importDone = false;
+        window.importCells([{ code: '// HOLD_c2', type: 'code', language: 'javascript' }],
+            { autoExecute: true }).then(() => { window.__importDone = true; });
     });
-    await page.evaluate(() => document.getElementById('help-modal').classList.add('hidden'));
+    await page.waitForFunction(() => Boolean(window.__holds.c2), null, { timeout: TIMEOUT });
+    await page.evaluate(() => window.__holds.c1());
+    await page.waitForTimeout(150);
+    state = await runState();
+    check('(c) the finished cell does not re-enable Run while the import still runs',
+        state.runDisabled, JSON.stringify(state));
+    await page.evaluate(() => window.__holds.c2());
+    await page.waitForFunction(() => window.__importDone, null, { timeout: TIMEOUT });
+    state = await runState();
+    check('(c) once both finish, Run is enabled and Ready',
+        !state.runDisabled && state.status === 'status.ready', JSON.stringify(state));
+    await page.fill('#code-input', '');
+    await page.evaluate(() => {
+        const sel = document.getElementById('lang-selector');
+        sel.value = 'python';
+        sel.dispatchEvent(new Event('change'));
+    });
 
     /* ------------------- insert while a cell is edited ------------------ */
     console.log('\n5. Insert while another cell is being edited');
@@ -372,6 +425,92 @@ try {
     }), editId);
     check('the edit can still be cancelled normally afterwards', !state.editing);
     await page.fill('#code-input', '');
+
+    /* ---------------- Show / Undo across notebooks ---------------------- */
+    console.log('\n5b. Show and Undo stay bound to the notebook that received the cell');
+    const nbs = await page.evaluate(() => {
+        const nm = window.notebookManager;
+        return { a: nm.getActiveNotebook().id, b: nm.createNotebook({ name: 'Other' }).id };
+    });
+    const pyBar = '#help-modal .help-example:has(> pre[data-example-lang="python"])';
+    const insertInto = async (bar) => {
+        await openHelp(page);
+        const count = await page.evaluate(() => window._cells.length);
+        await page.locator(`${bar} .help-example-insert`).first().click();
+        await page.waitForFunction((c) => window._cells.length === c + 1, count, { timeout: TIMEOUT });
+        return page.evaluate(() => window._cells[window._cells.length - 1].id);
+    };
+
+    // Undo after switching to a notebook that has a cell with the same id.
+    const undoId = await insertInto(pyBar);
+    state = await page.evaluate(async ({ b, id }) => {
+        window.notebookManager.switchTo(b);
+        window._cellCounter = id - 1;
+        const [twin] = await window.importCells([{ code: 'twin = True', type: 'code', language: 'python' }]);
+        return { twinId: twin.id };
+    }, { b: nbs.b, id: undoId });
+    check('the other notebook now has a cell with the same id', state.twinId === undoId, JSON.stringify(state));
+    await page.locator(`${pyBar} .help-example-undo`).first().click();
+    await page.waitForTimeout(150);
+    state = await page.evaluate(({ a, id }) => {
+        const nm = window.notebookManager;
+        return {
+            twinSurvives: window._cells.some((c) => c.id === id && c.code === 'twin = True'),
+            originalSurvives: nm.getNotebook(a).cells.some((c) => c.id === id),
+            notice: document.querySelector('#help-modal .help-example:has(> pre[data-example-lang="python"]) .help-example-notice-text').textContent,
+            live: document.querySelector('#help-modal .help-examples-live').textContent,
+            stillActive: nm.getActiveNotebook().id,
+        };
+    }, { a: nbs.a, id: undoId });
+    check('Undo after a notebook switch deletes nothing: the same-id cell in the open notebook survives',
+        state.twinSurvives && state.originalSurvives, JSON.stringify(state));
+    check('Undo explains why nothing was removed', /Not removed/.test(state.notice) && /Not removed/.test(state.live)
+        && state.stillActive === nbs.b, JSON.stringify(state));
+
+    // Show switches back to the notebook that received the cell.
+    await page.evaluate((a) => window.notebookManager.switchTo(a), nbs.a);
+    const bashBar2 = '#help-modal .help-example:has(> pre[data-example-lang="bash"])';
+    const showId = await insertInto(bashBar2);
+    await page.evaluate(() => { window.__shown = window._cells[window._cells.length - 1]; });
+    await page.evaluate((b) => window.notebookManager.switchTo(b), nbs.b);
+    await page.locator(`${bashBar2} .help-example-show`).click();
+    // The notebook scroller animates (scroll-behavior: smooth); wait for it.
+    await page.waitForFunction(() => {
+        const r = window.__shown.inputCard.getBoundingClientRect();
+        return r.bottom > 0 && r.top < innerHeight;
+    }, null, { timeout: 5000 }).catch(() => {});
+    state = await page.evaluate(({ a, id }) => {
+        const card = window.__shown.inputCard;
+        const r = card.getBoundingClientRect();
+        return {
+            active: window.notebookManager.getActiveNotebook().id === a,
+            helpHidden: document.getElementById('help-modal').classList.contains('hidden'),
+            focused: document.activeElement === card,
+            visible: card.isConnected && card.getClientRects().length > 0 && r.bottom > 0 && r.top < innerHeight,
+            id: window.__shown.id === id,
+        };
+    }, { a: nbs.a, id: showId });
+    check('Show switches back to the receiving notebook and focuses the inserted cell',
+        state.active && state.helpHidden && state.focused && state.visible && state.id, JSON.stringify(state));
+
+    // Show when the receiving notebook has been closed.
+    await page.evaluate((b) => window.notebookManager.switchTo(b), nbs.b);
+    await insertInto(bashBar2);
+    await page.evaluate(({ a, b }) => {
+        const nm = window.notebookManager;
+        nm.switchTo(a);
+        nm.removeNotebook(b);
+    }, nbs);
+    await page.locator(`${bashBar2} .help-example-show`).click();
+    await page.waitForTimeout(200);
+    state = await page.evaluate(() => ({
+        helpHidden: document.getElementById('help-modal').classList.contains('hidden'),
+        focus: document.activeElement && document.activeElement.id,
+        live: document.querySelector('body > .help-examples-live')?.textContent || '',
+    }));
+    check('Show for a closed notebook closes Help, focuses the Help button and says why',
+        state.helpHidden && state.focus === 'help-btn' && /no longer available/.test(state.live),
+        JSON.stringify(state));
 
     /* ------------------------------- copy ------------------------------- */
     console.log('\n6. Copy');

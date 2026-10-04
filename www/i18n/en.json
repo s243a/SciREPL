@@ -30,6 +30,14 @@
     "Session-AppState": "The current working state of the app. Not a meeting or a class."
   },
   "__senseOf": {
+    "help.exampleUndoUnavailable": [
+      "Cell-Notebook",
+      "Notebook-Document"
+    ],
+    "help.exampleShowUnavailable": [
+      "Cell-Notebook",
+      "Notebook-Document"
+    ],
     "help.exampleInsertAria": [
       "Cell-Notebook",
       "Notebook-Document"
@@ -194,6 +202,8 @@
     ]
   },
   "__context": {
+    "help.exampleUndoUnavailable": "Shown and announced when Undo cannot safely remove the inserted cell because the user switched notebooks or the cell is gone. Nothing was deleted.",
+    "help.exampleShowUnavailable": "Announced after Help closes when Show cannot find the inserted cell (deleted, or its notebook was closed).",
     "whatsNew.highlightStatusBar": "Release highlight for the Android-only status-bar setting. Reuse the existing translations of the menu path and of Never / In landscape / Always.",
     "whatsNew.highlightShortLandscapeComposer": "Release highlight. The new-cell panel is the composer at the bottom (see composer.collapse), not an existing cell's editor. 'Short landscape' means a landscape screen with little height.",
     "help.exampleCopy": "Button above each code example in Help: copies the example's code to the clipboard. Keep it one short word.",
@@ -715,6 +725,8 @@
     "help.exampleShow": "Show",
     "help.exampleUndo": "Undo",
     "help.exampleRemoved": "Example cell removed",
+    "help.exampleUndoUnavailable": "Not removed: the inserted cell is in another notebook or was already deleted.",
+    "help.exampleShowUnavailable": "The inserted cell is no longer available; it may have been deleted or its notebook closed.",
     "help.exampleCopyFailed": "Could not copy. The code is selected so you can copy it manually.",
     "appearance.showDrafts": "Include translations under review",
     "appearance.showDraftsHelp": "Most translations have not yet been checked by a speaker of the language. They are offered anyway, and labelled, because an interface you can read beats one you cannot. Turn this off to see only reviewed translations.",

@@ -439,6 +439,8 @@
     "help.exampleShow": "查看",
     "help.exampleUndo": "撤销",
     "help.exampleRemoved": "已移除示例单元格",
+    "help.exampleUndoUnavailable": "未移除：插入的单元格位于其他笔记本中，或已被删除。",
+    "help.exampleShowUnavailable": "插入的单元格已不可用，可能已被删除或其所在笔记本已关闭。",
     "help.exampleCopyFailed": "无法复制。代码已选中，请手动复制。",
     "appearance.showDrafts": "包含正在审核中的翻译",
     "appearance.showDraftsHelp": "大部分翻译尚未经过母语人士的校对。但由于可读的界面总好过无法理解的界面，因此我们仍提供这些翻译并予以标注。关闭此项可仅查看已审核的翻译。",

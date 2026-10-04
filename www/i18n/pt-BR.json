@@ -446,6 +446,8 @@
     "help.exampleShow": "Mostrar",
     "help.exampleUndo": "Desfazer",
     "help.exampleRemoved": "Célula de exemplo removida",
+    "help.exampleUndoUnavailable": "Não removida: a célula inserida está em outro caderno ou já foi excluída.",
+    "help.exampleShowUnavailable": "A célula inserida não está mais disponível; ela pode ter sido excluída ou seu caderno, fechado.",
     "help.exampleCopyFailed": "Não foi possível copiar. O código está selecionado para você copiar manualmente.",
     "appearance.showDrafts": "Incluir traduções em revisão",
     "appearance.showDraftsHelp": "A maioria das traduções ainda não foi verificada por um falante do idioma. Elas são oferecidas mesmo assim, e rotuladas, porque uma interface compreensível é melhor que uma que você não consiga ler. Desative isso para ver apenas traduções revisadas.",

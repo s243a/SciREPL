@@ -71,6 +71,29 @@
         if (className) badge.className = className;
     }
 
+    // Run-state ownership. Several paths execute code (the composer, cell
+    // re-runs, imports with autoExecute) and they can overlap: an Insert from
+    // Help may land while a cell is running. Each path brackets its work with
+    // beginRun()/endRun(); only the last one to finish re-enables Run and
+    // reports Ready, so no path restores a stale snapshot of another's state.
+    let runsInFlight = 0;
+
+    function beginRun() {
+        runsInFlight++;
+        runBtn.disabled = true;
+    }
+
+    function endRun() {
+        runsInFlight = Math.max(0, runsInFlight - 1);
+        if (runsInFlight === 0) {
+            setStatus('status.ready', undefined, 'ready');
+            runBtn.disabled = false;
+        } else {
+            runBtn.disabled = true;
+            setStatus('app.status.running', undefined, 'running');
+        }
+    }
+
     function clearUiText(el) {
         if (!el) return;
         el.textContent = '';
@@ -1246,6 +1269,15 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
     // ---- Re-run a cell ----
 
     async function reRunCell(cellId, code) {
+        beginRun();
+        try {
+            await reRunCellInner(cellId, code);
+        } finally {
+            endRun();
+        }
+    }
+
+    async function reRunCellInner(cellId, code) {
         const cell = window._cells.find(c => c.id === cellId);
         if (!cell) return;
 
@@ -1290,7 +1322,6 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                     language: langLabel(language) || language,
                     message: err.message
                 }), true);
-                setStatus('status.ready', undefined, 'ready');
                 return;
             }
         }
@@ -1343,10 +1374,9 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
             }
             window.renderText(err && err.message ? err.message : String(err), true);
         } finally {
-            // Always re-enable the cell, even if error rendering itself threw
+            // Run/Ready are restored by reRunCell()'s endRun(), which also
+            // runs when error rendering itself threw.
             window._currentOutputCard = null;
-            setStatus('status.ready', undefined, 'ready');
-            runBtn.disabled = false;
         }
         saveCellsToSession();
     }
@@ -1732,10 +1762,22 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         return promise;
     };
 
+    // An import may overlap a running cell (an Insert from Help) or execute
+    // its own cells (autoExecute); beginRun/endRun keep Run and the status
+    // badge truthful for whichever finishes last.
     window._processImport = async function (cellDefs, autoExecute) {
+        if (!window.kernelManager) return [];
+        beginRun();
+        try {
+            return await processImportInner(cellDefs, autoExecute);
+        } finally {
+            endRun();
+        }
+    };
+
+    async function processImportInner(cellDefs, autoExecute) {
         const km = window.kernelManager;
         const created = [];
-        if (!km) return created;
 
         // Lock to the target notebook — if the user switches tabs during an
         // await (e.g. kernel download), switch back before creating each cell
@@ -1743,15 +1785,6 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         const targetNb = nm && nm.getActiveNotebook();
         const targetId = targetNb ? targetNb.id : null;
 
-        // An import can arrive while a cell is still running (for example an
-        // Insert from Help). Remember that state so the end of the import does
-        // not re-enable Run or claim "Ready" underneath the running cell.
-        const runWasDisabled = runBtn.disabled;
-        const priorStatus = {
-            key: badge.getAttribute('data-i18n'),
-            vars: badge.getAttribute('data-i18n-vars'),
-            className: badge.className,
-        };
         setStatus('app.status.importing', undefined, 'running');
         runBtn.disabled = true;
 
@@ -1840,21 +1873,23 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
         saveCellsToSession();
         if (window.notebookManager) window.notebookManager.saveState();
-        if (!runWasDisabled) {
-            setStatus('status.ready', undefined, 'ready');
-        } else if (priorStatus.key) {
-            let vars;
-            try { vars = priorStatus.vars ? JSON.parse(priorStatus.vars) : undefined; } catch (_) { vars = undefined; }
-            setStatus(priorStatus.key, vars, priorStatus.className);
-        }
-        runBtn.disabled = runWasDisabled;
         getRepl().scrollTop = getRepl().scrollHeight;
         return created;
-    };
+    }
 
     // ---- Run from input bar (new cell) ----
 
     async function runCode() {
+        if (!input.value.trim()) return;
+        beginRun();
+        try {
+            await runCodeInner();
+        } finally {
+            endRun();
+        }
+    }
+
+    async function runCodeInner() {
         const code = input.value.trim();
         if (!code) return;
 
@@ -1877,8 +1912,6 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                         language: langLabel(language) || language,
                         message: err.message
                     }));
-                    runBtn.disabled = false;
-                    setStatus('status.ready', undefined, 'ready');
                     return;
                 }
             }
@@ -1951,14 +1984,12 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 }
                 window.renderText(err && err.message ? err.message : String(err), true);
             } finally {
-                // Always re-enable the input bar, even if error rendering itself threw
+                // Run/Ready are restored by runCode()'s endRun(), which also
+                // runs when error rendering itself threw.
                 window._currentOutputCard = null;
-                setStatus('status.ready', undefined, 'ready');
-                runBtn.disabled = false;
             }
         }
 
-        runBtn.disabled = false;
         input.value = '';
         if (window.sessionManager) {
             window.sessionManager.session.historyIndex = -1;

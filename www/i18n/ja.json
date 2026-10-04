@@ -440,6 +440,8 @@
     "help.exampleShow": "表示",
     "help.exampleUndo": "元に戻す",
     "help.exampleRemoved": "コード例のセルを削除しました",
+    "help.exampleUndoUnavailable": "削除されませんでした: 挿入したセルは別のノートブックにあるか、すでに削除されています。",
+    "help.exampleShowUnavailable": "挿入したセルはもう利用できません。削除されたか、そのノートブックが閉じられた可能性があります。",
     "help.exampleCopyFailed": "コピーできませんでした。コードが選択されていますので、手動でコピーしてください。",
     "appearance.showDrafts": "校閲中の翻訳を含める",
     "appearance.showDraftsHelp": "ほとんどの翻訳はまだ話者による確認が行われていません。読めないインターフェースより読める方が良いため、ラベルを付けた上で提供されています。確認済みの翻訳のみを表示するには、これをオフにしてください。",

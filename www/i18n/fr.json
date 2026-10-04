@@ -451,6 +451,8 @@
     "help.exampleShow": "Afficher",
     "help.exampleUndo": "Annuler",
     "help.exampleRemoved": "Cellule d’exemple supprimée",
+    "help.exampleUndoUnavailable": "Non supprimée : la cellule insérée se trouve dans un autre carnet ou a déjà été supprimée.",
+    "help.exampleShowUnavailable": "La cellule insérée n’est plus disponible ; elle a peut-être été supprimée ou son carnet fermé.",
     "help.exampleCopyFailed": "Copie impossible. Le code est sélectionné pour que vous puissiez le copier manuellement.",
     "appearance.showDrafts": "Inclure les traductions en cours de révision",
     "appearance.showDraftsHelp": "La plupart des traductions n'ont pas encore été vérifiées par une personne parlant la langue. Elles sont néanmoins proposées et étiquetées, car une interface lisible vaut mieux qu'une interface incompréhensible. Désactivez cette option pour ne voir que les traductions révisées.",

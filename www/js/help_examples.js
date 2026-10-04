@@ -168,6 +168,52 @@
         if (!modal.classList.contains('hidden')) modal.classList.add('hidden');
     }
 
+    /*
+     * An inserted cell is remembered as { cell, notebookId }: the cell OBJECT
+     * (ids repeat across notebooks, so a numeric id alone could name some
+     * other notebook's cell) and the notebook that received it. Show and Undo
+     * act only when that exact object is in the open notebook's cell list.
+     */
+    function notebookManager() {
+        const nm = window.notebookManager;
+        return nm && typeof nm.getActiveNotebook === 'function' ? nm : null;
+    }
+
+    function activeNotebookId() {
+        const nm = notebookManager();
+        const active = nm && nm.getActiveNotebook();
+        return active ? active.id : null;
+    }
+
+    function notebookIdOf(cell) {
+        if ((window._cells || []).includes(cell)) return activeNotebookId();
+        const nm = notebookManager();
+        const all = nm && typeof nm.getNotebooks === 'function' ? nm.getNotebooks() : [];
+        const owner = all.find((nb) => Array.isArray(nb.cells) && nb.cells.includes(cell));
+        return owner ? owner.id : null;
+    }
+
+    /** True when the remembered cell is that same object in the open notebook. */
+    function isLive(target) {
+        if (!target || !target.cell) return false;
+        if (target.notebookId !== null && activeNotebookId() !== target.notebookId) return false;
+        return (window._cells || []).includes(target.cell);
+    }
+
+    /**
+     * Make the target's notebook the open one through the app's own switch
+     * path (as a tab click would). Returns whether the cell is now live.
+     */
+    function revealNotebook(target) {
+        if (isLive(target)) return true;
+        const nm = notebookManager();
+        if (!target || target.notebookId === null || !nm || typeof nm.switchTo !== 'function') return false;
+        const nb = typeof nm.getNotebook === 'function' ? nm.getNotebook(target.notebookId) : null;
+        if (!nb || !Array.isArray(nb.cells) || !nb.cells.includes(target.cell)) return false;
+        nm.switchTo(target.notebookId);
+        return isLive(target);
+    }
+
     function showCell(cell) {
         const card = cell && cell.inputCard;
         if (!card || !card.isConnected) return false;
@@ -237,12 +283,20 @@
         // or screen readers may miss the first announcement.
         liveRegionFor(wrapper);
 
-        let lastCell = null;
+        let lastInsert = null;
         let noticeTimer = 0;
         const hideNotice = () => {
             clearTimeout(noticeTimer);
             notice.hidden = true;
-            lastCell = null;
+            lastInsert = null;
+        };
+        const showNotice = (key, vars, withActions) => {
+            setText(noticeText, key, vars);
+            showBtn.hidden = !withActions;
+            undoBtn.hidden = !withActions;
+            notice.hidden = false;
+            clearTimeout(noticeTimer);
+            noticeTimer = setTimeout(hideNotice, NOTICE_MS);
         };
 
         copy.button.addEventListener('click', async () => {
@@ -269,12 +323,10 @@
                     ? created[created.length - 1]
                     : (window._cells || [])[(window._cells || []).length - 1];
                 if (!cell) return;
-                lastCell = cell;
+                const added = { cell, notebookId: notebookIdOf(cell) };
                 flash(insert.button, insert.labelEl, 'help.exampleAdded', 'help.exampleInsert');
-                setText(noticeText, 'help.exampleAddedAsCell', { cellId: String(cell.id) });
-                notice.hidden = false;
-                clearTimeout(noticeTimer);
-                noticeTimer = setTimeout(hideNotice, NOTICE_MS);
+                showNotice('help.exampleAddedAsCell', { cellId: String(cell.id) }, true);
+                lastInsert = added;
                 announce(wrapper, 'help.exampleAddedAsCell', { cellId: String(cell.id) });
             } finally {
                 insert.button.disabled = false;
@@ -282,31 +334,41 @@
         });
 
         showBtn.addEventListener('click', () => {
-            const cell = lastCell;
+            const target = lastInsert;
             hideNotice();
+            const live = revealNotebook(target);
             closeOwningModal(wrapper);
-            if (!showCell(cell)) {
+            if (!live || !showCell(target.cell)) {
                 const helpBtn = document.getElementById('help-btn');
                 if (helpBtn) helpBtn.focus();
+                announce(document.body, 'help.exampleShowUnavailable');
             }
         });
 
         undoBtn.addEventListener('click', () => {
-            const cell = lastCell;
+            const target = lastInsert;
             hideNotice();
-            if (!cell || typeof window.deleteCell !== 'function') return;
-            const exists = (window._cells || []).some((c) => c.id === cell.id);
-            if (exists) {
-                window.deleteCell(cell.id);
-                announce(wrapper, 'help.exampleRemoved');
-            }
             insert.button.focus();
+            if (!target || typeof window.deleteCell !== 'function') return;
+            // Never delete by id alone: the open notebook may hold a different
+            // cell with the same number.
+            const sameObject = isLive(target)
+                && (window._cells || []).find((c) => c.id === target.cell.id) === target.cell;
+            if (!sameObject) {
+                showNotice('help.exampleUndoUnavailable', undefined, false);
+                announce(wrapper, 'help.exampleUndoUnavailable');
+                return;
+            }
+            window.deleteCell(target.cell.id);
+            announce(wrapper, 'help.exampleRemoved');
         });
     }
 
     /** Decorate every tagged example below root (idempotent). */
     function init(root = document) {
         for (const pre of root.querySelectorAll('pre[data-example-lang]')) decorate(pre);
+        // Announcements made after Help closes (Show could not find the cell).
+        if (document.body) liveRegionFor(document.body);
     }
 
     window.helpExamples = { init, copyText, exampleCode };

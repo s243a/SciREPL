@@ -454,6 +454,8 @@
     "help.exampleShow": "Anzeigen",
     "help.exampleUndo": "Rückgängig machen",
     "help.exampleRemoved": "Beispielzelle entfernt",
+    "help.exampleUndoUnavailable": "Nicht entfernt: Die eingefügte Zelle befindet sich in einem anderen Notebook oder wurde bereits gelöscht.",
+    "help.exampleShowUnavailable": "Die eingefügte Zelle ist nicht mehr verfügbar; sie wurde möglicherweise gelöscht oder ihr Notebook geschlossen.",
     "help.exampleCopyFailed": "Kopieren nicht möglich. Der Code ist markiert, sodass Sie ihn manuell kopieren können.",
     "appearance.showDrafts": "Übersetzungen in Prüfung einbeziehen",
     "appearance.showDraftsHelp": "Die meisten Übersetzungen wurden noch nicht von einem Muttersprachler überprüft. Sie werden dennoch angeboten und gekennzeichnet, da eine lesbare Oberfläche besser ist als eine unlesbare. Deaktivieren Sie dies, um nur überprüfte Übersetzungen anzuzeigen.",
