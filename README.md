@@ -84,8 +84,10 @@ This requires the Android SDK and Java toolchain. The build command prepares the
 ### Install via ADB
 
 ```bash
-adb install android/app/build/outputs/apk/debug/app-debug.apk
+adb install --user 0 android/app/build/outputs/apk/debug/app-debug.apk
 ```
+
+Debug builds install as `com.unifyweaver.scirepl.debug`, labelled "Sci REPL (debug)" with a red bug badge on the launcher icon, so they sit alongside the Play Store app (`com.unifyweaver.scirepl`) instead of replacing it. The two keep separate app data. `--user 0` (or `pm install --user 0` on the device) installs for the main user only, not into a work profile or other users. Debug-only resources live in `android/app/src/debug/res/`; after changing the release icons, regenerate the badged copies with `python3 scripts/make-debug-launcher-icons.py` (needs Pillow).
 
 ### Install as PWA
 
