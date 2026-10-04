@@ -79,6 +79,8 @@
     "appearance.layout": "Layout",
     "appearance.topMargin": "Oberer Rand",
     "appearance.topMarginAuto": "Automatisch",
+    "composer.collapse": "Bereich für neue Zellen ausblenden",
+    "composer.expand": "Bereich für neue Zellen einblenden",
     "appearance.statusBarMode": "Android-Statusleiste ausblenden",
     "appearance.statusBarNever": "Nie",
     "appearance.statusBarLandscape": "Im Querformat",

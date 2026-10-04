@@ -73,6 +73,8 @@
     "appearance.layout": "Diseño",
     "appearance.topMargin": "Margen superior",
     "appearance.topMarginAuto": "Automático",
+    "composer.collapse": "Ocultar el panel de nueva celda",
+    "composer.expand": "Mostrar el panel de nueva celda",
     "appearance.statusBarMode": "Ocultar la barra de estado de Android",
     "appearance.statusBarNever": "Nunca",
     "appearance.statusBarLandscape": "En horizontal",

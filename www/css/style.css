@@ -209,12 +209,26 @@ html, body {
 }
 
 #app-header h1 {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     font-size: 18px;
     font-weight: 700;
+}
+
+/* The gradient is clipped to the title text only, so the composer restore
+   control that shares the heading keeps its ordinary icon colour. */
+#app-header h1 .app-title-text {
     background: linear-gradient(135deg, var(--accent), #a371f7);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+/* While the landscape composer is collapsed its restore control takes the
+   title's place, rather than spending scarce mobile width in the header. */
+#app-header.composer-is-collapsed .app-title-text {
+    display: none;
 }
 
 #status-badge {
@@ -1569,6 +1583,61 @@ html, body {
     display: flex;
     gap: 8px;
     align-items: flex-end;
+}
+
+/* The main composer fields behave like their historical direct flex children.
+   The wrapper gives the landscape handle one semantic region to control without
+   changing the row's geometry. */
+#composer-content {
+    display: contents;
+}
+#composer-content[hidden] {
+    display: none;
+}
+
+/* Short-landscape control. JavaScript removes `hidden` only while the compact
+   layout is eligible; the media query is a second guard against a stale frame
+   during rotation. */
+#composer-toggle {
+    display: none;
+    flex: 0 0 44px;
+    width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--accent);
+    font: 600 13px/1.2 var(--font-sans);
+    cursor: pointer;
+    touch-action: none;
+}
+
+#composer-restore-btn[hidden] {
+    display: none;
+}
+.composer-toggle-glyph {
+    font-size: 20px;
+    line-height: 1;
+}
+.composer-toggle-label {
+    display: none;
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+    #composer-toggle:not([hidden]) {
+        display: inline-flex;
+    }
+
+    /* Once collapsed the restore control lives in the header. The entire
+       footer leaves layout, giving the notebook every available vertical
+       pixel rather than retaining a one-button footer row. */
+    #input-bar.composer-collapsed {
+        display: none;
+    }
 }
 
 /* The formula button hides when the composer language has no palette. */
@@ -3153,7 +3222,7 @@ body.force-mobile .vfs-delete-btn {
 
 /* The header title is a gradient clipped to the text; on light backgrounds the
    dark-theme gradient is close to invisible, so it gets its own pairing. */
-:root[data-theme="light"] #app-header h1 {
+:root[data-theme="light"] #app-header h1 .app-title-text {
     background: linear-gradient(135deg, var(--accent), #8250df);
     -webkit-background-clip: text;
     background-clip: text;

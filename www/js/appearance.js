@@ -1125,6 +1125,9 @@
             window.addEventListener('resize', refit);
             window.addEventListener('orientationchange', refit);
             document.addEventListener('i18n:changed', refit);
+            // The landscape composer's header restore control appears and
+            // disappears with the collapsed state (composer_collapse.js).
+            document.addEventListener('scirepl:header-controls-changed', refit);
 
             // The header also changes width on its own: the status badge grows
             // from "ready" to "loading ClojureScript…" and shrinks back, and the

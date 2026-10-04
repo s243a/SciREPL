@@ -311,6 +311,8 @@
     "appearance.layout": "Layout",
     "appearance.topMargin": "Top margin",
     "appearance.topMarginAuto": "Auto",
+    "composer.collapse": "Hide new-cell panel",
+    "composer.expand": "Show new-cell panel",
     "appearance.statusBarMode": "Hide Android status bar",
     "appearance.statusBarNever": "Never",
     "appearance.statusBarLandscape": "In landscape",

@@ -64,6 +64,8 @@
     "appearance.layout": "레이아웃",
     "appearance.topMargin": "상단 여백",
     "appearance.topMarginAuto": "자동",
+    "composer.collapse": "새 셀 패널 숨기기",
+    "composer.expand": "새 셀 패널 표시",
     "appearance.statusBarMode": "Android 상태 표시줄 숨기기",
     "appearance.statusBarNever": "안 함",
     "appearance.statusBarLandscape": "가로 모드에서",

@@ -76,6 +76,8 @@
     "appearance.layout": "Disposition",
     "appearance.topMargin": "Marge supérieure",
     "appearance.topMarginAuto": "Automatique",
+    "composer.collapse": "Masquer le panneau de nouvelle cellule",
+    "composer.expand": "Afficher le panneau de nouvelle cellule",
     "appearance.statusBarMode": "Masquer la barre d’état Android",
     "appearance.statusBarNever": "Jamais",
     "appearance.statusBarLandscape": "En mode paysage",

@@ -64,6 +64,8 @@
     "appearance.layout": "लेआउट",
     "appearance.topMargin": "शीर्ष मार्जिन",
     "appearance.topMarginAuto": "स्वचालित",
+    "composer.collapse": "नई सेल का पैनल छिपाएँ",
+    "composer.expand": "नई सेल का पैनल दिखाएँ",
     "appearance.statusBarMode": "Android स्टेटस बार छिपाएँ",
     "appearance.statusBarNever": "कभी नहीं",
     "appearance.statusBarLandscape": "लैंडस्केप में",

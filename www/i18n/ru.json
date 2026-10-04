@@ -64,6 +64,8 @@
     "appearance.layout": "Макет",
     "appearance.topMargin": "Верхний отступ",
     "appearance.topMarginAuto": "Авто",
+    "composer.collapse": "Скрыть панель новой ячейки",
+    "composer.expand": "Показать панель новой ячейки",
     "appearance.statusBarMode": "Скрывать строку состояния Android",
     "appearance.statusBarNever": "Никогда",
     "appearance.statusBarLandscape": "В альбомном режиме",

@@ -65,6 +65,8 @@
     "appearance.layout": "レイアウト",
     "appearance.topMargin": "上部マージン",
     "appearance.topMarginAuto": "自動",
+    "composer.collapse": "新規セルパネルを隠す",
+    "composer.expand": "新規セルパネルを表示",
     "appearance.statusBarMode": "Android のステータスバーを隠す",
     "appearance.statusBarNever": "しない",
     "appearance.statusBarLandscape": "横向きのとき",

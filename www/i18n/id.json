@@ -72,6 +72,8 @@
     "appearance.layout": "Tata Letak",
     "appearance.topMargin": "Margin atas",
     "appearance.topMarginAuto": "Otomatis",
+    "composer.collapse": "Sembunyikan panel sel baru",
+    "composer.expand": "Tampilkan panel sel baru",
     "appearance.statusBarMode": "Sembunyikan bilah status Android",
     "appearance.statusBarNever": "Tidak pernah",
     "appearance.statusBarLandscape": "Dalam mode lanskap",

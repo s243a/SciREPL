@@ -64,6 +64,8 @@
     "appearance.layout": "布局",
     "appearance.topMargin": "顶部边距",
     "appearance.topMarginAuto": "自动",
+    "composer.collapse": "隐藏新建单元格面板",
+    "composer.expand": "显示新建单元格面板",
     "appearance.statusBarMode": "隐藏 Android 状态栏",
     "appearance.statusBarNever": "从不",
     "appearance.statusBarLandscape": "横屏时",

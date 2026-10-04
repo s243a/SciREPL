@@ -64,6 +64,8 @@
     "appearance.layout": "লেআউট",
     "appearance.topMargin": "উপরের মার্জিন",
     "appearance.topMarginAuto": "স্বয়ংক্রিয়",
+    "composer.collapse": "নতুন সেলের প্যানেল লুকান",
+    "composer.expand": "নতুন সেলের প্যানেল দেখান",
     "appearance.statusBarMode": "Android স্ট্যাটাস বার লুকান",
     "appearance.statusBarNever": "কখনও নয়",
     "appearance.statusBarLandscape": "ল্যান্ডস্কেপে",

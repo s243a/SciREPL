@@ -64,6 +64,8 @@
     "appearance.layout": "التخطيط",
     "appearance.topMargin": "الهامش العلوي",
     "appearance.topMarginAuto": "تلقائي",
+    "composer.collapse": "إخفاء لوحة الخلية الجديدة",
+    "composer.expand": "إظهار لوحة الخلية الجديدة",
     "appearance.statusBarMode": "إخفاء شريط حالة Android",
     "appearance.statusBarNever": "أبدًا",
     "appearance.statusBarLandscape": "في الوضع الأفقي",
