@@ -30,7 +30,7 @@
        reports one, and falls back to the icon-button height on engines with no
        env() support. Users can override with an explicit value; 0 is valid and
        distinct from unset. See www/js/appearance.js. */
-    --app-top-margin: env(safe-area-inset-top, 28px);
+    --app-top-margin: var(--safe-area-inset-top, env(safe-area-inset-top, 28px));
 
     /* Space reserved below the input bar so the composer does not sit under
        the device navigation bar. targetSdk 36 enforces edge-to-edge on
@@ -2081,7 +2081,11 @@ html, body {
 /* ===== Scrollable modal variant ===== */
 
 .modal-content-scroll {
-    max-height: 85vh;
+    /* Still keep the status-bar allowance above and below a centred dialog
+       (see .modal-content): 85vh alone let a tall dialog reach under the
+       status bar on a short landscape screen or with a large top margin. */
+    max-block-size: min(85vh, calc(100vh - 2 * var(--app-top-margin)));
+    max-block-size: min(85vh, calc(100dvh - 2 * var(--app-top-margin)));
     overflow-y: auto;
 }
 
@@ -3695,4 +3699,38 @@ body.force-mobile .vfs-delete-btn {
 .help-keyboard-table td {
     white-space: nowrap;
     width: 1%;
+}
+
+/* The status-bar mode select wraps under its label in long locales. */
+#appearance-landscape-status-row {
+    flex-wrap: wrap;
+}
+#appearance-landscape-status-row > select {
+    min-block-size: 44px;
+    max-inline-size: 100%;
+}
+
+/* A status bar the user swiped back under a hide mode draws over the app on
+   edge-to-edge Android. For the reveal hold (appearance.js), this band in the
+   header colour sits behind it so the clock and icons stay readable. Its
+   block size is the measured top inset, set inline. Decorative only. */
+.status-bar-scrim {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    block-size: var(--safe-area-inset-top, 0px);
+    z-index: 9500;
+    pointer-events: none;
+    background: var(--bg-secondary);
+    background: color-mix(in srgb, var(--bg-secondary) 92%, transparent);
+    opacity: 0;
+    transition: opacity 120ms ease-out;
+}
+.status-bar-scrim.is-visible {
+    opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+    .status-bar-scrim {
+        transition: none;
+    }
 }

@@ -850,6 +850,18 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                     <span data-i18n="appearance.topMarginAuto">Auto</span>
                 </label>
             </div>
+            <div id="appearance-landscape-status-row" class="appearance-row hidden">
+                <label for="appearance-status-bar-mode" data-i18n="appearance.statusBarMode">Hide Android status bar</label>
+                <select id="appearance-status-bar-mode" class="settings-select" aria-describedby="appearance-landscape-status-help">
+                    <option value="never" data-i18n="appearance.statusBarNever">Never</option>
+                    <option value="landscape" data-i18n="appearance.statusBarLandscape">In landscape</option>
+                    <option value="always" data-i18n="appearance.statusBarAlways">Always</option>
+                </select>
+            </div>
+            <p id="appearance-landscape-status-help" class="appearance-note hidden"
+               data-i18n="appearance.statusBarModeHelp">
+                Saves vertical space on Android. In landscape: the status bar returns in portrait. The navigation bar is never hidden.
+            </p>
 
             <div class="settings-section" data-i18n="appearance.buttons">Buttons</div>
             <p class="appearance-note" data-i18n="appearance.buttonScaleHelp">

@@ -50,7 +50,8 @@
     "test:android-back": "node tests/test_android_back.mjs",
     "test:workbook-close-import": "node tests/test_workbook_close_import_picker.mjs",
     "test:lang-selector": "node tests/test_lang_selector.mjs",
-    "test:math-palette": "node tests/test_math_palette.mjs"
+    "test:math-palette": "node tests/test_math_palette.mjs",
+    "test:status-bar": "node tests/test_status_bar.mjs"
   },
   "keywords": [
     "python",

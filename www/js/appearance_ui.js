@@ -125,6 +125,7 @@
         _wireLayout() {
             const slider = $('appearance-top-margin');
             const auto = $('appearance-top-margin-auto');
+            const statusMode = $('appearance-status-bar-mode');
 
             slider.addEventListener('input', () => {
                 // Moving the slider is an explicit choice, so it leaves auto.
@@ -143,6 +144,13 @@
                 }
                 this._refreshTopMargin();
             });
+
+            if (statusMode) {
+                statusMode.addEventListener('change', () => {
+                    window.appearance.setStatusBarMode(statusMode.value);
+                    this._refreshLandscapeStatusBar();
+                });
+            }
         }
 
         /** What the header is actually using right now, in px. */
@@ -168,6 +176,20 @@
             value.textContent = stored === null
                 ? window.t('appearance.topMarginAutoValue', { pixels: effective })
                 : `${stored} px`;
+        }
+
+        /** The status-bar mode is an Android-only control: hidden elsewhere. */
+        _refreshLandscapeStatusBar() {
+            const supported = window.appearance.supportsLandscapeStatusBar();
+            const row = $('appearance-landscape-status-row');
+            const help = $('appearance-landscape-status-help');
+            const select = $('appearance-status-bar-mode');
+            if (row) row.classList.toggle('hidden', !supported);
+            if (help) help.classList.toggle('hidden', !supported);
+            if (select) {
+                select.disabled = !supported;
+                select.value = window.appearance.getStatusBarMode();
+            }
         }
 
         /* ----------------------------- buttons --------------------------- */
@@ -453,6 +475,7 @@
 
         refresh() {
             this._refreshTopMargin();
+            this._refreshLandscapeStatusBar();
             this._refreshButtonScale();
             this._refreshTheme();
             this._refreshLanguage();
