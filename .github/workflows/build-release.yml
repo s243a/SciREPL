@@ -45,6 +45,7 @@ jobs:
       - run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
       - run: node tests/test_appearance.mjs
       - run: node tests/test_onboarding.mjs
+      - run: npm run test:status-bar
       - run: npm run test:android-back
       - run: npm run test:workbook-close-import
       - run: node tests/test_whats_new.mjs

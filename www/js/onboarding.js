@@ -459,18 +459,41 @@
             const vw = vv ? vv.width : window.innerWidth;
             const vh = vv ? vv.height : window.innerHeight;
             const margin = 8;
+            // The card keeps the header's status-bar allowance (Appearance →
+            // Top margin) and the bottom navigation allowance, so it never
+            // draws under a visible system bar. Resolved through a probe: the
+            // properties may hold var()/env().
+            const probe = document.createElement('span');
+            probe.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;'
+                + 'padding-block-start:var(--app-top-margin, 0px);'
+                + 'padding-block-end:var(--app-bottom-margin, 0px)';
+            this.el.appendChild(probe);
+            const probeStyle = getComputedStyle(probe);
+            const topInset = Math.max(0, parseFloat(probeStyle.paddingTop) || 0);
+            const bottomInset = Math.max(0, parseFloat(probeStyle.paddingBottom) || 0);
+            probe.remove();
+            // The usable band. Fitting the viewport wins over the allowances:
+            // the bottom one never leaves less than the two margins, and the
+            // top one gives way until the card has its minimum height (80px,
+            // or the whole viewport when even that does not fit). The card
+            // then scrolls inside rather than running off-screen.
+            const safeBottom = oy + Math.max(margin * 2, vh - bottomInset);
+            const minCard = Math.min(80, Math.max(0, safeBottom - oy - margin * 2));
+            const safeTop = Math.max(oy, Math.min(oy + topInset,
+                safeBottom - margin * 2 - minCard));
+            const safeHeight = safeBottom - safeTop;
 
             card.classList.remove('tour-card-docked');
-            // No floor above the viewport: on a 320x120 visual viewport the card
-            // must be at most ~104px tall (and scroll inside), never 160.
+            // No floor above the usable band: on a 320x120 visual viewport the
+            // card must fit it (and scroll inside), never run past its edge.
             card.style.maxWidth = `${Math.max(120, vw - margin * 2)}px`;
-            card.style.maxHeight = `${Math.max(80, vh - margin * 2)}px`;
+            card.style.maxHeight = `${Math.max(0, safeHeight - margin * 2)}px`;
             card.style.transform = 'none';
 
             const place = (left, top) => {
                 const cr = card.getBoundingClientRect();
                 left = Math.max(ox + margin, Math.min(left, ox + vw - cr.width - margin));
-                top = Math.max(oy + margin, Math.min(top, oy + vh - cr.height - margin));
+                top = Math.max(safeTop + margin, Math.min(top, safeBottom - cr.height - margin));
                 card.style.left = `${left}px`;
                 card.style.top = `${top}px`;
             };
@@ -479,7 +502,7 @@
                 spotlight.style.display = 'none';
                 // Centre within the visible region, not the layout viewport.
                 const cr = card.getBoundingClientRect();
-                place(ox + (vw - cr.width) / 2, oy + (vh - cr.height) / 2);
+                place(ox + (vw - cr.width) / 2, safeTop + (safeHeight - cr.height) / 2);
                 return;
             }
 
@@ -493,15 +516,15 @@
 
             const cardRect = card.getBoundingClientRect();
             const gap = 14;
-            const below = (oy + vh) - r.bottom - gap;
-            const above = r.top - (oy + gap);
+            const below = safeBottom - r.bottom - gap;
+            const above = r.top - (safeTop + gap);
 
             // No room above or below within the visible region: dock to the
             // bottom edge of the VISIBLE area rather than pushing off-screen.
             if (cardRect.height > Math.max(below, above)) {
                 card.classList.add('tour-card-docked');
                 card.style.maxWidth = `${vw - margin * 2}px`;
-                place(ox + margin, oy + vh - cardRect.height - margin);
+                place(ox + margin, safeBottom - cardRect.height - margin);
                 return;
             }
 

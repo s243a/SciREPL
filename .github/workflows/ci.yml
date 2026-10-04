@@ -97,6 +97,9 @@ jobs:
       - name: Onboarding tour
         run: node tests/test_onboarding.mjs
 
+      - name: Android status-bar hiding and the status-bar allowance
+        run: npm run test:status-bar
+
       - name: Android hardware Back routing
         run: npm run test:android-back
 
