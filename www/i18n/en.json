@@ -30,6 +30,21 @@
     "Session-AppState": "The current working state of the app. Not a meeting or a class."
   },
   "__senseOf": {
+    "help.exampleInsertAria": [
+      "Cell-Notebook",
+      "Notebook-Document"
+    ],
+    "help.exampleAddedAsCell": [
+      "Cell-Notebook"
+    ],
+    "help.exampleRemoved": [
+      "Cell-Notebook"
+    ],
+    "whatsNew.highlightHelpExamples": [
+      "Cell-Notebook",
+      "Notebook-Document",
+      "Run-Execute"
+    ],
     "menu.runAll": [
       "Run-Execute",
       "Cell-Notebook"
@@ -179,6 +194,17 @@
     ]
   },
   "__context": {
+    "help.exampleCopy": "Button above each code example in Help: copies the example's code to the clipboard. Keep it one short word.",
+    "help.exampleInsert": "Button above each code example in Help: adds the example as a new cell at the end of the notebook, without running it. Keep it one short word.",
+    "help.exampleCopyAria": "Screen-reader name of the Copy button. {language} is a programming-language name (Python, R…) and stays untranslated. Include the visible Copy label.",
+    "help.exampleInsertAria": "Screen-reader name of the Insert button. {language} is a programming-language name and stays untranslated. Include the visible Insert label.",
+    "help.exampleCopied": "Brief confirmation that replaces the Copy label for two seconds and is announced to screen readers.",
+    "help.exampleAdded": "Brief confirmation that replaces the Insert label for two seconds.",
+    "help.exampleAddedAsCell": "Shown after Insert, followed by Show and Undo links. {cellId} is the number shown in the cell's In [n] label.",
+    "help.exampleShow": "Link after Insert: closes Help and moves to the new cell.",
+    "help.exampleUndo": "Link after Insert: removes the cell that was just added.",
+    "help.exampleRemoved": "Screen-reader announcement after Undo removed the inserted example cell.",
+    "help.exampleCopyFailed": "The clipboard was unavailable; the code is now selected on screen so the user can copy it with the system menu.",
     "appearance.themeAuto": "Follow the operating system's light/dark setting.",
     "appearance.themeCustom": "A user-defined colour scheme.",
     "appearance.customise": "Opens an editor. Trailing ellipsis means 'this opens a dialog' — keep it.",
@@ -431,6 +457,7 @@
     "whatsNew.highlightWorkbookClosing": "Closed workbooks now stay closed after a restart. Closing the final workbook shows an export reminder, and you can restore that reminder in Settings.",
     "whatsNew.highlightAndroidCloudImport": "Android can now import workbook files that cloud providers label as generic binary files.",
     "whatsNew.highlightAccessibility": "Clearer screen-reader names and stronger contrast improve the header, Tour, output labels, and Run button.",
+    "whatsNew.highlightHelpExamples": "Help examples have Copy and Insert buttons. Insert adds the example as a new cell at the end of the notebook without running it.",
     "whatsNew.releaseNotes": "Read the full release notes",
     "menu.showTour": "🧭 Take the Tour",
     "searchReplaceRow.replace": "Replace",
@@ -674,6 +701,17 @@
     "export.showEmptyFolders": "Show empty folders",
     "help.runtimeVersions": "<strong>Runtime versions:</strong> R and Prolog show the tested default, latest available, current selection, and successfully loaded session source separately. Leave the version and source fields blank to use the exact tested default. R accepts a webR tag such as <code>v0.5.4</code>; <code>latest</code> is rolling and unverified. Prolog accepts a compatible npm-swipl-wasm selector such as <code>3/8/2</code>; its global <code>latest</code> is an incompatible package line and is rejected, so use <strong>Check latest</strong> for the newest compatible 3.x release. Changes require a reload.",
     "help.includesFeatureList": "Includes: Multi-language (Python, R, Prolog, Bash, JavaScript, Lua), editable cells, markdown cells, session persistence with auto-save and crash recovery, Math Mode palette, .ipynb import/export with output preservation, .srwb workbook format, rich export (HTML, Markdown, PDF, DOCX with native equations, LaTeX) with syntax highlighting, virtual filesystem, search paths, URL file fetching, multi-notebook support, package catalog with one-click install, language settings, package format (.zip/.tar.gz)",
+    "help.exampleCopy": "Copy",
+    "help.exampleInsert": "Insert",
+    "help.exampleCopyAria": "Copy {language} example",
+    "help.exampleInsertAria": "Insert {language} example as a new cell at the end of the notebook",
+    "help.exampleCopied": "Copied",
+    "help.exampleAdded": "Added",
+    "help.exampleAddedAsCell": "Added as cell {cellId}",
+    "help.exampleShow": "Show",
+    "help.exampleUndo": "Undo",
+    "help.exampleRemoved": "Example cell removed",
+    "help.exampleCopyFailed": "Could not copy. The code is selected so you can copy it manually.",
     "appearance.showDrafts": "Include translations under review",
     "appearance.showDraftsHelp": "Most translations have not yet been checked by a speaker of the language. They are offered anyway, and labelled, because an interface you can read beats one you cannot. Turn this off to see only reviewed translations.",
     "appearance.languageDraft": "{language} — under review ({percent}%)",

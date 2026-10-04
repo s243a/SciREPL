@@ -1,7 +1,7 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v221';
+const CACHE_VERSION = 'v222';
 
 // Marker entry recording whether an app cache finished installing. Stored in
 // the cache itself so the answer travels with it and survives a restart.
@@ -59,6 +59,7 @@ const APP_SHELL = [
   './js/android_back.js',
   './js/release_highlights.js',
   './js/whats_new.js',
+  './js/help_examples.js',
   // Every shipped locale is precached. A catalogue fetched on demand fails
   // offline and silently falls back to English, which defeats the point of
   // translating for users who may have no connection at all. Kept in sync by

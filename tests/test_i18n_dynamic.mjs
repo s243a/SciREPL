@@ -795,6 +795,57 @@ try {
         && state.independentlyScrollableExamples > 0,
     JSON.stringify(state));
 
+    // Help example toolbars are generated in JavaScript; a locale switch
+    // must re-translate the already-built buttons, never leave raw keys.
+    const exampleFailures = [];
+    for (const locale of SUPPORTED_LOCALES) {
+        await activate(locale);
+        await dismissModals();
+        await page.click('#help-btn');
+        await page.locator('#help-modal').waitFor({ state: 'visible', timeout: TIMEOUT });
+        const result = await page.evaluate(() => {
+            const plain = (value) => String(value || '').replace(/[\u2066-\u2069]/g, '');
+            const bars = [...document.querySelectorAll('.help-example')];
+            const bad = [];
+            for (const wrap of bars) {
+                const language = wrap.querySelector('.help-example-lang')?.textContent;
+                const copy = wrap.querySelector('.help-example-copy');
+                const insert = wrap.querySelector('.help-example-insert');
+                const got = {
+                    copy: plain(copy?.querySelector('.help-example-label')?.textContent),
+                    insert: plain(insert?.querySelector('.help-example-label')?.textContent),
+                    copyAria: plain(copy?.getAttribute('aria-label')),
+                    insertAria: plain(insert?.getAttribute('aria-label')),
+                    show: plain(wrap.querySelector('.help-example-show')?.textContent),
+                    undo: plain(wrap.querySelector('.help-example-undo')?.textContent),
+                };
+                const want = {
+                    copy: plain(window.t('help.exampleCopy')),
+                    insert: plain(window.t('help.exampleInsert')),
+                    copyAria: plain(window.t('help.exampleCopyAria', { language })),
+                    insertAria: plain(window.t('help.exampleInsertAria', { language })),
+                    show: plain(window.t('help.exampleShow')),
+                    undo: plain(window.t('help.exampleUndo')),
+                };
+                const raw = Object.values(got).some((v) => /help\.example/.test(v));
+                const mismatch = Object.keys(want).filter((k) => got[k] !== want[k]);
+                if (raw || mismatch.length || !got.copyAria.includes(language)) {
+                    bad.push({ language, mismatch, got });
+                }
+            }
+            return { count: bars.length, bad: bad.slice(0, 2) };
+        });
+        if (result.count < 16 || result.bad.length) exampleFailures.push({ locale, ...result });
+    }
+    check('Help example Copy/Insert controls are localized in every supported locale',
+        exampleFailures.length === 0, JSON.stringify(exampleFailures));
+    await activate('de');
+    const german = await page.evaluate(() => document.querySelector(
+        '#help-modal .help-example-copy .help-example-label')?.textContent);
+    check('a locale switch re-translates an already-built example toolbar',
+        german === 'Kopieren', german);
+    await activate('en');
+
     check('no browser errors occurred', pageErrors.length === 0, pageErrors.join(' | '));
 } catch (error) {
     failures++;

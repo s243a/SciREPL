@@ -148,6 +148,9 @@ jobs:
       - name: Cell operations
         run: node tests/test_cell_ops.mjs
 
+      - name: Help examples — Copy and Insert
+        run: node tests/test_help_examples.mjs
+
       - name: JavaScript kernel
         run: node tests/test_js_kernel.mjs
 

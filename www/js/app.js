@@ -1706,6 +1706,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
      * Import cells from .ipynb — renders cells without executing by default.
      * If autoExecute is true, code cells are executed sequentially.
      * Multiple imports are queued and processed in order.
+     * Resolves with the array of cells this call created (empty if none).
      */
     window.importCells = function (cellDefs, { autoExecute = false } = {}) {
         // Each caller gets a promise that resolves when THEIR cells are done
@@ -1719,8 +1720,8 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 try {
                     while (window._importQueue.length > 0) {
                         const job = window._importQueue.shift();
-                        await window._processImport(job.cellDefs, job.autoExecute);
-                        job.resolve();
+                        const created = await window._processImport(job.cellDefs, job.autoExecute);
+                        job.resolve(created || []);
                     }
                 } finally {
                     window._importingCells = false;
@@ -1733,7 +1734,8 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
     window._processImport = async function (cellDefs, autoExecute) {
         const km = window.kernelManager;
-        if (!km) return;
+        const created = [];
+        if (!km) return created;
 
         // Lock to the target notebook — if the user switches tabs during an
         // await (e.g. kernel download), switch back before creating each cell
@@ -1769,6 +1771,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 outputCard: outputCard
             };
             window._cells.push(cell);
+            created.push(cell);
 
             if (def.type === 'markdown') {
                 const body = outputCard.querySelector('.card-body');
@@ -1831,6 +1834,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         setStatus('status.ready', undefined, 'ready');
         runBtn.disabled = false;
         getRepl().scrollTop = getRepl().scrollHeight;
+        return created;
     };
 
     // ---- Run from input bar (new cell) ----
