@@ -87,7 +87,7 @@ This requires the Android SDK and Java toolchain. The build command prepares the
 adb install --user 0 android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Debug builds install as `com.unifyweaver.scirepl.debug`, labelled "Sci REPL (debug)" with a red bug badge on the launcher icon, so they sit alongside the Play Store app (`com.unifyweaver.scirepl`) instead of replacing it. The two keep separate app data. `--user 0` (or `pm install --user 0` on the device) installs for the main user only, not into a work profile or other users. Debug-only resources live in `android/app/src/debug/res/`; after changing the release icons, regenerate the badged copies with `python3 scripts/make-debug-launcher-icons.py` (needs Pillow).
+Debug builds install as `com.unifyweaver.scirepl.debug`, labelled "Sci REPL (debug)" with a red bug badge on the launcher icon, so they sit alongside the Play Store app (`com.unifyweaver.scirepl`) instead of replacing it. The two keep separate app data. `--user 0` (or `pm install --user 0` on the device) installs for the main user only, not into a work profile or other users. The debug icon is vector-only (`android/app/src/debug/`): a badge drawable layered over the live release foreground, plus a bug silhouette for Android 13 themed icons. Changing the release artwork needs no regeneration step. `npm run test:android-debug-identity` checks the debug and release identities statically.
 
 ### Install as PWA
 

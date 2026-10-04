@@ -3,4 +3,6 @@
     <!-- Debug-only overrides; see the debug buildType in app/build.gradle. -->
     <string name="app_name">Sci REPL (debug)</string>
     <string name="title_activity_main">Sci REPL (debug)</string>
+    <string name="package_name">com.unifyweaver.scirepl.debug</string>
+    <string name="custom_url_scheme">com.unifyweaver.scirepl.debug</string>
 </resources>
