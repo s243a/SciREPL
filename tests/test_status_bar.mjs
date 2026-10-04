@@ -215,6 +215,38 @@ try {
     });
     check('the tour card starts below the top margin and stays on screen',
         tour.top >= 48 + 8 && tour.bottom <= tour.vh, JSON.stringify(tour));
+
+    // The extreme: the largest top margin (96 px) on a 320x120 viewport. The
+    // viewport wins over the allowance: the card fits inside it and scrolls.
+    await page.evaluate(() => window.appearance.setTopMargin(96));
+    await page.setViewportSize({ width: 320, height: 120 });
+    const tinyTour = await page.evaluate(async () => {
+        window.onboarding.start();
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const card = document.getElementById('tour-card');
+        const r = card.getBoundingClientRect();
+        const out = { top: Math.round(r.top), bottom: Math.round(r.bottom), left: Math.round(r.left),
+            right: Math.round(r.right), vw: innerWidth, vh: innerHeight,
+            overflowY: getComputedStyle(card).overflowY,
+            scrollable: card.scrollHeight > card.clientHeight };
+        // Every part of the content is reachable: scrolling to the end
+        // brings the last control fully inside the card.
+        card.scrollTop = card.scrollHeight;
+        const controls = [...card.querySelectorAll('button, select, input')]
+            .filter((el) => el.offsetParent !== null);
+        const last = controls.at(-1);
+        const lr = last?.getBoundingClientRect();
+        const cr = card.getBoundingClientRect();
+        out.lastReachable = !!lr && lr.top >= cr.top - 1 && lr.bottom <= cr.bottom + 1;
+        window.onboarding.finish();
+        localStorage.setItem('scirepl_onboarding_seen', '1');
+        return out;
+    });
+    check('320x120 with a 96 px top margin: the tour card is fully inside the viewport',
+        tinyTour.top >= 0 && tinyTour.bottom <= tinyTour.vh
+        && tinyTour.left >= 0 && tinyTour.right <= tinyTour.vw, JSON.stringify(tinyTour));
+    check('…and its content scrolls inside it, so the last control is reachable',
+        /auto|scroll/.test(tinyTour.overflowY) && tinyTour.lastReachable, JSON.stringify(tinyTour));
     await page.setViewportSize({ width: 844, height: 390 });
     await page.evaluate(() => {
         window.appearance.setTopMargin(null);
@@ -675,6 +707,34 @@ try {
     });
     await fb.waitForTimeout(100);
     const sCustomDark = await lastStyle();
+    // Any colour syntax the theme validator accepts is normalized before its
+    // luminance is taken: white written as color() or oklch() must still get
+    // dark icons (LIGHT), and a dark oklch() light icons (DARK).
+    const styleFor = async (bg) => {
+        await fb.evaluate((colour) => {
+            localStorage.setItem('scirepl_appearance_custom_theme', JSON.stringify({ name: 'T', base: 'dark', vars: { '--bg-secondary': colour } }));
+            // From a known opposite, so an unchanged style still records a call.
+            window.appearance._systemBarStyle = null;
+            window.appearance.setTheme('custom');
+        }, bg);
+        await fb.waitForTimeout(100);
+        return lastStyle();
+    };
+    const syntaxes = {
+        'color(srgb 1 1 1)': await styleFor('color(srgb 1 1 1)'),
+        'oklch(100% 0 0)': await styleFor('oklch(100% 0 0)'),
+        'oklch(20% 0 0)': await styleFor('oklch(20% 0 0)'),
+        'lab(98% 0 0)': await styleFor('lab(98% 0 0)'),
+        'hsl(0 0% 100%)': await styleFor('hsl(0 0% 100%)'),
+        white: await styleFor('white'),
+        '#111': await styleFor('#111'),
+    };
+    check('custom --bg-secondary in color()/oklch() white gives LIGHT (dark icons); oklch(20% 0 0) gives DARK',
+        syntaxes['color(srgb 1 1 1)'] === 'LIGHT/StatusBar' && syntaxes['oklch(100% 0 0)'] === 'LIGHT/StatusBar'
+        && syntaxes['oklch(20% 0 0)'] === 'DARK/StatusBar', JSON.stringify(syntaxes));
+    check('…and lab(), hsl(), named and hex colours are normalized the same way',
+        syntaxes['lab(98% 0 0)'] === 'LIGHT/StatusBar' && syntaxes['hsl(0 0% 100%)'] === 'LIGHT/StatusBar'
+        && syntaxes.white === 'LIGHT/StatusBar' && syntaxes['#111'] === 'DARK/StatusBar', JSON.stringify(syntaxes));
     check('status-bar icon style follows the app theme: dark → DARK, light → LIGHT, custom by --bg-secondary luminance, no call when unchanged',
         sDark === 'DARK/StatusBar' && sLight === 'LIGHT/StatusBar' && nAfter === nBefore
         && sCustomLight === 'LIGHT/StatusBar' && sCustomDark === 'DARK/StatusBar',

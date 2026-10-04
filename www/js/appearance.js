@@ -912,23 +912,63 @@
             return luminance > 0.179 ? 'LIGHT' : 'DARK';
         }
 
-        /** Any CSS colour → [r, g, b], via the canvas colour parser. */
+        /**
+         * Any colour the CSS parser accepts → sRGB [r, g, b] (0–255), or null.
+         *
+         * Normalized by painting it: a 1×1 canvas filled with the colour and
+         * read back gives sRGB bytes whatever the syntax (hex, named, rgb(),
+         * hsl(), hwb(), lab(), lch(), oklab(), oklch(), color()), with wide
+         * gamut clamped. Matching the fillStyle string instead missed every
+         * syntax the canvas serializes as written, so color(srgb 1 1 1) or
+         * oklch(100% 0 0) fell back to the dark-theme guess: white icons on
+         * a white bar. An engine whose canvas rejects a syntax gets a second
+         * try through a probe element's computed colour.
+         */
         _parseRgb(value) {
             if (!value) return null;
             try {
-                if (!this._colourCtx) {
-                    this._colourCtx = document.createElement('canvas').getContext('2d');
+                if (window.CSS && typeof CSS.supports === 'function'
+                        && !CSS.supports('color', value)) return null;
+                if (this._colourCtx === undefined) {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 1;
+                    canvas.height = 1;
+                    this._colourCtx = canvas.getContext('2d', { willReadFrequently: true }) || null;
                 }
                 const ctx = this._colourCtx;
-                if (!ctx) return null;
-                ctx.fillStyle = '#010203';
-                ctx.fillStyle = value;
-                const out = String(ctx.fillStyle);
-                if (out === '#010203' && !/^#010203$/i.test(value)) return null;
-                let m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(out);
-                if (m) return [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)];
-                m = /^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i.exec(out);
-                if (m) return [Number(m[1]), Number(m[2]), Number(m[3])];
+                const paint = (colour) => {
+                    if (!ctx || !colour) return null;
+                    // Two different sentinels: an accepted colour replaces
+                    // both identically; a rejected one leaves them unchanged.
+                    ctx.fillStyle = '#000000';
+                    ctx.fillStyle = colour;
+                    const first = String(ctx.fillStyle);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillStyle = colour;
+                    if (String(ctx.fillStyle) !== first) return null;
+                    ctx.clearRect(0, 0, 1, 1);
+                    ctx.fillRect(0, 0, 1, 1);
+                    const px = ctx.getImageData(0, 0, 1, 1).data;
+                    return px[3] === 0 ? null : [px[0], px[1], px[2]];
+                };
+                let rgb = paint(value);
+                if (!rgb && document.documentElement) {
+                    const probe = document.createElement('span');
+                    probe.style.color = value;
+                    document.documentElement.appendChild(probe);
+                    const resolved = getComputedStyle(probe).color;
+                    probe.remove();
+                    if (resolved && resolved !== value) rgb = paint(resolved);
+                    if (!rgb) {
+                        const m = /^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/i.exec(resolved || '');
+                        if (m) rgb = [m[1], m[2], m[3]].map((c) => Math.round(Math.min(1, Math.max(0, Number(c))) * 255));
+                    }
+                    if (!rgb) {
+                        const m = /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/i.exec(resolved || '');
+                        if (m) rgb = [Number(m[1]), Number(m[2]), Number(m[3])];
+                    }
+                }
+                return rgb;
             } catch (_) { /* fall back to data-theme */ }
             return null;
         }
