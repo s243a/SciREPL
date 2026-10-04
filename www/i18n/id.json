@@ -191,6 +191,8 @@
     "whatsNew.highlightWorkbookClosing": "Buku kerja yang ditutup kini tetap tertutup setelah aplikasi dimulai ulang. Menutup buku kerja terakhir menampilkan pengingat ekspor yang dapat diaktifkan kembali di Pengaturan.",
     "whatsNew.highlightAndroidCloudImport": "Android kini dapat mengimpor berkas buku kerja yang dilabeli penyedia cloud sebagai berkas biner umum.",
     "whatsNew.highlightAccessibility": "Nama pembaca layar yang lebih jelas dan kontras yang lebih kuat meningkatkan header, Tur, label keluaran, dan tombol Jalankan.",
+    "whatsNew.highlightStatusBar": "Android dapat menyembunyikan bilah status agar layar lebih luas: pilih Tidak pernah, Dalam mode lanskap, atau Selalu di Menu → Tampilan → Sembunyikan bilah status Android. Bilah navigasi tidak pernah disembunyikan.",
+    "whatsNew.highlightShortLandscapeComposer": "Pada layar lanskap pendek, sembunyikan panel sel baru agar buku catatan mendapat tinggi penuh. Munculkan kembali dengan tombol di header atau dengan menggeser ke atas di akhir buku catatan; panel juga tersembunyi saat papan ketik terbuka untuk sel yang sedang Anda edit.",
     "whatsNew.highlightHelpExamples": "Contoh di Bantuan kini memiliki tombol Salin dan Sisipkan. Sisipkan menambahkan contoh sebagai sel baru di akhir buku catatan tanpa menjalankannya.",
     "whatsNew.releaseNotes": "Baca catatan rilis lengkap",
     "menu.showTour": "🧭 Ikuti tur",

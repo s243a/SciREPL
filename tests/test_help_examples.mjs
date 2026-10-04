@@ -121,7 +121,11 @@ try {
     console.log('\n3. Insert appends a cell without running it');
     const before = await page.evaluate(() => window._cells.length);
     const pyPre = '#help-modal pre[data-example-lang="python"]';
-    const expectedPy = await page.evaluate((s) => window.helpExamples.exampleCode(document.querySelector(s)), pyPre);
+    // Computed independently of the module under test.
+    const expectedPy = await page.evaluate((s) => document.querySelector(s)
+        .querySelector('code').textContent.replace(/\s+$/, ''), pyPre);
+    check('the Python quick start is the example under test',
+        expectedPy.startsWith('# Basic math') && expectedPy.includes('np.arange'), expectedPy.slice(0, 40));
     await page.locator(`#help-modal .help-example:has(> pre[data-example-lang="python"]) .help-example-insert`).first().click();
     await page.waitForFunction((n) => window._cells.length === n + 1, before, { timeout: TIMEOUT });
     await page.waitForTimeout(150);
@@ -150,6 +154,29 @@ try {
             && state.noticeText.includes('Show') && state.noticeText.includes('Undo'), state.noticeText);
     check('the Insert label confirms briefly', state.label === 'Added', state.label);
     const pyId = state.id;
+    const linkSizes = await page.evaluate(() => {
+        const wrap = document.querySelector('#help-modal pre[data-example-lang="python"]').parentElement;
+        return [...wrap.querySelectorAll('.help-example-show, .help-example-undo')].map((b) => {
+            const r = b.getBoundingClientRect();
+            return { w: Math.round(r.width), h: Math.round(r.height) };
+        });
+    });
+    check('Show and Undo are at least 44×44 CSS px',
+        linkSizes.length === 2 && linkSizes.every((z) => z.w >= 44 && z.h >= 44), JSON.stringify(linkSizes));
+
+    // The live region is a one-shot announcement: a locale switch must not
+    // rewrite it (and so re-announce stale news) in the new language.
+    const liveBefore = await page.evaluate(() => document.querySelector('#help-modal .help-examples-live').textContent);
+    await page.evaluate(async () => { await window.i18n.activate('de'); });
+    await page.waitForTimeout(150);
+    state = await page.evaluate(() => {
+        const region = document.querySelector('#help-modal .help-examples-live');
+        return { text: region.textContent, key: region.getAttribute('data-i18n') };
+    });
+    check('a locale switch does not rewrite the live region',
+        state.text === liveBefore && state.key === null, JSON.stringify({ liveBefore, ...state }));
+    await page.evaluate(async () => { await window.i18n.activate('en'); });
+    await page.waitForTimeout(150);
 
     // Persistence: the inserted cell survives a reload like any other cell.
     const savedCount = await page.evaluate(() => window._cells.length);
@@ -250,6 +277,65 @@ try {
     check('Show closes Help and focuses the new cell',
         state.helpHidden && state.focused && state.inView && state.language === 'bash', JSON.stringify(state));
 
+    // If the inserted cell is already gone, Show falls back to the Help button
+    // and Undo does not claim to have removed anything.
+    const bashBar = '#help-modal .help-example:has(pre[data-example-lang="bash"])';
+    await openHelp(page);
+    n = await page.evaluate(() => window._cells.length);
+    await page.locator(`${bashBar} .help-example-insert`).click();
+    await page.waitForFunction((c) => window._cells.length === c + 1, n, { timeout: TIMEOUT });
+    await page.evaluate(() => window.deleteCell(window._cells[window._cells.length - 1].id));
+    await page.locator(`${bashBar} .help-example-show`).click();
+    await page.waitForTimeout(150);
+    state = await page.evaluate(() => ({
+        helpHidden: document.getElementById('help-modal').classList.contains('hidden'),
+        focus: document.activeElement && document.activeElement.id,
+    }));
+    check('Show for a cell that no longer exists closes Help and focuses the Help button',
+        state.helpHidden && state.focus === 'help-btn', JSON.stringify(state));
+    await openHelp(page);
+    n = await page.evaluate(() => window._cells.length);
+    await page.locator(`${bashBar} .help-example-insert`).click();
+    await page.waitForFunction((c) => window._cells.length === c + 1, n, { timeout: TIMEOUT });
+    await page.waitForTimeout(120);
+    await page.evaluate(() => window.deleteCell(window._cells[window._cells.length - 1].id));
+    const liveBeforeUndo = await page.evaluate(() => document.querySelector('#help-modal .help-examples-live').textContent);
+    await page.locator(`${bashBar} .help-example-undo`).click();
+    await page.waitForTimeout(150);
+    state = await page.evaluate(() => document.querySelector('#help-modal .help-examples-live').textContent);
+    check('Undo for an already-deleted cell announces nothing new',
+        state === liveBeforeUndo && !/removed/i.test(state), JSON.stringify({ liveBeforeUndo, state }));
+
+    /* --------------------- insert while a cell runs --------------------- */
+    console.log('\n4b. Insert while a cell is running');
+    await page.evaluate(() => {
+        // Simulate runCode()'s busy state: Run disabled, status "running".
+        document.getElementById('run-btn').disabled = true;
+        window.setI18nText(document.getElementById('status-badge'), 'app.status.running');
+        document.getElementById('status-badge').className = 'running';
+    });
+    n = await page.evaluate(() => window._cells.length);
+    await page.locator('#help-modal .help-example:has(> pre[data-example-lang="r"]) .help-example-insert').first().click();
+    await page.waitForFunction((c) => window._cells.length === c + 1, n, { timeout: TIMEOUT });
+    await page.waitForTimeout(100);
+    state = await page.evaluate(() => {
+        const badge = document.getElementById('status-badge');
+        return {
+            runDisabled: document.getElementById('run-btn').disabled,
+            statusKey: badge.getAttribute('data-i18n'),
+            statusClass: badge.className,
+        };
+    });
+    check('Insert during a running cell leaves Run disabled', state.runDisabled, JSON.stringify(state));
+    check('Insert during a running cell does not claim Ready',
+        state.statusKey !== 'status.ready' && state.statusClass === 'running', JSON.stringify(state));
+    await page.evaluate(() => {
+        document.getElementById('run-btn').disabled = false;
+        window.setI18nText(document.getElementById('status-badge'), 'status.ready');
+        document.getElementById('status-badge').className = 'ready';
+    });
+    await page.evaluate(() => document.getElementById('help-modal').classList.add('hidden'));
+
     /* ------------------- insert while a cell is edited ------------------ */
     console.log('\n5. Insert while another cell is being edited');
     const editId = await page.evaluate(() => window._cells[0].id);
@@ -291,7 +377,8 @@ try {
     console.log('\n6. Copy');
     await openHelp(page);
     const rPre = '#help-modal pre[data-example-lang="r"]';
-    const expectedR = await page.evaluate((s) => window.helpExamples.exampleCode(document.querySelector(s)), rPre);
+    const expectedR = await page.evaluate((s) => document.querySelector(s)
+        .querySelector('code').textContent.replace(/\s+$/, ''), rPre);
     await page.locator(`#help-modal .help-example:has(> pre[data-example-lang="r"]) .help-example-copy`).first().click();
     await page.waitForTimeout(150);
     state = await page.evaluate(async (s) => ({

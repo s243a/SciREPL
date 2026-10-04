@@ -183,6 +183,8 @@
     "whatsNew.highlightWorkbookClosing": "닫은 워크북은 앱을 다시 시작해도 닫힌 상태로 유지됩니다. 마지막 워크북을 닫으면 내보내기 알림이 표시되며, 설정에서 다시 켤 수 있습니다.",
     "whatsNew.highlightAndroidCloudImport": "Android에서는 클라우드 제공업체가 일반 바이너리 파일로 표시한 워크북 파일도 가져올 수 있습니다.",
     "whatsNew.highlightAccessibility": "더 명확한 스크린 리더 이름과 향상된 대비로 헤더, 둘러보기, 출력 레이블 및 실행 버튼을 더 쉽게 사용할 수 있습니다.",
+    "whatsNew.highlightStatusBar": "Android에서 상태 표시줄을 숨겨 공간을 넓힐 수 있습니다. 메뉴 → 모양 및 화면 → Android 상태 표시줄 숨기기에서 안 함, 가로 모드에서, 항상 중에 선택하세요. 내비게이션 바는 숨겨지지 않습니다.",
+    "whatsNew.highlightShortLandscapeComposer": "높이가 낮은 가로 화면에서는 새 셀 패널을 숨겨 노트북을 전체 높이로 사용할 수 있습니다. 헤더 버튼을 누르거나 노트북 끝에서 위로 스와이프하면 다시 나타나며, 편집 중인 셀의 키보드가 열려 있는 동안에도 숨겨집니다.",
     "whatsNew.highlightHelpExamples": "도움말 예제에 복사 및 삽입 버튼이 추가되었습니다. 삽입 버튼은 예제를 실행하지 않고 노트북 끝에 새 셀로 추가합니다.",
     "whatsNew.releaseNotes": "전체 릴리스 노트 읽기",
     "menu.showTour": "🧭 둘러보기 시작",

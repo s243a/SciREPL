@@ -1743,6 +1743,15 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         const targetNb = nm && nm.getActiveNotebook();
         const targetId = targetNb ? targetNb.id : null;
 
+        // An import can arrive while a cell is still running (for example an
+        // Insert from Help). Remember that state so the end of the import does
+        // not re-enable Run or claim "Ready" underneath the running cell.
+        const runWasDisabled = runBtn.disabled;
+        const priorStatus = {
+            key: badge.getAttribute('data-i18n'),
+            vars: badge.getAttribute('data-i18n-vars'),
+            className: badge.className,
+        };
         setStatus('app.status.importing', undefined, 'running');
         runBtn.disabled = true;
 
@@ -1831,8 +1840,14 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
         saveCellsToSession();
         if (window.notebookManager) window.notebookManager.saveState();
-        setStatus('status.ready', undefined, 'ready');
-        runBtn.disabled = false;
+        if (!runWasDisabled) {
+            setStatus('status.ready', undefined, 'ready');
+        } else if (priorStatus.key) {
+            let vars;
+            try { vars = priorStatus.vars ? JSON.parse(priorStatus.vars) : undefined; } catch (_) { vars = undefined; }
+            setStatus(priorStatus.key, vars, priorStatus.className);
+        }
+        runBtn.disabled = runWasDisabled;
         getRepl().scrollTop = getRepl().scrollHeight;
         return created;
     };

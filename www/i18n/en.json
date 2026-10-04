@@ -194,6 +194,8 @@
     ]
   },
   "__context": {
+    "whatsNew.highlightStatusBar": "Release highlight for the Android-only status-bar setting. Reuse the existing translations of the menu path and of Never / In landscape / Always.",
+    "whatsNew.highlightShortLandscapeComposer": "Release highlight. The new-cell panel is the composer at the bottom (see composer.collapse), not an existing cell's editor. 'Short landscape' means a landscape screen with little height.",
     "help.exampleCopy": "Button above each code example in Help: copies the example's code to the clipboard. Keep it one short word.",
     "help.exampleInsert": "Button above each code example in Help: adds the example as a new cell at the end of the notebook, without running it. Keep it one short word.",
     "help.exampleCopyAria": "Screen-reader name of the Copy button. {language} is a programming-language name (Python, R…) and stays untranslated. Include the visible Copy label.",
@@ -457,6 +459,8 @@
     "whatsNew.highlightWorkbookClosing": "Closed workbooks now stay closed after a restart. Closing the final workbook shows an export reminder, and you can restore that reminder in Settings.",
     "whatsNew.highlightAndroidCloudImport": "Android can now import workbook files that cloud providers label as generic binary files.",
     "whatsNew.highlightAccessibility": "Clearer screen-reader names and stronger contrast improve the header, Tour, output labels, and Run button.",
+    "whatsNew.highlightStatusBar": "Android can hide the status bar for more room: choose Never, In landscape or Always under Menu → Appearance → Hide Android status bar. The navigation bar is never hidden.",
+    "whatsNew.highlightShortLandscapeComposer": "In short landscape, hide the new-cell panel to give the notebook the full height. Bring it back with the header button or by swiping up at the end of the notebook; it also hides while the keyboard is open for a cell you are editing.",
     "whatsNew.highlightHelpExamples": "Help examples have Copy and Insert buttons. Insert adds the example as a new cell at the end of the notebook without running it.",
     "whatsNew.releaseNotes": "Read the full release notes",
     "menu.showTour": "🧭 Take the Tour",

@@ -184,6 +184,8 @@
     "whatsNew.highlightWorkbookClosing": "閉じたワークブックは、アプリを再起動しても閉じたままになります。最後のワークブックを閉じる際はエクスポートの案内が表示され、設定から再度有効にできます。",
     "whatsNew.highlightAndroidCloudImport": "Android では、クラウドプロバイダーが汎用バイナリファイルとして扱うワークブックもインポートできるようになりました。",
     "whatsNew.highlightAccessibility": "スクリーンリーダー向けの明確な名前と高いコントラストにより、ヘッダー、ツアー、出力ラベル、実行ボタンが使いやすくなりました。",
+    "whatsNew.highlightStatusBar": "Android ではステータスバーを隠して表示領域を広げられます。メニュー → 外観 → Android のステータスバーを隠す で「しない」「横向きのとき」「常に」から選べます。ナビゲーションバーは隠れません。",
+    "whatsNew.highlightShortLandscapeComposer": "高さの低い横向き画面では、新規セルパネルを隠してノートブックで画面の高さ全体を使えます。ヘッダーのボタンを押すか、ノートブックの末尾で上にスワイプすると再表示されます。セルの編集中にキーボードが開いている間も自動で隠れます。",
     "whatsNew.highlightHelpExamples": "ヘルプの例に「コピー」と「挿入」ボタンが付きました。「挿入」は例を実行せずに、ノートブックの末尾に新しいセルとして追加します。",
     "whatsNew.releaseNotes": "リリースノートをすべて読む",
     "menu.showTour": "🧭 ツアーを開始",

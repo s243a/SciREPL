@@ -195,6 +195,8 @@
     "whatsNew.highlightWorkbookClosing": "Les classeurs fermés restent désormais fermés après un redémarrage. Fermer le dernier classeur affiche un rappel d’exportation, qui peut être réactivé dans les paramètres.",
     "whatsNew.highlightAndroidCloudImport": "Android peut désormais importer les fichiers de classeur que les fournisseurs cloud marquent comme binaires génériques.",
     "whatsNew.highlightAccessibility": "Des noms plus clairs pour les lecteurs d’écran et un contraste renforcé améliorent l’en-tête, la visite guidée, les libellés de sortie et le bouton Exécuter.",
+    "whatsNew.highlightStatusBar": "Android peut masquer la barre d’état pour gagner de la place : choisissez Jamais, En mode paysage ou Toujours dans Menu → Apparence → Masquer la barre d’état Android. La barre de navigation n’est jamais masquée.",
+    "whatsNew.highlightShortLandscapeComposer": "En paysage de faible hauteur, masquez le panneau de nouvelle cellule pour donner toute la hauteur au carnet. Faites-le réapparaître avec le bouton de l’en-tête ou en balayant vers le haut à la fin du carnet ; il se masque aussi tant que le clavier est ouvert pour une cellule en cours d’édition.",
     "whatsNew.highlightHelpExamples": "Les exemples de l’Aide disposent de boutons Copier et Insérer. Insérer ajoute l’exemple comme nouvelle cellule à la fin du carnet, sans l’exécuter.",
     "whatsNew.releaseNotes": "Lire les notes de version complètes",
     "menu.showTour": "🧭 Faire la visite guidée",

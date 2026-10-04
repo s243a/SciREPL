@@ -192,6 +192,8 @@
     "whatsNew.highlightWorkbookClosing": "Los libros de trabajo cerrados ahora permanecen cerrados tras reiniciar. Al cerrar el último libro aparece un recordatorio de exportación que puede reactivarse en Ajustes.",
     "whatsNew.highlightAndroidCloudImport": "Android ahora puede importar archivos de libros de trabajo que los proveedores de nube etiquetan como binarios genéricos.",
     "whatsNew.highlightAccessibility": "Los nombres más claros para lectores de pantalla y un mayor contraste mejoran el encabezado, el recorrido, las etiquetas de salida y el botón Ejecutar.",
+    "whatsNew.highlightStatusBar": "Android puede ocultar la barra de estado para ganar espacio: elige Nunca, En horizontal o Siempre en Menú → Apariencia → Ocultar la barra de estado de Android. La barra de navegación nunca se oculta.",
+    "whatsNew.highlightShortLandscapeComposer": "En horizontal con poca altura, oculta el panel de nueva celda para que el cuaderno use toda la altura. Vuelve a mostrarlo con el botón del encabezado o deslizando hacia arriba al final del cuaderno; también se oculta mientras el teclado está abierto al editar una celda.",
     "whatsNew.highlightHelpExamples": "Los ejemplos de la Ayuda tienen botones Copiar e Insertar. Insertar añade el ejemplo como una celda nueva al final del cuaderno sin ejecutarlo.",
     "whatsNew.releaseNotes": "Leer las notas de la versión completas",
     "menu.showTour": "🧭 Ver la guía",

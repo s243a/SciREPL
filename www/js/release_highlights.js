@@ -39,6 +39,8 @@
             'whatsNew.highlightAccessibility',
         ]),
         unreleased: Object.freeze([
+            'whatsNew.highlightStatusBar',
+            'whatsNew.highlightShortLandscapeComposer',
             'whatsNew.highlightHelpExamples',
         ]),
     });

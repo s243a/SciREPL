@@ -198,6 +198,8 @@
     "whatsNew.highlightWorkbookClosing": "Geschlossene Arbeitsmappen bleiben nun auch nach einem Neustart geschlossen. Beim Schließen der letzten Arbeitsmappe erscheint eine Exporterinnerung, die in den Einstellungen wieder aktiviert werden kann.",
     "whatsNew.highlightAndroidCloudImport": "Android kann nun Arbeitsmappendateien importieren, die von Cloud-Anbietern als allgemeine Binärdateien gekennzeichnet sind.",
     "whatsNew.highlightAccessibility": "Klarere Namen für Screenreader und ein stärkerer Kontrast verbessern Kopfzeile, Tour, Ausgabebeschriftungen und die Schaltfläche „Ausführen“.",
+    "whatsNew.highlightStatusBar": "Android kann die Statusleiste für mehr Platz ausblenden: Wählen Sie unter Menü → Erscheinungsbild → Android-Statusleiste ausblenden „Nie“, „Im Querformat“ oder „Immer“. Die Navigationsleiste wird nie ausgeblendet.",
+    "whatsNew.highlightShortLandscapeComposer": "Im flachen Querformat blenden Sie den Bereich für neue Zellen aus, damit das Notebook die volle Höhe nutzt. Über die Schaltfläche in der Kopfzeile oder durch Wischen nach oben am Ende des Notebooks blenden Sie ihn wieder ein; während die Tastatur für eine Zelle geöffnet ist, die Sie bearbeiten, wird er ebenfalls ausgeblendet.",
     "whatsNew.highlightHelpExamples": "Hilfe-Beispiele haben jetzt die Schaltflächen „Kopieren“ und „Einfügen“. „Einfügen“ fügt das Beispiel als neue Zelle am Ende des Notebooks hinzu, ohne es auszuführen.",
     "whatsNew.releaseNotes": "Vollständige Versionshinweise lesen",
     "menu.showTour": "🧭 Tour starten",

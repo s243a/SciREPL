@@ -118,12 +118,19 @@
         return region;
     }
 
-    /** Polite announcement. Clearing first makes a repeated message re-read. */
+    /**
+     * Polite announcement. Clearing first makes a repeated message re-read.
+     * The region deliberately carries no data-i18n: a later locale switch
+     * would otherwise rewrite it and re-announce a stale message.
+     */
     function announce(node, key, vars) {
         const region = liveRegionFor(node);
         region.textContent = '';
         region.removeAttribute('data-i18n');
-        setTimeout(() => setText(region, key, vars), 50);
+        region.removeAttribute('data-i18n-vars');
+        setTimeout(() => {
+            region.textContent = typeof window.t === 'function' ? window.t(key, vars) : key;
+        }, 50);
     }
 
     function flash(button, labelEl, confirmedKey, restoreKey) {
@@ -152,9 +159,13 @@
         return { button, labelEl };
     }
 
+    /** Close through the modal's own close control so its handlers run. */
     function closeOwningModal(node) {
         const modal = node.closest('.modal');
-        if (modal) modal.classList.add('hidden');
+        if (!modal) return;
+        const close = modal.querySelector('.modal-close');
+        if (close) close.click();
+        if (!modal.classList.contains('hidden')) modal.classList.add('hidden');
     }
 
     function showCell(cell) {
@@ -197,10 +208,10 @@
             'help.exampleCopy', 'help.exampleCopyAria', vars);
         actions.appendChild(copy.button);
 
-        const canInsert = typeof window.importCells === 'function';
+        // importCells comes from app.js; the click handler checks for it, so
+        // the button is never hidden just because of script order.
         const insert = makeButton('help-example-insert', '+',
             'help.exampleInsert', 'help.exampleInsertAria', vars);
-        if (!canInsert) insert.button.hidden = true;
         actions.appendChild(insert.button);
 
         bar.append(chip, actions);
@@ -274,7 +285,10 @@
             const cell = lastCell;
             hideNotice();
             closeOwningModal(wrapper);
-            showCell(cell);
+            if (!showCell(cell)) {
+                const helpBtn = document.getElementById('help-btn');
+                if (helpBtn) helpBtn.focus();
+            }
         });
 
         undoBtn.addEventListener('click', () => {
@@ -282,8 +296,10 @@
             hideNotice();
             if (!cell || typeof window.deleteCell !== 'function') return;
             const exists = (window._cells || []).some((c) => c.id === cell.id);
-            if (exists) window.deleteCell(cell.id);
-            announce(wrapper, 'help.exampleRemoved');
+            if (exists) {
+                window.deleteCell(cell.id);
+                announce(wrapper, 'help.exampleRemoved');
+            }
             insert.button.focus();
         });
     }

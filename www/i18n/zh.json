@@ -183,6 +183,8 @@
     "whatsNew.highlightWorkbookClosing": "关闭的工作簿在应用重启后仍会保持关闭。关闭最后一个工作簿时会显示导出提醒，并可在“设置”中重新启用该提醒。",
     "whatsNew.highlightAndroidCloudImport": "Android 现在可以导入被云存储提供商标记为通用二进制文件的工作簿。",
     "whatsNew.highlightAccessibility": "更清晰的屏幕阅读器名称和更强的对比度改善了标题栏、导览、输出标签和运行按钮。",
+    "whatsNew.highlightStatusBar": "Android 可以隐藏状态栏以腾出更多空间：在 菜单 → 外观 → 隐藏 Android 状态栏 中选择“从不”“横屏时”或“始终”。导航栏始终不会隐藏。",
+    "whatsNew.highlightShortLandscapeComposer": "在高度较小的横屏下，可隐藏新建单元格面板，让笔记本占满整个高度。点击标题栏按钮或在笔记本末尾向上滑动即可恢复；编辑单元格并打开键盘时，它也会自动隐藏。",
     "whatsNew.highlightHelpExamples": "帮助中的示例现在带有“复制”和“插入”按钮。“插入”会将示例作为新单元格添加到笔记本末尾，但不会运行它。",
     "whatsNew.releaseNotes": "阅读完整发布说明",
     "menu.showTour": "🧭 开始导览",

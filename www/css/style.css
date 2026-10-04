@@ -912,10 +912,6 @@ html, body {
     min-height: 44px;
 }
 
-.help-example-btn[hidden] {
-    display: none;
-}
-
 .help-example-btn:disabled {
     opacity: 0.6;
     cursor: default;
@@ -1252,6 +1248,12 @@ html, body {
     color: #63b132;
     background: rgba(99, 177, 50, 0.1);
     border: 1px solid rgba(99, 177, 50, 0.3);
+}
+
+.lang-badge.lang-markdown {
+    color: var(--text-secondary);
+    background: rgba(139, 148, 158, 0.1);
+    border: 1px solid rgba(139, 148, 158, 0.3);
 }
 
 /* Cell name label (NotebookVFS) */
