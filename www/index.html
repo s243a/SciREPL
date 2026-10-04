@@ -101,6 +101,7 @@
         <div class="modal-content">
             <button class="modal-close" data-i18n-aria-label="common.close" data-i18n-title="common.close" aria-label="Close" title="Close">&times;</button>
             <h2 data-i18n="help.scireplHelp">SciREPL Help</h2>
+            <div class="help-examples-live visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
 
             <p><button id="btn-show-tour" class="vfs-btn" data-i18n="help.showTour">Show the tour again</button></p>
             <p><button id="btn-show-whats-new" class="vfs-btn" data-i18n="help.showWhatsNew">What’s new in this version</button></p>
@@ -171,7 +172,7 @@
             <p><a class="vfs-btn" href="open-source-licenses.html" data-i18n="help.openSourceLicenses">Open-source licences</a></p>
 
             <h3 data-i18n="help.quickStartPython">Quick Start — Python</h3>
-            <pre><code># Basic math
+            <pre dir="ltr" data-example-lang="python"><code># Basic math
 2 + 2
 
 # NumPy
@@ -199,7 +200,7 @@ big_array = np.arange(1000);</code></pre>
 
             <h3 data-i18n="help.installingPackages">Installing Packages</h3>
             <p data-i18n-html="help.installPurePythonPackagesFrom">Install pure-Python packages from PyPI with <code>%pip install</code>:</p>
-            <pre><code>%pip install requests
+            <pre dir="ltr" data-example-lang="python"><code>%pip install requests
 
 # Then use it
 import requests
@@ -208,7 +209,7 @@ print(r.status_code)</code></pre>
             <p data-i18n-html="help.noteOnlyPurePythonPackages"><em>Note: Only pure-Python packages are supported. Packages with C extensions (e.g. psutil) require pre-compiled WASM wheels.</em></p>
 
             <p data-i18n-html="help.installRPackagesInstallPackages">Install R packages with <code>install.packages()</code> or <code>%install</code>:</p>
-            <pre><code># Standard R syntax (works out of the box)
+            <pre dir="ltr" data-example-lang="r"><code># Standard R syntax (works out of the box)
 install.packages("jsonlite")
 library(jsonlite)
 
@@ -218,7 +219,7 @@ library(jsonlite)
 
             <h3 data-i18n="help.quickStartR">Quick Start — R</h3>
             <p data-i18n="help.switchRUsingLanguageSelector">Switch to R using the language selector. The webR runtime (~50 MB) downloads on first use and is cached.</p>
-            <pre><code># Basic math
+            <pre dir="ltr" data-example-lang="r"><code># Basic math
 mean(c(10, 20, 30))
 
 # Vectors and stats
@@ -246,7 +247,7 @@ sharedfs_list("/shared/data")</code></pre>
 
             <h3 data-i18n="help.quickStartProlog">Quick Start — Prolog</h3>
             <p data-i18n="help.switchPrologUsingLanguageSelector">Switch to Prolog using the language selector (Py → PL).</p>
-            <pre><code>% Assert facts
+            <pre dir="ltr" data-example-lang="prolog"><code>% Assert facts
 assert(parent(tom, bob)).
 assert(parent(bob, ann)).
 
@@ -279,14 +280,12 @@ grandparent(tom, Z).</code></pre>
                 <li data-i18n-html="help.bashBrushWasmShellHas"><strong>Bash</strong> — The brush-wasm shell has a built-in bridge to SharedVFS.</li>
             </ul>
 
-            <pre><code># Python — write a CSV to the shared folder
+            <pre dir="ltr" data-example-lang="python"><code># Python — write a CSV to the shared folder
 with open("/shared/data/results.csv", "w") as f:
-    f.write("x,y\n1,2\n3,4\n")
-
-# R — read it back
-sharedfs_read("/shared/data/results.csv")
-
-% Prolog — consult a shared knowledge base
+    f.write("x,y\n1,2\n3,4\n")</code></pre>
+            <pre dir="ltr" data-example-lang="r"><code># R — read it back
+sharedfs_read("/shared/data/results.csv")</code></pre>
+            <pre dir="ltr" data-example-lang="prolog"><code>% Prolog — consult a shared knowledge base
 :- consult('/shared/lib/prolog/kb.pl').</code></pre>
 
             <p data-i18n-html="help.packagesBundlesAmpWorkbooksWhen"><strong>Packages, bundles &amp; workbooks:</strong> When you install an item from Browse Packages, Bundles &amp; Workbooks, bundle dependencies are installed first and files with <code>/shared/</code> destination paths are written to SharedVFS automatically. Package files targeting a specific kernel (e.g., Prolog modules at <code>/user/</code>) go to that kernel's own filesystem.</p>
@@ -315,7 +314,7 @@ sharedfs_read("/shared/data/results.csv")
 
             <h3 data-i18n="help.quickStartLua">Quick Start — Lua</h3>
             <p data-i18n="help.switchLuaUsingLanguageSelector">Switch to Lua using the language selector. The Fengari runtime (~200 KB) downloads on first use from CDN.</p>
-            <pre><code>-- Tables (arrays and dictionaries)
+            <pre dir="ltr" data-example-lang="lua"><code>-- Tables (arrays and dictionaries)
 t = {10, 20, 30}
 print(#t, t[1])
 
@@ -360,7 +359,7 @@ nb.write("In[1]", ".code", "print('overwritten by Lua')")</code></pre>
             <p data-i18n-html="help.propertiesCodeOutputLanguageType"><strong>Properties:</strong> <code>.code</code>, <code>.output</code>, <code>.language</code>, <code>.type</code>, <code>.name</code></p>
 
             <p data-i18n-html="help.bashUsesFilesystemPathsDirectly"><strong>Bash</strong> — uses filesystem paths directly:</p>
-            <pre><code># By name
+            <pre dir="ltr" data-example-lang="bash"><code># By name
 cat /nb/my_cell/.code
 
 # By index
@@ -379,7 +378,7 @@ echo "print('hello')" > /nb/In[3]/.code
 ls /nb/</code></pre>
 
             <p data-i18n-html="help.pythonNbReadNbWrite"><strong>Python</strong> — <code>nb_read()</code> / <code>nb_write()</code>:</p>
-            <pre><code># By name
+            <pre dir="ltr" data-example-lang="python"><code># By name
 code = nb_read("my_cell", ".code")
 
 # By index
@@ -395,7 +394,7 @@ nb_write("results", ".code", "print('generated!')")
 cells = nb_list()</code></pre>
 
             <p data-i18n-html="help.rNbReadNbWrite"><strong>R</strong> — <code>nb_read()</code> / <code>nb_write()</code>:</p>
-            <pre><code># By name
+            <pre dir="ltr" data-example-lang="r"><code># By name
 code <- nb_read("my_cell", ".code")
 
 # By index
@@ -408,7 +407,7 @@ nb_write("plot_cell", ".code", "plot(1:10)")
 cells <- nb_list()</code></pre>
 
             <p data-i18n-html="help.luaNbReadNbWrite"><strong>Lua</strong> — <code>nb.read()</code> / <code>nb.write()</code>:</p>
-            <pre><code>-- By name
+            <pre dir="ltr" data-example-lang="lua"><code>-- By name
 code = nb.read("my_cell", ".code")
 
 -- By index
@@ -424,7 +423,7 @@ nb.write("results", ".code", "print('from Lua')")
 cells = nb.list()</code></pre>
 
             <p data-i18n-html="help.prologNbRead3Nb"><strong>Prolog</strong> — <code>nb_read/3</code> / <code>nb_write/3</code>:</p>
-            <pre><code>%% By name
+            <pre dir="ltr" data-example-lang="prolog"><code>%% By name
 nb_read('my_cell', '.code', Code).
 
 %% By index
@@ -434,7 +433,7 @@ nb_read('In[2]', '.output', Output).
 nb_write('r_factorial', '.code', GeneratedCode).</code></pre>
 
             <p data-i18n-html="help.javascriptDirectWindowNotebookvfsApi"><strong>JavaScript</strong> — direct <code>window.notebookVFS</code> API:</p>
-            <pre><code>// By name
+            <pre dir="ltr" data-example-lang="javascript"><code>// By name
 const code = window.notebookVFS.readFile("/nb/my_cell/.code");
 
 // By index
@@ -1174,7 +1173,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
 
             <div class="prolog-settings-help">
                 <h3 data-i18n="fetchStatus.usage">Usage</h3>
-                <pre><code>% After uploading myfile.pl:
+                <pre dir="ltr" data-example-lang="prolog"><code>% After uploading myfile.pl:
 :- consult('/user/myfile.pl').
 
 % After adding search path mylib → /user/mylib:
@@ -1398,6 +1397,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <script src="vendor/hljs/lua.min.js"></script>
     <script src="js/export.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/help_examples.js"></script>
 
     <!-- Privacy modal (shown on-demand by kernel_manager) + app start -->
     <script>

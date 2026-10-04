@@ -185,6 +185,14 @@ jobs:
       - name: Run cell operations tests
         run: node "$TEST_DIR/test_cell_ops.mjs"
 
+      - name: Run Help example Copy/Insert tests (when present on this tag)
+        run: |
+          if test -f "$TEST_DIR/test_help_examples.mjs"; then
+            node "$TEST_DIR/test_help_examples.mjs"
+          else
+            echo "test_help_examples.mjs absent on this ref; skipping"
+          fi
+
       - name: Run JavaScript kernel tests
         run: node "$TEST_DIR/test_js_kernel.mjs"
 

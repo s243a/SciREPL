@@ -871,6 +871,103 @@ html, body {
     border-radius: 6px;
 }
 
+/* Help examples: a toolbar above each tagged <pre> (built by
+   help_examples.js). The language chip sits at the inline start and the
+   actions at the inline end, so the row mirrors under RTL while the code
+   itself stays left-to-right. */
+.help-example {
+    margin: 12px 0;
+}
+
+.help-example > pre {
+    margin-top: 0;
+}
+
+.help-example-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.help-example-lang {
+    flex: 0 0 auto;
+    font-size: 11px;
+}
+
+.help-example-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-inline-start: auto;
+}
+
+.help-example-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.help-example-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.help-example-btn.is-confirmed {
+    color: var(--green);
+    border-color: var(--green);
+}
+
+.help-example-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.help-example-notice {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.help-example-notice[hidden] {
+    display: none;
+}
+
+.help-example-link {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 8px;
+    border: none;
+    background: none;
+    color: var(--accent);
+    font: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* Screen-reader-only text (live regions, hidden copy buffer). */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
 .modal-content kbd {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -1151,6 +1248,12 @@ html, body {
     color: #63b132;
     background: rgba(99, 177, 50, 0.1);
     border: 1px solid rgba(99, 177, 50, 0.3);
+}
+
+.lang-badge.lang-markdown {
+    color: var(--text-secondary);
+    background: rgba(139, 148, 158, 0.1);
+    border: 1px solid rgba(139, 148, 158, 0.3);
 }
 
 /* Cell name label (NotebookVFS) */

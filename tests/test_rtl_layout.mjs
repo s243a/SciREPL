@@ -48,6 +48,23 @@ const offsets = (selector) => page.evaluate((s) => {
     return { left: Math.round(a.left - b.left), right: Math.round(b.right - a.right) };
 }, selector);
 
+/** Help example toolbar geometry: where the language chip and the actions sit. */
+const exampleBar = () => page.evaluate(() => {
+    const help = document.getElementById('help-modal');
+    const wasHidden = help.classList.contains('hidden');
+    help.classList.remove('hidden');
+    const wrap = help.querySelector('.help-example');
+    const chip = wrap && wrap.querySelector('.help-example-lang').getBoundingClientRect();
+    const actions = wrap && wrap.querySelector('.help-example-actions').getBoundingClientRect();
+    const pre = wrap && wrap.querySelector('pre');
+    const out = wrap ? {
+        chipLeft: Math.round(chip.left), actionsLeft: Math.round(actions.left),
+        preDirection: getComputedStyle(pre).direction, preDir: pre.getAttribute('dir'),
+    } : null;
+    if (wasHidden) help.classList.add('hidden');
+    return out;
+});
+
 try {
     await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: TIMEOUT });
     await page.waitForFunction(() => window.i18n && window.appearance, null, { timeout: 30_000 });
@@ -84,6 +101,11 @@ try {
         || await offsets('#help-modal .modal-close');
     const ltrMenuAlign = await cssOf('.menu-grid button', 'text-align');
     check('menu buttons read from the start edge', ltrMenuAlign === 'start', ltrMenuAlign);
+
+    const ltrBar = await exampleBar();
+    check('a Help example toolbar puts the language chip before its Copy/Insert actions under ltr',
+        ltrBar && ltrBar.chipLeft < ltrBar.actionsLeft && ltrBar.preDirection === 'ltr',
+        JSON.stringify(ltrBar));
 
     // A blockquote's rule should sit on the side the text starts from.
     // .markdown-body is built at runtime for markdown cells, so the probe has
@@ -128,6 +150,11 @@ try {
     check('the modal close button moves to the opposite corner',
         rtlClose && rtlClose.left < rtlClose.right,
         `rtl offsets ${JSON.stringify(rtlClose)}`);
+    const rtlBar = await exampleBar();
+    check('the Help example toolbar mirrors under rtl: chip on the right, actions on the left',
+        rtlBar && rtlBar.chipLeft > rtlBar.actionsLeft, JSON.stringify(rtlBar));
+    check('the example code itself stays left-to-right under rtl',
+        rtlBar && rtlBar.preDirection === 'ltr' && rtlBar.preDir === 'ltr', JSON.stringify(rtlBar));
     await page.evaluate(() => document.getElementById('help-modal').classList.add('hidden'));
 
     // Nothing should overflow horizontally once mirrored.
