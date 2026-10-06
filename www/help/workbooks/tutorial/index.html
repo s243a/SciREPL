@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="../../styles.css">
   <link rel="stylesheet" href="../../interface/tutorial/tutorial.css">
   <link rel="stylesheet" href="tutorial.css">
+  <script src="catalogue-link.js" defer></script>
   <title>Markov Groups workbook walkthrough · SciREPL Help</title>
 </head>
 <body data-editions="free pro" data-platforms="android pwa windows-preview">
@@ -34,6 +35,7 @@
       <p class="screen-note">Real phone screenshots show SciREPL Pro <strong>1.4.0-debug</strong> on a <strong>Samsung Galaxy S24+</strong>, captured on <time datetime="2026-10-06">6 October 2026</time>. They illustrate the shared workbook workflow, not a released Pro build. Free and other versions may arrange some controls differently. The example is the English workbook from SciREPL Catalog <strong>v0.4.0</strong>.</p>
       <nav class="lesson-nav" aria-label="Workbook walkthrough steps">
         <strong>In this lesson</strong>
+        <p><a href="#find-menu">First, find the menu</a></p>
         <ol>
           <li><a href="#browse">Browse, filter, and search</a></li>
           <li><a href="#open">Open the workbook</a></li>
@@ -43,14 +45,28 @@
         </ol>
       </nav>
 
+      <section id="find-menu">
+        <p class="step-label">Before you begin</p>
+        <h2>Find the menu</h2>
+        <p>Look in SciREPL's <strong>header row at the top of the app</strong> for the <strong>☰ Menu</strong> button. Its icon is <strong>three horizontal lines</strong>, highlighted in yellow below. Tap it to open the app's menu; Step 1 shows which menu item to choose.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--find-menu" role="img" aria-label="SciREPL's top header row, with the three-horizontal-lines Menu button highlighted in yellow beside the question-mark Help button.">
+            <div class="shot-stage">
+              <img src="assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>The <strong>☰ Menu</strong> button is beside the <strong>? Help</strong> button in this screenshot. Use the three-line icon even if your header has a different arrangement.</figcaption>
+          <a class="full-shot-link" href="assets/phone-workbook.png">View the complete screenshot</a>
+        </figure>
+      </section>
+
       <section id="browse">
         <p class="step-label">Step 1</p>
         <h2>Browse, filter, and search</h2>
         <ol class="lesson-steps">
-          <li>Open <strong>Menu → Browse Packages, Bundles &amp; Workbooks</strong>. The optional <strong>📦</strong> header shortcut opens the same screen when it is visible.</li>
+          <li>Open <strong>Menu → Browse Packages, Bundles &amp; Workbooks</strong>. In Free, the optional <strong>📦</strong> header shortcut opens the same screen when it is visible. The <a href="../../interface/appearance/#browse-shortcut">Appearance walkthrough</a> shows how to enable it.</li>
           <li>Browse the list or use its filters. For this English example, choose <strong>English</strong> under <strong>Spoken language</strong> and <strong>Python</strong> under <strong>Kernel</strong>. <strong>All spoken languages</strong> and the kernel's <strong>All</strong> option also work, but show more entries.</li>
-          <li>Type <strong>Markov Groups</strong> in the search field. Under <strong>Workbooks</strong>, find <strong>Markov Groups: A Random Walk on Cube Moves</strong>. Check the full title before installing: this is a workbook template, not a package to add to Python.</li>
-          <li>If the keyboard covers the result, use its hide-keyboard button or press Android <strong>Back</strong> once to dismiss it. Keep Browse open and scroll to the matching workbook.</li>
         </ol>
         <figure class="phone-figure">
           <div class="shot-window shot-window--browse" role="img" aria-label="SciREPL Browse screen with its catalogue controls highlighted in yellow.">
@@ -62,7 +78,10 @@
           <figcaption>Browse brings together packages, bundles, and workbook templates. Its search and filters help you narrow the list.</figcaption>
           <a class="full-shot-link" href="assets/phone-browse.png">View the complete Browse screenshot</a>
         </figure>
-        <p><strong>What else is available?</strong> Clear the search and try topics such as <strong>CSV</strong>, <strong>Prolog</strong>, <strong>Lua</strong>, or <strong>statistics</strong>. Workbooks range from small file exercises to language tutorials and mathematical examples. The list depends on the catalogue release and your filters; language editions of a lesson are separate entries, not different lessons. Choose <strong>All</strong> under Kernel when exploring other languages.</p>
+        <ol class="lesson-steps" start="3">
+          <li>Type <strong>Markov Groups</strong> in the search field. Under <strong>Workbooks</strong>, find <strong>Markov Groups: A Random Walk on Cube Moves</strong>. Check the full title before installing: this is a workbook template, not a package to add to Python.</li>
+          <li>If the keyboard covers the result, use its hide-keyboard button or press Android <strong>Back</strong> once to dismiss it. Keep Browse open and scroll to the matching workbook.</li>
+        </ol>
         <figure class="phone-figure">
           <div class="shot-window shot-window--search" role="img" aria-label="Browse search for Markov Groups with the matching workbook and its Install control highlighted in yellow.">
             <div class="shot-stage">
@@ -73,6 +92,26 @@
           <figcaption>Search for <strong>Markov Groups</strong>, then check the matching workbook's title and <strong>Install</strong> button.</figcaption>
           <a class="full-shot-link" href="assets/phone-search.png">View the complete search screenshot</a>
         </figure>
+        <p><strong>What else is available?</strong> <a id="catalogue-workbooks-link" href="https://github.com/s243a/SciREPL-Catalog/tree/main/workbooks/en">Browse the workbook list on GitHub (<bdi id="catalogue-workbooks-language">English</bdi>)</a>. Language editions of a lesson are separate entries, not different lessons.</p>
+        <div class="catalogue-language-choice" id="catalogue-language-choice" hidden>
+          <label for="catalogue-workbooks-locale">Workbook language:</label>
+          <select id="catalogue-workbooks-locale">
+            <option value="ar" lang="ar">العربية</option>
+            <option value="bn" lang="bn">বাংলা</option>
+            <option value="de" lang="de">Deutsch</option>
+            <option value="en" lang="en" selected>English</option>
+            <option value="es" lang="es">Español</option>
+            <option value="fr" lang="fr">Français</option>
+            <option value="hi" lang="hi">हिन्दी</option>
+            <option value="id" lang="id">Bahasa Indonesia</option>
+            <option value="ja" lang="ja">日本語</option>
+            <option value="ko" lang="ko">한국어</option>
+            <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+            <option value="ru" lang="ru">Русский</option>
+            <option value="zh" lang="zh">中文</option>
+          </select>
+        </div>
+        <p>The GitHub list follows the catalogue's <code>main</code> branch, so it may include workbooks not yet in the app's stable catalogue. In SciREPL, clear the search and try <strong>CSV</strong>, <strong>Prolog</strong>, <strong>Lua</strong>, or <strong>statistics</strong>; choose <strong>All</strong> under Kernel when exploring other languages.</p>
         <p class="callout"><strong>If a privacy notice appears:</strong> fetching or refreshing the remote catalogue needs a network connection. Read the disclosure, scroll <em>inside the dialog</em> to the bottom, and tap <strong>I Understand</strong> only if you agree. Closing the notice prevents that network refresh; built-in entries and previously cached catalogue entries may still appear. See <a href="../../privacy/">privacy and local data</a>.</p>
         <p class="callout"><strong>No matching workbook?</strong> Check the language and kernel filters, then use the catalogue's <strong>Refresh</strong> control. An older app may not have the same catalogue controls. Alternatively, <a download="markov-groups.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/v0.4.0/workbooks/en/markov-groups.srwb">save the pinned v0.4.0 workbook file</a> to your device, then choose <strong>Menu → Import File</strong> and select <code>markov-groups.srwb</code>. If your browser displays the file as text, use its save/download action and keep the <code>.srwb</code> extension.</p>
       </section>
@@ -81,8 +120,8 @@
         <p class="step-label">Step 2</p>
         <h2>Open the workbook and inspect its cells</h2>
         <ol class="lesson-steps">
-          <li>Tap <strong>Install</strong> on the workbook card. If the button already says <strong>Installed</strong>, close Browse and choose the existing workbook from the workbook selector instead.</li>
-          <li>The workbook normally becomes the selected tab. If Browse stays open, close it with <strong>×</strong>. If automatic switching is off, choose <strong>Markov Groups: A Random Walk on Cube Moves</strong> from the workbook selector.</li>
+          <li>Tap <strong>Install</strong> on the workbook card. If the button already says <strong>Installed</strong>, exit the Browse menu and choose the existing workbook from the workbook selector instead.</li>
+          <li>The workbook normally becomes the selected tab. If the Browse menu stays open, exit it. If automatic switching is off, choose <strong>Markov Groups: A Random Walk on Cube Moves</strong> from the workbook selector.</li>
           <li>Read the opening text, then scroll through the cells. Markdown cells explain the lesson; Python cells contain the code you will run. Each Python cell has a name to help you find it.</li>
         </ol>
         <figure class="phone-figure">

@@ -25,6 +25,7 @@ const expected = [
   'help/getting-started/index.html',
   'help/interface/index.html',
   'help/interface/tutorial/index.html',
+  'help/interface/appearance/index.html',
   'help/files-export/tutorial/index.html',
   'help/workbooks/index.html',
   'help/workbooks/tutorial/index.html',
@@ -137,6 +138,28 @@ check('CSV tutorial offers a downloadable workbook before the next app release',
 
 const markovTutorial = readFileSync(path.join(WWW, 'help/workbooks/tutorial/index.html'), 'utf8');
 const markovText = helpText(markovTutorial);
+const markovMenuSection = (markovTutorial.match(
+  /<section\b[^>]*\bid="find-menu"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+check('Markov tutorial shows where Menu is before Step 1',
+  !!markovMenuSection
+    && markovTutorial.indexOf('id="find-menu"') < markovTutorial.indexOf('id="browse"')
+    && /header row at the top/i.test(helpText(markovMenuSection))
+    && /☰ Menu/.test(helpText(markovMenuSection))
+    && /three horizontal lines/i.test(helpText(markovMenuSection))
+    && /<figure\b/.test(markovMenuSection)
+    && markovMenuSection.includes('assets/menu-overlay.svg'));
+check('Markov tutorial shows unfiltered Browse before the search and other topics after results',
+  markovTutorial.indexOf('assets/phone-browse.png') < markovTutorial.indexOf('Type <strong>Markov Groups')
+    && markovTutorial.indexOf('Type <strong>Markov Groups') < markovTutorial.indexOf('assets/phone-search.png')
+    && markovTutorial.indexOf('assets/phone-search.png') < markovTutorial.indexOf('What else is available?')
+    && /<ol\b[^>]*\bstart="3"/.test(markovTutorial));
+check('Markov tutorial links the Free Browse shortcut setup',
+  /In Free, the optional/.test(markovText)
+    && markovTutorial.includes('../../interface/appearance/#browse-shortcut'));
+check('Markov tutorial offers the catalogue folder and distinguishes main from stable',
+  markovTutorial.includes('https://github.com/s243a/SciREPL-Catalog/tree/main/workbooks/en')
+    && /main.{0,120}not yet in the app.s stable catalogue/.test(markovText)
+    && /<label\b[^>]*for="catalogue-workbooks-locale"/.test(markovTutorial));
 check('Markov tutorial starts with catalogue search, not a new workbook',
   markovText.indexOf('Browse Packages, Bundles & Workbooks') >= 0
     && markovText.indexOf('Browse Packages, Bundles & Workbooks') < markovText.indexOf('cube_moves')
@@ -162,8 +185,8 @@ check('Markov tutorial links a workbook backup workflow',
     && /Workbook\s*\(\.srwb\)/.test(markovText));
 const markovAssets = path.join(WWW, 'help/workbooks/tutorial/assets');
 const markovShots = ['browse', 'search', 'workbook', 'checks', 'edit', 'six-moves', 'export'];
-check('Markov tutorial contains all seven annotated phone figures',
-  (markovTutorial.match(/<figure\b/g) || []).length === markovShots.length
+check('Markov tutorial contains all seven phone captures plus the annotated header crop',
+  (markovTutorial.match(/<figure\b/g) || []).length === markovShots.length + 1
     && markovShots.every(name => markovTutorial.includes(`assets/phone-${name}.png`)
       && markovTutorial.includes(`assets/${name}-overlay.svg`)));
 for (const name of markovShots) {
@@ -174,12 +197,58 @@ for (const name of markovShots) {
       && png.readUInt32BE(16) === 1080 && png.readUInt32BE(20) === 2340
       && /viewBox="0 0 1080 2340"/.test(svg));
 }
+check('Markov Menu overlay uses the existing unmodified workbook screenshot dimensions',
+  markovMenuSection.includes('assets/phone-workbook.png')
+    && /viewBox="0 0 1080 2340"/.test(readFileSync(path.join(markovAssets, 'menu-overlay.svg'), 'utf8')));
 const markovReceipt = JSON.parse(readFileSync(path.join(markovAssets, 'capture-receipt.json'), 'utf8'));
 check('Markov capture receipt records real run results and the export-test limit',
   markovReceipt.imagesUnmodified === true
     && markovReceipt.phoneChecks.allSixMovesPassed === true
     && markovReceipt.phoneChecks.editedSampledMoves.length === 6
     && markovReceipt.limits.some(limit => /destination.{0,100}not selected/i.test(limit)));
+
+const appearanceTutorial = readFileSync(path.join(WWW, 'help/interface/appearance/index.html'), 'utf8');
+const appearanceText = helpText(appearanceTutorial);
+const browseShortcutSection = (appearanceTutorial.match(
+  /<section\b[^>]*\bid="browse-shortcut"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+check('Appearance tutorial teaches the Free Browse shortcut and the Pro menu fallback',
+  /Free 1\.4\.0/.test(helpText(browseShortcutSection))
+    && /Show Browse shortcut/.test(helpText(browseShortcutSection))
+    && ['Always', 'When there is room', 'Never'].every(value => helpText(browseShortcutSection).includes(value))
+    && /Using Pro\?/.test(helpText(browseShortcutSection))
+    && /Menu → Browse Packages, Bundles & Workbooks/.test(helpText(browseShortcutSection)));
+check('Appearance Browse shortcut deep link includes opening the settings',
+  /Open Menu → Appearance\s*, then scroll to Header shortcuts/.test(helpText(browseShortcutSection)));
+check('Appearance tutorial explains immediate changes and limited Reset',
+  /Closing Appearance.{0,80}does not cancel/i.test(appearanceText)
+    && /does not erase your workbook cells/i.test(appearanceText)
+    && /not reset the separate Run button or interface-language/i.test(appearanceText));
+check('Appearance tutorial separates button size from font zoom and composer Run from cell Run',
+  /no text-zoom slider/i.test(appearanceText)
+    && /not a general font-size setting/i.test(appearanceText)
+    && /new-cell panel.{0,100}not the Run buttons inside saved-cell editors/i.test(appearanceText));
+check('Appearance tutorial keeps Android status and navigation bars distinct',
+  /status bar, not the navigation or gesture bar/i.test(appearanceText)
+    && /absent from the browser\/PWA and Windows/i.test(appearanceText));
+const appearanceAssets = path.join(WWW, 'help/interface/appearance/assets');
+const appearanceShots = ['menu', 'shortcuts', 'header', 'options', 'theme'];
+check('Appearance tutorial contains five annotated Free phone figures',
+  (appearanceTutorial.match(/<figure\b/g) || []).length === appearanceShots.length
+    && /SciREPL Free 1\.4\.0-debug/.test(appearanceText));
+for (const name of appearanceShots) {
+  const png = readFileSync(path.join(appearanceAssets, `phone-${name}.png`));
+  const svg = readFileSync(path.join(appearanceAssets, `${name}-overlay.svg`), 'utf8');
+  check(`Appearance ${name} screenshot and overlay share dimensions`,
+    png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+      && png.readUInt32BE(16) === 1080 && png.readUInt32BE(20) === 2340
+      && /viewBox="0 0 1080 2340"/.test(svg));
+}
+const appearanceReceipt = JSON.parse(readFileSync(path.join(appearanceAssets, 'capture-receipt.json'), 'utf8'));
+check('Appearance capture receipt records Browse visibility and restoration',
+  appearanceReceipt.imagesUnmodified === true
+    && appearanceReceipt.checks.browseHeaderVisible === true
+    && appearanceReceipt.checks.browseOriginalStorageValueRestored === true
+    && appearanceReceipt.checks.noNotebookChanges === true);
 
 const alias = readFileSync(path.join(WWW, 'pro/help/index.html'), 'utf8');
 check('compatibility alias is noindex', /name=["']robots["']\s+content=["']noindex["']/i.test(alias));
@@ -233,6 +302,56 @@ for (const file of linkedHtml) {
 
 const browser = await chromium.launch({ headless: true });
 try {
+  const catalogueFolder = 'https://github.com/s243a/SciREPL-Catalog/tree/main/workbooks/';
+  const tutorialRoute = `${TEST_ORIGIN}/help/workbooks/tutorial/index.html`;
+  const folders = ['ar', 'bn', 'de', 'en', 'es', 'fr', 'hi', 'id', 'ja', 'ko', 'pt-BR', 'ru', 'zh'];
+  const cataloguePage = await browser.newPage({ viewport: { width: 320, height: 800 } });
+  let tutorialLocale = 'en';
+  let externalRequests = 0;
+  await cataloguePage.route('**/*', async route => {
+    if (new URL(route.request().url()).origin !== new URL(TEST_ORIGIN).origin) {
+      externalRequests++;
+      return route.abort();
+    }
+    if (route.request().url() === tutorialRoute) {
+      return route.fulfill({ contentType: 'text/html',
+        body: markovTutorial.replace('<html lang="en">', `<html lang="${tutorialLocale}">`) });
+    }
+    return route.continue();
+  });
+  await cataloguePage.goto(tutorialRoute, { waitUntil: 'networkidle' });
+  check('Catalogue folder selector names all thirteen actual locale folders',
+    JSON.stringify(await cataloguePage.locator('#catalogue-workbooks-locale option')
+      .evaluateAll(options => options.map(option => option.value))) === JSON.stringify(folders));
+  check('Catalogue selector is labelled, visible and tap-sized',
+    await cataloguePage.getByLabel('Workbook language:').isVisible()
+      && (await cataloguePage.getByLabel('Workbook language:').boundingBox()).height >= 44);
+  for (const folder of folders) {
+    await cataloguePage.getByLabel('Workbook language:').selectOption(folder);
+    check(`Catalogue language selection points to ${folder}`,
+      await cataloguePage.locator('#catalogue-workbooks-link').getAttribute('href') === catalogueFolder + folder
+        && await cataloguePage.locator('#catalogue-workbooks-language').textContent()
+          === await cataloguePage.locator('#catalogue-workbooks-locale').evaluate(select => select.selectedOptions[0].textContent));
+  }
+  for (const [locale, folder] of [
+    ['en', 'en'], ['fr-FR', 'fr'], ['pt-BR', 'pt-BR'], ['pt', 'pt-BR'],
+    ['PT_pt', 'pt-BR'], ['zh-Hant', 'zh'], ['unknown', 'en'], ['', 'en'],
+    ['constructor', 'en'], ['../../outside', 'en'],
+  ]) {
+    tutorialLocale = locale;
+    await cataloguePage.goto(tutorialRoute, { waitUntil: 'networkidle' });
+    check(`Catalogue link defaults from tutorial locale ${locale || '(empty)'}`,
+      await cataloguePage.locator('#catalogue-workbooks-link').getAttribute('href') === catalogueFolder + folder
+        && await cataloguePage.getByLabel('Workbook language:').inputValue() === folder);
+  }
+  check('Catalogue selector does not fetch GitHub or make other external requests', externalRequests === 0);
+  await cataloguePage.close();
+  const noScript = await browser.newPage({ javaScriptEnabled: false });
+  await noScript.goto(tutorialRoute, { waitUntil: 'networkidle' });
+  check('Catalogue link remains usable without JavaScript, with no dead selector',
+    await noScript.locator('#catalogue-workbooks-link').getAttribute('href') === catalogueFolder + 'en'
+      && !await noScript.locator('#catalogue-language-choice').isVisible());
+  await noScript.close();
   const pages = contentPages.map(rel => `/${rel}`);
   for (const route of pages) {
     const page = await browser.newPage({ viewport: { width: 320, height: 800 } });
