@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Find the Markov Groups workbook in SciREPL's catalogue, run its Python cells, edit a random walk, and export your own workbook copy.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../styles.css">
+  <link rel="stylesheet" href="../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="tutorial.css">
+  <title>Markov Groups workbook walkthrough · SciREPL Help</title>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="../../">sci<span>REPL</span> Help</a>
+    <nav aria-label="Primary navigation">
+      <a href="../">Workbooks reference</a>
+      <a href="../../">All help</a>
+      <a href="../../../">Open Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <p class="breadcrumbs"><a href="../../">Help</a> / <a href="../">Workbooks</a> / Markov Groups walkthrough</p>
+    <article>
+      <p class="eyebrow">Learn by doing</p>
+      <h1>Explore a workbook from the catalogue</h1>
+      <p class="lede">Find the existing <strong>Markov Groups: A Random Walk on Cube Moves</strong> workbook, run its four Python cells, shorten its random walk, and save your own copy. The focus is on using SciREPL; you do not need to know matrix algebra or solve a Rubik's Cube.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Android steps</li>
+        <li class="chip">About 15 minutes</li>
+      </ul>
+      <p class="screen-note">Real phone screenshots show SciREPL Pro <strong>1.4.0-debug</strong> on a <strong>Samsung Galaxy S24+</strong>, captured on <time datetime="2026-10-06">6 October 2026</time>. They illustrate the shared workbook workflow, not a released Pro build. Free and other versions may arrange some controls differently. The example is the English workbook from SciREPL Catalog <strong>v0.4.0</strong>.</p>
+      <nav class="lesson-nav" aria-label="Workbook walkthrough steps">
+        <strong>In this lesson</strong>
+        <ol>
+          <li><a href="#browse">Browse, filter, and search</a></li>
+          <li><a href="#open">Open the workbook</a></li>
+          <li><a href="#run">Run its cells in order</a></li>
+          <li><a href="#edit">Change one value and rerun</a></li>
+          <li><a href="#export">Export your workbook copy</a></li>
+        </ol>
+      </nav>
+
+      <section id="browse">
+        <p class="step-label">Step 1</p>
+        <h2>Browse, filter, and search</h2>
+        <ol class="lesson-steps">
+          <li>Open <strong>Menu → Browse Packages, Bundles &amp; Workbooks</strong>. The optional <strong>📦</strong> header shortcut opens the same screen when it is visible.</li>
+          <li>Browse the list or use its filters. For this English example, choose <strong>English</strong> under <strong>Spoken language</strong> and <strong>Python</strong> under <strong>Kernel</strong>. <strong>All spoken languages</strong> and the kernel's <strong>All</strong> option also work, but show more entries.</li>
+          <li>Type <strong>Markov Groups</strong> in the search field. Under <strong>Workbooks</strong>, find <strong>Markov Groups: A Random Walk on Cube Moves</strong>. Check the full title before installing: this is a workbook template, not a package to add to Python.</li>
+          <li>If the keyboard covers the result, use its hide-keyboard button or press Android <strong>Back</strong> once to dismiss it. Keep Browse open and scroll to the matching workbook.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse" role="img" aria-label="SciREPL Browse screen with its catalogue controls highlighted in yellow.">
+            <div class="shot-stage">
+              <img src="assets/phone-browse.png" alt="" loading="lazy" decoding="async">
+              <img src="assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Browse brings together packages, bundles, and workbook templates. Its search and filters help you narrow the list.</figcaption>
+          <a class="full-shot-link" href="assets/phone-browse.png">View the complete Browse screenshot</a>
+        </figure>
+        <p><strong>What else is available?</strong> Clear the search and try topics such as <strong>CSV</strong>, <strong>Prolog</strong>, <strong>Lua</strong>, or <strong>statistics</strong>. Workbooks range from small file exercises to language tutorials and mathematical examples. The list depends on the catalogue release and your filters; language editions of a lesson are separate entries, not different lessons. Choose <strong>All</strong> under Kernel when exploring other languages.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--search" role="img" aria-label="Browse search for Markov Groups with the matching workbook and its Install control highlighted in yellow.">
+            <div class="shot-stage">
+              <img src="assets/phone-search.png" alt="" loading="lazy" decoding="async">
+              <img src="assets/search-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Search for <strong>Markov Groups</strong>, then check the matching workbook's title and <strong>Install</strong> button.</figcaption>
+          <a class="full-shot-link" href="assets/phone-search.png">View the complete search screenshot</a>
+        </figure>
+        <p class="callout"><strong>If a privacy notice appears:</strong> fetching or refreshing the remote catalogue needs a network connection. Read the disclosure, scroll <em>inside the dialog</em> to the bottom, and tap <strong>I Understand</strong> only if you agree. Closing the notice prevents that network refresh; built-in entries and previously cached catalogue entries may still appear. See <a href="../../privacy/">privacy and local data</a>.</p>
+        <p class="callout"><strong>No matching workbook?</strong> Check the language and kernel filters, then use the catalogue's <strong>Refresh</strong> control. An older app may not have the same catalogue controls. Alternatively, <a download="markov-groups.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/v0.4.0/workbooks/en/markov-groups.srwb">save the pinned v0.4.0 workbook file</a> to your device, then choose <strong>Menu → Import File</strong> and select <code>markov-groups.srwb</code>. If your browser displays the file as text, use its save/download action and keep the <code>.srwb</code> extension.</p>
+      </section>
+
+      <section id="open">
+        <p class="step-label">Step 2</p>
+        <h2>Open the workbook and inspect its cells</h2>
+        <ol class="lesson-steps">
+          <li>Tap <strong>Install</strong> on the workbook card. If the button already says <strong>Installed</strong>, close Browse and choose the existing workbook from the workbook selector instead.</li>
+          <li>The workbook normally becomes the selected tab. If Browse stays open, close it with <strong>×</strong>. If automatic switching is off, choose <strong>Markov Groups: A Random Walk on Cube Moves</strong> from the workbook selector.</li>
+          <li>Read the opening text, then scroll through the cells. Markdown cells explain the lesson; Python cells contain the code you will run. Each Python cell has a name to help you find it.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--workbook" role="img" aria-label="The opened Markov Groups workbook, with its title and workbook controls highlighted in yellow.">
+            <div class="shot-stage">
+              <img src="assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="assets/workbook-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>The catalogue workbook opens as editable cells. Its introduction gives the Python run order.</figcaption>
+          <a class="full-shot-link" href="assets/phone-workbook.png">View the complete workbook screenshot</a>
+        </figure>
+        <p class="callout"><strong>Install does not mean Run.</strong> Installing this remote catalogue workbook adds its cells without executing its Python code. The v0.4.0 template has no saved Python outputs, so inspect the code and run it yourself. No AI account, API key, external dataset, or extra package installation is needed; the code uses NumPy with SciREPL's Python runtime.</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">Step 3</p>
+        <h2>Run the four Python cells in order</h2>
+        <p>For a saved cell, tap the <strong>✎ pencil</strong> in that cell's header, then tap that cell's own <strong>Run</strong>. This executes the existing cell; the bottom new-cell panel creates a different cell. In Pro you can also double-tap saved code to open its editor.</p>
+        <ol class="lesson-steps">
+          <li>Run <code>cube_moves</code>. It defines the moves and helpers. Expect <code>Built six clockwise quarter-turn matrices with fixed face centres.</code></li>
+          <li>Run <code>check_moves</code>. It checks that no sticker is lost, centres stay fixed, and four repetitions of each quarter turn return to the start. After six passed lines, expect <code>All six moves passed. U and R do not commute.</code></li>
+          <li>Run <code>show_turn</code>. It prints the U-turn cycles and sticker labels before and after a turn. The front top row changes from <code>[19, 20, 21]</code> to <code>[46, 47, 48]</code>. The comparison <code>U then R equals R then U: False</code> shows that move order matters.</li>
+          <li>Run <code>random_walk</code>. It prints a one-sticker probability total of <code>1.0</code>, a 12-step sampled path, final face-letter labels, and a message confirming that every sticker label and all six centres were preserved.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--checks" role="img" aria-label="Fresh check_moves output on the phone, with the passed checks highlighted in yellow.">
+            <div class="shot-stage">
+              <img src="assets/phone-checks.png" alt="" loading="lazy" decoding="async">
+              <img src="assets/checks-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>The printed checks are fresh results from running <code>check_moves</code>, not saved results supplied by the catalogue.</figcaption>
+          <a class="full-shot-link" href="assets/phone-checks.png">View the complete checks screenshot</a>
+        </figure>
+        <p>You can also choose <strong>Menu → Run All Cells</strong> after inspecting the workbook. Its Python cells are already in the required order. Do not reorder them: later cells reuse definitions from <code>cube_moves</code>.</p>
+        <p class="callout"><strong>First run slower?</strong> Python may need time to initialize, and a runtime download or network fallback may need your consent. Wait for the status badge to return to <strong>ready</strong> and check the cell's output for errors. If a later cell reports an undefined name after a restart, run the four Python cells from the beginning; saved output is not the same as live Python definitions.</p>
+        <h3>A little meaning behind the output</h3>
+        <p>The workbook tracks <strong>54 individually labelled stickers</strong>, not just six colours. A legal move rearranges those labels. Four repetitions of one quarter turn return to the starting arrangement, but turns of different faces can give different results when their order changes.</p>
+        <p>The random walk chooses among 13 options: stay still (<code>I</code>), six quarter turns, and their six inverses. Its <strong>54×54 probability matrix describes the location of one sticker</strong>, not every full-cube configuration. A probability total of <code>1.0</code> means that this sticker's location probabilities sum to one; it does not prove that the cube is uniformly scrambled.</p>
+        <p>This workbook prints text and face-letter lists. It does not draw or animate a cube, and its seeded short path is not evidence of a uniformly mixed scramble.</p>
+      </section>
+
+      <section id="edit">
+        <p class="step-label">Step 4</p>
+        <h2>Shorten the walk and rerun the saved cell</h2>
+        <ol class="lesson-steps">
+          <li>Find <code>random_walk</code> and tap <em>its</em> <strong>✎ pencil</strong>.</li>
+          <li>Find this line and change only <code>size=12</code> to <code>size=6</code>:
+            <pre><code>moves = rng.choice(MOVE_OPTIONS, size=12).tolist()</code></pre>
+            <p>Leave <code>np.random.default_rng(7)</code> unchanged. The seed makes this example reproducible.</p>
+          </li>
+          <li>Tap the <strong>Run</strong> button in that saved cell's editor. The output is refreshed; the <code>Sampled moves:</code> line now contains six options instead of twelve. <code>I</code> counts as an option even though it leaves the cube still.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--edit" role="img" aria-label="The saved random_walk cell being edited, with size equals six and the cell's Run control highlighted in yellow.">
+            <div class="shot-stage">
+              <img src="assets/phone-edit.png" alt="" loading="lazy" decoding="async">
+              <img src="assets/edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Change one value in the saved cell, then use <em>that cell's</em> Run. Editing alone does not refresh its previous output.</figcaption>
+          <a class="full-shot-link" href="assets/phone-edit.png">View the complete editing screenshot</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--six-moves" role="img" aria-label="Fresh random_walk output showing six sampled options after rerunning, highlighted in yellow.">
+            <div class="shot-stage">
+              <img src="assets/phone-six-moves.png" alt="" loading="lazy" decoding="async">
+              <img src="assets/six-moves-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>The shorter sampled path is the visible result of your edit. The final message still confirms that the trajectory preserves the sticker labels and centres.</figcaption>
+          <a class="full-shot-link" href="assets/phone-six-moves.png">View the complete six-option result screenshot</a>
+        </figure>
+        <p>For this change, rerun only <code>random_walk</code> while the earlier definitions are loaded. If you edit <code>cube_moves</code> instead, rerun the later Python cells too. Outputs record their last execution; they do not automatically recalculate when another cell changes.</p>
+        <p>If you opened the editor by mistake, choose <strong>Cancel</strong>. To return to the original example, change <code>size=6</code> back to <code>size=12</code> and run the cell again.</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">Step 5</p>
+        <h2>Export your own workbook copy</h2>
+        <ol class="lesson-steps">
+          <li>Keep the Markov Groups workbook selected, then open <strong>Menu → Export Workbooks &amp; Packages</strong>, not Export Document.</li>
+          <li>Choose <strong>Workbook (.srwb)</strong> and <strong>Current tab only</strong>.</li>
+          <li>Tap <strong>Export</strong> and save the copy somewhere you control. Android opens a share/save flow; a browser downloads a file. Keep the <code>.srwb</code> extension.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="Export dialog with Workbook srwb, Current tab only, and Export highlighted in yellow.">
+            <div class="shot-stage">
+              <img src="assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Workbook format and Current tab only save this edited workbook without including unrelated tabs. The Pro-only <strong>Include AI conversation</strong> option is not needed for this lesson; leave it unchecked.</figcaption>
+          <a class="full-shot-link" href="assets/phone-export.png">View the complete export screenshot</a>
+        </figure>
+        <p>The workbook needs no separate data file, so an <code>.srwb</code> copy is enough for this lesson. You can reopen it with <strong>Menu → Import File</strong>; run its Python cells from the beginning when starting a fresh runtime.</p>
+        <p class="callout"><strong>Local recovery is not a backup.</strong> Clearing app/site storage or uninstalling can remove local work. Android and browser sessions do not automatically share your edits. Export does not publish your changes to the catalogue; it gives you a separate copy.</p>
+        <p>For the basics of saved-cell editing, see the <a href="../../interface/tutorial/">first-workbook interface walkthrough</a>. For an example that reads and carries a separate data file, try the <a href="../../files-export/tutorial/">CSV workbook walkthrough</a>. The <a href="../">workbooks reference</a> covers cell types and stable cell names.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL Help</span><nav aria-label="Footer navigation"><a href="../">Workbooks reference</a><a href="../../">All help</a></nav></footer>
+</body>
+</html>

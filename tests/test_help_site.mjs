@@ -27,6 +27,7 @@ const expected = [
   'help/interface/tutorial/index.html',
   'help/files-export/tutorial/index.html',
   'help/workbooks/index.html',
+  'help/workbooks/tutorial/index.html',
   'help/languages-packages/index.html',
   'help/files-export/index.html',
   'help/troubleshooting/index.html',
@@ -133,6 +134,52 @@ check('CSV tutorial warns against overwriting imported edits with create_csv',
     && /overwrit/i.test(csvReopenText));
 check('CSV tutorial offers a downloadable workbook before the next app release',
   /<a\s+download="csv-basics-seedlings\.srwb"\s+href="assets\/csv-basics-seedlings\.srwb"/.test(csvTutorial));
+
+const markovTutorial = readFileSync(path.join(WWW, 'help/workbooks/tutorial/index.html'), 'utf8');
+const markovText = helpText(markovTutorial);
+check('Markov tutorial starts with catalogue search, not a new workbook',
+  markovText.indexOf('Browse Packages, Bundles & Workbooks') >= 0
+    && markovText.indexOf('Browse Packages, Bundles & Workbooks') < markovText.indexOf('cube_moves')
+    && markovText.includes('Markov Groups: A Random Walk on Cube Moves'));
+check('Markov tutorial names the four code cells in their run order',
+  ['cube_moves', 'check_moves', 'show_turn', 'random_walk'].every(name => markovText.includes(name))
+    && markovText.indexOf('cube_moves') < markovText.indexOf('check_moves')
+    && markovText.indexOf('check_moves') < markovText.indexOf('show_turn')
+    && markovText.indexOf('show_turn') < markovText.indexOf('random_walk'));
+check('Markov tutorial distinguishes importing from execution',
+  /(?:does not|doesn['’]t|without|not)\s+(?:automatically\s+)?(?:execut(?:e|ing)|run)/i.test(markovText));
+check('Markov tutorial edits a saved cell, not the composer',
+  /pencil|✎/.test(markovText) && /size=12/.test(markovText) && /size=6/.test(markovText)
+    && /new-cell panel/i.test(markovText));
+check('Markov tutorial separates one-sticker probabilities from full cube states',
+  /one-sticker/i.test(markovText) && /not.{0,120}(?:full|every|all).{0,60}cube/i.test(markovText));
+check('Markov tutorial offers a pinned catalogue workbook fallback',
+  /href="https:\/\/raw\.githubusercontent\.com\/s243a\/SciREPL-Catalog\/v0\.4\.0\/workbooks\/en\/markov-groups\.srwb"/.test(markovTutorial));
+check('Markov tutorial identifies the actual screenshot edition',
+  /Pro 1\.4\.0-debug/.test(markovText) && /S24\+/.test(markovText));
+check('Markov tutorial links a workbook backup workflow',
+  /Export Workbooks & Packages/.test(markovText) && /Current tab only/.test(markovText)
+    && /Workbook\s*\(\.srwb\)/.test(markovText));
+const markovAssets = path.join(WWW, 'help/workbooks/tutorial/assets');
+const markovShots = ['browse', 'search', 'workbook', 'checks', 'edit', 'six-moves', 'export'];
+check('Markov tutorial contains all seven annotated phone figures',
+  (markovTutorial.match(/<figure\b/g) || []).length === markovShots.length
+    && markovShots.every(name => markovTutorial.includes(`assets/phone-${name}.png`)
+      && markovTutorial.includes(`assets/${name}-overlay.svg`)));
+for (const name of markovShots) {
+  const png = readFileSync(path.join(markovAssets, `phone-${name}.png`));
+  const svg = readFileSync(path.join(markovAssets, `${name}-overlay.svg`), 'utf8');
+  check(`Markov ${name} screenshot and editable overlay use the same dimensions`,
+    png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+      && png.readUInt32BE(16) === 1080 && png.readUInt32BE(20) === 2340
+      && /viewBox="0 0 1080 2340"/.test(svg));
+}
+const markovReceipt = JSON.parse(readFileSync(path.join(markovAssets, 'capture-receipt.json'), 'utf8'));
+check('Markov capture receipt records real run results and the export-test limit',
+  markovReceipt.imagesUnmodified === true
+    && markovReceipt.phoneChecks.allSixMovesPassed === true
+    && markovReceipt.phoneChecks.editedSampledMoves.length === 6
+    && markovReceipt.limits.some(limit => /destination.{0,100}not selected/i.test(limit)));
 
 const alias = readFileSync(path.join(WWW, 'pro/help/index.html'), 'utf8');
 check('compatibility alias is noindex', /name=["']robots["']\s+content=["']noindex["']/i.test(alias));

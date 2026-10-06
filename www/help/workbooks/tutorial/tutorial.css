@@ -1,0 +1,10 @@
+/* Raw phone captures stay intact; these viewports crop only their display. */
+.shot-window--browse { aspect-ratio: 1080 / 1310; --shift: -25.64%; }
+.shot-window--search { aspect-ratio: 1080 / 1350; --shift: -35.47%; }
+.shot-window--workbook { aspect-ratio: 1080 / 1800; --shift: -3.85%; }
+.shot-window--checks { aspect-ratio: 1080 / 860; --shift: -26.71%; }
+.shot-window--edit { aspect-ratio: 1080 / 1210; --shift: -13.68%; }
+.shot-window--six-moves { aspect-ratio: 1080 / 800; --shift: -27.78%; }
+.shot-window--export { aspect-ratio: 1080 / 1220; --shift: -24.36%; }
+article code { overflow-wrap: anywhere; }
+.lesson-steps pre { white-space: pre-wrap; overflow-wrap: anywhere; }
