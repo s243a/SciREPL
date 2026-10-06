@@ -76,6 +76,13 @@ android {
         }
     }
     buildTypes {
+        // Debug builds install beside the Play/release app: a distinct
+        // package id, plus the "(debug)" label and bug-badged launcher icon
+        // from src/debug/res. Release keeps com.unifyweaver.scirepl.
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
         release {
             minifyEnabled false
             if (releaseSigningConfigured) {

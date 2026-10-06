@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Free debug badge: red disc, white ring and white bug, bottom-right.
+     Outer edge (radius 12.5 + 0.5 stroke from 67,67) stays inside the
+     adaptive icon's 33dp safe-zone radius: sqrt(2)*13 + 13 = 31.4dp. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#E53935" android:strokeColor="#FFFFFF"
+        android:strokeWidth="1"
+        android:pathData="M67,54.5a12.5,12.5 0,1 0,0 25a12.5,12.5 0,1 0,0 -25" />
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M67,60C64,60 63,62 63,65L63,69C63,72 65,74 67,74C69,74 71,72 71,69L71,65C71,62 70,60 67,60Z" />
+    <path android:fillColor="#00000000" android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.6" android:strokeLineCap="round"
+        android:pathData="M65,61L63,58M69,61L71,58M63,64L60,62M63,67L59,67M63,70L60,73M71,64L74,62M71,67L75,67M71,70L74,73" />
+    <path android:fillColor="#00000000" android:strokeColor="#E53935"
+        android:strokeWidth="1" android:pathData="M67,64L67,71" />
+</vector>

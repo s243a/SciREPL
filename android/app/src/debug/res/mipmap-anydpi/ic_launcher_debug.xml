@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- API 23-25: the release bitmap with the debug badge on top. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:gravity="fill" android:drawable="@mipmap/ic_launcher" />
+    <item android:gravity="fill" android:drawable="@drawable/ic_debug_badge" />
+</layer-list>

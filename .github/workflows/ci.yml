@@ -103,6 +103,9 @@ jobs:
       - name: Android hardware Back routing
         run: npm run test:android-back
 
+      - name: Android debug identity and launcher resources
+        run: npm run test:android-debug-identity
+
       - name: Workbook close and Android cloud-file import
         run: npm run test:workbook-close-import
 
