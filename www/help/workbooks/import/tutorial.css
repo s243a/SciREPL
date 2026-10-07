@@ -1,0 +1,6 @@
+/* Screenshots are intact; these windows crop only the displayed area. */
+.shot-window--import-menu { aspect-ratio: 1080 / 630; --shift: -12.82%; }
+.shot-window--import-result { width: min(100%, 390px); aspect-ratio: 390 / 735; --shift: 0%; }
+.shot-window--import-result .shot-stage { aspect-ratio: 390 / 844; }
+article code { overflow-wrap: anywhere; }
+.lesson-steps a { overflow-wrap: anywhere; }

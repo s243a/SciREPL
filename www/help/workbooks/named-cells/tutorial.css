@@ -1,0 +1,41 @@
+/* White, reading-first tutorial; share the established interface lesson style. */
+article code { overflow-wrap: anywhere; }
+article pre code { overflow-wrap: normal; }
+.lesson-steps a { overflow-wrap: anywhere; }
+table caption { padding-bottom: 10px; text-align: left; font-weight: 700; }
+table th { min-width: 7rem; }
+.tutorial-shot {
+  display: block;
+  width: min(100%, 390px);
+  height: auto;
+  border: 2px solid #526170;
+  border-radius: 10px;
+  background: #fff;
+}
+.path-tree { font-size: .93rem; }
+.annotated-shot { position: relative; width: min(100%, 390px); border: 2px solid #526170; border-radius: 10px; overflow: hidden; }
+.annotated-shot img { display: block; width: 100%; height: auto; }
+.annotated-shot .shot-annotation { position: absolute; inset: 0; height: 100%; pointer-events: none; }
+.program-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+  max-width: none;
+}
+.program-flow li {
+  flex: 1 1 190px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--cyan);
+  background: var(--panel);
+}
+.program-flow li span { display: block; margin-top: 6px; font-size: .93rem; }
+@media (max-width: 480px) {
+  article th, article td { padding: 8px; }
+  .phone-figure { padding: 10px; }
+  .program-flow { flex-direction: column; }
+  .program-flow li { flex-basis: auto; }
+}

@@ -113,7 +113,7 @@
         </div>
         <p>The GitHub link shows the latest development contents. SciREPL normally uses the latest stable catalogue release, so some workbooks shown on GitHub may not yet appear in Browse. In SciREPL, clear the search and try <strong>CSV</strong>, <strong>Prolog</strong>, <strong>Lua</strong>, or <strong>statistics</strong>; choose <strong>All</strong> under Kernel when exploring other languages.</p>
         <p class="callout"><strong>If a privacy notice appears:</strong> fetching or refreshing the remote catalogue needs a network connection. Read the disclosure, scroll <em>inside the dialog</em> to the bottom, and tap <strong>I Understand</strong> only if you agree. Closing the notice prevents that network refresh; built-in entries and previously cached catalogue entries may still appear. See <a href="../../privacy/">privacy and local data</a>.</p>
-        <p class="callout"><strong>No matching workbook?</strong> Check the language and kernel filters, then use the catalogue's <strong>Refresh</strong> control. An older app may not have the same catalogue controls. Alternatively, <a download="markov-groups.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/v0.4.0/workbooks/en/markov-groups.srwb">save the pinned v0.4.0 workbook file</a> to your device, then choose <strong>Menu → Import File</strong> and select <code>markov-groups.srwb</code>. If your browser displays the file as text, use its save/download action and keep the <code>.srwb</code> extension.</p>
+        <p class="callout"><strong>No matching workbook?</strong> Check the language and kernel filters, then use the catalogue's <strong>Refresh</strong> control. An older app may not have the same catalogue controls. Alternatively, <a download="markov-groups.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/v0.4.0/workbooks/en/markov-groups.srwb">save the pinned v0.4.0 workbook file</a> to your device, then choose <strong>Menu → Import File</strong> and select <code>markov-groups.srwb</code>. If your browser displays the file as text, use its save/download action and keep the <code>.srwb</code> extension. The <a href="../import/">manual workbook import walkthrough</a> shows the steps using Simpson's Paradox from GitHub's <code>main</code> branch; choose the Markov file above to continue this lesson.</p>
       </section>
 
       <section id="open">
@@ -121,7 +121,7 @@
         <h2>Open the workbook and inspect its cells</h2>
         <ol class="lesson-steps">
           <li>Tap <strong>Install</strong> on the workbook card. If the button already says <strong>Installed</strong>, exit the Browse menu and choose the existing workbook from the workbook selector instead.</li>
-          <li>The workbook normally becomes the selected tab. If the Browse menu stays open, exit it. If automatic switching is off, choose <strong>Markov Groups: A Random Walk on Cube Moves</strong> from the workbook selector.</li>
+          <li>The workbook normally becomes the selected tab. If the Browse menu stays open, exit it. If automatic switching is off, choose <strong>Markov Groups: A Random Walk on Cube Moves</strong> from the <strong><svg role="img" aria-label="down-chevron" width="16" height="16" viewBox="0 0 16 16" style="vertical-align: -.125em;"><path d="M3 5.5 8 10.5 13 5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> workbook selector</strong> next to <strong>SciREPL</strong> in the header.</li>
           <li>Read the opening text, then scroll through the cells. Markdown cells explain the lesson; Python cells contain the code you will run. Each Python cell has a name to help you find it.</li>
         </ol>
         <figure class="phone-figure">
@@ -140,7 +140,9 @@
       <section id="run">
         <p class="step-label">Step 3</p>
         <h2>Run the four Python cells in order</h2>
-        <p>For a saved cell, tap the <strong>✎ pencil</strong> in that cell's header, then tap that cell's own <strong>Run</strong>. This executes the existing cell; the bottom new-cell panel creates a different cell. In Pro you can also double-tap saved code to open its editor.</p>
+        <p>For a saved cell, tap the <strong>✎ pencil</strong> in that cell's header, then tap that cell's own <strong>Run</strong>. This executes the existing cell; the bottom new-cell panel creates a different cell.</p>
+        <aside class="callout" data-editions="pro"><strong>Pro shortcut:</strong> double-tap the saved code to open its editor, then tap that cell's own <strong>Run</strong>. Free uses the <strong>✎ pencil</strong> in this walkthrough.</aside>
+        <p class="callout"><strong>What do these names mean?</strong> <code>cube_moves</code> and <code>check_moves</code> are names shown on the cells, not commands to type. Find the matching name, then use that cell's pencil and Run. The <a href="../named-cells/">named cells and cross-language paths tutorial</a> shows how to assign names and use them as references such as <code>/nb/cube_moves/.code</code>.</p>
         <ol class="lesson-steps">
           <li>Run <code>cube_moves</code>. It defines the moves and helpers. Expect <code>Built six clockwise quarter-turn matrices with fixed face centres.</code></li>
           <li>Run <code>check_moves</code>. It checks that no sticker is lost, centres stay fixed, and four repetitions of each quarter turn return to the start. After six passed lines, expect <code>All six moves passed. U and R do not commute.</code></li>
@@ -199,6 +201,8 @@
         <p>For this change, rerun only <code>random_walk</code> while the earlier definitions are loaded. If you edit <code>cube_moves</code> instead, rerun the later Python cells too. Outputs record their last execution; they do not automatically recalculate when another cell changes.</p>
         <p>If you opened the editor by mistake, choose <strong>Cancel</strong>. To return to the original example, change <code>size=6</code> back to <code>size=12</code> and run the cell again.</p>
       </section>
+
+      <p class="callout"><strong>Curious about the face directions?</strong> The workbook's <code>coordinates</code> cell gives the global axes and each face's right, up and outward normal. The <a href="../graphics/">pictures, diagrams and equations tutorial</a> shows how to put that kind of explanation into a workbook. Coordinate diagrams are being added to the catalogue's development copy; the pinned v0.4.0 copy above does not include them.</p>
 
       <section id="export">
         <p class="step-label">Step 5</p>

@@ -1,0 +1,83 @@
+{
+  "capturedAt": "2026-10-07T04:24:17.677Z",
+  "platform": "Chromium browser, not Android",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "app": {
+    "name": "SciREPL",
+    "version": "1.4.0",
+    "releaseChannel": "release",
+    "releaseUrl": "https://github.com/s243a/SciREPL/releases",
+    "repository": "https://github.com/s243a/SciREPL",
+    "releasesUrl": "https://github.com/s243a/SciREPL/releases"
+  },
+  "workbookSha256": "aa45c507de380f5adea5538f84cef49a867e6971beadee45d61096387f738502",
+  "imagesUnmodified": true,
+  "limits": [
+    "Free browser build only; no Android or Pro verification in these captures"
+  ],
+  "checks": [
+    "SRWB import preserves existing tabs",
+    "Every name and source imports exactly",
+    "No code runs on import, even with auto-execute on",
+    "Import does not create the shared file",
+    "Actual rename dialog changes the named path",
+    "Restoring the name restores readers without changing source",
+    "Producer stores exact JSON as last text output",
+    "Bash reads JavaScript source, output and language",
+    "Bash lists names and current positions",
+    "Path inspection does not create shared files",
+    "Explicit writer stores exact JSON text in SharedVFS",
+    "Bash reads the ordinary file written by JavaScript",
+    "Another program reads the ordinary shared file",
+    "Files & Storage previews the shared JSON file",
+    "Generator replaces only the existing Bash source",
+    "Writing .code does not execute the target",
+    "Manual Run executes generated code in its own language",
+    "Output property is read-only",
+    "Cross-notebook and programmatic execution permissions stay off",
+    "Python reads both named output and the shared file",
+    "Producer change leaves copied file and target output unchanged",
+    "New source is 17 while the previous result is still 16",
+    "Rerunning the target refreshes its result",
+    "Rerunning the copy and reader refreshes the shared-file route",
+    "Named paths keep their target after reordering",
+    "In[N] paths mean current position, not the printed cell ID",
+    "Names and generated source persist locally",
+    "Shared file persists in this app profile",
+    "SRWB export keeps all cell names and generated source",
+    "Ordinary SRWB import keeps source but drops saved code output",
+    "SRWB does not carry the separate shared data file",
+    "No external network requests needed, including optional Python",
+    "No page errors"
+  ],
+  "files": [
+    {
+      "file": "browser-name-dialog.png",
+      "sha256": "45dfa9ca34f610691b7ced590f0b5092c0abffb09a31658f6a2589cd13664ffd"
+    },
+    {
+      "file": "browser-named-cell.png",
+      "sha256": "0a7de3716adfb8a25db4f93758b77d9c879743adef87799979a923dc87eb9b43"
+    },
+    {
+      "file": "browser-named-cell-overlay.svg",
+      "sha256": "b8b15c5837e0c7cde77e92c42725a066c5e91d8af246be4e6355516a785d593b",
+      "kind": "separate editable annotation, raw screenshot unchanged"
+    },
+    {
+      "file": "browser-cell-paths.png",
+      "sha256": "9ddaffe46188452afa9f574c23f137f770bead93e0bf7960594e4221b8b54e74"
+    },
+    {
+      "file": "browser-shared-values.png",
+      "sha256": "44c8f63a3765449880b7aa0160597d9acb92bf0fa2247a46db25444ea19e23f5"
+    },
+    {
+      "file": "browser-generated-report.png",
+      "sha256": "ee9125e31811217c9f04fbcdb372040d4a3eeb61006f6d7e078ca8740d542bdd"
+    }
+  ]
+}

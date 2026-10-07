@@ -29,6 +29,9 @@ const expected = [
   'help/files-export/tutorial/index.html',
   'help/workbooks/index.html',
   'help/workbooks/tutorial/index.html',
+  'help/workbooks/import/index.html',
+  'help/workbooks/graphics/index.html',
+  'help/workbooks/named-cells/index.html',
   'help/languages-packages/index.html',
   'help/files-export/index.html',
   'help/troubleshooting/index.html',
@@ -180,6 +183,13 @@ check('Markov tutorial separates one-sticker probabilities from full cube states
   /one-sticker/i.test(markovText) && /not.{0,120}(?:full|every|all).{0,60}cube/i.test(markovText));
 check('Markov tutorial offers a pinned catalogue workbook fallback',
   /href="https:\/\/raw\.githubusercontent\.com\/s243a\/SciREPL-Catalog\/v0\.4\.0\/workbooks\/en\/markov-groups\.srwb"/.test(markovTutorial));
+check('Markov fallback links the manual import tutorial without changing its example file',
+  markovTutorial.includes('href="../import/"')
+    && /choose the Markov file above to continue this lesson/.test(markovText));
+check('Markov tutorial shows the actual down-chevron workbook selector icon',
+  /<svg\b[^>]*aria-label="down-chevron"/.test(markovTutorial)
+    && /from the[\s\S]*?<svg\b[\s\S]*?workbook selector/.test(markovTutorial)
+    && /workbook selector next to SciREPL in the header/.test(markovText));
 check('Markov tutorial identifies the actual screenshot edition',
   /Pro 1\.4\.0-debug/.test(markovText) && /S24\+/.test(markovText));
 check('Markov tutorial links a workbook backup workflow',
@@ -251,6 +261,97 @@ check('Appearance capture receipt records Browse visibility and restoration',
     && appearanceReceipt.checks.browseHeaderVisible === true
     && appearanceReceipt.checks.browseOriginalStorageValueRestored === true
     && appearanceReceipt.checks.noNotebookChanges === true);
+
+const importTutorial = readFileSync(path.join(WWW, 'help/workbooks/import/index.html'), 'utf8');
+const importText = helpText(importTutorial);
+check('Manual import tutorial downloads the actual Simpson workbook from main, not a release',
+  importTutorial.includes('https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb')
+    && importTutorial.includes('https://raw.githubusercontent.com/s243a/SciREPL-Catalog/main/workbooks/en/simpsons-paradox.srwb')
+    && /main.{0,70}development branch/.test(importText)
+    && /not yet in the latest stable catalogue release/.test(importText));
+check('Manual import tutorial names both notebook formats correctly',
+  /two notebook formats/.test(importText) && importText.includes('.srwb')
+    && importText.includes('.ipynb') && !importText.includes('.ipywb'));
+check('Manual import tutorial teaches Menu, file selection and preserved tabs',
+  /three horizontal lines/.test(importText) && /Import File/.test(importText)
+    && /system file picker/.test(importText) && /Downloads/.test(importText)
+    && /Your existing tabs are kept/.test(importText)
+    && /another import adds another copy/.test(importText));
+check('Manual import tutorial identifies R and JavaScript cells without implying auto-execution',
+  ['data', 'compute', 'viz', 'js_check'].every(name => importText.includes(name))
+    && /does not execute the code when you import an .srwb/.test(importText)
+    && /standalone/.test(importText));
+check('Manual import tutorial warns about Jupyter auto-execute and separate data',
+  /Menu → Settings → Import & Editing/.test(importText)
+    && /Auto-execute cells on workbook import/.test(importText)
+    && /off \(unchecked\)/.test(importText)
+    && /does not carry separate CSV files/.test(importText)
+    && importTutorial.includes('../../files-export/tutorial/#reopen'));
+
+const graphicsTutorial = readFileSync(path.join(WWW, 'help/workbooks/graphics/index.html'), 'utf8');
+const graphicsText = helpText(graphicsTutorial);
+check('Graphics tutorial covers static images, canvas output and KaTeX',
+  ['svg', 'javascript', 'math'].every(kind => graphicsTutorial.includes(`data-graphic-example="${kind}"`))
+    && graphicsText.includes('data:image/png;base64,')
+    && graphicsText.includes('window.renderImage(canvas.toDataURL')
+    && graphicsText.includes('KaTeX'));
+check('Graphics tutorial distinguishes Markdown rendering from code execution',
+  /For an Md cell.{0,100}renders text.{0,100}does not execute JavaScript/.test(graphicsText)
+    && /Only canvas_axes needs JavaScript execution/.test(graphicsText));
+check('Graphics tutorial teaches editing and ordinary SRWB output loss',
+  /pencil/.test(graphicsText) && /new-cell panel/.test(graphicsText)
+    && /manual Menu → Import File does not restore that code output/.test(graphicsText)
+    && /Markdown source and are displayed on import/.test(graphicsText));
+check('Graphics tutorial does not promise KaTeX image inclusion or Android captures',
+  /not Android captures/.test(graphicsText)
+    && /requires a trust option that SciREPL does not enable/.test(graphicsText)
+    && /does not compile TikZ/.test(graphicsText));
+const graphicsAssets = path.join(WWW, 'help/workbooks/graphics/assets');
+const graphicsBook = JSON.parse(readFileSync(path.join(graphicsAssets, 'workbook-graphics.srwb'), 'utf8'));
+check('Graphics download contains four named cells and no saved code outputs',
+  JSON.stringify(graphicsBook.notebook.cells.map(c => c.name)) === JSON.stringify(['static_axes', 'embedded_png', 'canvas_axes', 'math_axes'])
+    && graphicsBook.notebook.cells.every(c => !c.lastOutputHtml && !c.lastOutput));
+for (const name of ['static', 'canvas', 'equations']) {
+  const png = readFileSync(path.join(graphicsAssets, `browser-graphics-${name}.png`));
+  check(`Graphics ${name} browser capture is 390 by 844`,
+    png.readUInt32BE(16) === 390 && png.readUInt32BE(20) === 844);
+}
+
+const namedTutorial = readFileSync(path.join(WWW, 'help/workbooks/named-cells/index.html'), 'utf8');
+const namedText = helpText(namedTutorial);
+check('Named-cell guide is linked where Markov first asks readers to use names',
+  markovTutorial.includes('href="../named-cells/"')
+    && markovText.indexOf('What do these names mean?') < markovText.indexOf('Run cube_moves'));
+check('Markov double-tap shortcut is clearly a Pro callout',
+  /<aside\b[^>]*data-editions="pro"[^>]*>[\s\S]*?double-tap[\s\S]*?<\/aside>/.test(markovTutorial));
+check('Named-cell guide teaches the naming label rather than the pencil',
+  /double-click its In\[…\] label/.test(namedText) && /press and hold that label/.test(namedText)
+    && /not the .*pencil/.test(namedText));
+check('Named-cell guide separates virtual cell paths and shared files',
+  ['/nb/numbers/.output', '/shared/data/named-cell-tutorial/values.json', 'Files & Storage'].every(value => namedText.includes(value))
+    && /not a folder in Android/.test(namedText) && /does not browse \/nb\//.test(namedText)
+    && /not.{0,100}cloud synchronization/.test(namedText));
+check('Named-cell guide distinguishes source replacement from running',
+  /not run Bash/.test(namedText) && /source write does not execute the destination/.test(namedText)
+    && /read-only/.test(namedText) && /old.{0,30}Total: 16.{0,30}output/.test(namedText));
+check('Named-cell guide explains unstable positions and unsaved drafts',
+  /current 1-based position/.test(namedText) && /printed In\[…\] number can differ/.test(namedText)
+    && /unsaved editor draft is not the stored .code/.test(namedText));
+check('Named-cell guide explains shared-file backup and refresh',
+  /copy does not update automatically/.test(namedText)
+    && /workbook-only .srwb export does not include separate files/.test(namedText)
+    && /Package archive export/.test(namedText));
+const namedAssets = path.join(WWW, 'help/workbooks/named-cells/assets');
+const namedBook = JSON.parse(readFileSync(path.join(namedAssets, 'named-cell-interop.srwb'), 'utf8'));
+check('Named-cell download contains the complete named sources without outputs',
+  JSON.stringify(namedBook.notebook.cells.map(c => c.name)) === JSON.stringify(['intro', 'numbers', 'inspect_cells', 'write_shared', 'read_shared', 'generate_report', 'bash_report', 'python_total'])
+    && namedBook.notebook.cells.every(c => !c.lastOutputHtml && !c.lastOutput)
+    && namedBook.notebook.name === 'Named Cell Interop');
+for (const name of ['named-cell', 'name-dialog', 'cell-paths', 'shared-values', 'generated-report']) {
+  const png = readFileSync(path.join(namedAssets, `browser-${name}.png`));
+  check(`Named-cell ${name} browser capture is 390 by 844`,
+    png.readUInt32BE(16) === 390 && png.readUInt32BE(20) === 844);
+}
 
 const alias = readFileSync(path.join(WWW, 'pro/help/index.html'), 'utf8');
 check('compatibility alias is noindex', /name=["']robots["']\s+content=["']noindex["']/i.test(alias));

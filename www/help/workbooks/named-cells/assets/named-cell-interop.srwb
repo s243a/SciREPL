@@ -1,0 +1,57 @@
+{
+  "format": "srwb",
+  "version": "1.0",
+  "notebook": {
+    "name": "Named Cell Interop",
+    "cells": [
+      {
+        "name": "intro",
+        "type": "markdown",
+        "language": "markdown",
+        "code": "# Named cells and cross-language paths\n\nRead the code before running it. This workbook uses the current workbook’s /nb/ virtual cell paths.\n\nRun **numbers**, then **inspect_cells** to inspect virtual paths. Run **write_shared**, then **read_shared** to read the copied JSON file (expected total: `16`). Run **generate_report**, inspect the new Bash source in **bash_report**, then run that cell yourself. Expected result: `Total: 16`.\n\n**write_shared** writes a small JSON text copy to `/shared/data/named-cell-tutorial/values.json`, replacing an earlier copy at that exact path if present. Open it through Menu → Files & Storage.\n\n**python_total** is optional and reads both the named cell and the shared file. It requires the Python runtime; the first six code cells use only JavaScript and bundled Bash. No cell installs packages, uses a model or sends a network request. A runtime download, if needed, is separate.\n\nWriting another cell’s source does not execute it or refresh its old output. After editing numbers, rerun numbers → write_shared (to update the copied file) → read_shared. For the generated-code route, rerun numbers → generate_report → bash_report. Ordinary .srwb import drops saved code outputs; rerun the producer before its readers."
+      },
+      {
+        "name": "numbers",
+        "type": "code",
+        "language": "javascript",
+        "code": "console.log(JSON.stringify({values: [3, 5, 8]}));"
+      },
+      {
+        "name": "inspect_cells",
+        "type": "code",
+        "language": "bash",
+        "code": "printf 'Source:\\n'\ncat /nb/numbers/.code\nprintf '\\nOutput:\\n'\ncat /nb/numbers/.output\nprintf '\\nLanguage:\\n'\ncat /nb/numbers/.language\nprintf '\\nCell names and positions:\\n'\nls /nb/"
+      },
+      {
+        "name": "write_shared",
+        "type": "code",
+        "language": "javascript",
+        "code": "const text = window.notebookVFS.readFile('/nb/numbers/.output');\nif (!text) throw new Error('Run numbers first.');\nwindow.sharedVFS.writeFile('/shared/data/named-cell-tutorial/values.json', text, 'javascript');\nconsole.log('Saved JSON to /shared/data/named-cell-tutorial/values.json');"
+      },
+      {
+        "name": "read_shared",
+        "type": "code",
+        "language": "javascript",
+        "code": "const text = window.sharedVFS.readFile('/shared/data/named-cell-tutorial/values.json', 'utf8');\nif (!text) throw new Error('Run write_shared first.');\nconst record = JSON.parse(text);\nconsole.log(record.values.reduce((sum, value) => sum + value, 0));"
+      },
+      {
+        "name": "generate_report",
+        "type": "code",
+        "language": "javascript",
+        "code": "const text = window.notebookVFS.readFile('/nb/numbers/.output');\nif (!text) throw new Error('Run numbers first.');\nconst data = JSON.parse(text);\nconst total = data.values.reduce((sum, value) => sum + value, 0);\nconst updated = window.notebookVFS.writeFile(\n  '/nb/bash_report/.code', `echo \"Total: ${total}\"`\n);\nif (!updated) throw new Error('Check bash_report exists and cell writes are allowed.');\nconsole.log('Updated bash_report source; inspect it, then run it yourself.');"
+      },
+      {
+        "name": "bash_report",
+        "type": "code",
+        "language": "bash",
+        "code": "echo \"Run generate_report first\""
+      },
+      {
+        "name": "python_total",
+        "type": "code",
+        "language": "python",
+        "code": "import json\nrecord = json.loads(nb_read('numbers', '.output'))\nprint('Cell output:', sum(record['values']))\nwith open('/shared/data/named-cell-tutorial/values.json') as source:\n    saved = json.load(source)\nprint('Shared file:', sum(saved['values']))"
+      }
+    ]
+  }
+}
