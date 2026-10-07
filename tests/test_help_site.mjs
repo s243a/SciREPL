@@ -156,9 +156,11 @@ check('Markov tutorial shows unfiltered Browse before the search and other topic
 check('Markov tutorial links the Free Browse shortcut setup',
   /In Free, the optional/.test(markovText)
     && markovTutorial.includes('../../interface/appearance/#browse-shortcut'));
-check('Markov tutorial offers the catalogue folder and distinguishes main from stable',
+check('Markov tutorial offers the catalogue folder and distinguishes development from stable',
   markovTutorial.includes('https://github.com/s243a/SciREPL-Catalog/tree/main/workbooks/en')
-    && /main.{0,120}not yet in the app.s stable catalogue/.test(markovText)
+    && /GitHub link shows the latest development contents/.test(markovText)
+    && /SciREPL normally uses the latest stable catalogue release/.test(markovText)
+    && /workbooks shown on GitHub may not yet appear in Browse/.test(markovText)
     && /<label\b[^>]*for="catalogue-workbooks-locale"/.test(markovTutorial));
 check('Markov tutorial starts with catalogue search, not a new workbook',
   markovText.indexOf('Browse Packages, Bundles & Workbooks') >= 0
