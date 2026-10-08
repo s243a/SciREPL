@@ -101,6 +101,11 @@ check('Tutorial discovery includes the published walkthroughs', publishedTutoria
 for (const rel of publishedTutorials) {
   check(`Tutorial index lists ${rel} exactly once`,
     indexedTutorials.filter(target => target === rel).length === 1);
+  const lesson = readFileSync(path.join(WWW, rel), 'utf8');
+  const backLinks = [...lesson.matchAll(/<a\b[^>]*href=["']([^"']+)["'][^>]*>\s*All tutorials\s*<\/a>/gi)];
+  check(`Tutorial ${rel} links back to its index`, backLinks.some(([, href]) =>
+    new URL(href, new URL(BASE_PATH + rel, ORIGIN)).href
+      === new URL(BASE_PATH + tutorialIndexPath.replace(/index\.html$/, ''), ORIGIN).href));
 }
 check('Tutorial index cards point only to published lessons',
   indexedTutorials.every(target => publishedTutorials.includes(target)));
