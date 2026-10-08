@@ -14,7 +14,7 @@
     "height": 2340
   },
   "captureMethod": "Android screencap; unmodified full-screen PNGs",
-  "displayMethod": "Completion screenshots use CSS lower-700-pixel detail views; agent result is full-height. All link to full PNGs.",
+  "displayMethod": "Composer screenshots use CSS lower-700-pixel detail views; expanded Suggestions menu uses original pixels 775–1415; agent result is full-height. All link to full PNGs.",
   "practiceWorkbookOnly": true,
   "cleanup": {
     "originalWorkbookDraftAndLanguageRestored": true,
@@ -23,6 +23,20 @@
     "newlySavedProviderKeyRetained": true,
     "completionSpendingTalliesRetained": true,
     "policyConsentAcceptedForAuthorizedRequests": true
+  },
+  "completionPositionMenu": {
+    "section": "General",
+    "control": "Suggestions",
+    "selectedValue": "caret",
+    "options": [
+      { "value": "caret", "label": "At cursor" },
+      { "value": "end", "label": "End of cell only" }
+    ],
+    "nativeAndroidMenuOpen": true,
+    "nearbyIndentationSettingsOccludedByNativeMenu": true,
+    "providerRequests": 0,
+    "settingsRestored": true,
+    "capturedAtUtc": "2026-10-08T22:09:23.052Z"
   },
   "offline": {
     "onlineMode": "off",
@@ -94,6 +108,7 @@
     "latencyBenchmark": false
   },
   "screenshots": [
+    { "file": "phone-completion-position.png", "width": 1080, "height": 2340, "sha256": "09c596242324b761316cc99f606d3b495097054b330c8a6ea71c34d0689941fa", "capturedAtUtc": "2026-10-08T22:09:23.052Z" },
     { "file": "phone-table-javascript.png", "width": 1080, "height": 2340, "sha256": "a212a34eec1ec73ab4eca7a0ab4e7875c80baa806648deaed96e3b8489ca0991", "capturedAtUtc": "2026-10-08T21:59:22.444Z" },
     { "file": "phone-table-ghost.png", "width": 1080, "height": 2340, "sha256": "9dbb10f4149ef671391e9fd7cb4d0adab7d07c39e0c94bcf718538868f4a5b7b" },
     { "file": "phone-table-chips.png", "width": 1080, "height": 2340, "sha256": "af0c555b73a77313f23ee2af62d8d4036d8ebb54df010404be0cfefb44cf72e6" },

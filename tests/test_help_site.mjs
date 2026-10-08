@@ -157,6 +157,23 @@ check('Pro AI tutorial puts keys in settings, not workbook source',
   /API Key/i.test(aiSection('key')) && /Saved keys/i.test(aiSection('key'))
     && /without application-level encryption/i.test(aiSection('key'))
     && /Do not paste it into a cell/i.test(aiSection('key')));
+const aiKeyMarkup = (aiTutorial.match(
+  /<section\b[^>]*\bid="key"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+check('Pro AI key setup places the scroll tip after the gear and the configuration image after key privacy',
+  aiKeyMarkup.indexOf("Can't see the gear?") > aiKeyMarkup.indexOf('⚙ gear')
+    && aiKeyMarkup.indexOf("Can't see the gear?") < aiKeyMarkup.indexOf('Configure model for → AI Assistant')
+    && aiKeyMarkup.indexOf('assets/assistant-key-setup.png') > aiKeyMarkup.indexOf('Keep the key out of the workbook.')
+    && /Drag the panel's contents downwards/.test(aiSection('key'))
+    && /placeholder, not a saved key/.test(aiSection('key')));
+check('Pro AI model examples link primary documentation and qualify version and provider availability',
+  ['GLM 5.3 Flash', 'GPT-6 Luna', 'Claude Haiku 5.5', 'DeepSeek V4 Flash']
+    .every(name => aiSection('key').includes(name))
+    && ['https://openrouter.ai/z-ai/glm-5.3-flash',
+      'https://developers.openai.com/api/docs/models/gpt-6-luna',
+      'https://www.anthropic.com/claude/haiku',
+      'https://api-docs.deepseek.com/quick_start/pricing']
+      .every(href => aiKeyMarkup.includes(`href="${href}"`))
+    && /depend on your app version and provider/.test(aiSection('key')));
 check('Pro AI tutorial describes Open and browser limits without promising safe generated code',
   /second-most-permissive/i.test(aiSection('agent'))
     && /Active worksheet/.test(aiSection('agent'))
@@ -215,8 +232,41 @@ check('Pro AI General callouts match the unchanged screenshot and locate heading
     && aiTutorial.includes('assets/completion-general-overlay.svg')
     && /Yellow borders locate/.test(aiSection('tables')));
 const aiPhoneReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-phone.json'), 'utf8'));
+const aiKeyReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-key-setup.json'), 'utf8'));
+check('Pro AI configuration capture is keyless, guarded and measured without sending a request',
+  aiKeyReceipt.sourceSha === aiReceipt.sourceSha
+    && aiKeyReceipt.sourceGuards.exactShaBeforeAndAfter === true
+    && aiKeyReceipt.sourceGuards.trackedSourceCleanBeforeAndAfter === true
+    && aiKeyReceipt.actualUi.apiKeyEmpty === true
+    && aiKeyReceipt.actualUi.settingsSaved === false
+    && aiKeyReceipt.actualUi.configureModelFor === 'assistant'
+    && aiKeyReceipt.actualUi.backend === 'openrouter'
+    && aiKeyReceipt.actualUi.model === 'z-ai/glm-5.3-flash'
+    && ['providerStoreList', 'blockedRequests', 'externalResponses', 'pageErrors']
+      .every(field => Array.isArray(aiKeyReceipt[field]) && aiKeyReceipt[field].length === 0));
+for (const asset of [aiKeyReceipt.screenshot, aiKeyReceipt.overlay]) {
+  const bytes = readFileSync(path.join(aiAssets, asset.file));
+  check(`Pro AI ${asset.file} matches the keyless capture receipt`,
+    createHash('sha256').update(bytes).digest('hex') === asset.sha256
+      && aiTutorial.includes(`src="assets/${asset.file}"`));
+}
+const aiKeyOverlay = readFileSync(path.join(aiAssets, aiKeyReceipt.overlay.file), 'utf8');
+check('Pro AI configuration overlay highlights the four actual setup fields',
+  /viewBox="0 0 390 538"/.test(aiKeyOverlay)
+    && ['configure-target', 'backend-setting', 'model-setting', 'api-key-setting']
+      .every(id => aiKeyOverlay.includes(`id="${id}"`))
+    && aiKeyReceipt.overlay.highlights.length === 4);
+check('Pro AI expanded position screenshot follows the alternative and explains whole-cell and native-menu limits',
+  aiTablesMarkup.indexOf('assets/phone-completion-position.png')
+      > aiTablesMarkup.indexOf('<strong>End of cell only</strong> is an alternative')
+    && /whole cell\s*, not each line/.test(aiSection('tables'))
+    && /expanded menu covers the nearby indentation settings/.test(aiSection('tables'))
+    && aiPhoneReceipt.completionPositionMenu.nativeAndroidMenuOpen === true
+    && aiPhoneReceipt.completionPositionMenu.options.map(option => option.value).join(',') === 'caret,end'
+    && aiPhoneReceipt.completionPositionMenu.providerRequests === 0
+    && aiPhoneReceipt.completionPositionMenu.settingsRestored === true);
 check('Pro AI phone receipt includes the JavaScript example and the existing phone evidence',
-  ['phone-table-javascript.png', 'phone-table-ghost.png', 'phone-table-chips.png',
+  ['phone-completion-position.png', 'phone-table-javascript.png', 'phone-table-ghost.png', 'phone-table-chips.png',
     'phone-online-chips.png', 'phone-agent-result.png']
     .every(file => aiPhoneReceipt.screenshots.some(shot => shot.file === file)));
 check('Pro AI JavaScript phone capture verifies ghost acceptance without extra keys or API use',

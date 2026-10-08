@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 538">
+  <title>AI Assistant provider and key setup</title>
+  <desc>Yellow borders locate the real Configure model for, Backend, Model and blank API Key controls. Save is below the captured upper region and is not pictured.</desc>
+  <g fill="none" stroke="#ffd43b" stroke-width="3">
+    <rect id="configure-target" x="22" y="68" width="346" height="67" rx="6"/>
+    <rect id="backend-setting" x="22" y="145" width="346" height="53" rx="6"/>
+    <rect id="model-setting" x="22" y="220" width="346" height="53" rx="6"/>
+    <rect id="api-key-setting" x="22" y="468.78" width="346" height="60" rx="6"/>
+  </g>
+</svg>

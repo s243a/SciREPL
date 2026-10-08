@@ -53,6 +53,18 @@ completion, inference, phone performance, or Android rendering was exercised.
 The browser's unavailable native-only local-model state was not fabricated or
 pictured. These three browser images demonstrate UI navigation and configuration only.
 
+### Additional key-setup capture
+
+`assistant-key-setup.png` is a separate fresh, keyless browser capture from the
+same clean, pinned Pro source, taken on 2026-10-08 at 22:11 UTC. Its own script
+(`capture-pro-key-setup.mjs`) and receipt (`capture-pro-key-setup.json`) record
+the source guards, empty provider store and API-key input, and zero external
+requests, responses or page errors. The actual dialog controls select
+AI Assistant → OpenRouter → GLM 5.3 Flash; Save was below the cropped upper
+region and was not pressed. The 390 × 538 PNG is unmodified. Its matching,
+editable `assistant-key-setup-overlay.svg` contains four yellow borders using
+measured control bounds. The faint `sk-…` is the empty input's placeholder.
+
 The yellow borders over `completion-general.png` are a separate, editable
 SVG (`completion-general-overlay.svg`, 414 × 820, matching the screenshot).
 They locate section titles and the Suggestions / Suggestion chips controls.
@@ -67,12 +79,19 @@ link opens it without annotations.
   treat the browser source SHA above as the phone's build SHA.
 - Captured 2026-10-08 UTC (2026-10-07–08 local), English/dark theme, portrait,
   1080 × 2340, using Android's `screencap`. These are unmodified full-screen
-  PNGs. The four completion pictures use a CSS detail view of their lower
-  700 pixels; the agent result uses the full-height picture. Each links to
+  PNGs. The four composer pictures use a CSS detail view of their lower
+  700 pixels; the expanded Suggestions menu shows original pixels 775–1415;
+  the agent result uses the full-height picture. Each links to
   its full screenshot. No code, labels or results were painted into them.
 - A separate practice workbook contained only toy code. No existing workbook
   source or provider credential is included in the published screenshots or
   receipt. The software keyboard was dismissed for the published pictures.
+- `phone-completion-position.png`: captured at 2026-10-08 22:09 UTC. The real
+  Android Suggestions menu is open with At cursor selected and End of cell
+  only beneath it. It overlays the adjacent indentation settings; the tutorial
+  says so rather than presenting those controls as visible. No API request
+  was made and the three temporary Completion settings were restored. The
+  screenshot contains only General settings, not a key or workbook source.
 - `phone-table-javascript.png`: checked on the phone at 2026-10-08 21:59 UTC
   (8 October local). JavaScript `cons` offers the faint suffix `t`, with
   Suggestion chips On and extra keys Off. Pressing the real Accept button

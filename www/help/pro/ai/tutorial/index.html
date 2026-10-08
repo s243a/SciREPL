@@ -94,6 +94,15 @@ sample_m</code></pre>
         <p>The offline layer uses curated names and, where supported, local workbook/session information and frequency or acceptance history to rank suggestions. It is <strong>not a language model</strong>. It can complete a familiar name, but it does not reason about your whole task. Different languages have different coverage; a known-looking chip is not proof that the name exists in the running program.</p>
         <p class="callout"><strong>Accept is not Run.</strong> Accepting a suggestion edits the source; it does not execute the cell. Review it, then use that editor's <strong>Run</strong> button. Typing a prefix does not send an API request or start a language runtime just to make these suggestions.</p>
         <p><strong>End of cell only</strong> is an alternative if mid-cell suggestions distract you. A selection, string, comment, or half-split name may intentionally produce no suggestions. In short landscape, optional rows can disappear to keep room for code; see <a href="../../../interface/appearance/">Appearance settings</a>.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-position">
+            <div class="shot-stage">
+              <img src="assets/phone-completion-position.png" width="1080" height="2340" alt="Detail of the actual Galaxy S24+ Android General Completion screen: the Suggestions dropdown is open with At cursor selected and End of cell only beneath it." loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Actual Galaxy S24+ Android screenshot.</strong> In <strong>Completion → General → Ghost text → Suggestions</strong>, choose <strong>At cursor</strong> or <strong>End of cell only</strong>. The latter means the end of the <em>whole cell</em>, not each line. Android's expanded menu covers the nearby indentation settings; those are separate controls, not part of this choice.</figcaption>
+          <a class="full-shot-link" href="assets/phone-completion-position.png">View the unmodified full phone screenshot of the expanded Suggestions menu</a>
+        </figure>
       </section>
 
       <section id="key">
@@ -101,13 +110,25 @@ sample_m</code></pre>
         <h2>Save an API key</h2>
         <p>An API key lets SciREPL use a provider account you control. Obtain the key from that provider, check its current prices and account limits, and use only a small practice workbook with non-private data for this lesson.</p>
         <ol class="lesson-steps">
-          <li>Open <strong>Menu → 🤖 AI Assistant (Pro)</strong>. Tap the panel's <strong>⚙ gear</strong> to open AI Settings.</li>
+          <li>Open <strong>Menu → 🤖 AI Assistant (Pro)</strong>. Tap the panel's <strong>⚙ gear</strong> to open AI Settings.
+            <p class="callout"><strong>Can't see the gear?</strong> The keyboard can shift or scroll the Assistant panel. Drag the panel's contents downwards to scroll back towards its top and reveal the gear; dismissing the keyboard can also give you more room.</p>
+          </li>
           <li>Set <strong>Configure model for → AI Assistant</strong>. Choose a <strong>Backend</strong> and <strong>Model</strong>, and check the endpoint if your backend uses a configurable one.</li>
           <li>Enter the matching <strong>API Key</strong>. Use <strong>Saved keys</strong> to manage keys for other provider/endpoint pairs. A key for one destination is not automatically a key for another.</li>
           <li>Tap <strong>Save</strong>. Saving settings alone does not make a model request. Keep the panel open for the next step.</li>
         </ol>
         <p class="callout"><strong>Keep the key out of the workbook.</strong> Do not paste it into a cell, prompt, screenshot or exported file. Saved keys stay in local app/browser storage, without application-level encryption; protect the device and do not run untrusted code. The <a href="../../../../pro/privacy.html">Pro privacy policy</a> explains what is stored and sent.</p>
-        <p>A low-cost, tool-capable model is a sensible starting point for the Assistant. Availability and prices change, so check the current picker and your provider instead of relying on a price printed in a tutorial. Later, you can choose a different inexpensive model just for completions.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--key-setup" role="img" aria-label="Keyless Pro browser AI Settings. Yellow borders identify Configure model for: AI Assistant, Backend: OpenRouter, Model: GLM 5.3 Flash, and the empty API Key field.">
+            <div class="shot-stage shot-stage--key-setup">
+              <img src="assets/assistant-key-setup.png" width="390" height="538" alt="" loading="lazy" decoding="async">
+              <img src="assets/assistant-key-setup-overlay.svg" width="390" height="538" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>A fresh, <strong>keyless browser capture</strong> of AI Settings, not an Android screenshot. Yellow borders mark the fields to set: <strong>Configure model for</strong>, <strong>Backend</strong>, <strong>Model</strong> and <strong>API Key</strong>. The faint <code>sk-…</code> is a placeholder, not a saved key. Scroll farther down to reach <strong>Save</strong>; no key was entered or request sent for this picture.</figcaption>
+          <a class="full-shot-link" href="assets/assistant-key-setup.png">View the unmodified AI configuration screenshot</a>
+        </figure>
+        <p>A low-cost, tool-capable model is a sensible starting point for the Assistant. Examples to compare include <a href="https://openrouter.ai/z-ai/glm-5.3-flash">GLM 5.3 Flash</a>, <a href="https://developers.openai.com/api/docs/models/gpt-6-luna">GPT-6 Luna</a>, <a href="https://www.anthropic.com/claude/haiku">Claude Haiku 5.5</a>, and <a href="https://api-docs.deepseek.com/quick_start/pricing">DeepSeek V4 Flash</a>. Exact model IDs, available versions, tool support and prices depend on your app version and provider; check the current picker and provider documentation. A newly announced model may need an app update before it appears. Later, you can choose a different inexpensive model just for completions.</p>
       </section>
 
       <section id="agent">
