@@ -89,10 +89,10 @@ pictured. These three browser images demonstrate UI navigation and configuration
   the output was count 3, mean 15, min 12, max 18. The app's displayed burst
   estimates were approximately $0.0025, $0.0016 and $0.0018—not an independently
   audited provider total. The online completion alternatives were not run.
-- After the check, the original workbook, draft, language and the changed
-  completion/agent settings were restored. The practice workbook and its
-  checked output remain available. The user's saved key was left untouched,
-  and actual spending tallies were kept. The provider-policy consent accepted
+- After the check, the original workbook, draft and language were restored,
+  along with only the snapshotted temporary completion/agent settings. The
+  practice workbook and its checked output remain available. The newly saved
+  provider key and actual spending tallies were retained. The provider-policy consent accepted
   for these authorized requests was not rolled back.
 - `capture-pro-phone.json` records the screenshot hashes and narrowly scoped
   observations. No key, hint, authorization header, account id, phone network

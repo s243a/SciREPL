@@ -18,9 +18,9 @@
   "practiceWorkbookOnly": true,
   "cleanup": {
     "originalWorkbookDraftAndLanguageRestored": true,
-    "temporaryCompletionAndAgentSettingsRestored": true,
+    "snapshottedTemporaryCompletionAndAgentSettingsRestored": true,
     "practiceWorkbookRetained": true,
-    "providerKeyUntouched": true,
+    "newlySavedProviderKeyRetained": true,
     "completionSpendingTalliesRetained": true,
     "policyConsentAcceptedForAuthorizedRequests": true
   },
