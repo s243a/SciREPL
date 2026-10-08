@@ -216,8 +216,42 @@ check('Markov tutorial links a workbook backup workflow',
     && /Workbook\s*\(\.srwb\)/.test(markovText));
 const markovAssets = path.join(WWW, 'help/workbooks/tutorial/assets');
 const markovStage4Preview = (markovTutorial.match(
-  /<div\b[^>]*\bid="stage4-preview"[^>]*>([\s\S]*?)<\/div>\s*<p>You can also choose/i) || [])[1] || '';
+  /<div\b[^>]*\bid="stage4-preview"[^>]*>([\s\S]*?)<\/div>\s*<\/section>/i) || [])[1] || '';
 const markovStage4PreviewText = helpText(markovStage4Preview);
+const markovCompletion = (markovTutorial.match(
+  /<p\b[^>]*\bid="walkthrough-complete"[^>]*>([\s\S]*?)<\/p>/i) || [])[1] || '';
+const markovRunSection = (markovTutorial.match(
+  /<section\b[^>]*\bid="run"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+const markovBatchNote = (markovTutorial.match(
+  /<aside\b[^>]*\bid="batch-run-note"[^>]*>([\s\S]*?)<\/aside>/i) || [])[1] || '';
+check('Markov tutorial explains both batch-run actions before the optional reading boundary',
+  /open a saved cell with its ✎ pencil/.test(helpText(markovBatchNote))
+    && /Run All Below/.test(helpText(markovBatchNote))
+    && /▶↓/.test(helpText(markovBatchNote))
+    && /that cell and every cell below it, in order/.test(helpText(markovBatchNote))
+    && /Menu → Run All Cells/.test(helpText(markovBatchNote))
+    && /selected workbook from its first cell to its last/.test(helpText(markovBatchNote))
+    && /not a command to run every workbook tab/.test(helpText(markovBatchNote))
+    && /These actions execute code/.test(helpText(markovBatchNote))
+    && /does not make the app skip its code cells/.test(helpText(markovBatchNote))
+    && /cube_moves/.test(helpText(markovBatchNote))
+    && markovRunSection.includes('href="#batch-run-note"')
+    && markovTutorial.indexOf('<section id="export">') < markovTutorial.indexOf('id="batch-run-note"')
+    && markovTutorial.indexOf('id="batch-run-note"') < markovTutorial.indexOf('id="walkthrough-complete"'));
+check('Markov tutorial completes the five app-use steps before optional mathematics',
+  /Here to learn the app\?/.test(markovText)
+    && /Follow Steps 1–5/.test(markovText)
+    && /not needed to complete this walkthrough/.test(markovText)
+    && markovTutorial.includes('href="#optional-maths"')
+    && /You’ve completed the SciREPL walkthrough/.test(helpText(markovCompletion))
+    && /you can stop here/.test(helpText(markovCompletion))
+    && markovTutorial.indexOf('<section id="export">') < markovTutorial.indexOf('id="walkthrough-complete"')
+    && markovTutorial.indexOf('id="walkthrough-complete"') < markovTutorial.indexOf('<section id="optional-maths">')
+    && markovTutorial.indexOf('<section id="optional-maths">') < markovTutorial.indexOf('id="stage4-preview"')
+    && !markovRunSection.includes('stage4-preview')
+    && !markovRunSection.includes('A little meaning behind the output')
+    && /The Step 4 size=12 edit/.test(markovStage4PreviewText)
+    && !/The next section/.test(markovStage4PreviewText));
 check('Markov tutorial keeps the stable lesson distinct from the pinned development preview',
   /steps and phone screenshots above use the stable v0\.4\.0 workbook/.test(markovStage4PreviewText)
     && /development preview.{0,40}not yet the stable catalogue/.test(markovStage4PreviewText)

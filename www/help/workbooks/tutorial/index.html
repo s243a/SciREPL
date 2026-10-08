@@ -27,6 +27,7 @@
       <p class="eyebrow">Learn by doing</p>
       <h1>Explore a workbook from the catalogue</h1>
       <p class="lede">Find the existing <strong>Markov Groups: A Random Walk on Cube Moves</strong> workbook, run its four Python cells, shorten its random walk, and save your own copy. The focus is on using SciREPL; you do not need to know matrix algebra or solve a Rubik's Cube.</p>
+      <p class="callout"><strong>Here to learn the app?</strong> Follow Steps 1–5: find, open, run, edit and export a workbook. You can stop after Step 5. The <a href="#optional-maths">optional mathematics</a> comes afterwards; it is not needed to complete this walkthrough.</p>
       <ul class="meta">
         <li class="chip chip-free">Free + Pro</li>
         <li class="chip">Android steps</li>
@@ -43,6 +44,7 @@
           <li><a href="#edit">Change one value and rerun</a></li>
           <li><a href="#export">Export your workbook copy</a></li>
         </ol>
+        <p><a href="#optional-maths">Optional: the mathematics behind the cube example</a></p>
       </nav>
 
       <section id="find-menu">
@@ -176,37 +178,8 @@ U then R equals R then U: False</code></pre>
         <ol class="lesson-steps" start="4">
           <li>Run <code>random_walk</code>. It prints a one-sticker probability total of <code>1.0</code>, a 12-step sampled path, final face-letter labels, and a message confirming that every sticker label and all six centres were preserved.</li>
         </ol>
-        <div id="stage4-preview">
-          <h3>Optional: preview the revised Stage 4</h3>
-          <p>The steps and phone screenshots above use the stable <strong>v0.4.0</strong> workbook. The <a download="markov-groups-stage4-preview.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/f88d9b9e26364eeb5e7ff1ee9bcce5f27d47c66e/workbooks/en/markov-groups.srwb">revised workbook download</a> is a <strong>development preview</strong>, not yet the stable catalogue. Import it with <strong>Menu → Import File</strong> if you want to try its shorter, interleaved explanation and code cells.</p>
-          <p>In that preview, run <code>cube_moves</code>, <code>check_moves</code> and <code>show_turn</code> first, as above. Then:</p>
-          <ol class="lesson-steps">
-            <li>Run <code>transition_matrix</code>. It builds <code>T</code>, the probability matrix for one sticker's location after one uniformly chosen option: <code>I</code>, a face quarter turn, or its inverse.</li>
-            <li>Run <code>sticker_step</code>. It follows <strong>sticker label 1</strong>, initially at <strong>zero-based position 0</strong>. Its location probabilities sum to <code>1.0</code>. The chart below shows the destination probabilities computed by that cell.</li>
-          </ol>
-          <figure id="sticker-probability-figure" aria-describedby="sticker-probability-caption" style="margin: 24px 0;">
-            <img src="assets/sticker-one-step.svg" width="400" height="380" style="display: block; width: min(100%, 560px); height: auto;" alt="After one random move, sticker label 1 has probability seven thirteenths of staying at position 0, and one thirteenth each of reaching positions 2, 6, 18, 35, 42 or 47.">
-            <figcaption id="sticker-probability-caption"><strong>A probability bar chart, not a binned histogram.</strong> This illustration is calculated from <code>after_one_step = T @ location_probability</code>; it is not a phone screenshot or a new output produced by the workbook. Positions are zero-based. The other 47 positions have probability zero and are omitted. The sticker's label stays 1.</figcaption>
-          </figure>
-          <div class="table-wrap">
-            <table aria-label="Exact one-step probabilities for sticker label 1">
-              <thead><tr><th>Destination position</th><th>Probability</th></tr></thead>
-              <tbody>
-                <tr><td>0</td><td>7/13 ≈ 53.85%</td></tr>
-                <tr><td>2, 6, 18, 35, 42, 47 (each)</td><td>1/13 ≈ 7.69%</td></tr>
-                <tr><td>All other 47 positions</td><td>0</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <ol class="lesson-steps" start="3">
-            <li>Run <code>random_walk</code>. It samples a 12-option path for the <strong>whole cube</strong>, using the definitions from <code>transition_matrix</code>. This is different from the one-sticker probabilities above. The next section's <code>size=12</code> edit works in this cell in either edition.</li>
-          </ol>
-        </div>
-        <p>You can also choose <strong>Menu → Run All Cells</strong> after inspecting the workbook. Its Python cells are already in the required order. Do not reorder them: later cells reuse definitions from <code>cube_moves</code>.</p>
+        <p>The Python cells are already in the required order. Do not reorder them: later cells reuse definitions from <code>cube_moves</code>. To run several cells at once, see <a href="#batch-run-note">Run All Below and Run All Cells</a>.</p>
         <p class="callout"><strong>First run slower?</strong> Python may need time to initialize, and a runtime download or network fallback may need your consent. Wait for the status badge to return to <strong>ready</strong> and check the cell's output for errors. If a later cell reports an undefined name after a restart, run the Python cells from the beginning; saved output is not the same as live Python definitions.</p>
-        <h3>A little meaning behind the output</h3>
-        <p>The workbook tracks <strong>54 individually labelled stickers</strong>, not just six colours. A legal move rearranges those labels. Four repetitions of one quarter turn return to the starting arrangement, but turns of different faces can give different results when their order changes.</p>
-        <p>The random walk chooses among 13 options: stay still (<code>I</code>), six quarter turns, and their six inverses. Its <strong>54×54 probability matrix describes the location of one sticker</strong>, not every full-cube configuration. A probability total of <code>1.0</code> means that this sticker's location probabilities sum to one; it does not prove that the cube is uniformly scrambled.</p>
         <p>This workbook prints text and face-letter lists. It does not draw or animate a cube, and its seeded short path is not evidence of a uniformly mixed scramble.</p>
       </section>
 
@@ -245,8 +218,6 @@ U then R equals R then U: False</code></pre>
         <p>If you opened the editor by mistake, choose <strong>Cancel</strong>. To return to the original example, change <code>size=6</code> back to <code>size=12</code> and run the cell again.</p>
       </section>
 
-      <p class="callout"><strong>Curious about the face directions?</strong> The workbook's <code>coordinates</code> cell gives the global axes and each face's right, up and outward normal. The <a href="../graphics/">pictures, diagrams and equations tutorial</a> shows how to put that kind of explanation into a workbook. Coordinate diagrams are being added to the catalogue's development copy; the pinned v0.4.0 copy above does not include them.</p>
-
       <section id="export">
         <p class="step-label">Step 5</p>
         <h2>Export your own workbook copy</h2>
@@ -268,6 +239,52 @@ U then R equals R then U: False</code></pre>
         <p>The workbook needs no separate data file, so an <code>.srwb</code> copy is enough for this lesson. You can reopen it with <strong>Menu → Import File</strong>; run its Python cells from the beginning when starting a fresh runtime.</p>
         <p class="callout"><strong>Local recovery is not a backup.</strong> Clearing app/site storage or uninstalling can remove local work. Android and browser sessions do not automatically share your edits. Export does not publish your changes to the catalogue; it gives you a separate copy.</p>
         <p>For the basics of saved-cell editing, see the <a href="../../interface/tutorial/">first-workbook interface walkthrough</a>. For an example that reads and carries a separate data file, try the <a href="../../files-export/tutorial/">CSV workbook walkthrough</a>. The <a href="../">workbooks reference</a> covers cell types and stable cell names.</p>
+      </section>
+
+      <aside class="callout" id="batch-run-note" aria-labelledby="batch-run-heading">
+        <h3 id="batch-run-heading">Run All Below and Run All Cells</h3>
+        <ul>
+          <li><strong>Run All Below:</strong> open a saved cell with its <strong>✎ pencil</strong>, then choose <strong>Run All Below</strong> (the compact icon is <strong>▶↓</strong>). It runs that cell <em>and</em> every cell below it, in order.</li>
+          <li><strong>Menu → Run All Cells:</strong> runs the selected workbook from its first cell to its last. It is not a command to run every workbook tab.</li>
+        </ul>
+        <p>Inspect the code first and keep this workbook selected while the batch runs. After a fresh Python session, start from <code>cube_moves</code> so later cells have their definitions. These actions execute code; calling an explanation “optional” does not make the app skip its code cells.</p>
+      </aside>
+
+      <p class="callout" id="walkthrough-complete"><strong>You’ve completed the SciREPL walkthrough.</strong> You have found, opened, run, edited and exported a workbook. If you only wanted to learn the app, you can stop here. Continue below if you would like to explore the cube mathematics and the development workbook.</p>
+
+      <section id="optional-maths">
+        <p class="step-label">Optional reading</p>
+        <h2>The mathematics behind the cube example</h2>
+        <h3>A little meaning behind the output</h3>
+        <p>The workbook tracks <strong>54 individually labelled stickers</strong>, not just six colours. A legal move rearranges those labels. Four repetitions of one quarter turn return to the starting arrangement, but turns of different faces can give different results when their order changes.</p>
+        <p>The random walk chooses among 13 options: stay still (<code>I</code>), six quarter turns, and their six inverses. Its <strong>54×54 probability matrix describes the location of one sticker</strong>, not every full-cube configuration. A probability total of <code>1.0</code> means that this sticker's location probabilities sum to one; it does not prove that the cube is uniformly scrambled.</p>
+        <p class="callout"><strong>Curious about the face directions?</strong> The workbook's <code>coordinates</code> cell gives the global axes and each face's right, up and outward normal. The <a href="../graphics/">pictures, diagrams and equations tutorial</a> shows how to put that kind of explanation into a workbook. Coordinate diagrams are being added to the catalogue's development copy; the pinned v0.4.0 copy above does not include them.</p>
+        <div id="stage4-preview">
+          <h3>Optional: preview the revised Stage 4</h3>
+          <p>The steps and phone screenshots above use the stable <strong>v0.4.0</strong> workbook. The <a download="markov-groups-stage4-preview.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/f88d9b9e26364eeb5e7ff1ee9bcce5f27d47c66e/workbooks/en/markov-groups.srwb">revised workbook download</a> is a <strong>development preview</strong>, not yet the stable catalogue. Import it with <strong>Menu → Import File</strong> if you want to try its shorter, interleaved explanation and code cells.</p>
+          <p>In that preview, run <code>cube_moves</code>, <code>check_moves</code> and <code>show_turn</code> first, as above. Then:</p>
+          <ol class="lesson-steps">
+            <li>Run <code>transition_matrix</code>. It builds <code>T</code>, the probability matrix for one sticker's location after one uniformly chosen option: <code>I</code>, a face quarter turn, or its inverse.</li>
+            <li>Run <code>sticker_step</code>. It follows <strong>sticker label 1</strong>, initially at <strong>zero-based position 0</strong>. Its location probabilities sum to <code>1.0</code>. The chart below shows the destination probabilities computed by that cell.</li>
+          </ol>
+          <figure id="sticker-probability-figure" aria-describedby="sticker-probability-caption" style="margin: 24px 0;">
+            <img src="assets/sticker-one-step.svg" width="400" height="380" style="display: block; width: min(100%, 560px); height: auto;" alt="After one random move, sticker label 1 has probability seven thirteenths of staying at position 0, and one thirteenth each of reaching positions 2, 6, 18, 35, 42 or 47.">
+            <figcaption id="sticker-probability-caption"><strong>A probability bar chart, not a binned histogram.</strong> This illustration is calculated from <code>after_one_step = T @ location_probability</code>; it is not a phone screenshot or a new output produced by the workbook. Positions are zero-based. The other 47 positions have probability zero and are omitted. The sticker's label stays 1.</figcaption>
+          </figure>
+          <div class="table-wrap">
+            <table aria-label="Exact one-step probabilities for sticker label 1">
+              <thead><tr><th>Destination position</th><th>Probability</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>7/13 ≈ 53.85%</td></tr>
+                <tr><td>2, 6, 18, 35, 42, 47 (each)</td><td>1/13 ≈ 7.69%</td></tr>
+                <tr><td>All other 47 positions</td><td>0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <ol class="lesson-steps" start="3">
+            <li>Run <code>random_walk</code>. It samples a 12-option path for the <strong>whole cube</strong>, using the definitions from <code>transition_matrix</code>. This is different from the one-sticker probabilities above. The Step 4 <code>size=12</code> edit works in this cell in either edition.</li>
+          </ol>
+        </div>
       </section>
     </article>
   </main>
