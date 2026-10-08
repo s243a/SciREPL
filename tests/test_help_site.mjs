@@ -22,6 +22,7 @@ const check = (name, ok, detail = '', quietPass = false) => {
 
 const expected = [
   'help/index.html',
+  'help/tutorials/index.html',
   'help/getting-started/index.html',
   'help/interface/index.html',
   'help/interface/tutorial/index.html',
@@ -74,6 +75,43 @@ for (const rel of contentPages) {
 const rootHelp = readFileSync(path.join(WWW, 'help/index.html'), 'utf8');
 check('Free/shared contents precede Pro contents',
   rootHelp.indexOf('Free and shared notebook help') < rootHelp.indexOf('Optional Pro extensions'));
+check('Help home directly links to All tutorials',
+  /<a\b[^>]*href=["']tutorials\/["'][^>]*>All tutorials<\/a>/i.test(rootHelp));
+
+const tutorialIndexPath = 'help/tutorials/index.html';
+const tutorialIndex = readFileSync(path.join(WWW, tutorialIndexPath), 'utf8');
+// Curate the cards for readers, but discover lessons from their existing step
+// navigation. A future tutorial must not silently be omitted from the index.
+const publishedTutorials = walkHtml(path.join(WWW, 'help'))
+  .filter(file => /<nav\b[^>]*\bclass=["'][^"']*\blesson-nav\b[^"']*["']/i
+    .test(readFileSync(file, 'utf8')))
+  .map(file => path.relative(WWW, file).replaceAll(path.sep, '/'))
+  .sort();
+const indexedTutorials = [...tutorialIndex.matchAll(/<a\b([^>]*)>/gi)]
+  .filter(([, attributes]) => /\bclass=["'][^"']*\bcard\b[^"']*["']/i.test(attributes))
+  .map(([, attributes]) => {
+    const href = (attributes.match(/\bhref=["']([^"']+)["']/i) || [])[1];
+    if (!href) return null;
+    const target = new URL(href, new URL(BASE_PATH + tutorialIndexPath, ORIGIN));
+    if (target.origin !== ORIGIN || !target.pathname.startsWith(BASE_PATH)) return null;
+    const relative = decodeURIComponent(target.pathname.slice(BASE_PATH.length));
+    return relative.endsWith('/') ? relative + 'index.html' : relative;
+  });
+check('Tutorial discovery includes the published walkthroughs', publishedTutorials.length >= 7);
+for (const rel of publishedTutorials) {
+  check(`Tutorial index lists ${rel} exactly once`,
+    indexedTutorials.filter(target => target === rel).length === 1);
+  const lesson = readFileSync(path.join(WWW, rel), 'utf8');
+  const backLinks = [...lesson.matchAll(/<a\b[^>]*href=["']([^"']+)["'][^>]*>\s*All tutorials\s*<\/a>/gi)];
+  check(`Tutorial ${rel} links back to its index`, backLinks.some(([, href]) =>
+    new URL(href, new URL(BASE_PATH + rel, ORIGIN)).href
+      === new URL(BASE_PATH + tutorialIndexPath.replace(/index\.html$/, ''), ORIGIN).href));
+}
+check('Tutorial index cards point only to published lessons',
+  indexedTutorials.every(target => publishedTutorials.includes(target)));
+check('Tutorial index needs no JavaScript or external stylesheet',
+  !/<script\b/i.test(tutorialIndex)
+    && /<link\b[^>]*href=["']\.\.\/styles\.css["']/i.test(tutorialIndex));
 
 const csvTutorial = readFileSync(path.join(WWW, 'help/files-export/tutorial/index.html'), 'utf8');
 // Check the lesson's meaning without depending on emphasis tags or line wrapping.
