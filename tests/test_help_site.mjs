@@ -174,6 +174,25 @@ check('Markov tutorial names the four code cells in their run order',
     && markovText.indexOf('cube_moves') < markovText.indexOf('check_moves')
     && markovText.indexOf('check_moves') < markovText.indexOf('show_turn')
     && markovText.indexOf('show_turn') < markovText.indexOf('random_walk'));
+check('Markov tutorial places show_turn and random_walk instructions after the checks screenshot',
+  markovTutorial.indexOf('assets/phone-checks.png') < markovTutorial.indexOf('Run <code>show_turn</code>')
+    && markovTutorial.indexOf('Run <code>show_turn</code>') < markovTutorial.indexOf('Run <code>random_walk</code>')
+    && markovTutorial.indexOf('Run <code>show_turn</code>') < markovTutorial.indexOf('id="show-turn-output"')
+    && markovTutorial.indexOf('id="show-turn-output"') < markovTutorial.indexOf('Run <code>random_walk</code>')
+    && /<ol\b[^>]*\bstart="4"[^>]*>\s*<li>Run <code>random_walk<\/code>/.test(markovTutorial)
+    && /<ol\b[^>]*\bstart="3"[^>]*>\s*<li>Run <code>show_turn<\/code>/.test(markovTutorial));
+const showTurnExcerpt = (markovTutorial.match(
+  /<pre\b[^>]*\bid="show-turn-output"[^>]*><code>([\s\S]*?)<\/code><\/pre>/i) || [])[1] || '';
+check('Markov show_turn excerpt contains the actual U cycles and before/after label output',
+  ['1 -&gt; 3 -&gt; 9 -&gt; 7 -&gt; 1', '2 -&gt; 6 -&gt; 8 -&gt; 4 -&gt; 2',
+    '19 -&gt; 37 -&gt; 28 -&gt; 46 -&gt; 19', '20 -&gt; 38 -&gt; 29 -&gt; 47 -&gt; 20',
+    '21 -&gt; 39 -&gt; 30 -&gt; 48 -&gt; 21', 'F top row labels before U: [19, 20, 21]',
+    'F top row labels after U:  [46, 47, 48]', 'U then R equals R then U: False']
+    .every(line => showTurnExcerpt.includes(line))
+    && /Part of the printed output:/.test(markovText)
+    && /long face-letter list is omitted/.test(markovText)
+    && /cycle lines use one-based positions/.test(markovText)
+    && /row comparison shows sticker labels/.test(markovText));
 check('Markov tutorial distinguishes importing from execution',
   /(?:does not|doesn['’]t|without|not)\s+(?:automatically\s+)?(?:execut(?:e|ing)|run)/i.test(markovText));
 check('Markov tutorial edits a saved cell, not the composer',
@@ -196,9 +215,39 @@ check('Markov tutorial links a workbook backup workflow',
   /Export Workbooks & Packages/.test(markovText) && /Current tab only/.test(markovText)
     && /Workbook\s*\(\.srwb\)/.test(markovText));
 const markovAssets = path.join(WWW, 'help/workbooks/tutorial/assets');
+const markovStage4Preview = (markovTutorial.match(
+  /<div\b[^>]*\bid="stage4-preview"[^>]*>([\s\S]*?)<\/div>\s*<p>You can also choose/i) || [])[1] || '';
+const markovStage4PreviewText = helpText(markovStage4Preview);
+check('Markov tutorial keeps the stable lesson distinct from the pinned development preview',
+  /steps and phone screenshots above use the stable v0\.4\.0 workbook/.test(markovStage4PreviewText)
+    && /development preview.{0,40}not yet the stable catalogue/.test(markovStage4PreviewText)
+    && /https:\/\/raw\.githubusercontent\.com\/s243a\/SciREPL-Catalog\/[a-f0-9]{40}\/workbooks\/en\/markov-groups\.srwb/.test(markovStage4Preview)
+    && /Menu → Import File/.test(markovStage4PreviewText)
+    && markovTutorial.indexOf('Run <code>random_walk</code>') < markovTutorial.indexOf('id="stage4-preview"'));
+check('Markov preview puts the probability chart after sticker_step and before random_walk',
+  markovStage4Preview.indexOf('Run <code>transition_matrix</code>') >= 0
+    && markovStage4Preview.indexOf('Run <code>transition_matrix</code>') < markovStage4Preview.indexOf('Run <code>sticker_step</code>')
+    && markovStage4Preview.indexOf('Run <code>sticker_step</code>') < markovStage4Preview.indexOf('id="sticker-probability-figure"')
+    && markovStage4Preview.indexOf('id="sticker-probability-figure"') < markovStage4Preview.indexOf('Run <code>random_walk</code>')
+    && /sticker label 1.{0,50}zero-based position 0/.test(markovStage4PreviewText)
+    && /not a phone screenshot or a new output produced by the workbook/.test(markovStage4PreviewText)
+    && /probability bar chart, not a binned histogram/.test(markovStage4PreviewText));
+const stickerProbabilitySvg = readFileSync(path.join(markovAssets, 'sticker-one-step.svg'), 'utf8');
+const stickerProbabilityBars = [...stickerProbabilitySvg.matchAll(
+  /<rect\s+data-position="(\d+)"\s+data-numerator="(\d+)"\s+data-denominator="(\d+)"[^>]*\bwidth="([\d.]+)"/g)]
+  .map(match => ({ position: Number(match[1]), numerator: Number(match[2]), denominator: Number(match[3]), width: Number(match[4]) }));
+check('Markov probability illustration matches T[:, 0] and has an accessible zero-probability summary',
+  JSON.stringify(stickerProbabilityBars.map(({ position, numerator, denominator }) => [position, numerator, denominator]))
+    === JSON.stringify([[0, 7, 13], [2, 1, 13], [6, 1, 13], [18, 1, 13], [35, 1, 13], [42, 1, 13], [47, 1, 13]])
+    && stickerProbabilityBars.slice(1).every(bar => Math.abs(bar.width * 7 - stickerProbabilityBars[0].width) < 0.00001)
+    && /<title[^>]*>One-step destination probabilities for sticker label 1<\/title>/.test(stickerProbabilitySvg)
+    && /All other 47 positions have probability zero and are omitted/.test(stickerProbabilitySvg)
+    && /<table\b[^>]*aria-label="Exact one-step probabilities for sticker label 1"/.test(markovStage4Preview)
+    && /0.{0,20}7\/13 ≈ 53\.85%/.test(markovStage4PreviewText)
+    && /2, 6, 18, 35, 42, 47 \(each\).{0,20}1\/13 ≈ 7\.69%/.test(markovStage4PreviewText));
 const markovShots = ['browse', 'search', 'workbook', 'checks', 'edit', 'six-moves', 'export'];
 check('Markov tutorial contains all seven phone captures plus the annotated header crop',
-  (markovTutorial.match(/<figure\b/g) || []).length === markovShots.length + 1
+  (markovTutorial.match(/<figure\b[^>]*\bclass="phone-figure"/g) || []).length === markovShots.length + 1
     && markovShots.every(name => markovTutorial.includes(`assets/phone-${name}.png`)
       && markovTutorial.includes(`assets/${name}-overlay.svg`)));
 for (const name of markovShots) {

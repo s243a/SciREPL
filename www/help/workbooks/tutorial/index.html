@@ -146,8 +146,6 @@
         <ol class="lesson-steps">
           <li>Run <code>cube_moves</code>. It defines the moves and helpers. Expect <code>Built six clockwise quarter-turn matrices with fixed face centres.</code></li>
           <li>Run <code>check_moves</code>. It checks that no sticker is lost, centres stay fixed, and four repetitions of each quarter turn return to the start. After six passed lines, expect <code>All six moves passed. U and R do not commute.</code></li>
-          <li>Run <code>show_turn</code>. It prints the U-turn cycles and sticker labels before and after a turn. The front top row changes from <code>[19, 20, 21]</code> to <code>[46, 47, 48]</code>. The comparison <code>U then R equals R then U: False</code> shows that move order matters.</li>
-          <li>Run <code>random_walk</code>. It prints a one-sticker probability total of <code>1.0</code>, a 12-step sampled path, final face-letter labels, and a message confirming that every sticker label and all six centres were preserved.</li>
         </ol>
         <figure class="phone-figure">
           <div class="shot-window shot-window--checks" role="img" aria-label="Fresh check_moves output on the phone, with the passed checks highlighted in yellow.">
@@ -159,8 +157,53 @@
           <figcaption>The printed checks are fresh results from running <code>check_moves</code>, not saved results supplied by the catalogue.</figcaption>
           <a class="full-shot-link" href="assets/phone-checks.png">View the complete checks screenshot</a>
         </figure>
+        <ol class="lesson-steps" start="3">
+          <li>Run <code>show_turn</code>. It prints the U-turn cycles and sticker labels before and after a turn. The front top row changes from <code>[19, 20, 21]</code> to <code>[46, 47, 48]</code>. The comparison <code>U then R equals R then U: False</code> shows that move order matters.</li>
+        </ol>
+        <p><strong>Part of the printed output:</strong></p>
+        <pre id="show-turn-output" style="white-space: pre-wrap; overflow-wrap: anywhere;"><code>U cycles, shown as one-based sticker positions:
+1 -&gt; 3 -&gt; 9 -&gt; 7 -&gt; 1
+2 -&gt; 6 -&gt; 8 -&gt; 4 -&gt; 2
+19 -&gt; 37 -&gt; 28 -&gt; 46 -&gt; 19
+20 -&gt; 38 -&gt; 29 -&gt; 47 -&gt; 20
+21 -&gt; 39 -&gt; 30 -&gt; 48 -&gt; 21
+
+F top row labels before U: [19, 20, 21]
+F top row labels after U:  [46, 47, 48]
+
+U then R equals R then U: False</code></pre>
+        <p>The long face-letter list is omitted here. The cycle lines use <strong>one-based positions</strong>; the row comparison shows <strong>sticker labels</strong>. These are different meanings, even though the solved cube initially gives them matching numbers.</p>
+        <ol class="lesson-steps" start="4">
+          <li>Run <code>random_walk</code>. It prints a one-sticker probability total of <code>1.0</code>, a 12-step sampled path, final face-letter labels, and a message confirming that every sticker label and all six centres were preserved.</li>
+        </ol>
+        <div id="stage4-preview">
+          <h3>Optional: preview the revised Stage 4</h3>
+          <p>The steps and phone screenshots above use the stable <strong>v0.4.0</strong> workbook. The <a download="markov-groups-stage4-preview.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/f88d9b9e26364eeb5e7ff1ee9bcce5f27d47c66e/workbooks/en/markov-groups.srwb">revised workbook download</a> is a <strong>development preview</strong>, not yet the stable catalogue. Import it with <strong>Menu → Import File</strong> if you want to try its shorter, interleaved explanation and code cells.</p>
+          <p>In that preview, run <code>cube_moves</code>, <code>check_moves</code> and <code>show_turn</code> first, as above. Then:</p>
+          <ol class="lesson-steps">
+            <li>Run <code>transition_matrix</code>. It builds <code>T</code>, the probability matrix for one sticker's location after one uniformly chosen option: <code>I</code>, a face quarter turn, or its inverse.</li>
+            <li>Run <code>sticker_step</code>. It follows <strong>sticker label 1</strong>, initially at <strong>zero-based position 0</strong>. Its location probabilities sum to <code>1.0</code>. The chart below shows the destination probabilities computed by that cell.</li>
+          </ol>
+          <figure id="sticker-probability-figure" aria-describedby="sticker-probability-caption" style="margin: 24px 0;">
+            <img src="assets/sticker-one-step.svg" width="400" height="380" style="display: block; width: min(100%, 560px); height: auto;" alt="After one random move, sticker label 1 has probability seven thirteenths of staying at position 0, and one thirteenth each of reaching positions 2, 6, 18, 35, 42 or 47.">
+            <figcaption id="sticker-probability-caption"><strong>A probability bar chart, not a binned histogram.</strong> This illustration is calculated from <code>after_one_step = T @ location_probability</code>; it is not a phone screenshot or a new output produced by the workbook. Positions are zero-based. The other 47 positions have probability zero and are omitted. The sticker's label stays 1.</figcaption>
+          </figure>
+          <div class="table-wrap">
+            <table aria-label="Exact one-step probabilities for sticker label 1">
+              <thead><tr><th>Destination position</th><th>Probability</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>7/13 ≈ 53.85%</td></tr>
+                <tr><td>2, 6, 18, 35, 42, 47 (each)</td><td>1/13 ≈ 7.69%</td></tr>
+                <tr><td>All other 47 positions</td><td>0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <ol class="lesson-steps" start="3">
+            <li>Run <code>random_walk</code>. It samples a 12-option path for the <strong>whole cube</strong>, using the definitions from <code>transition_matrix</code>. This is different from the one-sticker probabilities above. The next section's <code>size=12</code> edit works in this cell in either edition.</li>
+          </ol>
+        </div>
         <p>You can also choose <strong>Menu → Run All Cells</strong> after inspecting the workbook. Its Python cells are already in the required order. Do not reorder them: later cells reuse definitions from <code>cube_moves</code>.</p>
-        <p class="callout"><strong>First run slower?</strong> Python may need time to initialize, and a runtime download or network fallback may need your consent. Wait for the status badge to return to <strong>ready</strong> and check the cell's output for errors. If a later cell reports an undefined name after a restart, run the four Python cells from the beginning; saved output is not the same as live Python definitions.</p>
+        <p class="callout"><strong>First run slower?</strong> Python may need time to initialize, and a runtime download or network fallback may need your consent. Wait for the status badge to return to <strong>ready</strong> and check the cell's output for errors. If a later cell reports an undefined name after a restart, run the Python cells from the beginning; saved output is not the same as live Python definitions.</p>
         <h3>A little meaning behind the output</h3>
         <p>The workbook tracks <strong>54 individually labelled stickers</strong>, not just six colours. A legal move rearranges those labels. Four repetitions of one quarter turn return to the starting arrangement, but turns of different faces can give different results when their order changes.</p>
         <p>The random walk chooses among 13 options: stay still (<code>I</code>), six quarter turns, and their six inverses. Its <strong>54×54 probability matrix describes the location of one sticker</strong>, not every full-cube configuration. A probability total of <code>1.0</code> means that this sticker's location probabilities sum to one; it does not prove that the cube is uniformly scrambled.</p>

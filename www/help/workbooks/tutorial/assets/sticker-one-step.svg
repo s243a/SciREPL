@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 380" role="img" aria-labelledby="title desc">
+  <title id="title">One-step destination probabilities for sticker label 1</title>
+  <desc id="desc">Starting at zero-based position 0, a uniformly chosen identity, quarter turn or inverse gives position 0 probability 7/13. Positions 2, 6, 18, 35, 42 and 47 each have probability 1/13. All other 47 positions have probability zero and are omitted.</desc>
+  <rect width="400" height="380" rx="12" fill="#fff"/>
+  <g font-family="system-ui, sans-serif" fill="#17212b">
+    <text x="18" y="27" font-size="17" font-weight="700">Where can sticker label 1 go?</text>
+    <text x="18" y="50" font-size="14">Start: position 0 · one random move</text>
+    <text x="18" y="77" font-size="13" font-weight="600">Position</text>
+    <text x="100" y="77" font-size="13" font-weight="600">Probability</text>
+    <g stroke="#d4dce4" stroke-width="1">
+      <path d="M80 91V315M129 91V315M178 91V315M227 91V315M276 91V315M325 91V315"/>
+    </g>
+    <g font-size="14" dominant-baseline="middle">
+      <text x="30" y="104">0</text>
+      <rect data-position="0" data-numerator="7" data-denominator="13" x="80" y="94" width="220" height="20" rx="3" fill="#075d69"/>
+      <text x="307" y="104">7/13</text>
+      <text x="30" y="136">2</text>
+      <rect data-position="2" data-numerator="1" data-denominator="13" x="80" y="126" width="31.428571" height="20" rx="3" fill="#17689c"/>
+      <text x="120" y="136">1/13</text>
+      <text x="30" y="168">6</text>
+      <rect data-position="6" data-numerator="1" data-denominator="13" x="80" y="158" width="31.428571" height="20" rx="3" fill="#17689c"/>
+      <text x="120" y="168">1/13</text>
+      <text x="25" y="200">18</text>
+      <rect data-position="18" data-numerator="1" data-denominator="13" x="80" y="190" width="31.428571" height="20" rx="3" fill="#17689c"/>
+      <text x="120" y="200">1/13</text>
+      <text x="25" y="232">35</text>
+      <rect data-position="35" data-numerator="1" data-denominator="13" x="80" y="222" width="31.428571" height="20" rx="3" fill="#17689c"/>
+      <text x="120" y="232">1/13</text>
+      <text x="25" y="264">42</text>
+      <rect data-position="42" data-numerator="1" data-denominator="13" x="80" y="254" width="31.428571" height="20" rx="3" fill="#17689c"/>
+      <text x="120" y="264">1/13</text>
+      <text x="25" y="296">47</text>
+      <rect data-position="47" data-numerator="1" data-denominator="13" x="80" y="286" width="31.428571" height="20" rx="3" fill="#17689c"/>
+      <text x="120" y="296">1/13</text>
+    </g>
+    <g font-size="12" text-anchor="middle">
+      <text x="80" y="333">0%</text><text x="129" y="333">12%</text>
+      <text x="178" y="333">24%</text><text x="227" y="333">36%</text>
+      <text x="276" y="333">48%</text><text x="325" y="333">60%</text>
+    </g>
+    <text x="18" y="362" font-size="13">Other 47 positions: zero (not shown).</text>
+  </g>
+</svg>
