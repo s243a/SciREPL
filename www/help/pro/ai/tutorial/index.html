@@ -32,7 +32,7 @@
         <li class="chip">Pro 1.4.0 controls</li>
         <li class="chip">Local model: Android</li>
       </ul>
-      <p class="screen-note">This guide follows the English controls in the Pro 1.4.0 codebase. It is not a new Play-delivery or phone-performance test. Local-model figures below come from earlier native-engine measurements; the installation and layout can differ with your app version.</p>
+      <p class="screen-note">This guide follows the English controls in the Pro 1.4.0 codebase and includes real Galaxy S24+ Android captures of offline suggestions, a low-cost online completion and reviewed agent-created code. These are not Play-delivery or phone-performance tests. Local-model figures below come from earlier native-engine measurements; the installation and layout can differ with your app version.</p>
       <p class="callout"><strong>“Free” here means no API charge.</strong> Table suggestions and the on-device model do not bill a provider. That does not make them Free-edition features: this walkthrough is for <strong>SciREPL Pro</strong>. Online requests use your own provider account and can cost money.</p>
       <nav class="lesson-nav" aria-label="AI and completion walkthrough steps">
         <strong>In this lesson</strong>
@@ -62,6 +62,22 @@
           <figcaption>The actual General controls in a narrow <strong>browser capture, not an Android screenshot</strong>. The Section dropdown is at the top; lower settings may require scrolling.</figcaption>
           <a class="full-shot-link" href="assets/completion-general.png">View the complete settings capture</a>
         </figure>
+        <p><strong>See the two offline displays on a phone.</strong> For the ghost example, temporarily set <strong>Suggestion chips → Off</strong>, choose <strong>Python</strong>, and type <code>pri</code>. The faint <code>nt</code> after the caret offers <code>print</code>; it is not part of your source until you accept it. Keep <strong>AI suggestions</strong> and <strong>Use local model</strong> off for both examples.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="assets/phone-table-ghost.png" width="1080" height="2340" alt="Lower composer detail from an Android Galaxy S24+ screenshot: Python source pri followed by faint ghost text nt, with suggestion chips off." loading="lazy" decoding="async">
+          <figcaption><strong>Detail view of an actual Galaxy S24+ Android screenshot.</strong> Offline table completion offers one faint suffix at the caret. Chips are off just for this demonstration; the API and local model are off too.</figcaption>
+          <a class="full-shot-link" href="assets/phone-table-ghost.png">View the unmodified full phone screenshot of ghost text</a>
+        </figure>
+        <p>For candidate chips, turn <strong>Suggestion chips → On</strong> again. Replace the practice input with these three lines, leaving the caret after the unfinished <code>sample_m</code>. The row offers <code>sample_mean</code> and <code>sample_median</code> from names in your own source. Tap a chip to choose a candidate; unlike ghost text, the row shows alternatives.</p>
+        <pre><code>sample_mean = 0
+sample_median = 0
+sample_m</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="assets/phone-table-chips.png" width="1080" height="2340" alt="Lower composer detail from an Android Galaxy S24+ screenshot: Python source defines sample_mean and sample_median, then sample_m, with candidate chips sample_mean and sample_median." loading="lazy" decoding="async">
+          <figcaption><strong>Detail view of an actual Galaxy S24+ Android screenshot.</strong> With chips on, source-derived offline candidates offer the two names above. The API and local model remain off.</figcaption>
+          <a class="full-shot-link" href="assets/phone-table-chips.png">View the unmodified full phone screenshot of candidate chips</a>
+        </figure>
+        <p>These prefixes demonstrate editing only—there is no need to Run them. After trying the displays, switch back to <strong>JavaScript</strong> for the example above and leave chips on for the rest of the lesson.</p>
         <p>The offline layer uses curated names and, where supported, local workbook/session information and frequency or acceptance history to rank suggestions. It is <strong>not a language model</strong>. It can complete a familiar name, but it does not reason about your whole task. Different languages have different coverage; a known-looking chip is not proof that the name exists in the running program.</p>
         <p class="callout"><strong>Accept is not Run.</strong> Accepting a suggestion edits the source; it does not execute the cell. Review it, then use that editor's <strong>Run</strong> button. Typing a prefix does not send an API request or start a language runtime just to make these suggestions.</p>
         <p><strong>End of cell only</strong> is an alternative if mid-cell suggestions distract you. A selection, string, comment, or half-split name may intentionally produce no suggestions. In short landscape, optional rows can disappear to keep room for code; see <a href="../../../interface/appearance/">Appearance settings</a>.</p>
@@ -104,6 +120,12 @@ to print count, mean, minimum and maximum using only arrays,
 arithmetic and console.log. Do not run cells or change existing
 cells. Do not use files, storage, DOM APIs, network requests or
 packages. Explain the expected results so I can review the code.</code></pre>
+        <p><strong>Paused with a Continue button?</strong> The agent may reach its configured step limit before finishing. Read what it has already done, then press <strong>Continue</strong> if the task is unfinished and you want another bounded run. Continuing can incur more API charges; it is not needed after <strong>Done</strong>.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="assets/phone-agent-result.png" width="1080" height="2340" alt="Actual Android Galaxy S24+ screenshot showing the reviewed JavaScript summary_demo source and its output: count 3, mean 15, min 12, max 18." loading="lazy" decoding="async">
+          <figcaption><strong>Actual Galaxy S24+ Android screenshot.</strong> GLM 5.3 Flash created the practice cells and finished after two Continue presses. The code was inspected and run manually—not automatically by the agent—and produced the four expected results.</figcaption>
+          <a class="full-shot-link" href="assets/phone-agent-result.png">View the full phone screenshot of the reviewed code and result</a>
+        </figure>
         <p>If you prefer more confirmation, use <strong>Cautious</strong> instead. Open still respects the separate source-browsing and write-scope controls; Full control bypasses those two coarse controls. Individual permissions and other safety gates still matter. <strong>Review</strong> is an additional read-mostly restriction, which would obstruct this cell-creation demonstration.</p>
         <aside class="callout" id="sandbox">
           <h3>What the browser sandbox does—and does not—protect</h3>
@@ -119,7 +141,10 @@ packages. Explain the expected results so I can review the code.</code></pre>
           <li>Open <strong>Menu → Completion</strong>, then choose <strong>Section → AI suggestions (online)</strong>. Set <strong>AI suggestions → On tap</strong>.</li>
           <li>Keep <strong>Completion model → Follow AI Assistant</strong> to inherit its provider, endpoint and model. Or choose <strong>Choose provider and model</strong>, select a saved provider/endpoint and a low-cost model suited to short suggestions. No key is entered on this screen; <strong>Open AI Settings</strong> lets you add one first.</li>
           <li>Open this section's <strong>Advanced</strong> to inspect the reply timeout and spending guards. Defaults are <strong>6 seconds</strong>, <strong>$0.25/day</strong> and <strong>$5/month</strong>. Check prices before increasing them.</li>
-          <li>Return to an editor and type an unfinished line such as <code>const average = </code>. Tap <strong>…</strong> at the end of the suggestion row, use the <strong>…AI</strong> extra key, or press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd>.</li>
+          <li>Return to a <strong>JavaScript</strong> editor and enter this practice snippet:
+            <pre><code>const values = [12, 15, 18];
+const average = </code></pre>
+            Leave the caret after the unfinished <code>const average = </code> line. Tap <strong>…</strong> at the end of the suggestion row, use the <strong>…AI</strong> extra key, or press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd>.</li>
           <li>Review the first request's actual payload and destination before sending it. AI chips carry a <strong>✦</strong> marker. Tap one to accept it; a truncated or multi-line chip opens a preview first. Review the resulting source before Run.</li>
         </ol>
         <figure class="phone-figure">
@@ -127,6 +152,12 @@ packages. Explain the expected results so I can review the code.</code></pre>
           <figcaption>A deliberately <strong>keyless browser capture</strong> of the independent-model controls. Its warning is real: without a saved key and valid destination, nothing can be sent. Your configured provider and model appear here after Step 2.</figcaption>
           <a class="full-shot-link" href="assets/completion-online.png">View the complete online settings capture</a>
         </figure>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="assets/phone-online-chips.png" width="1080" height="2340" alt="Lower composer detail from an Android Galaxy S24+ screenshot: the unfinished JavaScript average expression has two truncated AI chips, values.reduce and eval(values, each marked with a star." loading="lazy" decoding="async">
+          <figcaption><strong>Detail view of an actual Galaxy S24+ Android screenshot after a real completion request.</strong> Completion used <strong>Gemini 3.5 Flash-Lite via OpenRouter</strong> while the Assistant stayed on <strong>GLM 5.3 Flash</strong>. The two ✦ chips are truncated; outputs vary, so inspect the preview before accepting.</figcaption>
+          <a class="full-shot-link" href="assets/phone-online-chips.png">View the unmodified full phone screenshot of online candidate chips</a>
+        </figure>
+        <p class="callout"><strong>Choose the code, not just an AI chip.</strong> In this request, the first chip proposed <code>values.reduce((a, b) => a + b, 0) / values.length;</code>. Tap it to inspect the full preview: it sums the array and divides by its length, giving <strong>15</strong> for this example. The second proposed <code>eval(values.join(' + ')) / values.length;</code>. <strong>Reject that unnecessary <code>eval</code> alternative</strong>: calculating a mean does not need to turn a string into executable code. Check your own returned code before accepting it, and Run only after review.</p>
         <p>The request asks for up to five alternatives, but your screen may fit fewer. Another tap first pages through already-received alternatives; once those are exhausted it can request more. Tap while the request spins to cancel it. Later replies are dropped when the timeout expires, and typing or moving the caret makes old suggestions stale.</p>
         <p><strong>Independent means independent:</strong> a separate completion choice stays separate when you change the Assistant's model. This is useful when you want a capable agent but inexpensive autocomplete. Following the Assistant inherits its identity, <em>not</em> its conversation or agent permissions.</p>
         <aside class="callout" id="completion-privacy">
@@ -159,7 +190,7 @@ packages. Explain the expected results so I can review the code.</code></pre>
         <h2>Finish with a focused AI Prompt cell</h2>
         <p>The Assistant is useful for multi-step work. An <strong>AI Prompt</strong> cell is better for a small, repeatable question about a particular piece of code: it makes <strong>one isolated request</strong>, without Assistant history or tools. Use it to ask why a calculation works before extending it.</p>
         <ol class="lesson-steps">
-          <li>Add an <strong>AI Prompt</strong> cell immediately after the JavaScript example you want explained. Keep the cell type as <strong>Code</strong>, then choose <strong>AI Prompt</strong> from the <strong>language/mode dropdown</strong>. If it is absent, enable it under <strong>Menu → Languages &amp; modes</strong>.</li>
+          <li>Add an <strong>AI Prompt</strong> cell immediately after Step 3's <code>summary_demo</code> JavaScript cell—not the average-only snippet from Step 4—so the question below matches the selected source. Keep the cell type as <strong>Code</strong>, then choose <strong>AI Prompt</strong> from the <strong>language/mode dropdown</strong>. If it is absent, enable it under <strong>Menu → Languages &amp; modes</strong>.</li>
           <li>Enter the prompt below. Open its <strong>Configure</strong> control.</li>
           <li>Set <strong>Put final response in → This cell's output</strong>, the default. Under <strong>Context to send → Include source from</strong>, choose <strong>Previous 1 cell</strong>. Uncheck <strong>Include saved output text</strong> if only the source is needed, then <strong>Save configuration</strong>.</li>
           <li>Tap the AI Prompt cell's <strong>Run</strong>. Check the selected context in the review, then choose <strong>Send to AI provider</strong>. Read the explanation alongside the source and compare it with the known results.</li>

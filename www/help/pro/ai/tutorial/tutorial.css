@@ -5,3 +5,10 @@
   border: 1px solid var(--line);
   border-radius: 8px;
 }
+
+.tutorial-shot--composer-detail {
+  width: min(100%, 560px);
+  aspect-ratio: 1080 / 700;
+  object-fit: cover;
+  object-position: bottom;
+}

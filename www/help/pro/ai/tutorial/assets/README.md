@@ -1,9 +1,12 @@
 # Pro AI tutorial screenshots
 
-These are direct screenshots of the actual SciREPL Pro browser UI, not mockups,
-Android-device screenshots, or native-model tests.
+The three original settings pictures are direct screenshots of the actual
+SciREPL Pro **browser** UI. The separate `phone-*.png` pictures below are actual
+Android screenshots, including a real low-cost online completion.
 
-## Provenance
+## Browser settings captures
+
+### Provenance
 
 - Source: `SciREPL-Pro` commit `38316dbb3d12cc628b57af392c9ede49f36d71d0`.
 - Source identity: version `1.4.0`, **development** channel, Android version code
@@ -21,7 +24,7 @@ Android-device screenshots, or native-model tests.
   `SCIREPL_CAPTURE_OUTPUT` to a new output directory; an existing receipt is
   deliberately not overwritten.
 
-## Images
+### Images
 
 | File | Actual state shown |
 | --- | --- |
@@ -35,17 +38,65 @@ storage entries suppressed onboarding/What's New and disabled automatic
 downloads. Subsequent setting changes used actual UI controls. The provider
 store remained empty and the API-key input remained empty.
 
-## Network policy and limits
+### Network policy and limits
 
 The temporary server listened only on `127.0.0.1:8108` and served unchanged
 static files from Pro's `www/`. It rejected proxy routes and non-GET requests.
 Browser routing allowed same-origin GETs only, aborted every external request
 and every non-GET, and blocked service workers. The final successful capture
 recorded **zero external requests attempted, zero external responses and zero
-page errors**. The source SHA and clean tracked worktree were asserted before
-and after capture. The server and browser were closed after capture.
+page errors**. The source SHA was asserted before capture; the clean tracked
+worktree was checked before and after. The server and browser were closed afterward.
 
 No provider request, API key, model download, native installation, generated
 completion, inference, phone performance, or Android rendering was exercised.
 The browser's unavailable native-only local-model state was not fabricated or
-pictured. The images demonstrate UI navigation and configuration only.
+pictured. These three browser images demonstrate UI navigation and configuration only.
+
+## Android completion captures
+
+- Actual Galaxy S24+ (`SM-S926W`), `com.unifyweaver.scirepl.pro.debug`, version
+  `1.4.0-debug`, version code `25`, development UI, active app cache `v461`.
+  The installed app's Git commit was not independently identified; do not
+  treat the browser source SHA above as the phone's build SHA.
+- Captured 2026-10-08 UTC (2026-10-07 local), English/dark theme, portrait,
+  1080 × 2340, using Android's `screencap`. These are unmodified full-screen
+  PNGs. The three completion pictures use a CSS detail view of their lower
+  700 pixels; the agent result uses the full-height picture. Each links to
+  its full screenshot. No code, labels or results were painted into them.
+- A separate practice workbook contained only toy code. No existing workbook
+  source or provider credential is included in the published screenshots or
+  receipt. The software keyboard was dismissed for the published pictures.
+- `phone-table-ghost.png`: Python `pri` offers the faint suffix `nt`, chips
+  temporarily off. `phone-table-chips.png`: earlier source declares
+  `sample_mean` and `sample_median`, then `sample_m` offers both names. Online
+  suggestions and the local model were off; neither Python example was run.
+- `phone-online-chips.png`: a real, independently selected
+  `google/gemini-3.5-flash-lite` completion through OpenRouter, while the
+  Assistant's model stayed `z-ai/glm-5.3-flash`. The exact toy payload was
+  reviewed and sent once. The first returned option used `reduce`; the second
+  used unnecessary `eval`, explicitly rejected in the tutorial.
+- The completion response was HTTP 200, with 172 input and 125 output tokens,
+  provider-reported cost $0.0003641, and app-ledger settlement $0.0007282.
+  Those are distinct figures, not a promise about the final provider bill.
+  The single request took about 2.6 s in this session, not a latency benchmark.
+- `phone-agent-result.png`: GLM 5.3 Flash created a Markdown explanation and
+  the JavaScript `summary_demo` cell. It used seven tool-loop steps across
+  three bounded runs, with two Continue presses, then showed Done. Open was
+  selected, auto-run and source browsing were off, JavaScript execution was
+  Ask, writes were limited to the practice workbook, and Remote/Terminal were
+  off. The source was inspected before manually pressing the cell's Run;
+  the output was count 3, mean 15, min 12, max 18. The app's displayed burst
+  estimates were approximately $0.0025, $0.0016 and $0.0018—not an independently
+  audited provider total. The online completion alternatives were not run.
+- After the check, the original workbook, draft, language and the changed
+  completion/agent settings were restored. The practice workbook and its
+  checked output remain available. The user's saved key was left untouched,
+  and actual spending tallies were kept. The provider-policy consent accepted
+  for these authorized requests was not rolled back.
+- `capture-pro-phone.json` records the screenshot hashes and narrowly scoped
+  observations. No key, hint, authorization header, account id, phone network
+  address, or private workbook transcript is retained there.
+
+No expensive model, local-model inference/download, Play installation or
+S10+ performance test was used to obtain these phone pictures.

@@ -185,6 +185,43 @@ for (const shot of aiReceipt.screenshots) {
   check(`Pro AI ${shot.file} matches its capture receipt`,
     createHash('sha256').update(png).digest('hex') === shot.sha256);
 }
+const aiPhoneReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-phone.json'), 'utf8'));
+check('Pro AI phone captures distinguish offline tables from a real independent API request',
+  aiPhoneReceipt.device.package === 'com.unifyweaver.scirepl.pro.debug'
+    && aiPhoneReceipt.device.buildCommit === null
+    && aiPhoneReceipt.practiceWorkbookOnly === true
+    && aiPhoneReceipt.offline.onlineMode === 'off'
+    && aiPhoneReceipt.offline.localModelMode === 'off'
+    && aiPhoneReceipt.offline.codeExecuted === false
+    && aiPhoneReceipt.offline.ghost.suffix === 'nt'
+    && aiPhoneReceipt.offline.chips.labels.join(',') === 'sample_mean,sample_median'
+    && aiPhoneReceipt.online.model === 'google/gemini-3.5-flash-lite'
+    && aiPhoneReceipt.online.assistantModel === 'z-ai/glm-5.3-flash'
+    && aiPhoneReceipt.online.independentModel === true
+    && aiPhoneReceipt.online.requests === 1 && aiPhoneReceipt.online.status === 200
+    && aiPhoneReceipt.online.latencyBenchmark === false);
+check('Pro AI phone examples explain ghost acceptance and reject the actual eval alternative',
+  /not part of your source until you accept it/.test(aiSection('tables'))
+    && /sample_mean/.test(aiSection('tables')) && /sample_median/.test(aiSection('tables'))
+    && /Reject that unnecessary eval alternative/.test(aiSection('online'))
+    && /not the average-only snippet from Step 4/.test(aiSection('prompt-cells')));
+check('Pro AI tutorial explains bounded Continue runs and records a reviewed manual agent run',
+  /another bounded run/.test(aiSection('agent'))
+    && /Continuing can incur more API charges/.test(aiSection('agent'))
+    && aiPhoneReceipt.agent.model === 'z-ai/glm-5.3-flash'
+    && aiPhoneReceipt.agent.autoRun === false
+    && aiPhoneReceipt.agent.continuePresses === 2 && aiPhoneReceipt.agent.status === 'Done'
+    && aiPhoneReceipt.agent.output === 'count: 3\nmean: 15\nmin: 12\nmax: 18'
+    && aiPhoneReceipt.agent.providerTotalIndependentlyVerified === false);
+for (const shot of aiPhoneReceipt.screenshots) {
+  const png = readFileSync(path.join(aiAssets, shot.file));
+  check(`Pro AI phone ${shot.file} is an intact full-size PNG linked from its detail view`,
+    png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+      && png.readUInt32BE(16) === shot.width && png.readUInt32BE(20) === shot.height
+      && createHash('sha256').update(png).digest('hex') === shot.sha256
+      && aiTutorial.includes(`src="assets/${shot.file}"`)
+      && aiTutorial.includes(`href="assets/${shot.file}"`));
+}
 
 const csvSection = id => (csvTutorial.match(new RegExp(
   `<section\\b[^>]*\\bid=["']${id}["'][^>]*>([\\s\\S]*?)<\\/section>`, 'i')) || [])[1] || '';

@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "capturedDateUtc": "2026-10-08",
+  "device": {
+    "model": "SM-S926W",
+    "name": "Galaxy S24+",
+    "package": "com.unifyweaver.scirepl.pro.debug",
+    "versionName": "1.4.0-debug",
+    "versionCode": 25,
+    "releaseChannel": "development",
+    "appCache": "scirepl-app-v461",
+    "buildCommit": null,
+    "width": 1080,
+    "height": 2340
+  },
+  "captureMethod": "Android screencap; unmodified full-screen PNGs",
+  "displayMethod": "Completion screenshots use CSS lower-700-pixel detail views; agent result is full-height. All link to full PNGs.",
+  "practiceWorkbookOnly": true,
+  "cleanup": {
+    "originalWorkbookDraftAndLanguageRestored": true,
+    "temporaryCompletionAndAgentSettingsRestored": true,
+    "practiceWorkbookRetained": true,
+    "providerKeyUntouched": true,
+    "completionSpendingTalliesRetained": true,
+    "policyConsentAcceptedForAuthorizedRequests": true
+  },
+  "offline": {
+    "onlineMode": "off",
+    "localModelMode": "off",
+    "codeExecuted": false,
+    "ghost": { "prefix": "pri", "suffix": "nt", "chipsEnabled": false },
+    "chips": {
+      "source": "sample_mean = 0\nsample_median = 0\nsample_m",
+      "labels": ["sample_mean", "sample_median"],
+      "chipsEnabled": true
+    }
+  },
+  "online": {
+    "backend": "openrouter",
+    "model": "google/gemini-3.5-flash-lite",
+    "assistantModel": "z-ai/glm-5.3-flash",
+    "independentModel": true,
+    "source": "const values = [12, 15, 18];\nconst average = ",
+    "consent": "Reviewed exact toy payload; Send once",
+    "requests": 1,
+    "status": 200,
+    "inputTokens": 172,
+    "outputTokens": 125,
+    "elapsedMs": 2639,
+    "providerReportedUsd": 0.0003641,
+    "appLedgerSettledUsd": 0.0007282,
+    "firstAlternative": "values.reduce((a, b) => a + b, 0) / values.length;",
+    "rejectedAlternative": "eval(values.join(' + ')) / values.length;",
+    "codeExecuted": false,
+    "latencyBenchmark": false
+  },
+  "agent": {
+    "backend": "openrouter",
+    "model": "z-ai/glm-5.3-flash",
+    "securityPreset": "open",
+    "autoRun": false,
+    "javascriptExecutionPermission": "ask",
+    "sourceBrowsing": false,
+    "writeScope": "active",
+    "remote": false,
+    "terminal": false,
+    "stepBursts": [3, 2, 2],
+    "continuePresses": 2,
+    "status": "Done",
+    "createdCells": ["Markdown explanation", "JavaScript summary_demo"],
+    "runMethod": "Reviewed toy source, then manually used the saved cell's Run button",
+    "output": "count: 3\nmean: 15\nmin: 12\nmax: 18",
+    "appDisplayedBurstEstimatesUsd": [0.0025, 0.0016, 0.0018],
+    "providerTotalIndependentlyVerified": false,
+    "latencyBenchmark": false
+  },
+  "screenshots": [
+    { "file": "phone-table-ghost.png", "width": 1080, "height": 2340, "sha256": "f1158984f46cc7d50684d339d7a7a80fb35949720e9af5309b6cb47784c0afea" },
+    { "file": "phone-table-chips.png", "width": 1080, "height": 2340, "sha256": "af0c555b73a77313f23ee2af62d8d4036d8ebb54df010404be0cfefb44cf72e6" },
+    { "file": "phone-online-chips.png", "width": 1080, "height": 2340, "sha256": "9a970d2cbc443de68cdc2069f8849371a4060b2de0e0638e10dc7dc5713e5303" },
+    { "file": "phone-agent-result.png", "width": 1080, "height": 2340, "sha256": "69d702e1cb089d4a382bc7f05e5c3efd1f782797d81a4aa7242179d91f33c498" }
+  ]
+}
