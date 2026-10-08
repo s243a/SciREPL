@@ -488,6 +488,15 @@ check('Appearance tutorial keeps Android status and navigation bars distinct',
     && /absent from the browser\/PWA and Windows/i.test(appearanceText));
 const appearanceProEditor = helpText((appearanceTutorial.match(
   /<section\b[^>]*\bid="pro-editor"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '');
+check('Pro Appearance explains both full-screen entry routes and draft-preserving exit',
+  /New cell: tap the ⤢ Full screen button in the new-cell code field/.test(appearanceProEditor)
+    && /Saved cell: tap that cell's ✎ pencil/.test(appearanceProEditor)
+    && /then tap ⤢ in the corner of that cell's code field/.test(appearanceProEditor)
+    && /editor label at the top/.test(appearanceProEditor)
+    && /Done applies the draft without running it/.test(appearanceProEditor)
+    && /Cancel discards the edit/.test(appearanceProEditor)
+    && /Done and Cancel both leave full screen without clearing the draft/.test(appearanceProEditor)
+    && /does not open the full-screen code editor/.test(appearanceProEditor));
 check('Appearance walkthrough distinguishes optional Pro keys, live colours and file highlighting',
   appearanceTutorial.includes('href="#pro-editor"')
     && /Pro only/.test(appearanceProEditor)
