@@ -2,6 +2,7 @@
 // Run after server.js is listening on http://localhost:8085.
 
 import { chromium } from 'playwright';
+import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -39,6 +40,7 @@ const expected = [
   'help/privacy/index.html',
   'help/pro/index.html',
   'help/pro/ai/index.html',
+  'help/pro/ai/tutorial/index.html',
   'help/pro/remote/index.html',
   'pro/help/index.html',
 ];
@@ -119,6 +121,71 @@ const helpText = html => html.replace(/<[^>]*>/g, ' ')
   .replace(/&amp;/gi, '&').replace(/&nbsp;|&#160;/gi, ' ')
   .replace(/&#39;|&apos;/gi, "'").replace(/&quot;/gi, '"')
   .replace(/\s+/g, ' ').trim();
+
+const aiTutorial = readFileSync(path.join(WWW, 'help/pro/ai/tutorial/index.html'), 'utf8');
+const aiSection = id => helpText((aiTutorial.match(new RegExp(
+  `<section\\b[^>]*\\bid=["']${id}["'][^>]*>([\\s\\S]*?)<\\/section>`, 'i')) || [])[1] || '');
+const aiSteps = ['tables', 'key', 'agent', 'online', 'local', 'prompt-cells'];
+check('Pro AI tutorial follows tables, key, Open agent, API completion, local model, AI Prompt',
+  aiSteps.every((id, index) => aiTutorial.includes(`id="${id}"`)
+    && (!index || aiTutorial.indexOf(`id="${aiSteps[index - 1]}"`) < aiTutorial.indexOf(`id="${id}"`))));
+check('Pro AI tutorial distinguishes no API charge from the Free edition and touch Auto default',
+  /Free.{0,60}means no API charge/i.test(helpText(aiTutorial))
+    && /not make them Free-edition features/i.test(helpText(aiTutorial))
+    && /desktop on, touch off/i.test(aiSection('tables'))
+    && /Accept is not Run/i.test(aiSection('tables')));
+check('Pro AI tutorial puts keys in settings, not workbook source',
+  /API Key/i.test(aiSection('key')) && /Saved keys/i.test(aiSection('key'))
+    && /without application-level encryption/i.test(aiSection('key'))
+    && /Do not paste it into a cell/i.test(aiSection('key')));
+check('Pro AI tutorial describes Open and browser limits without promising safe generated code',
+  /second-most-permissive/i.test(aiSection('agent'))
+    && /Active worksheet/.test(aiSection('agent'))
+    && /turn off Auto-run cells created by AI/.test(aiSection('agent'))
+    && /not a guarantee/.test(aiSection('agent'))
+    && /saved credentials/.test(aiSection('agent'))
+    && /Kernels… → JavaScript → Ask/.test(aiSection('agent'))
+    && /first 500 characters of each cell/.test(aiSection('agent'))
+    && /network restrictions are best-effort/.test(aiSection('agent'))
+    && /real shell on the broker host/.test(aiSection('agent')));
+check('Pro AI tutorial covers independent completion identity and on-demand consent',
+  ['Follow AI Assistant', 'Choose provider and model', 'On tap', 'Always allow', 'first real payload']
+    .every(text => aiSection('online').includes(text))
+    && /Prefetch while I type is not yet available/.test(aiSection('online'))
+    && /completion-only soft spending guards/.test(aiSection('online'))
+    && /not the budget for Assistant or AI Prompt/.test(aiSection('online')));
+check('Pro AI tutorial qualifies Android memory, delivery and S10 performance claims',
+  ['64-bit ARM', '4 GB', '400 MB', 'Google Play', 'Galaxy S24+', 'Galaxy S10+', '460–490 MB']
+    .every(text => aiSection('local').includes(text))
+    && /did not measure the S10\+/.test(aiSection('local'))
+    && /not a measured speed comparison/.test(aiSection('local'))
+    && /sideloaded installations cannot download/.test(aiSection('local')));
+check('Pro AI tutorial ends with isolated Prompt context and qualified cost savings',
+  ['Previous 1 cell', 'Include saved output text', "This cell's output", 'one isolated request',
+    'without Assistant history or tools', 'not guaranteed', "Assistant's provider/model", 'language/mode dropdown']
+    .every(text => aiSection('prompt-cells').includes(text))
+    && /outside the completion spending guards/.test(aiSection('prompt-cells')));
+check('Pro AI reference links the guide rather than claiming AI completion is unshipped',
+  /href="tutorial\/"/.test(readFileSync(path.join(WWW, 'help/pro/ai/index.html'), 'utf8'))
+    && !/AI autocomplete is not shipped/.test(readFileSync(path.join(WWW, 'help/pro/ai/index.html'), 'utf8')));
+const aiAssets = path.join(WWW, 'help/pro/ai/tutorial/assets');
+const aiReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-ui.json'), 'utf8'));
+check('Pro AI captures record a keyless browser UI, not phone or model performance',
+  aiReceipt.browser.headless === true && aiReceipt.sourceVersion.version === '1.4.0'
+    && !aiReceipt.sourceVersion.scripts
+    && ['providerStoreList', 'blockedRequests', 'externalResponses', 'pageErrors']
+      .every(field => Array.isArray(aiReceipt[field]) && aiReceipt[field].length === 0)
+    && aiReceipt.assistantSettings.autoRunCellsCreatedByAI === false
+    && aiReceipt.assistantSettings.sourceBrowsing === false
+    && aiReceipt.assistantSettings.securityLevel === 'open'
+    && /not an Android screenshot/.test(aiSection('tables'))
+    && /keyless browser capture/.test(aiSection('online')));
+for (const shot of aiReceipt.screenshots) {
+  const png = readFileSync(path.join(aiAssets, shot.file));
+  check(`Pro AI ${shot.file} matches its capture receipt`,
+    createHash('sha256').update(png).digest('hex') === shot.sha256);
+}
+
 const csvSection = id => (csvTutorial.match(new RegExp(
   `<section\\b[^>]*\\bid=["']${id}["'][^>]*>([\\s\\S]*?)<\\/section>`, 'i')) || [])[1] || '';
 const csvText = helpText(csvTutorial);
@@ -582,6 +649,12 @@ try {
     await page.goto(`${TEST_ORIGIN}${route}`, { waitUntil: 'networkidle' });
     const normal = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
     check(`${route} fits 320 CSS px`, normal);
+    if (publishedTutorials.includes(route.slice(1))) {
+      const backLink = page.locator('.site-header').getByRole('link', { name: 'All tutorials', exact: true });
+      check(`${route} has a visible narrow-screen tutorial-index link`,
+        await backLink.isVisible()
+          && await backLink.evaluate(link => link.href) === `${TEST_ORIGIN}/help/tutorials/`);
+    }
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.evaluate(() => { document.documentElement.style.zoom = '2'; });
     const zoomed = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);

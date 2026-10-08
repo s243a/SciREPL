@@ -1,0 +1,7 @@
+.tutorial-shot {
+  display: block;
+  width: min(100%, 430px);
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
