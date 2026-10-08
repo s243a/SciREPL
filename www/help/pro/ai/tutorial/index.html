@@ -58,17 +58,22 @@
           <li>Tap the <code>const</code> chip to insert it. A faint in-line completion is called <strong>ghost text</strong>; use <strong>Accept</strong> or <kbd>Tab</kbd> for a visible ghost. Finish the line yourself, for example <code>const values = [12, 15, 18];</code>.</li>
         </ol>
         <figure class="phone-figure">
-          <img class="tutorial-shot" src="assets/completion-general.png" width="414" height="820" alt="Pro browser Completion screen with General selected, Local code completion On, Suggestions At cursor and Suggestion chips On." loading="lazy" decoding="async">
-          <figcaption>The actual General controls in a narrow <strong>browser capture, not an Android screenshot</strong>. The Section dropdown is at the top; lower settings may require scrolling.</figcaption>
+          <div class="shot-window shot-window--completion-general" role="img" aria-label="Pro browser General Completion screen. Yellow borders locate the Ghost text and Suggestion chips headings, Suggestions: At cursor, and Suggestion chips: On.">
+            <div class="shot-stage shot-stage--completion-general">
+              <img src="assets/completion-general.png" width="414" height="820" alt="" loading="lazy" decoding="async">
+              <img src="assets/completion-general-overlay.svg" width="414" height="820" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>The actual General controls in a narrow <strong>browser capture, not an Android screenshot</strong>. Yellow borders locate <strong>Suggestions → At cursor</strong>, <strong>Suggestion chips → On</strong>, and their section titles. The Section dropdown is at the top; lower settings may require scrolling.</figcaption>
           <a class="full-shot-link" href="assets/completion-general.png">View the complete settings capture</a>
         </figure>
-        <p><strong>See the two offline displays on a phone.</strong> For the ghost example, temporarily set <strong>Suggestion chips → Off</strong>, choose <strong>Python</strong>, and type <code>pri</code>. The faint <code>nt</code> after the caret offers <code>print</code>; it is not part of your source until you accept it. Keep <strong>AI suggestions</strong> and <strong>Use local model</strong> off for both examples.</p>
+        <p><strong>See the two offline displays on a phone.</strong> Leave <strong>Suggestion chips → On</strong>, choose <strong>Python</strong>, and type <code>pri</code>. The faint <code>nt</code> after the caret offers <code>print</code>; it is not part of your source until you accept it. <strong>You do not need to turn chips off to see ghost text.</strong> A single candidate can appear as a ghost, while chips offer a choice when several candidates fit. Keep <strong>AI suggestions</strong> and <strong>Use local model</strong> off for both examples.</p>
         <figure class="phone-figure">
-          <img class="tutorial-shot tutorial-shot--composer-detail" src="assets/phone-table-ghost.png" width="1080" height="2340" alt="Lower composer detail from an Android Galaxy S24+ screenshot: Python source pri followed by faint ghost text nt, with suggestion chips off." loading="lazy" decoding="async">
-          <figcaption><strong>Detail view of an actual Galaxy S24+ Android screenshot.</strong> Offline table completion offers one faint suffix at the caret. Chips are off just for this demonstration; the API and local model are off too.</figcaption>
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="assets/phone-table-ghost.png" width="1080" height="2340" alt="Lower composer detail from an Android Galaxy S24+ screenshot: Python source pri followed by faint ghost text nt and an Accept button. Suggestion chips are enabled." loading="lazy" decoding="async">
+          <figcaption><strong>Detail view of an actual Galaxy S24+ Android screenshot.</strong> Offline table completion offers one faint suffix at the caret with <strong>Suggestion chips → On</strong>. The API and local model are off.</figcaption>
           <a class="full-shot-link" href="assets/phone-table-ghost.png">View the unmodified full phone screenshot of ghost text</a>
         </figure>
-        <p>For candidate chips, turn <strong>Suggestion chips → On</strong> again. Replace the practice input with these three lines, leaving the caret after the unfinished <code>sample_m</code>. The row offers <code>sample_mean</code> and <code>sample_median</code> from names in your own source. Tap a chip to choose a candidate; unlike ghost text, the row shows alternatives.</p>
+        <p>With chips still <strong>On</strong>, replace the practice input with these three lines, leaving the caret after the unfinished <code>sample_m</code>. The row offers <code>sample_mean</code> and <code>sample_median</code> from names in your own source. Tap a chip to choose a candidate; unlike ghost text, the row shows alternatives.</p>
         <pre><code>sample_mean = 0
 sample_median = 0
 sample_m</code></pre>
@@ -77,6 +82,7 @@ sample_m</code></pre>
           <figcaption><strong>Detail view of an actual Galaxy S24+ Android screenshot.</strong> With chips on, source-derived offline candidates offer the two names above. The API and local model remain off.</figcaption>
           <a class="full-shot-link" href="assets/phone-table-chips.png">View the unmodified full phone screenshot of candidate chips</a>
         </figure>
+        <p>The <strong>extra-key row</strong> visible in the phone pictures and <strong>syntax colours while typing</strong> are separate, optional Pro controls. See <a href="../../../interface/appearance/#pro-editor">Appearance walkthrough: extra keys and syntax colours</a> to turn either on or off, and to find the file editor's separate highlighting checkbox.</p>
         <p>These prefixes demonstrate editing only—there is no need to Run them. After trying the displays, switch back to <strong>JavaScript</strong> for the example above and leave chips on for the rest of the lesson.</p>
         <p>The offline layer uses curated names and, where supported, local workbook/session information and frequency or acceptance history to rank suggestions. It is <strong>not a language model</strong>. It can complete a familiar name, but it does not reason about your whole task. Different languages have different coverage; a known-looking chip is not proof that the name exists in the running program.</p>
         <p class="callout"><strong>Accept is not Run.</strong> Accepting a suggestion edits the source; it does not execute the cell. Review it, then use that editor's <strong>Run</strong> button. Typing a prefix does not send an API request or start a language runtime just to make these suggestions.</p>

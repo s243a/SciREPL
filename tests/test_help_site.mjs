@@ -185,6 +185,16 @@ for (const shot of aiReceipt.screenshots) {
   check(`Pro AI ${shot.file} matches its capture receipt`,
     createHash('sha256').update(png).digest('hex') === shot.sha256);
 }
+const aiGeneralOverlay = readFileSync(path.join(aiAssets, 'completion-general-overlay.svg'), 'utf8');
+const aiGeneralPng = readFileSync(path.join(aiAssets, 'completion-general.png'));
+check('Pro AI General callouts match the unchanged screenshot and locate headings and settings',
+  aiGeneralPng.readUInt32BE(16) === 414 && aiGeneralPng.readUInt32BE(20) === 820
+    && /viewBox="0 0 414 820"/.test(aiGeneralOverlay)
+    && ['ghost-heading', 'suggestions-setting', 'chips-heading', 'chips-setting']
+      .every(id => aiGeneralOverlay.includes(`id="${id}"`))
+    && /stroke="#ffd43b"/.test(aiGeneralOverlay)
+    && aiTutorial.includes('assets/completion-general-overlay.svg')
+    && /Yellow borders locate/.test(aiSection('tables')));
 const aiPhoneReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-phone.json'), 'utf8'));
 check('Pro AI phone captures distinguish offline tables from a real independent API request',
   aiPhoneReceipt.device.package === 'com.unifyweaver.scirepl.pro.debug'
@@ -194,12 +204,21 @@ check('Pro AI phone captures distinguish offline tables from a real independent 
     && aiPhoneReceipt.offline.localModelMode === 'off'
     && aiPhoneReceipt.offline.codeExecuted === false
     && aiPhoneReceipt.offline.ghost.suffix === 'nt'
+    && aiPhoneReceipt.offline.ghost.chipsEnabled === true
+    && aiPhoneReceipt.offline.ghost.realChipsControl === 'On'
+    && aiPhoneReceipt.offline.ghost.providerRequests === 0
+    && aiPhoneReceipt.offline.ghost.originalWorkbookDraftLanguageAndSettingsRestored === true
     && aiPhoneReceipt.offline.chips.labels.join(',') === 'sample_mean,sample_median'
     && aiPhoneReceipt.online.model === 'google/gemini-3.5-flash-lite'
     && aiPhoneReceipt.online.assistantModel === 'z-ai/glm-5.3-flash'
     && aiPhoneReceipt.online.independentModel === true
     && aiPhoneReceipt.online.requests === 1 && aiPhoneReceipt.online.status === 200
     && aiPhoneReceipt.online.latencyBenchmark === false);
+check('Pro AI ghost lesson keeps chips On and links optional Pro editor controls',
+  /You do not need to turn chips off to see ghost text/.test(aiSection('tables'))
+    && /With chips still On/.test(aiSection('tables'))
+    && !/temporarily set Suggestion chips → Off/.test(aiSection('tables'))
+    && aiTutorial.includes('href="../../../interface/appearance/#pro-editor"'));
 check('Pro AI phone examples explain ghost acceptance and reject the actual eval alternative',
   /not part of your source until you accept it/.test(aiSection('tables'))
     && /sample_mean/.test(aiSection('tables')) && /sample_median/.test(aiSection('tables'))
@@ -467,6 +486,20 @@ check('Appearance tutorial separates button size from font zoom and composer Run
 check('Appearance tutorial keeps Android status and navigation bars distinct',
   /status bar, not the navigation or gesture bar/i.test(appearanceText)
     && /absent from the browser\/PWA and Windows/i.test(appearanceText));
+const appearanceProEditor = helpText((appearanceTutorial.match(
+  /<section\b[^>]*\bid="pro-editor"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '');
+check('Appearance walkthrough distinguishes optional Pro keys, live colours and file highlighting',
+  appearanceTutorial.includes('href="#pro-editor"')
+    && /Pro only/.test(appearanceProEditor)
+    && /Menu → Completion → Section → General/.test(appearanceProEditor)
+    && /Extra keys above the keyboard → On/.test(appearanceProEditor)
+    && /Menu → Appearance → Syntax colours while typing/.test(appearanceProEditor)
+    && /Auto \(desktop on, touch off\)/.test(appearanceProEditor)
+    && /6000 characters/.test(appearanceProEditor)
+    && /Files & Storage has a separate switch/.test(appearanceProEditor)
+    && /Syntax highlighting checkbox is independent/.test(appearanceProEditor)
+    && /100,000 characters/.test(appearanceProEditor)
+    && /not controls shown in the Free screenshots/.test(appearanceProEditor));
 const appearanceAssets = path.join(WWW, 'help/interface/appearance/assets');
 const appearanceShots = ['menu', 'shortcuts', 'header', 'options', 'theme'];
 check('Appearance tutorial contains five annotated Free phone figures',

@@ -26,19 +26,20 @@
     <article>
       <p class="eyebrow">Make the interface your own</p>
       <h1>Show Browse and adjust Appearance</h1>
-      <p class="lede">Put the <strong>📦 Browse</strong> shortcut in <strong>SciREPL Free's</strong> header, then choose comfortable buttons and a light or dark theme. The other Appearance controls below are also useful in Pro. You can do this without changing or running any workbook cells.</p>
+      <p class="lede">Put the <strong>📦 Browse</strong> shortcut in <strong>SciREPL Free's</strong> header, then choose comfortable buttons and a light or dark theme. Shared Appearance controls are also useful in Pro; a separate Pro-only section covers extra keys and live syntax colours. You can do this without changing or running any workbook cells.</p>
       <ul class="meta">
-        <li class="chip chip-free">Free + shared Pro controls</li>
+        <li class="chip chip-free">Free + Pro (see labels)</li>
         <li class="chip">Android screenshots</li>
         <li class="chip">About 3 minutes</li>
       </ul>
-      <p class="screen-note">All screenshots are real captures of <strong>SciREPL Free 1.4.0-debug</strong> on a <strong>Samsung Galaxy S24+</strong>, taken on <time datetime="2026-10-06">6 October 2026</time>. They show the debug-signed app, not an installation from the Play Store. The steps use Free 1.4.0 controls. Browse's header shortcut is Free-only; Pro users can open the same catalogue from Menu.</p>
+      <p class="screen-note">The five screenshots are real captures of <strong>SciREPL Free 1.4.0-debug</strong> on a <strong>Samsung Galaxy S24+</strong>, taken on <time datetime="2026-10-06">6 October 2026</time>. They show the debug-signed app, not an installation from the Play Store. The pictured steps use Free 1.4.0 controls. Browse's header shortcut is Free-only; Pro users can open the same catalogue from Menu. The Pro-only text below is verified against the Pro 1.4.0 codebase; those controls are not illustrated by these Free pictures, and older menus can differ.</p>
       <nav class="lesson-nav" aria-label="Appearance walkthrough steps">
         <strong>In this lesson</strong>
         <ol>
           <li><a href="#open-appearance">Open Appearance</a></li>
           <li><a href="#browse-shortcut">Show the Browse shortcut</a></li>
           <li><a href="#buttons">Adjust buttons and Run</a></li>
+          <li><a href="#pro-editor">Pro only: extra keys and live colours</a></li>
           <li><a href="#theme">Choose a theme</a></li>
           <li><a href="#android-space">Optional Android space and recovery</a></li>
         </ol>
@@ -126,6 +127,20 @@
           <li><strong>Always show the label:</strong> keep the text, even on a narrow screen.</li>
         </ul>
         <p>There is no text-zoom slider in Appearance. <strong>Button size</strong> is not a general font-size setting. Free 1.4.0 and Pro 1.3.0 automatically enlarge compact header controls to accommodate Android's system text zoom.</p>
+      </section>
+
+      <section id="pro-editor">
+        <p class="step-label">Optional · Pro only</p>
+        <h2>Pro only: extra keys and syntax colours while typing</h2>
+        <p>These are <strong>SciREPL Pro 1.4.0</strong> editor controls, not controls shown in the Free screenshots above. Extra keys and live colours are separate settings.</p>
+        <h3>Show the extra-key row</h3>
+        <p>Open <strong>Menu → Completion → Section → General</strong>. Set <strong>Extra keys above the keyboard → On</strong>; the default is <strong>Off</strong>. The row offers Esc, Tab, indent removal, arrows, Home, End, Run and punctuation. Swipe it sideways to reach keys that do not fit. Choosing On does not run code, but the row's <strong>▶ Run</strong> key does—review the source before tapping it.</p>
+        <p>In the same section, <strong>Chips in portrait</strong> and <strong>Chips in landscape</strong> choose <strong>Own row</strong> or <strong>Replace extra keys</strong>. The defaults are Own row in portrait and Replace extra keys in landscape: while candidates appear, they can temporarily take the keys' place. With extra keys off, chips use their own row. <strong>Accessory rows in landscape</strong> offers <strong>Off</strong>, <strong>When there is room</strong> (default), or <strong>Always</strong>. When there is room uses <strong>Minimum visible code lines</strong>, initially <strong>8</strong>, so a short landscape view can hide optional rows.</p>
+        <h3>Turn live syntax colours on or off</h3>
+        <p>Open <strong>Menu → Appearance → Syntax colours while typing</strong>. Choose <strong>On</strong> to colour supported code while editing, or <strong>Off</strong> for plain text. The default, <strong>Auto (desktop on, touch off)</strong>, enables colours in desktop browsers and leaves them off on phones. If typing feels less responsive, choose Off; colouring can cost typing speed on slower devices. Code longer than <strong>6000 characters</strong> remains uncoloured even with On.</p>
+        <p>Colours do not validate or execute code, send an API request, or turn completion on. Changing this setting takes effect immediately and does not alter your source.</p>
+        <h3>Files &amp; Storage has a separate switch</h3>
+        <p>For a text file, use <strong>Menu → Files &amp; Storage (VFS / Paths)</strong>, select the file, then choose <strong>Full screen</strong>. That editor's <strong>Syntax highlighting</strong> checkbox is independent of Appearance's live-colour setting and is off by default. It is unavailable for unrecognised file types or files over 100,000 characters. Its extra keys share the Completion preference, but can hide when the file editor has too little room. File <strong>Save</strong> writes your edits; switching colours alone does not.</p>
       </section>
 
       <section id="theme">

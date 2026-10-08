@@ -53,6 +53,12 @@ completion, inference, phone performance, or Android rendering was exercised.
 The browser's unavailable native-only local-model state was not fabricated or
 pictured. These three browser images demonstrate UI navigation and configuration only.
 
+The yellow borders over `completion-general.png` are a separate, editable
+SVG (`completion-general-overlay.svg`, 414 × 820, matching the screenshot).
+They locate section titles and the Suggestions / Suggestion chips controls.
+The original PNG and its capture-receipt hash are unchanged; the full-image
+link opens it without annotations.
+
 ## Android completion captures
 
 - Actual Galaxy S24+ (`SM-S926W`), `com.unifyweaver.scirepl.pro.debug`, version
@@ -67,8 +73,11 @@ pictured. These three browser images demonstrate UI navigation and configuration
 - A separate practice workbook contained only toy code. No existing workbook
   source or provider credential is included in the published screenshots or
   receipt. The software keyboard was dismissed for the published pictures.
-- `phone-table-ghost.png`: Python `pri` offers the faint suffix `nt`, chips
-  temporarily off. `phone-table-chips.png`: earlier source declares
+- `phone-table-ghost.png`: re-checked on the phone at 2026-10-08 04:30 UTC
+  (7 October local). Python `pri` offers the faint suffix `nt` with the actual
+  Suggestion chips control set to On. No provider request was sent; the
+  previous workbook, draft, language and snapshotted settings were restored.
+  `phone-table-chips.png`: earlier source declares
   `sample_mean` and `sample_median`, then `sample_m` offers both names. Online
   suggestions and the local model were off; neither Python example was run.
 - `phone-online-chips.png`: a real, independently selected
