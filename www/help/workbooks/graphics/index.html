@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Make static Markdown diagrams, generate a picture with JavaScript canvas, and write KaTeX equations in a SciREPL workbook without installing packages.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/workbooks/graphics/">
+  <link rel="stylesheet" href="../../styles.css">
+  <link rel="stylesheet" href="../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="tutorial.css">
+  <title>Pictures, diagrams and equations · SciREPL Help</title>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="../../">sci<span>REPL</span> Help</a>
+    <nav aria-label="Primary navigation">
+      <a href="../">Workbooks reference</a>
+      <a href="../../">All help</a>
+      <a href="../../../">Open Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <p class="breadcrumbs"><a href="../../">Help</a> / <a href="../">Workbooks</a> / Pictures, diagrams and equations</p>
+    <article>
+      <p class="eyebrow">Learn by doing</p>
+      <h1>Add pictures, diagrams and equations</h1>
+      <p class="lede">A workbook can explain an idea with a picture as well as code. Try three ways to show the same simple coordinate frame: a static image in Markdown, a picture drawn by JavaScript, and an equation typeset with KaTeX. You do not need Python, R, a package installation, or an AI account.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro workflow</li>
+        <li class="chip">Browser-verified examples</li>
+        <li class="chip">About 10 minutes</li>
+      </ul>
+      <p class="screen-note">The examples and screenshots were checked in the <strong>SciREPL Free browser build</strong> on <time datetime="2026-10-06">6 October 2026</time>. Screenshots use a narrow browser viewport; they are <strong>not Android captures</strong>. The same controls are used on Android, but their position may differ. Pro and every released app version have not been tested for this guide.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Choose the method that fits your explanation</caption>
+          <thead><tr><th scope="col">What you want</th><th scope="col">Cell type</th><th scope="col">What creates the result</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">A fixed diagram or picture</th><td>Markdown (<strong>Md</strong>)</td><td>Inline SVG or an embedded PNG, stored in the cell's text</td></tr>
+            <tr><th scope="row">A picture calculated or drawn by code</th><td>Code → JavaScript (<strong>JS</strong>)</td><td>A canvas, displayed with <code>window.renderImage(...)</code></td></tr>
+            <tr><th scope="row">A formula or matrix</th><td>Markdown (<strong>Md</strong>)</td><td>TeX-style math between <code>$$</code> delimiters, rendered by KaTeX</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <nav class="lesson-nav" aria-label="Graphics walkthrough steps">
+        <strong>In this lesson</strong>
+        <ol>
+          <li><a href="#open">Open the small example workbook</a></li>
+          <li><a href="#static">Keep a static picture in Markdown</a></li>
+          <li><a href="#canvas">Draw a picture with JavaScript</a></li>
+          <li><a href="#math">Write equations with KaTeX</a></li>
+          <li><a href="#save">Save and reopen your work</a></li>
+        </ol>
+        <p><a href="#troubleshooting">If the result does not appear</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">Step 1</p>
+        <h2>Open the example workbook</h2>
+        <p>The companion file contains the complete examples, including an embedded PNG. It keeps everything in one small workbook so you do not have to type a long Base64 image string.</p>
+        <ol class="lesson-steps">
+          <li><a href="assets/workbook-graphics.srwb" download="workbook-graphics.srwb">Download the graphics example workbook (.srwb)</a>. Save the actual file, keeping its <code>.srwb</code> extension. If your browser displays text, use its save/download action. Note the folder you saved it in.</li>
+          <li>Open SciREPL. In the <strong>header at the top of the app</strong>, find <strong>☰ Menu</strong>, the button with <strong>three horizontal lines</strong>. Tap or click it.</li>
+          <li>Choose <strong>📂 Import File (e.g. .srwb, .ipynb, .csv, .py, .zip)</strong>. Scroll <em>inside the menu</em> if needed. In your device's file picker, select <code>workbook-graphics.srwb</code> from Downloads or the folder you chose.</li>
+          <li>Close the menu if it remains open, and select the new <strong>Workbook Graphics</strong> tab in the workbook selector. Your existing tabs are kept.</li>
+          <li>Find the four cells named <code>static_axes</code>, <code>embedded_png</code>, <code>canvas_axes</code>, and <code>math_axes</code>. Read them before running code. The static diagrams and equations appear from their Markdown source; the JavaScript picture appears only after you run its cell.</li>
+        </ol>
+        <p class="callout"><strong>Importing is not running.</strong> An <code>.srwb</code> import does not execute its code, even when the auto-execute setting is enabled. Only <code>canvas_axes</code> needs JavaScript execution in this lesson. There is no <strong>Run All Cells</strong> step.</p>
+        <p>Need more detail about the download or picker? Follow the <a href="../import/">manual workbook import walkthrough</a>. The names above appear on the saved cells; the <a href="../named-cells/">named-cell paths tutorial</a> explains how to assign and use them. You can also create these examples in a workbook you already have open, using the steps below.</p>
+      </section>
+
+      <section id="static">
+        <p class="step-label">Step 2 · Method 1</p>
+        <h2>Keep a static diagram in Markdown</h2>
+        <p>Think of a sheet of paper facing you. <strong>r</strong> points right along the paper, <strong>u</strong> points up along it, and <strong>n</strong> points out of the paper toward you. A circle with a dot represents that outward direction, like seeing the tip of an arrow coming toward you.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="assets/browser-graphics-static.png" alt="Narrow-browser screenshot of a SciREPL Markdown cell displaying a paper diagram with right and up arrows and a dot in a circle for the normal toward the viewer." loading="lazy" decoding="async">
+          <figcaption>The static SVG is rendered <em>inside a Markdown cell</em>. This is a browser capture of SciREPL Free, not a drawing generated by running a language kernel.</figcaption>
+          <a class="full-shot-link" href="assets/browser-graphics-static.png">View the complete browser screenshot</a>
+        </figure>
+        <h3>Edit the imported diagram</h3>
+        <ol class="lesson-steps">
+          <li>Find <code>static_axes</code>. Tap its <strong>✎ pencil</strong> in that saved cell's own header, near <strong>✕</strong>. This opens the existing cell's source; the new-cell panel would make another cell.</li>
+          <li>Keep the cell-type button set to <strong>Md</strong>. In the SVG text, change <code>r: right</code> to <code>r: across</code>.</li>
+          <li>Tap that cell's <strong>▶ Run</strong> button to save and render the Markdown again. For an <strong>Md</strong> cell, this button renders text; it does not execute JavaScript or start a language runtime.</li>
+        </ol>
+        <h3>Or create your own Markdown cell</h3>
+        <ol class="lesson-steps">
+          <li>Find the <strong>new-cell panel</strong> where you type the next cell. If it is collapsed, use the <strong>⌃ Show new-cell panel</strong> button near the app title.</li>
+          <li>Tap the cell-type button marked <strong>Code</strong> so it changes to <strong>Md</strong>. Markdown is a <em>cell type</em>, not an entry in the language dropdown.</li>
+          <li>Copy the complete SVG below into the text field, <strong>without adding Markdown code fences</strong> (<code>```</code>). Leave a blank line between surrounding prose and the SVG.</li>
+          <li>Tap <strong>▶ Run</strong> to add the rendered Markdown cell. You should see the paper and all three direction labels.</li>
+        </ol>
+        <pre><code data-graphic-example="svg">&lt;svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 360 220" width="100%" height="220"
+     role="img" aria-label="Right, up and outward normal on paper"&gt;
+  &lt;title&gt;A paper coordinate frame&lt;/title&gt;
+  &lt;rect x="20" y="18" width="320" height="184"
+        rx="6" fill="#ffffff" stroke="#526170" stroke-width="2" /&gt;
+  &lt;path d="M110 145 H280" fill="none" stroke="#075d69" stroke-width="3" /&gt;
+  &lt;polygon points="280,145 267,138 267,152" fill="#075d69" /&gt;
+  &lt;path d="M110 145 V48" fill="none" stroke="#064d91" stroke-width="3" /&gt;
+  &lt;polygon points="110,48 103,61 117,61" fill="#064d91" /&gt;
+  &lt;circle cx="110" cy="145" r="10" fill="#ffffff" stroke="#14191f" stroke-width="2" /&gt;
+  &lt;circle cx="110" cy="145" r="3" fill="#14191f" /&gt;
+  &lt;text x="204" y="168" fill="#14191f" font-size="16"&gt;r: right&lt;/text&gt;
+  &lt;text x="124" y="62" fill="#14191f" font-size="16"&gt;u: up&lt;/text&gt;
+  &lt;text x="42" y="190" fill="#14191f" font-size="16"&gt;n: toward you&lt;/text&gt;
+&lt;/svg&gt;</code></pre>
+        <p>SciREPL sanitizes Markdown. This example uses ordinary SVG shapes, text, and explicit <code>fill</code>/<code>stroke</code> attributes. Its arrowheads are polygons: do not rely on <code>marker-end="url(...)"</code>, a <code>&lt;style&gt;</code> block, scripts, or animation surviving the sanitizer.</p>
+
+        <h3>Use an embedded PNG instead</h3>
+        <p>The other static option is a PNG with its Base64 data stored directly in the Markdown source. Standard Markdown image syntax looks like this:</p>
+        <pre><code>![Paper axes](data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE)</code></pre>
+        <p>This line shows the <em>format</em>, not a working picture: replace the placeholder with the complete encoded PNG, or use the already-working <code>embedded_png</code> cell. The part after <code>base64,</code> is image data, not a filename. Keep it on one line.</p>
+        <p>For a picture that fits the cell on a small screen, the companion's <code>embedded_png</code> cell uses the equivalent inline HTML below, with <code>width="100%"</code>. It is still stored inside Markdown, not as code output:</p>
+        <pre><code>&lt;img alt="Paper axes" width="100%"
+     src="data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE"&gt;</code></pre>
+        <p class="callout"><strong>Choose one static route:</strong> use an <em>inline SVG element</em> for a small editable diagram, or a <code>data:image/png;base64,...</code> image for a raster picture. An SVG data URL such as <code>data:image/svg+xml,...</code> is not the same as inline SVG and is blocked in the checked build. Remote image URLs are also blocked there. These two self-contained examples need no image download when displayed.</p>
+        <p>Both static examples live in Markdown source. They can be displayed after workbook import without running code.</p>
+      </section>
+
+      <section id="canvas">
+        <p class="step-label">Step 3 · Method 2</p>
+        <h2>Draw a picture with JavaScript</h2>
+        <p>A static picture stays the same until you edit its source. For a picture that is computed or drawn by a program, use a <strong>Code</strong> cell and select <strong>JS - JavaScript</strong>. This example draws onto a canvas, converts it to a PNG, and sends that image to the cell's output.</p>
+        <ol class="lesson-steps">
+          <li>In the imported workbook, tap the <strong>✎ pencil</strong> on <code>canvas_axes</code>. Check that the cell type is <strong>Code</strong> and its language is <strong>JS - JavaScript</strong> (the compact selector can show just <strong>JS</strong>).</li>
+          <li>Read the code below, which is the complete program in that cell. It needs no other cell, file, package, or network request.</li>
+          <li>Tap <em>that cell's</em> <strong>▶ Run</strong>. A picture should appear beneath the JavaScript source.</li>
+        </ol>
+        <p>To make a new cell instead, go to the new-cell panel, change <strong>Md</strong> back to <strong>Code</strong> if needed, and choose <strong>JS - JavaScript</strong> from the language dropdown. Paste the code, then tap <strong>▶ Run</strong>. If JavaScript is hidden, find <strong>☰ Menu → Languages</strong> and enable it.</p>
+        <pre><code data-graphic-example="javascript">(() =&gt; {
+  const canvas = document.createElement('canvas');
+  canvas.width = 360;
+  canvas.height = 220;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 360, 220);
+  ctx.strokeStyle = '#526170';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(20, 18, 320, 184);
+
+  function arrow(x1, y1, x2, y2, color) {
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 14 * Math.cos(angle - 0.5),
+               y2 - 14 * Math.sin(angle - 0.5));
+    ctx.lineTo(x2 - 14 * Math.cos(angle + 0.5),
+               y2 - 14 * Math.sin(angle + 0.5));
+    ctx.closePath();
+    ctx.fill();
+  }
+  arrow(110, 145, 280, 145, '#075d69'); // right
+  arrow(110, 145, 110, 48, '#064d91');  // up
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#14191f';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(110, 145, 10, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#14191f';
+  ctx.beginPath();
+  ctx.arc(110, 145, 3, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.font = '16px sans-serif';
+  ctx.fillText('r: right', 204, 168);
+  ctx.fillText('u: up', 124, 62);
+  ctx.fillText('n: toward you', 42, 190);
+  window.renderImage(canvas.toDataURL('image/png'));
+})();</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="assets/browser-graphics-canvas.png" alt="Narrow-browser screenshot of SciREPL displaying the paper coordinate frame as PNG output below a JavaScript canvas cell." loading="lazy" decoding="async">
+          <figcaption>This similar-looking diagram is a <strong>generated PNG output</strong>, not Markdown. The JavaScript cell creates it when you choose <strong>▶ Run</strong>. Browser capture of SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="assets/browser-graphics-canvas.png">View the complete browser screenshot</a>
+        </figure>
+        <p>Try changing <code>r: right</code> in <code>ctx.fillText(...)</code>, then run the cell again. The function wrapper <code>(() =&gt; { ... })();</code> keeps this example's variables local, so you can rerun it without redeclaring top-level <code>const</code> variables.</p>
+        <p class="callout"><strong>The display call matters.</strong> Keep <code>window.renderImage(canvas.toDataURL('image/png'))</code> at the end. Returning an ordinary string such as <code>'&lt;svg&gt;...&lt;/svg&gt;'</code> from JavaScript displays text; it does not turn that string into an inline diagram. You do not need to insert the canvas into the app's page.</p>
+      </section>
+
+      <section id="math">
+        <p class="step-label">Step 4 · Method 3</p>
+        <h2>Explain the picture with equations</h2>
+        <p>Use a <strong>Markdown (Md)</strong> cell for TeX-style math. The diagrams' directions form a right-handed frame: <strong>right × up = outward normal</strong>. In the matrix below, the first row is <strong>r</strong>, the second is <strong>u</strong>, and the third is <strong>n</strong>; the subscripts are their components in a chosen x, y, z coordinate system.</p>
+        <ol class="lesson-steps">
+          <li>Tap the <strong>✎ pencil</strong> on <code>math_axes</code>, or create a new cell using <strong>Code → Md</strong> in the new-cell panel.</li>
+          <li>Use the complete text below. The <code>$$</code> delimiters belong in the Markdown source; do not wrap it in a code fence.</li>
+          <li>Tap <strong>▶ Run</strong> to save and render the Markdown. You should see a cross-product equation and a three-row matrix, not raw backslash commands. No language kernel runs for this cell.</li>
+        </ol>
+        <pre><code data-graphic-example="math">Right, up and outward normal form a right-handed frame.
+
+$$\mathbf{r} \times \mathbf{u} = \mathbf{n}$$
+
+Rows of the frame matrix: right, up, then outward normal.
+
+$$
+M = \begin{pmatrix}
+r_x &amp; r_y &amp; r_z \\
+u_x &amp; u_y &amp; u_z \\
+n_x &amp; n_y &amp; n_z
+\end{pmatrix}
+$$</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="assets/browser-graphics-equations.png" alt="Narrow-browser screenshot of SciREPL rendering right cross up equals normal and a three-row coordinate-frame matrix with KaTeX in a Markdown cell." loading="lazy" decoding="async">
+          <figcaption>KaTeX typesets the math directly from the <strong>Markdown source</strong>. These are equations, not a TeX-generated drawing. Browser capture of SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="assets/browser-graphics-equations.png">View the complete browser screenshot</a>
+        </figure>
+        <p class="callout"><strong>KaTeX is not a full TeX compiler.</strong> It renders supported math notation, but does not compile TikZ diagrams or a whole LaTeX document. Although KaTeX lists <code>\includegraphics</code>, it requires a trust option that SciREPL does not enable in the checked renderer; it is not an image-insertion route here. Use Markdown SVG/PNG or JavaScript canvas for pictures.</p>
+        <p>For other symbols and math commands, consult the <a href="https://katex.org/docs/support_table.html">KaTeX support table</a>; the documentation may describe features newer than SciREPL's bundled version. For a workbook using these directions to explain cube moves, see the <a href="../tutorial/#open">Markov Groups walkthrough</a>.</p>
+      </section>
+
+      <section id="save">
+        <p class="step-label">Step 5</p>
+        <h2>Save a copy, then know what to rerun</h2>
+        <ol class="lesson-steps">
+          <li>Open <strong>☰ Menu → Export Workbooks &amp; Packages</strong>.</li>
+          <li>Choose <strong>Workbook (.srwb)</strong> and <strong>Current tab only</strong> for this workbook, then tap <strong>Export</strong>. Save the file somewhere you control.</li>
+          <li>To reopen that copy, use <strong>Menu → Import File</strong>. This adds another workbook tab; it does not replace your existing one.</li>
+          <li>Check the static SVG, embedded PNG, and equations. They come from the saved Markdown source and need no code execution. Inspect <code>canvas_axes</code> and run that JavaScript cell again to regenerate its picture.</li>
+        </ol>
+        <p class="callout"><strong>Generated output is not the same as source.</strong> In the checked Free browser build, <code>.srwb</code> export can store a JavaScript image output, but manual <strong>Menu → Import File</strong> does not restore that code output. The JavaScript source remains, so rerun it. The inline SVG, embedded PNG, and equations are Markdown source and are displayed on import. Do not use a previously visible output as proof that code has just run.</p>
+        <p>These checks cover the workbook examples above, not image fidelity in every export format. Do not assume PDF, DOCX, Markdown, and other document exports preserve every image the same way; inspect your exported document. See <a href="../../files-export/">files and export</a> for the available formats.</p>
+        <p>Exporting your edited workbook creates a backup of your changes; the original downloaded example does not update when you edit a cell. Local app storage is not a backup, and Android and browser sessions do not automatically share work.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">If something looks wrong</p>
+        <h2>Check the cell type and source</h2>
+        <ul>
+          <li><strong>You see SVG code instead of a diagram:</strong> check that the cell type is <strong>Md</strong>, remove any surrounding code fences, and render the cell again. Use the complete inline <code>&lt;svg&gt;...&lt;/svg&gt;</code> example, not an SVG data URL.</li>
+          <li><strong>The PNG is missing:</strong> use the companion's <code>embedded_png</code> cell, or check that you pasted the entire <code>data:image/png;base64,...</code> string without spaces or line breaks. A local filename is not embedded image data.</li>
+          <li><strong>The canvas code does not run:</strong> set its cell type to <strong>Code</strong> and its language to <strong>JS - JavaScript</strong>, not Python. Keep the whole function wrapper and the final <code>window.renderImage(...)</code> call.</li>
+          <li><strong>An imported JavaScript cell has no picture:</strong> importing this workbook does not run it or restore its code output. Inspect and rerun <code>canvas_axes</code>.</li>
+          <li><strong>You see raw TeX or a math error:</strong> use <strong>Md</strong>, include both opening and closing <code>$$</code>, and check each backslash and brace against the example. Each matrix row except the last ends with two backslashes, <code>\\</code>.</li>
+          <li><strong>Editing created an extra cell:</strong> the new-cell panel adds cells. Use the saved cell's <strong>✎ pencil</strong> to change that existing cell, then its own <strong>▶ Run</strong> button. Use <strong>Cancel</strong> if you opened its editor by mistake.</li>
+        </ul>
+        <p>For an illustrated tour of saved cells, the pencil, and the new-cell panel, see the <a href="../../interface/tutorial/">first-workbook interface walkthrough</a>. Return to the <a href="../">workbooks reference</a> for a concise reminder of cell types.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL Help</span><nav aria-label="Footer navigation"><a href="../">Workbooks reference</a><a href="../../">All help</a></nav></footer>
+</body>
+</html>

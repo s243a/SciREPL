@@ -1,0 +1,26 @@
+{
+  "capturedAt": "2026-10-06",
+  "device": "Samsung Galaxy S24+ (SM-S926W)",
+  "app": "SciREPL Free 1.4.0-debug",
+  "package": "com.unifyweaver.scirepl.debug",
+  "configChannel": "release",
+  "activeAppCache": "v223",
+  "captureMethod": "ADB screencap; actual Free app controls through its WebView debugger",
+  "pixelSize": [1080, 2340],
+  "imagesUnmodified": true,
+  "annotations": "Separate editable SVG overlays. CSS crops only the display; full-image links preserve original screenshots.",
+  "checks": {
+    "browseOriginalMode": "auto",
+    "browseCapturedMode": "always",
+    "browseHeaderVisible": true,
+    "browseOriginalModeRestored": true,
+    "browseOriginalStorageValueRestored": true,
+    "noNotebookChanges": true,
+    "modalsClosed": true
+  },
+  "limits": [
+    "The debug-signed app uses Free 1.4.0 release configuration; screenshots are not a Play Store installation test.",
+    "Only Browse's visibility was changed and restored. Theme, button size, Run mode and Android status-bar values were inspected, not changed.",
+    "The Browse shortcut was checked as visible; this capture did not perform another catalogue download."
+  ]
+}

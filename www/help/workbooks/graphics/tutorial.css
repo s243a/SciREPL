@@ -1,0 +1,18 @@
+/* Use the shared white-background interface tutorial style. */
+article code { overflow-wrap: anywhere; }
+article pre code { overflow-wrap: normal; }
+.lesson-steps a { overflow-wrap: anywhere; }
+table caption { padding-bottom: 10px; text-align: left; font-weight: 700; }
+table th { min-width: 8.5rem; }
+.tutorial-shot {
+  display: block;
+  width: min(100%, 390px);
+  height: auto;
+  border: 2px solid #526170;
+  border-radius: 10px;
+  background: #fff;
+}
+@media (max-width: 480px) {
+  article th, article td { padding: 8px; }
+  .phone-figure { padding: 10px; }
+}

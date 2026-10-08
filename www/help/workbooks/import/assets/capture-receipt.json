@@ -1,0 +1,61 @@
+{
+  "capturedAt": "2026-10-06",
+  "imagesUnmodified": true,
+  "annotations": "Separate editable SVG overlays match each source image's dimensions. CSS crops the displayed area only; full-screenshot links preserve every original pixel.",
+  "images": [
+    {
+      "file": "phone-menu.png",
+      "platform": "Android",
+      "device": "Samsung Galaxy S24+ (SM-S926W)",
+      "app": "SciREPL Free 1.4.0-debug",
+      "package": "com.unifyweaver.scirepl.debug",
+      "captureMethod": "ADB screencap of the actual Free app Menu, controlled through its WebView debugger",
+      "pixelSize": [1080, 2340],
+      "sha256": "d1ffdb0c3e33f404e52f4c34714a2402df4d623319fa7bcd517a88eab9db7065",
+      "overlay": "menu-overlay.svg"
+    },
+    {
+      "file": "browser-imported.png",
+      "platform": "browser",
+      "browser": "Chromium (headless Playwright)",
+      "app": "SciREPL Free 1.4.0",
+      "captureMethod": "Browser screenshot after Menu → Import File and file-chooser selection in a fresh isolated browser context",
+      "pixelSize": [390, 844],
+      "deviceScaleFactor": 1,
+      "sha256": "53a8b505f1af454a020eb677715cf7e996e701364f08789bc4cda47f8b02677c",
+      "overlay": "imported-overlay.svg"
+    }
+  ],
+  "workbook": {
+    "source": "https://raw.githubusercontent.com/s243a/SciREPL-Catalog/main/workbooks/en/simpsons-paradox.srwb",
+    "branch": "main (development; not a pinned release)",
+    "filename": "simpsons-paradox.srwb",
+    "locale": "en",
+    "title": "Simpson's Paradox",
+    "sourceSha256": "a99db8a614a1392f64ad4f1a5d00181a26c65bd3f4e67581de4b911e4299aacb",
+    "cellCount": 7,
+    "cellNamesInOrder": ["intro", "data", "pause", "compute", "viz", "js_check", "explanation"],
+    "codeCellsInOrder": ["r:data", "r:compute", "r:viz", "javascript:js_check"]
+  },
+  "browserChecks": {
+    "fileChooserImport": true,
+    "autoExecuteOffInVisibleSettings": true,
+    "separateWorkbookTabCreated": true,
+    "existingWorkbookPreserved": true,
+    "allSevenCellSourcesMatchReviewedDownload": true,
+    "codeCellNamesAndLanguagesRetained": true,
+    "codeCellsExecuted": false,
+    "codeCellOutputCardsPresentAfterImport": false,
+    "composerEmptyAfterImport": true,
+    "reimportCreatesAnotherCopy": true,
+    "runButtonEnabledAfterImport": true,
+    "pageErrors": [],
+    "externalRequests": 0
+  },
+  "limits": [
+    "The Android capture verifies the actual Menu and Import File entry only; it is not a Play Store installation test.",
+    "The Android picker was opened, but the ADB-staged tutorial file was not available through DownloadsProvider. A completed native Android import was not verified and no phone import-result screenshot is claimed.",
+    "The import result and workbook-preservation checks were verified in an isolated Chromium browser context, not the user's phone session.",
+    "No R or JavaScript lesson code was executed for the import-result screenshot. Runtime initialization and generated charts are separate steps."
+  ]
+}

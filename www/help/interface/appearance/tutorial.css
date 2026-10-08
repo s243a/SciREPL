@@ -1,0 +1,7 @@
+/* The original phone captures stay intact; crop only their display. */
+.shot-window--appearance-menu { aspect-ratio: 1080 / 700; --shift: -62.82%; }
+.shot-window--appearance-shortcuts { aspect-ratio: 1080 / 1110; --shift: -18.38%; }
+.shot-window--appearance-header { aspect-ratio: 1080 / 190; --shift: -3.85%; }
+.shot-window--appearance-options { aspect-ratio: 1080 / 1280; --shift: -25.64%; }
+.shot-window--appearance-theme { aspect-ratio: 1080 / 480; --shift: -47.86%; }
+article code { overflow-wrap: anywhere; }

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Download a SciREPL workbook file, find Menu → Import File, select it on Android or desktop, and check its cells before running them.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/workbooks/import/">
+  <link rel="stylesheet" href="../../styles.css">
+  <link rel="stylesheet" href="../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="tutorial.css">
+  <title>Import a workbook file · SciREPL Help</title>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="../../">sci<span>REPL</span> Help</a>
+    <nav aria-label="Primary navigation">
+      <a href="../">Workbooks reference</a>
+      <a href="../../">All help</a>
+      <a href="../../../">Open Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <p class="breadcrumbs"><a href="../../">Help</a> / <a href="../">Workbooks</a> / Import a workbook file</p>
+    <article>
+      <p class="eyebrow">Learn by doing</p>
+      <h1>Import a workbook file yourself</h1>
+      <p class="lede">Already have a workbook file, or cannot find a lesson in Browse? Save the file to your device, then use <strong>Menu → Import File</strong> to add it to SciREPL. This short walkthrough uses <strong>Simpson's Paradox</strong> from the catalogue's GitHub <code>main</code> branch; you do not need to install a package or write code to import it.</p>
+      <p>SciREPL imports two notebook formats: <strong><code>.srwb</code></strong>, its own workbook format, and <strong><code>.ipynb</code></strong>, the Jupyter notebook format. This example uses <code>.srwb</code>; the <a href="#other-formats">format notes below</a> explain the different execution behavior of Jupyter imports.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Android + browser steps</li>
+        <li class="chip">About 3 minutes</li>
+      </ul>
+      <p class="screen-note">The Menu screenshot is a real Android capture on a <strong>Samsung Galaxy S24+</strong>, showing <strong>SciREPL Free 1.4.0-debug</strong>, not a Play Store installation. The imported-workbook screenshot is a separate <strong>Chromium browser capture of Free 1.4.0 at a mobile-sized viewport</strong>; it is not proof of an Android file-picker import. Both were taken on <time datetime="2026-10-06">6 October 2026</time>. Other editions, versions, and file pickers may arrange controls differently. The example is the English <code>simpsons-paradox.srwb</code> file from SciREPL Catalog's <code>main</code> branch as reviewed for this guide; that branch can change. <a href="assets/capture-receipt.json">Capture and source details</a> record the exact image dimensions and reviewed file hash.</p>
+      <nav class="lesson-nav" aria-label="Manual workbook import steps">
+        <strong>In this lesson</strong>
+        <ol>
+          <li><a href="#download">Save the workbook file</a></li>
+          <li><a href="#import">Find Menu and import the file</a></li>
+          <li><a href="#check">Check the new workbook tab</a></li>
+          <li><a href="#next">Continue with the lesson</a></li>
+        </ol>
+        <p><a href="#other-formats">Other formats and safety</a> · <a href="#troubleshooting">If something looks wrong</a></p>
+      </nav>
+
+      <section id="download">
+        <p class="step-label">Step 1</p>
+        <h2>Save the workbook file to your device</h2>
+        <p>GitHub's <code>main</code> branch can contain workbooks or updates that are not yet in the latest stable catalogue release shown by Browse. Catalogue releases change independently of the app release. A direct file import lets you try a trusted workbook without waiting for it to appear in Browse.</p>
+        <ol class="lesson-steps">
+          <li><a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">View Simpson's Paradox on GitHub</a>, then <a download="simpsons-paradox.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/main/workbooks/en/simpsons-paradox.srwb">download the actual workbook file (.srwb)</a>. The second link opens the raw file, not the GitHub web page.</li>
+          <li>If your browser displays the file as text instead of downloading it, use the browser's <strong>save/download</strong> action. Save the workbook file itself, not a screenshot or an HTML page.</li>
+          <li>Keep the filename <code>simpsons-paradox.srwb</code> and its <code>.srwb</code> extension. Note where it was saved: Android commonly uses <strong>Downloads</strong>; on desktop it may be Downloads or a folder you chose.</li>
+        </ol>
+        <p><strong>This is not a pinned release download.</strong> <code>main</code> is a development branch: the file's content and cells may change after these screenshots were taken. The file you save is a local copy; a later GitHub change does not update your imported tab automatically.</p>
+        <p class="callout"><strong>Downloading is not importing.</strong> Saving the file puts it on your device; it does not yet open a workbook in SciREPL. You do not need to open it in a text editor or put it in SciREPL's Files view. The next step selects that downloaded file.</p>
+        <p>If you already have a trusted <code>.srwb</code> file from someone else, use that file instead and skip the example download. Its workbook title and cell count will differ from the checks in Step 3.</p>
+      </section>
+
+      <section id="import">
+        <p class="step-label">Step 2</p>
+        <h2>Find Menu and choose Import File</h2>
+        <ol class="lesson-steps">
+          <li>Return to SciREPL. In the <strong>header row at the top of the app</strong>, find <strong>☰ Menu</strong>, the button with <strong>three horizontal lines</strong>, and tap or click it.</li>
+          <li>Choose <strong>📂 Import File (e.g. .srwb, .ipynb, .csv, .py, .zip)</strong>. If the menu is taller than the screen, scroll <em>inside the menu</em> to find it.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-menu" role="img" aria-label="Samsung Galaxy S24+ screenshot of SciREPL Free's open Menu, with the Import File entry highlighted in yellow.">
+            <div class="shot-stage">
+              <img src="assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Choose <strong>📂 Import File</strong> in the app's menu. The yellow annotation points to the import entry in <strong>Free 1.4.0-debug on Android</strong>.</figcaption>
+          <a class="full-shot-link" href="assets/phone-menu.png">View the complete Android Menu screenshot</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li><strong>On Android:</strong> the system file picker opens. Look in <strong>Downloads</strong>, or browse to the place where you saved the file. Select <code>simpsons-paradox.srwb</code>. The picker belongs to Android, so its layout and any final <strong>Open</strong> or selection control depend on your device.</li>
+          <li><strong>On desktop:</strong> use the file chooser to find the folder you chose when downloading. Select <code>simpsons-paradox.srwb</code> and confirm the selection. Use this route instead of looking for Android's Downloads screen.</li>
+          <li>Back in SciREPL, wait for the import to finish. If the menu is still open, close it to see the workbook.</li>
+        </ol>
+        <p class="callout"><strong>A workbook is not a data-file upload.</strong> Importing an <code>.srwb</code> file adds its workbook as a separate tab, or separate tabs if the file contains several workbooks. Your existing tabs are kept. It does not put the workbook into the Files view, and it does not replace your current workbook.</p>
+      </section>
+
+      <section id="check">
+        <p class="step-label">Step 3</p>
+        <h2>Check the new workbook before running anything</h2>
+        <ol class="lesson-steps">
+          <li>Look in the workbook selector for <strong>Simpson's Paradox</strong>. Select that new tab if it is not already selected. Its introduction is headed <strong>Simpson's Paradox: When Every Group Disagrees with the Total</strong>.</li>
+          <li>Read the introduction and scroll through the cells. The version reviewed for these screenshots has <strong>seven cells</strong>: three text cells, three <strong>R</strong> cells, and one <strong>JavaScript</strong> cell. A later version on <code>main</code> may differ.</li>
+          <li>Find the R cells named <code>data</code>, <code>compute</code>, and <code>viz</code>, in that order. The JavaScript cell is named <code>js_check</code> and is a separate, optional check. Read the explanatory text as well as the code.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-result" role="img" aria-label="Chromium browser screenshot of SciREPL Free 1.4.0 at a mobile-sized viewport, showing the imported Simpson's Paradox workbook and its title highlighted in yellow.">
+            <div class="shot-stage">
+              <img src="assets/browser-imported.png" alt="" loading="lazy" decoding="async">
+              <img src="assets/imported-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Browser import result:</strong> the imported <strong>Simpson's Paradox</strong> workbook opens as editable cells in <strong>Free 1.4.0 in Chromium</strong>, here at a 390 × 844 viewport. This is not an Android screenshot. Importing has not run its R or JavaScript cells.</figcaption>
+          <a class="full-shot-link" href="assets/browser-imported.png">View the complete browser imported-workbook screenshot</a>
+        </figure>
+        <p class="callout"><strong>Import does not mean Run for .srwb.</strong> SciREPL does not execute the code when you import an <code>.srwb</code> file, even if auto-execute is enabled for other imports. Inspect code from an unfamiliar or untrusted source before choosing <strong>Run</strong> or <strong>Run All Cells</strong>.</p>
+        <p><strong>Ordinary .srwb import currently drops saved code-cell outputs</strong>, even when the file contains them. Markdown text is retained and rendered, which is why the introduction appears immediately. To regenerate charts or other code-generated images, run their code cells again, with dependent cells in order. Import does not restore live R or other runtime variables.</p>
+      </section>
+
+      <section id="next">
+        <p class="step-label">Step 4</p>
+        <h2>Optional: run the imported lesson</h2>
+        <p>Your manual import is complete; running code is a separate step. Simpson's Paradox uses <strong>synthetic teaching data</strong> to show how comparisons within groups can disagree with the overall comparison. To explore it, tap a saved code cell's <strong>✎ pencil</strong>, inspect the code, then use <em>that cell's</em> <strong>Run</strong> button.</p>
+        <ol class="lesson-steps">
+          <li>Run the R cell <code>data</code>, then read the text cell <code>pause</code> and make its prediction before running <code>compute</code>. Continue with <code>viz</code> to generate the chart. The later R cells depend on the earlier ones. They use base R; you do not need to install extra R packages.</li>
+          <li>If you want a separate JavaScript check, run <code>js_check</code>. It is standalone: it does not depend on the R cells and does not require starting R.</li>
+        </ol>
+        <p class="callout"><strong>First R run:</strong> SciREPL's webR runtime may need to download and initialize. A network/privacy notice may appear; read it and agree only if you want to proceed. Wait for the runtime to become ready and check the cell for errors. Importing the workbook alone has not loaded its R definitions.</p>
+        <p>For another example with a fuller run-and-edit walkthrough, see <a href="../tutorial/#run">the Markov Groups lesson</a>. That is a different workbook, with four Python cells; its <a href="../tutorial/#export">export step</a> also illustrates how to save an edited workbook copy.</p>
+        <p class="callout"><strong>Keep a copy you control.</strong> The downloaded file is the original workbook copy, not a backup of later edits. Export a workbook copy to save your changes. Clearing app or browser storage can remove local work, and Android and browser sessions do not automatically share your changes.</p>
+      </section>
+
+      <section id="other-formats">
+        <p class="step-label">Other formats and safety</p>
+        <h2>Know what your file carries</h2>
+        <p><strong>Jupyter notebooks (.ipynb)</strong> also use <strong>Menu → Import File</strong>, but their execution behavior differs from <code>.srwb</code>. If <strong>Auto-execute cells on workbook import</strong> is enabled, an <code>.ipynb</code> import can automatically run code cells that have no saved outputs.</p>
+        <p class="callout"><strong>Import notebook files only from sources you trust.</strong> Before importing an <code>.ipynb</code>, open <strong>Menu → Settings → Import &amp; Editing</strong> and make sure <strong>Auto-execute cells on workbook import</strong> is <strong>off</strong> (unchecked). It is off by default, but check your current setting. Turning it off is not a guarantee that an arbitrary notebook is safe; inspect trusted notebook code before deciding explicitly whether to run it.</p>
+        <p><strong>Separate data files:</strong> a normal <code>.srwb</code> export does not carry separate CSV files or other data stored in SciREPL's virtual filesystem (the <strong>Files</strong> view). This version of Simpson's Paradox creates its synthetic data in code, so it needs no separate data file. For a workbook that reads a CSV, follow the <a href="../../files-export/tutorial/#export">CSV walkthrough's Package archive export</a> and <a href="../../files-export/tutorial/#reopen">reopen steps</a> to carry and restore both the workbook and its data. Package archives and <code>.zip</code> imports are outside this short workbook-file lesson.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">If something looks wrong</p>
+        <h2>Check the file and the selected tab</h2>
+        <ul>
+          <li><strong>The picker cannot find the file:</strong> check your browser's downloads list to see where it was saved, then browse to that folder. Downloading on a desktop does not put the file in your phone's Downloads folder.</li>
+          <li><strong>The filename ends in .txt or .html:</strong> return to the workbook download link and save the actual file with its <code>.srwb</code> extension. Renaming an HTML page to <code>.srwb</code> does not turn it into a workbook.</li>
+          <li><strong>You still see your old workbook:</strong> close the menu and check the workbook selector for the new title. Existing tabs are preserved.</li>
+          <li><strong>You imported it twice:</strong> another import adds another copy; it does not update or replace the earlier tab. Check which copy you are editing before making changes.</li>
+          <li><strong>The title or cells do not match:</strong> check that you selected <code>simpsons-paradox.srwb</code>, not a different download or a file from another lesson. The file on <code>main</code> can change; compare your copy with the <a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">current GitHub file</a> and inspect unfamiliar code before running it.</li>
+        </ul>
+        <p>For the basics of workbook tabs and saved-cell editing, see the <a href="../../interface/tutorial/">first-workbook interface walkthrough</a>. The <a href="../">workbooks reference</a> explains workbook structure and cell types.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL Help</span><nav aria-label="Footer navigation"><a href="../">Workbooks reference</a><a href="../../">All help</a></nav></footer>
+</body>
+</html>

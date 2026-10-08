@@ -1,0 +1,43 @@
+{
+  "capturedAt": "2026-10-06",
+  "device": "Samsung Galaxy S24+ (SM-S926W)",
+  "app": "SciREPL Pro 1.4.0-debug",
+  "package": "com.unifyweaver.scirepl.pro.debug",
+  "channel": "development",
+  "activeAppCache": "v461",
+  "captureMethod": "ADB screencap; app controlled through its WebView debugger and Android keyboard dismissal",
+  "pixelSize": [1080, 2340],
+  "imagesUnmodified": true,
+  "annotations": "Separate editable SVG overlays with a 1080 by 2340 viewBox. CSS crops the display only; full-screenshot links retain every original pixel.",
+  "catalog": {
+    "source": "Latest stable",
+    "release": "v0.4.0",
+    "verifiedEntries": 284,
+    "workbook": "Markov Groups: A Random Walk on Cube Moves",
+    "locale": "en",
+    "sourceSha256": "eda0edd38694d79ce595da4592a322ec81543d4654d6fc5ef1a1009ce11bb1f4"
+  },
+  "phoneChecks": {
+    "newWorkbookImportedWithoutExecution": true,
+    "cellCount": 9,
+    "pythonCellCount": 4,
+    "runOrder": ["cube_moves", "check_moves", "show_turn", "random_walk"],
+    "allSixMovesPassed": true,
+    "frontTopBeforeU": [19, 20, 21],
+    "frontTopAfterU": [46, 47, 48],
+    "uThenREqualsRThenU": false,
+    "probabilityMass": 1.0,
+    "initialSampledMoves": ["R'", "B'", "B'", "R", "B", "L'", "L'", "U'", "I", "D", "D", "R"],
+    "editedSampledMoves": ["R'", "B'", "B'", "R", "B", "L'"],
+    "onlyCodeChange": "random_walk: size=12 changed to size=6",
+    "exactOtherCellSourcesPreserved": true,
+    "noCellErrors": true,
+    "editorClosedAfterRun": true,
+    "exportDialog": {"format": "srwb", "scope": "current", "includeAIConversation": false}
+  },
+  "limits": [
+    "Screenshots are of a development Pro build, not a released Free or Pro APK.",
+    "Export format and scope were checked; a destination in Android's share/save flow was not selected.",
+    "The independent Free browser run used existing Pyodide files routed from another local checkout, not fresh offline installation or Play delivery."
+  ]
+}

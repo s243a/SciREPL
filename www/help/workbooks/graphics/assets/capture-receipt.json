@@ -1,0 +1,35 @@
+{
+  "capturedAt": "2026-10-07T03:08:21.199Z",
+  "platform": "Chromium browser, not Android",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "app": {
+    "name": "SciREPL",
+    "version": "1.4.0",
+    "releaseChannel": "release",
+    "releaseUrl": "https://github.com/s243a/SciREPL/releases",
+    "repository": "https://github.com/s243a/SciREPL",
+    "releasesUrl": "https://github.com/s243a/SciREPL/releases"
+  },
+  "workbookSha256": "6cf5ff6549fc3895b2dbe84d48baaacb92a663788c58a52b59fe26e06dac4171",
+  "imagesUnmodified": true,
+  "limits": [
+    "Free browser build only; no Android or Pro verification in these captures"
+  ],
+  "files": [
+    {
+      "file": "browser-graphics-static.png",
+      "sha256": "3ab1616082aaea712b327dc585ef9b46a234bc5edad1b5e49cd441a41fb5b1d0"
+    },
+    {
+      "file": "browser-graphics-canvas.png",
+      "sha256": "aa75aab7009a0cbe5570c613478115fd37d5c63c341e568b2656300e00b25d4a"
+    },
+    {
+      "file": "browser-graphics-equations.png",
+      "sha256": "aa75aab7009a0cbe5570c613478115fd37d5c63c341e568b2656300e00b25d4a"
+    }
+  ]
+}

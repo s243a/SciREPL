@@ -25,8 +25,13 @@ const expected = [
   'help/getting-started/index.html',
   'help/interface/index.html',
   'help/interface/tutorial/index.html',
+  'help/interface/appearance/index.html',
   'help/files-export/tutorial/index.html',
   'help/workbooks/index.html',
+  'help/workbooks/tutorial/index.html',
+  'help/workbooks/import/index.html',
+  'help/workbooks/graphics/index.html',
+  'help/workbooks/named-cells/index.html',
   'help/languages-packages/index.html',
   'help/files-export/index.html',
   'help/troubleshooting/index.html',
@@ -134,6 +139,303 @@ check('CSV tutorial warns against overwriting imported edits with create_csv',
 check('CSV tutorial offers a downloadable workbook before the next app release',
   /<a\s+download="csv-basics-seedlings\.srwb"\s+href="assets\/csv-basics-seedlings\.srwb"/.test(csvTutorial));
 
+const markovTutorial = readFileSync(path.join(WWW, 'help/workbooks/tutorial/index.html'), 'utf8');
+const markovText = helpText(markovTutorial);
+const markovMenuSection = (markovTutorial.match(
+  /<section\b[^>]*\bid="find-menu"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+check('Markov tutorial shows where Menu is before Step 1',
+  !!markovMenuSection
+    && markovTutorial.indexOf('id="find-menu"') < markovTutorial.indexOf('id="browse"')
+    && /header row at the top/i.test(helpText(markovMenuSection))
+    && /☰ Menu/.test(helpText(markovMenuSection))
+    && /three horizontal lines/i.test(helpText(markovMenuSection))
+    && /<figure\b/.test(markovMenuSection)
+    && markovMenuSection.includes('assets/menu-overlay.svg'));
+check('Markov tutorial shows unfiltered Browse before the search and other topics after results',
+  markovTutorial.indexOf('assets/phone-browse.png') < markovTutorial.indexOf('Type <strong>Markov Groups')
+    && markovTutorial.indexOf('Type <strong>Markov Groups') < markovTutorial.indexOf('assets/phone-search.png')
+    && markovTutorial.indexOf('assets/phone-search.png') < markovTutorial.indexOf('What else is available?')
+    && /<ol\b[^>]*\bstart="3"/.test(markovTutorial));
+check('Markov tutorial links the Free Browse shortcut setup',
+  /In Free, the optional/.test(markovText)
+    && markovTutorial.includes('../../interface/appearance/#browse-shortcut'));
+check('Markov tutorial offers the catalogue folder and distinguishes development from stable',
+  markovTutorial.includes('https://github.com/s243a/SciREPL-Catalog/tree/main/workbooks/en')
+    && /GitHub link shows the latest development contents/.test(markovText)
+    && /SciREPL normally uses the latest stable catalogue release/.test(markovText)
+    && /workbooks shown on GitHub may not yet appear in Browse/.test(markovText)
+    && /<label\b[^>]*for="catalogue-workbooks-locale"/.test(markovTutorial));
+check('Markov tutorial starts with catalogue search, not a new workbook',
+  markovText.indexOf('Browse Packages, Bundles & Workbooks') >= 0
+    && markovText.indexOf('Browse Packages, Bundles & Workbooks') < markovText.indexOf('cube_moves')
+    && markovText.includes('Markov Groups: A Random Walk on Cube Moves'));
+check('Markov tutorial names the four code cells in their run order',
+  ['cube_moves', 'check_moves', 'show_turn', 'random_walk'].every(name => markovText.includes(name))
+    && markovText.indexOf('cube_moves') < markovText.indexOf('check_moves')
+    && markovText.indexOf('check_moves') < markovText.indexOf('show_turn')
+    && markovText.indexOf('show_turn') < markovText.indexOf('random_walk'));
+check('Markov tutorial places show_turn and random_walk instructions after the checks screenshot',
+  markovTutorial.indexOf('assets/phone-checks.png') < markovTutorial.indexOf('Run <code>show_turn</code>')
+    && markovTutorial.indexOf('Run <code>show_turn</code>') < markovTutorial.indexOf('Run <code>random_walk</code>')
+    && markovTutorial.indexOf('Run <code>show_turn</code>') < markovTutorial.indexOf('id="show-turn-output"')
+    && markovTutorial.indexOf('id="show-turn-output"') < markovTutorial.indexOf('Run <code>random_walk</code>')
+    && /<ol\b[^>]*\bstart="4"[^>]*>\s*<li>Run <code>random_walk<\/code>/.test(markovTutorial)
+    && /<ol\b[^>]*\bstart="3"[^>]*>\s*<li>Run <code>show_turn<\/code>/.test(markovTutorial));
+const showTurnExcerpt = (markovTutorial.match(
+  /<pre\b[^>]*\bid="show-turn-output"[^>]*><code>([\s\S]*?)<\/code><\/pre>/i) || [])[1] || '';
+check('Markov show_turn excerpt contains the actual U cycles and before/after label output',
+  ['1 -&gt; 3 -&gt; 9 -&gt; 7 -&gt; 1', '2 -&gt; 6 -&gt; 8 -&gt; 4 -&gt; 2',
+    '19 -&gt; 37 -&gt; 28 -&gt; 46 -&gt; 19', '20 -&gt; 38 -&gt; 29 -&gt; 47 -&gt; 20',
+    '21 -&gt; 39 -&gt; 30 -&gt; 48 -&gt; 21', 'F top row labels before U: [19, 20, 21]',
+    'F top row labels after U:  [46, 47, 48]', 'U then R equals R then U: False']
+    .every(line => showTurnExcerpt.includes(line))
+    && /Part of the printed output:/.test(markovText)
+    && /long face-letter list is omitted/.test(markovText)
+    && /cycle lines use one-based positions/.test(markovText)
+    && /row comparison shows sticker labels/.test(markovText));
+check('Markov tutorial distinguishes importing from execution',
+  /(?:does not|doesn['’]t|without|not)\s+(?:automatically\s+)?(?:execut(?:e|ing)|run)/i.test(markovText));
+check('Markov tutorial edits a saved cell, not the composer',
+  /pencil|✎/.test(markovText) && /size=12/.test(markovText) && /size=6/.test(markovText)
+    && /new-cell panel/i.test(markovText));
+check('Markov tutorial separates one-sticker probabilities from full cube states',
+  /one-sticker/i.test(markovText) && /not.{0,120}(?:full|every|all).{0,60}cube/i.test(markovText));
+check('Markov tutorial offers a pinned catalogue workbook fallback',
+  /href="https:\/\/raw\.githubusercontent\.com\/s243a\/SciREPL-Catalog\/v0\.4\.0\/workbooks\/en\/markov-groups\.srwb"/.test(markovTutorial));
+check('Markov fallback links the manual import tutorial without changing its example file',
+  markovTutorial.includes('href="../import/"')
+    && /choose the Markov file above to continue this lesson/.test(markovText));
+check('Markov tutorial shows the actual down-chevron workbook selector icon',
+  /<svg\b[^>]*aria-label="down-chevron"/.test(markovTutorial)
+    && /from the[\s\S]*?<svg\b[\s\S]*?workbook selector/.test(markovTutorial)
+    && /workbook selector next to SciREPL in the header/.test(markovText));
+check('Markov tutorial identifies the actual screenshot edition',
+  /Pro 1\.4\.0-debug/.test(markovText) && /S24\+/.test(markovText));
+check('Markov tutorial links a workbook backup workflow',
+  /Export Workbooks & Packages/.test(markovText) && /Current tab only/.test(markovText)
+    && /Workbook\s*\(\.srwb\)/.test(markovText));
+const markovAssets = path.join(WWW, 'help/workbooks/tutorial/assets');
+const markovStage4Preview = (markovTutorial.match(
+  /<div\b[^>]*\bid="stage4-preview"[^>]*>([\s\S]*?)<\/div>\s*<\/section>/i) || [])[1] || '';
+const markovStage4PreviewText = helpText(markovStage4Preview);
+const markovCompletion = (markovTutorial.match(
+  /<p\b[^>]*\bid="walkthrough-complete"[^>]*>([\s\S]*?)<\/p>/i) || [])[1] || '';
+const markovRunSection = (markovTutorial.match(
+  /<section\b[^>]*\bid="run"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+const markovBatchNote = (markovTutorial.match(
+  /<aside\b[^>]*\bid="batch-run-note"[^>]*>([\s\S]*?)<\/aside>/i) || [])[1] || '';
+check('Markov tutorial explains both batch-run actions before the optional reading boundary',
+  /open a saved cell with its ✎ pencil/.test(helpText(markovBatchNote))
+    && /Run All Below/.test(helpText(markovBatchNote))
+    && /▶↓/.test(helpText(markovBatchNote))
+    && /that cell and every cell below it, in order/.test(helpText(markovBatchNote))
+    && /Menu → Run All Cells/.test(helpText(markovBatchNote))
+    && /selected workbook from its first cell to its last/.test(helpText(markovBatchNote))
+    && /not a command to run every workbook tab/.test(helpText(markovBatchNote))
+    && /These actions execute code/.test(helpText(markovBatchNote))
+    && /does not make the app skip its code cells/.test(helpText(markovBatchNote))
+    && /cube_moves/.test(helpText(markovBatchNote))
+    && markovRunSection.includes('href="#batch-run-note"')
+    && markovTutorial.indexOf('<section id="export">') < markovTutorial.indexOf('id="batch-run-note"')
+    && markovTutorial.indexOf('id="batch-run-note"') < markovTutorial.indexOf('id="walkthrough-complete"'));
+check('Markov tutorial completes the five app-use steps before optional mathematics',
+  /Here to learn the app\?/.test(markovText)
+    && /Follow Steps 1–5/.test(markovText)
+    && /not needed to complete this walkthrough/.test(markovText)
+    && markovTutorial.includes('href="#optional-maths"')
+    && /You’ve completed the SciREPL walkthrough/.test(helpText(markovCompletion))
+    && /you can stop here/.test(helpText(markovCompletion))
+    && markovTutorial.indexOf('<section id="export">') < markovTutorial.indexOf('id="walkthrough-complete"')
+    && markovTutorial.indexOf('id="walkthrough-complete"') < markovTutorial.indexOf('<section id="optional-maths">')
+    && markovTutorial.indexOf('<section id="optional-maths">') < markovTutorial.indexOf('id="stage4-preview"')
+    && !markovRunSection.includes('stage4-preview')
+    && !markovRunSection.includes('A little meaning behind the output')
+    && /The Step 4 size=12 edit/.test(markovStage4PreviewText)
+    && !/The next section/.test(markovStage4PreviewText));
+check('Markov tutorial keeps the stable lesson distinct from the pinned development preview',
+  /steps and phone screenshots above use the stable v0\.4\.0 workbook/.test(markovStage4PreviewText)
+    && /development preview.{0,40}not yet the stable catalogue/.test(markovStage4PreviewText)
+    && /https:\/\/raw\.githubusercontent\.com\/s243a\/SciREPL-Catalog\/[a-f0-9]{40}\/workbooks\/en\/markov-groups\.srwb/.test(markovStage4Preview)
+    && /Menu → Import File/.test(markovStage4PreviewText)
+    && markovTutorial.indexOf('Run <code>random_walk</code>') < markovTutorial.indexOf('id="stage4-preview"'));
+check('Markov preview puts the probability chart after sticker_step and before random_walk',
+  markovStage4Preview.indexOf('Run <code>transition_matrix</code>') >= 0
+    && markovStage4Preview.indexOf('Run <code>transition_matrix</code>') < markovStage4Preview.indexOf('Run <code>sticker_step</code>')
+    && markovStage4Preview.indexOf('Run <code>sticker_step</code>') < markovStage4Preview.indexOf('id="sticker-probability-figure"')
+    && markovStage4Preview.indexOf('id="sticker-probability-figure"') < markovStage4Preview.indexOf('Run <code>random_walk</code>')
+    && /sticker label 1.{0,50}zero-based position 0/.test(markovStage4PreviewText)
+    && /not a phone screenshot or a new output produced by the workbook/.test(markovStage4PreviewText)
+    && /probability bar chart, not a binned histogram/.test(markovStage4PreviewText));
+const stickerProbabilitySvg = readFileSync(path.join(markovAssets, 'sticker-one-step.svg'), 'utf8');
+const stickerProbabilityBars = [...stickerProbabilitySvg.matchAll(
+  /<rect\s+data-position="(\d+)"\s+data-numerator="(\d+)"\s+data-denominator="(\d+)"[^>]*\bwidth="([\d.]+)"/g)]
+  .map(match => ({ position: Number(match[1]), numerator: Number(match[2]), denominator: Number(match[3]), width: Number(match[4]) }));
+check('Markov probability illustration matches T[:, 0] and has an accessible zero-probability summary',
+  JSON.stringify(stickerProbabilityBars.map(({ position, numerator, denominator }) => [position, numerator, denominator]))
+    === JSON.stringify([[0, 7, 13], [2, 1, 13], [6, 1, 13], [18, 1, 13], [35, 1, 13], [42, 1, 13], [47, 1, 13]])
+    && stickerProbabilityBars.slice(1).every(bar => Math.abs(bar.width * 7 - stickerProbabilityBars[0].width) < 0.00001)
+    && /<title[^>]*>One-step destination probabilities for sticker label 1<\/title>/.test(stickerProbabilitySvg)
+    && /All other 47 positions have probability zero and are omitted/.test(stickerProbabilitySvg)
+    && /<table\b[^>]*aria-label="Exact one-step probabilities for sticker label 1"/.test(markovStage4Preview)
+    && /0.{0,20}7\/13 ≈ 53\.85%/.test(markovStage4PreviewText)
+    && /2, 6, 18, 35, 42, 47 \(each\).{0,20}1\/13 ≈ 7\.69%/.test(markovStage4PreviewText));
+const markovShots = ['browse', 'search', 'workbook', 'checks', 'edit', 'six-moves', 'export'];
+check('Markov tutorial contains all seven phone captures plus the annotated header crop',
+  (markovTutorial.match(/<figure\b[^>]*\bclass="phone-figure"/g) || []).length === markovShots.length + 1
+    && markovShots.every(name => markovTutorial.includes(`assets/phone-${name}.png`)
+      && markovTutorial.includes(`assets/${name}-overlay.svg`)));
+for (const name of markovShots) {
+  const png = readFileSync(path.join(markovAssets, `phone-${name}.png`));
+  const svg = readFileSync(path.join(markovAssets, `${name}-overlay.svg`), 'utf8');
+  check(`Markov ${name} screenshot and editable overlay use the same dimensions`,
+    png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+      && png.readUInt32BE(16) === 1080 && png.readUInt32BE(20) === 2340
+      && /viewBox="0 0 1080 2340"/.test(svg));
+}
+check('Markov Menu overlay uses the existing unmodified workbook screenshot dimensions',
+  markovMenuSection.includes('assets/phone-workbook.png')
+    && /viewBox="0 0 1080 2340"/.test(readFileSync(path.join(markovAssets, 'menu-overlay.svg'), 'utf8')));
+const markovReceipt = JSON.parse(readFileSync(path.join(markovAssets, 'capture-receipt.json'), 'utf8'));
+check('Markov capture receipt records real run results and the export-test limit',
+  markovReceipt.imagesUnmodified === true
+    && markovReceipt.phoneChecks.allSixMovesPassed === true
+    && markovReceipt.phoneChecks.editedSampledMoves.length === 6
+    && markovReceipt.limits.some(limit => /destination.{0,100}not selected/i.test(limit)));
+
+const appearanceTutorial = readFileSync(path.join(WWW, 'help/interface/appearance/index.html'), 'utf8');
+const appearanceText = helpText(appearanceTutorial);
+const browseShortcutSection = (appearanceTutorial.match(
+  /<section\b[^>]*\bid="browse-shortcut"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+check('Appearance tutorial teaches the Free Browse shortcut and the Pro menu fallback',
+  /Free 1\.4\.0/.test(helpText(browseShortcutSection))
+    && /Show Browse shortcut/.test(helpText(browseShortcutSection))
+    && ['Always', 'When there is room', 'Never'].every(value => helpText(browseShortcutSection).includes(value))
+    && /Using Pro\?/.test(helpText(browseShortcutSection))
+    && /Menu → Browse Packages, Bundles & Workbooks/.test(helpText(browseShortcutSection)));
+check('Appearance Browse shortcut deep link includes opening the settings',
+  /Open Menu → Appearance\s*, then scroll to Header shortcuts/.test(helpText(browseShortcutSection)));
+check('Appearance tutorial explains immediate changes and limited Reset',
+  /Closing Appearance.{0,80}does not cancel/i.test(appearanceText)
+    && /does not erase your workbook cells/i.test(appearanceText)
+    && /not reset the separate Run button or interface-language/i.test(appearanceText));
+check('Appearance tutorial separates button size from font zoom and composer Run from cell Run',
+  /no text-zoom slider/i.test(appearanceText)
+    && /not a general font-size setting/i.test(appearanceText)
+    && /new-cell panel.{0,100}not the Run buttons inside saved-cell editors/i.test(appearanceText));
+check('Appearance tutorial keeps Android status and navigation bars distinct',
+  /status bar, not the navigation or gesture bar/i.test(appearanceText)
+    && /absent from the browser\/PWA and Windows/i.test(appearanceText));
+const appearanceAssets = path.join(WWW, 'help/interface/appearance/assets');
+const appearanceShots = ['menu', 'shortcuts', 'header', 'options', 'theme'];
+check('Appearance tutorial contains five annotated Free phone figures',
+  (appearanceTutorial.match(/<figure\b/g) || []).length === appearanceShots.length
+    && /SciREPL Free 1\.4\.0-debug/.test(appearanceText));
+for (const name of appearanceShots) {
+  const png = readFileSync(path.join(appearanceAssets, `phone-${name}.png`));
+  const svg = readFileSync(path.join(appearanceAssets, `${name}-overlay.svg`), 'utf8');
+  check(`Appearance ${name} screenshot and overlay share dimensions`,
+    png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+      && png.readUInt32BE(16) === 1080 && png.readUInt32BE(20) === 2340
+      && /viewBox="0 0 1080 2340"/.test(svg));
+}
+const appearanceReceipt = JSON.parse(readFileSync(path.join(appearanceAssets, 'capture-receipt.json'), 'utf8'));
+check('Appearance capture receipt records Browse visibility and restoration',
+  appearanceReceipt.imagesUnmodified === true
+    && appearanceReceipt.checks.browseHeaderVisible === true
+    && appearanceReceipt.checks.browseOriginalStorageValueRestored === true
+    && appearanceReceipt.checks.noNotebookChanges === true);
+
+const importTutorial = readFileSync(path.join(WWW, 'help/workbooks/import/index.html'), 'utf8');
+const importText = helpText(importTutorial);
+check('Manual import tutorial downloads the actual Simpson workbook from main, not a release',
+  importTutorial.includes('https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb')
+    && importTutorial.includes('https://raw.githubusercontent.com/s243a/SciREPL-Catalog/main/workbooks/en/simpsons-paradox.srwb')
+    && /main.{0,70}development branch/.test(importText)
+    && /not yet in the latest stable catalogue release/.test(importText));
+check('Manual import tutorial names both notebook formats correctly',
+  /two notebook formats/.test(importText) && importText.includes('.srwb')
+    && importText.includes('.ipynb') && !importText.includes('.ipywb'));
+check('Manual import tutorial teaches Menu, file selection and preserved tabs',
+  /three horizontal lines/.test(importText) && /Import File/.test(importText)
+    && /system file picker/.test(importText) && /Downloads/.test(importText)
+    && /Your existing tabs are kept/.test(importText)
+    && /another import adds another copy/.test(importText));
+check('Manual import tutorial identifies R and JavaScript cells without implying auto-execution',
+  ['data', 'compute', 'viz', 'js_check'].every(name => importText.includes(name))
+    && /does not execute the code when you import an .srwb/.test(importText)
+    && /standalone/.test(importText));
+check('Manual import tutorial warns about Jupyter auto-execute and separate data',
+  /Menu → Settings → Import & Editing/.test(importText)
+    && /Auto-execute cells on workbook import/.test(importText)
+    && /off \(unchecked\)/.test(importText)
+    && /does not carry separate CSV files/.test(importText)
+    && importTutorial.includes('../../files-export/tutorial/#reopen'));
+
+const graphicsTutorial = readFileSync(path.join(WWW, 'help/workbooks/graphics/index.html'), 'utf8');
+const graphicsText = helpText(graphicsTutorial);
+check('Graphics tutorial covers static images, canvas output and KaTeX',
+  ['svg', 'javascript', 'math'].every(kind => graphicsTutorial.includes(`data-graphic-example="${kind}"`))
+    && graphicsText.includes('data:image/png;base64,')
+    && graphicsText.includes('window.renderImage(canvas.toDataURL')
+    && graphicsText.includes('KaTeX'));
+check('Graphics tutorial distinguishes Markdown rendering from code execution',
+  /For an Md cell.{0,100}renders text.{0,100}does not execute JavaScript/.test(graphicsText)
+    && /Only canvas_axes needs JavaScript execution/.test(graphicsText));
+check('Graphics tutorial teaches editing and ordinary SRWB output loss',
+  /pencil/.test(graphicsText) && /new-cell panel/.test(graphicsText)
+    && /manual Menu → Import File does not restore that code output/.test(graphicsText)
+    && /Markdown source and are displayed on import/.test(graphicsText));
+check('Graphics tutorial does not promise KaTeX image inclusion or Android captures',
+  /not Android captures/.test(graphicsText)
+    && /requires a trust option that SciREPL does not enable/.test(graphicsText)
+    && /does not compile TikZ/.test(graphicsText));
+const graphicsAssets = path.join(WWW, 'help/workbooks/graphics/assets');
+const graphicsBook = JSON.parse(readFileSync(path.join(graphicsAssets, 'workbook-graphics.srwb'), 'utf8'));
+check('Graphics download contains four named cells and no saved code outputs',
+  JSON.stringify(graphicsBook.notebook.cells.map(c => c.name)) === JSON.stringify(['static_axes', 'embedded_png', 'canvas_axes', 'math_axes'])
+    && graphicsBook.notebook.cells.every(c => !c.lastOutputHtml && !c.lastOutput));
+for (const name of ['static', 'canvas', 'equations']) {
+  const png = readFileSync(path.join(graphicsAssets, `browser-graphics-${name}.png`));
+  check(`Graphics ${name} browser capture is 390 by 844`,
+    png.readUInt32BE(16) === 390 && png.readUInt32BE(20) === 844);
+}
+
+const namedTutorial = readFileSync(path.join(WWW, 'help/workbooks/named-cells/index.html'), 'utf8');
+const namedText = helpText(namedTutorial);
+check('Named-cell guide is linked where Markov first asks readers to use names',
+  markovTutorial.includes('href="../named-cells/"')
+    && markovText.indexOf('What do these names mean?') < markovText.indexOf('Run cube_moves'));
+check('Markov double-tap shortcut is clearly a Pro callout',
+  /<aside\b[^>]*data-editions="pro"[^>]*>[\s\S]*?double-tap[\s\S]*?<\/aside>/.test(markovTutorial));
+check('Named-cell guide teaches the naming label rather than the pencil',
+  /double-click its In\[…\] label/.test(namedText) && /press and hold that label/.test(namedText)
+    && /not the .*pencil/.test(namedText));
+check('Named-cell guide separates virtual cell paths and shared files',
+  ['/nb/numbers/.output', '/shared/data/named-cell-tutorial/values.json', 'Files & Storage'].every(value => namedText.includes(value))
+    && /not a folder in Android/.test(namedText) && /does not browse \/nb\//.test(namedText)
+    && /not.{0,100}cloud synchronization/.test(namedText));
+check('Named-cell guide distinguishes source replacement from running',
+  /not run Bash/.test(namedText) && /source write does not execute the destination/.test(namedText)
+    && /read-only/.test(namedText) && /old.{0,30}Total: 16.{0,30}output/.test(namedText));
+check('Named-cell guide explains unstable positions and unsaved drafts',
+  /current 1-based position/.test(namedText) && /printed In\[…\] number can differ/.test(namedText)
+    && /unsaved editor draft is not the stored .code/.test(namedText));
+check('Named-cell guide explains shared-file backup and refresh',
+  /copy does not update automatically/.test(namedText)
+    && /workbook-only .srwb export does not include separate files/.test(namedText)
+    && /Package archive export/.test(namedText));
+const namedAssets = path.join(WWW, 'help/workbooks/named-cells/assets');
+const namedBook = JSON.parse(readFileSync(path.join(namedAssets, 'named-cell-interop.srwb'), 'utf8'));
+check('Named-cell download contains the complete named sources without outputs',
+  JSON.stringify(namedBook.notebook.cells.map(c => c.name)) === JSON.stringify(['intro', 'numbers', 'inspect_cells', 'write_shared', 'read_shared', 'generate_report', 'bash_report', 'python_total'])
+    && namedBook.notebook.cells.every(c => !c.lastOutputHtml && !c.lastOutput)
+    && namedBook.notebook.name === 'Named Cell Interop');
+for (const name of ['named-cell', 'name-dialog', 'cell-paths', 'shared-values', 'generated-report']) {
+  const png = readFileSync(path.join(namedAssets, `browser-${name}.png`));
+  check(`Named-cell ${name} browser capture is 390 by 844`,
+    png.readUInt32BE(16) === 390 && png.readUInt32BE(20) === 844);
+}
+
 const alias = readFileSync(path.join(WWW, 'pro/help/index.html'), 'utf8');
 check('compatibility alias is noindex', /name=["']robots["']\s+content=["']noindex["']/i.test(alias));
 check('compatibility alias canonically targets /help/pro/',
@@ -186,6 +488,56 @@ for (const file of linkedHtml) {
 
 const browser = await chromium.launch({ headless: true });
 try {
+  const catalogueFolder = 'https://github.com/s243a/SciREPL-Catalog/tree/main/workbooks/';
+  const tutorialRoute = `${TEST_ORIGIN}/help/workbooks/tutorial/index.html`;
+  const folders = ['ar', 'bn', 'de', 'en', 'es', 'fr', 'hi', 'id', 'ja', 'ko', 'pt-BR', 'ru', 'zh'];
+  const cataloguePage = await browser.newPage({ viewport: { width: 320, height: 800 } });
+  let tutorialLocale = 'en';
+  let externalRequests = 0;
+  await cataloguePage.route('**/*', async route => {
+    if (new URL(route.request().url()).origin !== new URL(TEST_ORIGIN).origin) {
+      externalRequests++;
+      return route.abort();
+    }
+    if (route.request().url() === tutorialRoute) {
+      return route.fulfill({ contentType: 'text/html',
+        body: markovTutorial.replace('<html lang="en">', `<html lang="${tutorialLocale}">`) });
+    }
+    return route.continue();
+  });
+  await cataloguePage.goto(tutorialRoute, { waitUntil: 'networkidle' });
+  check('Catalogue folder selector names all thirteen actual locale folders',
+    JSON.stringify(await cataloguePage.locator('#catalogue-workbooks-locale option')
+      .evaluateAll(options => options.map(option => option.value))) === JSON.stringify(folders));
+  check('Catalogue selector is labelled, visible and tap-sized',
+    await cataloguePage.getByLabel('Workbook language:').isVisible()
+      && (await cataloguePage.getByLabel('Workbook language:').boundingBox()).height >= 44);
+  for (const folder of folders) {
+    await cataloguePage.getByLabel('Workbook language:').selectOption(folder);
+    check(`Catalogue language selection points to ${folder}`,
+      await cataloguePage.locator('#catalogue-workbooks-link').getAttribute('href') === catalogueFolder + folder
+        && await cataloguePage.locator('#catalogue-workbooks-language').textContent()
+          === await cataloguePage.locator('#catalogue-workbooks-locale').evaluate(select => select.selectedOptions[0].textContent));
+  }
+  for (const [locale, folder] of [
+    ['en', 'en'], ['fr-FR', 'fr'], ['pt-BR', 'pt-BR'], ['pt', 'pt-BR'],
+    ['PT_pt', 'pt-BR'], ['zh-Hant', 'zh'], ['unknown', 'en'], ['', 'en'],
+    ['constructor', 'en'], ['../../outside', 'en'],
+  ]) {
+    tutorialLocale = locale;
+    await cataloguePage.goto(tutorialRoute, { waitUntil: 'networkidle' });
+    check(`Catalogue link defaults from tutorial locale ${locale || '(empty)'}`,
+      await cataloguePage.locator('#catalogue-workbooks-link').getAttribute('href') === catalogueFolder + folder
+        && await cataloguePage.getByLabel('Workbook language:').inputValue() === folder);
+  }
+  check('Catalogue selector does not fetch GitHub or make other external requests', externalRequests === 0);
+  await cataloguePage.close();
+  const noScript = await browser.newPage({ javaScriptEnabled: false });
+  await noScript.goto(tutorialRoute, { waitUntil: 'networkidle' });
+  check('Catalogue link remains usable without JavaScript, with no dead selector',
+    await noScript.locator('#catalogue-workbooks-link').getAttribute('href') === catalogueFolder + 'en'
+      && !await noScript.locator('#catalogue-language-choice').isVisible());
+  await noScript.close();
   const pages = contentPages.map(rel => `/${rel}`);
   for (const route of pages) {
     const page = await browser.newPage({ viewport: { width: 320, height: 800 } });
