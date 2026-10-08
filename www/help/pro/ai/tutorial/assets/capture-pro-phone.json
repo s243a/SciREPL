@@ -28,6 +28,19 @@
     "onlineMode": "off",
     "localModelMode": "off",
     "codeExecuted": false,
+    "javascript": {
+      "prefix": "cons",
+      "suffix": "t",
+      "chipsEnabled": true,
+      "extraKeysEnabled": false,
+      "extraKeysVisible": false,
+      "acceptedBy": "Accept button",
+      "acceptedSource": "const",
+      "verifiedAtUtc": "2026-10-08T21:59:22.444Z",
+      "providerRequests": 0,
+      "originalWorkbookDraftLanguageAndSettingsRestored": true,
+      "extraKeysRestored": true
+    },
     "ghost": {
       "prefix": "pri", "suffix": "nt", "chipsEnabled": true,
       "verifiedAtUtc": "2026-10-08T04:30:33.386Z",
@@ -81,6 +94,7 @@
     "latencyBenchmark": false
   },
   "screenshots": [
+    { "file": "phone-table-javascript.png", "width": 1080, "height": 2340, "sha256": "a212a34eec1ec73ab4eca7a0ab4e7875c80baa806648deaed96e3b8489ca0991", "capturedAtUtc": "2026-10-08T21:59:22.444Z" },
     { "file": "phone-table-ghost.png", "width": 1080, "height": 2340, "sha256": "9dbb10f4149ef671391e9fd7cb4d0adab7d07c39e0c94bcf718538868f4a5b7b" },
     { "file": "phone-table-chips.png", "width": 1080, "height": 2340, "sha256": "af0c555b73a77313f23ee2af62d8d4036d8ebb54df010404be0cfefb44cf72e6" },
     { "file": "phone-online-chips.png", "width": 1080, "height": 2340, "sha256": "9a970d2cbc443de68cdc2069f8849371a4060b2de0e0638e10dc7dc5713e5303" },

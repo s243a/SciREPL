@@ -134,6 +134,25 @@ check('Pro AI tutorial distinguishes no API charge from the Free edition and tou
     && /not make them Free-edition features/i.test(helpText(aiTutorial))
     && /desktop on, touch off/i.test(aiSection('tables'))
     && /Accept is not Run/i.test(aiSection('tables')));
+const aiTablesMarkup = (aiTutorial.match(
+  /<section\b[^>]*\bid="tables"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+const aiTablesLists = [...aiTablesMarkup.matchAll(/<ol\b([^>]*)>([\s\S]*?)<\/ol>/gi)];
+const aiGeneralFigurePosition = aiTablesMarkup.indexOf('src="assets/completion-general.png"');
+const aiJavascriptFigurePosition = aiTablesMarkup.indexOf('src="assets/phone-table-javascript.png"');
+check('Pro AI table lesson places setup before item 4 and the JavaScript example after acceptance',
+  aiTablesLists.length === 2
+    && (aiTablesLists[0][2].match(/<li\b/g) || []).length === 3
+    && /\bstart="4"/.test(aiTablesLists[1][1])
+    && (aiTablesLists[1][2].match(/<li\b/g) || []).length === 1
+    && aiGeneralFigurePosition > aiTablesLists[0].index + aiTablesLists[0][0].length
+    && aiGeneralFigurePosition < aiTablesLists[1].index
+    && aiJavascriptFigurePosition > aiTablesLists[1].index + aiTablesLists[1][0].length
+    && aiJavascriptFigurePosition < aiTablesMarkup.indexOf('src="assets/phone-table-ghost.png"'));
+check('Pro AI JavaScript example separates hidden extra keys from table-only completion',
+  /JavaScript table completion offers const for cons/.test(aiSection('tables'))
+    && /the faint t is ghost text, with Accept visible and chips enabled/.test(aiSection('tables'))
+    && /extra-key row is hidden here/.test(aiSection('tables'))
+    && /not a requirement for completion/.test(aiSection('tables')));
 check('Pro AI tutorial puts keys in settings, not workbook source',
   /API Key/i.test(aiSection('key')) && /Saved keys/i.test(aiSection('key'))
     && /without application-level encryption/i.test(aiSection('key'))
@@ -196,6 +215,19 @@ check('Pro AI General callouts match the unchanged screenshot and locate heading
     && aiTutorial.includes('assets/completion-general-overlay.svg')
     && /Yellow borders locate/.test(aiSection('tables')));
 const aiPhoneReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-phone.json'), 'utf8'));
+check('Pro AI phone receipt includes the JavaScript example and the existing phone evidence',
+  ['phone-table-javascript.png', 'phone-table-ghost.png', 'phone-table-chips.png',
+    'phone-online-chips.png', 'phone-agent-result.png']
+    .every(file => aiPhoneReceipt.screenshots.some(shot => shot.file === file)));
+check('Pro AI JavaScript phone capture verifies ghost acceptance without extra keys or API use',
+  aiPhoneReceipt.offline.javascript?.prefix === 'cons'
+    && aiPhoneReceipt.offline.javascript.suffix === 't'
+    && aiPhoneReceipt.offline.javascript.chipsEnabled === true
+    && aiPhoneReceipt.offline.javascript.extraKeysEnabled === false
+    && aiPhoneReceipt.offline.javascript.extraKeysVisible === false
+    && aiPhoneReceipt.offline.javascript.acceptedBy === 'Accept button'
+    && aiPhoneReceipt.offline.javascript.acceptedSource === 'const'
+    && aiPhoneReceipt.offline.javascript.providerRequests === 0);
 check('Pro AI phone captures distinguish offline tables from a real independent API request',
   aiPhoneReceipt.device.package === 'com.unifyweaver.scirepl.pro.debug'
     && aiPhoneReceipt.device.buildCommit === null

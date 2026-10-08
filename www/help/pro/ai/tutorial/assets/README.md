@@ -65,14 +65,21 @@ link opens it without annotations.
   `1.4.0-debug`, version code `25`, development UI, active app cache `v461`.
   The installed app's Git commit was not independently identified; do not
   treat the browser source SHA above as the phone's build SHA.
-- Captured 2026-10-08 UTC (2026-10-07 local), English/dark theme, portrait,
+- Captured 2026-10-08 UTC (2026-10-07–08 local), English/dark theme, portrait,
   1080 × 2340, using Android's `screencap`. These are unmodified full-screen
-  PNGs. The three completion pictures use a CSS detail view of their lower
+  PNGs. The four completion pictures use a CSS detail view of their lower
   700 pixels; the agent result uses the full-height picture. Each links to
   its full screenshot. No code, labels or results were painted into them.
 - A separate practice workbook contained only toy code. No existing workbook
   source or provider credential is included in the published screenshots or
   receipt. The software keyboard was dismissed for the published pictures.
+- `phone-table-javascript.png`: checked on the phone at 2026-10-08 21:59 UTC
+  (8 October local). JavaScript `cons` offers the faint suffix `t`, with
+  Suggestion chips On and extra keys Off. Pressing the real Accept button
+  inserted exactly `const`; the incomplete declaration was not run. Online
+  suggestions and the local model were Off, with zero provider requests.
+  The previous workbook, draft, language and snapshotted settings, including
+  the extra-key setting, were restored. The screenshot precedes acceptance.
 - `phone-table-ghost.png`: re-checked on the phone at 2026-10-08 04:30 UTC
   (7 October local). Python `pri` offers the faint suffix `nt` with the actual
   Suggestion chips control set to On. No provider request was sent; the
