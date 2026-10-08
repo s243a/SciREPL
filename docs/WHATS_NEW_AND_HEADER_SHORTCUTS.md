@@ -137,3 +137,94 @@ Unknown or missing names in the priority array fall back to the registry order,
 so a stored list can never strand a shortcut, and shortcuts whose button this
 edition does not ship are filtered out — which is how one implementation serves
 both Free and Pro.
+
+## Post-release UI follow-ups
+
+**Status:** design notes for later work. None of the behavior in this section is
+implemented, and none of it is a blocker for the v1.3.1 release.
+
+### Formula setup helper
+
+The Python runtime preloads SymPy, but a workbook is easier to understand,
+export and reuse when its own setup is explicit. Add a **Set up SymPy** action to
+the Python Formula palette that can insert or update a dedicated setup cell
+above the active cell. It should:
+
+- preview the exact imports and symbol declarations before changing anything;
+- recognize an existing compatible setup cell instead of creating duplicates;
+- offer **Insert** and **Insert and run** as separate choices, never execute code
+  merely because the helper was opened; and
+- optionally define common symbols such as `x`, `y` and `z`, while making that
+  choice visible and editable.
+
+Decide on one canonical generated style (explicit imports or a `sympy` module
+alias) before implementation, and keep generated examples consistent with the
+palette templates. Markdown Formula mode produces LaTeX and therefore must not
+offer a Python import helper.
+
+### Formula function help
+
+Every Formula action should explain the code it inserts. A short localized
+tooltip may serve mouse users, but help must not depend on hover: keyboard and
+touch users need an equally discoverable affordance, such as a visible help
+mode or an information control. Expanded help should include:
+
+- the function's argument order;
+- a small copyable example and expected result;
+- any required setup, imports or symbols; and
+- context-specific wording for Python/SymPy versus Markdown/LaTeX.
+
+For example, Integrate can show
+`integrate(x**2, (x, 0, a))` → `a**3/3`. Help must have localized accessible
+names, fit above the Android safe area and keyboard, and dismiss predictably by
+its close control, Escape and Android Back. Supporting Formula palettes for R
+or other languages remains a separate, non-critical extension; unsupported
+languages should continue to hide the Formula control.
+
+### Find and Help as optional header shortcuts
+
+Add Find and Help to the existing shortcut registry with all three modes:
+**Always**, **When there is room**, and **Never**. Both should default to `auto`
+(**When there is room**). Before either can disappear from the header, add
+permanent Find and Help entries to the main menu; `Ctrl`/`Cmd`+`F` is not a
+mobile fallback, and Help must never become unreachable.
+
+The provisional default priority should let Help stand down first and Find
+second when space is tight, while retaining the existing user-reorderable,
+highest-priority-first model. Preserve stored choices and migrate older priority
+arrays by the registry's existing unknown/missing-name rules.
+
+This work should replace the known mandatory-control limitation documented
+above rather than merely add two more buttons to the fitter. Tests need complete
+hit targets and correct restoration with multiple notebooks, all shipped
+locales including RTL, large button sizes, portrait/landscape changes and idle
+observer quiescence. Reset must restore Find and Help to `auto`.
+
+### Parent-aware menu navigation
+
+Opening a screen from the main menu currently hides the menu, so Back from that
+screen returns directly to the workbook. The recommended navigation model is a
+small parent stack:
+
+1. Back from a menu-opened screen returns to the main menu.
+2. A second Back closes the main menu and returns to the workbook.
+3. An explicit Close or backdrop dismissal exits the menu flow immediately.
+
+Apply the same semantic order to visible Back controls, Android system Back and
+desktop Escape where appropriate, and restore focus to the item that opened the
+screen. Nested catalogue panels must continue to unwind their own inner level
+before returning to the main menu. Test browser/PWA, Android and Electron paths,
+including screens opened directly rather than through the menu.
+
+Do not add a navigation preference initially. If real use shows that some
+people consistently prefer Back to close the whole menu, a later setting can
+offer **Return to parent menu** versus **Close menu**, with the conventional
+parent behavior as the default.
+
+### Help organization
+
+If the added Formula and navigation guidance makes the current Help page too
+long, split it into accessible sections such as Getting started, Formula,
+Navigation and About. The About section is the natural home for the app version,
+release notes and licences. This is information architecture work, not a reason
+to delay the smaller contextual-help improvements above.
