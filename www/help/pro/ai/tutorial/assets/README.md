@@ -76,6 +76,32 @@ They locate section titles and the Suggestions / Suggestion chips controls.
 The original PNG and its capture-receipt hash are unchanged; the full-image
 link opens it without annotations.
 
+### Custom-model capture
+
+`assistant-custom-model.png` is a separate real browser capture from clean Pro
+head `6dbc4d0793e04f0ea051d2e464032bf8fcab09d5` (the approved #136 head), not
+from the older source used for the pictures above. The custom-ID field already
+exists in released Pro 1.4.0. This newer capture does not show execution-consent
+dialogs or change the provenance of any previous picture.
+
+`capture-pro-custom-model.mjs` selects AI Assistant → OpenRouter using the actual
+controls, then fills the custom-model input with `anthropic/claude-haiku-5.5`.
+That ID is genuinely absent from this source's dropdown and was verified against
+the provider's model page and ID-format documentation on 8 October 2026. It is
+not an invented option, injected label or provider-availability test. The listed
+GLM model remains visible; the tutorial explains that the custom field takes
+precedence on Save. No Save was pressed and no key was entered.
+
+The unmodified PNG is 390 × 456, cropped through the custom field, before API
+Key and Save. The editable `assistant-custom-model-overlay.svg` contains yellow
+borders drawn from measured Backend/custom-field bounds. Its own receipt,
+`capture-pro-custom-model.json`, records the exact source, browser, capture time,
+hashes, empty provider store, and zero external requests/responses or page errors.
+The temporary same-origin GET-only server on 127.0.0.1:8187 and the fresh browser
+are closed after capture. No phone, model inference, billing or API compatibility
+test was performed. The script uses the same source/dependency/output environment
+variables as the earlier capture scripts and refuses to overwrite existing files.
+
 ## Android completion captures
 
 - Actual Galaxy S24+ (`SM-S926W`), `com.unifyweaver.scirepl.pro.debug`, version

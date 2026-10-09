@@ -32,7 +32,7 @@
         <li class="chip">Pro 1.4.0 + upcoming execution controls</li>
         <li class="chip">Local model: Android</li>
       </ul>
-      <p class="screen-note">This guide covers Pro 1.4.0 completion features and a separately marked, unreleased execution-consent update. The pictures are real browser or Galaxy S24+ Android captures taken before that update; they do not show its new approval dialogs or prove Play delivery or phone performance. Local-model figures below come from earlier native-engine measurements; installation and layout can differ with your app version.</p>
+      <p class="screen-note">This guide covers Pro 1.4.0 completion features and a separately marked, unreleased execution-consent update. The pictures are real browser or Galaxy S24+ Android captures; the existing execution-settings picture predates that update, and none shows its new approval dialogs or proves Play delivery or phone performance. The custom-model picture is a separate, newer browser capture. Local-model figures below come from earlier native-engine measurements; installation and layout can differ with your app version.</p>
       <p class="callout"><strong>Check your version.</strong> The execution changes in <a href="#execution-permissions">Step 3</a> are planned for <strong>proposed Pro 1.5.0</strong>, which is <strong>unreleased</strong>; the final release number may change. In Pro 1.4.0, Open can run allowed kernels without asking. In the upcoming version, Open asks before Assistant cell execution by default. Keep <strong>Kernels… → JavaScript → Ask</strong> for this exercise on either version. Offline tables, on-tap API completion, the separate completion model and the Android local model are already 1.4.0 features.</p>
       <p class="callout"><strong>“Free” here means no API charge.</strong> Table suggestions and the on-device model do not bill a provider. That does not make them Free-edition features: this walkthrough is for <strong>SciREPL Pro</strong>. Online requests use your own provider account and can cost money.</p>
       <nav class="lesson-nav" aria-label="AI and completion walkthrough steps">
@@ -131,6 +131,21 @@ sample_m</code></pre>
           <a class="full-shot-link" href="assets/assistant-key-setup.png">View the unmodified AI configuration screenshot</a>
         </figure>
         <p>A low-cost, tool-capable model is a sensible starting point for the Assistant. Examples to compare include <a href="https://openrouter.ai/z-ai/glm-5.3-flash">GLM 5.3 Flash</a>, <a href="https://developers.openai.com/api/docs/models/gpt-6-luna">GPT-6 Luna</a>, <a href="https://www.anthropic.com/claude/haiku">Claude Haiku 5.5</a>, and <a href="https://api-docs.deepseek.com/quick_start/pricing">DeepSeek V4 Flash</a>. Exact model IDs, available versions, tool support and prices depend on your app version and provider; check the current picker and provider documentation. A newly announced model may need an app update before it appears. Later, you can choose a different inexpensive model just for completions.</p>
+        <aside class="callout" id="custom-model">
+          <p><strong>Model missing from the list?</strong> In <strong>AI Settings → Configure model for → AI Assistant</strong>, choose the correct <strong>Backend</strong> first, then enter the provider's <strong>exact API model ID</strong> in <strong>Or enter custom model ID</strong>, below the Model picker, and tap <strong>Save</strong>. This field is already available in Pro 1.4.0.</p>
+          <p>Verify the ID with your selected provider, not just the model's marketing name. For OpenRouter, include the organization prefix—for example, <code>anthropic/claude-haiku-5.5</code> on <a href="https://openrouter.ai/anthropic/claude-haiku-5.5">its model page</a>. Enter the ID, not that page's URL. The custom ID takes precedence over the dropdown; choosing a listed model again clears the custom field.</p>
+          <p><strong>An ID does not add API support.</strong> The model must support tool calls through the API SciREPL uses. Check provider access, compatibility and current prices; saving does not validate them or make a model request.</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--custom-model" role="img" aria-label="Keyless Pro browser AI Settings. Yellow borders identify Backend: OpenRouter and the custom model ID field containing anthropic/claude-haiku-5.5, beneath the Model picker.">
+            <div class="shot-stage shot-stage--custom-model">
+              <img src="assets/assistant-custom-model.png" width="390" height="456" alt="" loading="lazy" decoding="async">
+              <img src="assets/assistant-custom-model-overlay.svg" width="390" height="456" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>A real, <strong>keyless browser capture</strong>, not an Android screenshot. The yellow border below Model locates the custom-ID field. The dropdown still shows GLM 5.3 Flash, but the typed Haiku ID would take precedence on Save. API Key and Save are below this crop; no key was entered, Save was not pressed, and no model request was sent. This is a configuration example, not a test that the model works.</figcaption>
+          <a class="full-shot-link" href="assets/assistant-custom-model.png">View the unmodified custom-model screenshot</a>
+        </figure>
       </section>
 
       <section id="agent">

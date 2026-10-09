@@ -183,6 +183,19 @@ check('Pro AI model examples link primary documentation and qualify version and 
       'https://api-docs.deepseek.com/quick_start/pricing']
       .every(href => aiKeyMarkup.includes(`href="${href}"`))
     && /depend on your app version and provider/.test(aiSection('key')));
+const aiCustomMarkup = (aiTutorial.match(
+  /<aside\b[^>]*\bid="custom-model"[^>]*>([\s\S]*?)<\/aside>/i) || [])[1] || '';
+const aiCustomText = helpText(aiCustomMarkup);
+check('Pro AI missing-model callout follows named examples and gives the real custom-ID route',
+  aiKeyMarkup.indexOf('id="custom-model"') > aiKeyMarkup.indexOf('A low-cost, tool-capable model')
+    && ['AI Settings → Configure model for → AI Assistant', 'Backend first', 'exact API model ID',
+      'Or enter custom model ID', 'below the Model picker', 'already available in Pro 1.4.0']
+      .every(text => aiCustomText.includes(text)));
+check('Pro AI custom-ID guidance verifies provider format, precedence and compatibility without claiming validation',
+  ['organization prefix', 'anthropic/claude-haiku-5.5', "not that page's URL", 'takes precedence over the dropdown',
+    'clears the custom field', 'An ID does not add API support', 'support tool calls through the API SciREPL uses',
+    'saving does not validate them or make a model request'].every(text => aiCustomText.includes(text))
+    && aiCustomMarkup.includes('href="https://openrouter.ai/anthropic/claude-haiku-5.5"'));
 check('Pro AI tutorial describes Open and browser limits without promising safe generated code',
   /second-most-permissive/i.test(aiSection('agent'))
     && /Active worksheet/.test(aiSection('agent'))
@@ -309,6 +322,36 @@ check('Pro AI configuration overlay highlights the four actual setup fields',
     && ['configure-target', 'backend-setting', 'model-setting', 'api-key-setting']
       .every(id => aiKeyOverlay.includes(`id="${id}"`))
     && aiKeyReceipt.overlay.highlights.length === 4);
+const aiCustomReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-custom-model.json'), 'utf8'));
+check('Pro AI custom-model capture is a separately pinned, genuinely keyless UI entry',
+  aiCustomReceipt.sourceSha === '6dbc4d0793e04f0ea051d2e464032bf8fcab09d5'
+    && aiCustomReceipt.sourceGuards.exactShaBeforeAndAfter === true
+    && aiCustomReceipt.sourceGuards.trackedSourceCleanBeforeAndAfter === true
+    && aiCustomReceipt.actualUi.backend === 'openrouter'
+    && aiCustomReceipt.actualUi.configureModelFor === 'assistant'
+    && aiCustomReceipt.actualUi.customModelId === 'anthropic/claude-haiku-5.5'
+    && aiCustomReceipt.actualUi.customIdAbsentFromPicker === true
+    && aiCustomReceipt.actualUi.customIdEnteredThroughUi === true
+    && aiCustomReceipt.actualUi.apiKeyEmpty === true
+    && aiCustomReceipt.actualUi.apiKeyOutsideCrop === true
+    && aiCustomReceipt.actualUi.settingsSaved === false
+    && ['providerStoreList', 'blockedRequests', 'externalResponses', 'pageErrors']
+      .every(field => Array.isArray(aiCustomReceipt[field]) && aiCustomReceipt[field].length === 0));
+for (const asset of [aiCustomReceipt.screenshot, aiCustomReceipt.overlay]) {
+  const bytes = readFileSync(path.join(aiAssets, asset.file));
+  check(`Pro AI ${asset.file} matches its independent custom-model receipt`,
+    createHash('sha256').update(bytes).digest('hex') === asset.sha256
+      && aiTutorial.includes(`src="assets/${asset.file}"`));
+}
+const aiCustomPng = readFileSync(path.join(aiAssets, aiCustomReceipt.screenshot.file));
+const aiCustomOverlay = readFileSync(path.join(aiAssets, aiCustomReceipt.overlay.file), 'utf8');
+check('Pro AI custom-model picture highlights actual controls and makes the untested state clear',
+  aiCustomPng.readUInt32BE(16) === 390 && aiCustomPng.readUInt32BE(20) === 456
+    && /viewBox="0 0 390 456"/.test(aiCustomOverlay)
+    && ['backend-setting', 'custom-model-setting'].every(id => aiCustomOverlay.includes(`id="${id}"`))
+    && aiCustomReceipt.overlay.highlights.length === 2
+    && /dropdown still shows GLM 5.3 Flash/.test(aiSection('key'))
+    && /configuration example, not a test that the model works/.test(aiSection('key')));
 check('Pro AI expanded position screenshot follows the alternative and explains whole-cell and native-menu limits',
   aiTablesMarkup.indexOf('assets/phone-completion-position.png')
       > aiTablesMarkup.indexOf('<strong>End of cell only</strong> is an alternative')
