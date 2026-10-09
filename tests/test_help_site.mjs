@@ -184,6 +184,50 @@ check('Pro AI tutorial describes Open and browser limits without promising safe 
     && /first 500 characters of each cell/.test(aiSection('agent'))
     && /network restrictions are best-effort/.test(aiSection('agent'))
     && /real shell on the broker host/.test(aiSection('agent')));
+const aiExecutionText = helpText((aiTutorial.match(
+  /<aside\b[^>]*\bid="execution-permissions"[^>]*>([\s\S]*?)<\/aside>/i) || [])[1] || '');
+check('Pro AI tutorial separates released Open defaults from a provisional unreleased update',
+  /In Pro 1\.4\.0, Open can run allowed kernels without asking/.test(helpText(aiTutorial))
+    && /In the upcoming version, Open asks before Assistant cell execution by default/.test(helpText(aiTutorial))
+    && /proposed Pro 1\.5\.0/.test(aiExecutionText)
+    && /Unreleased/.test(aiExecutionText) && /release number is provisional/.test(aiExecutionText)
+    && /already 1\.4\.0 features/.test(helpText(aiTutorial)));
+check('Pro AI execution guide identifies real settings and independent override precedence',
+  /AI Settings → Security… → execute_cell \/ run_cells/.test(aiExecutionText)
+    && /Default \/ Allow \/ Ask \/ Deny/.test(aiExecutionText)
+    && /already offers Default \/ Allow \/ Ask \/ Deny/.test(aiExecutionText)
+    && /changes Open's inherited Default to Ask/.test(aiExecutionText)
+    && /when both are explicit, the safer rule wins/.test(aiExecutionText)
+    && /Auto-run off is not an execution lock/.test(aiSection('agent'))
+    && /explicit tool or kernel Allow can change that default/.test(aiSection('agent')));
+check('Pro AI execution guide limits standing-grant creation and warns about cross-workbook scope',
+  /leave Allow future Assistant cell execution without asking unchecked/.test(aiExecutionText)
+    && /all workbooks/.test(aiExecutionText)
+    && /explicit kernel Ask hides that option/.test(aiExecutionText)
+    && /Namespace-inspection and newly created-cell prompts cannot create that standing grant/.test(aiExecutionText)
+    && /bounded code preview/.test(aiExecutionText) && /long preview ends with an ellipsis/.test(aiExecutionText)
+    && /saved execution Allow can still permit created-cell autorun/.test(aiExecutionText));
+check('Pro AI execution guide distinguishes staged preset changes and separate sending consent',
+  ['Reset to Default', 'Keep Allow', 'Cancel', 'without clearing kernel overrides',
+    'Cancel restores the previous preset selection', 'draft changes until you save Settings',
+    'Execution approval is not blanket permission to share data',
+    "Execution-tool outputs can return to the Assistant's model",
+    'permitted code can use networking', 'MCP notebook execution uses the same execution checks']
+    .every(text => aiExecutionText.includes(text))
+    && /Online completion's Always allow\s*, AI Prompt's context review, and Remote\/MCP's privacy disclosure remain separate/.test(aiExecutionText));
+check('Pro AI tutorial retains honest pre-update screenshot provenance',
+  /browser capture predates the execution-consent update/.test(aiSection('agent'))
+    && /upcoming approval and override dialogs are not pictured/.test(aiSection('agent'))
+    && !/Open also lets the agent execute allowed kernels/.test(aiSection('agent')));
+const aiReferenceText = helpText(readFileSync(path.join(WWW, 'help/pro/ai/index.html'), 'utf8'));
+const aiOverviewText = helpText(readFileSync(path.join(WWW, 'help/pro/index.html'), 'utf8'));
+const aiRemoteText = helpText(readFileSync(path.join(WWW, 'help/pro/remote/index.html'), 'utf8'));
+check('Pro reference pages qualify historical defaults and share the pending-release explanation',
+  /In Pro 1\.3\.0 and 1\.4\.0/.test(aiReferenceText)
+    && [aiReferenceText, aiOverviewText, aiRemoteText].every(text =>
+      /proposed Pro 1\.5\.0|proposed for Pro 1\.5\.0/i.test(text) && /unreleased/i.test(text))
+    && /version provisional/.test(aiReferenceText)
+    && /Execution approval, Remote-data consent and access to a Terminal shell are distinct permissions/.test(aiRemoteText));
 check('Pro AI tutorial covers independent completion identity and on-demand consent',
   ['Follow AI Assistant', 'Choose provider and model', 'On tap', 'Always allow', 'first real payload']
     .every(text => aiSection('online').includes(text))

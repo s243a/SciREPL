@@ -10,7 +10,12 @@ Android screenshots, including a real low-cost online completion.
 
 - Source: `SciREPL-Pro` commit `38316dbb3d12cc628b57af392c9ede49f36d71d0`.
 - Source identity: version `1.4.0`, **development** channel, Android version code
-  `25`. This is current repository UI, not independent evidence of Play rollout.
+  `25`. This is the pinned repository UI at capture time, not independent evidence of Play rollout.
+- These captures predate Pro #136's execution-consent update. In particular,
+  `assistant-open.png` shows the older Open label; the upcoming approval,
+  code-preview and execution-override dialogs are not pictured. The tutorial
+  marks their availability as proposed Pro 1.5.0 (unreleased, provisional).
+  This note does not change any recorded source SHA, screenshot or receipt.
 - Capture: 2026-10-08 UTC (2026-10-07 local), headless Chromium, fresh non-persistent browser
   context, English, dark app theme, viewport `430 × 1100`, device scale factor 1.
 - The screenshot target was each real modal's `.modal-content`. Its normal
