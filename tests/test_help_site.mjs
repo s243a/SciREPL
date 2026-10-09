@@ -153,6 +153,15 @@ check('Pro AI JavaScript example separates hidden extra keys from table-only com
     && /the faint t is ghost text, with Accept visible and chips enabled/.test(aiSection('tables'))
     && /extra-key row is hidden here/.test(aiSection('tables'))
     && /not a requirement for completion/.test(aiSection('tables')));
+check('Pro AI offline suggestions explain kernel and source-derived names without universal live resolution',
+  ['variables and functions found in workbook code', 'cached kernel names and object attributes, including methods',
+    'Frequency and acceptance history help rank them', 'static lists, unrun definitions or stale snapshots',
+    'not currently available in scope'].every(text => aiSection('tables').includes(text)));
+check('Pro AI no-request promise is scoped to current tables and distinguishes future opt-in prefetch',
+  /With only the offline table layer enabled, typing a prefix does not send an API request/.test(aiSection('tables'))
+    && /Future online prefetch/.test(aiSection('tables'))
+    && /an opt-in mode is planned that could send model requests while you type/.test(aiSection('tables'))
+    && /not available yet, and no release number is assigned/.test(aiSection('tables')));
 check('Pro AI tutorial puts keys in settings, not workbook source',
   /API Key/i.test(aiSection('key')) && /Saved keys/i.test(aiSection('key'))
     && /without application-level encryption/i.test(aiSection('key'))
