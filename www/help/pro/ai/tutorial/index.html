@@ -33,7 +33,7 @@
         <li class="chip">Local model: Android</li>
       </ul>
       <p class="screen-note">This guide covers Pro 1.4.0 completion features and a separately marked, unreleased execution-consent update. The pictures are real browser or Galaxy S24+ Android captures; the existing execution-settings picture predates that update, and none shows its new approval dialogs or proves Play delivery or phone performance. The custom-model picture is a separate, newer browser capture. Local-model figures below come from earlier native-engine measurements; installation and layout can differ with your app version.</p>
-      <p class="callout"><strong>Check your version.</strong> The execution changes in <a href="#execution-permissions">Step 3</a> are planned for <strong>proposed Pro 1.5.0</strong>, which is <strong>unreleased</strong>; the final release number may change. In Pro 1.4.0, Open can run allowed kernels without asking. In the upcoming version, Open asks before Assistant cell execution by default. Keep <strong>Kernels… → JavaScript → Ask</strong> for this exercise on either version. Offline tables, on-tap API completion, the separate completion model and the Android local model are already 1.4.0 features.</p>
+      <p class="callout"><strong>Check your version.</strong> The execution changes in the <a href="#execution-permissions">appendix</a> are planned for <strong>proposed Pro 1.5.0</strong>, which is <strong>unreleased</strong>; the final release number may change. In Pro 1.4.0, Open can run allowed kernels without asking. In the upcoming version, Open asks before Assistant cell execution by default. Keep <strong>Kernels… → JavaScript → Ask</strong> for this exercise on either version. Offline tables, on-tap API completion, the separate completion model and the Android local model are already 1.4.0 features.</p>
       <p class="callout"><strong>“Free” here means no API charge.</strong> Table suggestions and the on-device model do not bill a provider. That does not make them Free-edition features: this walkthrough is for <strong>SciREPL Pro</strong>. Online requests use your own provider account and can cost money.</p>
       <nav class="lesson-nav" aria-label="AI and completion walkthrough steps">
         <strong>In this lesson</strong>
@@ -151,37 +151,31 @@ sample_m</code></pre>
       <section id="agent">
         <p class="step-label">Step 3 · Deliberate tool use</p>
         <h2>Build a small example with the Open agent preset</h2>
-        <p><strong>Open</strong> is the <strong>second-most-permissive</strong> security preset, after <strong>Full control</strong>. It allows notebook edits by default, with fewer prompts than Cautious. Whether execution asks depends on your version and permission settings; see the version-specific explanation below. Use it deliberately in a practice workbook—not as a requirement for autocomplete.</p>
+        <p><strong>Open</strong> is the <strong>second-most-permissive</strong> security preset, after <strong>Full control</strong>. It allows notebook edits by default, with fewer prompts than Cautious. Whether execution asks depends on your version and permission settings; see the <a href="#execution-permissions">upcoming execution-approval appendix</a>. Use it deliberately in a practice workbook—not as a requirement for autocomplete.</p>
         <ol class="lesson-steps">
-          <li>In AI Settings, select <strong>Security Level → Open</strong> and <strong>Agent writes → Active worksheet</strong>. Leave source browsing off and turn off <strong>Auto-run cells created by AI</strong>. Under <strong>Kernels…</strong>, set <strong>JavaScript → Ask</strong>, then save. This kernel rule still asks even if an execution-tool Allow was saved earlier.</li>
+          <li>In AI Settings, select <strong>Security Level → Open</strong> and <strong>Agent writes → Active worksheet</strong>. Leave source browsing off and turn off <strong>Auto-run cells created by AI</strong>. Under <strong>Kernels…</strong>, set <strong>JavaScript → Ask</strong>, then save. This kernel rule still asks even if an execution-tool Allow was saved earlier.
+            <p class="callout" id="auto-run-warning"><strong>Auto-run off is not an execution lock.</strong> It stops newly created cells from running automatically; it does not disable separate <code>execute_cell</code> or <code>run_cells</code> requests. Released Pro 1.4.0's Open default can allow them without asking. The upcoming Open default asks, but an explicit tool or kernel Allow can change that default. <strong>AI Settings → Kernels… → JavaScript → Ask</strong> keeps this exercise's JavaScript execution behind confirmation. Your own manual cell Run remains a separate action. <a href="#execution-permissions">Next-release execution controls are detailed in the appendix.</a></p>
+          </li>
           <li>In the Assistant panel, choose <strong>This workbook</strong>. Leave <strong>Review</strong>, <strong>Remote</strong>, and <strong>Terminal</strong> off for this direct-provider example.</li>
-          <li>Send the request below. The panel's <strong>Send</strong> already starts the agentic tool loop: there is no extra “Agent mode” toggle here. The full-screen editor's <strong>Agent</strong> button is a separate workflow.</li>
+          <li>Send the practice prompt in the callout below. The panel's <strong>Send</strong> already starts the agentic tool loop: there is no extra “Agent mode” toggle here. The full-screen editor's <strong>Agent</strong> button is a separate workflow.
+            <div class="callout" id="assistant-practice-prompt">
+              <p><strong>Copy this prompt.</strong> Paste it into the <strong>Assistant's message box</strong>, not a code cell, then tap <strong>Send</strong>.</p>
+              <pre><code>In this practice workbook, add a Markdown explanation followed
+by one JavaScript cell named summary_demo. Use [12, 15, 18]
+to print count, mean, minimum and maximum using only arrays,
+arithmetic and console.log. Do not run cells or change existing
+cells. Do not use files, storage, DOM APIs, network requests or
+packages. Explain the expected results so I can review the code.</code></pre>
+            </div>
+          </li>
           <li>Read the proposed explanation and the new <code>summary_demo</code> cell. Check that it only uses the small array and ordinary JavaScript. Run that cell yourself. The expected results are count <strong>3</strong>, mean <strong>15</strong>, minimum <strong>12</strong>, maximum <strong>18</strong>.</li>
         </ol>
-        <p class="callout"><strong>Auto-run off is not an execution lock.</strong> It stops newly created cells from running automatically; it does not disable separate <code>execute_cell</code> or <code>run_cells</code> requests. Released Pro 1.4.0's Open default can allow them without asking. The upcoming Open default asks, but an explicit tool or kernel Allow can change that default. <strong>AI Settings → Kernels… → JavaScript → Ask</strong> keeps this exercise's JavaScript execution behind confirmation. Your own manual cell Run remains a separate action.</p>
-        <aside class="callout" id="execution-permissions">
-          <h3>Upcoming execution approval · proposed Pro 1.5.0</h3>
-          <p><strong>Unreleased:</strong> these controls describe the next-release implementation, not a promise that your 1.4.0 install has it. The release number is provisional.</p>
-          <ul>
-            <li><strong>AI Settings → Security… → <code>execute_cell</code> / <code>run_cells</code></strong> already offers <strong>Default / Allow / Ask / Deny</strong>. This update changes Open's inherited Default to <strong>Ask</strong>; Full control keeps Allow. Explicit tool or kernel rules can replace inherited defaults; when both are explicit, the safer rule wins. Leave Default or Ask while learning. Allow is an override, not a stronger sandbox; kernel Ask/Deny, Review and the global JavaScript disable still apply.</li>
-            <li>Read the execution request before choosing <strong>Run</strong>; leave <strong>Allow future Assistant cell execution without asking</strong> unchecked to approve only that request. Checking it changes the shared execution-tool rule across <strong>all workbooks</strong> until reset—not just this cell, conversation or provider. An explicit kernel Ask hides that option.</li>
-            <li>Namespace-inspection and newly created-cell prompts <strong>cannot create that standing grant</strong>. A created-cell execution prompt includes a bounded code preview; a long preview ends with an ellipsis. If it is truncated, choose Cancel, inspect the newly created cell's full source, and Run it yourself only if you trust it. A previously saved execution Allow can still permit created-cell autorun when Auto-run is on, so keep Auto-run off here.</li>
-            <li>If you select a preset other than Full control while a saved execution-tool Allow remains effective, a warning offers <strong>Reset to Default</strong>, <strong>Keep Allow</strong>, or <strong>Cancel</strong>. Reset restores the selected preset's tool rule without clearing kernel overrides. Keep retains the override. Cancel restores the previous preset selection. Reset and Keep stay draft changes until you save Settings.</li>
-          </ul>
-          <p><strong>Execution approval is not blanket permission to share data.</strong> Execution-tool outputs can return to the Assistant's model, and permitted code can use networking. Online completion's <strong>Always allow</strong>, AI Prompt's context review, and Remote/MCP's privacy disclosure remain separate. MCP notebook execution uses the same execution checks; those checks do not sandbox a broker's Terminal shell.</p>
-        </aside>
         <p><strong>Before Send:</strong> the Assistant includes the selected conversation and a bounded preview of the current workbook's cells (up to the first 500 characters of each cell, plus metadata). Allowed tools can send more. Turning source browsing off does <em>not</em> stop workbook previews from being sent. That is different from the smaller current-cell payload used by completion below.</p>
         <figure class="phone-figure">
           <img class="tutorial-shot" src="assets/assistant-open.png" width="390" height="1100" alt="Scrolled Pro browser AI Settings showing auto-run unchecked, source browsing unchecked, Active worksheet writes and the Open security preset." loading="lazy" decoding="async">
           <figcaption>AI Settings scrolled to execution and permissions. This <strong>browser capture predates the execution-consent update</strong> and shows Open with auto-run off; it is not a provider request or a security test. Its Open label describes the older defaults and is longer than the narrow dropdown can display. The upcoming approval and override dialogs are not pictured.</figcaption>
           <a class="full-shot-link" href="assets/assistant-open.png">View the complete scrolled settings capture</a>
         </figure>
-        <pre><code>In this practice workbook, add a Markdown explanation followed
-by one JavaScript cell named summary_demo. Use [12, 15, 18]
-to print count, mean, minimum and maximum using only arrays,
-arithmetic and console.log. Do not run cells or change existing
-cells. Do not use files, storage, DOM APIs, network requests or
-packages. Explain the expected results so I can review the code.</code></pre>
         <p><strong>Paused with a Continue button?</strong> The agent may reach its configured step limit before finishing. Read what it has already done, then press <strong>Continue</strong> if the task is unfinished and you want another bounded run. Continuing can incur more API charges; it is not needed after <strong>Done</strong>.</p>
         <figure class="phone-figure">
           <img class="tutorial-shot" src="assets/phone-agent-result.png" width="1080" height="2340" alt="Actual Android Galaxy S24+ screenshot showing the reviewed JavaScript summary_demo source and its output: count 3, mean 15, min 12, max 18." loading="lazy" decoding="async">
@@ -283,6 +277,17 @@ Return a short explanation only; do not rewrite the code.</code></pre>
         </dl>
         <p><a href="../">AI setup and workflows reference</a> · <a href="../../remote/">Remote and security</a> · <a href="../../../tutorials/">All tutorials</a></p>
       </section>
+      <aside class="callout" id="execution-permissions" aria-labelledby="execution-appendix-title">
+        <h2 id="execution-appendix-title">Appendix · Upcoming execution approval · proposed Pro 1.5.0</h2>
+        <p><strong>Unreleased:</strong> these controls describe the next-release implementation, not a promise that your 1.4.0 install has it. The release number is provisional.</p>
+        <ul>
+          <li><strong>AI Settings → Security… → <code>execute_cell</code> / <code>run_cells</code></strong> already offers <strong>Default / Allow / Ask / Deny</strong>. This update changes Open's inherited Default to <strong>Ask</strong>; Full control keeps Allow. Explicit tool or kernel rules can replace inherited defaults; when both are explicit, the safer rule wins. Leave Default or Ask while learning. Allow is an override, not a stronger sandbox; kernel Ask/Deny, Review and the global JavaScript disable still apply.</li>
+          <li>Read the execution request before choosing <strong>Run</strong>; leave <strong>Allow future Assistant cell execution without asking</strong> unchecked to approve only that request. Checking it changes the shared execution-tool rule across <strong>all workbooks</strong> until reset—not just this cell, conversation or provider. An explicit kernel Ask hides that option.</li>
+          <li>Namespace-inspection and newly created-cell prompts <strong>cannot create that standing grant</strong>. A created-cell execution prompt includes a bounded code preview; a long preview ends with an ellipsis. If it is truncated, choose Cancel, inspect the newly created cell's full source, and Run it yourself only if you trust it. A previously saved execution Allow can still permit created-cell autorun when Auto-run is on, so keep Auto-run off here.</li>
+          <li>If you select a preset other than Full control while a saved execution-tool Allow remains effective, a warning offers <strong>Reset to Default</strong>, <strong>Keep Allow</strong>, or <strong>Cancel</strong>. Reset restores the selected preset's tool rule without clearing kernel overrides. Keep retains the override. Cancel restores the previous preset selection. Reset and Keep stay draft changes until you save Settings.</li>
+        </ul>
+        <p><strong>Execution approval is not blanket permission to share data.</strong> Execution-tool outputs can return to the Assistant's model, and permitted code can use networking. Online completion's <strong>Always allow</strong>, AI Prompt's context review, and Remote/MCP's privacy disclosure remain separate. MCP notebook execution uses the same execution checks; those checks do not sandbox a broker's Terminal shell.</p>
+      </aside>
     </article>
   </main>
   <footer class="site-footer">

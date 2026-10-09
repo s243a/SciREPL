@@ -196,6 +196,31 @@ check('Pro AI custom-ID guidance verifies provider format, precedence and compat
     'clears the custom field', 'An ID does not add API support', 'support tool calls through the API SciREPL uses',
     'saving does not validate them or make a model request'].every(text => aiCustomText.includes(text))
     && aiCustomMarkup.includes('href="https://openrouter.ai/anthropic/claude-haiku-5.5"'));
+const aiAgentMarkup = (aiTutorial.match(
+  /<section\b[^>]*\bid="agent"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+const aiAgentList = (aiAgentMarkup.match(/<ol\b[^>]*>([\s\S]*?)<\/ol>/i) || [])[1] || '';
+const aiAgentItems = [...aiAgentList.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)];
+const aiPracticePrompt = `In this practice workbook, add a Markdown explanation followed
+by one JavaScript cell named summary_demo. Use [12, 15, 18]
+to print count, mean, minimum and maximum using only arrays,
+arithmetic and console.log. Do not run cells or change existing
+cells. Do not use files, storage, DOM APIs, network requests or
+packages. Explain the expected results so I can review the code.`;
+check('Pro AI auto-run warning sits directly inside setup instruction 1 before choosing the conversation',
+  aiAgentItems.length === 4
+    && /id="auto-run-warning"/.test(aiAgentItems[0][1])
+    && /Auto-run off is not an execution lock/.test(helpText(aiAgentItems[0][1]))
+    && /Your own manual cell Run remains a separate action/.test(helpText(aiAgentItems[0][1]))
+    && /In the Assistant panel/.test(helpText(aiAgentItems[1][1]))
+    && aiAgentMarkup.split('Auto-run off is not an execution lock.').length === 2);
+check('Pro AI practice prompt is labelled and directly inside instruction 3 before review instruction 4',
+  aiAgentItems.length === 4
+    && /id="assistant-practice-prompt"/.test(aiAgentItems[2][1])
+    && /Copy this prompt/.test(helpText(aiAgentItems[2][1]))
+    && /Assistant's message box\s*, not a code cell/.test(helpText(aiAgentItems[2][1]))
+    && aiAgentItems[2][1].includes(`<pre><code>${aiPracticePrompt}</code></pre>`)
+    && /Read the proposed explanation/.test(helpText(aiAgentItems[3][1]))
+    && aiAgentMarkup.split(aiPracticePrompt).length === 2);
 check('Pro AI tutorial describes Open and browser limits without promising safe generated code',
   /second-most-permissive/i.test(aiSection('agent'))
     && /Active worksheet/.test(aiSection('agent'))
@@ -208,6 +233,13 @@ check('Pro AI tutorial describes Open and browser limits without promising safe 
     && /real shell on the broker host/.test(aiSection('agent')));
 const aiExecutionText = helpText((aiTutorial.match(
   /<aside\b[^>]*\bid="execution-permissions"[^>]*>([\s\S]*?)<\/aside>/i) || [])[1] || '');
+check('Pro AI future execution details are a linked appendix after the walkthrough and troubleshooting',
+  aiTutorial.indexOf('id="execution-permissions"') > aiTutorial.lastIndexOf('</section>')
+    && /Appendix · Upcoming execution approval/.test(aiExecutionText)
+    && !aiAgentMarkup.includes('id="execution-permissions"')
+    && aiAgentItems[0][1].includes('href="#execution-permissions"')
+    && /<aside\b[^>]*id="execution-permissions"[^>]*aria-labelledby="execution-appendix-title"/.test(aiTutorial)
+    && aiTutorial.split('id="execution-permissions"').length === 2);
 check('Pro AI tutorial separates released Open defaults from a provisional unreleased update',
   /In Pro 1\.4\.0, Open can run allowed kernels without asking/.test(helpText(aiTutorial))
     && /In the upcoming version, Open asks before Assistant cell execution by default/.test(helpText(aiTutorial))
