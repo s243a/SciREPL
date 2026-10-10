@@ -161,20 +161,35 @@ sample_m</code></pre>
             <div class="callout" id="assistant-practice-prompt">
               <p><strong>Copy this prompt.</strong> Paste it into the <strong>Assistant's message box</strong>, not a code cell, then tap <strong>Send</strong>.</p>
               <pre><code>In this practice workbook, add a Markdown explanation followed
-by one JavaScript cell named summary_demo. Start with this fixed
-input array: const values = [12, 15, 18];
-Compute the count (array length), arithmetic mean, minimum and
-maximum of those three input values. Print each result on its
-own labelled line with console.log. Do not generate additional
-or random data.
-Use ordinary JavaScript arrays and arithmetic, with no packages.
+by one JavaScript cell named summary_demo. Generate an input
+array of 10 pseudorandom integers from 1 to 20 inclusive.
+Use the Park-Miller generator with initial state 42. For each
+value, first update state = (16807 * state) % 2147483647;
+then append 1 + Math.floor(20 * state / 2147483647).
+Generate the array with this rule; do not hard-code its values
+or use Math.random. Reset state to 42 on each cell Run.
+Print the generated input array, then compute its count (array
+length), arithmetic mean, minimum and maximum. Print each
+result on its own labelled line with console.log.
+Use ordinary JavaScript arrays, arithmetic and Math.floor,
+with no packages.
 Do not run cells or change existing cells. Do not use files,
 storage, DOM APIs or network requests. Explain the expected
 results so I can review the code.</code></pre>
             </div>
           </li>
-          <li>Read the proposed explanation and the new <code>summary_demo</code> cell. Check that it only uses the small array and ordinary JavaScript. Run that cell yourself. The expected results are count <strong>3</strong>, mean <strong>15</strong>, minimum <strong>12</strong>, maximum <strong>18</strong>.</li>
+          <li>Read the proposed explanation and the new <code>summary_demo</code> cell. Check that it generates the input using the stated rule and computes the summaries from that array. Run that cell yourself, then compare with the check below. The expected results are count <strong>10</strong>, mean <strong>9.3</strong>, minimum <strong>1</strong>, maximum <strong>20</strong>.</li>
         </ol>
+        <aside class="callout" id="seeded-summary-check">
+          <h3>Check the input as well as the summaries</h3>
+          <p>The seed fixes the sequence, so this random-looking input is reproducible. With the update-before-draw rule above, expect:</p>
+          <pre><code>Input: [1, 11, 15, 6, 8, 4, 20, 11, 11, 6]
+Count: 10
+Mean: 9.3
+Minimum: 1
+Maximum: 20</code></pre>
+          <p>Output labels may differ, but the numbers should match. Running the cell again should produce the same input and summaries. A different seed changes the exercise; this small generator is for a reproducible demonstration, not security-sensitive randomness.</p>
+        </aside>
         <p><strong>Before Send:</strong> the Assistant includes the selected conversation and a bounded preview of the current workbook's cells (up to the first 500 characters of each cell, plus metadata). Allowed tools can send more. Turning source browsing off does <em>not</em> stop workbook previews from being sent. That is different from the smaller current-cell payload used by completion below.</p>
         <figure class="phone-figure">
           <img class="tutorial-shot" src="assets/assistant-open.png" width="390" height="1100" alt="Scrolled Pro browser AI Settings showing auto-run unchecked, source browsing unchecked, Active worksheet writes and the Open security preset." loading="lazy" decoding="async">
@@ -184,7 +199,7 @@ results so I can review the code.</code></pre>
         <p><strong>Paused with a Continue button?</strong> The agent may reach its configured step limit before finishing. Read what it has already done, then press <strong>Continue</strong> if the task is unfinished and you want another bounded run. Continuing can incur more API charges; it is not needed after <strong>Done</strong>.</p>
         <figure class="phone-figure">
           <img class="tutorial-shot" src="assets/phone-agent-result.png" width="1080" height="2340" alt="Actual Android Galaxy S24+ screenshot showing the reviewed JavaScript summary_demo source and its output: count 3, mean 15, min 12, max 18." loading="lazy" decoding="async">
-          <figcaption><strong>Actual Galaxy S24+ Android screenshot.</strong> GLM 5.3 Flash created the practice cells and finished after two Continue presses. The code was inspected and run manually—not automatically by the agent—and produced the four expected results.</figcaption>
+          <figcaption><strong>Actual Galaxy S24+ Android screenshot of the earlier fixed-array exercise.</strong> GLM 5.3 Flash created the practice cells using <code>[12, 15, 18]</code> and finished after two Continue presses. The code was inspected and run manually—not automatically by the agent—and produced count 3, mean 15, minimum 12 and maximum 18. This shows the workflow, not the output of the revised seeded exercise above.</figcaption>
           <a class="full-shot-link" href="assets/phone-agent-result.png">View the full phone screenshot of the reviewed code and result</a>
         </figure>
         <p>If you prefer more confirmation, use <strong>Cautious</strong> instead. Open still respects the separate source-browsing and write-scope controls; Full control bypasses those two coarse controls. Individual permissions and other safety gates still matter. <strong>Review</strong> is an additional read-mostly restriction, which would obstruct this cell-creation demonstration.</p>
@@ -257,7 +272,9 @@ const average = </code></pre>
           <li>Tap the AI Prompt cell's <strong>Run</strong>. Check the selected context in the review, then choose <strong>Send to AI provider</strong>. Read the explanation alongside the source and compare it with the known results.</li>
         </ol>
         <pre><code>Explain the selected JavaScript cell line by line.
-Why should it report count 3, mean 15, minimum 12 and maximum 18?
+How do the generator rule and seed 42 determine its input array?
+Why should it report count 10, mean 9.3, minimum 1 and maximum 20?
+Why does resetting the seed make the result repeatable?
 Explain what needs changing for an empty array.
 Return a short explanation only; do not rewrite the code.</code></pre>
         <p class="callout"><strong>A way to control API costs and improve understanding.</strong> A focused AI Prompt can send less context than a growing agent conversation and avoid a multi-step tool loop, reducing input tokens and potentially the bill. Ask for concise reasoning, assumptions and expected output as you code. Savings are <strong>not guaranteed</strong>: model rates, response length, reasoning tokens and your chosen context still matter. These requests use the <strong>Assistant's provider/model</strong>, not the independent completion model, and are outside the completion spending guards.</p>

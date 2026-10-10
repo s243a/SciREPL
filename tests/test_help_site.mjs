@@ -206,13 +206,18 @@ const aiAgentMarkup = (aiTutorial.match(
 const aiAgentList = (aiAgentMarkup.match(/<ol\b[^>]*>([\s\S]*?)<\/ol>/i) || [])[1] || '';
 const aiAgentItems = [...aiAgentList.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)];
 const aiPracticePrompt = `In this practice workbook, add a Markdown explanation followed
-by one JavaScript cell named summary_demo. Start with this fixed
-input array: const values = [12, 15, 18];
-Compute the count (array length), arithmetic mean, minimum and
-maximum of those three input values. Print each result on its
-own labelled line with console.log. Do not generate additional
-or random data.
-Use ordinary JavaScript arrays and arithmetic, with no packages.
+by one JavaScript cell named summary_demo. Generate an input
+array of 10 pseudorandom integers from 1 to 20 inclusive.
+Use the Park-Miller generator with initial state 42. For each
+value, first update state = (16807 * state) % 2147483647;
+then append 1 + Math.floor(20 * state / 2147483647).
+Generate the array with this rule; do not hard-code its values
+or use Math.random. Reset state to 42 on each cell Run.
+Print the generated input array, then compute its count (array
+length), arithmetic mean, minimum and maximum. Print each
+result on its own labelled line with console.log.
+Use ordinary JavaScript arrays, arithmetic and Math.floor,
+with no packages.
 Do not run cells or change existing cells. Do not use files,
 storage, DOM APIs or network requests. Explain the expected
 results so I can review the code.`;
@@ -231,12 +236,37 @@ check('Pro AI practice prompt is labelled and directly inside instruction 3 befo
     && aiAgentItems[2][1].includes(`<pre><code>${aiPracticePrompt}</code></pre>`)
     && /Read the proposed explanation/.test(helpText(aiAgentItems[3][1]))
     && aiAgentMarkup.split(aiPracticePrompt).length === 2);
-check('Pro AI practice prompt identifies fixed input values and separately labelled aggregate outputs',
-  /fixed\s+input array: const values = \[12, 15, 18\];/.test(aiPracticePrompt)
-    && /count \(array length\), arithmetic mean, minimum and\s+maximum of those three input values/.test(aiPracticePrompt)
-    && /each result on its\s+own labelled line with console\.log/.test(aiPracticePrompt)
-    && /Do not generate additional\s+or random data\./.test(aiPracticePrompt)
-    && /count <strong>3<\/strong>, mean <strong>15<\/strong>, minimum <strong>12<\/strong>, maximum <strong>18<\/strong>/.test(aiAgentItems[3][1]));
+check('Pro AI practice prompt specifies generated input, exact seed and rule, and separately labelled summaries',
+  /array of 10 pseudorandom integers from 1 to 20 inclusive\./.test(aiPracticePrompt)
+    && /Park-Miller generator with initial state 42/.test(aiPracticePrompt)
+    && /first update state = \(16807 \* state\) % 2147483647;/.test(aiPracticePrompt)
+    && /then append 1 \+ Math\.floor\(20 \* state \/ 2147483647\)\./.test(aiPracticePrompt)
+    && /do not hard-code its values\s+or use Math\.random/.test(aiPracticePrompt)
+    && /Reset state to 42 on each cell Run\./.test(aiPracticePrompt)
+    && /Print the generated input array, then compute its count \(array\s+length\), arithmetic mean, minimum and maximum/.test(aiPracticePrompt)
+    && /each\s+result on its own labelled line with console\.log/.test(aiPracticePrompt)
+    && /count <strong>10<\/strong>, mean <strong>9\.3<\/strong>, minimum <strong>1<\/strong>, maximum <strong>20<\/strong>/.test(aiAgentItems[3][1]));
+// Use exact integer arithmetic independently of the exercise's Number-based
+// implementation, including the conversion to the stated integer range.
+let summaryState = 42n;
+const summaryVector = Array.from({ length: 10 }, () => {
+  summaryState = (16807n * summaryState) % 2147483647n;
+  return Number(1n + (20n * summaryState) / 2147483647n);
+});
+const summaryCheck = (aiAgentMarkup.match(
+  /<aside\b[^>]*\bid="seeded-summary-check"[^>]*>([\s\S]*?)<\/aside>/i) || [])[1] || '';
+const summaryOutput = (summaryCheck.match(/<pre><code>([\s\S]*?)<\/code><\/pre>/i) || [])[1] || '';
+check('Pro AI seeded-vector check agrees with an independent exact-integer calculation',
+  summaryOutput === `Input: [${summaryVector.join(', ')}]\nCount: ${summaryVector.length}\nMean: ${summaryVector.reduce((a, b) => a + b, 0) / summaryVector.length}\nMinimum: ${Math.min(...summaryVector)}\nMaximum: ${Math.max(...summaryVector)}`
+    && /same input and summaries/.test(helpText(summaryCheck))
+    && /not security-sensitive randomness/.test(helpText(summaryCheck)));
+check('Pro AI real phone result is explicitly the earlier fixed-array exercise, not a seeded-run claim',
+  /Actual Galaxy S24\+ Android screenshot of the earlier fixed-array exercise/.test(helpText(aiAgentMarkup))
+    && /not the output of the revised seeded exercise/.test(helpText(aiAgentMarkup)));
+check('Pro AI Prompt follow-up asks about the matching seeded calculation rather than the old fixed array',
+  /generator rule and seed 42 determine its input array/.test(aiSection('prompt-cells'))
+    && /count 10, mean 9\.3, minimum 1 and maximum 20/.test(aiSection('prompt-cells'))
+    && /resetting the seed make the result repeatable/.test(aiSection('prompt-cells')));
 check('Pro AI tutorial describes Open and browser limits without promising safe generated code',
   /second-most-permissive/i.test(aiSection('agent'))
     && /Active worksheet/.test(aiSection('agent'))

@@ -147,7 +147,8 @@ variables as the earlier capture scripts and refuses to overwrite existing files
   Those are distinct figures, not a promise about the final provider bill.
   The single request took about 2.6 s in this session, not a latency benchmark.
 - `phone-agent-result.png`: GLM 5.3 Flash created a Markdown explanation and
-  the JavaScript `summary_demo` cell. It used seven tool-loop steps across
+  the JavaScript `summary_demo` cell for the earlier fixed input `[12, 15, 18]`,
+  not the tutorial's later seeded-vector exercise. It used seven tool-loop steps across
   three bounded runs, with two Continue presses, then showed Done. Open was
   selected, auto-run and source browsing were off, JavaScript execution was
   Ask, writes were limited to the practice workbook, and Remote/Terminal were
