@@ -315,6 +315,34 @@ check('Pro AI execution guide distinguishes staged preset changes and separate s
     'permitted code can use networking', 'MCP notebook execution uses the same execution checks']
     .every(text => aiExecutionText.includes(text))
     && /Online completion's Always allow\s*, AI Prompt's context review, and Remote\/MCP's privacy disclosure remain separate/.test(aiExecutionText));
+const aiContextMarkup = (aiTutorial.match(
+  /<aside\b[^>]*\bid="planned-workbook-context"[^>]*>([\s\S]*?)<\/aside>/i) || [])[1] || '';
+const aiContextText = helpText(aiContextMarkup);
+check('Pro AI current workbook disclosure links a separate design-only context appendix',
+  /first 500 characters of each cell/.test(aiSection('agent'))
+    && aiAgentMarkup.includes('href="#planned-workbook-context"')
+    && aiTutorial.indexOf('id="planned-workbook-context"') > aiTutorial.lastIndexOf('</section>')
+    && /<aside\b[^>]*id="planned-workbook-context"[^>]*aria-labelledby="context-appendix-title"/.test(aiTutorial)
+    && /Design proposal only/.test(aiContextText)
+    && /not implemented or assigned to a release/.test(aiContextText)
+    && /separate from the upcoming execution-approval changes/.test(aiContextText));
+check('Pro AI planned summary uses metadata tooling rather than an automatic source or model summary',
+  ['metadata-only directory tool', 'cell names, optional descriptions, languages and types',
+    'list_cells', 'view: "metadata"', 'read selected source separately',
+    'not an automatically generated AI explanation'].every(text => aiContextText.includes(text)));
+check('Pro AI attach-once idea discloses its tentative default, actual-send consumption and privacy boundaries',
+  ['Attach workbook summary this time', 'could start checked for a fresh conversation',
+    'after that attachment is actually sent', 'initial default still needs privacy and usability review',
+    'Continuations would not add another summary', 'switching tabs would not silently re-enable it',
+    'existing read/privacy permissions', 'not remove summaries already in the conversation',
+    'prevent allowed tool reads'].every(text => aiContextText.includes(text)));
+check('Pro AI optional changes and Git/GitHub history are scoped future features with separate sharing',
+  ['known sent-context baseline', 'agent edits, imports and unknown changes',
+    'not automatically rewrite a cell', 'longer-term Pro ideas', 'Local Send checkpoints',
+    'Gist or a chosen file in a repository', 'Enabling history would not push to GitHub',
+    'not proof that a human made them', 'A secret Gist is not private',
+    'Anyone with its URL can read it', 'use a private repository'].every(text => aiContextText.includes(text))
+    && aiContextMarkup.includes('href="https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists/creating-gists"'));
 check('Pro AI tutorial retains honest pre-update screenshot provenance',
   /browser capture predates the execution-consent update/.test(aiSection('agent'))
     && /upcoming approval and override dialogs are not pictured/.test(aiSection('agent'))
