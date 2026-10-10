@@ -407,6 +407,7 @@ const aiOpenPng = readFileSync(path.join(aiAssets, 'assistant-open.png'));
 const aiOpenOverlay = readFileSync(path.join(aiAssets, 'assistant-open-overlay.svg'), 'utf8');
 const aiOpenFigure = (aiAgentMarkup.match(
   /<figure\b[^>]*\bid="assistant-run-controls"[^>]*>([\s\S]*?)<\/figure>/i) || [])[1] || '';
+const aiOpenRects = [...aiOpenOverlay.matchAll(/<rect\b[^>]*\bx="([\d.]+)"[^>]*\by="([\d.]+)"[^>]*\bwidth="([\d.]+)"[^>]*\bheight="([\d.]+)"/g)];
 check('Pro AI execution settings overlay matches the original PNG and outlines five relevant controls',
   aiOpenPng.readUInt32BE(16) === 390 && aiOpenPng.readUInt32BE(20) === 1100
     && /viewBox="0 0 390 1100"/.test(aiOpenOverlay)
@@ -414,9 +415,13 @@ check('Pro AI execution settings overlay matches the original PNG and outlines f
     && ['auto-run-setting', 'source-browsing-setting', 'agent-writes-setting',
       'max-steps-setting', 'security-level-setting']
       .every(id => aiOpenOverlay.includes(`id="${id}"`))
-    && [...aiOpenOverlay.matchAll(/<rect\b[^>]*\bx="([\d.]+)"[^>]*\by="([\d.]+)"[^>]*\bwidth="([\d.]+)"[^>]*\bheight="([\d.]+)"/g)]
+    && aiOpenRects.length === 5
+    && aiOpenRects
       .every(([, x, y, width, height]) => Number(x) > 0 && Number(y) > 0
         && Number(x) + Number(width) < 390 && Number(y) + Number(height) < 1100));
+check('Pro AI execution highlights extend to both GUI margins without clipping their strokes',
+  aiOpenRects.length === 5 && aiOpenRects.every(([, x, , width]) =>
+    Number(x) === 3 && Number(width) === aiOpenPng.readUInt32BE(16) - 6));
 check('Pro AI execution figure keeps controls accessible and links the original without changing provenance',
   /role="img" aria-label="[^\"]*Auto-run[^\"]*Allow source browsing[^\"]*Max steps/.test(aiOpenFigure)
     && aiOpenFigure.includes('src="assets/assistant-open-overlay.svg"')

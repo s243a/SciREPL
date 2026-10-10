@@ -78,8 +78,10 @@ link opens it without annotations.
 
 `assistant-open-overlay.svg` adds five yellow outlines to the existing
 390 × 1100 `assistant-open.png`: Auto-run, Allow source browsing, Agent writes,
-Max steps and Security Level. The positions were checked against the original
-image; no screenshot pixels, controls or values were changed. The tutorial uses
+Max steps and Security Level. Each outline reaches the GUI's left and right
+margins, with a 3-pixel inset so its stroke remains inside the screenshot.
+The positions were checked against the original image; no screenshot pixels,
+controls or values were changed. The tutorial uses
 a CSS crop through pixel 713 to focus on these settings rather than Remote/MCP,
 and links the unmodified full PNG. Max steps is already visible in this capture,
 so the Continue explanation uses the same figure, not a new capture. This remains
