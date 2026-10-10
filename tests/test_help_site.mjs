@@ -138,14 +138,19 @@ const aiTablesMarkup = (aiTutorial.match(
   /<section\b[^>]*\bid="tables"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
 const aiTablesLists = [...aiTablesMarkup.matchAll(/<ol\b([^>]*)>([\s\S]*?)<\/ol>/gi)];
 const aiGeneralFigurePosition = aiTablesMarkup.indexOf('src="assets/completion-general.png"');
+const aiGeneralFigureEnd = aiTablesMarkup.indexOf('</figure>', aiGeneralFigurePosition) + '</figure>'.length;
 const aiJavascriptFigurePosition = aiTablesMarkup.indexOf('src="assets/phone-table-javascript.png"');
-check('Pro AI table lesson places setup before item 4 and the JavaScript example after acceptance',
+check('Pro AI table lesson places the settings figure before practice item 3 and acceptance before its example',
   aiTablesLists.length === 2
-    && (aiTablesLists[0][2].match(/<li\b/g) || []).length === 3
-    && /\bstart="4"/.test(aiTablesLists[1][1])
-    && (aiTablesLists[1][2].match(/<li\b/g) || []).length === 1
+    && (aiTablesLists[0][2].match(/<li\b/g) || []).length === 2
+    && /\bstart="3"/.test(aiTablesLists[1][1])
+    && (aiTablesLists[1][2].match(/<li\b/g) || []).length === 2
+    && /Close Completion\./.test(aiTablesLists[1][2])
+    && aiTablesLists[1][2].indexOf('Close Completion.') < aiTablesLists[1][2].indexOf('In the screenshot below')
     && aiGeneralFigurePosition > aiTablesLists[0].index + aiTablesLists[0][0].length
-    && aiGeneralFigurePosition < aiTablesLists[1].index
+    && aiGeneralFigureEnd > aiGeneralFigurePosition
+    && aiGeneralFigureEnd < aiTablesLists[1].index
+    && aiTablesMarkup.indexOf('View the complete settings capture') < aiGeneralFigureEnd
     && aiJavascriptFigurePosition > aiTablesLists[1].index + aiTablesLists[1][0].length
     && aiJavascriptFigurePosition < aiTablesMarkup.indexOf('src="assets/phone-table-ghost.png"'));
 check('Pro AI JavaScript example separates hidden extra keys from table-only completion',
