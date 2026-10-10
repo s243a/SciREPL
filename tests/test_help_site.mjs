@@ -228,6 +228,20 @@ check('Pro AI auto-run warning sits directly inside setup instruction 1 before c
     && /Your own manual cell Run remains a separate action/.test(helpText(aiAgentItems[0][1]))
     && /In the Assistant panel/.test(helpText(aiAgentItems[1][1]))
     && aiAgentMarkup.split('Auto-run off is not an execution lock.').length === 2);
+const aiSetupSafetyMarkup = (((aiAgentItems[0] || [])[1] || '').match(
+  /<aside\b[^>]*\bid="sandbox"[^>]*>([\s\S]*?)<\/aside>/i) || [])[1] || '';
+check('Pro AI Cautious and sandbox callout follows the auto-run warning inside setup instruction 1 before Send',
+  aiAgentItems.length === 4
+    && /id="auto-run-warning"[^>]*>[\s\S]*?<\/p>\s*<aside\b[^>]*class="callout"[^>]*id="sandbox"/.test(aiAgentItems[0][1])
+    && aiSetupSafetyMarkup.indexOf('If you prefer more confirmation') >= 0
+    && aiSetupSafetyMarkup.indexOf('If you prefer more confirmation') < aiSetupSafetyMarkup.indexOf('<h3>')
+    && /Cautious/.test(helpText(aiSetupSafetyMarkup))
+    && /What the browser sandbox does—and does not—protect/.test(helpText(aiSetupSafetyMarkup))
+    && /Remote\/MCP Terminal is different/.test(helpText(aiSetupSafetyMarkup))
+    && aiSetupSafetyMarkup.includes('href="../../remote/"')
+    && aiAgentMarkup.indexOf('id="sandbox"') < aiAgentMarkup.indexOf('Send the practice prompt')
+    && aiAgentMarkup.split('id="sandbox"').length === 2
+    && aiAgentMarkup.split('If you prefer more confirmation').length === 2);
 check('Pro AI practice prompt is labelled and directly inside instruction 3 before review instruction 4',
   aiAgentItems.length === 4
     && /id="assistant-practice-prompt"/.test(aiAgentItems[2][1])
@@ -260,9 +274,12 @@ check('Pro AI seeded-vector check agrees with an independent exact-integer calcu
   summaryOutput === `Input: [${summaryVector.join(', ')}]\nCount: ${summaryVector.length}\nMean: ${summaryVector.reduce((a, b) => a + b, 0) / summaryVector.length}\nMinimum: ${Math.min(...summaryVector)}\nMaximum: ${Math.max(...summaryVector)}`
     && /same input and summaries/.test(helpText(summaryCheck))
     && /not security-sensitive randomness/.test(helpText(summaryCheck)));
-check('Pro AI real phone result is explicitly the earlier fixed-array exercise, not a seeded-run claim',
-  /Actual Galaxy S24\+ Android screenshot of the earlier fixed-array exercise/.test(helpText(aiAgentMarkup))
-    && /not the output of the revised seeded exercise/.test(helpText(aiAgentMarkup)));
+check('Pro AI real phone result matches the current seeded exercise and distinguishes manual execution',
+  /Actual Galaxy S24\+ Android screenshot of the seeded-vector exercise above/.test(helpText(aiAgentMarkup))
+    && /count 10, mean 9\.3, minimum 1 and maximum 20/.test(helpText(aiAgentMarkup))
+    && /run manually—not automatically by the agent/.test(helpText(aiAgentMarkup))
+    && /second manual Run reproduced the same results/.test(helpText(aiAgentMarkup))
+    && /output and part of the source/.test(helpText(aiAgentMarkup)));
 check('Pro AI Prompt follow-up asks about the matching seeded calculation rather than the old fixed array',
   /generator rule and seed 42 determine its input array/.test(aiSection('prompt-cells'))
     && /count 10, mean 9\.3, minimum 1 and maximum 20/.test(aiSection('prompt-cells'))
@@ -543,8 +560,18 @@ check('Pro AI tutorial explains bounded Continue runs and records a reviewed man
     && /Continuing can incur more API charges/.test(aiSection('agent'))
     && aiPhoneReceipt.agent.model === 'z-ai/glm-5.3-flash'
     && aiPhoneReceipt.agent.autoRun === false
-    && aiPhoneReceipt.agent.continuePresses === 2 && aiPhoneReceipt.agent.status === 'Done'
-    && aiPhoneReceipt.agent.output === 'count: 3\nmean: 15\nmin: 12\nmax: 18'
+    && aiPhoneReceipt.agent.maxStepsPerRun === 4
+    && aiPhoneReceipt.agent.stepBursts.join(',') === '4,1'
+    && aiPhoneReceipt.agent.continuePresses === 1 && aiPhoneReceipt.agent.status === 'Done'
+    && aiPhoneReceipt.agent.output === `input: ${summaryVector.join(', ')}\ncount: 10\nmean: 9.3\nmin: 1\nmax: 20`
+    && JSON.stringify(aiPhoneReceipt.agent.input) === JSON.stringify(summaryVector)
+    && aiPhoneReceipt.agent.initialState === 42
+    && aiPhoneReceipt.agent.manualRuns === 2 && aiPhoneReceipt.agent.repeatableOutput === true
+    && aiPhoneReceipt.agent.generatedSourceUnchangedExceptTrailingWhitespace === true
+    && aiPhoneReceipt.agent.originalWorkbookDraftLanguageAndSnapshottedSettingsRestored === true
+    && aiPhoneReceipt.agent.providerRequests === 5
+    && aiPhoneReceipt.agent.providerStatuses.length === aiPhoneReceipt.agent.providerRequests
+    && aiPhoneReceipt.agent.providerStatuses.every(status => status === 200)
     && aiPhoneReceipt.agent.providerTotalIndependentlyVerified === false);
 for (const shot of aiPhoneReceipt.screenshots) {
   const png = readFileSync(path.join(aiAssets, shot.file));

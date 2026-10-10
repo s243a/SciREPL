@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
-  "capturedDateUtc": "2026-10-08",
+  "initialCapturedDateUtc": "2026-10-08",
+  "captureDatesUtc": ["2026-10-08", "2026-10-10"],
   "device": {
     "model": "SM-S926W",
     "name": "Galaxy S24+",
@@ -88,6 +89,7 @@
     "latencyBenchmark": false
   },
   "agent": {
+    "capturedAtUtc": "2026-10-10T02:08:28.641Z",
     "backend": "openrouter",
     "model": "z-ai/glm-5.3-flash",
     "securityPreset": "open",
@@ -97,13 +99,29 @@
     "writeScope": "active",
     "remote": false,
     "terminal": false,
-    "stepBursts": [3, 2, 2],
-    "continuePresses": 2,
+    "maxStepsPerRun": 4,
+    "maxOutputTokensPerRequest": 2048,
+    "perRunUsdGuard": 0.03,
+    "stepBursts": [4, 1],
+    "continuePresses": 1,
     "status": "Done",
     "createdCells": ["Markdown explanation", "JavaScript summary_demo"],
     "runMethod": "Reviewed toy source, then manually used the saved cell's Run button",
-    "output": "count: 3\nmean: 15\nmin: 12\nmax: 18",
-    "appDisplayedBurstEstimatesUsd": [0.0025, 0.0016, 0.0018],
+    "exercise": "Park-Miller seeded vector from the current tutorial prompt",
+    "initialState": 42,
+    "input": [1, 11, 15, 6, 8, 4, 20, 11, 11, 6],
+    "summaries": { "count": 10, "mean": 9.3, "minimum": 1, "maximum": 20 },
+    "output": "input: 1, 11, 15, 6, 8, 4, 20, 11, 11, 6\ncount: 10\nmean: 9.3\nmin: 1\nmax: 20",
+    "manualRuns": 2,
+    "repeatableOutput": true,
+    "generatedSourceUnchangedExceptTrailingWhitespace": true,
+    "providerRequests": 5,
+    "providerStatuses": [200, 200, 200, 200, 200],
+    "providerReportedUsd": 0.0023609,
+    "appCacheAtCapture": "scirepl-app-v461",
+    "buildCommit": null,
+    "originalWorkbookDraftLanguageAndSnapshottedSettingsRestored": true,
+    "providerKeySpendingAndConsentRetained": true,
     "providerTotalIndependentlyVerified": false,
     "latencyBenchmark": false
   },
@@ -113,6 +131,6 @@
     { "file": "phone-table-ghost.png", "width": 1080, "height": 2340, "sha256": "9dbb10f4149ef671391e9fd7cb4d0adab7d07c39e0c94bcf718538868f4a5b7b" },
     { "file": "phone-table-chips.png", "width": 1080, "height": 2340, "sha256": "af0c555b73a77313f23ee2af62d8d4036d8ebb54df010404be0cfefb44cf72e6" },
     { "file": "phone-online-chips.png", "width": 1080, "height": 2340, "sha256": "9a970d2cbc443de68cdc2069f8849371a4060b2de0e0638e10dc7dc5713e5303" },
-    { "file": "phone-agent-result.png", "width": 1080, "height": 2340, "sha256": "69d702e1cb089d4a382bc7f05e5c3efd1f782797d81a4aa7242179d91f33c498" }
+    { "file": "phone-agent-result.png", "width": 1080, "height": 2340, "sha256": "0b5b5b0dea59c8899ea78e0b2aa7e66ce74994973fe549aebb776c6a1fde3060", "capturedAtUtc": "2026-10-10T02:08:28.641Z" }
   ]
 }

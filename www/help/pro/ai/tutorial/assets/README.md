@@ -119,7 +119,8 @@ variables as the earlier capture scripts and refuses to overwrite existing files
   `1.4.0-debug`, version code `25`, development UI, active app cache `v461`.
   The installed app's Git commit was not independently identified; do not
   treat the browser source SHA above as the phone's build SHA.
-- Captured 2026-10-08 UTC (2026-10-07–08 local), English/dark theme, portrait,
+- Original pictures captured 2026-10-08 UTC (2026-10-07–08 local); the agent
+  result was refreshed on 2026-10-10 UTC (2026-10-09 local). English/dark theme, portrait,
   1080 × 2340, using Android's `screencap`. These are unmodified full-screen
   PNGs. The four composer pictures use a CSS detail view of their lower
   700 pixels; the expanded Suggestions menu shows original pixels 775–1415;
@@ -157,16 +158,24 @@ variables as the earlier capture scripts and refuses to overwrite existing files
   provider-reported cost $0.0003641, and app-ledger settlement $0.0007282.
   Those are distinct figures, not a promise about the final provider bill.
   The single request took about 2.6 s in this session, not a latency benchmark.
-- `phone-agent-result.png`: GLM 5.3 Flash created a Markdown explanation and
-  the JavaScript `summary_demo` cell for the earlier fixed input `[12, 15, 18]`,
-  not the tutorial's later seeded-vector exercise. It used seven tool-loop steps across
-  three bounded runs, with two Continue presses, then showed Done. Open was
+- `phone-agent-result.png`: refreshed at 2026-10-10 02:08 UTC using the tutorial's
+  exact seeded-vector prompt. GLM 5.3 Flash created a Markdown explanation and
+  the JavaScript `summary_demo` cell. The first bounded run reached the four-step
+  limit; one Continue press made one further provider request, then showed Done. Open was
   selected, auto-run and source browsing were off, JavaScript execution was
   Ask, writes were limited to the practice workbook, and Remote/Terminal were
-  off. The source was inspected before manually pressing the cell's Run;
-  the output was count 3, mean 15, min 12, max 18. The app's displayed burst
-  estimates were approximately $0.0025, $0.0016 and $0.0018—not an independently
-  audited provider total. The online completion alternatives were not run.
+  off. The source was inspected before manually pressing the saved cell's Run.
+  It generated `1, 11, 15, 6, 8, 4, 20, 11, 11, 6`, with count 10, mean 9.3,
+  min 1 and max 20; a second manual Run reproduced the entire output without
+  changing the source. The picture shows all output and part of the source,
+  with the seed and first lines above the scrolled position. Neither code nor
+  screenshot pixels were rewritten to obtain this result.
+  Five HTTP 200 provider responses reported a combined $0.0023609; this is
+  reported usage, not an independently audited bill. Each request was limited
+  to 2,048 output tokens, with the app's per-run USD guard set to $0.03.
+  The installed cache was still v461; its build commit remains unidentified,
+  so this is not evidence of the newer execution-consent implementation.
+  The online completion alternatives were not run.
 - After the check, the original workbook, draft and language were restored,
   along with only the snapshotted temporary completion/agent settings. The
   practice workbook and its checked output remain available. The newly saved
