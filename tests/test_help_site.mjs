@@ -206,11 +206,16 @@ const aiAgentMarkup = (aiTutorial.match(
 const aiAgentList = (aiAgentMarkup.match(/<ol\b[^>]*>([\s\S]*?)<\/ol>/i) || [])[1] || '';
 const aiAgentItems = [...aiAgentList.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)];
 const aiPracticePrompt = `In this practice workbook, add a Markdown explanation followed
-by one JavaScript cell named summary_demo. Use [12, 15, 18]
-to print count, mean, minimum and maximum using only arrays,
-arithmetic and console.log. Do not run cells or change existing
-cells. Do not use files, storage, DOM APIs, network requests or
-packages. Explain the expected results so I can review the code.`;
+by one JavaScript cell named summary_demo. Start with this fixed
+input array: const values = [12, 15, 18];
+Compute the count (array length), arithmetic mean, minimum and
+maximum of those three input values. Print each result on its
+own labelled line with console.log. Do not generate additional
+or random data.
+Use ordinary JavaScript arrays and arithmetic, with no packages.
+Do not run cells or change existing cells. Do not use files,
+storage, DOM APIs or network requests. Explain the expected
+results so I can review the code.`;
 check('Pro AI auto-run warning sits directly inside setup instruction 1 before choosing the conversation',
   aiAgentItems.length === 4
     && /id="auto-run-warning"/.test(aiAgentItems[0][1])
@@ -226,6 +231,12 @@ check('Pro AI practice prompt is labelled and directly inside instruction 3 befo
     && aiAgentItems[2][1].includes(`<pre><code>${aiPracticePrompt}</code></pre>`)
     && /Read the proposed explanation/.test(helpText(aiAgentItems[3][1]))
     && aiAgentMarkup.split(aiPracticePrompt).length === 2);
+check('Pro AI practice prompt identifies fixed input values and separately labelled aggregate outputs',
+  /fixed\s+input array: const values = \[12, 15, 18\];/.test(aiPracticePrompt)
+    && /count \(array length\), arithmetic mean, minimum and\s+maximum of those three input values/.test(aiPracticePrompt)
+    && /each result on its\s+own labelled line with console\.log/.test(aiPracticePrompt)
+    && /Do not generate additional\s+or random data\./.test(aiPracticePrompt)
+    && /count <strong>3<\/strong>, mean <strong>15<\/strong>, minimum <strong>12<\/strong>, maximum <strong>18<\/strong>/.test(aiAgentItems[3][1]));
 check('Pro AI tutorial describes Open and browser limits without promising safe generated code',
   /second-most-permissive/i.test(aiSection('agent'))
     && /Active worksheet/.test(aiSection('agent'))
