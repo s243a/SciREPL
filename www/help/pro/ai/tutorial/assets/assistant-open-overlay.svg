@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 1100">
+  <title>Assistant execution controls and per-run step limit</title>
+  <desc>Yellow borders extend to the GUI margins and locate the unchecked Auto-run and Allow source browsing controls, Agent writes set to Active worksheet, Max steps with its default 25 hint, and the Open security preset. The underlying browser screenshot is unchanged.</desc>
+  <g fill="none" stroke="#ffd43b" stroke-width="3">
+    <rect id="auto-run-setting" x="3" y="112" width="384" height="30" rx="6"/>
+    <rect id="source-browsing-setting" x="3" y="145" width="384" height="36" rx="6"/>
+    <rect id="agent-writes-setting" x="3" y="184" width="384" height="39" rx="6"/>
+    <rect id="max-steps-setting" x="3" y="343" width="384" height="42" rx="6"/>
+    <rect id="security-level-setting" x="3" y="532" width="384" height="39" rx="6"/>
+  </g>
+</svg>

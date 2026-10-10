@@ -2,6 +2,7 @@
 // Run after server.js is listening on http://localhost:8085.
 
 import { chromium } from 'playwright';
+import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -39,6 +40,7 @@ const expected = [
   'help/privacy/index.html',
   'help/pro/index.html',
   'help/pro/ai/index.html',
+  'help/pro/ai/tutorial/index.html',
   'help/pro/remote/index.html',
   'pro/help/index.html',
 ];
@@ -119,6 +121,468 @@ const helpText = html => html.replace(/<[^>]*>/g, ' ')
   .replace(/&amp;/gi, '&').replace(/&nbsp;|&#160;/gi, ' ')
   .replace(/&#39;|&apos;/gi, "'").replace(/&quot;/gi, '"')
   .replace(/\s+/g, ' ').trim();
+
+const aiTutorial = readFileSync(path.join(WWW, 'help/pro/ai/tutorial/index.html'), 'utf8');
+const aiSection = id => helpText((aiTutorial.match(new RegExp(
+  `<section\\b[^>]*\\bid=["']${id}["'][^>]*>([\\s\\S]*?)<\\/section>`, 'i')) || [])[1] || '');
+const aiSteps = ['tables', 'key', 'agent', 'online', 'local', 'prompt-cells'];
+check('Pro AI tutorial follows tables, key, Open agent, API completion, local model, AI Prompt',
+  aiSteps.every((id, index) => aiTutorial.includes(`id="${id}"`)
+    && (!index || aiTutorial.indexOf(`id="${aiSteps[index - 1]}"`) < aiTutorial.indexOf(`id="${id}"`))));
+check('Pro AI tutorial distinguishes no API charge from the Free edition and touch Auto default',
+  /Free.{0,60}means no API charge/i.test(helpText(aiTutorial))
+    && /not make them Free-edition features/i.test(helpText(aiTutorial))
+    && /desktop on, touch off/i.test(aiSection('tables'))
+    && /Accept is not Run/i.test(aiSection('tables')));
+const aiTablesMarkup = (aiTutorial.match(
+  /<section\b[^>]*\bid="tables"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+const aiTablesLists = [...aiTablesMarkup.matchAll(/<ol\b([^>]*)>([\s\S]*?)<\/ol>/gi)];
+const aiGeneralFigurePosition = aiTablesMarkup.indexOf('src="assets/completion-general.png"');
+const aiGeneralFigureEnd = aiTablesMarkup.indexOf('</figure>', aiGeneralFigurePosition) + '</figure>'.length;
+const aiJavascriptFigurePosition = aiTablesMarkup.indexOf('src="assets/phone-table-javascript.png"');
+check('Pro AI table lesson places the settings figure before practice item 3 and acceptance before its example',
+  aiTablesLists.length === 2
+    && (aiTablesLists[0][2].match(/<li\b/g) || []).length === 2
+    && /\bstart="3"/.test(aiTablesLists[1][1])
+    && (aiTablesLists[1][2].match(/<li\b/g) || []).length === 2
+    && /Close Completion\./.test(aiTablesLists[1][2])
+    && aiTablesLists[1][2].indexOf('Close Completion.') < aiTablesLists[1][2].indexOf('In the screenshot below')
+    && aiGeneralFigurePosition > aiTablesLists[0].index + aiTablesLists[0][0].length
+    && aiGeneralFigureEnd > aiGeneralFigurePosition
+    && aiGeneralFigureEnd < aiTablesLists[1].index
+    && aiTablesMarkup.indexOf('View the complete settings capture') < aiGeneralFigureEnd
+    && aiJavascriptFigurePosition > aiTablesLists[1].index + aiTablesLists[1][0].length
+    && aiJavascriptFigurePosition < aiTablesMarkup.indexOf('src="assets/phone-table-ghost.png"'));
+check('Pro AI JavaScript example separates hidden extra keys from table-only completion',
+  /JavaScript table completion offers const for cons/.test(aiSection('tables'))
+    && /the faint t is ghost text, with Accept visible and chips enabled/.test(aiSection('tables'))
+    && /extra-key row is hidden here/.test(aiSection('tables'))
+    && /not a requirement for completion/.test(aiSection('tables')));
+check('Pro AI offline suggestions explain kernel and source-derived names without universal live resolution',
+  ['variables and functions found in workbook code', 'cached kernel names and object attributes, including methods',
+    'Frequency and acceptance history help rank them', 'static lists, unrun definitions or stale snapshots',
+    'not currently available in scope'].every(text => aiSection('tables').includes(text)));
+check('Pro AI no-request promise is scoped to current tables and distinguishes future opt-in prefetch',
+  /With only the offline table layer enabled, typing a prefix does not send an API request/.test(aiSection('tables'))
+    && /Future online prefetch/.test(aiSection('tables'))
+    && /an opt-in mode is planned that could send model requests while you type/.test(aiSection('tables'))
+    && /not available yet, and no release number is assigned/.test(aiSection('tables')));
+check('Pro AI tutorial puts keys in settings, not workbook source',
+  /API Key/i.test(aiSection('key')) && /Saved keys/i.test(aiSection('key'))
+    && /without application-level encryption/i.test(aiSection('key'))
+    && /Do not paste it into a cell/i.test(aiSection('key')));
+const aiKeyMarkup = (aiTutorial.match(
+  /<section\b[^>]*\bid="key"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+check('Pro AI key setup places the scroll tip after the gear and the configuration image after key privacy',
+  aiKeyMarkup.indexOf("Can't see the gear?") > aiKeyMarkup.indexOf('⚙ gear')
+    && aiKeyMarkup.indexOf("Can't see the gear?") < aiKeyMarkup.indexOf('Configure model for → AI Assistant')
+    && aiKeyMarkup.indexOf('assets/assistant-key-setup.png') > aiKeyMarkup.indexOf('Keep the key out of the workbook.')
+    && /Drag the panel's contents downwards/.test(aiSection('key'))
+    && /placeholder, not a saved key/.test(aiSection('key')));
+check('Pro AI model examples link primary documentation and qualify version and provider availability',
+  ['GLM 5.3 Flash', 'GPT-6 Luna', 'Claude Haiku 5.5', 'DeepSeek V4 Flash']
+    .every(name => aiSection('key').includes(name))
+    && ['https://openrouter.ai/z-ai/glm-5.3-flash',
+      'https://developers.openai.com/api/docs/models/gpt-6-luna',
+      'https://www.anthropic.com/claude/haiku',
+      'https://api-docs.deepseek.com/quick_start/pricing']
+      .every(href => aiKeyMarkup.includes(`href="${href}"`))
+    && /depend on your app version and provider/.test(aiSection('key')));
+const aiCustomMarkup = (aiTutorial.match(
+  /<aside\b[^>]*\bid="custom-model"[^>]*>([\s\S]*?)<\/aside>/i) || [])[1] || '';
+const aiCustomText = helpText(aiCustomMarkup);
+check('Pro AI missing-model callout follows named examples and gives the real custom-ID route',
+  aiKeyMarkup.indexOf('id="custom-model"') > aiKeyMarkup.indexOf('A low-cost, tool-capable model')
+    && ['AI Settings → Configure model for → AI Assistant', 'Backend first', 'exact API model ID',
+      'Or enter custom model ID', 'below the Model picker', 'already available in Pro 1.4.0']
+      .every(text => aiCustomText.includes(text)));
+check('Pro AI custom-ID guidance verifies provider format, precedence and compatibility without claiming validation',
+  ['organization prefix', 'anthropic/claude-haiku-5.5', "not that page's URL", 'takes precedence over the dropdown',
+    'clears the custom field', 'An ID does not add API support', 'support tool calls through the API SciREPL uses',
+    'saving does not validate them or make a model request'].every(text => aiCustomText.includes(text))
+    && aiCustomMarkup.includes('href="https://openrouter.ai/anthropic/claude-haiku-5.5"'));
+const aiAgentMarkup = (aiTutorial.match(
+  /<section\b[^>]*\bid="agent"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+const aiAgentList = (aiAgentMarkup.match(/<ol\b[^>]*>([\s\S]*?)<\/ol>/i) || [])[1] || '';
+const aiAgentItems = [...aiAgentList.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)];
+const aiPracticePrompt = `In this practice workbook, add a Markdown explanation followed
+by one JavaScript cell named summary_demo. Generate an input
+array of 10 pseudorandom integers from 1 to 20 inclusive.
+Use the Park-Miller generator with initial state 42. For each
+value, first update state = (16807 * state) % 2147483647;
+then append 1 + Math.floor(20 * state / 2147483647).
+Generate the array with this rule; do not hard-code its values
+or use Math.random. Reset state to 42 on each cell Run.
+Print the generated input array, then compute its count (array
+length), arithmetic mean, minimum and maximum. Print each
+result on its own labelled line with console.log.
+Use ordinary JavaScript arrays, arithmetic and Math.floor,
+with no packages.
+Do not run cells or change existing cells. Do not use files,
+storage, DOM APIs or network requests. Explain the expected
+results so I can review the code.`;
+check('Pro AI auto-run warning sits directly inside setup instruction 1 before choosing the conversation',
+  aiAgentItems.length === 4
+    && /id="auto-run-warning"/.test(aiAgentItems[0][1])
+    && /Auto-run off is not an execution lock/.test(helpText(aiAgentItems[0][1]))
+    && /Your own manual cell Run remains a separate action/.test(helpText(aiAgentItems[0][1]))
+    && /In the Assistant panel/.test(helpText(aiAgentItems[1][1]))
+    && aiAgentMarkup.split('Auto-run off is not an execution lock.').length === 2);
+const aiSetupSafetyMarkup = (((aiAgentItems[0] || [])[1] || '').match(
+  /<aside\b[^>]*\bid="sandbox"[^>]*>([\s\S]*?)<\/aside>/i) || [])[1] || '';
+check('Pro AI Cautious and sandbox callout follows the auto-run warning inside setup instruction 1 before Send',
+  aiAgentItems.length === 4
+    && /id="auto-run-warning"[^>]*>[\s\S]*?<\/p>\s*<aside\b[^>]*class="callout"[^>]*id="sandbox"/.test(aiAgentItems[0][1])
+    && aiSetupSafetyMarkup.indexOf('If you prefer more confirmation') >= 0
+    && aiSetupSafetyMarkup.indexOf('If you prefer more confirmation') < aiSetupSafetyMarkup.indexOf('<h3>')
+    && /Cautious/.test(helpText(aiSetupSafetyMarkup))
+    && /What the browser sandbox does—and does not—protect/.test(helpText(aiSetupSafetyMarkup))
+    && /Remote\/MCP Terminal is different/.test(helpText(aiSetupSafetyMarkup))
+    && aiSetupSafetyMarkup.includes('href="../../remote/"')
+    && aiAgentMarkup.indexOf('id="sandbox"') < aiAgentMarkup.indexOf('Send the practice prompt')
+    && aiAgentMarkup.split('id="sandbox"').length === 2
+    && aiAgentMarkup.split('If you prefer more confirmation').length === 2);
+check('Pro AI practice prompt is labelled and directly inside instruction 3 before review instruction 4',
+  aiAgentItems.length === 4
+    && /id="assistant-practice-prompt"/.test(aiAgentItems[2][1])
+    && /Copy this prompt/.test(helpText(aiAgentItems[2][1]))
+    && /Assistant's message box\s*, not a code cell/.test(helpText(aiAgentItems[2][1]))
+    && aiAgentItems[2][1].includes(`<pre><code>${aiPracticePrompt}</code></pre>`)
+    && /Read the proposed explanation/.test(helpText(aiAgentItems[3][1]))
+    && aiAgentMarkup.split(aiPracticePrompt).length === 2);
+check('Pro AI practice prompt specifies generated input, exact seed and rule, and separately labelled summaries',
+  /array of 10 pseudorandom integers from 1 to 20 inclusive\./.test(aiPracticePrompt)
+    && /Park-Miller generator with initial state 42/.test(aiPracticePrompt)
+    && /first update state = \(16807 \* state\) % 2147483647;/.test(aiPracticePrompt)
+    && /then append 1 \+ Math\.floor\(20 \* state \/ 2147483647\)\./.test(aiPracticePrompt)
+    && /do not hard-code its values\s+or use Math\.random/.test(aiPracticePrompt)
+    && /Reset state to 42 on each cell Run\./.test(aiPracticePrompt)
+    && /Print the generated input array, then compute its count \(array\s+length\), arithmetic mean, minimum and maximum/.test(aiPracticePrompt)
+    && /each\s+result on its own labelled line with console\.log/.test(aiPracticePrompt)
+    && /count <strong>10<\/strong>, mean <strong>9\.3<\/strong>, minimum <strong>1<\/strong>, maximum <strong>20<\/strong>/.test(aiAgentItems[3][1]));
+// Use exact integer arithmetic independently of the exercise's Number-based
+// implementation, including the conversion to the stated integer range.
+let summaryState = 42n;
+const summaryVector = Array.from({ length: 10 }, () => {
+  summaryState = (16807n * summaryState) % 2147483647n;
+  return Number(1n + (20n * summaryState) / 2147483647n);
+});
+const summaryCheck = (aiAgentMarkup.match(
+  /<aside\b[^>]*\bid="seeded-summary-check"[^>]*>([\s\S]*?)<\/aside>/i) || [])[1] || '';
+const summaryOutput = (summaryCheck.match(/<pre><code>([\s\S]*?)<\/code><\/pre>/i) || [])[1] || '';
+check('Pro AI seeded-vector check agrees with an independent exact-integer calculation',
+  summaryOutput === `Input: [${summaryVector.join(', ')}]\nCount: ${summaryVector.length}\nMean: ${summaryVector.reduce((a, b) => a + b, 0) / summaryVector.length}\nMinimum: ${Math.min(...summaryVector)}\nMaximum: ${Math.max(...summaryVector)}`
+    && /same input and summaries/.test(helpText(summaryCheck))
+    && /not security-sensitive randomness/.test(helpText(summaryCheck)));
+check('Pro AI real phone result matches the current seeded exercise and distinguishes manual execution',
+  /Actual Galaxy S24\+ Android screenshot of the seeded-vector exercise above/.test(helpText(aiAgentMarkup))
+    && /count 10, mean 9\.3, minimum 1 and maximum 20/.test(helpText(aiAgentMarkup))
+    && /run manually—not automatically by the agent/.test(helpText(aiAgentMarkup))
+    && /second manual Run reproduced the same results/.test(helpText(aiAgentMarkup))
+    && /output and part of the source/.test(helpText(aiAgentMarkup)));
+check('Pro AI Prompt follow-up asks about the matching seeded calculation rather than the old fixed array',
+  /generator rule and seed 42 determine its input array/.test(aiSection('prompt-cells'))
+    && /count 10, mean 9\.3, minimum 1 and maximum 20/.test(aiSection('prompt-cells'))
+    && /resetting the seed make the result repeatable/.test(aiSection('prompt-cells')));
+check('Pro AI tutorial describes Open and browser limits without promising safe generated code',
+  /second-most-permissive/i.test(aiSection('agent'))
+    && /Active worksheet/.test(aiSection('agent'))
+    && /turn off Auto-run cells created by AI/.test(aiSection('agent'))
+    && /not a guarantee/.test(aiSection('agent'))
+    && /saved credentials/.test(aiSection('agent'))
+    && /Kernels… → JavaScript → Ask/.test(aiSection('agent'))
+    && /first 500 characters of each cell/.test(aiSection('agent'))
+    && /network restrictions are best-effort/.test(aiSection('agent'))
+    && /real shell on the broker host/.test(aiSection('agent')));
+const aiExecutionText = helpText((aiTutorial.match(
+  /<aside\b[^>]*\bid="execution-permissions"[^>]*>([\s\S]*?)<\/aside>/i) || [])[1] || '');
+check('Pro AI future execution details are a linked appendix after the walkthrough and troubleshooting',
+  aiTutorial.indexOf('id="execution-permissions"') > aiTutorial.lastIndexOf('</section>')
+    && /Appendix · Upcoming execution approval/.test(aiExecutionText)
+    && !aiAgentMarkup.includes('id="execution-permissions"')
+    && aiAgentItems[0][1].includes('href="#execution-permissions"')
+    && /<aside\b[^>]*id="execution-permissions"[^>]*aria-labelledby="execution-appendix-title"/.test(aiTutorial)
+    && aiTutorial.split('id="execution-permissions"').length === 2);
+check('Pro AI tutorial separates released Open defaults from a provisional unreleased update',
+  /In Pro 1\.4\.0, Open can run allowed kernels without asking/.test(helpText(aiTutorial))
+    && /In the upcoming version, Open asks before Assistant cell execution by default/.test(helpText(aiTutorial))
+    && /proposed Pro 1\.5\.0/.test(aiExecutionText)
+    && /Unreleased/.test(aiExecutionText) && /release number is provisional/.test(aiExecutionText)
+    && /already 1\.4\.0 features/.test(helpText(aiTutorial)));
+check('Pro AI execution guide identifies real settings and independent override precedence',
+  /AI Settings → Security… → execute_cell \/ run_cells/.test(aiExecutionText)
+    && /Default \/ Allow \/ Ask \/ Deny/.test(aiExecutionText)
+    && /already offers Default \/ Allow \/ Ask \/ Deny/.test(aiExecutionText)
+    && /changes Open's inherited Default to Ask/.test(aiExecutionText)
+    && /when both are explicit, the safer rule wins/.test(aiExecutionText)
+    && /Auto-run off is not an execution lock/.test(aiSection('agent'))
+    && /explicit tool or kernel Allow can change that default/.test(aiSection('agent')));
+check('Pro AI execution guide limits standing-grant creation and warns about cross-workbook scope',
+  /leave Allow future Assistant cell execution without asking unchecked/.test(aiExecutionText)
+    && /all workbooks/.test(aiExecutionText)
+    && /explicit kernel Ask hides that option/.test(aiExecutionText)
+    && /Namespace-inspection and newly created-cell prompts cannot create that standing grant/.test(aiExecutionText)
+    && /bounded code preview/.test(aiExecutionText) && /long preview ends with an ellipsis/.test(aiExecutionText)
+    && /saved execution Allow can still permit created-cell autorun/.test(aiExecutionText));
+check('Pro AI execution guide distinguishes staged preset changes and separate sending consent',
+  ['Reset to Default', 'Keep Allow', 'Cancel', 'without clearing kernel overrides',
+    'Cancel restores the previous preset selection', 'draft changes until you save Settings',
+    'Execution approval is not blanket permission to share data',
+    "Execution-tool outputs can return to the Assistant's model",
+    'permitted code can use networking', 'MCP notebook execution uses the same execution checks']
+    .every(text => aiExecutionText.includes(text))
+    && /Online completion's Always allow\s*, AI Prompt's context review, and Remote\/MCP's privacy disclosure remain separate/.test(aiExecutionText));
+const aiContextMarkup = (aiTutorial.match(
+  /<aside\b[^>]*\bid="planned-workbook-context"[^>]*>([\s\S]*?)<\/aside>/i) || [])[1] || '';
+const aiContextText = helpText(aiContextMarkup);
+check('Pro AI current workbook disclosure links a separate design-only context appendix',
+  /first 500 characters of each cell/.test(aiSection('agent'))
+    && aiAgentMarkup.includes('href="#planned-workbook-context"')
+    && aiTutorial.indexOf('id="planned-workbook-context"') > aiTutorial.lastIndexOf('</section>')
+    && /<aside\b[^>]*id="planned-workbook-context"[^>]*aria-labelledby="context-appendix-title"/.test(aiTutorial)
+    && /Design proposal only/.test(aiContextText)
+    && /not implemented or assigned to a release/.test(aiContextText)
+    && /separate from the upcoming execution-approval changes/.test(aiContextText));
+check('Pro AI planned summary uses metadata tooling rather than an automatic source or model summary',
+  ['metadata-only directory tool', 'cell names, optional descriptions, languages and types',
+    'list_cells', 'view: "metadata"', 'read selected source separately',
+    'not an automatically generated AI explanation'].every(text => aiContextText.includes(text)));
+check('Pro AI attach-once idea discloses its tentative default, actual-send consumption and privacy boundaries',
+  ['Attach workbook summary this time', 'could start checked for a fresh conversation',
+    'after that attachment is actually sent', 'initial default still needs privacy and usability review',
+    'Continuations would not add another summary', 'switching tabs would not silently re-enable it',
+    'existing read/privacy permissions', 'not remove summaries already in the conversation',
+    'prevent allowed tool reads'].every(text => aiContextText.includes(text)));
+check('Pro AI optional changes and Git/GitHub history are scoped future features with separate sharing',
+  ['known sent-context baseline', 'agent edits, imports and unknown changes',
+    'not automatically rewrite a cell', 'longer-term Pro ideas', 'Local Send checkpoints',
+    'Gist or a chosen file in a repository', 'Enabling history would not push to GitHub',
+    'not proof that a human made them', 'A secret Gist is not private',
+    'Anyone with its URL can read it', 'use a private repository'].every(text => aiContextText.includes(text))
+    && aiContextMarkup.includes('href="https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists/creating-gists"'));
+check('Pro AI tutorial retains honest pre-update screenshot provenance',
+  /browser capture predates the execution-consent update/.test(aiSection('agent'))
+    && /upcoming approval and override dialogs are not pictured/.test(aiSection('agent'))
+    && !/Open also lets the agent execute allowed kernels/.test(aiSection('agent')));
+const aiReferenceText = helpText(readFileSync(path.join(WWW, 'help/pro/ai/index.html'), 'utf8'));
+const aiOverviewText = helpText(readFileSync(path.join(WWW, 'help/pro/index.html'), 'utf8'));
+const aiRemoteText = helpText(readFileSync(path.join(WWW, 'help/pro/remote/index.html'), 'utf8'));
+check('Pro reference pages qualify historical defaults and share the pending-release explanation',
+  /In Pro 1\.3\.0 and 1\.4\.0/.test(aiReferenceText)
+    && [aiReferenceText, aiOverviewText, aiRemoteText].every(text =>
+      /proposed Pro 1\.5\.0|proposed for Pro 1\.5\.0/i.test(text) && /unreleased/i.test(text))
+    && /version provisional/.test(aiReferenceText)
+    && /Execution approval, Remote-data consent and access to a Terminal shell are distinct permissions/.test(aiRemoteText));
+check('Pro AI tutorial covers independent completion identity and on-demand consent',
+  ['Follow AI Assistant', 'Choose provider and model', 'On tap', 'Always allow', 'first real payload']
+    .every(text => aiSection('online').includes(text))
+    && /Prefetch while I type is not yet available/.test(aiSection('online'))
+    && /completion-only soft spending guards/.test(aiSection('online'))
+    && /not the budget for Assistant or AI Prompt/.test(aiSection('online')));
+check('Pro AI tutorial qualifies Android memory, delivery and S10 performance claims',
+  ['64-bit ARM', '4 GB', '400 MB', 'Google Play', 'Galaxy S24+', 'Galaxy S10+', '460–490 MB']
+    .every(text => aiSection('local').includes(text))
+    && /did not measure the S10\+/.test(aiSection('local'))
+    && /not a measured speed comparison/.test(aiSection('local'))
+    && /sideloaded installations cannot download/.test(aiSection('local')));
+check('Pro AI tutorial ends with isolated Prompt context and qualified cost savings',
+  ['Previous 1 cell', 'Include saved output text', "This cell's output", 'one isolated request',
+    'without Assistant history or tools', 'not guaranteed', "Assistant's provider/model", 'language/mode dropdown']
+    .every(text => aiSection('prompt-cells').includes(text))
+    && /outside the completion spending guards/.test(aiSection('prompt-cells')));
+check('Pro AI reference links the guide rather than claiming AI completion is unshipped',
+  /href="tutorial\/"/.test(readFileSync(path.join(WWW, 'help/pro/ai/index.html'), 'utf8'))
+    && !/AI autocomplete is not shipped/.test(readFileSync(path.join(WWW, 'help/pro/ai/index.html'), 'utf8')));
+const aiAssets = path.join(WWW, 'help/pro/ai/tutorial/assets');
+const aiReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-ui.json'), 'utf8'));
+check('Pro AI captures record a keyless browser UI, not phone or model performance',
+  aiReceipt.browser.headless === true && aiReceipt.sourceVersion.version === '1.4.0'
+    && !aiReceipt.sourceVersion.scripts
+    && ['providerStoreList', 'blockedRequests', 'externalResponses', 'pageErrors']
+      .every(field => Array.isArray(aiReceipt[field]) && aiReceipt[field].length === 0)
+    && aiReceipt.assistantSettings.autoRunCellsCreatedByAI === false
+    && aiReceipt.assistantSettings.sourceBrowsing === false
+    && aiReceipt.assistantSettings.securityLevel === 'open'
+    && /not an Android screenshot/.test(aiSection('tables'))
+    && /keyless browser capture/.test(aiSection('online')));
+for (const shot of aiReceipt.screenshots) {
+  const png = readFileSync(path.join(aiAssets, shot.file));
+  check(`Pro AI ${shot.file} matches its capture receipt`,
+    createHash('sha256').update(png).digest('hex') === shot.sha256);
+}
+const aiGeneralOverlay = readFileSync(path.join(aiAssets, 'completion-general-overlay.svg'), 'utf8');
+const aiGeneralPng = readFileSync(path.join(aiAssets, 'completion-general.png'));
+check('Pro AI General callouts match the unchanged screenshot and locate headings and settings',
+  aiGeneralPng.readUInt32BE(16) === 414 && aiGeneralPng.readUInt32BE(20) === 820
+    && /viewBox="0 0 414 820"/.test(aiGeneralOverlay)
+    && ['ghost-heading', 'suggestions-setting', 'chips-heading', 'chips-setting']
+      .every(id => aiGeneralOverlay.includes(`id="${id}"`))
+    && /stroke="#ffd43b"/.test(aiGeneralOverlay)
+    && aiTutorial.includes('assets/completion-general-overlay.svg')
+    && /Yellow borders locate/.test(aiSection('tables')));
+const aiOpenPng = readFileSync(path.join(aiAssets, 'assistant-open.png'));
+const aiOpenOverlay = readFileSync(path.join(aiAssets, 'assistant-open-overlay.svg'), 'utf8');
+const aiOpenFigure = (aiAgentMarkup.match(
+  /<figure\b[^>]*\bid="assistant-run-controls"[^>]*>([\s\S]*?)<\/figure>/i) || [])[1] || '';
+const aiOpenRects = [...aiOpenOverlay.matchAll(/<rect\b[^>]*\bx="([\d.]+)"[^>]*\by="([\d.]+)"[^>]*\bwidth="([\d.]+)"[^>]*\bheight="([\d.]+)"/g)];
+check('Pro AI execution settings overlay matches the original PNG and outlines five relevant controls',
+  aiOpenPng.readUInt32BE(16) === 390 && aiOpenPng.readUInt32BE(20) === 1100
+    && /viewBox="0 0 390 1100"/.test(aiOpenOverlay)
+    && /stroke="#ffd43b"/.test(aiOpenOverlay)
+    && ['auto-run-setting', 'source-browsing-setting', 'agent-writes-setting',
+      'max-steps-setting', 'security-level-setting']
+      .every(id => aiOpenOverlay.includes(`id="${id}"`))
+    && aiOpenRects.length === 5
+    && aiOpenRects
+      .every(([, x, y, width, height]) => Number(x) > 0 && Number(y) > 0
+        && Number(x) + Number(width) < 390 && Number(y) + Number(height) < 1100));
+check('Pro AI execution highlights extend to both GUI margins without clipping their strokes',
+  aiOpenRects.length === 5 && aiOpenRects.every(([, x, , width]) =>
+    Number(x) === 3 && Number(width) === aiOpenPng.readUInt32BE(16) - 6));
+check('Pro AI execution figure keeps controls accessible and links the original without changing provenance',
+  /role="img" aria-label="[^\"]*Auto-run[^\"]*Allow source browsing[^\"]*Max steps/.test(aiOpenFigure)
+    && aiOpenFigure.includes('src="assets/assistant-open-overlay.svg"')
+    && ['both unchecked', 'Agent writes → Active worksheet', 'Agent limits (per run)',
+      'Security Level → Open', 'browser capture predates the execution-consent update']
+      .every(text => helpText(aiOpenFigure).includes(text))
+    && aiOpenFigure.includes('href="assets/assistant-open.png"'));
+check('Pro AI Continue explanation points to the pictured per-run Max steps control',
+  /Agent limits \(per run\) → Max steps\s*, highlighted above, controls the step allowance/.test(aiSection('agent'))
+    && /Continuing can incur more API charges/.test(aiSection('agent'))
+    && /not needed after Done/.test(aiSection('agent')));
+const aiPhoneReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-phone.json'), 'utf8'));
+const aiKeyReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-key-setup.json'), 'utf8'));
+check('Pro AI configuration capture is keyless, guarded and measured without sending a request',
+  aiKeyReceipt.sourceSha === aiReceipt.sourceSha
+    && aiKeyReceipt.sourceGuards.exactShaBeforeAndAfter === true
+    && aiKeyReceipt.sourceGuards.trackedSourceCleanBeforeAndAfter === true
+    && aiKeyReceipt.actualUi.apiKeyEmpty === true
+    && aiKeyReceipt.actualUi.settingsSaved === false
+    && aiKeyReceipt.actualUi.configureModelFor === 'assistant'
+    && aiKeyReceipt.actualUi.backend === 'openrouter'
+    && aiKeyReceipt.actualUi.model === 'z-ai/glm-5.3-flash'
+    && ['providerStoreList', 'blockedRequests', 'externalResponses', 'pageErrors']
+      .every(field => Array.isArray(aiKeyReceipt[field]) && aiKeyReceipt[field].length === 0));
+for (const asset of [aiKeyReceipt.screenshot, aiKeyReceipt.overlay]) {
+  const bytes = readFileSync(path.join(aiAssets, asset.file));
+  check(`Pro AI ${asset.file} matches the keyless capture receipt`,
+    createHash('sha256').update(bytes).digest('hex') === asset.sha256
+      && aiTutorial.includes(`src="assets/${asset.file}"`));
+}
+const aiKeyOverlay = readFileSync(path.join(aiAssets, aiKeyReceipt.overlay.file), 'utf8');
+check('Pro AI configuration overlay highlights the four actual setup fields',
+  /viewBox="0 0 390 538"/.test(aiKeyOverlay)
+    && ['configure-target', 'backend-setting', 'model-setting', 'api-key-setting']
+      .every(id => aiKeyOverlay.includes(`id="${id}"`))
+    && aiKeyReceipt.overlay.highlights.length === 4);
+const aiCustomReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-custom-model.json'), 'utf8'));
+check('Pro AI custom-model capture is a separately pinned, genuinely keyless UI entry',
+  aiCustomReceipt.sourceSha === '6dbc4d0793e04f0ea051d2e464032bf8fcab09d5'
+    && aiCustomReceipt.sourceGuards.exactShaBeforeAndAfter === true
+    && aiCustomReceipt.sourceGuards.trackedSourceCleanBeforeAndAfter === true
+    && aiCustomReceipt.actualUi.backend === 'openrouter'
+    && aiCustomReceipt.actualUi.configureModelFor === 'assistant'
+    && aiCustomReceipt.actualUi.customModelId === 'anthropic/claude-haiku-5.5'
+    && aiCustomReceipt.actualUi.customIdAbsentFromPicker === true
+    && aiCustomReceipt.actualUi.customIdEnteredThroughUi === true
+    && aiCustomReceipt.actualUi.apiKeyEmpty === true
+    && aiCustomReceipt.actualUi.apiKeyOutsideCrop === true
+    && aiCustomReceipt.actualUi.settingsSaved === false
+    && ['providerStoreList', 'blockedRequests', 'externalResponses', 'pageErrors']
+      .every(field => Array.isArray(aiCustomReceipt[field]) && aiCustomReceipt[field].length === 0));
+for (const asset of [aiCustomReceipt.screenshot, aiCustomReceipt.overlay]) {
+  const bytes = readFileSync(path.join(aiAssets, asset.file));
+  check(`Pro AI ${asset.file} matches its independent custom-model receipt`,
+    createHash('sha256').update(bytes).digest('hex') === asset.sha256
+      && aiTutorial.includes(`src="assets/${asset.file}"`));
+}
+const aiCustomPng = readFileSync(path.join(aiAssets, aiCustomReceipt.screenshot.file));
+const aiCustomOverlay = readFileSync(path.join(aiAssets, aiCustomReceipt.overlay.file), 'utf8');
+check('Pro AI custom-model picture highlights actual controls and makes the untested state clear',
+  aiCustomPng.readUInt32BE(16) === 390 && aiCustomPng.readUInt32BE(20) === 456
+    && /viewBox="0 0 390 456"/.test(aiCustomOverlay)
+    && ['backend-setting', 'custom-model-setting'].every(id => aiCustomOverlay.includes(`id="${id}"`))
+    && aiCustomReceipt.overlay.highlights.length === 2
+    && /dropdown still shows GLM 5.3 Flash/.test(aiSection('key'))
+    && /configuration example, not a test that the model works/.test(aiSection('key')));
+check('Pro AI expanded position screenshot follows the alternative and explains whole-cell and native-menu limits',
+  aiTablesMarkup.indexOf('assets/phone-completion-position.png')
+      > aiTablesMarkup.indexOf('<strong>End of cell only</strong> is an alternative')
+    && /whole cell\s*, not each line/.test(aiSection('tables'))
+    && /expanded menu covers the nearby indentation settings/.test(aiSection('tables'))
+    && aiPhoneReceipt.completionPositionMenu.nativeAndroidMenuOpen === true
+    && aiPhoneReceipt.completionPositionMenu.options.map(option => option.value).join(',') === 'caret,end'
+    && aiPhoneReceipt.completionPositionMenu.providerRequests === 0
+    && aiPhoneReceipt.completionPositionMenu.settingsRestored === true);
+check('Pro AI phone receipt includes the JavaScript example and the existing phone evidence',
+  ['phone-completion-position.png', 'phone-table-javascript.png', 'phone-table-ghost.png', 'phone-table-chips.png',
+    'phone-online-chips.png', 'phone-agent-result.png']
+    .every(file => aiPhoneReceipt.screenshots.some(shot => shot.file === file)));
+check('Pro AI JavaScript phone capture verifies ghost acceptance without extra keys or API use',
+  aiPhoneReceipt.offline.javascript?.prefix === 'cons'
+    && aiPhoneReceipt.offline.javascript.suffix === 't'
+    && aiPhoneReceipt.offline.javascript.chipsEnabled === true
+    && aiPhoneReceipt.offline.javascript.extraKeysEnabled === false
+    && aiPhoneReceipt.offline.javascript.extraKeysVisible === false
+    && aiPhoneReceipt.offline.javascript.acceptedBy === 'Accept button'
+    && aiPhoneReceipt.offline.javascript.acceptedSource === 'const'
+    && aiPhoneReceipt.offline.javascript.providerRequests === 0);
+check('Pro AI phone captures distinguish offline tables from a real independent API request',
+  aiPhoneReceipt.device.package === 'com.unifyweaver.scirepl.pro.debug'
+    && aiPhoneReceipt.device.buildCommit === null
+    && aiPhoneReceipt.practiceWorkbookOnly === true
+    && aiPhoneReceipt.offline.onlineMode === 'off'
+    && aiPhoneReceipt.offline.localModelMode === 'off'
+    && aiPhoneReceipt.offline.codeExecuted === false
+    && aiPhoneReceipt.offline.ghost.suffix === 'nt'
+    && aiPhoneReceipt.offline.ghost.chipsEnabled === true
+    && aiPhoneReceipt.offline.ghost.realChipsControl === 'On'
+    && aiPhoneReceipt.offline.ghost.providerRequests === 0
+    && aiPhoneReceipt.offline.ghost.originalWorkbookDraftLanguageAndSettingsRestored === true
+    && aiPhoneReceipt.offline.chips.labels.join(',') === 'sample_mean,sample_median'
+    && aiPhoneReceipt.online.model === 'google/gemini-3.5-flash-lite'
+    && aiPhoneReceipt.online.assistantModel === 'z-ai/glm-5.3-flash'
+    && aiPhoneReceipt.online.independentModel === true
+    && aiPhoneReceipt.online.requests === 1 && aiPhoneReceipt.online.status === 200
+    && aiPhoneReceipt.online.latencyBenchmark === false);
+check('Pro AI ghost lesson keeps chips On and links optional Pro editor controls',
+  /You do not need to turn chips off to see ghost text/.test(aiSection('tables'))
+    && /With chips still On/.test(aiSection('tables'))
+    && !/temporarily set Suggestion chips → Off/.test(aiSection('tables'))
+    && aiTutorial.includes('href="../../../interface/appearance/#pro-editor"'));
+check('Pro AI phone examples explain ghost acceptance and reject the actual eval alternative',
+  /not part of your source until you accept it/.test(aiSection('tables'))
+    && /sample_mean/.test(aiSection('tables')) && /sample_median/.test(aiSection('tables'))
+    && /Reject that unnecessary eval alternative/.test(aiSection('online'))
+    && /not the average-only snippet from Step 4/.test(aiSection('prompt-cells')));
+check('Pro AI tutorial explains bounded Continue runs and records a reviewed manual agent run',
+  /another bounded run/.test(aiSection('agent'))
+    && /Continuing can incur more API charges/.test(aiSection('agent'))
+    && aiPhoneReceipt.agent.model === 'z-ai/glm-5.3-flash'
+    && aiPhoneReceipt.agent.autoRun === false
+    && aiPhoneReceipt.agent.maxStepsPerRun === 4
+    && aiPhoneReceipt.agent.stepBursts.join(',') === '4,1'
+    && aiPhoneReceipt.agent.continuePresses === 1 && aiPhoneReceipt.agent.status === 'Done'
+    && aiPhoneReceipt.agent.output === `input: ${summaryVector.join(', ')}\ncount: 10\nmean: 9.3\nmin: 1\nmax: 20`
+    && JSON.stringify(aiPhoneReceipt.agent.input) === JSON.stringify(summaryVector)
+    && aiPhoneReceipt.agent.initialState === 42
+    && aiPhoneReceipt.agent.manualRuns === 2 && aiPhoneReceipt.agent.repeatableOutput === true
+    && aiPhoneReceipt.agent.generatedSourceUnchangedExceptTrailingWhitespace === true
+    && aiPhoneReceipt.agent.originalWorkbookDraftLanguageAndSnapshottedSettingsRestored === true
+    && aiPhoneReceipt.agent.providerRequests === 5
+    && aiPhoneReceipt.agent.providerStatuses.length === aiPhoneReceipt.agent.providerRequests
+    && aiPhoneReceipt.agent.providerStatuses.every(status => status === 200)
+    && aiPhoneReceipt.agent.providerTotalIndependentlyVerified === false);
+for (const shot of aiPhoneReceipt.screenshots) {
+  const png = readFileSync(path.join(aiAssets, shot.file));
+  check(`Pro AI phone ${shot.file} is an intact full-size PNG linked from its detail view`,
+    png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+      && png.readUInt32BE(16) === shot.width && png.readUInt32BE(20) === shot.height
+      && createHash('sha256').update(png).digest('hex') === shot.sha256
+      && aiTutorial.includes(`src="assets/${shot.file}"`)
+      && aiTutorial.includes(`href="assets/${shot.file}"`));
+}
+
 const csvSection = id => (csvTutorial.match(new RegExp(
   `<section\\b[^>]*\\bid=["']${id}["'][^>]*>([\\s\\S]*?)<\\/section>`, 'i')) || [])[1] || '';
 const csvText = helpText(csvTutorial);
@@ -363,6 +827,29 @@ check('Appearance tutorial separates button size from font zoom and composer Run
 check('Appearance tutorial keeps Android status and navigation bars distinct',
   /status bar, not the navigation or gesture bar/i.test(appearanceText)
     && /absent from the browser\/PWA and Windows/i.test(appearanceText));
+const appearanceProEditor = helpText((appearanceTutorial.match(
+  /<section\b[^>]*\bid="pro-editor"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '');
+check('Pro Appearance explains both full-screen entry routes and draft-preserving exit',
+  /New cell: tap the ⤢ Full screen button in the new-cell code field/.test(appearanceProEditor)
+    && /Saved cell: tap that cell's ✎ pencil/.test(appearanceProEditor)
+    && /then tap ⤢ in the corner of that cell's code field/.test(appearanceProEditor)
+    && /editor label at the top/.test(appearanceProEditor)
+    && /Done applies the draft without running it/.test(appearanceProEditor)
+    && /Cancel discards the edit/.test(appearanceProEditor)
+    && /Done and Cancel both leave full screen without clearing the draft/.test(appearanceProEditor)
+    && /does not open the full-screen code editor/.test(appearanceProEditor));
+check('Appearance walkthrough distinguishes optional Pro keys, live colours and file highlighting',
+  appearanceTutorial.includes('href="#pro-editor"')
+    && /Pro only/.test(appearanceProEditor)
+    && /Menu → Completion → Section → General/.test(appearanceProEditor)
+    && /Extra keys above the keyboard → On/.test(appearanceProEditor)
+    && /Menu → Appearance → Syntax colours while typing/.test(appearanceProEditor)
+    && /Auto \(desktop on, touch off\)/.test(appearanceProEditor)
+    && /6000 characters/.test(appearanceProEditor)
+    && /Files & Storage has a separate switch/.test(appearanceProEditor)
+    && /Syntax highlighting checkbox is independent/.test(appearanceProEditor)
+    && /100,000 characters/.test(appearanceProEditor)
+    && /not controls shown in the Free screenshots/.test(appearanceProEditor));
 const appearanceAssets = path.join(WWW, 'help/interface/appearance/assets');
 const appearanceShots = ['menu', 'shortcuts', 'header', 'options', 'theme'];
 check('Appearance tutorial contains five annotated Free phone figures',
@@ -582,6 +1069,12 @@ try {
     await page.goto(`${TEST_ORIGIN}${route}`, { waitUntil: 'networkidle' });
     const normal = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
     check(`${route} fits 320 CSS px`, normal);
+    if (publishedTutorials.includes(route.slice(1))) {
+      const backLink = page.locator('.site-header').getByRole('link', { name: 'All tutorials', exact: true });
+      check(`${route} has a visible narrow-screen tutorial-index link`,
+        await backLink.isVisible()
+          && await backLink.evaluate(link => link.href) === `${TEST_ORIGIN}/help/tutorials/`);
+    }
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.evaluate(() => { document.documentElement.style.zoom = '2'; });
     const zoomed = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);

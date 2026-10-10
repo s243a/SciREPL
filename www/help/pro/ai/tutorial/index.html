@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A SciREPL Pro walkthrough: free-of-API-charge table suggestions, API-key setup, the Open agent preset, online and local completion, and focused AI Prompt cells.">
+  <meta name="theme-color" content="#06101d">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="tutorial.css">
+  <title>AI and completion, step by step · SciREPL Pro Help</title>
+</head>
+<body data-editions="pro" data-platforms="android windows-preview">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help</a>
+    <nav aria-label="Primary navigation">
+      <a href="../../../tutorials/">All tutorials</a>
+      <a href="../">AI reference</a>
+      <a href="../../">Pro help</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <p class="breadcrumbs"><a href="../../../">Help</a> / <a href="../../">Pro</a> / AI and completion</p>
+    <article>
+      <p class="eyebrow">Learn by doing · Pro</p>
+      <h1>From offline suggestions to AI-assisted coding</h1>
+      <p class="lede">Start with fast table-based suggestions that cost nothing per request. Then set up the Assistant, ask for online alternatives, try an on-device model, and finish with focused AI Prompt cells that explain your code.</p>
+      <ul class="meta">
+        <li class="chip chip-pro">Pro only</li>
+        <li class="chip">Pro 1.4.0 + upcoming execution controls</li>
+        <li class="chip">Local model: Android</li>
+      </ul>
+      <p class="screen-note">This guide covers Pro 1.4.0 completion features and a separately marked, unreleased execution-consent update. The pictures are real browser or Galaxy S24+ Android captures; the existing execution-settings picture predates that update, and none shows its new approval dialogs or proves Play delivery or phone performance. The custom-model picture is a separate, newer browser capture. Local-model figures below come from earlier native-engine measurements; installation and layout can differ with your app version.</p>
+      <p class="callout"><strong>Check your version.</strong> The execution changes in the <a href="#execution-permissions">appendix</a> are planned for <strong>proposed Pro 1.5.0</strong>, which is <strong>unreleased</strong>; the final release number may change. In Pro 1.4.0, Open can run allowed kernels without asking. In the upcoming version, Open asks before Assistant cell execution by default. Keep <strong>Kernels… → JavaScript → Ask</strong> for this exercise on either version. Offline tables, on-tap API completion, the separate completion model and the Android local model are already 1.4.0 features.</p>
+      <p class="callout"><strong>“Free” here means no API charge.</strong> Table suggestions and the on-device model do not bill a provider. That does not make them Free-edition features: this walkthrough is for <strong>SciREPL Pro</strong>. Online requests use your own provider account and can cost money.</p>
+      <nav class="lesson-nav" aria-label="AI and completion walkthrough steps">
+        <strong>In this lesson</strong>
+        <ol>
+          <li><a href="#tables">Start with offline table suggestions</a></li>
+          <li><a href="#key">Save an API key</a></li>
+          <li><a href="#agent">Build a small example with the Open agent preset</a></li>
+          <li><a href="#online">Ask for API-based completions</a></li>
+          <li><a href="#local">Try the on-device model</a></li>
+          <li><a href="#prompt-cells">Use an AI Prompt cell to understand the code</a></li>
+        </ol>
+        <p><a href="../../../tutorials/">Choose another tutorial</a> · <a href="#troubleshooting">If something does not work</a></p>
+      </nav>
+
+      <section id="tables">
+        <p class="step-label">Step 1 · No API key needed</p>
+        <h2>Start with offline table suggestions</h2>
+        <p>Find <strong>☰ Menu</strong> in the app's header: it is the button with <strong>three horizontal lines</strong>. Open <strong>Completion</strong>. Its <strong>Section</strong> picker separates <strong>General</strong>, <strong>AI suggestions (online)</strong>, and <strong>Local model (on device)</strong>. Begin with General.</p>
+        <ol class="lesson-steps">
+          <li>Set <strong>Local code completion → On</strong>. The default <strong>Auto (desktop on, touch off)</strong> would otherwise leave it off on a phone.</li>
+          <li>Set <strong>Suggestion chips → On</strong> and keep <strong>Suggestions → At cursor</strong>. To isolate the tables, set <strong>AI suggestions → Off</strong> in the online section and <strong>Use local model → Off</strong> in the local section, if either was previously enabled. Return to General.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-general" role="img" aria-label="Pro browser General Completion screen. Yellow borders locate the Ghost text and Suggestion chips headings, Suggestions: At cursor, and Suggestion chips: On.">
+            <div class="shot-stage shot-stage--completion-general">
+              <img src="assets/completion-general.png" width="414" height="820" alt="" loading="lazy" decoding="async">
+              <img src="assets/completion-general-overlay.svg" width="414" height="820" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>The actual General controls in a narrow <strong>browser capture, not an Android screenshot</strong>. Yellow borders locate <strong>Suggestions → At cursor</strong>, <strong>Suggestion chips → On</strong>, and their section titles. The Section dropdown is at the top; lower settings may require scrolling.</figcaption>
+          <a class="full-shot-link" href="assets/completion-general.png">View the complete settings capture</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>Close Completion. In a new practice workbook, choose a <strong>Code</strong> cell and the <strong>JavaScript</strong> language. Type <code>cons</code>, with the caret at the end and no selection. Look for <code>const</code>.</li>
+          <li>In the screenshot below, <code>cons</code> is followed by a faint <code>t</code>—in-line <strong>ghost text</strong>. Tap <strong>Accept</strong> or press <kbd>Tab</kbd> to insert the suggestion, giving <code>const</code>. If a <code>const</code> chip appears instead, tapping it is another way to accept that candidate. Finish the line yourself, for example <code>const values = [12, 15, 18];</code>.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="assets/phone-table-javascript.png" width="1080" height="2340" alt="Lower composer detail from an actual Android Galaxy S24+ screenshot: JavaScript cons followed by a faint t ghost and an Accept button, with suggestion chips enabled and the extra-key row hidden." loading="lazy" decoding="async">
+          <figcaption><strong>Detail view of an actual Galaxy S24+ Android screenshot.</strong> JavaScript table completion offers <code>const</code> for <code>cons</code>: the faint <code>t</code> is ghost text, with <strong>Accept</strong> visible and chips enabled. The API and local model are off. The extra-key row is hidden here to contrast with the next picture; it is a separate optional control, not a requirement for completion.</figcaption>
+          <a class="full-shot-link" href="assets/phone-table-javascript.png">View the unmodified full phone screenshot of JavaScript cons → const completion</a>
+        </figure>
+        <p><strong>See the two offline displays on a phone.</strong> Leave <strong>Suggestion chips → On</strong>, choose <strong>Python</strong>, and type <code>pri</code>. The faint <code>nt</code> after the caret offers <code>print</code>; it is not part of your source until you accept it. <strong>You do not need to turn chips off to see ghost text.</strong> A single candidate can appear as a ghost, while chips offer a choice when several candidates fit. Keep <strong>AI suggestions</strong> and <strong>Use local model</strong> off for both examples.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="assets/phone-table-ghost.png" width="1080" height="2340" alt="Lower composer detail from an Android Galaxy S24+ screenshot: Python source pri followed by faint ghost text nt and an Accept button. Suggestion chips are enabled." loading="lazy" decoding="async">
+          <figcaption><strong>Detail view of an actual Galaxy S24+ Android screenshot.</strong> Offline table completion offers one faint suffix at the caret with <strong>Suggestion chips → On</strong>. The API and local model are off.</figcaption>
+          <a class="full-shot-link" href="assets/phone-table-ghost.png">View the unmodified full phone screenshot of ghost text</a>
+        </figure>
+        <p>With chips still <strong>On</strong>, replace the practice input with these three lines, leaving the caret after the unfinished <code>sample_m</code>. The row offers <code>sample_mean</code> and <code>sample_median</code> from names in your own source. Tap a chip to choose a candidate; unlike ghost text, the row shows alternatives.</p>
+        <pre><code>sample_mean = 0
+sample_median = 0
+sample_m</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="assets/phone-table-chips.png" width="1080" height="2340" alt="Lower composer detail from an Android Galaxy S24+ screenshot: Python source defines sample_mean and sample_median, then sample_m, with candidate chips sample_mean and sample_median." loading="lazy" decoding="async">
+          <figcaption><strong>Detail view of an actual Galaxy S24+ Android screenshot.</strong> With chips on, source-derived offline candidates offer the two names above. The API and local model remain off.</figcaption>
+          <a class="full-shot-link" href="assets/phone-table-chips.png">View the unmodified full phone screenshot of candidate chips</a>
+        </figure>
+        <p>The <strong>extra-key row</strong> visible in the Python phone pictures and <strong>syntax colours while typing</strong> are separate, optional Pro controls. See <a href="../../../interface/appearance/#pro-editor">Appearance walkthrough: extra keys and syntax colours</a> to turn either on or off, and to find the file editor's separate highlighting checkbox.</p>
+        <p>These prefixes demonstrate editing only—there is no need to Run them. After trying the displays, switch back to <strong>JavaScript</strong> for the example above and leave chips on for the rest of the lesson.</p>
+        <p>Offline suggestions combine curated names with local code information. In Python, that includes variables and functions found in workbook code and cached kernel names and object attributes, including methods. Frequency and acceptance history help rank them. Other languages have different coverage: static lists, unrun definitions or stale snapshots may suggest a name that is not currently available in scope. This layer is <strong>not a language model</strong> and does not reason about your whole task.</p>
+        <p class="callout"><strong>Accept is not Run.</strong> Accepting a suggestion edits the source; it does not execute the cell. Review it, then use that editor's <strong>Run</strong> button. With only the offline table layer enabled, typing a prefix does not send an API request or start a language runtime just to make suggestions.</p>
+        <p class="note"><strong>Future online prefetch:</strong> an opt-in mode is planned that could send model requests while you type. It is not available yet, and no release number is assigned to it. The no-request statement above describes the current offline table layer, not this future mode.</p>
+        <p><strong>End of cell only</strong> is an alternative if mid-cell suggestions distract you. A selection, string, comment, or half-split name may intentionally produce no suggestions. In short landscape, optional rows can disappear to keep room for code; see <a href="../../../interface/appearance/">Appearance settings</a>.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-position">
+            <div class="shot-stage">
+              <img src="assets/phone-completion-position.png" width="1080" height="2340" alt="Detail of the actual Galaxy S24+ Android General Completion screen: the Suggestions dropdown is open with At cursor selected and End of cell only beneath it." loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Actual Galaxy S24+ Android screenshot.</strong> In <strong>Completion → General → Ghost text → Suggestions</strong>, choose <strong>At cursor</strong> or <strong>End of cell only</strong>. The latter means the end of the <em>whole cell</em>, not each line. Android's expanded menu covers the nearby indentation settings; those are separate controls, not part of this choice.</figcaption>
+          <a class="full-shot-link" href="assets/phone-completion-position.png">View the unmodified full phone screenshot of the expanded Suggestions menu</a>
+        </figure>
+      </section>
+
+      <section id="key">
+        <p class="step-label">Step 2 · Online setup</p>
+        <h2>Save an API key</h2>
+        <p>An API key lets SciREPL use a provider account you control. Obtain the key from that provider, check its current prices and account limits, and use only a small practice workbook with non-private data for this lesson.</p>
+        <ol class="lesson-steps">
+          <li>Open <strong>Menu → 🤖 AI Assistant (Pro)</strong>. Tap the panel's <strong>⚙ gear</strong> to open AI Settings.
+            <p class="callout"><strong>Can't see the gear?</strong> The keyboard can shift or scroll the Assistant panel. Drag the panel's contents downwards to scroll back towards its top and reveal the gear; dismissing the keyboard can also give you more room.</p>
+          </li>
+          <li>Set <strong>Configure model for → AI Assistant</strong>. Choose a <strong>Backend</strong> (e.g. OpenRouter) and <strong>Model</strong>, and check the endpoint if your backend uses a configurable one.</li>
+          <li>Enter the matching <strong>API Key</strong>. Use <strong>Saved keys</strong> to manage keys for other provider/endpoint pairs. A key for one destination is not automatically a key for another.</li>
+          <li>Tap <strong>Save</strong>. Saving settings alone does not make a model request. Keep the panel open for the next step.</li>
+        </ol>
+        <p class="callout"><strong>Keep the key out of the workbook.</strong> Do not paste it into a cell, prompt, screenshot or exported file. Saved keys stay in local app/browser storage, without application-level encryption; protect the device and do not run untrusted code. The <a href="../../../../pro/privacy.html">Pro privacy policy</a> explains what is stored and sent.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--key-setup" role="img" aria-label="Keyless Pro browser AI Settings. Yellow borders identify Configure model for: AI Assistant, Backend: OpenRouter, Model: GLM 5.3 Flash, and the empty API Key field.">
+            <div class="shot-stage shot-stage--key-setup">
+              <img src="assets/assistant-key-setup.png" width="390" height="538" alt="" loading="lazy" decoding="async">
+              <img src="assets/assistant-key-setup-overlay.svg" width="390" height="538" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>A fresh, <strong>keyless browser capture</strong> of AI Settings, not an Android screenshot. Yellow borders mark the fields to set: <strong>Configure model for</strong>, <strong>Backend</strong>, <strong>Model</strong> and <strong>API Key</strong>. The faint <code>sk-…</code> is a placeholder, not a saved key. Scroll farther down to reach <strong>Save</strong>; no key was entered or request sent for this picture.</figcaption>
+          <a class="full-shot-link" href="assets/assistant-key-setup.png">View the unmodified AI configuration screenshot</a>
+        </figure>
+        <p>A low-cost, tool-capable model is a sensible starting point for the Assistant. Examples to compare include <a href="https://openrouter.ai/z-ai/glm-5.3-flash">GLM 5.3 Flash</a>, <a href="https://developers.openai.com/api/docs/models/gpt-6-luna">GPT-6 Luna</a>, <a href="https://www.anthropic.com/claude/haiku">Claude Haiku 5.5</a>, and <a href="https://api-docs.deepseek.com/quick_start/pricing">DeepSeek V4 Flash</a>. Exact model IDs, available versions, tool support and prices depend on your app version and provider; check the current picker and provider documentation. A newly announced model may need an app update before it appears. Later, you can choose a different inexpensive model just for completions.</p>
+        <aside class="callout" id="custom-model">
+          <p><strong>Model missing from the list?</strong> In <strong>AI Settings → Configure model for → AI Assistant</strong>, choose the correct <strong>Backend</strong> first, then enter the provider's <strong>exact API model ID</strong> in <strong>Or enter custom model ID</strong>, below the Model picker, and tap <strong>Save</strong>. This field is already available in Pro 1.4.0.</p>
+          <p>Verify the ID with your selected provider, not just the model's marketing name. For OpenRouter, include the organization prefix—for example, <code>anthropic/claude-haiku-5.5</code> on <a href="https://openrouter.ai/anthropic/claude-haiku-5.5">its model page</a>. Enter the ID, not that page's URL. The custom ID takes precedence over the dropdown; choosing a listed model again clears the custom field.</p>
+          <p><strong>An ID does not add API support.</strong> The model must support tool calls through the API SciREPL uses. Check provider access, compatibility and current prices; saving does not validate them or make a model request.</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--custom-model" role="img" aria-label="Keyless Pro browser AI Settings. Yellow borders identify Backend: OpenRouter and the custom model ID field containing anthropic/claude-haiku-5.5, beneath the Model picker.">
+            <div class="shot-stage shot-stage--custom-model">
+              <img src="assets/assistant-custom-model.png" width="390" height="456" alt="" loading="lazy" decoding="async">
+              <img src="assets/assistant-custom-model-overlay.svg" width="390" height="456" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>A real, <strong>keyless browser capture</strong>, not an Android screenshot. The yellow border below Model locates the custom-ID field. The dropdown still shows GLM 5.3 Flash, but the typed Haiku ID would take precedence on Save. API Key and Save are below this crop; no key was entered, Save was not pressed, and no model request was sent. This is a configuration example, not a test that the model works.</figcaption>
+          <a class="full-shot-link" href="assets/assistant-custom-model.png">View the unmodified custom-model screenshot</a>
+        </figure>
+      </section>
+
+      <section id="agent">
+        <p class="step-label">Step 3 · Deliberate tool use</p>
+        <h2>Build a small example with the Open agent preset</h2>
+        <p><strong>Open</strong> is the <strong>second-most-permissive</strong> security preset, after <strong>Full control</strong>. It allows notebook edits by default, with fewer prompts than Cautious. Whether execution asks depends on your version and permission settings; see the <a href="#execution-permissions">upcoming execution-approval appendix</a>. Use it deliberately in a practice workbook—not as a requirement for autocomplete.</p>
+        <ol class="lesson-steps">
+          <li>In AI Settings, select <strong>Security Level → Open</strong> and <strong>Agent writes → Active worksheet</strong>. Leave source browsing off and turn off <strong>Auto-run cells created by AI</strong>. Under <strong>Kernels…</strong>, set <strong>JavaScript → Ask</strong>, then save. This kernel rule still asks even if an execution-tool Allow was saved earlier.
+            <p class="callout" id="auto-run-warning"><strong>Auto-run off is not an execution lock.</strong> It stops newly created cells from running automatically; it does not disable separate <code>execute_cell</code> or <code>run_cells</code> requests. Released Pro 1.4.0's Open default can allow them without asking. The upcoming Open default asks, but an explicit tool or kernel Allow can change that default. <strong>AI Settings → Kernels… → JavaScript → Ask</strong> keeps this exercise's JavaScript execution behind confirmation. Your own manual cell Run remains a separate action. <a href="#execution-permissions">Next-release execution controls are detailed in the appendix.</a></p>
+            <aside class="callout" id="sandbox">
+              <p>If you prefer more confirmation, use <strong>Cautious</strong> instead. Open still respects the separate source-browsing and write-scope controls; Full control bypasses those two coarse controls. Individual permissions and other safety gates still matter. <strong>Review</strong> is an additional read-mostly restriction, which would obstruct this cell-creation demonstration.</p>
+              <h3>What the browser sandbox does—and does not—protect</h3>
+              <p>Normal workbook execution runs in the browser/WebView and its language runtimes, with a virtual filesystem rather than unrestricted access to your phone's files. That is a useful boundary, <strong>not a guarantee that code cannot do harm</strong>. Permitted JavaScript and bridges to it can reach app data and saved credentials; network restrictions are best-effort once allowed code starts, not an isolation boundary you should trust with secrets. The upcoming execution prompt adds an approval step, not isolation from the app's data. Use a practice workbook and keep its contents non-private.</p>
+              <p><strong>Remote/MCP Terminal is different:</strong> it can expose a real shell on the broker host, outside the browser-local sandbox. Keep Remote and Terminal off here. See <a href="../../remote/">Remote and security</a> before enabling them. A polite “do not…” in the prompt is not a security control.</p>
+            </aside>
+          </li>
+          <li>In the Assistant panel, choose <strong>This workbook</strong>. Leave <strong>Review</strong>, <strong>Remote</strong>, and <strong>Terminal</strong> off for this direct-provider example.</li>
+          <li>Send the practice prompt in the callout below. The panel's <strong>Send</strong> already starts the agentic tool loop: there is no extra “Agent mode” toggle here. The full-screen editor's <strong>Agent</strong> button is a separate workflow.
+            <div class="callout" id="assistant-practice-prompt">
+              <p><strong>Copy this prompt.</strong> Paste it into the <strong>Assistant's message box</strong>, not a code cell, then tap <strong>Send</strong>.</p>
+              <pre><code>In this practice workbook, add a Markdown explanation followed
+by one JavaScript cell named summary_demo. Generate an input
+array of 10 pseudorandom integers from 1 to 20 inclusive.
+Use the Park-Miller generator with initial state 42. For each
+value, first update state = (16807 * state) % 2147483647;
+then append 1 + Math.floor(20 * state / 2147483647).
+Generate the array with this rule; do not hard-code its values
+or use Math.random. Reset state to 42 on each cell Run.
+Print the generated input array, then compute its count (array
+length), arithmetic mean, minimum and maximum. Print each
+result on its own labelled line with console.log.
+Use ordinary JavaScript arrays, arithmetic and Math.floor,
+with no packages.
+Do not run cells or change existing cells. Do not use files,
+storage, DOM APIs or network requests. Explain the expected
+results so I can review the code.</code></pre>
+            </div>
+          </li>
+          <li>Read the proposed explanation and the new <code>summary_demo</code> cell. Check that it generates the input using the stated rule and computes the summaries from that array. Run that cell yourself, then compare with the check below. The expected results are count <strong>10</strong>, mean <strong>9.3</strong>, minimum <strong>1</strong>, maximum <strong>20</strong>.</li>
+        </ol>
+        <aside class="callout" id="seeded-summary-check">
+          <h3>Check the input as well as the summaries</h3>
+          <p>The seed fixes the sequence, so this random-looking input is reproducible. With the update-before-draw rule above, expect:</p>
+          <pre><code>Input: [1, 11, 15, 6, 8, 4, 20, 11, 11, 6]
+Count: 10
+Mean: 9.3
+Minimum: 1
+Maximum: 20</code></pre>
+          <p>Output labels may differ, but the numbers should match. Running the cell again should produce the same input and summaries. A different seed changes the exercise; this small generator is for a reproducible demonstration, not security-sensitive randomness.</p>
+        </aside>
+        <p><strong>Before Send:</strong> the Assistant includes the selected conversation and a bounded preview of the current workbook's cells (up to the first 500 characters of each cell, plus metadata). Allowed tools can send more. Turning source browsing off does <em>not</em> stop workbook previews from being sent. That is different from the smaller current-cell payload used by completion below. <a href="#planned-workbook-context">Planned workbook-context changes are described in the appendix.</a></p>
+        <figure class="phone-figure" id="assistant-run-controls">
+          <div class="shot-window shot-window--assistant-open" role="img" aria-label="Scrolled Pro browser AI Settings. Yellow borders locate Auto-run cells created by AI: unchecked, Allow source browsing: unchecked, Agent writes: Active worksheet, Max steps with a default 25 hint, and Security Level: Open.">
+            <div class="shot-stage shot-stage--assistant-open">
+              <img src="assets/assistant-open.png" width="390" height="1100" alt="" loading="lazy" decoding="async">
+              <img src="assets/assistant-open-overlay.svg" width="390" height="1100" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>AI Settings scrolled to execution and permissions. Yellow borders identify <strong>Auto-run cells created by AI</strong> and <strong>Allow source browsing</strong> (both unchecked), <strong>Agent writes → Active worksheet</strong>, <strong>Max steps</strong> under <strong>Agent limits (per run)</strong>, and <strong>Security Level → Open</strong>. This <strong>browser capture predates the execution-consent update</strong>; it is not a provider request or a security test. Its Open label describes the older defaults and is longer than the narrow dropdown can display. The upcoming approval and override dialogs are not pictured.</figcaption>
+          <a class="full-shot-link" href="assets/assistant-open.png">View the unmodified full scrolled settings capture</a>
+        </figure>
+        <p><strong>Paused with a Continue button?</strong> <strong>Agent limits (per run) → Max steps</strong>, highlighted above, controls the step allowance for one bounded run. The agent may reach that limit before finishing. Read what it has already done, then press <strong>Continue</strong> if the task is unfinished and you want another bounded run. Continuing can incur more API charges; it is not needed after <strong>Done</strong>.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="assets/phone-agent-result.png" width="1080" height="2340" alt="Actual Android Galaxy S24+ screenshot showing part of the reviewed JavaScript summary_demo source and its seeded output: input 1, 11, 15, 6, 8, 4, 20, 11, 11, 6; count 10, mean 9.3, min 1, max 20." loading="lazy" decoding="async">
+          <figcaption><strong>Actual Galaxy S24+ Android screenshot of the seeded-vector exercise above.</strong> GLM 5.3 Flash created the practice cells, paused at a four-step limit, and finished after one <strong>Continue</strong> press. The code was inspected and run manually—not automatically by the agent—and produced the expected input, count 10, mean 9.3, minimum 1 and maximum 20. A second manual Run reproduced the same results. The screenshot shows the output and part of the source; scroll up in the cell to inspect its seed and first lines.</figcaption>
+          <a class="full-shot-link" href="assets/phone-agent-result.png">View the full phone screenshot of the reviewed code and result</a>
+        </figure>
+      </section>
+
+      <section id="online">
+        <p class="step-label">Step 4 · Request alternatives when you want them</p>
+        <h2>Ask for API-based completions</h2>
+        <ol class="lesson-steps">
+          <li>Open <strong>Menu → Completion</strong>, then choose <strong>Section → AI suggestions (online)</strong>. Set <strong>AI suggestions → On tap</strong>.</li>
+          <li>Keep <strong>Completion model → Follow AI Assistant</strong> to inherit its provider, endpoint and model. Or choose <strong>Choose provider and model</strong>, select a saved provider/endpoint and a low-cost model suited to short suggestions. No key is entered on this screen; <strong>Open AI Settings</strong> lets you add one first.</li>
+          <li>Open this section's <strong>Advanced</strong> to inspect the reply timeout and spending guards. Defaults are <strong>6 seconds</strong>, <strong>$0.25/day</strong> and <strong>$5/month</strong>. Check prices before increasing them.</li>
+          <li>Return to a <strong>JavaScript</strong> editor and enter this practice snippet:
+            <pre><code>const values = [12, 15, 18];
+const average = </code></pre>
+            Leave the caret after the unfinished <code>const average = </code> line. Tap <strong>…</strong> at the end of the suggestion row, use the <strong>…AI</strong> extra key, or press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd>.</li>
+          <li>Review the first request's actual payload and destination before sending it. AI chips carry a <strong>✦</strong> marker. Tap one to accept it; a truncated or multi-line chip opens a preview first. Review the resulting source before Run.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="assets/completion-online.png" width="414" height="820" alt="Pro browser online completion screen with On tap and Choose provider and model, explaining that no provider keys are saved and offering Open AI Settings." loading="lazy" decoding="async">
+          <figcaption>A deliberately <strong>keyless browser capture</strong> of the independent-model controls. Its warning is real: without a saved key and valid destination, nothing can be sent. Your configured provider and model appear here after Step 2.</figcaption>
+          <a class="full-shot-link" href="assets/completion-online.png">View the complete online settings capture</a>
+        </figure>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="assets/phone-online-chips.png" width="1080" height="2340" alt="Lower composer detail from an Android Galaxy S24+ screenshot: the unfinished JavaScript average expression has two truncated AI chips, values.reduce and eval(values, each marked with a star." loading="lazy" decoding="async">
+          <figcaption><strong>Detail view of an actual Galaxy S24+ Android screenshot after a real completion request.</strong> Completion used <strong>Gemini 3.5 Flash-Lite via OpenRouter</strong> while the Assistant stayed on <strong>GLM 5.3 Flash</strong>. The two ✦ chips are truncated; outputs vary, so inspect the preview before accepting.</figcaption>
+          <a class="full-shot-link" href="assets/phone-online-chips.png">View the unmodified full phone screenshot of online candidate chips</a>
+        </figure>
+        <p class="callout"><strong>Choose the code, not just an AI chip.</strong> In this request, the first chip proposed <code>values.reduce((a, b) => a + b, 0) / values.length;</code>. Tap it to inspect the full preview: it sums the array and divides by its length, giving <strong>15</strong> for this example. The second proposed <code>eval(values.join(' + ')) / values.length;</code>. <strong>Reject that unnecessary <code>eval</code> alternative</strong>: calculating a mean does not need to turn a string into executable code. Check your own returned code before accepting it, and Run only after review.</p>
+        <p>The request asks for up to five alternatives, but your screen may fit fewer. Another tap first pages through already-received alternatives; once those are exhausted it can request more. Tap while the request spins to cancel it. Later replies are dropped when the timeout expires, and typing or moving the caret makes old suggestions stale.</p>
+        <p><strong>Independent means independent:</strong> a separate completion choice stays separate when you change the Assistant's model. This is useful when you want a capable agent but inexpensive autocomplete. Following the Assistant inherits its identity, <em>not</em> its conversation or agent permissions.</p>
+        <aside class="callout" id="completion-privacy">
+          <h3>Know what you are paying for and sending</h3>
+          <p>Online completion is <strong>on demand</strong>: ordinary typing sends nothing. <strong>Prefetch while I type</strong> is not yet available in this workflow. Completion sends bounded current-cell context: at most 1,500 characters before the caret, 200 after it, and up to 12 local names—not the Assistant chat or entire workbook. Secret masking is best-effort, so review the payload yourself.</p>
+          <p><strong>Always allow</strong> grants standing consent for that destination; a provider, endpoint or model change asks again. <strong>Send without asking</strong> initially arms that choice but still shows the first real payload once. Keep <strong>Ask each time</strong> while learning.</p>
+          <p>The day/month amounts are <strong>completion-only soft spending guards</strong>, not guaranteed provider billing caps and not the budget for Assistant or AI Prompt requests. Failures and cancellations can retain their reserved charge. Clear spending history does not reset cap totals. A model with no listed price needs explicit input/output price ceilings, or the app refuses to send.</p>
+        </aside>
+      </section>
+
+      <section id="local">
+        <p class="step-label">Step 5 · Optional Android download</p>
+        <h2>Try the on-device model</h2>
+        <p>The optional <strong>Qwen2.5-Coder 0.5B</strong> model suggests code locally when the tables are unsure. It is a small code-completion model, <strong>not a replacement for the conversational agent</strong>. Once installed, inference sends no typed code to a provider and has no API charge.</p>
+        <ol class="lesson-steps">
+          <li>On a qualifying Android phone with Pro installed from <strong>Google Play</strong>, open <strong>Menu → Completion → Section → Local model (on device)</strong>.</li>
+          <li>Tap <strong>Install</strong> and allow time and storage for the approximately <strong>400 MB</strong> download. Current sideloaded installations cannot download the model through this flow.</li>
+          <li>When ready, keep <strong>Use local model → When unsure</strong>. Tables answer easy cases; the model contributes when they are uncertain. <strong>Always</strong> runs it more often; <strong>Off</strong> stops it without deleting the download.</li>
+          <li>Return to a code cell and pause at an unfinished name or line. Results vary with context; not every pause produces a suggestion. Accept an appropriate ghost or chip, inspect the source, then Run separately.</li>
+        </ol>
+        <h3>Which phone is comfortable?</h3>
+        <p>Minimum eligibility is <strong>64-bit ARM Android with at least 4 GB of RAM</strong>, not a promise of smooth performance. A <strong>Galaxy S24+-class phone</strong> is a practical comfort target: Samsung lists <strong>12 GB of RAM</strong> for the S24+, leaving more headroom for the app, kernels and model. This is a recommended performance level, not a requirement to buy that model. <a href="https://news.samsung.com/us/enter-new-era-of-mobile-ai-samsung-galaxy-s24-series/">Samsung's S24-series specifications</a>.</p>
+        <p>A <strong>Galaxy S10+</strong> has qualifying 8 GB or 12 GB variants. The maintainer's informal experience is that local completion can work there but feel slower than API completion; the comparison depends on the model and network. <strong>The recorded local-engine benchmark did not measure the S10+</strong>, so this is not a measured speed comparison or a guarantee for every handset. Watch for lag or an unresponsive app when combining the model with large workbooks and memory-heavy kernels. <a href="https://news.samsung.com/us/galaxy-s10-interactive/">Samsung's S10-series specifications</a>.</p>
+        <p>The earlier S24+-class native-engine test measured a warm first-word median around <strong>0.10 seconds</strong> and a cold first-word median around <strong>0.24 seconds</strong>, after loading. These are sample benchmark results, not guarantees: an uncached initial load took several seconds. The loaded model added roughly <strong>460–490 MB</strong> of app-process memory, <em>in addition to</em> the WebView, Python/R runtimes and the operating system.</p>
+        <p class="callout"><strong>If an older phone becomes sluggish:</strong> set <strong>Use local model → Off</strong> and use tables or on-tap API alternatives instead. Under local <strong>Advanced</strong>, setting <strong>Keep loaded after leaving the app → 0</strong> releases it when you leave; the idle-unload and low-battery controls also help. Save/export your workbook before troubleshooting. A no-API-cost model still uses storage, memory and battery.</p>
+      </section>
+
+      <section id="prompt-cells">
+        <p class="step-label">Step 6 · Understand the code as you build it</p>
+        <h2>Finish with a focused AI Prompt cell</h2>
+        <p>The Assistant is useful for multi-step work. An <strong>AI Prompt</strong> cell is better for a small, repeatable question about a particular piece of code: it makes <strong>one isolated request</strong>, without Assistant history or tools. Use it to ask why a calculation works before extending it.</p>
+        <ol class="lesson-steps">
+          <li>Add an <strong>AI Prompt</strong> cell immediately after Step 3's <code>summary_demo</code> JavaScript cell—not the average-only snippet from Step 4—so the question below matches the selected source. Keep the cell type as <strong>Code</strong>, then choose <strong>AI Prompt</strong> from the <strong>language/mode dropdown</strong>. If it is absent, enable it under <strong>Menu → Languages &amp; modes</strong>.</li>
+          <li>Enter the prompt below. Open its <strong>Configure</strong> control.</li>
+          <li>Set <strong>Put final response in → This cell's output</strong>, the default. Under <strong>Context to send → Include source from</strong>, choose <strong>Previous 1 cell</strong>. Uncheck <strong>Include saved output text</strong> if only the source is needed, then <strong>Save configuration</strong>.</li>
+          <li>Tap the AI Prompt cell's <strong>Run</strong>. Check the selected context in the review, then choose <strong>Send to AI provider</strong>. Read the explanation alongside the source and compare it with the known results.</li>
+        </ol>
+        <pre><code>Explain the selected JavaScript cell line by line.
+How do the generator rule and seed 42 determine its input array?
+Why should it report count 10, mean 9.3, minimum 1 and maximum 20?
+Why does resetting the seed make the result repeatable?
+Explain what needs changing for an empty array.
+Return a short explanation only; do not rewrite the code.</code></pre>
+        <p class="callout"><strong>A way to control API costs and improve understanding.</strong> A focused AI Prompt can send less context than a growing agent conversation and avoid a multi-step tool loop, reducing input tokens and potentially the bill. Ask for concise reasoning, assumptions and expected output as you code. Savings are <strong>not guaranteed</strong>: model rates, response length, reasoning tokens and your chosen context still matter. These requests use the <strong>Assistant's provider/model</strong>, not the independent completion model, and are outside the completion spending guards.</p>
+        <p>Later, Configure can send the answer to a linked result cell or propose a replacement for another cell. Generated code is not automatically run; replacements need a separate <strong>Apply</strong>. For this first exercise, keep the explanation in the prompt cell's output so you can compare it without overwriting anything.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>If something does not work</h2>
+        <dl>
+          <dt><strong>No offline suggestions on a phone</strong></dt>
+          <dd>Choose General → Local code completion → On rather than Auto. Check chips, caret position, language, and whether the optional row has room.</dd>
+          <dt><strong>No online request</strong></dt>
+          <dd>Check On tap, the saved key for the exact provider/endpoint, the selected model's price entry or ceilings, consent and spending totals. Open is not required for completion. A secure browser context and Web Locks are needed; unsupported contexts refuse requests.</dd>
+          <dt><strong>The Assistant asks before running a cell—or does not ask</strong></dt>
+          <dd>Check your app version, Security… execution permissions and Kernels… rules. The upcoming Open default is Ask; Pro 1.4.0's default can allow execution. Auto-run off is not an execution-tool Deny. Online completion's Always allow does not grant cell-execution permission; see <a href="#execution-permissions">execution approval</a>.</dd>
+          <dt><strong>The completion does not understand another cell</strong></dt>
+          <dd>Online alternatives use bounded current-cell context, not your full notebook. Use an AI Prompt with explicitly selected source, or the Assistant, when you need broader explanation.</dd>
+          <dt><strong>Install is unavailable</strong></dt>
+          <dd>The native local-model flow is for eligible Android Google Play installs, not desktop/browser or current sideload delivery. Meeting the RAM minimum does not guarantee speed.</dd>
+          <dt><strong>The generated answer looks plausible but wrong</strong></dt>
+          <dd>Compare it against small known examples. Check imports, units, empty-input behavior and side effects before running. A model response is not a correctness proof.</dd>
+        </dl>
+        <p><a href="../">AI setup and workflows reference</a> · <a href="../../remote/">Remote and security</a> · <a href="../../../tutorials/">All tutorials</a></p>
+      </section>
+      <aside class="callout" id="execution-permissions" aria-labelledby="execution-appendix-title">
+        <h2 id="execution-appendix-title">Appendix · Upcoming execution approval · proposed Pro 1.5.0</h2>
+        <p><strong>Unreleased:</strong> these controls describe the next-release implementation, not a promise that your 1.4.0 install has it. The release number is provisional.</p>
+        <ul>
+          <li><strong>AI Settings → Security… → <code>execute_cell</code> / <code>run_cells</code></strong> already offers <strong>Default / Allow / Ask / Deny</strong>. This update changes Open's inherited Default to <strong>Ask</strong>; Full control keeps Allow. Explicit tool or kernel rules can replace inherited defaults; when both are explicit, the safer rule wins. Leave Default or Ask while learning. Allow is an override, not a stronger sandbox; kernel Ask/Deny, Review and the global JavaScript disable still apply.</li>
+          <li>Read the execution request before choosing <strong>Run</strong>; leave <strong>Allow future Assistant cell execution without asking</strong> unchecked to approve only that request. Checking it changes the shared execution-tool rule across <strong>all workbooks</strong> until reset—not just this cell, conversation or provider. An explicit kernel Ask hides that option.</li>
+          <li>Namespace-inspection and newly created-cell prompts <strong>cannot create that standing grant</strong>. A created-cell execution prompt includes a bounded code preview; a long preview ends with an ellipsis. If it is truncated, choose Cancel, inspect the newly created cell's full source, and Run it yourself only if you trust it. A previously saved execution Allow can still permit created-cell autorun when Auto-run is on, so keep Auto-run off here.</li>
+          <li>If you select a preset other than Full control while a saved execution-tool Allow remains effective, a warning offers <strong>Reset to Default</strong>, <strong>Keep Allow</strong>, or <strong>Cancel</strong>. Reset restores the selected preset's tool rule without clearing kernel overrides. Keep retains the override. Cancel restores the previous preset selection. Reset and Keep stay draft changes until you save Settings.</li>
+        </ul>
+        <p><strong>Execution approval is not blanket permission to share data.</strong> Execution-tool outputs can return to the Assistant's model, and permitted code can use networking. Online completion's <strong>Always allow</strong>, AI Prompt's context review, and Remote/MCP's privacy disclosure remain separate. MCP notebook execution uses the same execution checks; those checks do not sandbox a broker's Terminal shell.</p>
+      </aside>
+      <aside class="callout" id="planned-workbook-context" aria-labelledby="context-appendix-title">
+        <h2 id="context-appendix-title">Appendix · Planned workbook context and history</h2>
+        <p><strong>Design proposal only:</strong> these features are not implemented or assigned to a release. They are separate from the upcoming execution-approval changes above and do not block the current release.</p>
+        <ul>
+          <li><strong>Fetch a workbook summary when needed.</strong> The plan replaces repeated automatic source previews with a metadata-only directory tool: cell names, optional descriptions, languages and types, plus a workbook revision. The proposed tool is <code>list_cells</code> with <code>view: "metadata"</code>; the Assistant would read selected source separately. This is a bounded overview, not an automatically generated AI explanation.</li>
+          <li><strong>Attach once rather than on every Send.</strong> A proposed <strong>Attach workbook summary this time</strong> checkbox could start checked for a fresh conversation and uncheck after that attachment is actually sent. You could uncheck it before sending or check it again for a fresh overview. Its initial default still needs privacy and usability review. Continuations would not add another summary, and switching tabs would not silently re-enable it. The preview and existing read/privacy permissions would still apply; a large workbook could require further pages.</li>
+          <li><strong>Unchecked does not erase history.</strong> It would stop a new automatic attachment, not remove summaries already in the conversation or prevent allowed tool reads. Existing full-screen Agent, AI Prompt and completion context controls would remain separate.</li>
+          <li><strong>Changes between sends are a later option.</strong> Compact updates would need a known sent-context baseline and reliable revisions. Human edits could be highlighted, but agent edits, imports and unknown changes also matter. A source edit would not automatically rewrite a cell's description; missing or stale history would need a fresh overview rather than a guessed update.</li>
+          <li><strong>Optional local history and GitHub sync are longer-term Pro ideas.</strong> Local Send checkpoints could support Git-backed diffs without sharing anything. Independent sync could publish a workbook to a Gist or a chosen file in a repository, with its own payload preview and authorization. Enabling history would not push to GitHub or send a diff to the AI. Git shows content changes, not proof that a human made them.</li>
+        </ul>
+        <p><strong>A secret Gist is not private.</strong> Anyone with its URL can read it; use a private repository when access must be restricted. Keep secrets out of workbook source and descriptions before publishing. <a href="https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists/creating-gists">GitHub's Gist visibility documentation</a>.</p>
+      </aside>
+    </article>
+  </main>
+  <footer class="site-footer">
+    <span>SciREPL Pro Help</span>
+    <nav aria-label="Footer navigation">
+      <a href="../../../tutorials/">All tutorials</a>
+      <a href="../../">Pro help</a>
+      <a href="../../../../pro/privacy.html">Pro privacy</a>
+    </nav>
+  </footer>
+</body>
+</html>

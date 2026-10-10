@@ -1,0 +1,48 @@
+.tutorial-shot {
+  display: block;
+  width: min(100%, 430px);
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.tutorial-shot--composer-detail {
+  width: min(100%, 560px);
+  aspect-ratio: 1080 / 700;
+  object-fit: cover;
+  object-position: bottom;
+}
+
+.shot-window--completion-general {
+  width: min(100%, 430px);
+  aspect-ratio: 414 / 820;
+}
+
+.shot-stage--completion-general { aspect-ratio: 414 / 820; }
+
+.shot-window--completion-position {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 640;
+  --shift: -33.119658%; /* Show original pixels 775–1415 of the 2340-pixel image. */
+}
+
+.shot-window--key-setup {
+  width: min(100%, 430px);
+  aspect-ratio: 390 / 538;
+}
+
+.shot-stage--key-setup { aspect-ratio: 390 / 538; }
+
+.shot-window--custom-model {
+  width: min(100%, 430px);
+  aspect-ratio: 390 / 456;
+}
+
+.shot-stage--custom-model { aspect-ratio: 390 / 456; }
+
+.shot-window--assistant-open {
+  width: min(100%, 430px);
+  aspect-ratio: 390 / 713; /* Keep execution, step limits and security; the full PNG is linked. */
+}
+
+.shot-stage--assistant-open { aspect-ratio: 390 / 1100; }
