@@ -39,3 +39,10 @@
 }
 
 .shot-stage--custom-model { aspect-ratio: 390 / 456; }
+
+.shot-window--assistant-open {
+  width: min(100%, 430px);
+  aspect-ratio: 390 / 713; /* Keep execution, step limits and security; the full PNG is linked. */
+}
+
+.shot-stage--assistant-open { aspect-ratio: 390 / 1100; }

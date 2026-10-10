@@ -76,6 +76,15 @@ They locate section titles and the Suggestions / Suggestion chips controls.
 The original PNG and its capture-receipt hash are unchanged; the full-image
 link opens it without annotations.
 
+`assistant-open-overlay.svg` adds five yellow outlines to the existing
+390 × 1100 `assistant-open.png`: Auto-run, Allow source browsing, Agent writes,
+Max steps and Security Level. The positions were checked against the original
+image; no screenshot pixels, controls or values were changed. The tutorial uses
+a CSS crop through pixel 713 to focus on these settings rather than Remote/MCP,
+and links the unmodified full PNG. Max steps is already visible in this capture,
+so the Continue explanation uses the same figure, not a new capture. This remains
+the older browser UI, not a new phone test or execution-permission verification.
+
 ### Custom-model capture
 
 `assistant-custom-model.png` is a separate real browser capture from clean Pro

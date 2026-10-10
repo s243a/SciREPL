@@ -403,6 +403,31 @@ check('Pro AI General callouts match the unchanged screenshot and locate heading
     && /stroke="#ffd43b"/.test(aiGeneralOverlay)
     && aiTutorial.includes('assets/completion-general-overlay.svg')
     && /Yellow borders locate/.test(aiSection('tables')));
+const aiOpenPng = readFileSync(path.join(aiAssets, 'assistant-open.png'));
+const aiOpenOverlay = readFileSync(path.join(aiAssets, 'assistant-open-overlay.svg'), 'utf8');
+const aiOpenFigure = (aiAgentMarkup.match(
+  /<figure\b[^>]*\bid="assistant-run-controls"[^>]*>([\s\S]*?)<\/figure>/i) || [])[1] || '';
+check('Pro AI execution settings overlay matches the original PNG and outlines five relevant controls',
+  aiOpenPng.readUInt32BE(16) === 390 && aiOpenPng.readUInt32BE(20) === 1100
+    && /viewBox="0 0 390 1100"/.test(aiOpenOverlay)
+    && /stroke="#ffd43b"/.test(aiOpenOverlay)
+    && ['auto-run-setting', 'source-browsing-setting', 'agent-writes-setting',
+      'max-steps-setting', 'security-level-setting']
+      .every(id => aiOpenOverlay.includes(`id="${id}"`))
+    && [...aiOpenOverlay.matchAll(/<rect\b[^>]*\bx="([\d.]+)"[^>]*\by="([\d.]+)"[^>]*\bwidth="([\d.]+)"[^>]*\bheight="([\d.]+)"/g)]
+      .every(([, x, y, width, height]) => Number(x) > 0 && Number(y) > 0
+        && Number(x) + Number(width) < 390 && Number(y) + Number(height) < 1100));
+check('Pro AI execution figure keeps controls accessible and links the original without changing provenance',
+  /role="img" aria-label="[^\"]*Auto-run[^\"]*Allow source browsing[^\"]*Max steps/.test(aiOpenFigure)
+    && aiOpenFigure.includes('src="assets/assistant-open-overlay.svg"')
+    && ['both unchecked', 'Agent writes → Active worksheet', 'Agent limits (per run)',
+      'Security Level → Open', 'browser capture predates the execution-consent update']
+      .every(text => helpText(aiOpenFigure).includes(text))
+    && aiOpenFigure.includes('href="assets/assistant-open.png"'));
+check('Pro AI Continue explanation points to the pictured per-run Max steps control',
+  /Agent limits \(per run\) → Max steps\s*, highlighted above, controls the step allowance/.test(aiSection('agent'))
+    && /Continuing can incur more API charges/.test(aiSection('agent'))
+    && /not needed after Done/.test(aiSection('agent')));
 const aiPhoneReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-phone.json'), 'utf8'));
 const aiKeyReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-key-setup.json'), 'utf8'));
 check('Pro AI configuration capture is keyless, guarded and measured without sending a request',
