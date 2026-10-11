@@ -67,7 +67,7 @@
           <a class="full-shot-link" href="assets/completion-general.png">View the complete settings capture</a>
         </figure>
         <ol class="lesson-steps" start="3">
-          <li>Close Completion. In a new practice workbook, choose a <strong>Code</strong> cell and the <strong>JavaScript</strong> language. Type <code>cons</code>, with the caret at the end and no selection. Look for <code>const</code>.</li>
+          <li>Close Completion. In a new practice workbook, choose a <strong>Code</strong> cell and the <strong>JavaScript</strong> language. Type <code>cons</code>, with the caret at the end and no selection. These first letters of <code>const</code> are called a <strong>prefix</strong>. Look for <code>const</code>.</li>
           <li>In the screenshot below, <code>cons</code> is followed by a faint <code>t</code>—in-line <strong>ghost text</strong>. Tap <strong>Accept</strong> or press <kbd>Tab</kbd> to insert the suggestion, giving <code>const</code>. If a <code>const</code> chip appears instead, tapping it is another way to accept that candidate. Finish the line yourself, for example <code>const values = [12, 15, 18];</code>.</li>
         </ol>
         <p class="callout"><strong>Accept is not Run.</strong> Accepting a suggestion edits the source; it does not execute the cell. Review it, then use that editor's <strong>Run</strong> button. With only the offline table layer enabled, typing a prefix does not send an API request or start a language runtime just to make suggestions.</p>
@@ -93,7 +93,7 @@ sample_m</code></pre>
           <a class="full-shot-link" href="assets/phone-table-chips.png">View the unmodified full phone screenshot of candidate chips</a>
         </figure>
         <p>The <strong>extra-key row</strong> visible in the Python phone pictures and <strong>syntax colours while typing</strong> are separate, optional Pro controls. See <a href="../../../interface/appearance/#pro-editor">Appearance walkthrough: extra keys and syntax colours</a> to turn either on or off, and to find the file editor's separate highlighting checkbox.</p>
-        <p>These prefixes demonstrate editing only—there is no need to Run them. After trying the displays, switch back to <strong>JavaScript</strong> for the example above and leave chips on for the rest of the lesson.</p>
+        <p>The partial names <code>cons</code>, <code>pri</code> and <code>sample_m</code> demonstrate editing only—there is no need to Run them. After trying the displays, switch back to <strong>JavaScript</strong> for the example above and leave chips on for the rest of the lesson.</p>
         <p>Offline suggestions combine curated names with local code information. In Python, that includes variables and functions found in workbook code and cached kernel names and object attributes, including methods. Frequency and acceptance history help rank them. Other languages have different coverage: static lists, unrun definitions or stale snapshots may suggest a name that is not currently available in scope. This layer is <strong>not a language model</strong> and does not reason about your whole task.</p>
         <p><strong>End of cell only</strong> is an alternative if mid-cell suggestions distract you. A selection, string, comment, or half-split name may intentionally produce no suggestions. In short landscape, optional rows can disappear to keep room for code; see <a href="../../../interface/appearance/">Appearance settings</a>.</p>
         <figure class="phone-figure">

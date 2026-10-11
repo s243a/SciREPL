@@ -153,6 +153,9 @@ check('Pro AI table lesson places the settings figure before practice item 3 and
     && aiTablesMarkup.indexOf('View the complete settings capture') < aiGeneralFigureEnd
     && aiJavascriptFigurePosition > aiTablesLists[1].index + aiTablesLists[1][0].length
     && aiJavascriptFigurePosition < aiTablesMarkup.indexOf('src="assets/phone-table-ghost.png"'));
+check('Pro AI table lesson defines prefix in the first practice step and identifies the later partial names',
+  /These first letters of const are called a prefix/.test(helpText(aiTablesLists[1]?.[2] || ''))
+    && /The partial names cons\s*, pri and sample_m demonstrate editing only/.test(aiSection('tables')));
 const aiTableAcceptNotes = [...aiTablesMarkup.matchAll(
   /<p class="callout"><strong>Accept is not Run\.<\/strong>[\s\S]*?<\/p>/g)];
 check('Pro AI Accept is not Run note immediately follows practice step 4, before its screenshot',
