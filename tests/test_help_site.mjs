@@ -153,6 +153,25 @@ check('Pro AI table lesson places the settings figure before practice item 3 and
     && aiTablesMarkup.indexOf('View the complete settings capture') < aiGeneralFigureEnd
     && aiJavascriptFigurePosition > aiTablesLists[1].index + aiTablesLists[1][0].length
     && aiJavascriptFigurePosition < aiTablesMarkup.indexOf('src="assets/phone-table-ghost.png"'));
+const aiTableAcceptNotes = [...aiTablesMarkup.matchAll(
+  /<p class="callout"><strong>Accept is not Run\.<\/strong>[\s\S]*?<\/p>/g)];
+check('Pro AI Accept is not Run note immediately follows practice step 4, before its screenshot',
+  aiTablesLists.length === 2 && aiTableAcceptNotes.length === 1
+    && aiTableAcceptNotes[0].index >= aiTablesLists[1].index + aiTablesLists[1][0].length
+    && aiTablesMarkup.slice(aiTablesLists[1].index + aiTablesLists[1][0].length,
+      aiTableAcceptNotes[0].index).trim() === ''
+    && aiTableAcceptNotes[0].index + aiTableAcceptNotes[0][0].length < aiJavascriptFigurePosition);
+const aiTablePrefetchNotes = [...aiTablesMarkup.matchAll(
+  /<p class="note"><strong>Future online prefetch:<\/strong>[\s\S]*?<\/p>/g)];
+const aiJavascriptFigureStart = aiTablesMarkup.lastIndexOf('<figure', aiJavascriptFigurePosition);
+check('Pro AI future-prefetch note stays beside the no-request explanation before the screenshot',
+  aiTableAcceptNotes.length === 1 && aiTablePrefetchNotes.length === 1
+    && aiTablePrefetchNotes[0].index >= aiTableAcceptNotes[0].index + aiTableAcceptNotes[0][0].length
+    && aiTablesMarkup.slice(aiTableAcceptNotes[0].index + aiTableAcceptNotes[0][0].length,
+      aiTablePrefetchNotes[0].index).trim() === ''
+    && aiTablePrefetchNotes[0].index + aiTablePrefetchNotes[0][0].length < aiJavascriptFigureStart
+    && aiTablesMarkup.slice(aiTablePrefetchNotes[0].index + aiTablePrefetchNotes[0][0].length,
+      aiJavascriptFigureStart).trim() === '');
 check('Pro AI JavaScript example separates hidden extra keys from table-only completion',
   /JavaScript table completion offers const for cons/.test(aiSection('tables'))
     && /the faint t is ghost text, with Accept visible and chips enabled/.test(aiSection('tables'))
