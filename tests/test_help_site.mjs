@@ -304,11 +304,18 @@ check('Pro AI future execution details are a linked appendix after the walkthrou
     && /<aside\b[^>]*id="execution-permissions"[^>]*aria-labelledby="execution-appendix-title"/.test(aiTutorial)
     && aiTutorial.split('id="execution-permissions"').length === 2);
 check('Pro AI tutorial separates released Open defaults from a provisional unreleased update',
-  /In Pro 1\.4\.0, Open can run allowed kernels without asking/.test(helpText(aiTutorial))
-    && /In the upcoming version, Open asks before Assistant cell execution by default/.test(helpText(aiTutorial))
+  /Released Pro 1\.4\.0's Open default can allow them without asking/.test(aiSection('agent'))
+    && /The upcoming Open default asks/.test(aiSection('agent'))
     && /proposed Pro 1\.5\.0/.test(aiExecutionText)
-    && /Unreleased/.test(aiExecutionText) && /release number is provisional/.test(aiExecutionText)
-    && /already 1\.4\.0 features/.test(helpText(aiTutorial)));
+    && /Unreleased/.test(aiExecutionText) && /release number is provisional/.test(aiExecutionText));
+const aiVersionNote = (aiTutorial.match(
+  /<p class="callout"><strong>Check your version\.<\/strong>([\s\S]*?)<\/p>/) || [])[1] || '';
+check('Pro AI opening version note links the unreleased appendix without repeating section details',
+  aiVersionNote.includes('href="#execution-permissions"')
+    && /proposed Pro 1\.5\.0/.test(helpText(aiVersionNote))
+    && /unreleased/.test(helpText(aiVersionNote))
+    && /final release number may change/.test(helpText(aiVersionNote))
+    && !/Open|Kernels|Offline tables|on-tap API|separate completion model|Android local model/.test(helpText(aiVersionNote)));
 check('Pro AI execution guide identifies real settings and independent override precedence',
   /AI Settings → Security… → execute_cell \/ run_cells/.test(aiExecutionText)
     && /Default \/ Allow \/ Ask \/ Deny/.test(aiExecutionText)
