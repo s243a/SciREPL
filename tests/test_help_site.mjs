@@ -153,9 +153,8 @@ check('Pro AI table lesson places the settings figure before practice item 3 and
     && aiTablesMarkup.indexOf('View the complete settings capture') < aiGeneralFigureEnd
     && aiJavascriptFigurePosition > aiTablesLists[1].index + aiTablesLists[1][0].length
     && aiJavascriptFigurePosition < aiTablesMarkup.indexOf('src="assets/phone-table-ghost.png"'));
-check('Pro AI table lesson defines prefix in the first practice step and identifies the later partial names',
-  /These first letters of const are called a prefix/.test(helpText(aiTablesLists[1]?.[2] || ''))
-    && /The partial names cons\s*, pri and sample_m demonstrate editing only/.test(aiSection('tables')));
+check('Pro AI table lesson defines prefix in the first practice step',
+  /These first letters of const are called a prefix/.test(helpText(aiTablesLists[1]?.[2] || '')));
 const aiTableAcceptNotes = [...aiTablesMarkup.matchAll(
   /<p class="callout"><strong>Accept is not Run\.<\/strong>[\s\S]*?<\/p>/g)];
 check('Pro AI Accept is not Run note immediately follows practice step 4, before its screenshot',
@@ -164,6 +163,11 @@ check('Pro AI Accept is not Run note immediately follows practice step 4, before
     && aiTablesMarkup.slice(aiTablesLists[1].index + aiTablesLists[1][0].length,
       aiTableAcceptNotes[0].index).trim() === ''
     && aiTableAcceptNotes[0].index + aiTableAcceptNotes[0][0].length < aiJavascriptFigurePosition);
+check('Pro AI completion exercise explains editing-only scope next to acceptance rather than the distant transition',
+  /The JavaScript and Python examples in this section demonstrate autocomplete while editing/.test(helpText(aiTableAcceptNotes[0]?.[0] || ''))
+    && /Running these practice cells is not part of this section/.test(helpText(aiTableAcceptNotes[0]?.[0] || ''))
+    && !/Review it, then use that editor's Run button|no need to Run them/.test(aiSection('tables'))
+    && /After trying these completion displays, switch back to JavaScript and leave chips on/.test(aiSection('tables')));
 const aiTablePrefetchNotes = [...aiTablesMarkup.matchAll(
   /<p class="note"><strong>Future online prefetch:<\/strong>[\s\S]*?<\/p>/g)];
 const aiJavascriptFigureStart = aiTablesMarkup.lastIndexOf('<figure', aiJavascriptFigurePosition);
