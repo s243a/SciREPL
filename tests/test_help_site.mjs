@@ -188,6 +188,11 @@ check('Pro AI offline suggestions explain kernel and source-derived names withou
   ['variables and functions found in workbook code', 'cached kernel names and object attributes, including methods',
     'Frequency and acceptance history help rank them', 'static lists, unrun definitions or stale snapshots',
     'not currently available in scope'].every(text => aiSection('tables').includes(text)));
+check('Pro AI table explanation names the offline chips control and matching method explicitly',
+  /The offline chips shown here, enabled under Completion → General → Suggestion chips/.test(aiSection('tables'))
+    && /curated name tables with local code information/.test(aiSection('tables'))
+    && /Table-based completion is not a language model and does not reason about your task/.test(aiSection('tables'))
+    && !/This layer is/.test(aiSection('tables')));
 check('Pro AI no-request promise is scoped to current tables and distinguishes future opt-in prefetch',
   /With only the offline table layer enabled, typing a prefix does not send an API request/.test(aiSection('tables'))
     && /Future online prefetch/.test(aiSection('tables'))
