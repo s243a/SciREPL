@@ -162,7 +162,26 @@ sample_m</code></pre>
               <p><strong>Remote/MCP Terminal is different:</strong> it can expose a real shell on the broker host, outside the browser-local sandbox. Keep Remote and Terminal off here. See <a href="../../remote/">Remote and security</a> before enabling them. A polite “do not…” in the prompt is not a security control.</p>
             </aside>
           </li>
-          <li>In the Assistant panel, choose <strong>This workbook</strong>. Leave <strong>Review</strong>, <strong>Remote</strong>, and <strong>Terminal</strong> off for this direct-provider example.</li>
+          <li>In the Assistant panel, choose <strong>This workbook</strong>. Leave <strong>Review</strong>, <strong>Remote</strong>, and <strong>Terminal</strong> off for this direct-provider example.
+            <figure class="phone-figure" id="assistant-context-controls">
+              <p class="screen-note">Panel header</p>
+              <div class="shot-window shot-window--assistant-context-header" role="img" aria-label="Top detail of the Android Assistant panel. A yellow border highlights This workbook selected in the conversation dropdown.">
+                <div class="shot-stage">
+                  <img src="assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <p class="screen-note">Bottom controls</p>
+              <div class="shot-window shot-window--assistant-context-footer" role="img" aria-label="Bottom detail of the same Android Assistant panel. Yellow borders highlight Review, Remote and Terminal, all unchecked. The empty message box and Send button are visible.">
+                <div class="shot-stage">
+                  <img src="assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption><strong>Two details of the same actual Galaxy S24+ Android screenshot.</strong> Yellow borders locate <strong>This workbook</strong> and <strong>Review</strong>, <strong>Remote</strong> and <strong>Terminal</strong> (all unchecked). The empty middle of the panel is omitted. No prompt was sent.</figcaption>
+              <a class="full-shot-link" href="assets/phone-assistant-context.png">View the unmodified full Assistant-panel screenshot</a>
+            </figure>
+          </li>
           <li>Send the practice prompt in the callout below. The panel's <strong>Send</strong> already starts the agentic tool loop: there is no extra “Agent mode” toggle here. The full-screen editor's <strong>Agent</strong> button is a separate workflow.
             <div class="callout" id="assistant-practice-prompt">
               <p><strong>Copy this prompt.</strong> Paste it into the <strong>Assistant's message box</strong>, not a code cell, then tap <strong>Send</strong>.</p>
@@ -196,7 +215,13 @@ Minimum: 1
 Maximum: 20</code></pre>
           <p>Output labels may differ, but the numbers should match. Running the cell again should produce the same input and summaries. A different seed changes the exercise; this small generator is for a reproducible demonstration, not security-sensitive randomness.</p>
         </aside>
+        <figure class="phone-figure" id="assistant-seeded-result">
+          <img class="tutorial-shot" src="assets/phone-agent-result.png" width="1080" height="2340" alt="Actual Android Galaxy S24+ screenshot showing part of the reviewed JavaScript summary_demo source and its seeded output: input 1, 11, 15, 6, 8, 4, 20, 11, 11, 6; count 10, mean 9.3, min 1, max 20." loading="lazy" decoding="async">
+          <figcaption><strong>Actual Galaxy S24+ Android screenshot of the seeded-vector exercise above.</strong> GLM 5.3 Flash created the practice cells, paused at a four-step limit, and finished after one <strong>Continue</strong> press. The code was inspected and run manually—not automatically by the agent—and produced the expected input, count 10, mean 9.3, minimum 1 and maximum 20. A second manual Run reproduced the same results. The screenshot shows the output and part of the source; scroll up in the cell to inspect its seed and first lines.</figcaption>
+          <a class="full-shot-link" href="assets/phone-agent-result.png">View the full phone screenshot of the reviewed code and result</a>
+        </figure>
         <p><strong>Before Send:</strong> the Assistant includes the selected conversation and a bounded preview of the current workbook's cells (up to the first 500 characters of each cell, plus metadata). Allowed tools can send more. Turning source browsing off does <em>not</em> stop workbook previews from being sent. That is different from the smaller current-cell payload used by completion below. <a href="#planned-workbook-context">Planned workbook-context changes are described in the appendix.</a></p>
+        <p><strong>Paused with a Continue button?</strong> <strong>Agent limits (per run) → Max steps</strong>, highlighted below, controls the step allowance for one bounded run. The agent may reach that limit before finishing. Read what it has already done, then press <strong>Continue</strong> if the task is unfinished and you want another bounded run. Continuing can incur more API charges; it is not needed after <strong>Done</strong>.</p>
         <figure class="phone-figure" id="assistant-run-controls">
           <div class="shot-window shot-window--assistant-open" role="img" aria-label="Scrolled Pro browser AI Settings. Yellow borders locate Auto-run cells created by AI: unchecked, Allow source browsing: unchecked, Agent writes: Active worksheet, Max steps with a default 25 hint, and Security Level: Open.">
             <div class="shot-stage shot-stage--assistant-open">
@@ -206,12 +231,6 @@ Maximum: 20</code></pre>
           </div>
           <figcaption>AI Settings scrolled to execution and permissions. Yellow borders identify <strong>Auto-run cells created by AI</strong> and <strong>Allow source browsing</strong> (both unchecked), <strong>Agent writes → Active worksheet</strong>, <strong>Max steps</strong> under <strong>Agent limits (per run)</strong>, and <strong>Security Level → Open</strong>. This <strong>browser capture predates the execution-consent update</strong>; it is not a provider request or a security test. Its Open label describes the older defaults and is longer than the narrow dropdown can display. The upcoming approval and override dialogs are not pictured.</figcaption>
           <a class="full-shot-link" href="assets/assistant-open.png">View the unmodified full scrolled settings capture</a>
-        </figure>
-        <p><strong>Paused with a Continue button?</strong> <strong>Agent limits (per run) → Max steps</strong>, highlighted above, controls the step allowance for one bounded run. The agent may reach that limit before finishing. Read what it has already done, then press <strong>Continue</strong> if the task is unfinished and you want another bounded run. Continuing can incur more API charges; it is not needed after <strong>Done</strong>.</p>
-        <figure class="phone-figure">
-          <img class="tutorial-shot" src="assets/phone-agent-result.png" width="1080" height="2340" alt="Actual Android Galaxy S24+ screenshot showing part of the reviewed JavaScript summary_demo source and its seeded output: input 1, 11, 15, 6, 8, 4, 20, 11, 11, 6; count 10, mean 9.3, min 1, max 20." loading="lazy" decoding="async">
-          <figcaption><strong>Actual Galaxy S24+ Android screenshot of the seeded-vector exercise above.</strong> GLM 5.3 Flash created the practice cells, paused at a four-step limit, and finished after one <strong>Continue</strong> press. The code was inspected and run manually—not automatically by the agent—and produced the expected input, count 10, mean 9.3, minimum 1 and maximum 20. A second manual Run reproduced the same results. The screenshot shows the output and part of the source; scroll up in the cell to inspect its seed and first lines.</figcaption>
-          <a class="full-shot-link" href="assets/phone-agent-result.png">View the full phone screenshot of the reviewed code and result</a>
         </figure>
       </section>
 

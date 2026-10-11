@@ -187,3 +187,29 @@ variables as the earlier capture scripts and refuses to overwrite existing files
 
 No expensive model, local-model inference/download, Play installation or
 S10+ performance test was used to obtain these phone pictures.
+
+### Assistant panel controls (2026-10-11 UTC)
+
+`phone-assistant-context.png` is a separate, unchanged Galaxy S24+ Android
+`screencap` (1080 × 2340), from Pro debug 1.4.0-debug/code 25, cache v461.
+The build commit is unknown. An empty temporary practice workbook and an
+empty conversation/message box prevent private source or chat appearing in
+the picture. This workbook is selected; Review, Remote and Terminal are off.
+Open was temporarily selected through the app's preset method to match the
+exercise. No Send or Run was pressed; fetch/XHR monitoring recorded zero
+provider requests and zero external requests during the capture.
+
+The figure inside Assistant instruction 2 shows two labelled CSS detail views
+of the same PNG: the header at original pixels 90–270 and the bottom controls
+at pixels 1860–2270. Its empty middle is omitted, not rearranged into a claimed
+full-screen image. The original full screenshot remains linked. The separate
+`phone-assistant-context-overlay.svg` outlines the actual dropdown and three
+unchecked controls; coordinates come from their measured WebView bounds.
+No screenshot pixels or labels were painted over.
+
+`capture-pro-assistant-context.json` pins the image and overlay hashes and
+records the observed states and restoration checks. The original workbook,
+draft, language, prompt, scope, checkbox states, security preset and panel
+visibility were restored; the unchanged empty capture workbook and temporary
+ADB forward were removed. Credentials were not exposed or modified. This is
+a panel-control illustration, not an API, execution-security or Play test.

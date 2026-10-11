@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "capturedAtUtc": "2026-10-11T06:11:11.440Z",
+  "sourceRepository": "SciREPL-Pro",
+  "device": {
+    "model": "SM-S926W",
+    "name": "Galaxy S24+",
+    "package": "com.unifyweaver.scirepl.pro.debug",
+    "versionName": "1.4.0-debug",
+    "versionCode": 25,
+    "appCache": "scirepl-app-v461",
+    "buildCommit": null
+  },
+  "captureMethod": "Android screencap; unmodified full-screen PNG with a separate editable SVG overlay",
+  "actualUi": {
+    "scope": "workbook",
+    "scopeLabel": "This workbook",
+    "securityPreset": "open",
+    "review": false,
+    "remote": false,
+    "terminal": false,
+    "practiceCellCount": 0,
+    "conversationEntryCount": 0,
+    "promptEmpty": true,
+    "sendPressed": false,
+    "codeExecuted": false
+  },
+  "monitor": {
+    "method": "Temporary fetch and XMLHttpRequest.open counters; URLs, headers and bodies not retained",
+    "providerRequests": 0,
+    "externalFetchOrXhrRequests": 0,
+    "originalFunctionsRestored": true
+  },
+  "screenshot": {
+    "file": "phone-assistant-context.png",
+    "width": 1080,
+    "height": 2340,
+    "sha256": "3d595d9b5fc2baedab32281f2e68cd0e1c1d035b99e84f0694579ed394b63ba5"
+  },
+  "displayViews": [
+    { "name": "Panel header", "x": 0, "y": 90, "width": 1080, "height": 180 },
+    { "name": "Bottom controls", "x": 0, "y": 1860, "width": 1080, "height": 410 }
+  ],
+  "overlay": {
+    "file": "phone-assistant-context-overlay.svg",
+    "width": 1080,
+    "height": 2340,
+    "sha256": "1575c4e80cfe671a82d456f6d992f5460377abfe000a0e81780199bc0bcdcd48",
+    "highlights": [
+      { "id": "this-workbook-setting", "selector": "#ai-scope", "bounds": { "x": 518, "y": 134, "width": 295, "height": 68 } },
+      { "id": "review-setting", "selector": "#ai-readonly-cb", "bounds": { "x": 216, "y": 2060, "width": 168, "height": 58 } },
+      { "id": "remote-setting", "selector": "#ai-remote-cb", "bounds": { "x": 547, "y": 2060, "width": 178, "height": 58 } },
+      { "id": "terminal-setting", "selector": "#ai-term-cb", "bounds": { "x": 729, "y": 2060, "width": 191, "height": 58 } }
+    ]
+  },
+  "cleanup": {
+    "originalWorkbookRestored": true,
+    "draftRestored": true,
+    "languageRestored": true,
+    "promptRestored": true,
+    "panelVisibilityRestored": true,
+    "scopeRestored": true,
+    "settingsRestored": true,
+    "checkboxStatesRestored": true,
+    "emptyCaptureWorkbookRemoved": true,
+    "providerCredentialsNotExposedOrModified": true,
+    "temporaryAdbForwardRemoved": true
+  },
+  "limitations": [
+    "Control-location capture only, not a provider request, execution-permission test or Play-delivery check.",
+    "The installed app's build commit is unknown; this capture does not demonstrate the upcoming approval dialogs.",
+    "The figure shows two labelled CSS detail views of the same unchanged PNG, omitting the empty middle of the panel."
+  ]
+}

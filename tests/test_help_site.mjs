@@ -460,8 +460,9 @@ check('Pro AI General callouts match the unchanged screenshot and locate heading
     && /Yellow borders locate/.test(aiSection('tables')));
 const aiOpenPng = readFileSync(path.join(aiAssets, 'assistant-open.png'));
 const aiOpenOverlay = readFileSync(path.join(aiAssets, 'assistant-open-overlay.svg'), 'utf8');
-const aiOpenFigure = (aiAgentMarkup.match(
-  /<figure\b[^>]*\bid="assistant-run-controls"[^>]*>([\s\S]*?)<\/figure>/i) || [])[1] || '';
+const aiOpenFigureMatch = aiAgentMarkup.match(
+  /<figure\b[^>]*\bid="assistant-run-controls"[^>]*>([\s\S]*?)<\/figure>/i);
+const aiOpenFigure = (aiOpenFigureMatch || [])[1] || '';
 const aiOpenRects = [...aiOpenOverlay.matchAll(/<rect\b[^>]*\bx="([\d.]+)"[^>]*\by="([\d.]+)"[^>]*\bwidth="([\d.]+)"[^>]*\bheight="([\d.]+)"/g)];
 check('Pro AI execution settings overlay matches the original PNG and outlines five relevant controls',
   aiOpenPng.readUInt32BE(16) === 390 && aiOpenPng.readUInt32BE(20) === 1100
@@ -485,9 +486,28 @@ check('Pro AI execution figure keeps controls accessible and links the original 
       .every(text => helpText(aiOpenFigure).includes(text))
     && aiOpenFigure.includes('href="assets/assistant-open.png"'));
 check('Pro AI Continue explanation points to the pictured per-run Max steps control',
-  /Agent limits \(per run\) → Max steps\s*, highlighted above, controls the step allowance/.test(aiSection('agent'))
+  /Agent limits \(per run\) → Max steps\s*, highlighted below, controls the step allowance/.test(aiSection('agent'))
     && /Continuing can incur more API charges/.test(aiSection('agent'))
     && /not needed after Done/.test(aiSection('agent')));
+const aiSeededCheckAside = aiAgentMarkup.match(
+  /<aside\b[^>]*\bid="seeded-summary-check"[^>]*>[\s\S]*?<\/aside>/i);
+const aiAgentResultFigures = [...aiAgentMarkup.matchAll(/<figure\b[^>]*>[\s\S]*?<\/figure>/gi)]
+  .filter(match => match[0].includes('src="assets/phone-agent-result.png"'));
+const aiBeforeSendPosition = aiAgentMarkup.indexOf('<strong>Before Send:</strong>');
+check('Pro AI seeded phone result immediately follows the expected-output check before the sending-context note',
+  aiSeededCheckAside && aiAgentResultFigures.length === 1
+    && aiAgentResultFigures[0].index >= aiSeededCheckAside.index + aiSeededCheckAside[0].length
+    && !aiAgentMarkup.slice(aiSeededCheckAside.index + aiSeededCheckAside[0].length,
+      aiAgentResultFigures[0].index).trim()
+    && aiBeforeSendPosition > aiAgentResultFigures[0].index + aiAgentResultFigures[0][0].length);
+const aiContinueParagraph = aiAgentMarkup.match(
+  /<p\b[^>]*><strong>Paused with a Continue button\?<\/strong>[\s\S]*?<\/p>/i);
+check('Pro AI Continue explanation immediately precedes its execution-settings figure',
+  aiContinueParagraph && aiOpenFigureMatch
+    && aiAgentMarkup.split('Paused with a Continue button?').length === 2
+    && aiOpenFigureMatch.index >= aiContinueParagraph.index + aiContinueParagraph[0].length
+    && !aiAgentMarkup.slice(aiContinueParagraph.index + aiContinueParagraph[0].length,
+      aiOpenFigureMatch.index).trim());
 const aiPhoneReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-phone.json'), 'utf8'));
 const aiKeyReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-key-setup.json'), 'utf8'));
 check('Pro AI configuration capture is keyless, guarded and measured without sending a request',
@@ -620,6 +640,73 @@ for (const shot of aiPhoneReceipt.screenshots) {
       && aiTutorial.includes(`src="assets/${shot.file}"`)
       && aiTutorial.includes(`href="assets/${shot.file}"`));
 }
+
+const aiContextReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-assistant-context.json'), 'utf8'));
+const aiContextFigure = (aiAgentMarkup.match(
+  /<figure\b[^>]*\bid="assistant-context-controls"[^>]*>([\s\S]*?)<\/figure>/i) || [])[1] || '';
+check('Pro AI conversation and toggle figure sits inside instruction 2 before sending the practice prompt',
+  aiAgentItems.length === 4
+    && aiAgentItems[1][1].includes('id="assistant-context-controls"')
+    && aiAgentItems[1][1].indexOf('id="assistant-context-controls"') > aiAgentItems[1][1].indexOf('In the Assistant panel')
+    && aiAgentMarkup.indexOf('id="assistant-context-controls"') < aiAgentMarkup.indexOf('Send the practice prompt')
+    && aiAgentMarkup.split('id="assistant-context-controls"').length === 2);
+check('Pro AI panel figure names both detail views, unchecked toggles, and the unchanged full phone screenshot',
+  ['Two details of the same actual Galaxy S24+ Android screenshot', 'This workbook',
+    'Review', 'Remote', 'Terminal', 'all unchecked', 'empty middle of the panel is omitted',
+    'No prompt was sent'].every(text => helpText(aiContextFigure).includes(text))
+    && (aiContextFigure.match(/role="img" aria-label="/g) || []).length === 2
+    && (aiContextFigure.match(/src="assets\/phone-assistant-context-overlay\.svg"[^>]*aria-hidden="true"/g) || []).length === 2
+    && aiContextFigure.includes('href="assets/phone-assistant-context.png"'));
+check('Pro AI panel capture records actual controls and restored state without sending or executing anything',
+  aiContextReceipt.device.package === 'com.unifyweaver.scirepl.pro.debug'
+    && aiContextReceipt.device.buildCommit === null
+    && aiContextReceipt.actualUi.scope === 'workbook'
+    && aiContextReceipt.actualUi.scopeLabel === 'This workbook'
+    && aiContextReceipt.actualUi.securityPreset === 'open'
+    && ['review', 'remote', 'terminal', 'sendPressed', 'codeExecuted']
+      .every(field => aiContextReceipt.actualUi[field] === false)
+    && aiContextReceipt.actualUi.promptEmpty === true
+    && aiContextReceipt.actualUi.practiceCellCount === 0
+    && aiContextReceipt.actualUi.conversationEntryCount === 0
+    && aiContextReceipt.monitor.providerRequests === 0
+    && aiContextReceipt.monitor.externalFetchOrXhrRequests === 0
+    && aiContextReceipt.monitor.originalFunctionsRestored === true
+    && Object.values(aiContextReceipt.cleanup).every(value => value === true));
+const aiContextPng = readFileSync(path.join(aiAssets, aiContextReceipt.screenshot.file));
+const aiContextOverlay = readFileSync(path.join(aiAssets, aiContextReceipt.overlay.file), 'utf8');
+check('Pro AI panel screenshot and editable overlay match their independent capture receipt',
+  aiContextPng.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+    && aiContextPng.readUInt32BE(16) === 1080 && aiContextPng.readUInt32BE(20) === 2340
+    && aiContextReceipt.screenshot.width === 1080 && aiContextReceipt.screenshot.height === 2340
+    && createHash('sha256').update(aiContextPng).digest('hex') === aiContextReceipt.screenshot.sha256
+    && createHash('sha256').update(aiContextOverlay).digest('hex') === aiContextReceipt.overlay.sha256
+    && /viewBox="0 0 1080 2340"/.test(aiContextOverlay)
+    && /fill="none" stroke="#ffd43b"/.test(aiContextOverlay));
+const aiContextRects = [...aiContextOverlay.matchAll(
+  /<rect\b[^>]*\bid="([^"]+)"[^>]*\bx="([\d.]+)"[^>]*\by="([\d.]+)"[^>]*\bwidth="([\d.]+)"[^>]*\bheight="([\d.]+)"/g)];
+check('Pro AI panel outlines identify exactly the selected scope and three off toggles within their detail views',
+  aiContextRects.length === 4
+    && aiContextReceipt.overlay.highlights.map(item => item.id).join(',')
+      === 'this-workbook-setting,review-setting,remote-setting,terminal-setting'
+    && aiContextRects.every(([, id, x, y, width, height], index) => {
+      const recorded = aiContextReceipt.overlay.highlights[index];
+      const view = aiContextReceipt.displayViews[index === 0 ? 0 : 1];
+      return id === recorded.id
+        && ['x', 'y', 'width', 'height'].every((key, i) => recorded.bounds[key] === Number([x, y, width, height][i]))
+        && Number(x) >= view.x && Number(x) + Number(width) <= view.x + view.width
+        && Number(y) >= view.y && Number(y) + Number(height) <= view.y + view.height;
+    }));
+const aiTutorialCss = readFileSync(path.join(WWW, 'help/pro/ai/tutorial/tutorial.css'), 'utf8');
+check('Pro AI panel detail crops match their documented windows without editing the source image',
+  aiContextReceipt.displayViews.length === 2
+    && ['header', 'footer'].every((name, index) => {
+      const view = aiContextReceipt.displayViews[index];
+      const css = (aiTutorialCss.match(new RegExp(`\\.shot-window--assistant-context-${name}\\s*\\{([^}]+)\\}`)) || [])[1] || '';
+      const shift = Number((css.match(/--shift:\s*([\d.-]+)%/) || [])[1]);
+      return aiContextFigure.includes(`shot-window--assistant-context-${name}`)
+        && css.includes(`aspect-ratio: ${view.width} / ${view.height}`)
+        && Math.abs(shift / 100 + view.y / aiContextReceipt.screenshot.height) < 0.00000001;
+    }));
 
 const csvSection = id => (csvTutorial.match(new RegExp(
   `<section\\b[^>]*\\bid=["']${id}["'][^>]*>([\\s\\S]*?)<\\/section>`, 'i')) || [])[1] || '';
