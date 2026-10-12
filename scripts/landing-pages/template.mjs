@@ -14,8 +14,10 @@ function inline(s) {
 
 const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
 
+// The referrer is itself a query string, so it is serialised with
+// URLSearchParams first and then encoded as one value of the outer URL.
 function playHref(base, ref) {
-  const query = UTM_KEYS.filter((k) => ref[k]).map((k) => `${k}=${ref[k]}`).join('&');
+  const query = new URLSearchParams(UTM_KEYS.filter((k) => ref[k]).map((k) => [k, ref[k]])).toString();
   return query ? `${base}&referrer=${encodeURIComponent(query)}` : base;
 }
 
@@ -43,6 +45,14 @@ function codeBlock(lang, label, code) {
           </div>`;
 }
 
+// An example is one code block (`code`) or several cells (`cells`), each
+// with its own Copy button, so code meant for separate cells is never
+// copied, pasted and run as one cell.
+function exampleCells(it) {
+  if (!it.cells) return [{ label: it.langLabel, code: it.code }];
+  return it.cells.map((code, i) => ({ label: `${it.langLabel} · CELL ${i + 1}`, code }));
+}
+
 const renderers = {
   cards: (s) => `<div class="grid">
         ${s.items.map((it) => `<div class="card"><h3>${inline(it.title)}</h3><p>${inline(it.body)}</p></div>`).join('\n        ')}
@@ -52,7 +62,7 @@ const renderers = {
         <div>
           <h3>${inline(it.title)}</h3>
           <p>${inline(it.body)}</p>
-          ${codeBlock(it.lang, it.langLabel, it.code)}
+          ${exampleCells(it).map((c) => codeBlock(it.lang, c.label, c.code)).join('\n          ')}
           ${it.note ? `<p>${inline(it.note)}</p>` : ''}
         </div>
         ${it.image ? phone(it.image, assetBase) : ''}
@@ -104,10 +114,10 @@ const PAGE_SCRIPT = `(function () {
   var keys = ${JSON.stringify(UTM_KEYS)};
   var params = new URLSearchParams(location.search);
   if (params.get('utm_source')) {
-    var ref = keys.filter(function (k) { return params.get(k); })
-      .map(function (k) { return k + '=' + params.get(k); }).join('&');
+    var ref = new URLSearchParams();
+    keys.forEach(function (k) { if (params.get(k)) ref.append(k, params.get(k)); });
     document.querySelectorAll('a[data-play-base]').forEach(function (a) {
-      a.href = a.getAttribute('data-play-base') + '&referrer=' + encodeURIComponent(ref);
+      a.href = a.getAttribute('data-play-base') + '&referrer=' + encodeURIComponent(ref.toString());
     });
   }
   if (navigator.clipboard) {

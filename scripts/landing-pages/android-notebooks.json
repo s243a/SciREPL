@@ -48,7 +48,7 @@
       "nav": "Examples",
       "type": "examples",
       "heading": "Try these examples",
-      "lede": "Each screenshot is real output from the code beside it. Paste the code into a cell and press Run.",
+      "lede": "Each screenshot is real output from the code beside it. Copy each block into its own cell and press Run.",
       "items": [
         {
           "title": "Plot a function",
@@ -62,8 +62,11 @@
           "title": "Symbolic math with SymPy",
           "body": "Differentiate, integrate and solve, with results rendered as LaTeX. The ∑ Math Mode button inserts common SymPy functions, so there is less to type on a phone keyboard.",
           "lang": "python",
-          "langLabel": "PYTHON · 2 CELLS",
-          "code": "from sympy import symbols, diff, integrate, sin, exp\nx = symbols('x')\ndiff(sin(x)*exp(x), x)\n\n# next cell\nintegrate(x**2 * exp(-x), x)",
+          "langLabel": "PYTHON",
+          "cells": [
+            "from sympy import symbols, diff, integrate, sin, exp\nx = symbols('x')\ndiff(sin(x)*exp(x), x)",
+            "integrate(x**2 * exp(-x), x)"
+          ],
           "image": {
             "src": "img/notebook-sympy-latex.webp", "width": 800, "height": 1140,
             "alt": "Two SymPy cells: the derivative of sin(x)·exp(x) and the integral of x²·exp(−x), both shown as typeset formulas.",
@@ -74,8 +77,12 @@
           "title": "Mix in other languages",
           "body": "Each cell has its own language. Choose PL in the language selector to write Prolog. R, Bash, JavaScript, Lua and others work the same way, and every language can read and write the same files under `/shared`.",
           "lang": "prolog",
-          "langLabel": "PROLOG · 2 CELLS",
-          "code": "parent(tom, bob).\nparent(bob, ann).\ngrandparent(X, Z) :- parent(X, Y), parent(Y, Z).\n\n% next cell\ngrandparent(tom, Who).",
+          "langLabel": "PROLOG",
+          "cells": [
+            "parent(tom, bob).\nparent(bob, ann).\ngrandparent(X, Z) :- parent(X, Y), parent(Y, Z).",
+            "grandparent(tom, Who)."
+          ],
+          "note": "Run these as two cells. A cell that defines rules is loaded as a program, so the query goes in its own cell.",
           "image": {
             "src": "img/notebook-prolog-query.webp", "width": 800, "height": 900,
             "alt": "Two Prolog cells: facts and a grandparent rule, then the query grandparent(tom, Who) answering Who = ann.",

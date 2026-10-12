@@ -35,7 +35,10 @@ network. Pages here are always fresh and stay out of the app cache. A push to
 1. Copy an existing config to `scripts/landing-pages/<slug>.json` and rewrite
    it.
 2. Section types: `cards`, `examples` (code with an optional phone
-   screenshot), `checks`, `limits`, `steps`, `table`. Keep the section ids
+   screenshot), `checks`, `limits`, `steps`, `table`. An example takes either
+   `code` (one cell) or `cells` (an array, one Copy button per cell). Never put
+   two cells in one block: pasted as one cell, a Prolog query after a rule is
+   loaded as a fact instead of being run. Keep the section ids
    `examples`, `free-vs-pro`, `limits` and `start`, so links to those anchors
    work on every page.
 3. Text fields accept only `` `code` `` and `[text](url)` as markup. Everything
@@ -46,7 +49,9 @@ network. Pages here are always fresh and stay out of the app cache. A push to
 
 - **Play links** carry a `referrer`, so Play Console can credit installs to
   their source. A visitor who arrives with UTM tags has those tags copied into
-  the referrer by a small inline script. Everyone else gets the page default.
+  the referrer by a small inline script. The referrer is serialised with
+  `URLSearchParams` and then encoded, so values containing `+`, `&` or `=`
+  arrive intact. Everyone else gets the page default.
   Without JavaScript the links still work, using the default.
 - **Copy buttons** on code blocks appear only when the Clipboard API is
   available.

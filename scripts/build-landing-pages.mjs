@@ -38,6 +38,11 @@ function validate(page, file) {
     if (!existsSync(path.join(assetsDir, img.src))) errors.push(`image not found: www/pro/guides/assets/${img.src}`);
   }
   if (page.ogImage && !existsSync(path.join(assetsDir, page.ogImage))) errors.push(`ogImage not found: www/pro/guides/assets/${page.ogImage}`);
+  for (const s of (page.sections || []).filter((x) => x.type === 'examples')) {
+    for (const it of s.items) {
+      if (!it.code === !it.cells) errors.push(`example "${it.title}" needs exactly one of "code" or "cells"`);
+    }
+  }
   const ids = (page.sections || []).map((s) => s.id);
   if (new Set(ids).size !== ids.length) errors.push('duplicate section ids');
   if (errors.length) throw new Error(`${file}:\n  - ${errors.join('\n  - ')}`);

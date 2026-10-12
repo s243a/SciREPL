@@ -79,7 +79,7 @@
   <section id="examples">
     <div class="wrap">
       <h2>Try these examples</h2>
-      <p class="section-lede">Each screenshot is real output from the code beside it. Paste the code into a cell and press Run.</p>
+      <p class="section-lede">Each screenshot is real output from the code beside it. Copy each block into its own cell and press Run.</p>
       <div class="example example-text">
         <div>
           <h3>Plot a function</h3>
@@ -99,13 +99,14 @@ plot(x, np.sin(x))</code></pre>
           <h3>Symbolic math with SymPy</h3>
           <p>Differentiate, integrate and solve, with results rendered as LaTeX. The ∑ Math Mode button inserts common SymPy functions, so there is less to type on a phone keyboard.</p>
           <div class="code">
-            <div class="code-label lang-python"><span>PYTHON · 2 CELLS</span><button type="button" class="copy-btn" hidden>Copy</button></div>
+            <div class="code-label lang-python"><span>PYTHON · CELL 1</span><button type="button" class="copy-btn" hidden>Copy</button></div>
             <pre><code>from sympy import symbols, diff, integrate, sin, exp
 x = symbols(&#39;x&#39;)
-diff(sin(x)*exp(x), x)
-
-# next cell
-integrate(x**2 * exp(-x), x)</code></pre>
+diff(sin(x)*exp(x), x)</code></pre>
+          </div>
+          <div class="code">
+            <div class="code-label lang-python"><span>PYTHON · CELL 2</span><button type="button" class="copy-btn" hidden>Copy</button></div>
+            <pre><code>integrate(x**2 * exp(-x), x)</code></pre>
           </div>
           
         </div>
@@ -119,15 +120,16 @@ integrate(x**2 * exp(-x), x)</code></pre>
           <h3>Mix in other languages</h3>
           <p>Each cell has its own language. Choose PL in the language selector to write Prolog. R, Bash, JavaScript, Lua and others work the same way, and every language can read and write the same files under <code>/shared</code>.</p>
           <div class="code">
-            <div class="code-label lang-prolog"><span>PROLOG · 2 CELLS</span><button type="button" class="copy-btn" hidden>Copy</button></div>
+            <div class="code-label lang-prolog"><span>PROLOG · CELL 1</span><button type="button" class="copy-btn" hidden>Copy</button></div>
             <pre><code>parent(tom, bob).
 parent(bob, ann).
-grandparent(X, Z) :- parent(X, Y), parent(Y, Z).
-
-% next cell
-grandparent(tom, Who).</code></pre>
+grandparent(X, Z) :- parent(X, Y), parent(Y, Z).</code></pre>
           </div>
-          
+          <div class="code">
+            <div class="code-label lang-prolog"><span>PROLOG · CELL 2</span><button type="button" class="copy-btn" hidden>Copy</button></div>
+            <pre><code>grandparent(tom, Who).</code></pre>
+          </div>
+          <p>Run these as two cells. A cell that defines rules is loaded as a program, so the query goes in its own cell.</p>
         </div>
         <figure>
           <div class="phone"><img src="../assets/img/notebook-prolog-query.webp" width="800" height="900" alt="Two Prolog cells: facts and a grandparent rule, then the query grandparent(tom, Who) answering Who = ann." loading="lazy"></div>
@@ -229,10 +231,10 @@ grandparent(tom, Who).</code></pre>
   var keys = ["utm_source","utm_medium","utm_campaign","utm_content","utm_term"];
   var params = new URLSearchParams(location.search);
   if (params.get('utm_source')) {
-    var ref = keys.filter(function (k) { return params.get(k); })
-      .map(function (k) { return k + '=' + params.get(k); }).join('&');
+    var ref = new URLSearchParams();
+    keys.forEach(function (k) { if (params.get(k)) ref.append(k, params.get(k)); });
     document.querySelectorAll('a[data-play-base]').forEach(function (a) {
-      a.href = a.getAttribute('data-play-base') + '&referrer=' + encodeURIComponent(ref);
+      a.href = a.getAttribute('data-play-base') + '&referrer=' + encodeURIComponent(ref.toString());
     });
   }
   if (navigator.clipboard) {
