@@ -240,3 +240,26 @@ restored, and only the unchanged empty capture workbook was removed. Saved
 credentials, spending tallies and the ledger were retained. The temporary
 completion-fetch guard and ADB forward were removed. This is not an execution
 permission or Play-delivery test.
+
+### Local model settings
+
+`phone-local-settings.png` is a separate actual S24+ Android screenshot taken
+on 2026-10-12 at 23:25 UTC. The Pro debug app is 1.4.0-debug, version code 25,
+active cache v461; its source commit was not independently identified.
+The native screen reports **Ready (398 MB on this device)** and shows Delete,
+not Install. It is a settings illustration, not proof of Google Play delivery.
+
+The real Completion screen was opened at Local model with Advanced collapsed;
+the actual Use local model control was temporarily changed to When unsure.
+No Install/Delete button was pressed, no download or inference was requested,
+no code was executed, and no provider or external request occurred. A separate
+empty capture workbook kept existing workbook contents out of the picture.
+The previous workbook, composer draft, language and settings were restored;
+only that unchanged empty capture workbook was removed. The provider-request
+guard was restored and the temporary ADB forward removed.
+
+The original PNG stays unchanged. The inline CSS view shows original pixels
+90–1170, including the section picker, status and use mode, without excess
+blank space. `phone-local-settings-overlay.svg` adds three yellow borders at
+measured screen coordinates; it does not change screenshot pixels or values.
+`capture-pro-local-settings-phone.json` records the PNG hash, crop and checks.

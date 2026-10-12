@@ -783,6 +783,49 @@ check('Pro AI preview-only crop omits the keyboard and matches the receipt witho
     && aiPreviewCropCss.includes(`aspect-ratio: ${aiPreviewReceipt.displayView.width} / ${aiPreviewReceipt.displayView.height}`)
     && Math.abs(aiPreviewCropShift / 100 + aiPreviewReceipt.displayView.y / aiPreviewReceipt.screenshot.height) < 0.00000001);
 
+const aiLocalMarkup = (aiTutorial.match(
+  /<section\b[^>]*\bid="local"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+const aiLocalFigure = (aiLocalMarkup.match(/<figure class="phone-figure" id="local-model-settings">[\s\S]*?<\/figure>/) || [])[0] || '';
+check('Pro AI local settings picture follows install/use steps, before returning to code',
+  /Use local model → When unsure[\s\S]*?<\/li>\s*<\/ol>\s*<figure class="phone-figure" id="local-model-settings">/.test(aiLocalMarkup)
+    && /<\/figure>\s*<ol class="lesson-steps" start="4">\s*<li>Return to a code cell/.test(aiLocalMarkup));
+const aiLocalReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-local-settings-phone.json'), 'utf8'));
+const aiLocalPng = readFileSync(path.join(aiAssets, aiLocalReceipt.screenshot.file));
+const aiLocalOverlay = readFileSync(path.join(aiAssets, 'phone-local-settings-overlay.svg'), 'utf8');
+check('Pro AI local settings are an intact native screenshot, not fabricated delivery state',
+  aiLocalPng.readUInt32BE(16) === 1080 && aiLocalPng.readUInt32BE(20) === 2340
+    && createHash('sha256').update(aiLocalPng).digest('hex') === aiLocalReceipt.screenshot.sha256
+    && aiLocalReceipt.captureMethod === 'Android screencap; unmodified full-screen PNG'
+    && aiLocalReceipt.device.appPackage === 'com.unifyweaver.scirepl.pro.debug'
+    && aiLocalReceipt.device.sourceCommit === null
+    && aiLocalReceipt.settings.section === 'local' && aiLocalReceipt.settings.selectedMode === 'unsure'
+    && aiLocalReceipt.settings.status === 'Ready (398 MB on this device)'
+    && aiLocalReceipt.settings.installVisible === false && aiLocalReceipt.settings.deleteVisible === true
+    && aiLocalReceipt.settings.advancedOpen === false
+    && /Delete.*instead of.*Install/.test(helpText(aiLocalFigure))
+    && /not a test of Google Play delivery/.test(helpText(aiLocalFigure))
+    && /href="assets\/phone-local-settings.png">View the unmodified full phone screenshot/.test(aiLocalFigure));
+check('Pro AI local settings capture makes no request, install, deletion or execution and restores state',
+  aiLocalReceipt.providerRequests === 0 && aiLocalReceipt.externalRequests === 0
+    && ['installPressed', 'deletePressed', 'modelDownloaded', 'inferenceRequested', 'codeExecuted']
+      .every(key => aiLocalReceipt[key] === false)
+    && ['originalWorkbookRestored', 'originalDraftRestored', 'originalLanguageUnchanged', 'settingsRestored',
+      'emptyCaptureWorkbookRemoved', 'completionScreenClosed', 'originalCompletionFetchRestored']
+      .every(key => aiLocalReceipt.cleanup[key] === true));
+check('Pro AI local settings overlay highlights section, Ready and use mode on the unchanged PNG',
+  /viewBox="0 0 1080 2340"/.test(aiLocalOverlay) && /stroke="#ffd43b"/.test(aiLocalOverlay)
+    && ['local-section-setting', 'local-ready-status', 'local-use-setting'].every(id => aiLocalOverlay.includes(`id="${id}"`))
+    && aiLocalFigure.includes('assets/phone-local-settings-overlay.svg')
+    && /Yellow borders locate/.test(aiLocalFigure));
+const aiLocalCropCss = (aiTutorialCss.match(/\.shot-window--local-model-settings\s*\{([^}]+)\}/) || [])[1] || '';
+const aiLocalCropShift = Number((aiLocalCropCss.match(/--shift:\s*([\d.-]+)%/) || [])[1]);
+check('Pro AI local settings detail crop matches its receipt and excludes unused space',
+  aiLocalFigure.includes('shot-window--local-model-settings')
+    && aiLocalReceipt.displayView.x === 0 && aiLocalReceipt.displayView.y === 90
+    && aiLocalReceipt.displayView.width === 1080 && aiLocalReceipt.displayView.height === 1080
+    && aiLocalCropCss.includes(`aspect-ratio: ${aiLocalReceipt.displayView.width} / ${aiLocalReceipt.displayView.height}`)
+    && Math.abs(aiLocalCropShift / 100 + aiLocalReceipt.displayView.y / aiLocalReceipt.screenshot.height) < 0.00000001);
+
 const csvSection = id => (csvTutorial.match(new RegExp(
   `<section\\b[^>]*\\bid=["']${id}["'][^>]*>([\\s\\S]*?)<\\/section>`, 'i')) || [])[1] || '';
 const csvText = helpText(csvTutorial);

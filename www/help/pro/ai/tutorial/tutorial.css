@@ -64,3 +64,9 @@
   aspect-ratio: 1080 / 390;
   --shift: -29.487179487%; /* Original pixels 690–1080: preview only, no keyboard. */
 }
+
+.shot-window--local-model-settings {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 1080;
+  --shift: -3.846153846%; /* Original pixels 90–1170: section, Ready status and use mode. */
+}
