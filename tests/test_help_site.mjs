@@ -708,6 +708,80 @@ check('Pro AI panel detail crops match their documented windows without editing 
         && Math.abs(shift / 100 + view.y / aiContextReceipt.screenshot.height) < 0.00000001;
     }));
 
+const aiPreviewReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-completion-preview-phone.json'), 'utf8'));
+const aiOnlineMarkup = (aiTutorial.match(
+  /<section\b[^>]*\bid="online"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+const aiChooseCodeCallout = aiOnlineMarkup.match(
+  /<p\b[^>]*><strong>Choose the code, not just an AI chip\.<\/strong>[\s\S]*?<\/p>/i);
+const aiPreviewFigureMatch = aiOnlineMarkup.match(
+  /<figure\b[^>]*\bid="online-completion-preview"[^>]*>[\s\S]*?<\/figure>/i);
+const aiPreviewFigure = aiPreviewFigureMatch?.[0] || '';
+const aiPreviewCaption = helpText((aiPreviewFigure.match(/<figcaption>([\s\S]*?)<\/figcaption>/i) || [])[1] || '');
+check('Pro AI online preview immediately follows the code-review callout in Step 4',
+  aiChooseCodeCallout && aiPreviewFigureMatch
+    && aiTutorial.split('id="online-completion-preview"').length === 2
+    && aiPreviewFigureMatch.index >= aiChooseCodeCallout.index + aiChooseCodeCallout[0].length
+    && !aiOnlineMarkup.slice(aiChooseCodeCallout.index + aiChooseCodeCallout[0].length,
+      aiPreviewFigureMatch.index).trim()
+    && aiOnlineMarkup.indexOf('The request asks for up to five alternatives')
+      > aiPreviewFigureMatch.index + aiPreviewFigure.length);
+check('Pro AI preview explains immediate insertion through a chosen logical line, not a selection-confirmation workflow',
+  /for a multi-line suggestion, tap or click the last line you want/i.test(aiPreviewCaption)
+    && /immediately inserts everything from the first line through that line, leaving later lines out/i.test(aiPreviewCaption)
+    && /Insert all accepts the whole suggestion/.test(aiPreviewCaption)
+    && /Cancel inserts nothing/.test(aiPreviewCaption)
+    && /one code line, even though it wraps on screen/.test(aiPreviewCaption)
+    && /tapping it accepts the whole expression/.test(aiPreviewCaption)
+    && /Accepting edits the source; it does not Run the cell/.test(aiPreviewCaption));
+check('Pro AI preview records one guarded toy request, an unknown phone build, and no acceptance or execution',
+  aiPreviewReceipt.schemaVersion === 1
+    && aiPreviewReceipt.sourceRepository === 'SciREPL-Pro'
+    && aiPreviewReceipt.captureMethod === 'Android screencap; unmodified full-screen PNG'
+    && aiPreviewReceipt.device.model === 'SM-S926W'
+    && aiPreviewReceipt.device.package === 'com.unifyweaver.scirepl.pro.debug'
+    && aiPreviewReceipt.device.buildCommit === null
+    && aiPreviewReceipt.request.backend === 'openrouter'
+    && aiPreviewReceipt.request.model === 'google/gemini-3.5-flash-lite'
+    && aiPreviewReceipt.request.count === 1 && aiPreviewReceipt.request.status === 200
+    && aiPreviewReceipt.request.maxOutputTokens === 500
+    && aiPreviewReceipt.request.guardedBeforeDispatch === true
+    && aiPreviewReceipt.request.source === 'const values = [12, 15, 18];\nconst average = '
+    && aiPreviewReceipt.request.privateWorkbookSent === false
+    && aiPreviewReceipt.request.providerBillIndependentlyVerified === false
+    && aiPreviewReceipt.preview.text === aiPhoneReceipt.online.firstAlternative
+    && aiPreviewReceipt.preview.logicalLineCount === 1
+    && aiPreviewReceipt.preview.text.split('\n').length === aiPreviewReceipt.preview.logicalLineCount
+    && aiPreviewReceipt.preview.visuallyWrapped === true
+    && aiPreviewReceipt.preview.displayedTier === 'unverified'
+    && aiPreviewReceipt.preview.sourceUnchangedWhenOpened === true
+    && aiPreviewReceipt.preview.accepted === false
+    && aiPreviewReceipt.preview.codeExecuted === false
+    && /new Gemini(?: 3\.5)? Flash-Lite request returned the same/.test(aiPreviewCaption));
+check('Pro AI preview capture restores workbook, draft, language, settings, credentials and monitoring',
+  ['originalWorkbookRestored', 'originalDraftRestored', 'originalLanguageRestored', 'settingsRestored',
+    'emptyCaptureWorkbookRemoved', 'providerCredentialsNotExposedOrModified', 'spendingTalliesAndLedgerPreserved',
+    'originalCompletionFetchRestored', 'temporaryAdbForwardRemoved']
+    .every(field => aiPreviewReceipt.cleanup[field] === true));
+const aiPreviewPng = readFileSync(path.join(aiAssets, aiPreviewReceipt.screenshot.file));
+check('Pro AI preview is an intact native phone PNG with a labeled detail and original full-image link',
+  aiPreviewReceipt.screenshot.file === 'phone-completion-preview.png'
+    && aiPreviewPng.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+    && aiPreviewPng.readUInt32BE(16) === 1080 && aiPreviewPng.readUInt32BE(20) === 2340
+    && aiPreviewReceipt.screenshot.width === 1080 && aiPreviewReceipt.screenshot.height === 2340
+    && createHash('sha256').update(aiPreviewPng).digest('hex') === aiPreviewReceipt.screenshot.sha256
+    && /src="assets\/phone-completion-preview\.png" width="1080" height="2340" alt=""/.test(aiPreviewFigure)
+    && /role="img" aria-label="[^\"]*AI suggestion preview[^\"]*Cancel and Insert all[^\"]*No suggestion has been inserted/.test(aiPreviewFigure)
+    && aiPreviewFigure.includes('href="assets/phone-completion-preview.png"')
+    && /unmodified full phone screenshot/.test(helpText(aiPreviewFigure)));
+const aiPreviewCropCss = (aiTutorialCss.match(/\.shot-window--completion-preview\s*\{([^}]+)\}/) || [])[1] || '';
+const aiPreviewCropShift = Number((aiPreviewCropCss.match(/--shift:\s*([\d.-]+)%/) || [])[1]);
+check('Pro AI preview crop matches the receipt while preserving the native screenshot',
+  aiPreviewFigure.includes('shot-window--completion-preview')
+    && aiPreviewReceipt.displayView.x === 0 && aiPreviewReceipt.displayView.y === 400
+    && aiPreviewReceipt.displayView.width === 1080 && aiPreviewReceipt.displayView.height === 800
+    && aiPreviewCropCss.includes(`aspect-ratio: ${aiPreviewReceipt.displayView.width} / ${aiPreviewReceipt.displayView.height}`)
+    && Math.abs(aiPreviewCropShift / 100 + aiPreviewReceipt.displayView.y / aiPreviewReceipt.screenshot.height) < 0.00000001);
+
 const csvSection = id => (csvTutorial.match(new RegExp(
   `<section\\b[^>]*\\bid=["']${id}["'][^>]*>([\\s\\S]*?)<\\/section>`, 'i')) || [])[1] || '';
 const csvText = helpText(csvTutorial);

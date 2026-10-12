@@ -213,3 +213,30 @@ draft, language, prompt, scope, checkbox states, security preset and panel
 visibility were restored; the unchanged empty capture workbook and temporary
 ADB forward were removed. Credentials were not exposed or modified. This is
 a panel-control illustration, not an API, execution-security or Play test.
+
+### Online completion preview (2026-10-12 UTC)
+
+`phone-completion-preview.png` is an unchanged S24+ Android screencap from
+Pro debug 1.4.0-debug/code 25, cache v461 (build commit unknown). A new,
+independent `google/gemini-3.5-flash-lite` request through OpenRouter used
+only the tutorial's two-line JavaScript mean example in an empty temporary
+workbook. A dispatch guard restricted it to one request, the exact toy source,
+no local completion names, no tools and at most 500 output tokens. The HTTP
+200 response reported 172 input/120 output tokens and $0.0003516; that is not
+an independently checked provider bill. No workbook code was run.
+
+The clipped `values.reduce` chip opened the real preview without inserting
+anything; Cancel closed it. The returned expression matches the earlier
+phone request, but other alternatives need not. The preview has one logical
+code line, which wraps visually: it cannot demonstrate a shorter acceptance.
+For genuinely multi-line suggestions, the production preview immediately
+inserts the first line through the tapped line; Insert all inserts everything.
+
+The tutorial uses a CSS detail view of original pixels 400–1200, preserving
+the source, preview and chip row, and links the unchanged full PNG. Its hash,
+request figures and state checks are in `capture-pro-completion-preview-phone.json`.
+The original workbook, draft, language and temporary completion settings were
+restored, and only the unchanged empty capture workbook was removed. Saved
+credentials, spending tallies and the ledger were retained. The temporary
+completion-fetch guard and ADB forward were removed. This is not an execution
+permission or Play-delivery test.

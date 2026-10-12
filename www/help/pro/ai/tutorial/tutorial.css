@@ -58,3 +58,9 @@
   aspect-ratio: 1080 / 410;
   --shift: -79.487179487%; /* Original pixels 1860–2270 from the same screenshot. */
 }
+
+.shot-window--completion-preview {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 800;
+  --shift: -17.094017094%; /* Original pixels 400–1200: source, preview and chip row. */
+}

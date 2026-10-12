@@ -258,6 +258,15 @@ const average = </code></pre>
           <a class="full-shot-link" href="assets/phone-online-chips.png">View the unmodified full phone screenshot of online candidate chips</a>
         </figure>
         <p class="callout"><strong>Choose the code, not just an AI chip.</strong> In this request, the first chip proposed <code>values.reduce((a, b) => a + b, 0) / values.length;</code>. Tap it to inspect the full preview: it sums the array and divides by its length, giving <strong>15</strong> for this example. The second proposed <code>eval(values.join(' + ')) / values.length;</code>. <strong>Reject that unnecessary <code>eval</code> alternative</strong>: calculating a mean does not need to turn a string into executable code. Check your own returned code before accepting it, and Run only after review.</p>
+        <figure class="phone-figure" id="online-completion-preview">
+          <div class="shot-window shot-window--completion-preview" role="img" aria-label="Android Galaxy S24+ detail showing the unfinished average expression and its AI suggestion preview: values.reduce((a, b) => a + b, 0) / values.length;, with Cancel and Insert all buttons. No suggestion has been inserted.">
+            <div class="shot-stage">
+              <img src="assets/phone-completion-preview.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>The full code preview on a Galaxy S24+.</strong> A new Gemini Flash-Lite request returned the same <code>reduce</code> expression. <strong>Accept only through a line:</strong> for a multi-line suggestion, tap or click the last line you want. This immediately inserts everything from the first line through that line, leaving later lines out. <strong>Insert all</strong> accepts the whole suggestion; <strong>Cancel</strong> inserts nothing. This example is one code line, even though it wraps on screen, so tapping it accepts the whole expression. Accepting edits the source; it does not Run the cell.</figcaption>
+          <a class="full-shot-link" href="assets/phone-completion-preview.png">View the unmodified full phone screenshot of the completion preview</a>
+        </figure>
         <p>The request asks for up to five alternatives, but your screen may fit fewer. Another tap first pages through already-received alternatives; once those are exhausted it can request more. Tap while the request spins to cancel it. Later replies are dropped when the timeout expires, and typing or moving the caret makes old suggestions stale.</p>
         <p><strong>Independent means independent:</strong> a separate completion choice stays separate when you change the Assistant's model. This is useful when you want a capable agent but inexpensive autocomplete. Following the Assistant inherits its identity, <em>not</em> its conversation or agent permissions.</p>
         <aside class="callout" id="completion-privacy">
