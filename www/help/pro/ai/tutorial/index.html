@@ -310,18 +310,74 @@ const average = </code></pre>
         <p class="step-label">Step 6 · Understand the code as you build it</p>
         <h2>Finish with a focused AI Prompt cell</h2>
         <p>The Assistant is useful for multi-step work. An <strong>AI Prompt</strong> cell is better for a small, repeatable question about a particular piece of code: it makes <strong>one isolated request</strong>, without Assistant history or tools. Use it to ask why a calculation works before extending it.</p>
+        <p>Here we return to Step 3's seeded-random <code>summary_demo</code> cell. We ask for an explanation of that existing calculation—not another random array, and not Step 4's average-only completion example.</p>
         <ol class="lesson-steps">
           <li>Add an <strong>AI Prompt</strong> cell immediately after Step 3's <code>summary_demo</code> JavaScript cell—not the average-only snippet from Step 4—so the question below matches the selected source. Keep the cell type as <strong>Code</strong>, then choose <strong>AI Prompt</strong> from the <strong>language/mode dropdown</strong>. If it is absent, enable it under <strong>Menu → Languages &amp; modes</strong>.</li>
-          <li>Enter the prompt below. Open its <strong>Configure</strong> control.</li>
-          <li>Set <strong>Put final response in → This cell's output</strong>, the default. Under <strong>Context to send → Include source from</strong>, choose <strong>Previous 1 cell</strong>. Uncheck <strong>Include saved output text</strong> if only the source is needed, then <strong>Save configuration</strong>.</li>
-          <li>Tap the AI Prompt cell's <strong>Run</strong>. Check the selected context in the review, then choose <strong>Send to AI provider</strong>. Read the explanation alongside the source and compare it with the known results.</li>
-        </ol>
-        <pre><code>Explain the selected JavaScript cell line by line.
+          <li>Paste the prompt below into the <strong>AI Prompt cell</strong>, not the Assistant's message box. Open its <strong>Configure</strong> control.
+            <div class="callout" id="ai-prompt-practice-prompt">
+              <pre><code>Explain the selected JavaScript cell line by line.
 How do the generator rule and seed 42 determine its input array?
 Why should it report count 10, mean 9.3, minimum 1 and maximum 20?
 Why does resetting the seed make the result repeatable?
 Explain what needs changing for an empty array.
 Return a short explanation only; do not rewrite the code.</code></pre>
+            </div>
+            <div class="prompt-config-locations">
+              <figure class="phone-figure" id="ai-prompt-composer-controls">
+                <p class="screen-note"><strong>New-cell composer</strong></p>
+                <div class="shot-window shot-window--ai-prompt-composer" role="img" aria-label="Android new-cell composer with AI Prompt selected. Yellow borders locate its AI language selector and Configure button beside the draft.">
+                  <div class="shot-stage">
+                    <img src="assets/phone-ai-prompt-composer.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="assets/phone-ai-prompt-composer-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Before the cell is saved:</strong> choose AI Prompt (shown as <strong>AI</strong>) and tap the composer's highlighted <strong>Configure</strong>. It configures the new prompt you are writing.</figcaption>
+                <a class="full-shot-link" href="assets/phone-ai-prompt-composer.png">View the full composer screenshot</a>
+              </figure>
+              <figure class="phone-figure" id="ai-prompt-edit-controls">
+                <p class="screen-note"><strong>Existing cell while editing</strong></p>
+                <div class="shot-window shot-window--ai-prompt-edit" role="img" aria-label="Android saved AI Prompt cell in edit mode. A yellow border locates Configure in the cell header above the start of the prompt.">
+                  <div class="shot-stage">
+                    <img src="assets/phone-ai-prompt-edit.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="assets/phone-ai-prompt-edit-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>For an existing cell:</strong> tap that cell's header <strong>Configure</strong>. It stays available while you edit the prompt. Both buttons open the same configuration dialog; changing settings alone sends nothing.</figcaption>
+                <a class="full-shot-link" href="assets/phone-ai-prompt-edit.png">View the full cell-edit screenshot</a>
+              </figure>
+            </div>
+          </li>
+          <li>Set <strong>Put final response in → This cell's output</strong>, the default. Under <strong>Context to send → Include source from</strong>, choose <strong>Previous 1 cell</strong>. Uncheck <strong>Include saved output text</strong> for this source-only exercise. Check that <strong>Context preview</strong> names <code>summary_demo</code>, then scroll down and tap <strong>Save configuration</strong>.
+            <figure class="phone-figure" id="ai-prompt-configuration">
+              <div class="shot-window shot-window--ai-prompt-config" role="img" aria-label="Android Configure AI Prompt cell dialog. Yellow borders locate This cell's output, Previous 1 cell, and Include saved output text unchecked.">
+                <div class="shot-stage">
+                  <img src="assets/phone-ai-prompt-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="assets/phone-ai-prompt-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption>The dialog opened by <strong>Configure</strong>. Yellow borders locate the response destination, <strong>Previous 1 cell</strong> and the unchecked saved-output option. Send only the preceding <code>summary_demo</code> source. <strong>Previous 1 cell</strong> means the immediately preceding cell in workbook order; it does not search by name.</figcaption>
+              <a class="full-shot-link" href="assets/phone-ai-prompt-config.png">View the full configuration screenshot</a>
+              <p class="screen-note">Scroll down in the dialog to reach <strong>Save configuration</strong>.</p>
+              <div class="shot-window shot-window--ai-prompt-config-save" role="img" aria-label="Bottom of the Android AI Prompt configuration dialog. A yellow border locates Save configuration beside Cancel.">
+                <div class="shot-stage">
+                  <img src="assets/phone-ai-prompt-config-save.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="assets/phone-ai-prompt-config-save-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <a class="full-shot-link" href="assets/phone-ai-prompt-config-save.png">View the full scrolled dialog screenshot</a>
+            </figure>
+          </li>
+          <li>Tap the AI Prompt cell's <strong>Run</strong>. Check the selected context in the review, then choose <strong>Send to AI provider</strong>. Read the explanation alongside the source and compare it with the known results.</li>
+        </ol>
+        <figure class="phone-figure" id="ai-prompt-explanation">
+          <div class="shot-window shot-window--ai-prompt-result" role="img" aria-label="Actual Android AI Prompt output from GLM 5.3 Flash. The visible excerpt explains the seeded generator, array length, reduce, minimum and maximum in summary_demo.">
+            <div class="shot-stage">
+              <img src="assets/phone-ai-prompt-result.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>A real GLM 5.3 Flash explanation on the Galaxy S24+.</strong> One source-only request produced this reply in the AI Prompt cell's output; it did not change or re-run the JavaScript cell. The picture shows the beginning of the explanation. Scroll the output to continue, and check the answer against the source and Step 3's expected results—an AI explanation is not a correctness guarantee.</figcaption>
+          <a class="full-shot-link" href="assets/phone-ai-prompt-result.png">View the full explanation screenshot</a>
+        </figure>
         <p class="callout"><strong>A way to control API costs and improve understanding.</strong> A focused AI Prompt can send less context than a growing agent conversation and avoid a multi-step tool loop, reducing input tokens and potentially the bill. Ask for concise reasoning, assumptions and expected output as you code. Savings are <strong>not guaranteed</strong>: model rates, response length, reasoning tokens and your chosen context still matter. These requests use the <strong>Assistant's provider/model</strong>, not the independent completion model, and are outside the completion spending guards.</p>
         <p>Later, Configure can send the answer to a linked result cell or propose a replacement for another cell. Generated code is not automatically run; replacements need a separate <strong>Apply</strong>. For this first exercise, keep the explanation in the prompt cell's output so you can compare it without overwriting anything.</p>
       </section>

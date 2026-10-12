@@ -70,3 +70,46 @@
   aspect-ratio: 1080 / 1080;
   --shift: -3.846153846%; /* Original pixels 90–1170: section, Ready status and use mode. */
 }
+
+.prompt-config-locations {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.prompt-config-locations > .phone-figure { min-width: 0; }
+
+.shot-window--ai-prompt-composer {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 550;
+  --shift: -67.948717949%; /* Original pixels 1590–2140: composer controls and draft. */
+}
+
+.shot-window--ai-prompt-edit {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 360;
+  --shift: -41.880341880%; /* Original pixels 980–1340: saved-cell header and start of prompt. */
+}
+
+.shot-window--ai-prompt-config {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 1285;
+  --shift: -4.059829060%; /* Original pixels 95–1380: settings and complete source-only note. */
+}
+
+.shot-window--ai-prompt-config-save {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 170;
+  --shift: -90.170940171%; /* Original pixels 2110–2280: Cancel and Save configuration. */
+}
+
+.shot-window--ai-prompt-result {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 1400;
+  --shift: -9.615384615%; /* Original pixels 225–1625: opening explanation, without composer. */
+}
+
+@media (max-width: 760px) {
+  .prompt-config-locations { grid-template-columns: minmax(0, 1fr); }
+}

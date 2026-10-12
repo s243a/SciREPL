@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runInNewContext } from 'node:vm';
 import { preparePublicPagesServiceWorker } from '../scripts/prepare-public-pages-sw.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -825,6 +826,141 @@ check('Pro AI local settings detail crop matches its receipt and excludes unused
     && aiLocalReceipt.displayView.width === 1080 && aiLocalReceipt.displayView.height === 1080
     && aiLocalCropCss.includes(`aspect-ratio: ${aiLocalReceipt.displayView.width} / ${aiLocalReceipt.displayView.height}`)
     && Math.abs(aiLocalCropShift / 100 + aiLocalReceipt.displayView.y / aiLocalReceipt.screenshot.height) < 0.00000001);
+
+const aiPromptMarkup = (aiTutorial.match(
+  /<section\b[^>]*\bid="prompt-cells"[^>]*>([\s\S]*?)<\/section>/i) || [])[1] || '';
+const aiPromptSteps = aiPromptMarkup.match(/<ol\b[^>]*>([\s\S]*?)<\/ol>/i);
+const aiPromptItems = [...(aiPromptSteps?.[1] || '').matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)];
+const aiPromptFigure = id => (aiPromptMarkup.match(new RegExp(
+  `<figure\\b[^>]*\\bid="${id}"[^>]*>[\\s\\S]*?<\\/figure>`, 'i')) || [])[0] || '';
+const aiPromptResultFigure = aiPromptFigure('ai-prompt-explanation');
+check('Pro AI Prompt instructions place the prompt and both Configure locations inside item 2',
+  aiPromptItems.length === 4
+    && ['ai-prompt-practice-prompt', 'ai-prompt-composer-controls', 'ai-prompt-edit-controls']
+      .every(id => aiPromptItems[1][1].includes(`id="${id}"`)
+        && aiPromptMarkup.split(`id="${id}"`).length === 2)
+    && /not the Assistant's message box/.test(helpText(aiPromptItems[1][1])));
+check('Pro AI Prompt configuration and Save detail remain inside item 3 before explicit Run',
+  aiPromptItems.length === 4
+    && aiPromptItems[2][1].includes('id="ai-prompt-configuration"')
+    && aiPromptItems[2][1].includes('shot-window--ai-prompt-config-save')
+    && /Previous 1 cell/.test(helpText(aiPromptItems[2][1]))
+    && /Uncheck Include saved output text/.test(helpText(aiPromptItems[2][1]))
+    && /Context preview names summary_demo/.test(helpText(aiPromptItems[2][1]))
+    && /Send to AI provider/.test(helpText(aiPromptItems[3][1])));
+const aiPromptResultPosition = aiPromptMarkup.indexOf(aiPromptResultFigure);
+check('Pro AI Prompt actual output immediately follows the four instructions without replacing them',
+  aiPromptSteps && aiPromptResultFigure
+    && aiPromptMarkup.split('id="ai-prompt-explanation"').length === 2
+    && aiPromptResultPosition >= aiPromptSteps.index + aiPromptSteps[0].length
+    && !aiPromptMarkup.slice(aiPromptSteps.index + aiPromptSteps[0].length, aiPromptResultPosition).trim()
+    && /did not change or re-run the JavaScript cell/.test(helpText(aiPromptResultFigure))
+    && /beginning of the explanation/.test(helpText(aiPromptResultFigure))
+    && /not a correctness guarantee/.test(helpText(aiPromptResultFigure)));
+const aiPromptReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-ai-prompt-phone.json'), 'utf8'));
+const aiPromptPractice = (aiPromptItems[1]?.[1].match(
+  /<div\b[^>]*\bid="ai-prompt-practice-prompt"[^>]*>([\s\S]*?)<\/div>/i) || [])[1] || '';
+const aiPromptPracticeText = (aiPromptPractice.match(/<pre><code>([\s\S]*?)<\/code><\/pre>/i) || [])[1] || '';
+check('Pro AI Prompt copyable exercise matches its source-only recorded request and seeded cell names',
+  aiPromptPracticeText === aiPromptReceipt.exercise.prompt
+    && aiPromptReceipt.exercise.summaryName === 'summary_demo'
+    && aiPromptReceipt.exercise.promptName === 'explain_summary'
+    && aiPromptReceipt.exercise.configuration.placement === 'output'
+    && aiPromptReceipt.exercise.configuration.scope === 'previous-1'
+    && aiPromptReceipt.exercise.configuration.includeSavedOutputs === false
+    && /immediately preceding cell in workbook order; it does not search by name/.test(helpText(aiPromptMarkup)));
+const aiPromptRequest = aiPromptReceipt.exercise.request;
+check('Pro AI Prompt records exactly one bounded, reviewed GLM request without history or tools',
+  aiPromptReceipt.captureMethod === 'Android screencap; unmodified full-screen PNG'
+    && aiPromptReceipt.device.model === 'SM-S926W'
+    && aiPromptReceipt.device.appPackage === 'com.unifyweaver.scirepl.pro.debug'
+    && aiPromptReceipt.device.sourceCommit === null
+    && aiPromptRequest.backend === 'openrouter' && aiPromptRequest.model === 'z-ai/glm-5.3-flash'
+    && aiPromptRequest.requests === 1 && aiPromptRequest.maxOutputTokens === 2048
+    && aiPromptRequest.selectedSourceCount === 1 && aiPromptRequest.sourceOnly === true
+    && aiPromptRequest.chatHistorySent === false && aiPromptRequest.toolsAvailable === false
+    && aiPromptRequest.reviewedBeforeSending === true && aiPromptRequest.finishReason === 'stop'
+    && aiPromptRequest.usage.inputTokens === 331 && aiPromptRequest.usage.outputTokens === 922
+    && aiPromptRequest.usage.totalTokens === aiPromptRequest.usage.inputTokens + aiPromptRequest.usage.outputTokens
+    && aiPromptReceipt.exercise.sourcesUnchanged === true);
+check('Pro AI Prompt capture restores workbook, draft, language, settings, request hook, credentials and rotation',
+  ['originalWorkbookRestored', 'originalDraftRestored', 'originalLanguageRestored', 'settingsRestored',
+    'captureWorkbookRemoved', 'originalRequestRestored', 'providerCredentialsNotExposedOrModified']
+    .every(field => aiPromptReceipt.cleanup[field] === true)
+    && aiPromptReceipt.rotationRestored === true);
+const aiPromptVmOutput = [];
+let aiPromptVmError = '';
+try {
+  runInNewContext(aiPromptReceipt.exercise.source, {
+    console: Object.freeze({ log: (...args) => aiPromptVmOutput.push(args.map(String).join(' ')) }),
+  }, { timeout: 1000 });
+} catch (error) {
+  aiPromptVmError = error.message;
+}
+const aiPromptExpectedOutput = `Input: ${JSON.stringify(summaryVector)}\nCount: 10\nMean: 9.3\nMinimum: 1\nMaximum: 20`;
+check('Pro AI Prompt selected toy source independently reproduces the seeded statistics in a time-limited VM',
+  !aiPromptVmError && aiPromptVmOutput.join('\n') === aiPromptReceipt.exercise.summaryOutput
+    && aiPromptReceipt.exercise.summaryOutput === aiPromptExpectedOutput, aiPromptVmError);
+const aiPromptShots = [
+  ['composer', 'ai-prompt-composer-controls', 1590, 550, 0,
+    ['composer-ai-language-setting', 'composer-ai-configure-setting'], /AI language selector and Configure button/],
+  ['edit', 'ai-prompt-edit-controls', 980, 360, 0,
+    ['saved-ai-configure-setting'], /Configure in the cell header above the start of the prompt/],
+  ['config', 'ai-prompt-configuration', 95, 1285, 0,
+    ['ai-prompt-result-placement-setting', 'ai-prompt-context-scope-setting', 'ai-prompt-context-outputs-setting'],
+    /This cell's output, Previous 1 cell, and Include saved output text unchecked/],
+  ['config-save', 'ai-prompt-configuration', 2110, 170, 1,
+    ['ai-prompt-save-configuration-setting'], /Save configuration beside Cancel/],
+  ['result', 'ai-prompt-explanation', 225, 1400, 1, [], /GLM 5\.3 Flash[\s\S]*summary_demo/],
+];
+check('Pro AI Prompt receipt identifies exactly five separate native screenshots',
+  aiPromptReceipt.screenshots.length === aiPromptShots.length
+    && new Set(aiPromptReceipt.screenshots.map(shot => shot.file)).size === aiPromptShots.length);
+for (const [stem, figureId, y, height, requestsAtCapture, highlightIds, label] of aiPromptShots) {
+  const file = `phone-ai-prompt-${stem}.png`;
+  const shot = aiPromptReceipt.screenshots.find(item => item.file === file);
+  const figure = aiPromptFigure(figureId);
+  const cropClass = `shot-window--ai-prompt-${stem}`;
+  const detail = (figure.match(new RegExp(
+    `<div\\b[^>]*\\bclass="[^"]*\\b${cropClass}\\b[^"]*"[^>]*>[\\s\\S]*?<\\/div>\\s*<\\/div>`, 'i')) || [])[0] || '';
+  const accessibleLabel = (detail.match(/\brole="img" aria-label="([^"]+)"/) || [])[1] || '';
+  const png = readFileSync(path.join(aiAssets, file));
+  check(`Pro AI Prompt ${file} is an intact native PNG with an honest capture sequence`,
+    shot && png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+      && png.readUInt32BE(16) === 1080 && png.readUInt32BE(20) === 2340
+      && shot.width === 1080 && shot.height === 2340
+      && createHash('sha256').update(png).digest('hex') === shot.sha256
+      && shot.providerRequestsAtCapture === requestsAtCapture);
+  check(`Pro AI Prompt ${file} has a truthful accessible detail and full-image link`,
+    detail.includes(`src="assets/${file}" width="1080" height="2340" alt=""`)
+      && label.test(accessibleLabel) && figure.includes(`href="assets/${file}"`)
+      && (stem !== 'edit' || !/\bRun\b|\bCancel\b/.test(accessibleLabel)));
+  const cropCss = (aiTutorialCss.match(new RegExp(`\\.${cropClass}\\s*\\{([^}]+)\\}`)) || [])[1] || '';
+  const shift = Number((cropCss.match(/--shift:\s*([\d.-]+)%/) || [])[1]);
+  check(`Pro AI Prompt ${file} crop matches its independently documented native detail window`,
+    shot?.displayView && shot.displayView.x === 0 && shot.displayView.y === y
+      && shot.displayView.width === 1080 && shot.displayView.height === height
+      && y + height <= shot.height && cropCss.includes(`aspect-ratio: 1080 / ${height}`)
+      && Math.abs(shift / 100 + y / shot.height) < 0.00000001);
+  if (highlightIds.length) {
+    const overlayFile = `phone-ai-prompt-${stem}-overlay.svg`;
+    const overlay = readFileSync(path.join(aiAssets, overlayFile), 'utf8');
+    const rects = [...overlay.matchAll(
+      /<rect\b[^>]*\bid="([^"]+)"[^>]*\bx="([\d.]+)"[^>]*\by="([\d.]+)"[^>]*\bwidth="([\d.]+)"[^>]*\bheight="([\d.]+)"/g)];
+    check(`Pro AI Prompt ${overlayFile} retains editable, labeled borders wholly inside its detail crop`,
+      /viewBox="0 0 1080 2340"/.test(overlay)
+        && /fill="none" stroke="#ffd43b" stroke-width="6"/.test(overlay)
+        && rects.length === highlightIds.length && rects.map(rect => rect[1]).join(',') === highlightIds.join(',')
+        && rects.every(([, , left, top, width, rectHeight]) => Number(left) >= 3
+          && Number(left) + Number(width) + 3 <= 1080 && Number(top) - 3 >= y
+          && Number(top) + Number(rectHeight) + 3 <= y + height)
+        && detail.includes(`src="assets/${overlayFile}"`)
+        && /class="shot-overlay"[^>]*aria-hidden="true"/.test(detail));
+  }
+}
+check('Pro AI Prompt scrolled Save view records its later capture rather than claiming pre-request evidence',
+  Date.parse(aiPromptReceipt.screenshots.find(shot => shot.file === 'phone-ai-prompt-config-save.png').capturedAtUtc)
+    > Date.parse(aiPromptReceipt.screenshots.find(shot => shot.file === 'phone-ai-prompt-result.png').capturedAtUtc));
 
 const csvSection = id => (csvTutorial.match(new RegExp(
   `<section\\b[^>]*\\bid=["']${id}["'][^>]*>([\\s\\S]*?)<\\/section>`, 'i')) || [])[1] || '';

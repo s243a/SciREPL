@@ -263,3 +263,41 @@ The original PNG stays unchanged. The inline CSS view shows original pixels
 blank space. `phone-local-settings-overlay.svg` adds three yellow borders at
 measured screen coordinates; it does not change screenshot pixels or values.
 `capture-pro-local-settings-phone.json` records the PNG hash, crop and checks.
+
+### AI Prompt cells: Configure and explanation (2026-10-12 UTC)
+
+Five unchanged S24+ Android screenshots show the new-cell composer's Configure
+button, the same control in a saved cell while editing, the configuration
+dialog, its Save button, and an actual explanation in the prompt cell's output.
+The device runs Pro debug 1.4.0-debug/code 25, cache v461; its source commit
+was not independently identified. They illustrate the existing AI Prompt
+workflow, not the upcoming Assistant execution-consent changes.
+
+An isolated, temporary practice workbook contained only the tutorial's
+seeded JavaScript `summary_demo` and `explain_summary` AI Prompt. The JavaScript
+was run manually and reproduced the expected array, count 10, mean 9.3,
+minimum 1 and maximum 20. Configure selected This cell's output, Previous 1
+cell, and no saved output text. The real context review was checked before
+Send; the single GLM 5.3 Flash request through OpenRouter contained just that
+toy source and the six-line explanation prompt, with no Assistant history or
+tools, and a 2,048-output-token limit. It reported 331 input and 922 output
+tokens, finishing normally. No independently verified dollar cost was recorded.
+The reply did not modify or re-run the JavaScript. It is an example response,
+not a proof of correctness.
+
+The composer, edit and upper-dialog pictures precede the request. The result
+and scrolled Save-button pictures were captured after its response. A dropped
+debugger connection was resumed to take those last pictures, without making
+another request. The original workbook, draft, language, settings, request
+function and automatic rotation were restored. Only the unchanged two-cell
+capture workbook was removed; credentials and spending records were retained.
+The temporary ADB forward was removed.
+
+The inline pictures are labelled CSS detail views, with separate editable
+yellow SVG borders on the real controls. The original PNGs remain linked and
+unmodified. Crops use the full 1,080-pixel width: composer y1590–2140, saved
+cell y980–1340, upper dialog y95–1380, Save y2110–2280, and explanation
+y225–1625. The explanation picture shows only its opening numbered section;
+the remaining answer requires scrolling the real output. The source-only note
+in the dialog is included in full. `capture-pro-ai-prompt-phone.json` records
+the native hashes, crops, toy source, exact prompt, response, usage and cleanup.
