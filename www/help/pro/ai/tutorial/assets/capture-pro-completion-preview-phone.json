@@ -41,7 +41,7 @@
     "sha256": "645cd4158fdf0f7e258620b4e4888cb20a2e2da04b47f71a06a7ae0ccc8f8d00",
     "capturedAtUtc": "2026-10-12T22:27:12.005Z"
   },
-  "displayView": { "x": 0, "y": 400, "width": 1080, "height": 800 },
+  "displayView": { "x": 0, "y": 690, "width": 1080, "height": 390 },
   "cleanup": {
     "originalWorkbookRestored": true,
     "originalDraftRestored": true,

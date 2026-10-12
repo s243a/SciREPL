@@ -775,10 +775,11 @@ check('Pro AI preview is an intact native phone PNG with a labeled detail and or
     && /unmodified full phone screenshot/.test(helpText(aiPreviewFigure)));
 const aiPreviewCropCss = (aiTutorialCss.match(/\.shot-window--completion-preview\s*\{([^}]+)\}/) || [])[1] || '';
 const aiPreviewCropShift = Number((aiPreviewCropCss.match(/--shift:\s*([\d.-]+)%/) || [])[1]);
-check('Pro AI preview crop matches the receipt while preserving the native screenshot',
+check('Pro AI preview-only crop omits the keyboard and matches the receipt without editing the screenshot',
   aiPreviewFigure.includes('shot-window--completion-preview')
-    && aiPreviewReceipt.displayView.x === 0 && aiPreviewReceipt.displayView.y === 400
-    && aiPreviewReceipt.displayView.width === 1080 && aiPreviewReceipt.displayView.height === 800
+    && aiPreviewReceipt.displayView.x === 0 && aiPreviewReceipt.displayView.y === 690
+    && aiPreviewReceipt.displayView.width === 1080 && aiPreviewReceipt.displayView.height === 390
+    && /The keyboard is omitted/.test(aiPreviewFigure)
     && aiPreviewCropCss.includes(`aspect-ratio: ${aiPreviewReceipt.displayView.width} / ${aiPreviewReceipt.displayView.height}`)
     && Math.abs(aiPreviewCropShift / 100 + aiPreviewReceipt.displayView.y / aiPreviewReceipt.screenshot.height) < 0.00000001);
 

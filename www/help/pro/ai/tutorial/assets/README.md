@@ -232,8 +232,8 @@ code line, which wraps visually: it cannot demonstrate a shorter acceptance.
 For genuinely multi-line suggestions, the production preview immediately
 inserts the first line through the tapped line; Insert all inserts everything.
 
-The tutorial uses a CSS detail view of original pixels 400–1200, preserving
-the source, preview and chip row, and links the unchanged full PNG. Its hash,
+The tutorial uses a CSS detail view of original pixels 690–1080, showing
+only the preview and its actions, without the keyboard. It links the unchanged full PNG. Its hash,
 request figures and state checks are in `capture-pro-completion-preview-phone.json`.
 The original workbook, draft, language and temporary completion settings were
 restored, and only the unchanged empty capture workbook was removed. Saved
