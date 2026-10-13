@@ -110,6 +110,30 @@
   --shift: -9.615384615%; /* Original pixels 225–1625: opening explanation, without composer. */
 }
 
+.shot-window--ai-variance-config {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 1560;
+  --shift: -16.239316239%; /* Original pixels 380–1940: replacement settings and context. */
+}
+
+.shot-window--ai-variance-preview-start {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 1060;
+  --shift: -9.615384615%; /* Original pixels 225–1285: Before/After and opening code. */
+}
+
+.shot-window--ai-variance-preview-apply {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 630;
+  --shift: -47.008547009%; /* Original pixels 1100–1730: final code and Apply/Cancel. */
+}
+
+.shot-window--ai-variance-plot {
+  width: min(100%, 560px);
+  aspect-ratio: 1080 / 900;
+  --shift: -9.615384615%; /* Original pixels 225–1125: plot and printed statistics. */
+}
+
 @media (max-width: 760px) {
   .prompt-config-locations { grid-template-columns: minmax(0, 1fr); }
 }

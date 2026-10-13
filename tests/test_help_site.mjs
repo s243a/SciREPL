@@ -962,6 +962,256 @@ check('Pro AI Prompt scrolled Save view records its later capture rather than cl
   Date.parse(aiPromptReceipt.screenshots.find(shot => shot.file === 'phone-ai-prompt-config-save.png').capturedAtUtc)
     > Date.parse(aiPromptReceipt.screenshots.find(shot => shot.file === 'phone-ai-prompt-result.png').capturedAtUtc));
 
+const aiVarianceStart = aiPromptMarkup.indexOf('<div id="ai-prompt-apply-example">');
+const aiVarianceMarkup = aiVarianceStart < 0 ? '' : aiPromptMarkup.slice(aiVarianceStart);
+const aiVarianceSteps = aiVarianceMarkup.match(/<ol\b[^>]*>([\s\S]*?)<\/ol>/i);
+const aiVarianceItems = [...(aiVarianceSteps?.[1] || '').matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)];
+const aiVariancePractice = (aiVarianceItems[1]?.[1].match(
+  /<div\b[^>]*\bid="ai-variance-practice-prompt"[^>]*>([\s\S]*?)<\/div>/i) || [])[1] || '';
+const aiVariancePracticeText = (aiVariancePractice.match(/<pre><code>([\s\S]*?)<\/code><\/pre>/i) || [])[1] || '';
+const aiVarianceExpectedPrompt = `Return only complete JavaScript source, without Markdown fences.
+Create a reproducible histogram of estimated sample variances.
+Simulate 2,000 fresh samples, each containing 10 standard-normal N(0,1) values.
+Do not reuse the earlier integer array from summary_demo.
+Initialize state = 42 once for the whole run, not per sample. Before each uniform draw set state = (16807 * state) % 2147483647, then u = state / 2147483647.
+For each normal draw use two successive uniforms: sqrt(-2 * log(u1)) * cos(2 * PI * u2). Do not reuse the spare sine result or use Math.random.
+For each sample compute its mean, then unbiased variance sum((x - mean)^2) / 9.
+Draw a labelled canvas histogram with 40 equal-width bins from 0 to 4. The horizontal axis is estimated variance; the vertical axis is sample count.
+Mark the true population variance 1 with a labelled vertical line. Use a light background, dark text and readable labels.
+Print sample size, repetitions, seed, mean estimated variance, histogram total and any overflow count. Count overflow separately rather than hiding it.
+Display the canvas with window.renderImage(canvas.toDataURL("image/png")).
+Use no packages, network, storage or workbook edits.`;
+check('Pro AI Prompt replacement exercise follows rather than alters the first four-step explanation',
+  aiVarianceStart > aiPromptResultPosition + aiPromptResultFigure.length
+    && aiPromptItems.length === 4 && aiVarianceItems.length === 6
+    && (aiPromptMarkup.match(/<ol\b/g) || []).length === 2
+    && ['ai-prompt-apply-example', 'ai-variance-practice-prompt']
+      .every(id => aiPromptMarkup.split(`id="${id}"`).length === 2)
+    && aiPromptPracticeText === aiPromptReceipt.exercise.prompt);
+check('Pro AI Prompt variance request fixes fresh normal samples, exact seeded draws and separate overflow',
+  aiVariancePracticeText === aiVarianceExpectedPrompt
+    && /fresh normal samples—not the earlier summary_demo integer array/.test(helpText(aiVarianceMarkup))
+    && /Configure → preview → Apply → Run/.test(helpText(aiVarianceMarkup)));
+const aiVarianceText = helpText(aiVarianceMarkup);
+check('Pro AI Prompt distinguishes chi-square sample variance from Student t sample mean with NIST links',
+  aiVarianceText.includes("Variance is not Student's t.")
+    && aiVarianceText.includes('9s² / σ² follows a chi-square distribution with 9 degrees of freedom')
+    && aiVarianceText.includes('true variance σ² = 1')
+    && aiVarianceText.includes("Student's t instead describes the standardized sample mean (mean − μ) / (s / √10)")
+    && /estimated standard deviation s/.test(aiVarianceText)
+    && /href="https:\/\/www\.itl\.nist\.gov\/div898\/handbook\/eda\/section3\/eda358\.htm"/.test(aiVarianceMarkup)
+    && /href="https:\/\/www\.itl\.nist\.gov\/div898\/handbook\/eda\/section3\/eda352\.htm"/.test(aiVarianceMarkup));
+check('Pro AI Prompt replacement prepares a unique named JavaScript target and a separate prompt',
+  aiVarianceItems.length === 6
+    && /JavaScript cell containing \/\/ Reviewed plot code will go here\./.test(helpText(aiVarianceItems[0][1]))
+    && /Run that harmless comment to save the cell/.test(helpText(aiVarianceItems[0][1]))
+    && /name it variance_plot\s*\. Keep that name unique/.test(helpText(aiVarianceItems[0][1]))
+    && /href="\.\.\/\.\.\/\.\.\/workbooks\/named-cells\/#name"/.test(aiVarianceItems[0][1])
+    && /Add a separate AI Prompt cell/.test(helpText(aiVarianceItems[1][1])));
+check('Pro AI Prompt replacement preserves target language and explains source sent despite No other cells',
+  aiVarianceItems.length === 6
+    && ['Put final response in → Replacement preview for a cell', 'Result cell language → Preserve target language',
+      'Cell to replace → Named cell', 'Cell name → variance_plot', 'Include source from → No other cells (default)',
+      'Save configuration'].every(text => helpText(aiVarianceItems[2][1]).includes(text))
+    && /Review what will be sent, then choose Send to AI provider/.test(helpText(aiVarianceItems[3][1]))
+    && /No other cells excludes extra workbook context; replacement still sends the complete source of the target cell/.test(
+      helpText(aiVarianceItems[3][1])));
+check('Pro AI Prompt replacement separates Before/After approval, Cancel and the target cell manual Run',
+  aiVarianceItems.length === 6
+    && /Before \/ After/.test(helpText(aiVarianceItems[4][1]))
+    && /seed 42, 2,000 samples of 10, variance divided by 9/.test(helpText(aiVarianceItems[4][1]))
+    && /Apply replacement only if you accept that source; Cancel leaves variance_plot unchanged/.test(
+      helpText(aiVarianceItems[4][1]))
+    && /Applying edits the destination cell but does not run it/.test(helpText(aiVarianceItems[4][1]))
+    && /Find variance_plot and tap its own Run/.test(helpText(aiVarianceItems[5][1]))
+    && /bar counts sample-variance estimates—not individual observations/.test(helpText(aiVarianceItems[5][1]))
+    && /mean estimated variance near 0\.9852\s*, a histogram total of 2,000 and overflow 0/.test(
+      helpText(aiVarianceItems[5][1]))
+    && /Re-running from seed 42 should reproduce the plot/.test(helpText(aiVarianceItems[5][1]))
+    && /Send to AI provider approves sharing the reviewed request\. Apply replacement approves editing the target's source/.test(
+      aiVarianceText)
+    && /Neither runs the proposed JavaScript/.test(aiVarianceText)
+    && /Do not choose A linked new cell/.test(aiVarianceText)
+    && /inserts an unrun result cell without this replacement-approval step/.test(aiVarianceText));
+// This calculation makes no provider request and does not execute returned code.
+// BigInt keeps the Park–Miller update independent of generated JavaScript arithmetic.
+let aiVarianceState = 42n;
+let aiVarianceUniformDraws = 0;
+const aiVarianceUniform = () => {
+  aiVarianceState = (16807n * aiVarianceState) % 2147483647n;
+  aiVarianceUniformDraws++;
+  return Number(aiVarianceState) / 2147483647;
+};
+const aiVarianceValues = [];
+const aiVarianceBins = Array(40).fill(0);
+let aiVarianceOverflow = 0;
+for (let repetition = 0; repetition < 2000; repetition++) {
+  const sample = Array.from({ length: 10 }, () => {
+    const u1 = aiVarianceUniform();
+    const u2 = aiVarianceUniform();
+    return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  });
+  const mean = sample.reduce((sum, value) => sum + value, 0) / 10;
+  const variance = sample.reduce((sum, value) => sum + (value - mean) ** 2, 0) / 9;
+  aiVarianceValues.push(variance);
+  if (variance >= 0 && variance < 4) aiVarianceBins[Math.floor(variance / 0.1)]++;
+  else aiVarianceOverflow++;
+}
+const aiVarianceMean = aiVarianceValues.reduce((sum, value) => sum + value, 0) / aiVarianceValues.length;
+const aiVarianceHistogramTotal = aiVarianceBins.reduce((sum, count) => sum + count, 0);
+check('Pro AI Prompt normal-sample variance exercise independently reproduces the exact seeded statistics',
+  aiVarianceValues.length === 2000 && aiVarianceUniformDraws === 40000
+    && aiVarianceState === 2057487431n && aiVarianceBins.length === 40
+    && aiVarianceValues.every(value => Number.isFinite(value) && value >= 0)
+    && Math.abs(aiVarianceMean - 0.9852140436801163) < 1e-12
+    && Math.abs(Math.min(...aiVarianceValues) - 0.08290714618890192) < 1e-12
+    && Math.abs(Math.max(...aiVarianceValues) - 3.215275275225368) < 1e-12
+    && aiVarianceHistogramTotal === 2000 && aiVarianceOverflow === 0);
+
+const aiVarianceReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-ai-variance-phone.json'), 'utf8'));
+const aiVarianceExercise = aiVarianceReceipt.exercise;
+const aiVarianceRequest = aiVarianceExercise.request;
+const aiVarianceGenerated = readFileSync(path.join(aiAssets, 'ai-variance-generated.js'), 'utf8');
+const aiVarianceReviewed = readFileSync(path.join(aiAssets, 'ai-variance-reviewed.js'), 'utf8');
+const aiVarianceFigure = id => (aiVarianceMarkup.match(new RegExp(
+  `<figure\\b[^>]*\\bid="${id}"[^>]*>[\\s\\S]*?<\\/figure>`, 'i')) || [])[0] || '';
+check('Pro AI Prompt variance capture records the exact prompt and one bounded reviewed GLM request',
+  aiVariancePracticeText === aiVarianceExercise.prompt
+    && aiVarianceReceipt.captureMethod === 'Android screencap; unmodified full-screen PNG'
+    && aiVarianceReceipt.device.model === 'SM-S926W'
+    && aiVarianceReceipt.device.appPackage === 'com.unifyweaver.scirepl.pro.debug'
+    && aiVarianceReceipt.device.sourceCommit === null
+    && aiVarianceRequest.backend === 'openrouter' && aiVarianceRequest.model === 'z-ai/glm-5.3-flash'
+    && aiVarianceRequest.requests === 1 && aiVarianceRequest.maxOutputTokens === 4096
+    && aiVarianceRequest.finishReason === 'stop'
+    && aiVarianceRequest.usage.inputTokens === 395 && aiVarianceRequest.usage.outputTokens === 1389
+    && aiVarianceRequest.usage.totalTokens === aiVarianceRequest.usage.inputTokens + aiVarianceRequest.usage.outputTokens
+    && aiVarianceExercise.review.requestsBeforeApproval === 0
+    && aiVarianceExercise.review.text === aiVarianceExercise.before
+    && aiVarianceExercise.before === '// Reviewed plot code will go here.');
+check('Pro AI Prompt variance documents the source-only request guard without claiming an HTTP-body capture',
+  aiVarianceExercise.contextScopeChosen === 'none'
+    && /Exactly one requestCellOnce call/.test(aiVarianceExercise.requestGuard)
+    && /toy prompt plus the complete harmless target source/.test(aiVarianceExercise.requestGuard)
+    && /no other cell source in the method argument/.test(aiVarianceExercise.requestGuard)
+    && /system framing\/runtime guide and one user message, without Assistant history or tools/.test(
+      aiVarianceExercise.singlePromptPathAudit)
+    && /source-path audit, not a saved HTTP-body capture/.test(aiVarianceExercise.singlePromptPathAudit));
+check('Pro AI Prompt variance capture preserves the named target language until approved replacement',
+  aiVarianceExercise.targetName === 'variance_plot'
+    && aiVarianceExercise.configuration.result.placement === 'replace-target'
+    && aiVarianceExercise.configuration.result.target.kind === 'namedCell'
+    && aiVarianceExercise.configuration.result.target.name === aiVarianceExercise.targetName
+    && aiVarianceExercise.configuration.result.targetLanguage === null
+    && aiVarianceExercise.targetUnchangedBeforeApply === true
+    && aiVarianceExercise.afterApply.targetMatchesGenerated === true
+    && aiVarianceExercise.afterApply.language === 'javascript'
+    && aiVarianceExercise.afterApply.outputCleared === true
+    && aiVarianceExercise.afterApply.requests === 1
+    && aiVarianceExercise.manualRun.separateFromApply === true);
+const aiVarianceReportMarker = '\n// Report\n';
+const aiVarianceReportStart = aiVarianceGenerated.indexOf(aiVarianceReportMarker);
+const aiVarianceGeneratedReport = aiVarianceGenerated.slice(aiVarianceReportStart + aiVarianceReportMarker.length).trimEnd();
+const aiVarianceOnlyPrintCorrection = aiVarianceGenerated.slice(0, aiVarianceReportStart + aiVarianceReportMarker.length)
+  + 'console.log(\n' + aiVarianceGeneratedReport.slice(0, -1) + '\n);\n';
+check('Pro AI Prompt variance links the unmodified response and discloses only the final print correction before Run',
+  aiVarianceGenerated.trimEnd() === aiVarianceRequest.text
+    && aiVarianceReviewed.trimEnd() === aiVarianceExercise.manualCorrection.code
+    && aiVarianceReportStart >= 0 && aiVarianceGeneratedReport.endsWith(';')
+    && aiVarianceReviewed === aiVarianceOnlyPrintCorrection
+    && aiVarianceExercise.manualRun.reviewedSourceFile === 'ai-variance-reviewed.js'
+    && /bare expression/.test(aiVarianceExercise.manualCorrection.reason)
+    && /console\.log before manual Run/.test(aiVarianceExercise.manualCorrection.reason)
+    && /href="assets\/ai-variance-generated\.js">Read the complete generated source/.test(aiVarianceItems[4][1])
+    && /href="assets\/ai-variance-reviewed\.js">Read the corrected source that was run/.test(aiVarianceItems[5][1])
+    && /After Apply, we edited only that final report into console\.log\(…\) before Run/.test(
+      helpText(aiVarianceItems[5][1])));
+const aiVarianceExpectedReport = 'sample size=10 | repetitions=2000 | seed=42 | mean estimated variance='
+  + aiVarianceMean.toFixed(5) + ` | histogram total=${aiVarianceHistogramTotal} | overflow=${aiVarianceOverflow}`;
+check('Pro AI Prompt variance actual plot checks agree with the independent normal-sample calculation',
+  aiVarianceExercise.output.text.includes(aiVarianceExpectedReport)
+    && aiVarianceExercise.output.plot.naturalWidth === 900 && aiVarianceExercise.output.plot.naturalHeight === 560
+    && aiVarianceExercise.output.requests === 1 && aiVarianceExercise.output.sourceMatchesReviewedCorrection === true
+    && Math.abs(aiVarianceExercise.manualRun.expected.meanEstimatedVariance - aiVarianceMean) < 1e-12
+    && aiVarianceExercise.manualRun.expected.histogramTotal === aiVarianceHistogramTotal
+    && aiVarianceExercise.manualRun.expected.overflow === aiVarianceOverflow);
+check('Pro AI Prompt variance capture restores state, rotation and request hook without preserving unexpected edits',
+  ['originalWorkbookRestored', 'originalDraftRestored', 'originalLanguageRestored', 'settingsRestored',
+    'requestFunctionRestored', 'temporaryWorkbookRemoved', 'rotationRestored', 'temporaryAdbForwardRemoved']
+    .every(field => aiVarianceReceipt.cleanup[field] === true)
+    && aiVarianceReceipt.cleanup.unexpectedEditsPreserved === false);
+const aiVarianceShots = [
+  ['config', 'ai-variance-configuration', 2, 380, 1560, 0,
+    ['ai-variance-placement-setting', 'ai-variance-language-setting', 'ai-variance-target-kind-setting',
+      'ai-variance-target-name-setting', 'ai-variance-context-setting'],
+    /Replacement preview for a cell, Preserve target language, Named cell, variance_plot, and No other cells/],
+  ['preview-start', 'ai-variance-approval', 4, 225, 1060, 1, [],
+    /Before\/After replacement preview[\s\S]*harmless comment[\s\S]*seed 42/],
+  ['preview-apply', 'ai-variance-approval', 4, 1100, 630, 1, ['ai-variance-approval-actions'],
+    /Apply replacement and Cancel; neither action runs the proposed code/],
+  ['plot', 'ai-variance-output', 5, 225, 900, 1, [],
+    /separate manual Run[\s\S]*2,000 sample-variance estimates[\s\S]*mean is 0\.98521[\s\S]*total 2000 and overflow 0/],
+];
+check('Pro AI Prompt variance receipt identifies exactly four separate native screenshots in capture order',
+  aiVarianceReceipt.screenshots.length === aiVarianceShots.length
+    && aiVarianceReceipt.screenshots.map(shot => shot.file).join(',')
+      === aiVarianceShots.map(([stem]) => `phone-ai-variance-${stem}.png`).join(',')
+    && aiVarianceReceipt.screenshots.every((shot, index, shots) => Number.isFinite(Date.parse(shot.capturedAtUtc))
+      && (index === 0 || Date.parse(shot.capturedAtUtc) > Date.parse(shots[index - 1].capturedAtUtc))));
+for (const [stem, figureId, itemIndex, y, height, requestsAtCapture, highlightIds, label] of aiVarianceShots) {
+  const file = `phone-ai-variance-${stem}.png`;
+  const shot = aiVarianceReceipt.screenshots.find(item => item.file === file);
+  const figure = aiVarianceFigure(figureId);
+  const cropClass = `shot-window--ai-variance-${stem}`;
+  const detail = (figure.match(new RegExp(
+    `<div\\b[^>]*\\bclass="[^"]*\\b${cropClass}\\b[^"]*"[^>]*>[\\s\\S]*?<\\/div>\\s*<\\/div>`, 'i')) || [])[0] || '';
+  const accessibleLabel = (detail.match(/\brole="img" aria-label="([^"]+)"/) || [])[1] || '';
+  const png = readFileSync(path.join(aiAssets, file));
+  check(`Pro AI Prompt variance ${file} stays in its relevant instruction with a truthful label and full-image link`,
+    aiVarianceItems[itemIndex][1].includes(`id="${figureId}"`)
+      && aiVarianceMarkup.split(`id="${figureId}"`).length === 2
+      && detail.includes(`src="assets/${file}" width="1080" height="2340" alt=""`)
+      && label.test(accessibleLabel) && figure.includes(`href="assets/${file}"`));
+  check(`Pro AI Prompt variance ${file} is the intact native PNG at the documented request count`,
+    shot && png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+      && png.readUInt32BE(16) === 1080 && png.readUInt32BE(20) === 2340
+      && shot.width === 1080 && shot.height === 2340
+      && createHash('sha256').update(png).digest('hex') === shot.sha256
+      && shot.providerRequestsAtCapture === requestsAtCapture);
+  const cropCss = (aiTutorialCss.match(new RegExp(`\\.${cropClass}\\s*\\{([^}]+)\\}`)) || [])[1] || '';
+  const shift = Number((cropCss.match(/--shift:\s*([\d.-]+)%/) || [])[1]);
+  check(`Pro AI Prompt variance ${file} CSS crop matches its native display window`,
+    shot?.displayView && shot.displayView.x === 0 && shot.displayView.y === y
+      && shot.displayView.width === 1080 && shot.displayView.height === height
+      && y + height <= shot.height && cropCss.includes(`aspect-ratio: 1080 / ${height}`)
+      && Math.abs(shift / 100 + y / shot.height) < 0.00000001);
+  if (highlightIds.length) {
+    const overlayFile = `phone-ai-variance-${stem}-overlay.svg`;
+    const overlay = readFileSync(path.join(aiAssets, overlayFile), 'utf8');
+    const rects = [...overlay.matchAll(
+      /<rect\b[^>]*\bid="([^"]+)"[^>]*\bx="([\d.]+)"[^>]*\by="([\d.]+)"[^>]*\bwidth="([\d.]+)"[^>]*\bheight="([\d.]+)"/g)];
+    check(`Pro AI Prompt variance ${overlayFile} contains only labeled editable borders inside the displayed crop`,
+      /viewBox="0 0 1080 2340"/.test(overlay)
+        && /<title>[^<]+<\/title>/.test(overlay) && /<desc>[^<]+<\/desc>/.test(overlay)
+        && /fill="none" stroke="#ffd43b" stroke-width="6"/.test(overlay)
+        && !/<(?:image|text|foreignObject)\b/i.test(overlay)
+        && rects.length === highlightIds.length && rects.map(rect => rect[1]).join(',') === highlightIds.join(',')
+        && rects.every(([, , left, top, width, rectHeight]) => Number(left) >= 3
+          && Number(left) + Number(width) + 3 <= 1080 && Number(top) - 3 >= y
+          && Number(top) + Number(rectHeight) + 3 <= y + height)
+        && detail.includes(`src="assets/${overlayFile}"`)
+        && /class="shot-overlay"[^>]*aria-hidden="true"/.test(detail));
+  }
+}
+const aiVarianceApprovalFigure = aiVarianceFigure('ai-variance-approval');
+check('Pro AI Prompt variance shows both ends of one preview and discloses the omitted middle',
+  aiVarianceApprovalFigure.indexOf('shot-window--ai-variance-preview-start')
+    < aiVarianceApprovalFigure.indexOf('shot-window--ai-variance-preview-apply')
+    && /target still contains only our comment/.test(helpText(aiVarianceApprovalFigure))
+    && /Read the whole After section/.test(helpText(aiVarianceApprovalFigure))
+    && /middle of this long preview is omitted/.test(helpText(aiVarianceApprovalFigure))
+    && /Apply replacement changes the named cell's source; it does not execute it/.test(helpText(aiVarianceApprovalFigure)));
+
 const csvSection = id => (csvTutorial.match(new RegExp(
   `<section\\b[^>]*\\bid=["']${id}["'][^>]*>([\\s\\S]*?)<\\/section>`, 'i')) || [])[1] || '';
 const csvText = helpText(csvTutorial);

@@ -379,7 +379,75 @@ Return a short explanation only; do not rewrite the code.</code></pre>
           <a class="full-shot-link" href="assets/phone-ai-prompt-result.png">View the full explanation screenshot</a>
         </figure>
         <p class="callout"><strong>A way to control API costs and improve understanding.</strong> A focused AI Prompt can send less context than a growing agent conversation and avoid a multi-step tool loop, reducing input tokens and potentially the bill. Ask for concise reasoning, assumptions and expected output as you code. Savings are <strong>not guaranteed</strong>: model rates, response length, reasoning tokens and your chosen context still matter. These requests use the <strong>Assistant's provider/model</strong>, not the independent completion model, and are outside the completion spending guards.</p>
-        <p>Later, Configure can send the answer to a linked result cell or propose a replacement for another cell. Generated code is not automatically run; replacements need a separate <strong>Apply</strong>. For this first exercise, keep the explanation in the prompt cell's output so you can compare it without overwriting anything.</p>
+        <div id="ai-prompt-apply-example">
+          <h3>Another example · Review a plot before replacing a cell</h3>
+          <p>Now ask an AI Prompt to write code into a <em>different</em> cell, with a review before anything is replaced. We will plot how estimated variance changes across many small samples. These are fresh normal samples—not the earlier <code>summary_demo</code> integer array. The goal is to learn <strong>Configure → preview → Apply → Run</strong>, not to master the statistics.</p>
+          <p class="callout"><strong>Variance is not Student's t.</strong> For independent normal samples of size 10, <code>9s² / σ²</code> follows a chi-square distribution with 9 degrees of freedom. Here the true variance <code>σ² = 1</code>. Student's t instead describes the standardized sample mean <code>(mean − μ) / (s / √10)</code>, using the estimated standard deviation <code>s</code>; it also has 9 degrees of freedom here. <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda358.htm">NIST: variance</a> · <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm">NIST: mean</a>.</p>
+          <ol class="lesson-steps">
+            <li>In the practice workbook, create a <strong>JavaScript</strong> cell containing <code>// Reviewed plot code will go here.</code> Run that harmless comment to save the cell. Long-press its <strong>In[…] label</strong> and name it <code>variance_plot</code>. Keep that name unique in the workbook; see <a href="../../../workbooks/named-cells/#name">naming cells</a>.</li>
+            <li>Add a separate <strong>AI Prompt</strong> cell and paste this request into it:
+              <div class="callout" id="ai-variance-practice-prompt">
+                <pre><code>Return only complete JavaScript source, without Markdown fences.
+Create a reproducible histogram of estimated sample variances.
+Simulate 2,000 fresh samples, each containing 10 standard-normal N(0,1) values.
+Do not reuse the earlier integer array from summary_demo.
+Initialize state = 42 once for the whole run, not per sample. Before each uniform draw set state = (16807 * state) % 2147483647, then u = state / 2147483647.
+For each normal draw use two successive uniforms: sqrt(-2 * log(u1)) * cos(2 * PI * u2). Do not reuse the spare sine result or use Math.random.
+For each sample compute its mean, then unbiased variance sum((x - mean)^2) / 9.
+Draw a labelled canvas histogram with 40 equal-width bins from 0 to 4. The horizontal axis is estimated variance; the vertical axis is sample count.
+Mark the true population variance 1 with a labelled vertical line. Use a light background, dark text and readable labels.
+Print sample size, repetitions, seed, mean estimated variance, histogram total and any overflow count. Count overflow separately rather than hiding it.
+Display the canvas with window.renderImage(canvas.toDataURL("image/png")).
+Use no packages, network, storage or workbook edits.</code></pre>
+              </div>
+            </li>
+            <li>Open the AI Prompt's <strong>Configure</strong>. Set <strong>Put final response in → Replacement preview for a cell</strong>, <strong>Result cell language → Preserve target language</strong>, <strong>Cell to replace → Named cell</strong>, and <strong>Cell name → variance_plot</strong>. Under context, keep <strong>Include source from → No other cells (default)</strong>, then <strong>Save configuration</strong>.
+              <figure class="phone-figure" id="ai-variance-configuration">
+                <div class="shot-window shot-window--ai-variance-config" role="img" aria-label="Android Configure AI Prompt cell dialog. Yellow borders locate Replacement preview for a cell, Preserve target language, Named cell, variance_plot, and No other cells.">
+                  <div class="shot-stage">
+                    <img src="assets/phone-ai-variance-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="assets/phone-ai-variance-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Replace only after review.</strong> These actual S24+ settings select the uniquely named JavaScript cell <code>variance_plot</code>, preserve its language, and omit other cells. Scroll down to <strong>Save configuration</strong>. Saving alone sends nothing; the next Run still presents the request for review.</figcaption>
+                <a class="full-shot-link" href="assets/phone-ai-variance-config.png">View the full replacement-settings screenshot</a>
+              </figure>
+            </li>
+            <li>Run the <strong>AI Prompt</strong> cell. Review what will be sent, then choose <strong>Send to AI provider</strong>. <strong>No other cells</strong> excludes extra workbook context; replacement still sends the <strong>complete source of the target cell</strong>. That is only our harmless comment here.</li>
+            <li>Read the returned <strong>Before / After</strong> preview. Check the complete JavaScript: seed 42, 2,000 samples of 10, variance divided by 9, and no unexpected networking or storage. Choose <strong>Apply replacement</strong> only if you accept that source; <strong>Cancel</strong> leaves <code>variance_plot</code> unchanged. Applying edits the destination cell but <strong>does not run it</strong>.
+              <figure class="phone-figure" id="ai-variance-approval">
+                <div class="shot-window shot-window--ai-variance-preview-start" role="img" aria-label="Android Before/After replacement preview. Before is the harmless comment; After begins the generated JavaScript with seed 42 and the normal-sample generator.">
+                  <div class="shot-stage">
+                    <img src="assets/phone-ai-variance-preview-start.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <p class="shot-detail-label"><strong>The generated code is in the approval preview.</strong> This is the start of the actual GLM 5.3 Flash response; the target still contains only our comment. Read the whole After section, not just the lines shown here.</p>
+                <a class="full-shot-link" href="assets/phone-ai-variance-preview-start.png">View the full start-of-preview screenshot</a>
+                <div class="shot-window shot-window--ai-variance-preview-apply" role="img" aria-label="End of the same Android generated-code preview. Yellow borders locate Apply replacement and Cancel; neither action runs the proposed code.">
+                  <div class="shot-stage">
+                    <img src="assets/phone-ai-variance-preview-apply.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="assets/phone-ai-variance-preview-apply-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Scroll to the end to approve or cancel.</strong> Apply replacement changes the named cell's source; it does not execute it. The middle of this long preview is omitted from these detail views. <a href="assets/ai-variance-generated.js">Read the complete generated source</a>.</figcaption>
+                <a class="full-shot-link" href="assets/phone-ai-variance-preview-apply.png">View the full approval-controls screenshot</a>
+              </figure>
+            </li>
+            <li>Find <code>variance_plot</code> and tap <strong>its own Run</strong>. Each histogram bar counts sample-variance estimates—not individual observations. With the exact generator above, expect a mean estimated variance near <strong>0.9852</strong>, a histogram total of <strong>2,000</strong> and overflow <strong>0</strong>. The true variance is 1; a finite simulation need not average to exactly 1. Re-running from seed 42 should reproduce the plot.
+              <p class="callout"><strong>Review caught a small omission.</strong> This model response ended with a report string rather than printing it. After Apply, we edited only that final report into <code>console.log(…)</code> before Run. Check your response too: an image alone does not show whether the totals are right. <a href="assets/ai-variance-reviewed.js">Read the corrected source that was run</a>.</p>
+              <figure class="phone-figure" id="ai-variance-output">
+                <div class="shot-window shot-window--ai-variance-plot" role="img" aria-label="Actual Android plot after a separate manual Run: histogram of 2,000 sample-variance estimates from normal samples of size 10. A red line marks true variance 1; printed mean is 0.98521, histogram total 2000 and overflow 0.">
+                  <div class="shot-stage">
+                    <img src="assets/phone-ai-variance-plot.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Output after Apply, review, and a separate manual Run on the S24+.</strong> The actual plot and printed checks match the seeded calculation: mean estimated variance <strong>0.98521</strong>, total <strong>2,000</strong>, overflow <strong>0</strong>. The red line is the population variance, not a fitted curve. Your model may format the code or chart differently.</figcaption>
+                <a class="full-shot-link" href="assets/phone-ai-variance-plot.png">View the full plot screenshot</a>
+              </figure>
+            </li>
+          </ol>
+          <p class="callout"><strong>Two separate approvals:</strong> <strong>Send to AI provider</strong> approves sharing the reviewed request. <strong>Apply replacement</strong> approves editing the target's source. Neither runs the proposed JavaScript. Do not choose <strong>A linked new cell</strong> for this demonstration: that option inserts an unrun result cell without this replacement-approval step.</p>
+        </div>
       </section>
 
       <section id="troubleshooting">

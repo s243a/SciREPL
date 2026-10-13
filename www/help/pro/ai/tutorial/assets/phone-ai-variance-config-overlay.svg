@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 2340">
+  <title>AI Prompt named-cell replacement configuration</title>
+  <desc>Yellow outlines locate Replacement preview for a cell, Preserve target language, Named cell, variance_plot, and No other cells with their labels. The Android screenshot is unchanged.</desc>
+  <g fill="none" stroke="#ffd43b" stroke-width="6">
+    <rect id="ai-variance-placement-setting" x="68" y="400" width="944" height="178" rx="10"/>
+    <rect id="ai-variance-language-setting" x="68" y="600" width="944" height="178" rx="10"/>
+    <rect id="ai-variance-target-kind-setting" x="68" y="1227" width="944" height="178" rx="10"/>
+    <rect id="ai-variance-target-name-setting" x="68" y="1430" width="944" height="178" rx="10"/>
+    <rect id="ai-variance-context-setting" x="68" y="1750" width="944" height="178" rx="10"/>
+  </g>
+</svg>

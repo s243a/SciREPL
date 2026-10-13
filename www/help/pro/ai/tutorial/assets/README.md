@@ -301,3 +301,51 @@ y225–1625. The explanation picture shows only its opening numbered section;
 the remaining answer requires scrolling the real output. The source-only note
 in the dialog is included in full. `capture-pro-ai-prompt-phone.json` records
 the native hashes, crops, toy source, exact prompt, response, usage and cleanup.
+
+### AI Prompt replacement approval and variance plot (2026-10-13 UTC)
+
+Four unchanged S24+ Android screenshots show replacement configuration, the
+start and end of a real generated-code preview, and the resulting histogram.
+The same Pro debug 1.4.0-debug/code 25 installation and active cache v461 were
+used; its source commit remains unidentified. Yellow borders are separate SVG
+assets on the configuration and Apply/Cancel controls. No code or output was
+painted into a screenshot. The inline details omit the app's composer and extra
+keys; every full native screenshot is linked.
+
+The isolated practice workbook contained only a uniquely named JavaScript
+`variance_plot` with a harmless comment, and `generate_variance_plot`, an AI
+Prompt. Configuration selected Replacement preview for a cell, Preserve target
+language, Named cell, and No other cells. The actual pre-send review was checked:
+No other cells excludes extra context, but the complete target source is still
+sent for replacement. One OpenRouter GLM 5.3 Flash request, capped at 4,096 output
+tokens, reported 395 input and 1,389 output tokens and finished normally. No
+Assistant conversation, tools, other workbook sources or credentials were
+included in the request. No independent dollar-cost measurement was recorded.
+
+The target remained unchanged until the real Apply replacement control was
+pressed. Apply cleared its output and changed source without running it. Full
+source review and a second independent calculation found the simulation correct,
+but the final report was a bare expression, which this JavaScript kernel does
+not print when helper functions contain `return`. After Apply, only that final
+report was manually wrapped in `console.log` through the cell editor, then the
+target was run separately. The correction is disclosed beside the output.
+`ai-variance-generated.js` is the original response; `ai-variance-reviewed.js`
+is the actual corrected source that ran.
+
+Fresh normal samples use a single seed 42 for the whole 2,000 × 10 run, Park–Miller
+uniforms, and the cosine Box–Muller branch using two draws per observation.
+Variance uses divisor 9. The independently reproduced mean is
+0.9852140436801163; forty bins over [0, 4) contain 2,000 estimates with overflow 0.
+The phone printed 0.98521, total 2,000, overflow 0 and rendered the 900 × 560 chart.
+This illustrates replacement approval, not a theoretical Student-t plot.
+
+Only the known two-cell capture workbook was removed after verifying its source;
+the original workbook, draft, language, local/online completion settings, request
+function and automatic rotation were restored. Credentials and spending records
+were retained. The task's temporary ADB forward was removed.
+
+CSS details use the full 1,080-pixel width: configuration y380–1940, preview start
+y225–1285, preview end y1100–1730, and plot y225–1125. The long preview's
+middle is not pictured; the complete source is linked instead.
+`capture-pro-ai-variance-phone.json` records request, response, source correction,
+state checks, native hashes, display views and restoration results.
