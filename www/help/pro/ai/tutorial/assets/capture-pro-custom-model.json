@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "sourceRepository": "SciREPL-Pro",
+  "sourceSha": "6dbc4d0793e04f0ea051d2e464032bf8fcab09d5",
+  "sourceVersion": {
+    "version": "1.4.0",
+    "releaseChannel": "development",
+    "androidVersionCode": 25
+  },
+  "sourceGuards": {
+    "exactShaBeforeAndAfter": true,
+    "trackedSourceCleanBeforeAndAfter": true
+  },
+  "capturedAtUtc": "2026-10-09T05:04:58.497Z",
+  "browser": {
+    "engine": "Chromium",
+    "version": "145.0.7632.6",
+    "headless": true
+  },
+  "viewport": {
+    "width": 430,
+    "height": 1100,
+    "deviceScaleFactor": 1
+  },
+  "sourceRoute": "http://127.0.0.1:8187/index.html",
+  "routePolicy": "Same-origin GET static files only; proxy and non-GET denied; external requests aborted; service workers blocked; fresh non-persistent keyless context.",
+  "introductoryStorage": {
+    "scirepl_onboarding_seen": "1",
+    "scirepl_auto_download": "0",
+    "scirepl_whats_new_seen_version": "current source version after DOMContentLoaded"
+  },
+  "actualUi": {
+    "route": "Menu → AI Assistant (Pro) → gear → AI Settings",
+    "configureModelFor": "assistant",
+    "backend": "openrouter",
+    "listedModel": "z-ai/glm-5.3-flash",
+    "customModelId": "anthropic/claude-haiku-5.5",
+    "customIdAbsentFromPicker": true,
+    "customIdEnteredThroughUi": true,
+    "apiKeyEmpty": true,
+    "settingsSaved": false,
+    "apiKeyOutsideCrop": true
+  },
+  "providerModelVerification": {
+    "url": "https://openrouter.ai/anthropic/claude-haiku-5.5",
+    "apiReference": "https://openrouter.ai/docs/api_reference/overview",
+    "checkedOnClientDate": "2026-10-08",
+    "statement": "Provider page names anthropic/claude-haiku-5.5; API reference requires the organization prefix. Availability and prices may change. No inference request was made."
+  },
+  "providerStoreList": [],
+  "servedPathCount": 105,
+  "blockedRequests": [],
+  "externalResponses": [],
+  "pageErrors": [],
+  "screenshot": {
+    "file": "assistant-custom-model.png",
+    "width": 390,
+    "height": 456,
+    "sha256": "3564d02f4e46a6e9a41f21dfce1d8b9ac3767dc7900fc76a6ed2c2bab8c14c75",
+    "clip": {
+      "x": 20,
+      "y": 0,
+      "width": 390,
+      "height": 456
+    },
+    "description": "Unmodified keyless browser pixels, cropped through the custom model ID field; provider chosen before ID entered; no Save."
+  },
+  "overlay": {
+    "file": "assistant-custom-model-overlay.svg",
+    "width": 390,
+    "height": 456,
+    "sha256": "3be14b01d9ff511272399c02991687931b650179cf1ffab8fb5390bc7c9deebd",
+    "highlights": [
+      {
+        "id": "backend-setting",
+        "selectors": [
+          "#ai-settings-assistant-section [data-i18n=\"aiSettings.backend\"]",
+          "#ai-settings-backend"
+        ],
+        "bounds": {
+          "x": 22,
+          "y": 145,
+          "width": 346,
+          "height": 53
+        }
+      },
+      {
+        "id": "custom-model-setting",
+        "selectors": [
+          "#ai-settings-model-custom"
+        ],
+        "bounds": {
+          "x": 22,
+          "y": 411.78,
+          "width": 346,
+          "height": 35
+        }
+      }
+    ]
+  },
+  "limitations": [
+    "Configuration capture only, not Android rendering, an API availability/tool-call test, billing verification, Play delivery or engine testing.",
+    "The custom ID is a staged UI entry. No key was entered and Save was not pressed.",
+    "API key and Save controls are below this crop."
+  ]
+}

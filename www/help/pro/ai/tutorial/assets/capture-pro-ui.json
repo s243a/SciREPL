@@ -1,0 +1,71 @@
+{
+  "sourceRepository": "SciREPL-Pro",
+  "sourceSha": "38316dbb3d12cc628b57af392c9ede49f36d71d0",
+  "sourceVersion": {
+    "version": "1.4.0",
+    "releaseChannel": "development",
+    "androidVersionCode": 25
+  },
+  "capturedAtUtc": "2026-10-08T02:06:30.001Z",
+  "browser": {
+    "engine": "Chromium",
+    "version": "145.0.7632.6",
+    "headless": true
+  },
+  "viewport": {
+    "width": 430,
+    "height": 1100,
+    "deviceScaleFactor": 1
+  },
+  "sourceRoute": "http://127.0.0.1:8108/index.html",
+  "routePolicy": "Allow only same-origin GET static files; server rejects proxy path. Abort every external request and every non-GET. Service workers disabled. Fresh non-persistent context; no keys, providers, fake engine state, generated UI, or completion requests.",
+  "introductoryStorage": {
+    "scirepl_onboarding_seen": "1",
+    "scirepl_auto_download": "0",
+    "scirepl_whats_new_seen_version": "current source version after DOMContentLoaded"
+  },
+  "assistantSettings": {
+    "autoRunCellsCreatedByAI": false,
+    "sourceBrowsing": false,
+    "agentWrites": "active",
+    "securityLevel": "open"
+  },
+  "storageKeys": [
+    "scirepl_completion_credential_choice_v2",
+    "scirepl_onboarding_seen",
+    "scirepl_local_completion",
+    "scirepl_auto_download",
+    "scirepl_whats_new_seen_version",
+    "scirepl_completion_section"
+  ],
+  "providerStoreList": [],
+  "servedPathCount": 104,
+  "blockedRequests": [],
+  "externalResponses": [],
+  "pageErrors": [],
+  "screenshots": [
+    {
+      "file": "completion-general.png",
+      "description": "Actual General Completion screen; Local code completion set to On using its dropdown.",
+      "selector": "#completion-modal .modal-content",
+      "sha256": "0d58ccadb003da546cdc321624e81233714f22a9c21e2732711f8164dd4565e2"
+    },
+    {
+      "file": "completion-online.png",
+      "description": "Actual online Completion screen; independent selection chosen with no saved provider keys.",
+      "selector": "#completion-modal .modal-content",
+      "sha256": "4fb5d39b0cc7ed916454c8c50688d7c133ec319585dd0002dd02d145d899c9f1"
+    },
+    {
+      "file": "assistant-open.png",
+      "description": "Actual AI Assistant Settings scrolled to Security Level; Open selected, Auto-run off, source browsing off, Active worksheet scope, disposable keyless profile.",
+      "selector": "#ai-settings-modal .modal-content",
+      "sha256": "ee4e47180d19e6b27949f6d4aaae3a9d0984a59edbb2dfa28ef22cdd4dfa7522"
+    }
+  ],
+  "limitations": [
+    "Browser UI capture only; no Android device, native engine, provider request, or model installation was tested.",
+    "AI Assistant Settings screenshot is scrolled; Backend/Model/API Key controls above it are not pictured.",
+    "Independent completion has no saved keys: provider/model choices are not populated; the app intentionally refuses requests."
+  ]
+}

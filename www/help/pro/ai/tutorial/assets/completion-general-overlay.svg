@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 414 820">
+  <title>Ghost text and Suggestion chips settings</title>
+  <desc>Yellow borders locate the section titles, Suggestions: At cursor, and Suggestion chips: On.</desc>
+  <g fill="none" stroke="#ffd43b" stroke-width="3">
+    <rect id="ghost-heading" x="12" y="261" width="95" height="24" rx="5"/>
+    <rect id="suggestions-setting" x="12" y="322" width="389" height="52" rx="7"/>
+    <rect id="chips-heading" x="12" y="471" width="145" height="23" rx="5"/>
+    <rect id="chips-setting" x="12" y="495" width="389" height="33" rx="7"/>
+  </g>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 2340">
+  <title>AI Prompt Save configuration control</title>
+  <desc>A yellow outline locates Save configuration in the lower part of the AI Prompt configuration dialog. The underlying Android screenshot is unchanged.</desc>
+  <g fill="none" stroke="#ffd43b" stroke-width="6">
+    <rect id="ai-prompt-save-configuration-setting" x="547" y="2138" width="464" height="122" rx="10"/>
+  </g>
+</svg>

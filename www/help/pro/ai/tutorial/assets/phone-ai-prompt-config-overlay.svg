@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 2340">
+  <title>AI Prompt response placement and source-only context</title>
+  <desc>Yellow outlines locate This cell's output, Previous 1 cell, and the unchecked Include saved output text control with their labels. The underlying Android screenshot is unchanged.</desc>
+  <g fill="none" stroke="#ffd43b" stroke-width="6">
+    <rect id="ai-prompt-result-placement-setting" x="68" y="400" width="944" height="178" rx="10"/>
+    <rect id="ai-prompt-context-scope-setting" x="68" y="710" width="944" height="178" rx="10"/>
+    <rect id="ai-prompt-context-outputs-setting" x="68" y="930" width="944" height="86" rx="10"/>
+  </g>
+</svg>

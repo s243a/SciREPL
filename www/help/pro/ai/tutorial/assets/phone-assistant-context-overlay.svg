@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 2340">
+  <title>Assistant conversation and direct-provider controls</title>
+  <desc>Yellow outlines identify This workbook selected in the panel header and the unchecked Review, Remote and Terminal controls near the bottom. The underlying Android screenshot is unchanged.</desc>
+  <g fill="none" stroke="#ffd43b" stroke-width="6">
+    <rect id="this-workbook-setting" x="518" y="134" width="295" height="68" rx="10"/>
+    <rect id="review-setting" x="216" y="2060" width="168" height="58" rx="10"/>
+    <rect id="remote-setting" x="547" y="2060" width="178" height="58" rx="10"/>
+    <rect id="terminal-setting" x="729" y="2060" width="191" height="58" rx="10"/>
+  </g>
+</svg>
