@@ -1126,6 +1126,16 @@ check('Pro AI Prompt variance links the unmodified response and discloses only t
     && /href="assets\/ai-variance-reviewed\.js">Read the corrected source that was run/.test(aiVarianceItems[5][1])
     && /After Apply, we edited only that final report into console\.log\(…\) before Run/.test(
       helpText(aiVarianceItems[5][1])));
+const aiVarianceRunInstruction = aiVarianceItems[5]?.[1] || '';
+const aiVarianceCorrectionPosition = aiVarianceRunInstruction.indexOf('Review caught a small omission.');
+const aiVarianceManualRunPosition = aiVarianceRunInstruction.indexOf('Find <code>variance_plot</code>');
+check('Pro AI Prompt variance places the report correction before instructing the separate target-cell Run',
+  aiVarianceCorrectionPosition >= 0 && aiVarianceManualRunPosition > aiVarianceCorrectionPosition
+    && aiVarianceRunInstruction.indexOf('id="ai-variance-output"') > aiVarianceManualRunPosition);
+const aiVarianceProvenance = readFileSync(path.join(aiAssets, 'README.md'), 'utf8').replace(/\s+/g, ' ');
+check('Pro AI Prompt variance distinguishes credentials excluded from model context from provider authentication',
+  aiVarianceProvenance.includes('credentials were included in the model prompt/context. Provider authentication still used the configured API key.')
+    && aiVarianceProvenance.includes('No Assistant conversation, tools, other workbook sources or credentials were included'));
 const aiVarianceExpectedReport = 'sample size=10 | repetitions=2000 | seed=42 | mean estimated variance='
   + aiVarianceMean.toFixed(5) + ` | histogram total=${aiVarianceHistogramTotal} | overflow=${aiVarianceOverflow}`;
 check('Pro AI Prompt variance actual plot checks agree with the independent normal-sample calculation',
@@ -1190,11 +1200,15 @@ for (const [stem, figureId, itemIndex, y, height, requestsAtCapture, highlightId
     const overlay = readFileSync(path.join(aiAssets, overlayFile), 'utf8');
     const rects = [...overlay.matchAll(
       /<rect\b[^>]*\bid="([^"]+)"[^>]*\bx="([\d.]+)"[^>]*\by="([\d.]+)"[^>]*\bwidth="([\d.]+)"[^>]*\bheight="([\d.]+)"/g)];
+    const overlayElements = [...overlay.matchAll(/<([a-zA-Z][\w:-]*)\b/g)].map(match => match[1]);
     check(`Pro AI Prompt variance ${overlayFile} contains only labeled editable borders inside the displayed crop`,
       /viewBox="0 0 1080 2340"/.test(overlay)
         && /<title>[^<]+<\/title>/.test(overlay) && /<desc>[^<]+<\/desc>/.test(overlay)
         && /fill="none" stroke="#ffd43b" stroke-width="6"/.test(overlay)
-        && !/<(?:image|text|foreignObject)\b/i.test(overlay)
+        && overlayElements.every(element => ['svg', 'title', 'desc', 'g', 'rect'].includes(element))
+        && overlayElements.filter(element => element === 'rect').length === rects.length
+        && (overlay.match(/\bfill\s*=/g) || []).length === 1
+        && (overlay.match(/\bstroke(?:-width)?\s*=/g) || []).length === 2 && !/\bstyle\s*=/.test(overlay)
         && rects.length === highlightIds.length && rects.map(rect => rect[1]).join(',') === highlightIds.join(',')
         && rects.every(([, , left, top, width, rectHeight]) => Number(left) >= 3
           && Number(left) + Number(width) + 3 <= 1080 && Number(top) - 3 >= y

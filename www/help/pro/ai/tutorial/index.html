@@ -433,8 +433,9 @@ Use no packages, network, storage or workbook edits.</code></pre>
                 <a class="full-shot-link" href="assets/phone-ai-variance-preview-apply.png">View the full approval-controls screenshot</a>
               </figure>
             </li>
-            <li>Find <code>variance_plot</code> and tap <strong>its own Run</strong>. Each histogram bar counts sample-variance estimates—not individual observations. With the exact generator above, expect a mean estimated variance near <strong>0.9852</strong>, a histogram total of <strong>2,000</strong> and overflow <strong>0</strong>. The true variance is 1; a finite simulation need not average to exactly 1. Re-running from seed 42 should reproduce the plot.
+            <li>
               <p class="callout"><strong>Review caught a small omission.</strong> This model response ended with a report string rather than printing it. After Apply, we edited only that final report into <code>console.log(…)</code> before Run. Check your response too: an image alone does not show whether the totals are right. <a href="assets/ai-variance-reviewed.js">Read the corrected source that was run</a>.</p>
+              <p>Find <code>variance_plot</code> and tap <strong>its own Run</strong>. Each histogram bar counts sample-variance estimates—not individual observations. With the exact generator above, expect a mean estimated variance near <strong>0.9852</strong>, a histogram total of <strong>2,000</strong> and overflow <strong>0</strong>. The true variance is 1; a finite simulation need not average to exactly 1. Re-running from seed 42 should reproduce the plot.</p>
               <figure class="phone-figure" id="ai-variance-output">
                 <div class="shot-window shot-window--ai-variance-plot" role="img" aria-label="Actual Android plot after a separate manual Run: histogram of 2,000 sample-variance estimates from normal samples of size 10. A red line marks true variance 1; printed mean is 0.98521, histogram total 2000 and overflow 0.">
                   <div class="shot-stage">

@@ -320,7 +320,8 @@ No other cells excludes extra context, but the complete target source is still
 sent for replacement. One OpenRouter GLM 5.3 Flash request, capped at 4,096 output
 tokens, reported 395 input and 1,389 output tokens and finished normally. No
 Assistant conversation, tools, other workbook sources or credentials were
-included in the request. No independent dollar-cost measurement was recorded.
+included in the model prompt/context. Provider authentication still used the
+configured API key. No independent dollar-cost measurement was recorded.
 
 The target remained unchanged until the real Apply replacement control was
 pressed. Apply cleared its output and changed source without running it. Full
