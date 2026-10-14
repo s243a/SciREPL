@@ -276,6 +276,8 @@
     "help.shortcutAtEndOfLine": "no fim da linha",
     "help.shortcutSuppressOutput": "Suprimir a saída",
     "help.documentation": "Documentação",
+    "help.tutorialIndex": "Tutoriais (online)",
+    "vfs.workbookImportTutorial": "Tutorial de importação de pastas de trabalho (online)",
     "help.supportOnKoFi": "Apoie-me no Ko-fi",
     "help.fullDocumentationGithubReadme": "Documentação completa: <a href=\"https://github.com/s243a/SciREPL#readme\" target=\"_blank\">README no GitHub</a>",
     "help.version": "Versão",
