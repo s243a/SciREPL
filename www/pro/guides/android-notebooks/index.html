@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Python Notebooks on Android — SciREPL</title>
+  <meta name="description" content="Write and run Python notebook cells on Android. NumPy, SymPy and interactive plots run locally on your phone; open and save .ipynb files.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/pro/guides/android-notebooks/">
+  <meta name="theme-color" content="#0d1117">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f6feb'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='16' font-weight='700' fill='white' text-anchor='middle'%3E%E2%88%91%3C/text%3E%3C/svg%3E">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Python Notebooks on Android — SciREPL">
+  <meta property="og:description" content="Write and run Python notebook cells on Android. NumPy, SymPy and interactive plots run locally on your phone; open and save .ipynb files.">
+  <meta property="og:url" content="https://s243a.github.io/SciREPL/pro/guides/android-notebooks/">
+  <meta property="og:image" content="https://s243a.github.io/SciREPL/pro/guides/assets/img/og-android-notebooks.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../assets/landing.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="../../">SciREPL</a>
+      <nav class="site-nav" aria-label="On this page">
+        <a href="#how">How it works</a>
+        <a href="#examples">Examples</a>
+        <a href="#notebooks">Notebooks</a>
+        <a href="#free-vs-pro">Free vs Pro</a>
+        <a href="#limits">Limits</a>
+        <a href="#start">Get started</a>
+      </nav>
+      <a class="btn btn-primary btn-small header-cta" href="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl.pro&amp;referrer=utm_source%3Dscirepl_guides%26utm_medium%3Dlanding%26utm_campaign%3Dandroid-notebooks" data-play-base="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl.pro">Get Pro</a>
+    </div>
+  </header>
+
+  <main id="main">
+  <section class="hero" aria-labelledby="page-title">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">SciREPL for Android</p>
+        <h1 id="page-title">Python notebooks on Android</h1>
+        <p class="lede">Jupyter-style cells, outputs and interactive plots, running on your phone instead of a server. NumPy and SymPy are built in, and <code>.ipynb</code> files open with their outputs intact.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl.pro&amp;referrer=utm_source%3Dscirepl_guides%26utm_medium%3Dlanding%26utm_campaign%3Dandroid-notebooks" data-play-base="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl.pro">Get SciREPL Pro on Google Play</a>
+          <a class="btn btn-secondary" href="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl&amp;referrer=utm_source%3Dscirepl_guides%26utm_medium%3Dlanding%26utm_campaign%3Dandroid-notebooks" data-play-base="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl">Try the free edition</a>
+        </div>
+        <p class="fineprint">One-time purchase · No subscription · No ads · Android 7.0+ · Or <a href="https://s243a.github.io/SciREPL/">try the free web version</a> in your browser.</p>
+        <ul class="chips" aria-label="Highlights">
+          <li>Python</li>
+          <li>NumPy</li>
+          <li>SymPy</li>
+          <li>Interactive plots</li>
+          <li>R</li>
+          <li>Prolog</li>
+          <li>.ipynb import/export</li>
+          <li>Works offline</li>
+        </ul>
+      </div>
+      <figure>
+          <div class="phone"><img src="../assets/img/notebook-python-plot.webp" width="800" height="1320" alt="SciREPL on a phone: a Python cell creating a NumPy array and calling plot(x, np.sin(x)), with the sine-wave chart shown below it." fetchpriority="high"></div>
+          <figcaption>A NumPy cell and its interactive plot.</figcaption>
+        </figure>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <h2>A notebook built for a phone screen</h2>
+      
+      <div class="grid">
+        <div class="card"><h3>Cells, like Jupyter</h3><p>Write code in a cell, press Run, and the output appears below it. Variables carry over between cells, and you can edit, re-run, reorder or delete any cell.</p></div>
+        <div class="card"><h3>Kernels run on the device</h3><p>Python runs inside the app through Pyodide (WebAssembly), with NumPy and SymPy preloaded. No server or account is involved.</p></div>
+        <div class="card"><h3>Rich output</h3><p>SymPy results render as typeset math. <code>plot()</code> draws charts you can pinch-zoom and pan, and Matplotlib&#39;s <code>plt.show()</code> renders inline images.</p></div>
+        <div class="card"><h3>Notes between the code</h3><p>Switch a cell from Code to Md to write Markdown with <code>$inline$</code> and <code>$$display$$</code> LaTeX math.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="examples">
+    <div class="wrap">
+      <h2>Try these examples</h2>
+      <p class="section-lede">Each screenshot is real output from the code beside it. Copy each block into its own cell and press Run.</p>
+      <div class="example example-text">
+        <div>
+          <h3>Plot a function</h3>
+          <p><code>plot()</code> is built in. The chart is interactive: pinch to zoom, drag to pan, and tap a point to read its value.</p>
+          <div class="code">
+            <div class="code-label lang-python"><span>PYTHON</span><button type="button" class="copy-btn" hidden>Copy</button></div>
+            <pre><code>import numpy as np
+x = np.linspace(0, 2*np.pi, 200)
+plot(x, np.sin(x))</code></pre>
+          </div>
+          <p>This is the cell in the screenshot at the top of the page.</p>
+        </div>
+        
+      </div>
+      <div class="example">
+        <div>
+          <h3>Symbolic math with SymPy</h3>
+          <p>Differentiate, integrate and solve, with results rendered as LaTeX. The ∑ Math Mode button inserts common SymPy functions, so there is less to type on a phone keyboard.</p>
+          <div class="code">
+            <div class="code-label lang-python"><span>PYTHON · CELL 1</span><button type="button" class="copy-btn" hidden>Copy</button></div>
+            <pre><code>from sympy import symbols, diff, integrate, sin, exp
+x = symbols(&#39;x&#39;)
+diff(sin(x)*exp(x), x)</code></pre>
+          </div>
+          <div class="code">
+            <div class="code-label lang-python"><span>PYTHON · CELL 2</span><button type="button" class="copy-btn" hidden>Copy</button></div>
+            <pre><code>integrate(x**2 * exp(-x), x)</code></pre>
+          </div>
+          
+        </div>
+        <figure>
+          <div class="phone"><img src="../assets/img/notebook-sympy-latex.webp" width="800" height="1140" alt="Two SymPy cells: the derivative of sin(x)·exp(x) and the integral of x²·exp(−x), both shown as typeset formulas." loading="lazy"></div>
+          <figcaption>The derivative and the integral, typeset.</figcaption>
+        </figure>
+      </div>
+      <div class="example">
+        <div>
+          <h3>Mix in other languages</h3>
+          <p>Each cell has its own language. Choose PL in the language selector to write Prolog. R, Bash, JavaScript, Lua and others work the same way, and every language can read and write the same files under <code>/shared</code>.</p>
+          <div class="code">
+            <div class="code-label lang-prolog"><span>PROLOG · CELL 1</span><button type="button" class="copy-btn" hidden>Copy</button></div>
+            <pre><code>parent(tom, bob).
+parent(bob, ann).
+grandparent(X, Z) :- parent(X, Y), parent(Y, Z).</code></pre>
+          </div>
+          <div class="code">
+            <div class="code-label lang-prolog"><span>PROLOG · CELL 2</span><button type="button" class="copy-btn" hidden>Copy</button></div>
+            <pre><code>grandparent(tom, Who).</code></pre>
+          </div>
+          <p>Run these as two cells. A cell that defines rules is loaded as a program, so the query goes in its own cell.</p>
+        </div>
+        <figure>
+          <div class="phone"><img src="../assets/img/notebook-prolog-query.webp" width="800" height="900" alt="Two Prolog cells: facts and a grandparent rule, then the query grandparent(tom, Who) answering Who = ann." loading="lazy"></div>
+          <figcaption>Facts and a rule, then a query.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="notebooks">
+    <div class="wrap">
+      <h2>Bring your notebooks with you</h2>
+      <p class="section-lede">SciREPL reads and writes the standard Jupyter format, so work moves between your phone and a laptop.</p>
+      <ul class="checks">
+        <li>Open <code>.ipynb</code> files with ☰ Menu → Import File. Saved outputs (text, images, LaTeX, tables) show straight away, without re-running anything.</li>
+        <li>Export back to <code>.ipynb</code> with outputs included, so the notebook still displays in Jupyter or on GitHub.</li>
+        <li>Export a readable document as HTML, Markdown, PDF, DOCX or LaTeX, with highlighted code, plots and equations.</li>
+        <li>Also imports <code>.py</code> and <code>.pl</code> source files, CSV data, and SciREPL&#39;s own <code>.srwb</code> workbooks.</li>
+        <li>Keep several notebooks open in tabs. They save automatically and come back when you reopen the app.</li>
+        <li>Send a notebook anywhere with Android&#39;s share sheet.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="free-vs-pro">
+    <div class="wrap">
+      <h2>Free or Pro?</h2>
+      <p class="section-lede">Both editions run the same notebook. Pro bundles every runtime for offline use and adds the AI features.</p>
+      <div class="table-scroll"><table>
+        <thead><tr><th scope="col"></th><th scope="col">SciREPL (free)</th><th scope="col">SciREPL Pro</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Python with NumPy and SymPy</th><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+          <tr><th scope="row">Prolog, Bash, JavaScript, Lua, TypR, ClojureScript</th><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+          <tr><th scope="row">R (webR)</th><td>Downloads on first use (~50 MB)</td><td class="yes">Yes, bundled for offline use</td></tr>
+          <tr><th scope="row"><code>.ipynb</code> import/export; HTML, PDF, DOCX, LaTeX export</th><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+          <tr><th scope="row">AI assistant and AI code completion</th><td class="no">—</td><td class="yes">Yes, using an AI service you choose</td></tr>
+          <tr><th scope="row">MCP and remote-agent clients</th><td class="no">—</td><td class="yes">Yes</td></tr>
+          <tr><th scope="row">Windows build</th><td class="no">—</td><td>Preview (unsigned)</td></tr>
+          <tr><th scope="row">Price</th><td>Free</td><td>One-time purchase</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <section id="limits">
+    <div class="wrap">
+      <h2>What it is not built for</h2>
+      <p class="section-lede">Worth knowing before you install:</p>
+      <ul class="checks limits">
+        <li>Python runs as WebAssembly, so heavy numerical work is slower than native Python on a laptop.</li>
+        <li><code>%pip install</code> works for pure-Python packages from PyPI. Packages with compiled C extensions need a prebuilt WebAssembly version, and many do not have one.</li>
+        <li>There is no GPU, so it is not for training machine-learning models or processing very large datasets.</li>
+        <li>Installing extra Python or R packages needs a network connection. The bundled runtimes do not.</li>
+        <li>It is single-user: there is no real-time collaboration or shared server.</li>
+        <li>Requires Android 7.0 or later. There is no iOS version; Pro also has an unsigned Windows preview.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="start">
+    <div class="wrap">
+      <h2>Get started</h2>
+      
+      <ol class="steps">
+        <li>Install SciREPL Pro, or the free edition, from Google Play.</li>
+        <li>Open the app. The input bar is at the bottom: pick a language on the left (Py, R, PL…), type some code, and press ▶ Run.</li>
+        <li>Paste one of the <a href="#examples">examples</a> above to check that everything works.</li>
+        <li>To open an existing notebook, use ☰ Menu → Import File and choose a <code>.ipynb</code> file.</li>
+        <li>Tap ? in the header for the built-in help. Every help example can be copied, or inserted as a new cell.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="closing" aria-labelledby="closing-title">
+    <div class="wrap">
+      <h2 id="closing-title">Carry your notebooks in your pocket</h2>
+      <p class="section-lede" style="margin-inline:auto">SciREPL Pro is a one-time purchase on Google Play, with no subscription and no ads. Or start with the free edition: notebooks move between the two as <code>.ipynb</code> files.</p>
+      <div class="cta-row">
+          <a class="btn btn-primary" href="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl.pro&amp;referrer=utm_source%3Dscirepl_guides%26utm_medium%3Dlanding%26utm_campaign%3Dandroid-notebooks" data-play-base="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl.pro">Get SciREPL Pro on Google Play</a>
+          <a class="btn btn-secondary" href="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl&amp;referrer=utm_source%3Dscirepl_guides%26utm_medium%3Dlanding%26utm_campaign%3Dandroid-notebooks" data-play-base="https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl">Try the free edition</a>
+        </div>
+    </div>
+  </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <nav aria-label="Footer">
+        <a href="../../../help/">Help and tutorials</a>
+        <a href="../../">SciREPL Pro</a>
+        <a href="../../privacy.html">Privacy policy</a>
+        <a href="https://github.com/s243a/SciREPL">Source code</a>
+        <a href="../../../">Free web version</a>
+      </nav>
+      <p>Screenshots show SciREPL&#39;s notebook interface at phone size, captured from the web edition; the Android apps use the same interface. SciREPL is an independent project, not affiliated with Project Jupyter. Jupyter is a trademark of NumFOCUS.</p>
+    </div>
+  </footer>
+  <script>(function () {
+  var keys = ["utm_source","utm_medium","utm_campaign","utm_content","utm_term"];
+  var params = new URLSearchParams(location.search);
+  if (params.get('utm_source')) {
+    var ref = new URLSearchParams();
+    keys.forEach(function (k) { if (params.get(k)) ref.append(k, params.get(k)); });
+    document.querySelectorAll('a[data-play-base]').forEach(function (a) {
+      a.href = a.getAttribute('data-play-base') + '&referrer=' + encodeURIComponent(ref.toString());
+    });
+  }
+  if (navigator.clipboard) {
+    document.querySelectorAll('.copy-btn').forEach(function (btn) {
+      btn.hidden = false;
+      btn.addEventListener('click', function () {
+        var code = btn.closest('.code').querySelector('pre').textContent;
+        navigator.clipboard.writeText(code).then(function () {
+          btn.textContent = 'Copied';
+          setTimeout(function () { btn.textContent = 'Copy'; }, 1600);
+        });
+      });
+    });
+  }
+})();</script>
+</body>
+</html>
