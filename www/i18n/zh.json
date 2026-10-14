@@ -269,6 +269,8 @@
     "help.shortcutAtEndOfLine": "位于行尾",
     "help.shortcutSuppressOutput": "不显示输出",
     "help.documentation": "文档",
+    "help.tutorialIndex": "教程（在线）",
+    "vfs.workbookImportTutorial": "工作簿导入教程（在线）",
     "help.supportOnKoFi": "在 Ko-fi 上支持我",
     "help.fullDocumentationGithubReadme": "完整文档：<a href=\"https://github.com/s243a/SciREPL#readme\" target=\"_blank\">GitHub README</a>",
     "help.version": "版本",

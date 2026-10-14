@@ -269,6 +269,8 @@
     "help.shortcutAtEndOfLine": "в конце строки",
     "help.shortcutSuppressOutput": "Не выводить результат",
     "help.documentation": "Документация",
+    "help.tutorialIndex": "Учебные руководства (онлайн)",
+    "vfs.workbookImportTutorial": "Руководство по импорту книг (онлайн)",
     "help.supportOnKoFi": "Поддержать меня на Ko-fi",
     "help.fullDocumentationGithubReadme": "Полная документация: <a href=\"https://github.com/s243a/SciREPL#readme\" target=\"_blank\">README на GitHub</a>",
     "help.version": "Версия",
