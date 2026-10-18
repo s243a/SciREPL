@@ -7,6 +7,8 @@ import { fileURLToPath } from 'node:url';
 import { captureActivitySnapshot, assessTranslationActivity, recommendTranslationRecovery } from './tutorial_translation_activity.mjs';
 import { inspectInflightCoverage } from './tutorial_translation_inflight.mjs';
 import { readWorkerActivity } from './tutorial_translation_process_activity.mjs';
+import { latestInspection, phaseLogActivity } from './tutorial_translation_inspect.mjs';
+import { DEFAULT_ACTIVITY_POLICY } from './tutorial_translation_activity.mjs';
 
 const SCRIPT = fileURLToPath(import.meta.url);
 const ROOT = path.dirname(path.dirname(SCRIPT));
@@ -128,9 +130,35 @@ function workflowSummary(snapshot) {
     units: Object.fromEntries(['planned', 'completed', 'held', 'skipped', 'remaining'].map(key => [key, count(units?.[key])])) };
 }
 
+// Per-phase worker-inspection view: latest inspector report, stack signature,
+// stuck-worker outcome, and an advisory when a running worker has made no
+// model request (AGY log markers only) for longer than the advisory threshold.
+const RUNNING_PHASES = new Set(['running', 'launching', 'stuck-after-completion']);
+export function workerInspectionSummary(campaign, snapshot, { job = null, nowMs = Date.now(), advisoryAfterSeconds = DEFAULT_ACTIVITY_POLICY.advisoryAfterSeconds } = {}) {
+  const rows = Array.isArray(snapshot?.progress?.phases) ? snapshot.progress.phases : [];
+  const phases = [], idle = [];
+  for (const row of rows) {
+    if (!row || typeof row.locale !== 'string' || typeof row.chunk !== 'string' || typeof row.phase !== 'string') continue;
+    const running = RUNNING_PHASES.has(row.state);
+    let latest = null, log = null;
+    try { latest = latestInspection(campaign, row); } catch { /* unknown */ }
+    if (running) { try { log = phaseLogActivity(campaign, row, nowMs); } catch { /* unknown */ } }
+    if (!running && !latest && !row.outcome && row.manualReviewSuggested !== true) continue;
+    const name = `${row.locale}/${row.chunk}/${row.phase}`;
+    const quiet = running && (log ? (log.secondsSinceModelRequest ?? (count(row.elapsedSeconds) ?? 0)) > advisoryAfterSeconds : false);
+    if (quiet) idle.push(name);
+    phases.push({ phase: name, state: typeof row.state === 'string' ? row.state : null, outcome: typeof row.outcome === 'string' ? row.outcome : null,
+      manualReviewSuggested: row.manualReviewSuggested === true, lastModelRequestAt: log?.lastModelRequestAt ?? null, secondsSinceModelRequest: log?.secondsSinceModelRequest ?? null,
+      noRecentModelRequest: quiet, latestInspection: latest });
+  }
+  const target = job ? `--job ${job}` : `--campaign ${campaign}`;
+  return { phases, attentionRequired: idle.length > 0, advisoryAfterSeconds,
+    recommendedAction: idle.length ? `run node scripts/tutorial_translation_inspect.mjs ${target}${idle.length === 1 ? ` --phase ${idle[0]}` : ''} (observational; no signals)` : null };
+}
+
 // Only allowlisted counts, timestamps and classifications leave this function.
 // Private IDs are used transiently solely to difference cumulative counters.
-export function inspectCampaign(campaign, snapshot = null) {
+export function inspectCampaign(campaign, snapshot = null, { job = null } = {}) {
   const coverage = { pageDirectories: 0, transportRecords: 0, readableTransports: 0, failedPageRecords: 0, unknownRecords: 0, unreadableDirectories: 0 };
   const pages = [], top = entries(campaign);
   if (!top.readable) coverage.unreadableDirectories++;
@@ -229,7 +257,8 @@ export function inspectCampaign(campaign, snapshot = null) {
     scope: 'Completed transport receipts only; outstanding requests and present authentication are not verified.' };
   const orchestration = recommendTranslationRecovery({ activity, workflow: ownerWorkflow,
     budget: snapshot?.progress?.recoveryBudget, authentication, failureCategories: categories });
-  return { schema: 1, observationOnly: true, workflow, ownerWorkflow, activity, inflight, orchestration, coverage,
+  const workerInspection = workerInspectionSummary(campaign, snapshot, { job });
+  return { schema: 1, observationOnly: true, workflow, ownerWorkflow, activity, inflight, orchestration, workerInspection, coverage,
     authentication,
     calls: { transportRecordsFound: coverage.transportRecords, readableTransportRecords: coverage.readableTransports, outerSuccesses, lastSuccessAt: safeDate(latestSuccess), lastFailureAt: safeDate(lastFailure),
       failureCategories: categories, unknownOutcomeRecords: coverage.unknownRecords },
@@ -240,9 +269,10 @@ export function inspectCampaign(campaign, snapshot = null) {
       cumulativeDeltaSamples: latencies.filter(row => row.source === 'cumulative_delta').length,
       unknownLatencySamples: coverage.transportRecords - latencies.filter(row => row.source !== 'unknown').length,
       timingCaveat: 'Filesystem timings approximate child-to-receipt wall time. Envelope durations are cumulative per conversation and are never summed as per-request durations.' },
-    attentionRequired: requiredCategory !== null || coverage.unknownRecords > 0 || coverage.unreadableDirectories > 0 || failures.length > 0 || workflow.attentionRequired || activity.attentionRequired,
+    attentionRequired: requiredCategory !== null || coverage.unknownRecords > 0 || coverage.unreadableDirectories > 0 || failures.length > 0 || workflow.attentionRequired || activity.attentionRequired || workerInspection.attentionRequired,
     recommendedAction: requiredCategory ? ACTIONS[requiredCategory] : authStatus === 'refresh_status_unknown' ? ACTIONS.token_refresh_unknown :
       coverage.unknownRecords || coverage.unreadableDirectories ? ACTIONS.metadata_unknown :
+      workerInspection.attentionRequired ? workerInspection.recommendedAction :
       activity.attentionRequired ? 'Inspect the existing request: process liveness and a fresh heartbeat do not verify progress. Do not cancel, replay or add replacement workers automatically.' :
       workflow.canAdvance === true ? failures.length ? 'Existing live work can continue. Inspect the held subset using the failure categories; do not replay phases or modify live owners.' : 'Observe existing work; do not replay failed phases, add workers or modify live owners.' :
       'Use the workflow status and failure categories to scope an explicitly authorized inspection or bounded recovery.',
@@ -257,7 +287,7 @@ export function readJobDiagnostics(job) {
   let snapshot = null;
   const result = spawnSync(process.execPath, [path.join(ROOT, 'scripts/tutorial_translation_background.mjs'), 'status', '--job', resolved], { cwd: ROOT, encoding: 'utf8', timeout: 15000, maxBuffer: 8 * 1024 * 1024 });
   if (result.status === 0) { try { snapshot = JSON.parse(result.stdout); } catch { /* Unknown, never missing or zero. */ } }
-  const summary = inspectCampaign(path.resolve(config.value.campaign), snapshot);
+  const summary = inspectCampaign(path.resolve(config.value.campaign), snapshot, { job: resolved });
   return { ...summary, statusReadable: snapshot !== null };
 }
 

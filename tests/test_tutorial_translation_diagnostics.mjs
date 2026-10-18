@@ -217,3 +217,25 @@ test('live long review now requires progress inspection and excludes in-flight a
   assert.equal(result.authentication.currentAuthenticationGuaranteed, false);
   assert(!JSON.stringify(result).includes(SECRET)); assert.deepEqual(hashes(root), before);
 });
+
+test('a running worker with no model request beyond the advisory asks for the inspector; stuck-worker outcomes and reports are surfaced', t => {
+  const { root, page } = fixture(t);
+  const glog = ms => { const at = new Date(ms), two = n => String(n).padStart(2, '0'); return `I${two(at.getMonth() + 1)}${two(at.getDate())} ${two(at.getHours())}:${two(at.getMinutes())}:${two(at.getSeconds())}.000000 1 h.go:1] `; };
+  const log = path.join(page, 'review-02.agy.log');
+  writeFileSync(log, glog(Date.now() - 7200000) + 'URL: https://x/v1:streamGenerateContent ' + SECRET + '\n' + glog(Date.now() - 60000) + 'token refreshed\n');
+  save(path.join(page, 'review-02.dispatched.json'), { agyLogPath: log });
+  save(path.join(page, 'review-01.inspect-2026-10-18T00-00-00-000Z.json'), { classification: 'complete-not-exited', reasonCode: 'complete-output-stream-exited-no-shutdown', stack: { knownSignature: 'title-generation-hang' }, recommendation: { action: 'review-held-output', rationale: SECRET } });
+  const snapshot = { ...workflow, state: 'running', progress: { updatedAt: new Date().toISOString(), phases: [
+    { locale: 'ar', chunk: '01', phase: 'review-01', state: 'completed', outcome: 'accepted-after-stuck-worker', manualReviewSuggested: true, knownSignature: 'title-generation-hang' },
+    { locale: 'ar', chunk: '01', phase: 'review-02', state: 'running', elapsedSeconds: 7300 },
+  ] } };
+  const result = inspectCampaign(root, snapshot, { job: '/tmp/scirepl-tutorial-translation-job-example' });
+  assert.equal(result.workerInspection.attentionRequired, true); assert.equal(result.attentionRequired, true);
+  assert.match(result.workerInspection.recommendedAction, /tutorial_translation_inspect\.mjs --job \/tmp\/scirepl-tutorial-translation-job-example --phase ar\/01\/review-02/);
+  const running = result.workerInspection.phases.find(row => row.phase === 'ar/01/review-02');
+  assert.equal(running.noRecentModelRequest, true); assert(running.secondsSinceModelRequest > 7000);
+  const done = result.workerInspection.phases.find(row => row.phase === 'ar/01/review-01');
+  assert.equal(done.outcome, 'accepted-after-stuck-worker'); assert.equal(done.manualReviewSuggested, true);
+  assert.equal(done.latestInspection.classification, 'complete-not-exited'); assert.equal(done.latestInspection.knownSignature, 'title-generation-hang'); assert.equal(done.latestInspection.recommendation, 'review-held-output');
+  assert(!JSON.stringify(result).includes(SECRET));
+});

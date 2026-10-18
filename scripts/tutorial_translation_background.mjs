@@ -139,7 +139,20 @@ if (command === 'start') {
   } finally { closeSync(descriptor); }
   console.log(JSON.stringify({ job, state: 'started-in-background', supervisorPid: child.pid, pollCommand: `node ${SCRIPT} status --job ${job}` }, null, 2));
 } else if (command === 'status') {
-  console.log(JSON.stringify(snapshot(checkedConfig()), null, 2));
+  const value = snapshot(checkedConfig());
+  // Read-only: latest worker inspection and stuck-worker outcome per phase.
+  // Loaded lazily so the owner/supervisor never depends on the inspector.
+  try {
+    const { latestInspection } = await import('./tutorial_translation_inspect.mjs');
+    value.inspections = (Array.isArray(value.progress?.phases) ? value.progress.phases : []).map(row => {
+      const latest = latestInspection(value.campaign, row);
+      if (!latest && !row.outcome && !row.manualReviewSuggested && !row.knownSignature) return null;
+      return { phase: `${row.locale}/${row.chunk}/${row.phase}`, state: row.state ?? null, outcome: row.outcome ?? null, manualReviewSuggested: row.manualReviewSuggested === true,
+        knownSignature: latest?.knownSignature ?? row.knownSignature ?? null, classification: latest?.classification ?? null, recommendation: latest?.recommendation ?? null,
+        reportPath: latest?.reportPath ?? null, stackSummaryPath: latest?.stackSummaryPath ?? row.stackSummaryPath ?? null };
+    }).filter(Boolean);
+  } catch { value.inspections = null; }
+  console.log(JSON.stringify(value, null, 2));
 } else if (command === 'stop') {
   const config = checkedConfig();
   if (!existsSync(file('cancel.request.json'))) exclusive(file('cancel.request.json'), { nonce: config.nonce, requestedAt: new Date().toISOString() });
