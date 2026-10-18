@@ -320,6 +320,27 @@ attempt is charged. A later generation may follow a held allowance run only with
 the same approval, and only within its remaining calls. The controller rebuilds
 the plan from the stopped evidence before claiming work; gates are unchanged.
 
+### Stuck workers: inspection and the title-generation acceptance rule
+
+See `progress-observer.md` ("Stuck after completion" and "Inspecting an idle
+worker"). In short: `tutorial_translation_inspect.mjs --job JOB` explains what an
+idle worker is doing without reading prompts or responses. At grace expiry the
+controller takes a goroutine dump, and accepts complete output only when the
+dump shows the `title-generation-hang` signature and every unchanged gate
+passes. Those fields are flagged for optional manual review
+(`tutorial_locale_status.mjs --manual-review`).
+
+A page held before stack dumps existed can be accepted only through a one-off,
+explicitly user-approved record (`user-approved-stuck-worker-acceptance`, with
+the parsed stack summary of the same page as evidence, never a raw crash log):
+`tutorial_section_stuck_acceptance.mjs --approval APPROVAL.json` (prepare-only),
+then `--output-dir /tmp/scirepl-tutorial-stuck-acceptance-NEW --execute`. It
+re-runs the transport, identity and review gates on the pinned held envelope,
+reads the old campaign without changing it, writes `accepted.json` to the new
+directory and applies it with the normal apply lock. On October 18, 2026 this
+accepted Russian `workbooks/tutorial` (22 fields) from the held
+`allowance-20261017-b` review.
+
 For static tutorial pages, prefer `tutorial_locale_section_plan.mjs` and
 `run_tutorial_section_translations.mjs` over the historical tiny-fragment
 controller. The published result is still static HTML under language-code URLs,
