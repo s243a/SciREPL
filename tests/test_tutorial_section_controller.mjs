@@ -4,10 +4,11 @@ import { spawn, spawnSync } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
+import { pathToFileURL } from 'node:url';
 import { ROOT, sha } from '../scripts/tutorial_locale_lib.mjs';
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-function fixture(mode = 'success') {
+function fixture(mode = 'success', extraConfig = {}) {
   const root = mkdtempSync(path.join(tmpdir(), 'scirepl-section-offline-fixture-'));
   const temporary = path.join(root, 'tmp'); mkdirSync(temporary);
   for (const name of ['run_tutorial_section_translations.mjs', 'tutorial_locale_section_plan.mjs', 'tutorial_section_recovery_plan.mjs', 'tutorial_locale_lib.mjs', 'tutorial_locale_status.mjs', 'tutorial_locale_apply.mjs', 'tutorial_translation_transport.mjs', 'tutorial_translation_queue.mjs', 'tutorial_section_protocol.mjs', 'tutorial_review_batching.mjs', 'tutorial_section_correction_plan.mjs', 'tutorial_section_review_continuation_plan.mjs']) {
@@ -41,8 +42,10 @@ function fixture(mode = 'success') {
     { route: 'beta', context: [], draftSeeds: [], sections: [section(pages[1], 'first', pages[1].fields)] },
   ] }] };
   plan.planHash = sha(JSON.stringify(plan)); const planFile = path.join(root, 'plan.json'); write(planFile, plan);
-  write(path.join(root, 'fake-config.json'), { mode, driftFile: pages[0].pin.file });
-  const env = { ...process.env, TMPDIR: temporary, SCIREPL_TRANSLATION_AGY: fake };
+  // Crash logs go to a fixture directory, never the real ~/.gemini one.
+  const crashes = path.join(root, 'crashes'); mkdirSync(crashes);
+  write(path.join(root, 'fake-config.json'), { mode, driftFile: pages[0].pin.file, crashesDir: crashes, ...extraConfig });
+  const env = { ...process.env, TMPDIR: temporary, SCIREPL_TRANSLATION_AGY: fake, SCIREPL_AGY_CRASHES_DIR: crashes };
   const campaign = mkdtempSync(path.join(tmpdir(), 'scirepl-tutorial-translation-section-offline-'));
   const args = [path.join(root, 'scripts/run_tutorial_section_translations.mjs'), '--plan', planFile, '--campaign', campaign];
   const calls = () => existsSync(path.join(root, 'fake-calls.jsonl')) ? readFileSync(path.join(root, 'fake-calls.jsonl'), 'utf8').trim().split('\n').map(row => JSON.parse(row)) : [];
@@ -213,14 +216,23 @@ for (const mode of ['numeric-order', 'numeric-script']) {
 }
 console.log('PASS exact numeric source sequence metadata never weakens ordering or digit-script validation');
 
-const stuckTest = fixture('stuck-after-complete'); stuckTest.env.SCIREPL_TRANSLATION_POST_COMPLETION_GRACE_SECONDS = '1';
+// Stuck after complete output, but the goroutine dump shows shutdown without
+// the title-generation blocker: no known safe signature, so it stays held.
+const SENTINEL = 'PRIVATE_PROMPT_RESPONSE_SENTINEL_7731';
+const stuckTest = fixture('stuck-after-complete', { stackSignature: 'none', logSentinel: SENTINEL }); stuckTest.env.SCIREPL_TRANSLATION_POST_COMPLETION_GRACE_SECONDS = '1';
 const stuckResult = stuckTest.run(true); assert.equal(stuckResult.status, 1, stuckResult.stderr);
 assert.equal(stuckTest.calls().filter(row => row.review).length, 2, 'A stuck worker is never retried automatically');
-assert.equal(JSON.parse(readFileSync(stuckTest.record)).translations['alpha.one'], undefined, 'Complete-looking output from a stopped worker is never accepted');
+assert.equal(JSON.parse(readFileSync(stuckTest.record)).translations['alpha.one'], undefined, 'Complete-looking output from a stopped worker without the title-generation signature is never accepted');
 assert(!existsSync(path.join(stuckTest.campaign, 'fr/01/accepted.json')));
 const stuckTransport = JSON.parse(readFileSync(path.join(stuckTest.campaign, 'fr/01/review-01.transport.json')));
-assert.equal(stuckTransport.stuckAfterCompleteOutput, true); assert.equal(stuckTransport.cancelled, false); assert.equal(stuckTransport.exitCode, null);
-assert.equal(stuckTransport.signal, 'SIGTERM'); assert.equal(stuckTransport.postCompletionGraceSeconds, 1);
+assert.equal(stuckTransport.stuckAfterCompleteOutput, true); assert.equal(stuckTransport.cancelled, false); assert.equal(stuckTransport.exitCode, 2);
+assert.equal(stuckTransport.stuckTerminationSignal, 'SIGQUIT'); assert.equal(stuckTransport.stackRequestedBy, 'controller'); assert.equal(stuckTransport.knownSignature, null);
+assert.equal(stuckTransport.postCompletionGraceSeconds, 1);
+const stuckSummary = JSON.parse(readFileSync(stuckTransport.stackSummaryPath, 'utf8'));
+assert.equal(stuckSummary.found, true); assert.deepEqual(stuckSummary.main.frames, ['background.(*Pool).close', 'cortex.(*backgroundRunner).CancelAndWait', 'cortex.(*CascadeManager).Shutdown', 'main.main']);
+assert(!readFileSync(stuckTransport.stackSummaryPath, 'utf8').includes(SENTINEL), 'Stack summaries never keep frame arguments');
+assert.equal(JSON.parse(readFileSync(path.join(stuckTest.campaign, 'fr/01/review-01.dispatched.json'))).agyLogPath, path.join(stuckTest.campaign, 'fr/01/review-01.agy.log'));
+assert(existsSync(path.join(stuckTest.campaign, 'fr/01/review-01.agy.log')), 'Each worker gets its own --log-file');
 assert(Date.parse(stuckTransport.stuckTerminatedAt) >= Date.parse(stuckTransport.completeOutputAt) + 900);
 assert.match(JSON.parse(readFileSync(path.join(stuckTest.campaign, 'fr/01/failed.json'))).error, /stuck after complete output/);
 const stuckStatus = JSON.parse(readFileSync(path.join(stuckTest.campaign, 'controller-status.json')));
@@ -228,7 +240,30 @@ const stuckRow = stuckStatus.phases.find(row => row.chunk === '01' && row.phase 
 assert.equal(stuckRow.state, 'held'); assert.equal(stuckRow.stuckAfterCompleteOutput, true); assert.equal(stuckStatus.state, 'held');
 assert.throws(() => process.kill(JSON.parse(readFileSync(path.join(stuckTest.campaign, 'fr/01/review-01.child.json'))).pid, 0), error => error.code === 'ESRCH');
 assert(!existsSync(path.join(stuckTest.campaign, 'controller.lock')));
-console.log('PASS a worker that never exits after a complete envelope is stopped after the grace, recorded as stuck-after-completion and held');
+console.log('PASS a worker that never exits after a complete envelope is dumped (SIGQUIT) after the grace, recorded as stuck-after-completion and held without a known signature');
+
+// Same, but the dump proves the worker only waited for conversation-title
+// generation: the complete output passes every unchanged gate and is accepted,
+// flagged for optional manual review.
+const titleHang = fixture('stuck-after-complete', { stackSignature: 'title', logSentinel: SENTINEL }); titleHang.env.SCIREPL_TRANSLATION_POST_COMPLETION_GRACE_SECONDS = '1';
+const titleResult = titleHang.run(true); assert.equal(titleResult.status, 0, titleResult.stderr);
+assert.equal(titleHang.calls().filter(row => row.review).length, 2, 'Accepting held output never adds calls');
+const titleRecord = JSON.parse(readFileSync(titleHang.record));
+assert.equal(titleRecord.translations['alpha.one'], 'Texte traduit : First prose.');
+const titleReceipt = titleRecord.receipts.find(row => row.fields.includes('alpha.one'));
+assert.equal(titleReceipt.review.manualReviewSuggested, true); assert.equal(titleReceipt.review.outcome, 'accepted-after-stuck-worker');
+assert.deepEqual(titleReceipt.review.manualReviewFields, ['alpha.one', 'alpha.seed', 'alpha.two']);
+assert.deepEqual(titleReceipt.review.stuckWorkerAcceptances, [{ phase: 'review-01', outcome: 'accepted-after-stuck-worker', knownSignature: 'title-generation-hang', fields: 3 }]);
+const titleTransport = JSON.parse(readFileSync(path.join(titleHang.campaign, 'fr/01/review-01.transport.json')));
+assert.equal(titleTransport.knownSignature, 'title-generation-hang'); assert.equal(titleTransport.stuckAfterCompleteOutput, true);
+const titleRow = JSON.parse(readFileSync(path.join(titleHang.campaign, 'controller-status.json'))).phases.find(row => row.chunk === '01' && row.phase === 'review-01');
+assert.equal(titleRow.state, 'completed'); assert.equal(titleRow.outcome, 'accepted-after-stuck-worker'); assert.equal(titleRow.manualReviewSuggested, true);
+assert.equal(titleRow.completeOutput, true); assert.equal(titleRow.completeOutputSummary.status, 'SUCCESS'); assert.equal(titleRow.completeOutputSummary.durationSeconds, 1);
+assert(!readFileSync(path.join(titleHang.campaign, 'controller-status.json'), 'utf8').includes('Texte traduit'), 'Phase status never carries response text');
+const { inspectLocaleRecord } = await import(pathToFileURL(path.join(titleHang.root, 'scripts/tutorial_locale_status.mjs')).href);
+const titleStatus = inspectLocaleRecord(JSON.parse(readFileSync(titleHang.plan.manifestFile.file)), 'fr', titleRecord);
+assert.deepEqual(titleStatus.manualReviewSuggested, ['alpha.one', 'alpha.two', 'alpha.seed', 'beta.one']); assert.deepEqual(titleStatus.unreviewed, []);
+console.log('PASS a stuck worker whose dump shows only the title-generation hang is accepted through the unchanged gates and flagged for manual review');
 
 const descendant = fixture('stuck-with-descendant'); descendant.env.SCIREPL_TRANSLATION_POST_COMPLETION_GRACE_SECONDS = '1';
 try {

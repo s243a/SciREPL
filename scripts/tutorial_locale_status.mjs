@@ -23,14 +23,26 @@ export function inspectLocaleRecord(manifest, locale, record) {
     } catch (error) { invalid.push({ id: field.id, reason: error.message }); }
   }
   const unreviewed = fields.filter(field => field.id in values && !reviewed.has(field.id)).map(field => field.id);
-  return { locale, fields: fields.length, translated: fields.length - missing.length, missing, unknown, invalid, unreviewed, complete: Boolean(record) && !missing.length && !unknown.length && !invalid.length && !unreviewed.length };
+  // Accepted fields a human may choose to spot-check (for example output kept
+  // from a worker stopped while waiting on title generation). Advisory only:
+  // they are reviewed and complete. A later receipt for a field supersedes it.
+  const manual = new Set();
+  for (const receipt of record?.receipts || []) {
+    const ids = receipt.fields || [];
+    if (receipt.review?.manualReviewSuggested === true) {
+      const flagged = new Set(Array.isArray(receipt.review.manualReviewFields) ? receipt.review.manualReviewFields : ids);
+      for (const id of ids) if (flagged.has(id)) manual.add(id); else manual.delete(id);
+    } else for (const id of ids) manual.delete(id);
+  }
+  const manualReviewSuggested = fields.filter(field => manual.has(field.id) && field.id in values).map(field => field.id);
+  return { locale, fields: fields.length, translated: fields.length - missing.length, missing, unknown, invalid, unreviewed, manualReviewSuggested, complete: Boolean(record) && !missing.length && !unknown.length && !invalid.length && !unreviewed.length };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2), selected = [], requireComplete = args.includes('--require-complete');
   for (let index = 0; index < args.length; index++) {
     if (args[index] === '--locale') { const locale = args[++index]; if (!LOCALES.includes(locale)) throw new Error('Unknown requested tutorial locale'); selected.push(locale); }
-    else if (!['--all', '--require-complete', '--details'].includes(args[index])) throw new Error(`Unknown status option: ${args[index]}`);
+    else if (!['--all', '--require-complete', '--details', '--manual-review'].includes(args[index])) throw new Error(`Unknown status option: ${args[index]}`);
   }
   const manifest = readManifest();
   const sourceCurrent = manifest.pages.every(page => sha(readFileSync(path.join(ROOT, 'www', 'help', page.route, 'index.html'))) === page.sourceHash);
@@ -41,7 +53,9 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     try { return inspectLocaleRecord(manifest, locale, JSON.parse(readFileSync(file, 'utf8'))); }
     catch { return { locale, complete: false, recordError: 'Translation record is unreadable or currently being written' }; }
   });
-  const display = args.includes('--details') ? rows : rows.map(row => row.fields === undefined ? row : { locale: row.locale, fields: row.fields, translated: row.translated, missing: row.missing.length, unknown: row.unknown.length, invalid: row.invalid.length, unreviewed: row.unreviewed.length, complete: row.complete });
+  // --manual-review lists only the optional spot-check field ids per locale.
+  const display = args.includes('--manual-review') ? rows.filter(row => row.manualReviewSuggested?.length).map(row => ({ locale: row.locale, manualReviewSuggested: row.manualReviewSuggested }))
+    : args.includes('--details') ? rows : rows.map(row => row.fields === undefined ? row : { locale: row.locale, fields: row.fields, translated: row.translated, missing: row.missing.length, unknown: row.unknown.length, invalid: row.invalid.length, unreviewed: row.unreviewed.length, manualReviewSuggested: row.manualReviewSuggested.length, complete: row.complete });
   console.log(JSON.stringify({ schema: 1, manifestHash: manifest.manifestHash, sourceCurrent, locales: display }, null, 2));
   if (requireComplete && (!sourceCurrent || rows.some(row => !row.complete))) process.exitCode = 1;
 }

@@ -12,7 +12,7 @@ import { performance } from 'node:perf_hooks';
 import { ROOT, LOCALES, readManifest, localeFile, sha, validateText, validateKeep } from './tutorial_locale_lib.mjs';
 import { classifySections } from './tutorial_locale_section_plan.mjs';
 import { acquireTranslationSlot, getProcessStartIdentity } from './tutorial_translation_queue.mjs';
-import { parseTransport, hasCliTimeoutWarning, workerProgress } from './tutorial_translation_transport.mjs';
+import { parseTransport, hasCliTimeoutWarning, workerProgress, envelopeMetadata, collectCrashSummary, acceptStuckAfterCompletion, crashesDirectory } from './tutorial_translation_transport.mjs';
 import { gateSection, reviewPrompt, correctionReviewPrompt, createDispatchCadence } from './tutorial_section_protocol.mjs';
 import { prepareSectionReviewContinuationPlan, splitContinuationReviewSections } from './tutorial_section_review_continuation_plan.mjs';
 import { packReviewSections } from './tutorial_review_batching.mjs';
@@ -96,7 +96,7 @@ export async function runSectionController(argv = process.argv.slice(2)) {
     else { assert(argv[i + 1] && !argv[i + 1].startsWith('--'), 'Missing option value'); options[key] = argv[++i]; }
   }
   assert(options['--plan'] && options['--campaign'], 'Usage: --plan FILE --campaign DIR [--execute]');
-  const postCompletionGraceMs = postCompletionGraceSeconds() * 1000;
+  const postCompletionGraceMs = postCompletionGraceSeconds() * 1000, crashes = crashesDirectory();
   const planFile = path.resolve(options['--plan']), campaign = path.resolve(options['--campaign']);
   assert(campaign.startsWith('/tmp/scirepl-tutorial-translation-'), 'Private campaign path required');
   const plan = json(planFile), manifest = readManifest();
@@ -352,15 +352,28 @@ export async function runSectionController(argv = process.argv.slice(2)) {
     // Stuck-after-completion: a COMPLETE final envelope was received but the
     // worker never exited. Only then, after a grace period, is it stopped.
     let completeOutputAt = null, stuckAfterCompleteOutput = false, stuckTerminatedAt = null, signal = null;
+    // At grace expiry the controller asks AGY for a goroutine dump (SIGQUIT, which
+    // also terminates it) and keeps only the parsed summary. An inspector that
+    // already requested the dump leaves a <phase>.stack-request.json marker.
+    let stackRequestedAt = null, stackRequestedBy = null, stackCollection = null, stackSummary = null, stackSummaryPath = null;
+    const stackRequestFile = path.join(dir, phase + '.stack-request.json'), stackSummaryFile = path.join(dir, phase + '.stack-summary.json');
+    const agyLogPath = path.join(dir, phase + '.agy.log');
+    const inspectorRequest = pid => { try { const value = json(stackRequestFile); return value?.pid === pid && Number.isFinite(Date.parse(value.requestedAt)) ? value : null; } catch { return null; } };
+    const inspectorSummary = async () => {
+      for (const deadline = Date.now() + 15000; Date.now() < deadline; await new Promise(resolve => setTimeout(resolve, 100))) {
+        try { const value = json(stackSummaryFile); if (value && typeof value === 'object') return value; } catch { /* not yet written */ }
+      }
+      return null;
+    };
     try {
       cadence = await waitForDispatchCadence();
       active(); checkPins(job); const runner = runnerProvenance();
       await new Promise(resolve => setImmediate(resolve)); active(); checkPins(job);
       chargeDispatch(job, phase);
       save(path.join(dir, phase + '.dispatched.json'), { planHash, model: MODEL, effort: 'medium', printTimeout: '0s', conversationId: session.id, runner,
-        workerPath: env.PATH, postCompletionGraceSeconds: postCompletionGraceMs / 1000,
+        workerPath: env.PATH, postCompletionGraceSeconds: postCompletionGraceMs / 1000, agyLogPath,
         ...(correction ? { dispatchedAt: new Date().toISOString(), dispatchPolicy: recovery.dispatchPolicy } : {}) });
-      const flags = ['--sandbox', '--mode', 'plan', '--disable-slash-commands', '--model', MODEL, '--effort', 'medium', '--output-format', 'json', '--print-timeout', '0s', ...(session.id ? ['--conversation', session.id] : []), '-p', prompt];
+      const flags = ['--sandbox', '--mode', 'plan', '--disable-slash-commands', '--model', MODEL, '--effort', 'medium', '--output-format', 'json', '--print-timeout', '0s', '--log-file', agyLogPath, ...(session.id ? ['--conversation', session.id] : []), '-p', prompt];
       await new Promise((resolve, reject) => {
         const child = spawn(agy, flags, { cwd: session.workspace, env, stdio: ['ignore', 'pipe', 'pipe'] });
         cadence?.(true); cadence = null;
@@ -369,10 +382,12 @@ export async function runSectionController(argv = process.argv.slice(2)) {
         child.stdout.setEncoding('utf8'); child.stderr.setEncoding('utf8');
         const stuck = () => {
           grace = null; if (child.exitCode !== null || child.signalCode !== null || !completeOutput(stdout)) return;
-          stuckAfterCompleteOutput = true; stuckTerminatedAt = new Date().toISOString();
-          try { setPhase(job, phase, { state: 'stuck-after-completion', stuckAfterCompleteOutput: true, completeOutputAt, stuckTerminatedAt, stdoutBytes, stderrBytes }); }
+          stuckAfterCompleteOutput = true; stuckTerminatedAt = new Date().toISOString();          try { setPhase(job, phase, { state: 'stuck-after-completion', stuckAfterCompleteOutput: true, completeOutput: true, completeOutputAt, stuckTerminatedAt, stdoutBytes, stderrBytes }); }
           catch { persistenceFailure = true; }
-          terminate();
+          // The result is already in hand, so a dump-and-terminate loses nothing.
+          if (inspectorRequest(child.pid)) stackRequestedBy = 'inspector';
+          else { stackRequestedBy = 'controller'; stackRequestedAt = Date.now(); child.kill('SIGQUIT'); }
+          force ||= setTimeout(() => child.kill('SIGKILL'), 5000);
         };
         const receive = (channel, text) => {
           const bytes = Buffer.byteLength(text);
@@ -383,40 +398,74 @@ export async function runSectionController(argv = process.argv.slice(2)) {
           // the accumulated stdout is a complete final envelope, and is reset if
           // later output makes it incomplete again.
           if (channel === 'stdout') {
-            if (completeOutput(stdout)) { if (!grace) { completeOutputAt ||= new Date().toISOString(); grace = setTimeout(stuck, postCompletionGraceMs); } }
-            else if (grace) { clearTimeout(grace); grace = null; completeOutputAt = null; }
+            if (completeOutput(stdout)) {
+              if (!grace && !stuckAfterCompleteOutput) {
+                completeOutputAt ||= new Date().toISOString(); grace = setTimeout(stuck, postCompletionGraceMs);                // Observable to inspectors: booleans, time and outer numeric metadata only.
+                try { setPhase(job, phase, { completeOutput: true, completeOutputAt, completeOutputSummary: envelopeMetadata(stdout), postCompletionGraceSeconds: postCompletionGraceMs / 1000, stdoutBytes, stderrBytes }); }
+                catch { persistenceFailure = true; }
+              }
+            } else if (grace) {
+              clearTimeout(grace); grace = null; completeOutputAt = null;
+              try { setPhase(job, phase, { completeOutput: false, completeOutputAt: null, completeOutputSummary: null, stdoutBytes, stderrBytes }); } catch { persistenceFailure = true; }
+            }
           }
         };
         child.stdout.on('data', text => receive('stdout', text)); child.stderr.on('data', text => receive('stderr', text));
         const startedAt = performance.now(), heartbeat = setInterval(() => {
-          try { setPhase(job, phase, { state: stuckAfterCompleteOutput ? 'stuck-after-completion' : 'running', ...(completeOutputAt ? { completeOutputAt } : {}), ...workerProgress({ startedAt, stdoutBytes, stderrBytes }, performance.now()) }); }
+          try { setPhase(job, phase, { state: stuckAfterCompleteOutput ? 'stuck-after-completion' : 'running', completeOutput: completeOutputAt !== null, ...(completeOutputAt ? { completeOutputAt } : {}), ...workerProgress({ startedAt, stdoutBytes, stderrBytes }, performance.now()) }); }
           catch { persistenceFailure = true; stop(); }
         }, 30000);
         const clear = () => { clearInterval(heartbeat); clearTimeout(force); clearTimeout(grace); clearTimeout(drain); children.delete(owned); };
         // If a stopped stuck worker left descendants holding its pipes, 'close'
         // may never arrive. After its own exit, stop reading those pipes.
-        child.on('exit', (code, exitSignal) => { signal = exitSignal; if (stuckAfterCompleteOutput) drain = setTimeout(() => { child.stdout.destroy(); child.stderr.destroy(); }, 10000); });
+        child.on('exit', (code, exitSignal) => {
+          signal = exitSignal;
+          // An inspector's verified dump of a worker that had already printed a
+          // complete envelope is the same stuck-after-completion termination path.
+          const request = cancelled ? null : inspectorRequest(child.pid);
+          if (!stuckAfterCompleteOutput && request && completeOutputAt !== null && completeOutput(stdout)) {
+            stuckAfterCompleteOutput = true; stuckTerminatedAt = new Date(Math.max(Date.parse(request.requestedAt), Date.parse(completeOutputAt))).toISOString(); stackRequestedBy = 'inspector';
+          } else if (!stackRequestedBy && request) stackRequestedBy = 'inspector';
+          if (stackRequestedBy === 'inspector') stackCollection = inspectorSummary();
+          else if (stackRequestedBy === 'controller') stackCollection = collectCrashSummary({ pid: child.pid, sinceMs: stackRequestedAt, directory: crashes, completeOutput: true });
+          if (stuckAfterCompleteOutput) drain = setTimeout(() => { child.stdout.destroy(); child.stderr.destroy(); }, 10000);
+        });
         child.on('error', error => { clear(); reject(error); }); child.on('close', code => { exitCode = code; clear(); resolve(); });
         try {
           const worker = { pid: child.pid ?? null, startIdentity: child.pid ? getProcessStartIdentity(child.pid) : null };
           save(path.join(dir, phase + '.child.json'), { ...worker, controller: ownership.owner }); setPhase(job, phase, { state: 'running', worker, elapsedSeconds: 0, stdoutBytes: 0, stderrBytes: 0 });
         } catch { persistenceFailure = true; owned.cancel(); }
       });
+      if (stackCollection) {
+        stackSummary = await stackCollection.catch(() => null);
+        if (stackRequestedBy === 'inspector') stackSummaryPath = stackSummary ? stackSummaryFile : null;
+        else if (stackSummary) {
+          // Parsed summary only (function names, states, wait minutes); never the raw dump.
+          try { save(stackSummaryFile, { ...stackSummary, phase: path.relative(campaign, path.join(dir, phase)), requestedBy: 'controller-grace-expiry', requestedAt: new Date(stackRequestedAt).toISOString() }); stackSummaryPath = stackSummaryFile; }
+          catch { persistenceFailure = true; }
+        }
+      }
+      const knownSignature = stackSummary?.knownSignature ?? null;
       const unexpectedFiles = readdirSync(session.workspace);
       const transport = { stdout, stderr, exitCode, timedOut: false, outputLimited, cancelled, persistenceFailure, runner, unexpectedFiles, cliTimeoutWarning: hasCliTimeoutWarning(stderr), printTimeout: '0s', watchdogTimeout: '0s',
         ...(signal ? { signal } : {}), ...(completeOutputAt ? { completeOutputAt } : {}),
-        ...(stuckAfterCompleteOutput ? { stuckAfterCompleteOutput: true, stuckTerminatedAt, postCompletionGraceSeconds: postCompletionGraceMs / 1000 } : {}) };
+        ...(stackRequestedBy ? { stackRequestedBy, stackSummaryPath, knownSignature } : {}),
+        ...(stuckAfterCompleteOutput ? { stuckAfterCompleteOutput: true, stuckTerminatedAt, postCompletionGraceSeconds: postCompletionGraceMs / 1000, stuckTerminationSignal: 'SIGQUIT' } : {}) };
       save(path.join(dir, phase + '.transport.json'), transport);
+      if (stackRequestedBy) try { setPhase(job, phase, { stackSummaryPath, knownSignature }); } catch { persistenceFailure = true; }
       assert(!persistenceFailure, 'Worker metadata could not be persisted'); assert.equal(unexpectedFiles.length, 0, 'Worker wrote files');
-      // The acceptance gate is unchanged: a worker stopped after complete-looking
-      // output is a failed call and is held, never accepted or retried.
-      assert(!stuckAfterCompleteOutput, 'Worker stuck after complete output; stopped and held as failed (no automatic retry)');
-      const proposal = parseTransport(transport), envelope = JSON.parse(stdout), id = envelope.conversation_id;
+      // A worker stopped after complete output is held as failed (never retried)
+      // unless its stack proves it only waited for conversation-title generation;
+      // then the unchanged transport, identity and review gates still apply.
+      const proposal = stuckAfterCompleteOutput ? acceptStuckAfterCompletion(transport, stackSummary) : parseTransport(transport);
+      const envelope = JSON.parse(stdout), id = envelope.conversation_id;
       assert(typeof id === 'string' && /^[\w.-]{1,200}$/.test(id), 'Missing explicit conversation identity');
       if (session.id) assert.equal(id, session.id, 'Continuation changed conversation identity');
       if (recovery) assert(!job.page.recovery.priorConversationIds.includes(id), 'Recovery must not reuse a prior draft or review conversation');
       session.id = id; save(path.join(dir, phase + '.session.json'), { conversationId: id, workspace: session.workspace });
-      save(path.join(dir, phase + '.proposal.json'), proposal); setPhase(job, phase, { state: 'completed', stdoutBytes, stderrBytes }); return proposal;
+      const stuckOutcome = stuckAfterCompleteOutput ? { outcome: 'accepted-after-stuck-worker', knownSignature, stackSummaryPath, manualReviewSuggested: true } : null;
+      session.lastStuckAcceptance = stuckOutcome && { phase, ...stuckOutcome };
+      save(path.join(dir, phase + '.proposal.json'), proposal); setPhase(job, phase, { state: 'completed', stdoutBytes, stderrBytes, ...(stuckOutcome || {}) }); return proposal;
     } finally { cadence?.(); lease.release(); }
   }
   async function translatePage(job) {
@@ -426,6 +475,7 @@ export async function runSectionController(argv = process.argv.slice(2)) {
       ...(correction ? { preservedReviewFields: job.page.reviewSeeds.reduce((sum, seed) => sum + seed.fieldIds.length, 0), explicitCorrection: true } : {}) });
     const draft = { id: null, workspace: mkdtempSync(path.join(tmpdir(), 'scirepl-tutorial-section-draft-')) }, reviewer = { id: null, workspace: mkdtempSync(path.join(tmpdir(), 'scirepl-tutorial-section-review-')) };
     let phase = 'draft', draftCalls = 0, reviewCalls = 0;
+    const stuckAcceptances = [];
     try {
       const candidates = Object.fromEntries(job.page.draftSeeds.map(seed => [seed.id, seed.translation]));
       save(path.join(dir, 'draft.seeds.json'), job.page.draftSeeds);
@@ -435,6 +485,7 @@ export async function runSectionController(argv = process.argv.slice(2)) {
         assert(plain(proposal) && plain(proposal.translations), 'Invalid section draft');
         assert.deepEqual(Object.keys(proposal.translations).sort(), [...section.fieldIds].sort(), 'Draft fields incomplete or added');
         for (const id of section.fieldIds) { assert(typeof proposal.translations[id] === 'string', 'Invalid draft value'); candidates[id] = proposal.translations[id]; }
+        if (draft.lastStuckAcceptance) stuckAcceptances.push({ ...draft.lastStuckAcceptance, fieldIds: [...section.fieldIds] });
       }
       phase = 'review';
       const preserved = preservedReviews(job);
@@ -449,6 +500,7 @@ export async function runSectionController(argv = process.argv.slice(2)) {
         const proposal = await call(job, dir, phase, (correction ? correctionReviewPrompt : reviewPrompt)(job, fields, candidates, i === 0), reviewer); reviewCalls++;
         assert(reviewer.id !== draft.id, 'Review must have an independent conversation');
         const normalized = gateSection(fields, proposal, sourceFields); Object.assign(translations, normalized.translations); Object.assign(keptFields, normalized.keptFields);
+        if (reviewer.lastStuckAcceptance) stuckAcceptances.push({ ...reviewer.lastStuckAcceptance, fieldIds: fields.map(field => field.id) });
       }
       assert.deepEqual(Object.keys(translations).sort(), expectedIds, 'Page review incomplete');
       gateSection(expectedIds.map(id => sourceFields.get(id)), { translations, keptFields }, sourceFields);
@@ -458,7 +510,12 @@ export async function runSectionController(argv = process.argv.slice(2)) {
         requests: { draft: draftCalls, freshReview: reviewCalls, repair: 0 }, preservedDraftFields: job.page.draftSeeds.length,
         ...(correction ? { preservedReviewFields: Object.keys(preserved.translations).length, preservedReviewSections: job.page.reviewSeeds.length,
           ...(allowance ? { explicitApprovedReviewAllowance: true, allowanceId: recovery.allowanceId } : continuation ? { explicitUntouchedContinuation: true } : { explicitBoundedCorrection: true }) } : {}),
-        draftHash: sha(JSON.stringify(candidates)), reviewedHash: sha(JSON.stringify(translations)) } };
+        draftHash: sha(JSON.stringify(candidates)), reviewedHash: sha(JSON.stringify(translations)),
+        // Output accepted from a worker stopped while waiting on title generation:
+        // usable, but flagged so a human may choose to spot-check those fields.
+        ...(stuckAcceptances.length ? { manualReviewSuggested: true, outcome: 'accepted-after-stuck-worker',
+          manualReviewFields: [...new Set(stuckAcceptances.flatMap(row => row.fieldIds))].filter(id => Object.hasOwn(translations, id)).sort(),
+          stuckWorkerAcceptances: stuckAcceptances.map(({ phase: stuckPhase, outcome, knownSignature, fieldIds }) => ({ phase: stuckPhase, outcome, knownSignature, fields: fieldIds.length })) } : {}) } };
       save(path.join(dir, 'accepted.json'), receipt);
       const applyRoot = path.join(tmpdir(), 'scirepl-tutorial-apply-locks', sha(ROOT)); mkdirSync(applyRoot, { recursive: true, mode: 0o700 });
       const applyLock = lock(path.join(applyRoot, job.locale));
@@ -469,7 +526,8 @@ export async function runSectionController(argv = process.argv.slice(2)) {
         const result = spawnSync(process.execPath, [path.join(ROOT, 'scripts/tutorial_locale_apply.mjs'), job.locale, path.join(dir, 'accepted.json')], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1024 * 1024 });
         assert.equal(result.status, 0, 'Deterministic page apply failed');
       } finally { applyLock.release(); }
-      save(path.join(dir, 'completed.json'), { planHash, locale: job.locale, route: job.page.route, fields: Object.keys(translations).length, acceptedHash: sha(readFileSync(path.join(dir, 'accepted.json'))), nativeLanguageReview: 'pending' });
+      save(path.join(dir, 'completed.json'), { planHash, locale: job.locale, route: job.page.route, fields: Object.keys(translations).length, acceptedHash: sha(readFileSync(path.join(dir, 'accepted.json'))), nativeLanguageReview: 'pending',
+        ...(stuckAcceptances.length ? { outcome: 'accepted-after-stuck-worker', manualReviewSuggested: true } : {}) });
       completed++; console.log(JSON.stringify({ event: 'page-completed', locale: job.locale, route: job.page.route, fields: Object.keys(translations).length, draftCalls, reviewCalls })); publish();
     } catch (error) {
       save(path.join(dir, 'failed.json'), { planHash, phase, error: error.message, noAutomaticRetry: true });
