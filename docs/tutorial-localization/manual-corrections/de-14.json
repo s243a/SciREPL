@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "locale": "de",
+  "chunk": "14",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "originalReviewHash": "a5143adbdc0982e1415ce5579fa75963e462275bce117db850ff175be4ed016e",
+  "reviewer": "Codex controller with independent Codex fidelity audit",
+  "reviewScope": "All 30 complete reviewed German fields were independently compared with the frozen source. The exact English workbook tab title is an operational strong label, not an English paragraph. Its original keep reason is appropriate. No text changes or additional model calls are needed; acceptance uses the single source-pinned label exception.",
+  "nativeLanguageReview": "pending",
+  "corrections": [],
+  "verifiedLiteralKeep": {
+    "fieldId": "workbooks.tutorial.0067",
+    "sourceHash": "d02073d0cfe1eba58a30788da919516205f791dbeaedc199ddccfa5adf47c767",
+    "identifier": "Markov Groups: A Random Walk on Cube Moves"
+  }
+}

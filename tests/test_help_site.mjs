@@ -86,6 +86,10 @@ const tutorialIndex = readFileSync(path.join(WWW, tutorialIndexPath), 'utf8');
 // Curate the cards for readers, but discover lessons from their existing step
 // navigation. A future tutorial must not silently be omitted from the index.
 const publishedTutorials = walkHtml(path.join(WWW, 'help'))
+  // Locale mirrors are checked by test_tutorial_locales; the legacy English
+  // index must still cover the original lessons exactly once.
+  .filter(file => !/^help\/(?:en|ar|bn|de|es|fr|hi|id|ja|ko|pt-BR|ru|zh)\//
+    .test(path.relative(WWW, file).replaceAll(path.sep, '/')))
   .filter(file => /<nav\b[^>]*\bclass=["'][^"']*\blesson-nav\b[^"']*["']/i
     .test(readFileSync(file, 'utf8')))
   .map(file => path.relative(WWW, file).replaceAll(path.sep, '/'))

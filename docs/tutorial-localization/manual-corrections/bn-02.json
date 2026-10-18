@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "locale": "bn",
+  "chunk": "02",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "originalReviewHash": "776731f5508e9d8dc8e64ea307af2b3d065a1281750c658cf572df2a6a506ff5",
+  "reviewer": "Codex controller with independent Codex fidelity audit",
+  "reviewScope": "All 40 fields in the complete Bengali chunk were independently compared with the frozen English source. Its numeric values were already correct; this small clause reorder matches the source numeric order required by the strict guard. No other fidelity issue was found.",
+  "nativeLanguageReview": "pending",
+  "corrections": [
+    {
+      "fieldId": "interface.tutorial.0015",
+      "before": "একটি Samsung Galaxy S24-সিরিজের ফোনে {{P000}} {{P001}} v1.{{P002}}",
+      "after": "{{P000}} {{P001}} v1.{{P002}} একটি Samsung Galaxy S24-সিরিজের ফোনে",
+      "reason": "Put the app/version before the phone model, retaining every source numeric value and protected token in order. The original translation was accurate; this readable rewording satisfies the numeric-order invariant without weakening it."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "locale": "ko",
+  "chunk": "02",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "originalReviewHash": "0547f2fd608ef408d059b6edebed15a83b98a1e61b7f06d7a49af95a53cade25",
+  "reviewer": "Codex controller with independent Codex fidelity audit",
+  "reviewScope": "All 40 complete Korean review fields were independently compared with the frozen English source. The numbers were already accurate; this minimal clause reorder follows the strict source numeric order without changing the meaning, protected tokens, or second sentence.",
+  "nativeLanguageReview": "pending",
+  "corrections": [
+    {
+      "fieldId": "interface.tutorial.0015",
+      "before": "Samsung Galaxy S24 시리즈 스마트폰의 {{P000}} {{P001}} v1.{{P002}} 버전을",
+      "after": "{{P000}} {{P001}} v1.{{P002}} 버전을 Samsung Galaxy S24 시리즈 스마트폰에서",
+      "reason": "Place the app/version before the phone model, keeping every numeric value and token. This preserves the Korean sentence's meaning for the source-order guard, not a correction of factual values."
+    }
+  ]
+}

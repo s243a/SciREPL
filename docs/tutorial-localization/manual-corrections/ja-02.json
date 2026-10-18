@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "locale": "ja",
+  "chunk": "02",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "originalReviewHash": "bcb77fa8a69dc1173e3d33ee637a1a83abc5f077bff43ef45e36b4df50c83f71",
+  "reviewer": "Codex controller with independent Codex fidelity audit",
+  "reviewScope": "All 40 complete Japanese review fields were independently compared with the frozen English source. The numbers were already accurate; this minimal clause reorder follows the strict source numeric order without changing the meaning, protected tokens, or second sentence.",
+  "nativeLanguageReview": "pending",
+  "corrections": [
+    {
+      "fieldId": "interface.tutorial.0015",
+      "before": "Samsung Galaxy S24シリーズのスマートフォンにおける{{P000}} {{P001}} v1.{{P002}}の",
+      "after": "{{P000}} {{P001}} v1.{{P002}}をSamsung Galaxy S24シリーズのスマートフォンで表示した",
+      "reason": "Place the app/version before the phone model, keeping every numeric value and token. This preserves the Japanese sentence's meaning for the source-order guard, not a correction of factual values."
+    }
+  ]
+}

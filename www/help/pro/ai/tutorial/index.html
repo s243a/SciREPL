@@ -185,7 +185,7 @@ sample_m</code></pre>
           <li>Send the practice prompt in the callout below. The panel's <strong>Send</strong> already starts the agentic tool loop: there is no extra “Agent mode” toggle here. The full-screen editor's <strong>Agent</strong> button is a separate workflow.
             <div class="callout" id="assistant-practice-prompt">
               <p><strong>Copy this prompt.</strong> Paste it into the <strong>Assistant's message box</strong>, not a code cell, then tap <strong>Send</strong>.</p>
-              <pre><code>In this practice workbook, add a Markdown explanation followed
+              <pre data-translatable-prompt="assistant-practice"><code>In this practice workbook, add a Markdown explanation followed
 by one JavaScript cell named summary_demo. Generate an input
 array of 10 pseudorandom integers from 1 to 20 inclusive.
 Use the Park-Miller generator with initial state 42. For each
@@ -315,7 +315,7 @@ const average = </code></pre>
           <li>Add an <strong>AI Prompt</strong> cell immediately after Step 3's <code>summary_demo</code> JavaScript cell—not the average-only snippet from Step 4—so the question below matches the selected source. Keep the cell type as <strong>Code</strong>, then choose <strong>AI Prompt</strong> from the <strong>language/mode dropdown</strong>. If it is absent, enable it under <strong>Menu → Languages &amp; modes</strong>.</li>
           <li>Paste the prompt below into the <strong>AI Prompt cell</strong>, not the Assistant's message box. Open its <strong>Configure</strong> control.
             <div class="callout" id="ai-prompt-practice-prompt">
-              <pre><code>Explain the selected JavaScript cell line by line.
+              <pre data-translatable-prompt="ai-explanation"><code>Explain the selected JavaScript cell line by line.
 How do the generator rule and seed 42 determine its input array?
 Why should it report count 10, mean 9.3, minimum 1 and maximum 20?
 Why does resetting the seed make the result repeatable?
@@ -387,7 +387,7 @@ Return a short explanation only; do not rewrite the code.</code></pre>
             <li>In the practice workbook, create a <strong>JavaScript</strong> cell containing <code>// Reviewed plot code will go here.</code> Run that harmless comment to save the cell. Long-press its <strong>In[…] label</strong> and name it <code>variance_plot</code>. Keep that name unique in the workbook; see <a href="../../../workbooks/named-cells/#name">naming cells</a>.</li>
             <li>Add a separate <strong>AI Prompt</strong> cell and paste this request into it:
               <div class="callout" id="ai-variance-practice-prompt">
-                <pre><code>Return only complete JavaScript source, without Markdown fences.
+                <pre data-translatable-prompt="ai-variance"><code>Return only complete JavaScript source, without Markdown fences.
 Create a reproducible histogram of estimated sample variances.
 Simulate 2,000 fresh samples, each containing 10 standard-normal N(0,1) values.
 Do not reuse the earlier integer array from summary_demo.

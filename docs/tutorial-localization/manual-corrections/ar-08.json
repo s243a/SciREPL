@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "locale": "ar",
+  "chunk": "08",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "originalReviewHash": "41452cb295800791dc84be2d7b338790631079c264e9282ef718423feb4edbba",
+  "reviewer": "Codex controller with independent Codex fidelity audit",
+  "reviewScope": "All 30 fields in the complete Arabic chunk were independently compared with the frozen English source. No other fidelity or structural issue was found.",
+  "nativeLanguageReview": "pending",
+  "corrections": [
+    {
+      "fieldId": "files-export.tutorial.0015",
+      "before": "سامسونج جالاكسي إس أربعة وعشرين",
+      "after": "Samsung Galaxy S24",
+      "reason": "Keep the source hardware model identifier S24 literal rather than spelling its numeric component in Arabic. This restores the unchanged source numeric value without changing tutorial meaning."
+    }
+  ]
+}

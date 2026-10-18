@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "locale": "ko",
+  "chunk": "22",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "originalReviewHash": "850250f4f1d913ee0d6536dd91bcee021109dd6e8c6cd44ccba909455bcdd2b9",
+  "reviewer": "Codex controller with independent Codex fidelity audit",
+  "reviewScope": "All 36 complete Korean review fields were independently compared with the frozen source. The sole correction restores the standard Base64 identifier rather than spelling its number; image methods, output/source distinctions, legitimate reviewed technical keeps, and surrounding prose remain unchanged.",
+  "nativeLanguageReview": "pending",
+  "corrections": [
+    {
+      "fieldId": "workbooks.graphics.0041",
+      "before": "Base육십사",
+      "after": "Base64",
+      "reason": "Restore the standard literal Base64 identifier; the reviewed Korean spelling already meant sixty-four and no algorithm, value, protected token, or surrounding prose is changed."
+    }
+  ]
+}

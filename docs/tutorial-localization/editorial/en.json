@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "kind": "controller-authored operational-name rendering",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "inventoryHash": "d4d0435e57acacba6635e801dd28a3a9f0821173d20e6ff4b4200f67ae77dcc2",
+  "locale": "en",
+  "modelApproval": false,
+  "nativeLanguageApproval": false,
+  "nativeLanguageReview": "not applicable: source language",
+  "scope": "Only the explicitly inventoried operational labels; model prose records remain unchanged.",
+  "corrections": []
+}

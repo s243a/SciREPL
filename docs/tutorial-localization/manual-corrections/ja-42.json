@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "locale": "ja",
+  "chunk": "42",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "originalReviewHash": "03b8fcf8aeb9e4c044426703c48288ab890a4478a675dd5874b77a7d95d02705",
+  "reviewer": "Codex controller with independent Codex fidelity audit",
+  "reviewScope": "All 24 complete Japanese review fields were independently compared with the frozen source, including AI Prompt cost/consent scope and the variance example. The sole correction restores the omitted exact S24+ product designation; surrounding prose and protected tokens remain unchanged.",
+  "nativeLanguageReview": "pending",
+  "corrections": [
+    {
+      "fieldId": "pro.ai.tutorial.0210",
+      "before": "Galaxy端末における",
+      "after": "Galaxy S24+端末における",
+      "reason": "Restore the source's exact Galaxy S24+ device designation, omitted in the reviewed Japanese caption, without changing the explanation or its execution claims."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "locale": "zh",
+  "chunk": "02",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "originalReviewHash": "f1ec4207c558e94f9c72dd0a6f0447dd4dd7c02d646236ee054b89f4cac85d48",
+  "reviewer": "Codex controller with independent Codex fidelity audit",
+  "reviewScope": "All 40 complete Chinese review fields were independently compared with the frozen source. All numeric values were already correct. This sole clause reorder follows the strict source numeric order, keeping the phone model, version, protected tokens, and second sentence unchanged.",
+  "nativeLanguageReview": "pending",
+  "corrections": [
+    {
+      "fieldId": "interface.tutorial.0015",
+      "before": "Samsung Galaxy S24 系列手机上的 {{P000}} {{P001}} v1.{{P002}}",
+      "after": "{{P000}} {{P001}} v1.{{P002}} 在 Samsung Galaxy S24 系列手机上的界面",
+      "reason": "Put the app/version before the phone model for the source-order guard using a natural Chinese clause, preserving every numeric value, protected token and the original meaning."
+    }
+  ]
+}
