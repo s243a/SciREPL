@@ -1116,7 +1116,29 @@
     "pro.ai.tutorial.0288": "Навигация в подвале",
     "pro.ai.tutorial.0289": "Все руководства",
     "pro.ai.tutorial.0290": "Справка {{P000}}",
-    "pro.ai.tutorial.0291": "Конфиденциальность {{P000}}"
+    "pro.ai.tutorial.0291": "Конфиденциальность {{P000}}",
+    "workbooks.tutorial.0132": "Математика в основе примера с кубиком",
+    "workbooks.tutorial.0133": "Немного о смысле выводимых данных",
+    "workbooks.tutorial.0134": "Рабочая книга отслеживает {{P000}}{{P002}} индивидуально помеченные наклейки{{P001}}, а не просто шесть цветов. Допустимый ход переставляет эти обозначения. Четыре повторения одного поворота на четверть возвращают кубик к начальному расположению, однако повороты разных граней могут приводить к разным результатам при изменении их порядка.",
+    "workbooks.tutorial.0135": "Случайное блуждание выбирает из {{P004}} вариантов: остаться на месте ({{P000}}), шесть поворотов на четверть и шесть обратных им ходов. Его матрица вероятностей {{P002}}{{P005}}×{{P006}} описывает положение одной наклейки{{P003}}, а не каждую конфигурацию кубика целиком. Суммарная вероятность {{P001}} означает, что вероятности положения этой наклейки в сумме дают единицу; это не доказывает, что кубик равномерно перемешан.",
+    "workbooks.tutorial.0136": "{{P001}}Интересуют направления граней?{{P002}} Ячейка {{P000}} рабочей книги задаёт глобальные оси, а также направления вправо, вверх и внешнюю нормаль для каждой грани. В {{P003}}руководстве по изображениям, диаграммам и уравнениям{{P004}} показано, как добавлять подобные объяснения в рабочую книгу. Координатные диаграммы сейчас добавляются в версию каталога для разработки; закреплённая копия v0.{{P005}} выше их не содержит.",
+    "workbooks.tutorial.0137": "Необязательно: предварительный просмотр обновлённого этапа {{P000}}",
+    "workbooks.tutorial.0138": "Описанные выше шаги и скриншоты с телефона относятся к стабильной рабочей книге {{P001}}v0.{{P009}}{{P002}}. {{P003}}Загрузка обновлённой рабочей книги{{P004}} представляет собой {{P005}}предварительную версию для разработки{{P006}}, которая ещё не вошла в стабильный каталог. Импортируйте её через {{P007}}{{P000}} → Import File{{P008}}, если хотите попробовать её более краткие чередующиеся ячейки с пояснениями и кодом.",
+    "workbooks.tutorial.0139": "В этой предварительной версии сначала выполните {{P000}}, {{P001}} и {{P002}}, как описано выше. Затем:",
+    "workbooks.tutorial.0140": "Выполните {{P000}}. Она формирует {{P001}} — матрицу вероятностей положения одной наклейки после одного равномерно выбранного варианта: {{P002}}, поворота грани на четверть или обратного ему хода.",
+    "workbooks.tutorial.0141": "Выполните {{P000}}. Она отслеживает {{P002}}наклейку с обозначением {{P006}}{{P003}}, изначально находящуюся в {{P004}}позиции {{P007}} при отсчёте от нуля{{P005}}. Сумма вероятностей её положения равна {{P001}}. На диаграмме ниже показаны вероятности позиций назначения, вычисленные этой ячейкой.",
+    "workbooks.tutorial.0142": "После одного случайного хода наклейка с обозначением {{P000}} с вероятностью семь тринадцатых остаётся в позиции {{P001}} и с вероятностью одна тринадцатая для каждой попадает в позиции {{P002}}, {{P003}}, {{P004}}, {{P005}}, {{P006}} или {{P007}}.",
+    "workbooks.tutorial.0143": "{{P001}}Столбчатая диаграмма вероятностей, а не группированная гистограмма.{{P002}} Эта иллюстрация рассчитана на основе {{P000}}; это не скриншот с телефона и не новый вывод, полученный рабочей книгой. Позиции отсчитываются от нуля. Остальные {{P003}} позиций имеют нулевую вероятность и опущены. Обозначение наклейки остаётся равным {{P004}}.",
+    "workbooks.tutorial.0144": "Точные одношаговые вероятности для наклейки с обозначением {{P000}}",
+    "workbooks.tutorial.0145": "Позиция назначения",
+    "workbooks.tutorial.0146": "Вероятность",
+    "workbooks.tutorial.0147": "{{P000}}, {{P001}}, {{P002}}, {{P003}}, {{P004}}, {{P005}} (каждая)",
+    "workbooks.tutorial.0148": "Все остальные {{P000}} позиций",
+    "workbooks.tutorial.0149": "Выполните {{P000}}. Она формирует выборку пути из {{P005}} вариантов для {{P003}}всего кубика{{P004}}, используя определения из {{P001}}. Это отличается от приведённых выше вероятностей для одной наклейки. Описанное на шаге {{P006}} изменение {{P002}} работает в этой ячейке в любой редакции.",
+    "workbooks.tutorial.0150": "Справка {{P000}}",
+    "workbooks.tutorial.0151": "Навигация в нижнем колонтитуле",
+    "workbooks.tutorial.0152": "Справочник по рабочим книгам",
+    "workbooks.tutorial.0153": "Вся справка"
   },
   "receipts": [
     {
@@ -2810,6 +2832,98 @@
         "explicitUntouchedContinuation": true,
         "draftHash": "68b39416b0a544e82a46add0148e3a91f5c883a55df99a80810757a9b167e0c8",
         "reviewedHash": "541ed653ad9799f9249713f98590379ce11925f3ba0372a607cce4e1231e4fb3"
+      }
+    },
+    {
+      "source": "accepted.json",
+      "fields": [
+        "workbooks.tutorial.0132",
+        "workbooks.tutorial.0133",
+        "workbooks.tutorial.0134",
+        "workbooks.tutorial.0135",
+        "workbooks.tutorial.0136",
+        "workbooks.tutorial.0137",
+        "workbooks.tutorial.0138",
+        "workbooks.tutorial.0139",
+        "workbooks.tutorial.0140",
+        "workbooks.tutorial.0141",
+        "workbooks.tutorial.0142",
+        "workbooks.tutorial.0143",
+        "workbooks.tutorial.0144",
+        "workbooks.tutorial.0145",
+        "workbooks.tutorial.0146",
+        "workbooks.tutorial.0147",
+        "workbooks.tutorial.0148",
+        "workbooks.tutorial.0149",
+        "workbooks.tutorial.0150",
+        "workbooks.tutorial.0151",
+        "workbooks.tutorial.0152",
+        "workbooks.tutorial.0153"
+      ],
+      "review": {
+        "status": "accepted",
+        "reviewer": "gemini-3.8-flash-medium (fresh independent review under an explicit user-approved allowance; complete output kept from a worker stopped during conversation-title generation, explicitly user-approved)",
+        "draftModel": "gemini-3.8-flash-medium",
+        "nativeLanguageReview": "pending",
+        "keptFields": {},
+        "planHash": "4a374fddf383894400b4bb97f8c62733998ad9e67c0f2ca33b486e87ecb8a810",
+        "source": "explicit-approved-review-allowance",
+        "requests": {
+          "draft": 0,
+          "freshReview": 1,
+          "repair": 0
+        },
+        "preservedDraftFields": 22,
+        "preservedReviewFields": 0,
+        "preservedReviewSections": 0,
+        "explicitApprovedReviewAllowance": true,
+        "allowanceId": "ru-workbooks-tutorial-review-20261017-a",
+        "draftHash": "e6c90136b79b2fa0a06d164a0128c33a05b9689fc11527afcbf05b3d266d0826",
+        "reviewedHash": "e4d26071e1000b31144c7bfc1f3bb866f762adcf1dfb887a46e5399fabefaaad",
+        "outcome": "accepted-after-stuck-worker",
+        "manualReviewSuggested": true,
+        "manualReviewFields": [
+          "workbooks.tutorial.0132",
+          "workbooks.tutorial.0133",
+          "workbooks.tutorial.0134",
+          "workbooks.tutorial.0135",
+          "workbooks.tutorial.0136",
+          "workbooks.tutorial.0137",
+          "workbooks.tutorial.0138",
+          "workbooks.tutorial.0139",
+          "workbooks.tutorial.0140",
+          "workbooks.tutorial.0141",
+          "workbooks.tutorial.0142",
+          "workbooks.tutorial.0143",
+          "workbooks.tutorial.0144",
+          "workbooks.tutorial.0145",
+          "workbooks.tutorial.0146",
+          "workbooks.tutorial.0147",
+          "workbooks.tutorial.0148",
+          "workbooks.tutorial.0149",
+          "workbooks.tutorial.0150",
+          "workbooks.tutorial.0151",
+          "workbooks.tutorial.0152",
+          "workbooks.tutorial.0153"
+        ],
+        "stuckWorkerAcceptances": [
+          {
+            "phase": "review-01",
+            "outcome": "accepted-after-stuck-worker",
+            "knownSignature": "title-generation-hang",
+            "fields": 22
+          }
+        ],
+        "stuckWorkerApproval": {
+          "approvalId": "ru-01-workbooks-tutorial-title-hang-20261018",
+          "approval": {
+            "file": "/tmp/scirepl-tutorial-section-plan-stuck-approval-20261018-ru01/approval.json",
+            "sha256": "1cc8b1a9bfae09f5eed73f449b7d2bd61c65badab65cfc8d0512a476e08697c2"
+          },
+          "sourceCampaign": "/tmp/scirepl-tutorial-translation-sections-allowance-20261017-b",
+          "heldPhase": "ru/01/review-01",
+          "transportSha256": "009230a7a5e1b4765aed9ea43097eada0fecd35d33629bf36e918565b876663e"
+        }
       }
     }
   ]
