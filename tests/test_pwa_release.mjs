@@ -379,6 +379,30 @@ try {
     );
     assert(prologCdnAttempts === 0, 'Prolog does not attempt its CDN fallback', String(prologCdnAttempts));
 
+    const bindingCases = await page.evaluate(async () => {
+        const queries = {
+            unbound: 'X = _.',
+            opaque: 'open_string("x", S), close(S).',
+            number: 'X = 42.',
+            compound: 'X = foo(bar).',
+            dict: 'X = person{name:alice}.',
+        };
+        const output = {};
+        for (const [name, query] of Object.entries(queries)) {
+            const result = await window.kernelManager.execute(query, 'prolog');
+            output[name] = result.stdout || '';
+        }
+        return output;
+    });
+    assert(!/\bX\s*=|\[object Object\]/.test(bindingCases.unbound),
+        'unbound Prolog variables are omitted from displayed bindings', bindingCases.unbound);
+    assert(!/\bS\s*=|\[object Object\]/.test(bindingCases.opaque),
+        'opaque Prolog handles are omitted from displayed bindings', bindingCases.opaque);
+    assert(/\bX\s*=\s*42\b/.test(bindingCases.number),
+        'bound numeric Prolog values remain visible', bindingCases.number);
+    assert(/\bX\s*=/.test(bindingCases.compound) && /\bX\s*=/.test(bindingCases.dict),
+        'compound and dictionary Prolog bindings remain visible', JSON.stringify(bindingCases));
+
     console.log('4. Going offline before installing the dependency-aware bundle...');
     await context.setOffline(true);
     const offlineInstall = await page.evaluate(async () => {
