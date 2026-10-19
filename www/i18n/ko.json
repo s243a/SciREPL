@@ -253,7 +253,7 @@
     "help.cellLanguage": "셀 언어",
     "help.eachCellRemembersItsLanguage": "각 셀은 프로그래밍 언어를 기억합니다. 변경하려면 ✎를 클릭하여 편집 모드로 들어간 후 드롭다운을 사용하세요. <strong>All→</strong>를 클릭하면 노트북의 모든 코드 셀에 언어가 적용됩니다.",
     "help.sourceOnlyCellsTyprDirectives": "소스 전용 셀 및 TypR 지시문",
-    "help.putSourceOnFirstLine": "이름이 지정된 TypR 또는 Lua 셀의 첫 번째 줄에 <code>#!source</code>를 배치하면 실행하지 않고도 Notebook VFS를 통해 강조 표시된 코드를 읽을 수 있습니다. 기타 지시문은 TypR 전용입니다:",
+    "help.putSourceOnFirstLine": "지원되는 모든 언어의 이름이 지정된 코드 셀의 첫 번째 줄에 <code>#!source</code>를 배치하면 실행하지 않고도 Notebook VFS를 통해 강조 표시된 코드를 읽을 수 있습니다. 기타 지시문은 TypR 전용입니다:",
     "help.sourceCellShowsSourceOnly": "<code>#!source</code> — <strong>소스만 표시</strong>하며 의도적으로 <code>Out [n]</code>을 생성하지 않고 Notebook VFS를 통해 읽을 수 있는 상태로 유지됩니다.",
     "help.typecheckTypeCheckFollowingCode": "<code>#!typecheck</code> — 실행하지 않고 다음 코드의 타입을 검사합니다.",
     "help.transpileShowTranspiledRCode": "<code>#!transpile</code> — 트랜스파일된 R 코드를 보여줍니다.",

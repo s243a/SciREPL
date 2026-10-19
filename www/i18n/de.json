@@ -268,7 +268,7 @@
     "help.cellLanguage": "Zellensprache",
     "help.eachCellRemembersItsLanguage": "Jede Zelle speichert ihre Programmiersprache. Zum Ändern klicken Sie auf ✎ und verwenden Sie das Dropdown-Menü. Klicken Sie auf <strong>All→</strong>, um die Sprache auf alle Code-Zellen des Notebooks anzuwenden.",
     "help.sourceOnlyCellsTyprDirectives": "Nur-Quellcode-Zellen und TypR-Direktiven",
-    "help.putSourceOnFirstLine": "Setzen Sie <code>#!source</code> in die erste Zeile einer benannten TypR- oder Lua-Zelle, um hervorgehobenen Code über Notebook VFS lesbar zu halten, ohne ihn auszuführen. Die weiteren Direktiven sind spezifisch für TypR:",
+    "help.putSourceOnFirstLine": "Setzen Sie <code>#!source</code> in die erste Zeile einer benannten Code-Zelle in einer beliebigen unterstützten Sprache, um hervorgehobenen Code über Notebook VFS lesbar zu halten, ohne ihn auszuführen. Die weiteren Direktiven sind spezifisch für TypR:",
     "help.sourceCellShowsSourceOnly": "<code>#!source</code> — Die Zelle zeigt <strong>nur Quellcode</strong>, erzeugt kein <code>Out [n]</code> und bleibt über Notebook VFS lesbar.",
     "help.typecheckTypeCheckFollowingCode": "<code>#!typecheck</code> — Prüft Typen des nachfolgenden Codes ohne Ausführung.",
     "help.transpileShowTranspiledRCode": "<code>#!transpile</code> — Zeigt den transpilierten R-Code.",

@@ -260,7 +260,7 @@
     "help.cellLanguage": "Linguagem da célula",
     "help.eachCellRemembersItsLanguage": "Cada célula lembra sua linguagem de programação. Para alterá-la, clique em ✎ para editar e use o menu suspenso. Clique em <strong>All→</strong> para aplicar a linguagem a todas as células de código do caderno.",
     "help.sourceOnlyCellsTyprDirectives": "Células somente de código-fonte e diretivas TypR",
-    "help.putSourceOnFirstLine": "Coloque <code>#!source</code> na primeira linha de uma célula nomeada TypR ou Lua para manter o código destacado legível via Notebook VFS sem executá-lo. As demais diretivas são específicas para TypR:",
+    "help.putSourceOnFirstLine": "Coloque <code>#!source</code> na primeira linha de uma célula de código nomeada em qualquer linguagem suportada para manter o código destacado legível via Notebook VFS sem executá-lo. As demais diretivas são específicas para TypR:",
     "help.sourceCellShowsSourceOnly": "<code>#!source</code> — A célula mostra <strong>apenas o código-fonte</strong>, sem gerar <code>Out [n]</code>, e permanece legível pelo Notebook VFS.",
     "help.typecheckTypeCheckFollowingCode": "<code>#!typecheck</code> — Verifica os tipos do código seguinte sem executá-lo.",
     "help.transpileShowTranspiledRCode": "<code>#!transpile</code> — Mostra o código R transpilado.",

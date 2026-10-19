@@ -253,7 +253,7 @@
     "help.cellLanguage": "Язык ячейки",
     "help.eachCellRemembersItsLanguage": "Каждая ячейка запоминает свой язык. Чтобы изменить его, нажмите ✎ для редактирования и выберите язык в меню. Нажмите <strong>All→</strong>, чтобы применить язык ко всем ячейкам блокнота.",
     "help.sourceOnlyCellsTyprDirectives": "Ячейки только с исходным кодом и директивы TypR",
-    "help.putSourceOnFirstLine": "Поместите <code>#!source</code> в первую строку именованной ячейки TypR или Lua, чтобы сохранить код доступным через Notebook VFS без его выполнения. Остальные директивы относятся к TypR:",
+    "help.putSourceOnFirstLine": "Поместите <code>#!source</code> в первую строку именованной ячейки кода на любом поддерживаемом языке, чтобы сохранить код доступным через Notebook VFS без его выполнения. Остальные директивы относятся к TypR:",
     "help.sourceCellShowsSourceOnly": "<code>#!source</code> — Ячейка показывает <strong>только исходный код</strong> без блока <code>Out [n]</code> и остаётся доступной для чтения через Notebook VFS.",
     "help.typecheckTypeCheckFollowingCode": "<code>#!typecheck</code> — Проверяет типы следующего кода без его выполнения.",
     "help.transpileShowTranspiledRCode": "<code>#!transpile</code> — Показывает транслированный код R.",

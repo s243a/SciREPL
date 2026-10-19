@@ -253,7 +253,7 @@
     "help.cellLanguage": "لغة الخلية",
     "help.eachCellRemembersItsLanguage": "تحتفظ كل خلية بلغتها. لتغيير لغة خلية، انقر على ✎ للتعديل، ثم استخدم القائمة المنسدلة للغة. انقر على <strong>All→</strong> لتطبيق اللغة على جميع خلايا الكود في دفتر الملاحظات.",
     "help.sourceOnlyCellsTyprDirectives": "خلايا المصدر فقط وتوجيهات TypR",
-    "help.putSourceOnFirstLine": "ضع <code>#!source</code> في السطر الأول من خلية TypR أو Lua مسماة للإبقاء على الكود المميز متاحًا عبر Notebook VFS دون تنفيذه. باقي التوجيهات خاصة بـ TypR:",
+    "help.putSourceOnFirstLine": "ضع <code>#!source</code> في السطر الأول من خلية كود مسماة بأي لغة مدعومة للإبقاء على الكود المميز متاحًا عبر Notebook VFS دون تنفيذه. باقي التوجيهات خاصة بـ TypR:",
     "help.sourceCellShowsSourceOnly": "<code>#!source</code> — تُظهر الخلية <strong>المصدر فقط</strong>، وتتعمد عدم وجود <code>Out [n]</code>، وتظل قابلة للقراءة عبر Notebook VFS.",
     "help.typecheckTypeCheckFollowingCode": "<code>#!typecheck</code> — فحص أنواع الكود التالي دون تنفيذه.",
     "help.transpileShowTranspiledRCode": "<code>#!transpile</code> — عرض كود R المترجم.",
