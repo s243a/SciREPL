@@ -253,7 +253,7 @@
     "help.cellLanguage": "সেলের ভাষা",
     "help.eachCellRemembersItsLanguage": "প্রতিটি সেল তার প্রোগ্রামিং ভাষা মনে রাখে। পরিবর্তন করতে ✎ ক্লিক করে সম্পাদনা করুন এবং ড্রপডাউন নির্বাচন করুন। নোটবুকের সমস্ত কোড সেলে ভাষা প্রয়োগ করতে <strong>All→</strong> ক্লিক করুন।",
     "help.sourceOnlyCellsTyprDirectives": "কেবল উৎস কোড সেল এবং TypR নির্দেশিকা",
-    "help.putSourceOnFirstLine": "নামকরণ করা TypR বা Lua সেলের প্রথম লাইনে <code>#!source</code> লিখুন যাতে কোড না চালিয়েও হাইলাইট করা কোড Notebook VFS দিয়ে পড়া যায়। অন্যান্য নির্দেশিকা TypR-এর জন্য নির্দিষ্ট:",
+    "help.putSourceOnFirstLine": "যেকোনো সমর্থিত ভাষার নামকরণ করা কোড সেলের প্রথম লাইনে <code>#!source</code> লিখুন যাতে কোড না চালিয়েও হাইলাইট করা কোড Notebook VFS দিয়ে পড়া যায়। অন্যান্য নির্দেশিকা TypR-এর জন্য নির্দিষ্ট:",
     "help.sourceCellShowsSourceOnly": "<code>#!source</code> — সেলটি <strong>কেবল সোর্স কোড</strong> দেখায়, <code>Out [n]</code> তৈরি করে না এবং Notebook VFS দিয়ে পড়া যায়।",
     "help.typecheckTypeCheckFollowingCode": "<code>#!typecheck</code> — কোড না চালিয়ে পরবর্তী কোডের ধরন যাচাই করে।",
     "help.transpileShowTranspiledRCode": "<code>#!transpile</code> — ট্রান্সপাইল করা R কোড দেখায়।",

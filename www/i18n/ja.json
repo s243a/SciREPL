@@ -254,7 +254,7 @@
     "help.cellLanguage": "セルの言語",
     "help.eachCellRemembersItsLanguage": "各セルは自身のプログラミング言語を記憶します。変更するには ✎ をクリックして編集モードにし、ドロップダウンから選択します。<strong>All→</strong> をクリックするとノートブック内の全コードセルに適用されます。",
     "help.sourceOnlyCellsTyprDirectives": "ソース専用セルとTypRディレクティブ",
-    "help.putSourceOnFirstLine": "名前付きTypRまたはLuaセルの1行目に <code>#!source</code> を配置すると、実行せずにハイライトされたコードをNotebook VFS経由で読み取り可能に保ちます。その他のディレクティブはTypR専用です:",
+    "help.putSourceOnFirstLine": "サポートされている任意の言語の名前付きコードセルの1行目に <code>#!source</code> を配置すると、実行せずにハイライトされたコードをNotebook VFS経由で読み取り可能に保ちます。その他のディレクティブはTypR専用です:",
     "help.sourceCellShowsSourceOnly": "<code>#!source</code> — <strong>ソースのみ表示</strong>し、<code>Out [n]</code> を生成せず、Notebook VFSから読み取れる状態を維持します。",
     "help.typecheckTypeCheckFollowingCode": "<code>#!typecheck</code> — 実行せずに後続コードの型チェックを行います。",
     "help.transpileShowTranspiledRCode": "<code>#!transpile</code> — トランスパイルされたRコードを表示します。",

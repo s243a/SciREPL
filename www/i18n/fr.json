@@ -265,7 +265,7 @@
     "help.cellLanguage": "Langage de cellule",
     "help.eachCellRemembersItsLanguage": "Chaque cellule mémorise son langage. Pour le modifier, cliquez sur ✎ pour éditer puis utilisez le menu déroulant. Cliquez sur <strong>All→</strong> pour appliquer le langage à toutes les cellules de code du carnet.",
     "help.sourceOnlyCellsTyprDirectives": "Cellules source seule et directives TypR",
-    "help.putSourceOnFirstLine": "Placez <code>#!source</code> sur la première ligne d'une cellule TypR ou Lua nommée pour garder le code coloré lisible via Notebook VFS sans l'exécuter. Les autres directives sont spécifiques à TypR :",
+    "help.putSourceOnFirstLine": "Placez <code>#!source</code> sur la première ligne d'une cellule de code nommée, dans n'importe quel langage pris en charge, pour garder le code coloré lisible via Notebook VFS sans l'exécuter. Les autres directives sont spécifiques à TypR :",
     "help.sourceCellShowsSourceOnly": "<code>#!source</code> — La cellule affiche <strong>source uniquement</strong>, sans <code>Out [n]</code>, et reste accessible via Notebook VFS.",
     "help.typecheckTypeCheckFollowingCode": "<code>#!typecheck</code> — Vérifie le typage du code suivant sans l'exécuter.",
     "help.transpileShowTranspiledRCode": "<code>#!transpile</code> — Affiche le code R transpilé.",

@@ -253,7 +253,7 @@
     "help.cellLanguage": "सेल भाषा",
     "help.eachCellRemembersItsLanguage": "प्रत्येक सेल अपनी भाषा याद रखता है। किसी सेल की भाषा बदलने के लिए, संपादित करने हेतु ✎ पर क्लिक करें, फिर भाषा ड्रॉपडाउन का उपयोग करें। नोटबुक के सभी कोड सेल पर भाषा लागू करने के लिए <strong>All→</strong> पर क्लिक करें।",
     "help.sourceOnlyCellsTyprDirectives": "केवल-स्रोत सेल और TypR निर्देश",
-    "help.putSourceOnFirstLine": "हाइलाइट किए गए कोड को निष्पादित किए बिना नोटबुक VFS के माध्यम से उपलब्ध रखने के लिए नामित TypR या Lua सेल की पहली पंक्ति पर <code>#!source</code> लगाएं। शेष निर्देश TypR-विशिष्ट हैं:",
+    "help.putSourceOnFirstLine": "हाइलाइट किए गए कोड को निष्पादित किए बिना नोटबुक VFS के माध्यम से उपलब्ध रखने के लिए किसी भी समर्थित भाषा के नामित कोड सेल की पहली पंक्ति पर <code>#!source</code> लगाएं। शेष निर्देश TypR-विशिष्ट हैं:",
     "help.sourceCellShowsSourceOnly": "<code>#!source</code> — सेल <strong>केवल स्रोत</strong> दिखाता है, जानबूझकर कोई <code>Out [n]</code> नहीं होता है, और नोटबुक VFS के माध्यम से पढ़ने योग्य रहता है।",
     "help.typecheckTypeCheckFollowingCode": "<code>#!typecheck</code> — निष्पादित किए बिना निम्नलिखित कोड की टाइप-जांच करें।",
     "help.transpileShowTranspiledRCode": "<code>#!transpile</code> — ट्रांसपाइल किया गया R कोड दिखाएं।",
