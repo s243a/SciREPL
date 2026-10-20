@@ -239,13 +239,23 @@ await window.i18n.activate('ar')  // switch, including direction
 A catalogue that merely copies the English values scores as **untranslated** —
 that check exists so a stub cannot look finished.
 
+The keyboard trust warning (`help.keyboardTrustNotice`) must be present and
+translated in every UI catalogue; `npm run i18n:keys` enforces this specific
+safety-copy requirement even when a missing field would round to 100% coverage.
+Other intentional fallback/literal keys are unaffected. The 12 current warning
+translations were copied unchanged from SciREPL Pro's catalogues after verifying
+that the English source matched exactly. Their existing `draft` status is retained;
+reuse is not native-speaker sign-off.
+
 ### Coverage is the static shell, not the whole app
 
-The 93% figure counts the **static** interface. Roughly 90 strings are
-generated in JavaScript (Files & storage, Prolog settings, export dialogs,
-some placeholders) and are still English in every language. See
-`docs/I18N_SCOPE.md` for the exact list. Do not read "93% wired" as "the app
-is 93% translated".
+The UI wiring figure counts the **static HTML elements recognized by the
+manifest generator**, not every string a user can encounter. Runtime-generated
+dialogs and messages also use localization helpers, but neither that static
+ratio nor the catalogue score proves complete runtime coverage. Browser checks
+must exercise those paths, including changing language while a dialog is open.
+Native-wrapper surfaces and native-language quality need separate validation.
+See `docs/I18N_SCOPE.md` for the limits of the machine checks.
 
 ### What the completeness score does *not* tell you
 
@@ -253,17 +263,15 @@ It measures how much of the **catalogue** is translated, not how much of the
 **app** is. Those diverged once already: the catalogue was 100% translated while
 91% of the interface was still hard-coded English, and nothing complained.
 
-`npm run i18n:manifest` now also counts visible strings that are not wired for
-translation and refuses to let that number grow, printing a line like:
-
-```
-[i18n] UI coverage: 230/248 strings wired (93%), 18 unwired (baseline 18).
-```
+`npm run i18n:manifest` also scans static HTML for visible strings that are not
+wired for translation. It prints the current wired/unwired counts and fails if
+the unwired count exceeds the configured ratchet baseline.
 
 If you add UI, tag it (`data-i18n`, `data-i18n-html`, `data-i18n-title`,
 `data-i18n-placeholder`, `data-i18n-aria-label`) and add the key, or the build
-fails and lists what you missed. The remaining 18 are decorative `×` glyphs and
-one status badge written from JavaScript.
+fails and lists what you missed. The baseline is an upper limit, not the current
+number of untranslated strings; it is not a measurement of dynamic or native
+surfaces.
 
 ## Reviewing a draft
 

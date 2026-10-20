@@ -37,6 +37,81 @@ async function runAllAndCollect(page) {
     })));
 }
 
+async function checkGenericSourceOnly(page) {
+    const recognition = await page.evaluate(() => {
+        const languages = ['python', 'r', 'prolog', 'bash', 'javascript', 'lua', 'typr', 'clojurescript'];
+        const recognized = {};
+        for (const [index, language] of languages.entries()) {
+            const card = window._appInternals.createInputCard(
+                '#!source\nstored fragment', 98000 + index, 'code', language
+            );
+            recognized[language] = !!card.querySelector('.source-only-badge') &&
+                card.classList.contains('card-source-only');
+            card.remove();
+        }
+        return {
+            recognized,
+            magic: window._appInternals.isSourceOnlyCell(
+                '%%javascript\n#!source\nwindow.saved = true;', 'code', 'python'
+            ),
+            markdown: window._appInternals.isSourceOnlyCell(
+                '#!source\nThis is prose.', 'markdown', 'python'
+            ),
+        };
+    });
+    assert(Object.values(recognition.recognized).every(Boolean) && recognition.magic && !recognition.markdown,
+        '#!source is recognized for every code language but not Markdown',
+        JSON.stringify(recognition));
+
+    const source = '#!source\nwindow.__sourceOnlySentinel += 1;';
+    const imported = await page.evaluate(async sourceCode => {
+        window.__sourceOnlySentinel = 0;
+        const before = window._cells.length;
+        await window.importCells([
+            { code: sourceCode, type: 'code', language: 'javascript' }
+        ], { autoExecute: true });
+        const cell = window._cells[before];
+        await window.runAllCells();
+        await window._appInternals.executeCode(sourceCode, 'javascript');
+        return {
+            sentinel: window.__sourceOnlySentinel,
+            badge: !!cell?.inputCard?.querySelector('.source-only-badge'),
+            output: !!cell?.outputCard,
+        };
+    }, source);
+    assert(imported.sentinel === 0 && imported.badge && !imported.output,
+        'auto-import, Run All, and direct execution keep source fragments inert',
+        JSON.stringify(imported));
+
+    const beforeInput = await page.evaluate(sourceCode => {
+        const selector = document.getElementById('lang-selector');
+        selector.value = 'javascript';
+        selector.dispatchEvent(new Event('change', { bubbles: true }));
+        document.getElementById('code-input').value = sourceCode;
+        const count = window._cells.length;
+        document.getElementById('run-btn').click();
+        return count;
+    }, source);
+    await page.waitForFunction(count => window._cells.length === count + 1, beforeInput);
+    const inputBar = await page.evaluate(() => {
+        const cell = window._cells[window._cells.length - 1];
+        return {
+            sentinel: window.__sourceOnlySentinel,
+            badge: !!cell?.inputCard?.querySelector('.source-only-badge'),
+            output: !!cell?.outputCard,
+        };
+    });
+    assert(inputBar.sentinel === 0 && inputBar.badge && !inputBar.output,
+        'input-bar source fragments are stored without execution or output',
+        JSON.stringify(inputBar));
+    await page.evaluate(sourceCode => {
+        for (const cell of [...window._cells]) {
+            if (cell.code === sourceCode) window.deleteCell(cell.id);
+        }
+        delete window.__sourceOnlySentinel;
+    }, source);
+}
+
 (async () => {
     const browser = await chromium.launch({
         headless: true,
@@ -71,6 +146,9 @@ async function runAllAndCollect(page) {
         console.log('1. Loading SciREPL...');
         await page.goto(BASE, { waitUntil: 'networkidle', timeout: 30_000 });
         await page.waitForSelector('#run-btn:not([disabled])');
+
+        console.log('\n1b. Checking language-independent source-only cells...');
+        await checkGenericSourceOnly(page);
 
         console.log('\n2. Installing and running TypR Introduction...');
         await installCatalogItem(page, 'TypR Introduction');
@@ -184,14 +262,79 @@ async function runAllAndCollect(page) {
             const removed = !cell.inputCard.querySelector('.source-only-badge') &&
                 !cell.inputCard.classList.contains('card-source-only');
 
+            const staleCodeOutput = window._appInternals.createOutputCard(cell.id, 'code');
+            staleCodeOutput.querySelector('.card-body').textContent = 'stale executable output';
+            cell.inputCard.after(staleCodeOutput);
+            cell.outputCard = staleCodeOutput;
+            cell.lastOutput = 'stale executable output';
+            cell.lastOutputHtml = '<strong>stale executable output</strong>';
             window.notebookVFS._setCellProperty(index, '.code', original);
             const restored = !!cell.inputCard.querySelector('.source-only-badge') &&
                 cell.inputCard.dataset.sourceOnly === 'true';
-            return { removed, restored };
+            const codeCleared = !staleCodeOutput.isConnected && cell.outputCard === null &&
+                cell.lastOutput === '' && cell.lastOutputHtml === '';
+
+            window.notebookVFS._setCellProperty(index, '.code', withoutDirective);
+            const codeToggleBack = !cell.inputCard.querySelector('.source-only-badge') &&
+                cell.outputCard === null && cell.lastOutput === '' && cell.lastOutputHtml === '';
+            window.notebookVFS._setCellProperty(index, '.code', original);
+
+            window.notebookVFS._setCellProperty(index, '.type', 'markdown');
+            const typeToggleBack = !cell.inputCard.querySelector('.source-only-badge') &&
+                cell.outputCard === null;
+            const staleMarkdownOutput = window._appInternals.createOutputCard(cell.id, 'markdown');
+            staleMarkdownOutput.querySelector('.card-body').textContent = 'stale markdown output';
+            cell.inputCard.after(staleMarkdownOutput);
+            cell.outputCard = staleMarkdownOutput;
+            cell.lastOutput = 'stale markdown output';
+            cell.lastOutputHtml = '<p>stale markdown output</p>';
+            window.notebookVFS._setCellProperty(index, '.type', 'code');
+            const typeCleared = !staleMarkdownOutput.isConnected && cell.outputCard === null &&
+                cell.lastOutput === '' && cell.lastOutputHtml === '' &&
+                !!cell.inputCard.querySelector('.source-only-badge');
+
+            return { removed, restored, codeCleared, codeToggleBack, typeToggleBack, typeCleared };
         });
-        assert(sourceBadgeLifecycle.removed && sourceBadgeLifecycle.restored,
-            'source-only badge follows Notebook VFS code changes',
+        assert(Object.values(sourceBadgeLifecycle).every(Boolean),
+            'Notebook VFS source-only changes clear stale output without recreating it',
             JSON.stringify(sourceBadgeLifecycle));
+
+        const inactiveSourceOutput = await page.evaluate(() => {
+            const inactive = window.notebookManager.getNotebooks()
+                .find(nb => !nb.isActive && nb.cells?.length);
+            if (!inactive) return { skipped: true };
+
+            const cell = inactive.cells[0];
+            const original = {
+                code: cell.code,
+                type: cell.type,
+                language: cell.language,
+                lastOutput: cell.lastOutput,
+                lastOutputHtml: cell.lastOutputHtml,
+                outputCard: cell.outputCard,
+            };
+            const settings = window.notebookVFS._getSettings();
+            window.notebookVFS._saveSettings({ ...settings, crossNotebookWrite: true });
+            cell.type = 'code';
+            cell.language = 'javascript';
+            cell.outputCard = null;
+            cell.lastOutput = 'stale inactive output';
+            cell.lastOutputHtml = '<p>stale inactive output</p>';
+            const written = window.workbookVFS.writeFile(
+                `/workbook/${inactive.name}/In[1]/.code`,
+                '#!source\nwindow.savedForLater = true;'
+            );
+            const cleared = cell.lastOutput === '' && cell.lastOutputHtml === '' &&
+                cell.outputCard === null;
+
+            Object.assign(cell, original);
+            window.notebookVFS._saveSettings(settings);
+            return { skipped: false, written, cleared };
+        });
+        assert(inactiveSourceOutput.skipped ||
+            (inactiveSourceOutput.written && inactiveSourceOutput.cleared),
+            'cross-workbook source writes clear inactive cached output',
+            JSON.stringify(inactiveSourceOutput));
 
         await page.setViewportSize({ width: 360, height: 740 });
         const mobileHeader = await page.evaluate(() => {

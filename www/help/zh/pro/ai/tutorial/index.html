@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="zh" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SciREPL Pro 演练指南：免 API 费用的表格建议、API 密钥设置、Open 智能体预设、在线与本地补全，以及专注的 AI Prompt 单元格。">
+  <meta name="theme-color" content="#06101d">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/zh/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../styles.css">
+  <link rel="stylesheet" href="../../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../../pro/ai/tutorial/tutorial.css">
+  <title>AI 与补全循序渐进指南 · SciREPL Pro 帮助</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../tutorial-locales.css">
+</head>
+<body data-editions="pro" data-platforms="android windows-preview">
+  <a class="skip-link" href="#main">跳转到内容</a>
+  <header class="site-header">
+    <a class="brand" href="../../../../">sci<span>REPL</span> Help<span class="english-reference"> (英文参考页面)</span></a>
+    <nav aria-label="主导航">
+      <a href="../../../tutorials/">所有教程</a>
+      <a href="../../../../pro/ai/">AI 参考<span class="english-reference"> (英文参考页面)</span></a>
+      <a href="../../../../pro/">Pro 帮助<span class="english-reference"> (英文参考页面)</span></a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="教程语言"><details class="tutorial-language-menu"><summary>教程语言: <bdi>简体中文</bdi></summary><nav aria-label="教程语言"><a href="../../../../en/pro/ai/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../../ar/pro/ai/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../../bn/pro/ai/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../../de/pro/ai/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../../es/pro/ai/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../../fr/pro/ai/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../../hi/pro/ai/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../../id/pro/ai/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../../ja/pro/ai/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../../ko/pro/ai/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../../pt-BR/pro/ai/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../../ru/pro/ai/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="./" lang="zh" hreflang="zh" aria-current="page">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">本教程为机器翻译，母语审校待完成。代码和技术参数保持不变。屏幕截图显示原始英文界面；请将本文中翻译的控件名称与您的应用相对应。</p></aside>
+    <p class="breadcrumbs"><a href="../../../../">帮助<span class="english-reference"> (英文参考页面)</span></a> / <a href="../../../../pro/">Pro<span class="english-reference"> (英文参考页面)</span></a> / AI 与补全</p>
+    <article>
+      <p class="eyebrow">边做边学 · Pro</p>
+      <h1>从离线建议到 AI 辅助编程</h1>
+      <p class="lede">首先体验快速且每次请求完全免费的基于表格的建议。然后设置 Assistant，请求在线备选建议，尝试端侧本地模型，最后使用专注的 AI Prompt 单元格来解释您的代码。</p>
+      <ul class="meta">
+        <li class="chip chip-pro">仅限 Pro</li>
+        <li class="chip">Pro 1.4.0 + 即将推出的执行控制</li>
+        <li class="chip">本地模型：Android</li>
+      </ul>
+      <p class="screen-note">大多数屏幕截图显示的是 Android 应用，部分为浏览器抓取画面。布局可能会因应用版本而异。</p>
+      <p class="callout"><strong>请检查您的版本。</strong><a href="#execution-permissions">附录</a>中的执行更改计划用于<strong>拟议的 Pro 1.5.0</strong>，该版本<strong>尚未发布</strong>；最终版本号可能会发生变动。</p>
+      <p class="callout"><strong>此处的“Free”表示免 API 费用。</strong>表格建议和端侧模型不会向服务提供商计费。但这并不代表它们是Free版功能：本演练适用于 <strong>SciREPL Pro</strong>。在线请求使用的是您自己的服务商账户，可能会产生费用。</p>
+      <nav class="lesson-nav" aria-label="AI 与补全演练步骤">
+        <strong>本课内容</strong>
+        <ol>
+          <li><a href="#tables">从离线表格建议开始</a></li>
+          <li><a href="#key">保存 API 密钥</a></li>
+          <li><a href="#agent">使用 Open 智能体预设构建一个小示例</a></li>
+          <li><a href="#online">请求基于 API 的补全</a></li>
+          <li><a href="#local">体验端侧模型</a></li>
+          <li><a href="#prompt-cells">使用 AI Prompt 单元格理解代码</a></li>
+        </ol>
+        <p><a href="../../../tutorials/">选择其他教程</a> · <a href="#troubleshooting">遇到问题怎么办</a></p>
+      </nav>
+
+      <section id="tables">
+        <p class="step-label">第 1 步 · 无需 API 密钥</p>
+        <h2>从离线表格建议开始</h2>
+        <p>在应用顶栏找到 <strong>☰ 菜单</strong>：它是带有<strong>三条横线</strong>的按钮。打开 <strong>补全</strong>。其 <strong>分区：</strong> 选择器区分了 <strong>通用</strong>、<strong>AI 建议（联网）</strong> 和 <strong>本地模型（在设备上）</strong>。首先从 General 开始。</p>
+        <ol class="lesson-steps">
+          <li>将 <strong>本地代码补全： 设置为 开启</strong>。否则默认的 <strong>自动（桌面端开启，触控端关闭）</strong> 会在手机上将其保持关闭。</li>
+          <li>设置 <strong>建议候选项： → 开启</strong> 并保持 <strong>建议： → 光标处</strong>。若之前启用了任一选项，请在在线部分将 <strong>AI 建议 设置为 关闭</strong>，并在本地部分将 <strong>使用本地模型： 设置为 关闭</strong>，以隔离表格建议。然后返回 General。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-general" role="img" aria-label="Pro 浏览器 General 补全屏幕。黄色边框标出了 Ghost text 与 Suggestion chips 标题、Suggestions: At cursor 以及 Suggestion chips: On。">
+            <div class="shot-stage shot-stage--completion-general">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general.png" width="414" height="820" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general-overlay.svg" width="414" height="820" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>窄屏<strong>浏览器抓取画面（而非 Android 屏幕截图）</strong>中的实际 General 控制项。黄色边框标出了 <strong>建议： → 光标处</strong>、<strong>建议候选项： → 开启</strong> 及其部分标题。Section 下拉菜单位于顶部；下方设置可能需要滚动查看。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-general.png">查看完整的设置抓取画面</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>关闭 Completion。在新的练习工作簿中，选择 <strong>代码</strong> 单元格和 <strong>JavaScript</strong> 语言。键入 <code>cons</code>，光标置于末尾且不选中任何文本。<code>const</code> 的这几个起始字母被称为<strong>前缀</strong>。注意观察 <code>const</code>。</li>
+          <li>在下方屏幕截图中，<code>cons</code> 后面跟有隐约可见的 <code>t</code>——行内<strong>幽灵文本</strong>。点击 <strong>接受</strong> 或按 <kbd>Tab</kbd> 插入该建议，得到 <code>const</code>。如果出现的是 <code>const</code> 药丸标签，点击它同样可以采纳该候选。自行完成该行代码，例如 <code>const values = [12, 15, 18];</code>。</li>
+        </ol>
+        <p class="callout"><strong>Accept 不等于 Run。</strong>采纳建议只会编辑源码，不会执行单元格。本节中的 JavaScript 和 Python 示例演示了编辑时的自动补全。运行这些练习单元格不属于本节内容。在仅启用离线表格层的情况下，键入前缀不会发送 API 请求，也不会仅仅为了提供建议而启动语言运行时。</p>
+        <p class="note"><strong>未来的在线预取：</strong>计划推出一种可选加入的模式，该模式可以在您键入时发送模型请求。目前该功能尚不可用，且尚未分配发布版本号。上述关于不发送请求的说明描述的是当前的离线表格层，而非这种未来模式。</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-javascript.png" width="1080" height="2340" alt="来自真实 Android Galaxy S24+ 屏幕截图的编辑器底部细节：JavaScript cons 后面紧跟隐约可见的 t 幽灵文本和 Accept 按钮，已启用建议药丸标签且隐藏了附加按键行。" loading="lazy" decoding="async">
+          <figcaption><strong>真实 Galaxy S24+ Android 屏幕截图的细节视图。</strong>JavaScript 表格补全提供了 <code>const</code> 来补全 <code>cons</code>：隐约可见的 <code>t</code> 为幽灵文本，<strong>接受</strong> 可见且已启用药丸标签。API 和本地模型均处于关闭状态。此处隐藏了附加按键行，以便与下一张图片形成对比；它是一个独立的可选控件，并非补全的必要条件。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-javascript.png">查看 JavaScript cons → const 补全的未修改完整手机屏幕截图</a>
+        </figure>
+        <p><strong>在手机上查看这两种离线显示方式。</strong>保持 <strong>建议候选项： → 开启</strong>，选择 <strong>Python</strong>，然后键入 <code>pri</code>。光标后隐约可见的 <code>nt</code> 提供了 <code>print</code>；在您采纳之前，它并不属于源码的一部分。<strong>无需关闭药丸标签即可看到幽灵文本。</strong>单个候选词可以显示为幽灵文本，而当有多个合适候选词时，药丸标签可供选择。在这两个示例中均请保持 <strong>AI 建议</strong> 和 <strong>使用本地模型：</strong> 关闭。</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-ghost.png" width="1080" height="2340" alt="来自 Android Galaxy S24+ 屏幕截图的编辑器底部细节：Python 源码 pri 后面跟有隐约可见的幽灵文本 nt 和 Accept 按钮。建议药丸标签已启用。" loading="lazy" decoding="async">
+          <figcaption><strong>真实 Galaxy S24+ Android 屏幕截图的细节视图。</strong>在 <strong>建议候选项： → 开启</strong> 的情况下，离线表格补全在光标处提供了一个隐约可见的后缀。API 和本地模型均处于关闭状态。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-ghost.png">查看幽灵文本的未修改完整手机屏幕截图</a>
+        </figure>
+        <p>在药丸标签仍处于 <strong>开启</strong> 的情况下，用以下三行替换练习输入，将光标留在未完成的 <code>sample_m</code> 之后。该行根据您自己源码中的名称提供了 <code>sample_mean</code> 和 <code>sample_median</code>。点击药丸标签即可选择候选词；与幽灵文本不同，该行显示了备选项。</p>
+        <pre><code>sample_mean = 0
+sample_median = 0
+sample_m</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-chips.png" width="1080" height="2340" alt="来自 Android Galaxy S24+ 屏幕截图的编辑器底部细节：Python 源码定义了 sample_mean 和 sample_median，接着是 sample_m，并带有候选药丸标签 sample_mean 和 sample_median。" loading="lazy" decoding="async">
+          <figcaption><strong>真实 Galaxy S24+ Android 屏幕截图的细节视图。</strong>在开启药丸标签时，源自源码的离线候选提供了上述两个名称。API 和本地模型保持关闭。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-chips.png">查看候选药丸标签的未修改完整手机屏幕截图</a>
+        </figure>
+        <p><strong>附加按键行</strong>（在 Python 手机图片中可见）以及<strong>键入时的语法高亮色彩</strong>是独立的、可选的 Pro 控件。请参阅<a href="../../../interface/appearance/#pro-editor">外观演练：附加按键与语法色彩</a>以开启或关闭其中任一项，并找到文件编辑器独立的语法高亮复选框。</p>
+        <p>在体验了这些补全显示方式后，切换回 <strong>JavaScript</strong>，并在本课余下部分保持药丸标签开启。</p>
+        <p>此处显示的离线药丸标签在 <strong>补全 → 通用 → 建议候选项：</strong> 下启用，它结合了精选的名称表格与本地代码信息。在 Python 中，这包括在工作簿代码中找到的变量与函数，以及缓存的内核名称和对象属性（包括方法）。使用频率和采纳历史有助于对它们进行排序。其他语言的覆盖范围有所不同：静态列表、未运行的定义或过期的快照可能会建议当前作用域中不可用的名称。<strong>基于表格的补全不是语言模型</strong>，不会对您的任务进行推理。</p>
+        <p>如果单元格中间的建议干扰到您，<strong>仅在单元格末尾</strong> 是一种替代方案。选中的内容、字符串、注释或拆分了一半的名称可能会有意不产生任何建议。在纵向空间较小的横屏模式下，可选行可能会隐藏以为代码留出空间；请参阅<a href="../../../interface/appearance/">外观设置</a>。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-position">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-position.png" width="1080" height="2340" alt="真实 Galaxy S24+ Android General 补全屏幕的细节：Suggestions 下拉菜单已打开，选中了 At cursor，下方显示 End of cell only。" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>真实 Galaxy S24+ Android 屏幕截图。</strong>在 <strong>补全 → 通用 → 幽灵文本 → 建议：</strong> 中，选择 <strong>光标处</strong> 或 <strong>仅在单元格末尾</strong>。后者表示<em>整个单元格</em>的末尾，而非每行的末尾。Android 的展开菜单遮挡了附近的缩进设置；这些是独立的控件，不属于此选择项。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-position.png">查看展开的 Suggestions 菜单的未修改完整手机屏幕截图</a>
+        </figure>
+      </section>
+
+      <section id="key">
+        <p class="step-label">第 2 步 · 在线设置</p>
+        <h2>保存 API 密钥</h2>
+        <p>API 密钥可让 SciREPL 使用由您控制的服务商账户。从该服务商处获取密钥，查看其当前价格和账户限额，并在本课中仅使用包含非私密数据的小型练习工作簿。</p>
+        <ol class="lesson-steps">
+          <li>打开 <strong>菜单 → 🤖 AI Assistant (Pro)</strong>。点击面板的 <strong>⚙ 齿轮图标</strong> 以打开 AI 设置。
+            <p class="callout"><strong>看不到齿轮图标？</strong>键盘可能会导致 Assistant 面板移位或滚动。向下拖动面板内容以向顶部回滚并露出齿轮图标；收起键盘也可以为您留出更多空间。</p>
+          </li>
+          <li>设置 <strong>为以下功能配置模型 → AI助手</strong>。选择 <strong>后端</strong>（例如 OpenRouter）和 <strong>模型</strong>，若您的后端使用可配置的端点，请检查端点。</li>
+          <li>输入匹配的 <strong>API密钥</strong>。使用 <strong>已保存的密钥</strong> 管理其他服务商/端点组合的密钥。适用于一个目标的密钥并不会自动适用于另一个目标。</li>
+          <li>点击 <strong>保存</strong>。仅保存设置不会发起模型请求。保持面板打开以进行下一步。</li>
+        </ol>
+        <p class="callout"><strong>请勿将密钥存放在工作簿中。</strong>请勿将其粘贴到单元格、提示词、屏幕截图或导出的文件中。已保存的密钥存放在本地应用/浏览器存储中，没有应用层加密；请保护好设备，切勿运行不可信代码。<a href="../../../../../pro/privacy.html">Pro 隐私政策</a>说明了存储和发送的内容。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--key-setup" role="img" aria-label="未填密钥的 Pro 浏览器 AI Settings。黄色边框标出了 Configure model for: AI Assistant、Backend: OpenRouter、Model: GLM 5.3 Flash 以及空的 API Key 字段。">
+            <div class="shot-stage shot-stage--key-setup">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup.png" width="390" height="538" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup-overlay.svg" width="390" height="538" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>AI Settings 的全新<strong>未填密钥浏览器抓取画面</strong>（非 Android 屏幕截图）。黄色边框标出了待设置的字段：<strong>为以下功能配置模型</strong>、<strong>后端</strong>、<strong>模型</strong> 和 <strong>API密钥</strong>。隐约可见的 <code>sk-…</code> 是占位符，而非已保存的密钥。继续向下滚动可到达 <strong>保存</strong>；制作此图时未输入任何密钥，也未发送任何请求。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-key-setup.png">查看未修改的 AI 配置屏幕截图</a>
+        </figure>
+        <p>对于 Assistant 而言，低成本且支持工具调用的模型是合理的起点。可供对比的示例包括 <a href="https://openrouter.ai/z-ai/glm-5.3-flash">GLM 5.3 Flash</a>、<a href="https://developers.openai.com/api/docs/models/gpt-6-luna">GPT-6 Luna</a>、<a href="https://www.anthropic.com/claude/haiku">Claude Haiku 5.5</a> 和 <a href="https://api-docs.deepseek.com/quick_start/pricing">DeepSeek V4 Flash</a>。确切的模型 ID、可用版本、工具支持和价格取决于您的应用版本和服务商；请查看当前选择器和服务商文档。新公布的模型可能需要应用更新后才会显示。稍后，您可以专门为补全选择另一款低成本模型。</p>
+        <aside class="callout" id="custom-model">
+          <p><strong>列表中缺少该模型？</strong>在 <strong>AI 设置 → 为以下功能配置模型 → AI助手</strong> 中，先选择正确的 <strong>后端</strong>，然后将服务商的<strong>准确 API 模型 ID</strong> 输入 Model 选择器下方的 <strong>或输入自定义模型ID</strong> 中，并点击 <strong>保存</strong>。该字段在 Pro 1.4.0 中已可用。</p>
+          <p>请向您选择的服务商核实 ID，而不仅仅依据模型的营销名称。对于 OpenRouter，需包含组织前缀——例如 <code>anthropic/claude-haiku-5.5</code>，如<a href="https://openrouter.ai/anthropic/claude-haiku-5.5">其模型页面</a>所示。输入该 ID，而非该页面的 URL。自定义 ID 的优先级高于下拉菜单；再次选择列表中列出的模型将清空自定义字段。</p>
+          <p><strong>填写 ID 并不会添加 API 支持。</strong>模型必须支持通过 API 进行工具调用，以供 SciREPL 使用。请检查服务商访问权限、兼容性及当前价格；保存并不会验证这些内容或发起模型请求。</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--custom-model" role="img" aria-label="未填密钥的 Pro 浏览器 AI Settings。黄色边框标出了 Backend: OpenRouter 以及 Model 选择器下方包含 anthropic/claude-haiku-5.5 的自定义模型 ID 字段。">
+            <div class="shot-stage shot-stage--custom-model">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model.png" width="390" height="456" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model-overlay.svg" width="390" height="456" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>真实的<strong>未填密钥浏览器抓取画面</strong>，而非 Android 屏幕截图。Model 下方的黄色边框标出了自定义 ID 字段。下拉菜单仍显示 GLM 5.3 Flash，但在保存时键入的 Haiku ID 将具有优先权。API Key 与 Save 位于此裁剪区域下方；制作此图时未输入密钥，未点击 Save，也未发送模型请求。这是一个配置示例，而非测试模型能否正常工作。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-custom-model.png">查看未修改的自定义模型屏幕截图</a>
+        </figure>
+      </section>
+
+      <section id="agent">
+        <p class="step-label">第 3 步 · 审慎的工具使用</p>
+        <h2>使用 Open 智能体预设构建一个小示例</h2>
+        <p><strong>开放</strong> 是<strong>第二宽松的</strong>安全预设，仅次于 <strong>完全控制</strong>。它默认允许编辑笔记本，且提示比 Cautious 更少。执行时是否会弹出确认提示取决于您的版本和权限设置；请参阅<a href="#execution-permissions">即将推出的执行审批附录</a>。请在练习工作簿中审慎使用它——而非作为自动补全的必要条件。</p>
+        <ol class="lesson-steps">
+          <li>在 AI Settings 中，选择 <strong>Security Level → Open</strong> 以及 <strong>智能体写入 → 活动工作表</strong>。保持源码浏览处于关闭状态，并关闭 <strong>自动运行由 AI 创建的单元格</strong>。在 <strong>Kernels…</strong>下，设置 <strong>JavaScript → Ask</strong>，然后保存。即使此前已保存了执行工具的 Allow 许可，该内核规则仍会弹出提示进行确认。
+            <p class="callout" id="auto-run-warning"><strong>关闭自动运行并不等同于执行锁定。</strong>它仅阻止新创建的单元格自动运行；并不会禁用单独的 <code>execute_cell</code> 或 <code>run_cells</code> 请求。已发布的 Pro 1.4.0 的 Open 默认设置可能无需询问即可允许它们。即将推出的 Open 默认设置会要求确认，但显式的工具或内核 Allow 设置可以更改该默认行为。<strong>AI 设置 → 内核… → JavaScript → 询问</strong> 可确保本次练习中的 JavaScript 执行需要经过确认。您自己手动进行的单元格 Run 仍属于独立操作。<a href="#execution-permissions">下一版本的执行控制详见附录。</a></p>
+            <aside class="callout" id="sandbox">
+              <p>如果您希望获得更多确认提示，请改用 <strong>谨慎</strong>。Open 依然遵循单独的源码浏览和写入范围控制项；Full control 则会绕过这两个粗粒度控制项。具体的各个权限和其他安全防线仍然起作用。<strong>审查</strong> 是一项额外的以只读为主的限制，它会妨碍本次单元格创建演示。</p>
+              <h3>浏览器沙盒保护与不保护的内容</h3>
+              <p>常规的工作簿执行运行在浏览器/WebView 及其语言运行时中，使用虚拟文件系统，而非对您手机文件的无限制访问。这是一个有用的边界，<strong>但不能保证代码绝无危害</strong>。获得许可的 JavaScript 以及与其连接的桥接程序可以访问应用数据和保存的凭据；一旦允许的代码开始运行，网络限制仅是尽力而为的防护，而非您可以放心托付机密信息的隔离边界。即将推出的执行提示增加的是审批步骤，而非与应用数据的隔离。请使用练习工作簿并确保其内容不涉及隐私。</p>
+              <p><strong>Remote/MCP 终端则截然不同：</strong>它可能会在代理主机上暴露一个真实的 shell，脱离浏览器本地沙盒。在此处请保持 Remote 和 Terminal 关闭。在启用它们之前，请参阅<a href="../../../../pro/remote/">远程与安全<span class="english-reference"> (英文参考页面)</span></a>。在提示词中礼貌地写一句“请勿……”绝不是一种安全控制措施。</p>
+            </aside>
+          </li>
+          <li>在 Assistant 面板中，选择 <strong>This workbook</strong>。保持 <strong>Review</strong>, <strong>Remote</strong>，以及 <strong>Terminal</strong> 处于关闭状态，以进行此直接服务商示例。
+            <figure class="phone-figure" id="assistant-context-controls">
+              <p class="screen-note">面板顶部</p>
+              <div class="shot-window shot-window--assistant-context-header" role="img" aria-label="Android Assistant 面板的顶部细节。黄色边框突出了在对话下拉菜单中选中的 This workbook。">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <p class="screen-note">底部控件</p>
+              <div class="shot-window shot-window--assistant-context-footer" role="img" aria-label="同一 Android Assistant 面板的底部细节。黄色边框标出了未勾选的 Review、Remote 和 Terminal。可见空白消息框和 Send 按钮。">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption><strong>同一真实 Galaxy S24+ Android 屏幕截图的两个细节视图。</strong>黄色边框标出了 <strong>本工作簿</strong> 以及 <strong>审查</strong>、<strong>远程</strong> 和 <strong>终端</strong>（均未勾选）。面板中间的空白部分已省略。未发送任何提示词。</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-assistant-context.png">查看未修改的完整 Assistant 面板屏幕截图</a>
+            </figure>
+          </li>
+          <li>发送下方标注框中的练习提示词。面板上的 <strong>Send</strong> 即可启动智能体工具调用循环：此处没有额外的“Agent 模式”开关。全屏编辑器的 <strong>Agent</strong> 按钮是单独的工作流程。
+            <div class="callout" id="assistant-practice-prompt">
+              <p><strong>复制此提示词。</strong>将其粘贴到 <strong>Assistant 的消息框</strong>中，而不是代码单元格中，然后点击 <strong>发送</strong>。</p>
+              <pre data-translatable-prompt="assistant-practice"><code>在此练习工作簿中，添加一段 Markdown 说明，随后
+添加一个 JavaScript 单元格，命名为 summary_demo。生成一个包含 10 个伪随机整数的输入
+数组，取值范围从 1 到 20（含两端）。
+使用 Park-Miller 生成器，初始 state 为 42。对于每个
+值，首先更新 state = (16807 * state) % 2147483647；
+然后追加 1 + Math.floor(20 * state / 2147483647)。
+按照此规则生成数组；不要硬编码其值
+或使用 Math.random。每次单元格运行（Run）时将 state 重置为 42。
+打印生成的输入数组，然后计算其计数（数组
+长度）、算术平均值、最小值和最大值。使用 console.log
+在各自带标签的行中打印每个结果。
+使用普通的 JavaScript 数组、算术运算和 Math.floor，
+不使用任何第三方包。
+请勿运行单元格或更改现有单元格。请勿使用文件、
+存储、DOM API 或网络请求。请解释预期
+结果，以便我审查代码。</code></pre>
+            </div>
+          </li>
+          <li>阅读所提议的说明和新的 <code>summary_demo</code> 单元格。检查它是否使用所述规则生成输入并据此计算统计摘要。自行运行该单元格，然后与下方的检查进行对比。预期结果为：计数 <strong>10</strong>、均值 <strong>9.3</strong>、最小值 <strong>1</strong>、最大值 <strong>20</strong>。</li>
+        </ol>
+        <aside class="callout" id="seeded-summary-check">
+          <h3>检查输入以及统计摘要</h3>
+          <p>种子固定了序列，因此这个看似随机的输入是可重现的。采用上述先更新后抽取的规则，预期结果为：</p>
+          <pre><code>Input: [1, 11, 15, 6, 8, 4, 20, 11, 11, 6]
+Count: 10
+Mean: 9.3
+Minimum: 1
+Maximum: 20</code></pre>
+          <p>输出标签可能有所不同，但数值应当一致。再次运行该单元格应产生相同的输入和摘要。使用不同的种子会改变练习内容；这个小型生成器旨在用于可重现的演示，而非对安全性要求极高的随机性场景。</p>
+        </aside>
+        <figure class="phone-figure" id="assistant-seeded-result">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/phone-agent-result.png" width="1080" height="2340" alt="真实 Android Galaxy S24+ 屏幕截图，展示了经审查的 JavaScript summary_demo 源码的一部分及其带种子的输出：输入 1、11、15、6、8、4、20、11、11、6；计数 10、均值 9.3、最小值 1、最大值 20。" loading="lazy" decoding="async">
+          <figcaption><strong>上述带种子向量练习的真实 Galaxy S24+ Android 屏幕截图。</strong>GLM 5.3 Flash 创建了练习单元格，在四步限制处暂停，并在点击一次 <strong>继续</strong> 后完成。代码经过了人工检查与手动运行（而非由智能体自动运行），并生成了预期的输入、计数 10、均值 9.3、最小值 1 和最大值 20。第二次手动运行重现了相同的结果。屏幕截图显示了输出以及部分源码；在单元格中向上滚动即可查看其种子和前几行代码。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-agent-result.png">查看审查后的代码及结果的完整手机屏幕截图</a>
+        </figure>
+        <p><strong>发送前：</strong>Assistant 会附带所选对话以及当前工作簿单元格的受限预览（每个单元格最多前 500 个字符，加上元数据）。获允许的工具可以发送更多内容。关闭源码浏览<em>并不会</em>阻止发送工作簿预览。这与下方代码补全所使用的更小当前单元格有效载荷不同。<a href="#planned-workbook-context">计划的工作簿上下文变更详见附录。</a></p>
+        <p><strong>因 Continue 按钮而暂停？</strong>下方高亮显示的 <strong>智能体限制（每次运行） → 最大步骤数</strong> 控制单次受限运行的步数限额。智能体可能会在完成任务前达到该限制。请查看其已完成的操作，若任务尚未完成且您希望进行另一次受限运行，请按 <strong>继续</strong>。继续运行可能会产生更多 API 费用；在显示 <strong>完成</strong> 后则无需继续。</p>
+        <figure class="phone-figure" id="assistant-run-controls">
+          <div class="shot-window shot-window--assistant-open" role="img" aria-label="已滚动的 Pro 浏览器 AI Settings。黄色边框标出了 Auto-run cells created by AI: 未勾选、Allow source browsing: 未勾选、Agent writes: Active worksheet、带有默认 25 提示的 Max steps 以及 Security Level: Open。">
+            <div class="shot-stage shot-stage--assistant-open">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open.png" width="390" height="1100" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open-overlay.svg" width="390" height="1100" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>AI Settings 滚动至执行与权限部分。黄色边框标出了 <strong>自动运行由AI创建的单元格</strong> 与 <strong>Allow source browsing</strong>（均未勾选）、<strong>智能体写入范围 → 当前活动工作表</strong>、<strong>最大步骤数</strong>（位于 <strong>智能体限制（每次运行）</strong> 下），以及 <strong>安全级别 → 开放</strong>。此<strong>浏览器抓取画面早于执行许可更新</strong>；它不是服务商请求，也不是安全测试。其 Open 标签描述的是较早的默认设置，且长度超出了狭窄下拉菜单的显示范围。即将推出的审批与覆盖对话框未在图中展示。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-open.png">查看未修改的完整滚动设置抓取画面</a>
+        </figure>
+      </section>
+
+      <section id="online">
+        <p class="step-label">第 4 步 · 在需要时请求备选方案</p>
+        <h2>请求基于 API 的补全</h2>
+        <ol class="lesson-steps">
+          <li>打开 <strong>菜单 → 补全</strong>，然后选择 <strong>分区： → AI 建议（联网）</strong>。将 <strong>AI 建议 设置为 点按时</strong>。</li>
+          <li>保持 <strong>补全模型： → 沿用 AI 助手设置</strong> 以继承其服务商、端点和模型。或者选择 <strong>选择提供商和模型</strong>，挑选已保存的服务商/端点以及适合简短建议的低成本模型。此屏幕无需输入密钥；点击 <strong>打开 AI 设置</strong> 可让您先添加一个密钥。</li>
+          <li>打开该部分的 <strong>高级</strong> 以检查回复超时和开销保护设置。默认值为 <strong>6 秒</strong>、<strong>$0.25/天</strong> 以及 <strong>$5/月</strong>。在调高这些限制之前，请核对价格。</li>
+          <li>返回 <strong>JavaScript</strong> 编辑器并输入以下练习代码段：
+            <pre><code>const values = [12, 15, 18];
+const average = </code></pre>
+            将光标留在未完成的 <code>const average = </code> 行后。点击建议行末尾的 <strong>…</strong>，使用 <strong>…AI</strong> 附加按键，或者按下 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd>。</li>
+          <li>在发送之前，请审查首次请求的实际有效载荷和目标地址。AI 药丸标签带有 <strong>✦</strong> 标记。点击一个标签即可采纳；被截断或多行的标签会先打开预览。在运行（Run）之前，请仔细审查生成的源码。</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/completion-online.png" width="414" height="820" alt="Pro 浏览器在线补全屏幕，包含 On tap 与 Choose provider and model，说明未保存服务商密钥并提供了 Open AI Settings 选项。" loading="lazy" decoding="async">
+          <figcaption>独立模型控件特意制作的<strong>未填密钥浏览器抓取画面</strong>。其警告是真实的：若没有保存的密钥和有效目标，将无法发送任何内容。在完成第 2 步后，您配置的服务商和模型将显示在此处。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-online.png">查看完整的在线设置抓取画面</a>
+        </figure>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-online-chips.png" width="1080" height="2340" alt="来自 Android Galaxy S24+ 屏幕截图的编辑器底部细节：未完成的 JavaScript average 表达式带有两个被截断的 AI 药丸标签 values.reduce 和 eval(values，每个都标有星号。" loading="lazy" decoding="async">
+          <figcaption><strong>真实补全请求后实际 Galaxy S24+ Android 屏幕截图的细节视图。</strong>补全使用了 <strong>Gemini 3.5 Flash-Lite via OpenRouter</strong>，而 Assistant 则保持为 <strong>GLM 5.3 Flash</strong>。两个 ✦ 药丸标签被截断；输出结果各不相同，因此在采纳前请仔细检查预览。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-online-chips.png">查看在线候选药丸标签的未修改完整手机屏幕截图</a>
+        </figure>
+        <p class="callout"><strong>选择代码本身，而不仅仅是看 AI 药丸标签。</strong>在此请求中，第一个标签提议了 <code>values.reduce((a, b) => a + b, 0) / values.length;</code>。点击它可查看完整预览：它对数组求和并除以其长度，在此示例中得出 <strong>15</strong>。第二个标签提议了 <code>eval(values.join(' + ')) / values.length;</code>。<strong>拒绝这种不必要的 <code>eval</code> 备选方案</strong>：计算均值无需将字符串转换为可执行代码。在采纳之前请务必检查返回的代码，且仅在审查之后再运行。</p>
+        <figure class="phone-figure" id="online-completion-preview">
+          <div class="shot-window shot-window--completion-preview" role="img" aria-label="AI 建议预览的 Android Galaxy S24+ 细节：values.reduce((a, b) =&gt; a + b, 0) / values.length;，带有 Cancel 和 Insert all 按钮。键盘已省略。尚未插入任何建议。">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-preview.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Galaxy S24+ 上的完整代码预览。</strong>一次新的 Gemini Flash-Lite 请求返回了相同的 <code>reduce</code> 表达式。<strong>仅采纳至某一行：</strong>对于多行建议，点击您需要的最后一行即可。这将立即插入从第一行到该行的所有内容，并排除后续各行。<strong>全部插入</strong> 会采纳整条建议；<strong>取消</strong> 则不插入任何内容。本例虽在屏幕上换行显示，但实际上为单行代码，因此点击它会采纳整个表达式。采纳建议只会编辑源码，并不会运行单元格。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-preview.png">查看补全预览的未修改完整手机屏幕截图</a>
+        </figure>
+        <p>该请求最多索取五个备选方案，但您的屏幕可能容纳不下这么多。再次点击会先翻阅已收到的备选方案；一旦浏览完毕，它可以请求更多。在请求加载旋转时点击即可取消。超时后收到的后续回复将被舍弃，而键入文本或移动光标会使旧的建议失效。</p>
+        <p><strong>独立即真正独立：</strong>当您更改 Assistant 的模型时，单独的补全选项仍保持独立。当您需要能力强大的智能体但希望使用低成本的自动补全时，这非常实用。跟随 Assistant 仅继承其模型标识，<em>而非</em>其对话或智能体权限。</p>
+        <aside class="callout" id="completion-privacy">
+          <h3>清楚了解您的付费内容与发送的数据</h3>
+          <p>在线补全是<strong>按需发起</strong>的：平常的键盘输入不会发送任何内容。<strong>边键入边预取</strong>在此工作流中尚不可用。补全仅发送受限的当前单元格上下文：光标前最多 1,500 个字符，光标后最多 200 个字符，以及最多 12 个本地名称——绝不发送 Assistant 聊天记录或整个工作簿。机密信息脱敏是尽力而为的，因此请自行核对发送的载荷。</p>
+          <p><strong>始终允许</strong> 授予对该目标的永久许可；一旦服务商、端点或模型变更，系统将再次询问。<strong>无需询问即发送</strong> 最初会启用该选择，但仍会展示一次真实的首次载荷。在学习阶段，建议保持 <strong>每次询问</strong>。</p>
+          <p>按日/按月限额是<strong>仅针对补全的软性开销防护</strong>，并非服务商账单上限保证，也不是 Assistant 或 AI Prompt 请求的预算。请求失败和取消操作可能会保留其预扣费用。清除开销历史不会重置上限总计。没有标明价格的模型需要显式设置输入/输出价格上限，否则应用将拒绝发送请求。</p>
+        </aside>
+      </section>
+
+      <section id="local">
+        <p class="step-label">第 5 步 · 可选的 Android 下载</p>
+        <h2>体验端侧模型</h2>
+        <p>当表格建议不确定时，可选的 <strong>Qwen2.5-Coder 0.5B</strong> 模型可在本地提供代码建议。它是一个小型代码补全模型，<strong>并非对话智能体的替代品</strong>。安装后，推理过程不会向服务商发送任何键入的代码，且不产生任何 API 费用。</p>
+        <ol class="lesson-steps">
+          <li>在符合条件的 Android 手机上（已安装 Pro，源自 <strong>Google Play</strong>），打开 <strong>菜单 → 补全 → 分区： → 本地模型（在设备上）</strong>。</li>
+          <li>点击 <strong>安装</strong>，并为约 <strong>400 MB</strong> 的下载预留时间与存储空间。当前侧载安装的版本无法通过此流程下载该模型。</li>
+          <li>准备就绪后，保持 <strong>使用本地模型： → 不确定时</strong>。表格建议负责处理简单情况；当其不确定时，模型会介入补充。<strong>始终显示</strong> 会更频繁地运行它；<strong>关闭</strong> 可将其停用而无需删除下载的文件。</li>
+        </ol>
+        <figure class="phone-figure" id="local-model-settings">
+          <div class="shot-window shot-window--local-model-settings" role="img" aria-label="Galaxy S24+ Android Local model 设置。黄色边框标出了 Local model 部分、Ready（在此设备上为 398 MB）以及 Use local model: When unsure。已安装的模型会显示 Delete 而非 Install。">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-local-settings.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+              <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-local-settings-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Galaxy S24+ 上的 Local model 设置。</strong>黄色边框标出了部分选择器、模型的 <strong>就绪</strong> 状态，以及 <strong>使用本地模型： → 不确定时</strong>。由于此手机已安装该模型，因此显示的是 <strong>删除</strong> 而非 <strong>安装</strong>；您无需将其删除。该调试版本图片仅展示设置界面，并非对 Google Play 分发机制的测试。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-local-settings.png">查看未修改的完整手机屏幕截图</a>
+        </figure>
+        <ol class="lesson-steps" start="4">
+          <li>返回代码单元格，并在未完成的名称或行处稍作停顿。结果会因上下文而异；并非每次停顿都会产生建议。采纳合适的幽灵文本或药丸标签，检查源码，然后单独执行运行（Run）。</li>
+        </ol>
+        <h3>什么样的手机能流畅运行？</h3>
+        <p>最低适用条件为 <strong>64 位 ARM Android 且至少拥有 4 GB RAM</strong>，这并不保证性能流畅。<strong>Galaxy S24+ 级别的手机</strong>是较为实际的舒适运行目标：三星标明 S24+ 拥有 <strong>12 GB RAM</strong>，能为应用、内核及模型留出更多余量。这是推荐的性能水平，而非要求必须购买该机型。详见<a href="https://news.samsung.com/us/enter-new-era-of-mobile-ai-samsung-galaxy-s24-series/">三星 S24 系列技术规格</a>。</p>
+        <p><strong>Galaxy S10+</strong> 拥有符合条件的 8 GB 或 12 GB 规格版本。维护者的日常体验是本地补全可以在其上运行，但感觉比 API 补全慢；具体对比取决于模型与网络状况。<strong>记录的本地引擎基准测试未对 S10+ 进行测量</strong>，因此这并非实测速度对比，也不对每款机型作保证。当将该模型与大型工作簿及高内存占用的内核结合使用时，请留意卡顿或应用无响应的情况。详见<a href="https://news.samsung.com/us/galaxy-s10-interactive/">三星 S10 系列技术规格</a>。</p>
+        <p>此前对 S24+ 级别原生引擎的测试显示，在完成加载后，热启动首词中位数约为 <strong>0.10 秒</strong>，冷启动首词中位数约为 <strong>0.24 秒</strong>。这些是基准测试样本结果，并非绝对保证：未缓存的初始加载耗时数秒。加载的模型增加了约 <strong>460–490 MB</strong> 的应用进程内存，<em>这还不算</em> WebView、Python/R 运行时以及操作系统本身所占用的内存。</p>
+        <p class="callout"><strong>若较旧的手机出现卡顿：</strong>请设置 <strong>使用本地模型： → 关闭</strong>，改用表格建议或按需点击的 API 备选方案。在本地 <strong>高级</strong> 下，设置 <strong>Keep loaded after leaving the app → 0</strong> 可在您离开应用时将其释放；空闲卸载和低电量控制项也大有帮助。排查问题之前，请先保存/导出工作簿。免 API 费用的模型仍然会占用存储空间、内存和电池电量。</p>
+      </section>
+
+      <section id="prompt-cells">
+        <p class="step-label">第 6 步 · 在构建代码的同时理解代码</p>
+        <h2>最后使用专注的 AI Prompt 单元格</h2>
+        <p>Assistant 适用于多步骤工作。而 <strong>AI Prompt</strong> 单元格更适合针对特定代码段提出简短且可重复的问题：它发起的是<strong>一次孤立的请求</strong>，不带 Assistant 历史记录或工具。在对计算进行扩展之前，可用它来询问该计算为何能正常运作。</p>
+        <p>在此我们返回到第 3 步中带种子的随机 <code>summary_demo</code> 单元格。我们请求对该现有计算进行解释——而不是再生成一个随机数组，也不是第 4 步仅计算平均值的补全示例。</p>
+        <ol class="lesson-steps">
+          <li>添加一个 <strong>AI Prompt</strong> 单元格，紧随第 3 步的 <code>summary_demo</code> JavaScript 单元格之后——而非第 4 步仅计算平均值的代码段——以便下方的问题与所选源码相匹配。保持单元格类型为 <strong>代码</strong>，然后选择 <strong>AI Prompt</strong>（来自<strong>语言/模式下拉菜单</strong>）。如果该项不存在，请在 <strong>菜单 → 语言与模式</strong> 下启用它。</li>
+          <li>将下方提示词粘贴到 <strong>AI Prompt 单元格</strong>中，而不是 Assistant 的消息框中。打开其 <strong>Configure</strong> 控件。
+            <div class="callout" id="ai-prompt-practice-prompt">
+              <pre data-translatable-prompt="ai-explanation"><code>逐行解释所选的 JavaScript 单元格。
+生成器规则和种子 42 是如何确定其输入数组的？
+为什么它应报告计数 10、均值 9.3、最小值 1 和最大值 20？
+为什么重置种子会使结果可重现？
+解释对于空数组需要做出哪些修改。
+仅返回简要解释；请勿重写代码。</code></pre>
+            </div>
+            <div class="prompt-config-locations">
+              <figure class="phone-figure" id="ai-prompt-composer-controls">
+                <p class="screen-note"><strong>新建单元格编辑器</strong></p>
+                <div class="shot-window shot-window--ai-prompt-composer" role="img" aria-label="已选中 AI Prompt 的 Android 新建单元格编辑器。黄色边框标出了草稿旁边的 AI 语言选择器和 Configure 按钮。">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>在保存单元格之前：</strong>选择 AI Prompt（显示为 <strong>AI</strong>），并点击编辑器中高亮显示的 <strong>配置</strong>。它用于配置您正在编写的新提示词。</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png">查看完整的编辑器屏幕截图</a>
+              </figure>
+              <figure class="phone-figure" id="ai-prompt-edit-controls">
+                <p class="screen-note"><strong>编辑中的现有单元格</strong></p>
+                <div class="shot-window shot-window--ai-prompt-edit" role="img" aria-label="处于编辑模式下的 Android 已保存 AI Prompt 单元格。黄色边框标出了位于提示词开头上方单元格标题栏中的 Configure。">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>对于现有单元格：</strong>点击该单元格标题栏中的 <strong>配置</strong>。在您编辑提示词时它始终可用。这两个按钮打开的是同一个配置对话框；仅更改设置不会发送任何内容。</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png">查看完整的单元格编辑屏幕截图</a>
+              </figure>
+            </div>
+          </li>
+          <li>设置 <strong>将最终回复放入 → 当前单元格的输出</strong>（默认值）。在 <strong>要发送的上下文 → 包含源码来源</strong>下，选择 <strong>Previous 1 cell</strong>。取消勾选 <strong>包含已保存的输出文本</strong> （用于本次仅针对源码的练习）。确认 <strong>Context preview</strong> 标明了 <code>summary_demo</code>，然后向下滚动并点击 <strong>Save configuration</strong>.
+            <figure class="phone-figure" id="ai-prompt-configuration">
+              <div class="shot-window shot-window--ai-prompt-config" role="img" aria-label="Android 配置 AI Prompt 单元格对话框。黄色边框标出了 This cell&#39;s output、Previous 1 cell 以及未勾选的 Include saved output text。">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption>由 <strong>配置</strong> 打开的对话框。黄色边框标出了响应目标、<strong>前 1 个单元格</strong> 以及未勾选的保存输出选项。仅发送前一个 <code>summary_demo</code> 的源码。<strong>前 1 个单元格</strong> 表示按工作簿顺序紧邻的前一个单元格；它不会按名称搜索。</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png">查看完整的配置屏幕截图</a>
+              <p class="screen-note">在对话框中向下滚动以找到 <strong>保存配置</strong>。</p>
+              <div class="shot-window shot-window--ai-prompt-config-save" role="img" aria-label="Android AI Prompt 配置对话框底部。黄色边框标出了 Cancel 旁边的 Save configuration。">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png">查看完整的滚动对话框屏幕截图</a>
+            </figure>
+          </li>
+          <li>点击 AI Prompt 单元格的 <strong>运行</strong>。在审查界面中检查所选上下文，然后选择 <strong>发送给 AI 提供商</strong>。对照源码阅读解释，并将其与已知结果进行比较。</li>
+        </ol>
+        <figure class="phone-figure" id="ai-prompt-explanation">
+          <div class="shot-window shot-window--ai-prompt-result" role="img" aria-label="来自 GLM 5.3 Flash 的真实 Android AI Prompt 输出。可见的摘要解释了 summary_demo 中带种子的生成器、数组长度、reduce、最小值和最大值。">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Galaxy S24+ 上的真实 GLM 5.3 Flash 解释。</strong>单次仅发送源码的请求在 AI Prompt 单元格的输出中生成了此回复；它没有更改或重新运行 JavaScript 单元格。图片展示了解释的开头部分。滚动输出可继续查看，并对照源码和第 3 步的预期结果检查答案——AI 的解释并不等同于正确性保证。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png">查看完整的解释屏幕截图</a>
+        </figure>
+        <p class="callout"><strong>控制 API 成本并加深理解的一种方式。</strong>相比不断增长的智能体对话，专注的 AI Prompt 可以发送更少的上下文，并避免多步骤工具循环，从而减少输入 token 并可能降低账单费用。在编写代码时，可请求其提供简明推理、假设和预期输出。节约费用是<strong>无法保证的</strong>：模型费率、回复长度、推理 token 以及您选择的上下文仍然起到决定作用。这些请求使用 <strong>Assistant 的服务商/模型</strong>，而非独立的补全模型，且不在补全开销保护的控制范围内。</p>
+        <div id="ai-prompt-apply-example">
+          <h3>另一个示例 · 在替换单元格之前审查图表</h3>
+          <p>现在请求 AI Prompt 将代码写入一个<em>不同的</em>单元格，在替换任何内容前先进行审查。我们将绘制估计方差在多个小样本中的变化图表。这些是全新生成的正态样本——而非早先的 <code>summary_demo</code> 整数数组。其目标是学习 <strong>配置 → 预览 → 应用 → 运行</strong> 这一流程，而非掌握统计学。</p>
+          <p class="callout"><strong>方差不等同于学生 t 分布。</strong>对于容量为 10 的独立正态样本，<code>9s² / σ²</code> 服从自由度为 9 的卡方分布。此处真实方差为 <code>σ² = 1</code>。学生 t 分布则描述标准化样本均值 <code>(mean − μ) / (s / √10)</code>（使用估计标准差 <code>s</code>）；在此处其自由度同样为 9。<a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda358.htm">NIST：方差</a> · <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm">NIST：均值</a>。</p>
+          <ol class="lesson-steps">
+            <li>在练习工作簿中，创建一个 <strong>JavaScript</strong> 单元格，其中包含 <code>// Reviewed plot code will go here.</code>。运行该无害注释以保存单元格。长按其 <strong>In[…] 标签</strong>并将其命名为 <code>variance_plot</code>。在工作簿中保持该名称唯一；请参阅<a href="../../../workbooks/named-cells/#name">命名单元格</a>。</li>
+            <li>添加一个单独的 <strong>AI Prompt</strong> 单元格，并将此请求粘贴到其中：
+              <div class="callout" id="ai-variance-practice-prompt">
+                <pre data-translatable-prompt="ai-variance"><code>仅返回完整的 JavaScript 源码，不要包含 Markdown 代码块标记。
+创建一个可重现的估计样本方差直方图。
+模拟 2,000 个全新样本，每个样本包含 10 个标准正态 N(0,1) 值。
+不要复用之前来自 summary_demo 的整数数组。
+在整个运行过程中仅初始化一次 state = 42，而不是每个样本初始化一次。在每次抽取均匀分布之前，设置 state = (16807 * state) % 2147483647，然后设置 u = state / 2147483647。
+每次抽取正态分布使用两个连续的均匀随机数：sqrt(-2 * log(u1)) * cos(2 * PI * u2)。不要复用多余的正弦结果，也不要使用 Math.random。
+针对每个样本计算其均值，然后计算无偏方差 sum((x - mean)^2) / 9。
+绘制一个带有标签的 canvas 直方图，划分出 40 个等宽柱状区间，范围从 0 到 4。横轴为估计方差；纵轴为样本计数。
+用带有标签的垂直线标记真实总体方差 1。使用浅色背景、深色文本和清晰易读的标签。
+打印样本容量、重复次数、种子、平均估计方差、直方图总数以及任何溢出计数。对溢出单独计数而不是将其隐藏。
+使用 window.renderImage(canvas.toDataURL("image/png")) 显示 canvas。
+不使用任何第三方包、网络、存储或工作簿编辑。</code></pre>
+              </div>
+            </li>
+            <li>打开该 AI Prompt 的 <strong>Configure</strong>。设置 <strong>将最终回复放入 → 单元格替换预览</strong>, <strong>结果单元格语言 → 保留目标语言</strong>, <strong>要替换的单元格 → 命名单元格</strong>，以及 <strong>Cell name → variance_plot</strong>。在上下文部分，保持 <strong>包含源码来源 → 无其他单元格（默认）</strong>，然后点击 <strong>Save configuration</strong>.
+              <figure class="phone-figure" id="ai-variance-configuration">
+                <div class="shot-window shot-window--ai-variance-config" role="img" aria-label="Android 配置 AI Prompt 单元格对话框。黄色边框标出了 Replacement preview for a cell、Preserve target language、Named cell、variance_plot 以及 No other cells。">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>仅在审查后执行替换。</strong>这些来自真实 S24+ 的设置选中了具有唯一命名的 JavaScript 单元格 <code>variance_plot</code>，保留其语言，并忽略其他单元格。向下滚动到 <strong>保存配置</strong>。单单保存不会发送任何内容；下一次运行仍会将请求呈现出来供您审查。</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png">查看完整的替换设置屏幕截图</a>
+              </figure>
+            </li>
+            <li>运行 <strong>AI Prompt</strong> 单元格。审查即将发送的内容，然后选择 <strong>发送给 AI 提供商</strong>。<strong>No other cells</strong> 排除了额外的工作簿上下文；替换操作仍会发送<strong>目标单元格的完整源码</strong>。在此处这仅仅是我们那条无害的注释。</li>
+            <li>阅读返回的 <strong>Before / After</strong> 预览。检查完整的 JavaScript：种子 42、2,000 个样本（每个包含 10 个数据点）、方差除以 9，并且没有非预期的网络或存储操作。选择 <strong>Apply replacement</strong> （仅在您认可该源码时）； <strong>Cancel</strong> 将保持 <code>variance_plot</code> 不变。应用替换会编辑目标单元格，但 <strong>不会运行它</strong>.
+              <figure class="phone-figure" id="ai-variance-approval">
+                <div class="shot-window shot-window--ai-variance-preview-start" role="img" aria-label="Android Before/After 替换预览。Before 是无害注释；After 以生成的 JavaScript 开头，包含种子 42 和正态样本生成器。">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <p class="shot-detail-label"><strong>生成的代码显示在审批预览中。</strong>这是真实 GLM 5.3 Flash 回复的开头；目标单元格当前仍仅包含我们的注释。请阅读完整的 After 部分，而不仅仅是此处显示的这几行。</p>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png">查看预览开头的完整屏幕截图</a>
+                <div class="shot-window shot-window--ai-variance-preview-apply" role="img" aria-label="同一 Android 生成代码预览的末尾。黄色边框标出了 Apply replacement 和 Cancel；这两个操作均不会运行所提议的代码。">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>滚动到末尾以批准或取消。</strong>Apply replacement 会更改指定命名单元格的源码；它不会执行该代码。这些细节视图中省略了该长预览的中间部分。<a href="../../../../pro/ai/tutorial/assets/ai-variance-generated.js">请阅读完整的生成源码</a>。</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png">查看审批控件的完整屏幕截图</a>
+              </figure>
+            </li>
+            <li>
+              <p class="callout"><strong>审查发现了一处小遗漏。</strong>该模型回复以一个报告字符串结尾，而不是将其打印出来。点击 Apply 之后，我们在运行之前仅将最后那段报告修改为了 <code>console.log(…)</code>。请同样检查您的回复：仅凭图像无法确认总计数值是否正确。<a href="../../../../pro/ai/tutorial/assets/ai-variance-reviewed.js">阅读所运行的修正后源码</a>。</p>
+              <p>找到 <code>variance_plot</code> 并点击<strong>其自带的 Run</strong>。直方图的每个柱子统计的是样本方差估计值——而非单个观测值。使用上述完全相同的生成器，预期平均估计方差接近 <strong>0.9852</strong>，直方图总数为 <strong>2,000</strong>，溢出为 <strong>0</strong>。真实方差为 1；有限次数的模拟其平均值不必完全等于 1。基于种子 42 重新运行应当能重现该图表。</p>
+              <figure class="phone-figure" id="ai-variance-output">
+                <div class="shot-window shot-window--ai-variance-plot" role="img" aria-label="单独手动运行后的真实 Android 图表：2,000 个样本方差估计值（取自容量为 10 的正态样本）的直方图。红线标出了真实方差 1；打印出的均值为 0.98521，直方图总数为 2000，溢出为 0。">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>在 S24+ 上经过 Apply、审查并单独手动运行后的输出。</strong>实际图表和打印检查项与带种子的计算相符：平均估计方差 <strong>0.98521</strong>、总数 <strong>2,000</strong>、溢出 <strong>0</strong>。红线代表总体方差，而非拟合曲线。您的模型可能会以不同方式排版代码或图表。</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png">查看图表的完整屏幕截图</a>
+              </figure>
+            </li>
+          </ol>
+          <p class="callout"><strong>两项独立的审批：</strong><strong>发送给 AI 提供商</strong> 批准共享经审查的请求。<strong>应用替换</strong> 批准编辑目标的源码。两者均不会运行所提议的 JavaScript。在此演示中请勿选择 <strong>关联的新单元格</strong>：该选项会插入一个未运行的结果单元格，而不包含此替换审批步骤。</p>
+        </div>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>遇到问题怎么办</h2>
+        <dl>
+          <dt><strong>手机上没有离线建议</strong></dt>
+          <dd>选择 General → Local code completion → On 而非 Auto。检查药丸标签、光标位置、语言以及可选行是否有足够空间。</dd>
+          <dt><strong>未发起在线请求</strong></dt>
+          <dd>检查 On tap、确切服务商/端点的已保存密钥、所选模型的价格条目或上限、授权许可和开销总计。补全并不需要 Open 预设。需要安全浏览器上下文和 Web Locks 支持；不支持的环境将拒绝请求。</dd>
+          <dt><strong>Assistant 在运行单元格前弹出提示——或者未弹出提示</strong></dt>
+          <dd>检查您的应用版本、Security… 执行权限以及 Kernels… 规则。即将推出的 Open 默认设置为 Ask；Pro 1.4.0 的默认设置则可能允许执行。关闭自动运行并不等同于执行工具的 Deny。在线补全的 Always allow 并不会授予单元格执行权限；请参阅<a href="#execution-permissions">执行审批</a>。</dd>
+          <dt><strong>补全无法理解其他单元格</strong></dt>
+          <dd>在线备选方案使用的是受限的当前单元格上下文，而非您的整个笔记本。当您需要更广泛的解释时，请使用显式选择了源码的 AI Prompt 或 Assistant。</dd>
+          <dt><strong>无法点击 Install</strong></dt>
+          <dd>原生本地模型流程适用于通过 Google Play 安装且符合条件的 Android 设备，不支持桌面端/浏览器或当前的侧载分发方式。满足最低 RAM 要求并不能保证运行速度。</dd>
+          <dt><strong>生成的答案看似合理但有误</strong></dt>
+          <dd>将其与已知的小示例进行比对。在运行之前，请检查导入项、单位、空输入行为和副作用。模型的回复并非正确性的证明。</dd>
+        </dl>
+        <p><a href="../../../../pro/ai/">AI 设置与工作流参考<span class="english-reference"> (英文参考页面)</span></a> · <a href="../../../../pro/remote/">远程与安全<span class="english-reference"> (英文参考页面)</span></a> · <a href="../../../tutorials/">所有教程</a></p>
+      </section>
+      <aside class="callout" id="execution-permissions" aria-labelledby="execution-appendix-title">
+        <h2 id="execution-appendix-title">附录 · 即将推出的执行审批 · 拟议的 Pro 1.5.0</h2>
+        <p><strong>尚未发布：</strong>这些控件描述的是下一版本的实现，并不保证您安装的 1.4.0 已具备该功能。版本号为暂定。</p>
+        <ul>
+          <li><strong>AI 设置 → 安全… → <code>execute_cell</code> / <code>run_cells</code></strong> 已提供 <strong>Default / Allow / Ask / Deny</strong>。此次更新将 Open 继承的 Default 更改为 <strong>询问</strong>；Full control 则保留 Allow。显式的工具或内核规则可以替代继承的默认设置；当两者均显式设定时，以更安全的规则为准。在学习阶段，请保留 Default 或 Ask。Allow 属于覆盖项，并非更强的沙盒；内核级别的 Ask/Deny、Review 以及全局的 JavaScript 禁用仍然生效。</li>
+          <li>在选择 <strong>运行</strong> 之前请先阅读执行请求；保持 <strong>允许将来在不询问的情况下运行助手单元格</strong> 未勾选以仅批准该次请求。勾选该项将更改跨<strong>所有工作簿</strong>共享的执行工具规则（直到被重置）——而不仅仅是当前单元格、对话或服务商。显式的内核 Ask 设置会隐藏该选项。</li>
+          <li>命名空间检查和新创建单元格的提示<strong>无法创建该永久授权</strong>。新创建单元格的执行提示包含受限的代码预览；较长的预览会以省略号结尾。如果内容被截断，请选择 Cancel，检查新创建单元格的完整源码，并且仅在您信任它时才自行运行它。当开启自动运行时，先前保存的执行 Allow 仍可能允许新创建单元格自动运行，因此在此处请保持自动运行处于关闭状态。</li>
+          <li>如果在保存的执行工具 Allow 仍然有效的情况下选择 Full control 以外的预设，警告会提供 <strong>恢复默认</strong>、<strong>保留“允许”</strong> 或 <strong>取消</strong> 选项。Reset 会恢复所选预设的工具规则，且不会清除内核覆盖项。Keep 会保留覆盖项。Cancel 会恢复之前选择的预设。Reset 和 Keep 在您保存 Settings 之前均保持为草稿更改。</li>
+        </ul>
+        <p><strong>执行审批并不等同于共享数据的一揽子许可。</strong>执行工具的输出可以返回给 Assistant 的模型，且获许可的代码可以使用网络。在线补全的 <strong>始终允许</strong>、AI Prompt 的上下文审查以及 Remote/MCP 的隐私公开声明仍各自独立。MCP 笔记本执行采用相同的执行检查；但这些检查不会对代理主机的 Terminal shell 进行沙盒隔离。</p>
+      </aside>
+      <aside class="callout" id="planned-workbook-context" aria-labelledby="context-appendix-title">
+        <h2 id="context-appendix-title">附录 · 计划中的工作簿上下文与历史记录</h2>
+        <p><strong>仅为设计方案：</strong>这些功能尚未实现，也未分配到任何发布版本中。它们与上述即将推出的执行审批更改各自独立，不会阻碍当前版本的发布。</p>
+        <ul>
+          <li><strong>在需要时获取工作簿摘要。</strong>该计划旨在用一个仅包含元数据的目录工具来替代重复的自动源码预览：单元格名称、可选描述、语言和类型，以及工作簿修订版本号。拟议的工具为 <code>list_cells</code>（带有 <code>view: "metadata"</code>）；Assistant 将单独读取选定的源码。这是一个受限的总览，而非自动生成的 AI 解释。</li>
+          <li><strong>单次附加而非每次发送时均附加。</strong>拟议的<strong>本次附加工作簿摘要</strong>复选框可以在新对话中初始处于勾选状态，并在该附件实际发送后取消勾选。您可以在发送前取消勾选，或再次勾选以获取全新的总览。其初始默认状态仍需进行隐私和易用性审查。后续对话不会添加新的摘要，切换标签页也不会静默重新启用它。预览和现有的读取/隐私权限仍然适用；大型工作簿可能需要更多分页。</li>
+          <li><strong>未勾选并不代表抹掉历史记录。</strong>它只会阻止新的自动附件，而不会移除对话中已有的摘要，也不会阻止已获许可的工具读取。现有的全屏 Agent、AI Prompt 和补全上下文控件仍将各自独立。</li>
+          <li><strong>两次发送之间的变更是一项后续选项。</strong>紧凑的增量更新需要已知的已发送上下文基准和可靠的修订版本号。人工编辑可以高亮显示，但智能体编辑、导入以及未知更改同样重要。源码编辑不会自动重写单元格的描述；缺失或过期的历史记录需要获取全新总览，而非靠猜测来进行更新。</li>
+          <li><strong>可选的本地历史记录与 GitHub 同步属于更长期的 Pro 设想。</strong>本地发送检查点可以支持基于 Git 的 diff 差异对比，而无需共享任何内容。独立的同步功能可以将工作簿发布到 Gist 或代码仓中的选定文件，并带有其专属的载荷预览和授权。启用历史记录不会推送到 GitHub，也不会向 AI 发送 diff。Git 仅展示内容变更，并不能证明该变更由人类做出。</li>
+        </ul>
+        <p><strong>Secret Gist 并非私密。</strong>拥有其 URL 的任何人都可以读取；在必须限制访问权限时，请使用私有代码仓。在发布之前，请勿将机密信息放入工作簿源码和描述中。详见<a href="https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists/creating-gists">GitHub 的 Gist 可见性文档</a>。</p>
+      </aside>
+    </article>
+  </main>
+  <footer class="site-footer">
+    <span>SciREPL Pro 帮助</span>
+    <nav aria-label="页脚导航">
+      <a href="../../../tutorials/">所有教程</a>
+      <a href="../../../../pro/">Pro 帮助<span class="english-reference"> (英文参考页面)</span></a>
+      <a href="../../../../../pro/privacy.html">Pro 隐私政策</a>
+    </nav>
+  </footer>
+</body>
+</html>

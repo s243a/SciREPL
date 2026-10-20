@@ -35,6 +35,7 @@ try {
     const pageErrors = [], missing = [];
     page.on('pageerror', error => pageErrors.push(error.message));
     page.on('response', response => { if (response.status() >= 400) missing.push(response.url()); });
+    page.on('requestfailed', request => missing.push(request.url()));
     await page.route('**/*', async request => {
       if (new URL(request.request().url()).origin !== origin) { report.externalRequests.push(request.request().url()); return request.abort(); }
       return request.continue();
@@ -45,8 +46,6 @@ try {
       row.checks.language = await page.locator('html').getAttribute('lang') === locale;
       row.checks.direction = await page.locator('html').getAttribute('dir') === (locale === 'ar' ? 'rtl' : 'ltr');
       row.checks.noHorizontalClip = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
-      row.checks.noMissingResources = missing.length === 0;
-      row.checks.noPageErrors = pageErrors.length === 0;
       const summary = page.locator('.tutorial-language-menu summary');
       await summary.focus(); await page.keyboard.press('Enter');
       row.checks.keyboardPicker = await page.locator('.tutorial-language-menu').getAttribute('open') !== null;
@@ -59,6 +58,25 @@ try {
       // No duplicate image trees: all source URLs resolve to the original help.
       row.checks.sharedImages = await page.locator('img[src]').evaluateAll(images => images.every(image => !/\/help\/(?:en|ar|bn|de|es|fr|hi|id|ja|ko|pt-BR|ru|zh)\/.*\/assets\//.test(image.src)));
       if (route === 'workbooks/tutorial') row.checks.catalogueLocale = await page.locator('#catalogue-workbooks-locale').inputValue() === locale;
+      // Long walkthroughs use lazy screenshots. Load and decode every image,
+      // including those below the viewport, before checking resources/layout.
+      // Each image has a finite wait and failures remain explicit test failures.
+      row.checks.allImagesDecoded = await page.locator('img[src]').evaluateAll(async images => (await Promise.all(images.map(async image => {
+        image.loading = 'eager';
+        let timer;
+        try {
+          await Promise.race([
+            image.decode(),
+            new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Image decode timed out')), 10000); }),
+          ]);
+          return image.complete && image.naturalWidth > 0 && image.naturalHeight > 0;
+        } catch { return false; }
+        finally { clearTimeout(timer); }
+      }))).every(Boolean));
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      row.checks.noHorizontalClipWithPicker = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
+      row.checks.noMissingResources = missing.length === 0;
+      row.checks.noPageErrors = pageErrors.length === 0;
       for (const [check, value] of Object.entries(row.checks)) assert.ok(value, `${locale}/${route} ${name}: ${check}`);
       console.log(`PASS ${locale}/${route} ${name}`);
     } catch (error) { row.failure = error.message; report.failures.push(row.failure); console.error(`FAIL ${row.failure}`); }

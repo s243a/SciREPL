@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="de" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Laden Sie eine SciREPL-Arbeitsbuchdatei herunter, suchen Sie nach Menü → Datei importieren, wählen Sie sie auf Android oder dem Desktop aus und überprüfen Sie ihre Zellen vor dem Ausführen.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/de/workbooks/import/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/import/tutorial.css">
+  <title>Eine Arbeitsbuchdatei importieren · SciREPL Hilfe</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/import/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/import/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/import/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/import/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/import/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/import/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/import/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/import/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/import/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/import/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/import/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/import/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/import/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/import/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Zum Inhalt springen</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Englische Referenzseite)</span></a>
+    <nav aria-label="Hauptnavigation">
+      <a href="../../../workbooks/">Arbeitsbuch-Referenz<span class="english-reference"> (Englische Referenzseite)</span></a>
+      <a href="../../tutorials/">Alle Anleitungen</a>
+      <a href="../../../">Gesamte Hilfe<span class="english-reference"> (Englische Referenzseite)</span></a>
+      <a href="../../../../">Free PWA öffnen</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Tutorial-Sprache"><details class="tutorial-language-menu"><summary>Tutorial-Sprache: <bdi>Deutsch</bdi></summary><nav aria-label="Tutorial-Sprache"><a href="../../../en/workbooks/import/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/import/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/import/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="./" lang="de" hreflang="de" aria-current="page">Deutsch</a>
+      <a href="../../../es/workbooks/import/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/import/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/import/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/import/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/import/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/import/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/import/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/import/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/import/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Maschinell übersetztes Tutorial; die Überprüfung durch Muttersprachler steht noch aus. Code und technische Werte sind unverändert. Screenshots zeigen die englische Originaloberfläche; gleichen Sie die übersetzten Bezeichnungen der Steuerelemente in diesem Text mit Ihrer App ab.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Hilfe<span class="english-reference"> (Englische Referenzseite)</span></a> / <a href="../../../workbooks/">Arbeitsbücher<span class="english-reference"> (Englische Referenzseite)</span></a> / Eine Arbeitsbuchdatei importieren</p>
+    <article>
+      <p class="eyebrow">Praktisch lernen</p>
+      <h1>Eine Arbeitsbuchdatei selbst importieren</h1>
+      <p class="lede">Sie haben bereits eine Arbeitsbuchdatei oder können eine Lektion nicht unter „Durchsuchen“ finden? Speichern Sie die Datei auf Ihrem Gerät und verwenden Sie dann <strong>Menü → Datei importieren</strong>, um sie zu SciREPL hinzuzufügen. Diese kurze Anleitung verwendet <strong>Simpson's Paradox</strong> aus dem GitHub-<code>main</code>-Branch des Katalogs; Sie müssen kein Paket installieren oder Code schreiben, um sie zu importieren.</p>
+      <p>SciREPL importiert zwei Notebook-Formate: <strong><code>.srwb</code></strong>, sein eigenes Arbeitsbuchformat, und <strong><code>.ipynb</code></strong>, das Jupyter-Notebook-Format. Dieses Beispiel verwendet <code>.srwb</code>; die <a href="#other-formats">Hinweise zum Format weiter unten</a> erklären das abweichende Ausführungsverhalten von Jupyter-Importen.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Schritte für Android + Browser</li>
+        <li class="chip">Etwa 3 Minuten</li>
+      </ul>
+      <p class="screen-note">Der Menü-Screenshot ist eine echte Android-Aufnahme auf einem <strong>Samsung Galaxy S24+</strong>, die <strong>SciREPL Free 1.4.0-debug</strong> zeigt, keine Installation aus dem Play Store. Der Screenshot des importierten Arbeitsbuchs ist eine separate <strong>Chromium-Browser-Aufnahme von Free 1.4.0 in einem Darstellungsbereich in Mobilgröße</strong>; er ist kein Beleg für einen Import über die Android-Dateiauswahl. Beide wurden am <time datetime="2026-10-06">6. Oktober 2026</time> aufgenommen. Andere Editionen, Versionen und Dateiauswahldialoge ordnen Steuerelemente möglicherweise anders an. Das Beispiel ist die englische <code>simpsons-paradox.srwb</code>-Datei aus dem SciREPL-Katalog, Branch <code>main</code>, wie für diesen Leitfaden geprüft; dieser Branch kann sich ändern. <a href="../../../workbooks/import/assets/capture-receipt.json">Aufnahme- und Quelldetails<span class="english-reference"> (Englische Referenzseite)</span></a> halten die exakten Bildabmessungen und den geprüften Datei-Hash fest.</p>
+      <nav class="lesson-nav" aria-label="Schritte zum manuellen Arbeitsbuch-Import">
+        <strong>In dieser Lektion</strong>
+        <ol>
+          <li><a href="#download">Arbeitsmappendatei speichern</a></li>
+          <li><a href="#import">Menü finden und die Datei importieren</a></li>
+          <li><a href="#check">Neuen Arbeitsmappen-Tab prüfen</a></li>
+          <li><a href="#next">Mit der Lektion fortfahren</a></li>
+        </ol>
+        <p><a href="#other-formats">Andere Formate und Sicherheit</a> · <a href="#troubleshooting">Wenn etwas nicht stimmt</a></p>
+        <p><a href="../../tutorials/">Alle Tutorials</a></p>
+      </nav>
+
+      <section id="download">
+        <p class="step-label">Schritt 1</p>
+        <h2>Arbeitsmappendatei auf Ihrem Gerät speichern</h2>
+        <p>Der GitHub-Zweig <code>main</code> kann Arbeitsmappen oder Aktualisierungen enthalten, die noch nicht in der neuesten stabilen Katalogversion enthalten sind, die von Browse angezeigt wird. Katalogversionen ändern sich unabhängig von der App-Version. Ein direkter Dateiimport ermöglicht es Ihnen, eine vertrauenswürdige Arbeitsmappe auszuprobieren, ohne darauf zu warten, dass sie in Browse erscheint.</p>
+        <ol class="lesson-steps">
+          <li><a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">Simpson-Paradoxon auf GitHub ansehen</a>, dann <a download="simpsons-paradox.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/main/workbooks/en/simpsons-paradox.srwb">die eigentliche Arbeitsmappendatei (.srwb) herunterladen</a>. Der zweite Link öffnet die Rohdatei, nicht die GitHub-Webseite.</li>
+          <li>Wenn Ihr Browser die Datei als Text anzeigt, anstatt sie herunterzuladen, verwenden Sie die Aktion <strong>Speichern/Herunterladen</strong> des Browsers. Speichern Sie die Arbeitsmappendatei selbst, keinen Screenshot oder eine HTML-Seite.</li>
+          <li>Behalten Sie den Dateinamen <code>simpsons-paradox.srwb</code> und seine Erweiterung <code>.srwb</code> bei. Merken Sie sich, wo sie gespeichert wurde: Android verwendet üblicherweise <strong>Downloads</strong>; auf dem Desktop ist es möglicherweise Downloads oder ein von Ihnen gewählter Ordner.</li>
+        </ol>
+        <p><strong>Dies ist kein Download eines festgepinnten Releases.</strong> <code>main</code> ist ein Entwicklungszweig: Der Inhalt und die Zellen der Datei können sich ändern, nachdem diese Screenshots aufgenommen wurden. Die von Ihnen gespeicherte Datei ist eine lokale Kopie; eine spätere Änderung auf GitHub aktualisiert Ihren importierten Tab nicht automatisch.</p>
+        <p class="callout"><strong>Herunterladen ist nicht gleich Importieren.</strong> Durch das Speichern der Datei befindet sie sich auf Ihrem Gerät; es wird dadurch noch keine Arbeitsmappe in SciREPL geöffnet. Sie müssen sie nicht in einem Texteditor öffnen oder in der Datei-Ansicht von SciREPL ablegen. Im nächsten Schritt wird diese heruntergeladene Datei ausgewählt.</p>
+        <p>Wenn Sie bereits eine vertrauenswürdige <code>.srwb</code>-Datei von jemand anderem haben, verwenden Sie stattdessen diese Datei und überspringen Sie den Beispieldownload. Der Titel der Arbeitsmappe und die Zellenzahl weichen von den Prüfungen in Schritt 3 ab.</p>
+      </section>
+
+      <section id="import">
+        <p class="step-label">Schritt 2</p>
+        <h2>Menü suchen und Datei importieren wählen</h2>
+        <ol class="lesson-steps">
+          <li>Kehren Sie zu SciREPL zurück. Suchen Sie in der <strong>Kopfzeile oben in der App</strong> nach <strong>☰ Menü</strong>, der Schaltfläche mit <strong>drei horizontalen Linien</strong>, und tippen oder klicken Sie darauf.</li>
+          <li>Wählen Sie <strong>📂 Datei importieren (z. B. .srwb, .ipynb, .csv, .py, .zip)</strong>. Wenn das Menü höher als der Bildschirm ist, scrollen Sie <em>innerhalb des Menüs</em>, um es zu finden.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-menu" role="img" aria-label="Samsung Galaxy S24+-Screenshot des geöffneten Menüs von SciREPL Free, wobei der Eintrag Datei importieren gelb hervorgehoben ist.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Wählen Sie <strong>📂 Datei importieren</strong> im Menü der App. Die gelbe Markierung weist auf den Importeintrag in <strong>Free 1.4.0-debug unter Android</strong> hin.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/phone-menu.png">Vollständigen Screenshot des Android-Menüs ansehen</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li><strong>Unter Android:</strong> Die Dateiauswahl des Systems wird geöffnet. Suchen Sie in <strong>Downloads</strong> oder navigieren Sie zu dem Ort, an dem Sie die Datei gespeichert haben. Wählen Sie <code>simpsons-paradox.srwb</code> aus. Die Dateiauswahl gehört zu Android, daher hängen ihr Layout und eine abschließende Schaltfläche wie <strong>Öffnen</strong> oder Auswählen von Ihrem Gerät ab.</li>
+          <li><strong>Auf dem Desktop:</strong> Verwenden Sie die Dateiauswahl, um den Ordner zu finden, den Sie beim Herunterladen ausgewählt haben. Wählen Sie <code>simpsons-paradox.srwb</code> aus und bestätigen Sie die Auswahl. Nutzen Sie diesen Weg, anstatt nach dem Downloads-Bildschirm von Android zu suchen.</li>
+          <li>Warten Sie zurück in SciREPL, bis der Import abgeschlossen ist. Wenn das Menü noch geöffnet ist, schließen Sie es, um die Arbeitsmappe zu sehen.</li>
+        </ol>
+        <p class="callout"><strong>Ein Arbeitsbuch ist kein Hochladen einer Datei.</strong> Das Importieren einer <code>.srwb</code>-Datei fügt ihr Arbeitsbuch als separaten Tab hinzu, oder als separate Tabs, falls die Datei mehrere Arbeitsbücher enthält. Ihre vorhandenen Tabs bleiben erhalten. Es verschiebt das Arbeitsbuch nicht in die Dateiansicht und ersetzt Ihr aktuelles Arbeitsbuch nicht.</p>
+      </section>
+
+      <section id="check">
+        <p class="step-label">Schritt 3</p>
+        <h2>Überprüfen Sie das neue Arbeitsbuch, bevor Sie etwas ausführen</h2>
+        <ol class="lesson-steps">
+          <li>Suchen Sie in der Arbeitsbuchauswahl nach <strong>Simpson's Paradox</strong>. Wählen Sie diesen neuen Tab aus, falls er nicht bereits ausgewählt ist. Seine Einführung ist mit <strong>Simpson's Paradox: When Every Group Disagrees with the Total</strong> überschrieben.</li>
+          <li>Lesen Sie die Einführung und scrollen Sie durch die Zellen. Die für diese Screenshots geprüfte Version enthält <strong>sieben Zellen</strong>: drei Textzellen, drei <strong>R</strong>-Zellen und eine <strong>JavaScript</strong>-Zelle. Eine spätere Version auf <code>main</code> kann abweichen.</li>
+          <li>Suchen Sie die R-Zellen namens <code>data</code>, <code>compute</code> und <code>viz</code> in dieser Reihenfolge. Die JavaScript-Zelle heißt <code>js_check</code> und ist eine separate, optionale Prüfung. Lesen Sie sowohl den erklärenden Text als auch den Code.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-result" role="img" aria-label="Chromium-Browser-Screenshot von SciREPL Free 1.4.0 in einem Viewport im Mobilformat, der das importierte Arbeitsbuch zu Simpson&#39;s Paradox und seinen gelb hervorgehobenen Titel zeigt.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/browser-imported.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/imported-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Ergebnis des Browser-Imports:</strong> Das importierte Arbeitsbuch <strong>Simpson's Paradox</strong> öffnet sich als bearbeitbare Zellen in <strong>Free 1.4.0 in Chromium</strong>, hier in einem Viewport von 390 × 844. Dies ist kein Android-Screenshot. Durch den Import wurden die R- oder JavaScript-Zellen nicht ausgeführt.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/browser-imported.png">Vollständigen Screenshot des im Browser importierten Arbeitsbuchs ansehen</a>
+        </figure>
+        <p class="callout"><strong>Importieren bedeutet bei .srwb nicht Ausführen.</strong> SciREPL führt den Code beim Importieren einer <code>.srwb</code>-Datei nicht aus, selbst wenn die automatische Ausführung für andere Importe aktiviert ist. Prüfen Sie Code aus einer unbekannten oder nicht vertrauenswürdigen Quelle, bevor Sie <strong>Ausführen</strong> oder <strong>Alle Zellen ausführen</strong> wählen.</p>
+        <p><strong>Beim gewöhnlichen .srwb-Import werden gespeicherte Ausgaben von Code-Zellen derzeit verworfen</strong>, selbst wenn die Datei diese enthält. Markdown-Text bleibt erhalten und wird gerendert, weshalb die Einführung sofort angezeigt wird. Um Diagramme oder andere durch Code erzeugte Bilder neu zu erstellen, führen Sie deren Code-Zellen erneut aus, und zwar abhängige Zellen der Reihe nach. Durch den Import werden aktive R- oder andere Laufzeitvariablen nicht wiederhergestellt.</p>
+      </section>
+
+      <section id="next">
+        <p class="step-label">Schritt 4</p>
+        <h2>Optional: die importierte Lektion ausführen</h2>
+        <p>Ihr manueller Import ist abgeschlossen; das Ausführen von Code ist ein separater Schritt. Simpson's Paradox verwendet <strong>synthetische Lehrdaten</strong>, um zu zeigen, wie Vergleiche innerhalb von Gruppen dem Gesamtvergleich widersprechen können. Um dies zu erkunden, tippen Sie auf den <strong>✎ Bleistift</strong> einer gespeicherten Code-Zelle, prüfen Sie den Code und nutzen Sie dann für <em>diese Zelle</em> die Schaltfläche <strong>Ausführen</strong>.</p>
+        <ol class="lesson-steps">
+          <li>Führen Sie die R-Zelle <code>data</code> aus, lesen Sie dann die Textzelle <code>pause</code> und treffen Sie deren Vorhersage, bevor Sie <code>compute</code> ausführen. Fahren Sie mit <code>viz</code> fort, um das Diagramm zu erstellen. Die späteren R-Zellen hängen von den früheren ab. Sie verwenden Basis-R; Sie müssen keine zusätzlichen R-Pakete installieren.</li>
+          <li>Wenn Sie eine separate JavaScript-Prüfung wünschen, führen Sie <code>js_check</code> aus. Sie ist eigenständig: Sie hängt nicht von den R-Zellen ab und erfordert keinen Start von R.</li>
+        </ol>
+        <p class="callout"><strong>Erster R-Lauf:</strong> In SciREPL muss die webR-Laufzeit möglicherweise heruntergeladen und initialisiert werden. Möglicherweise wird ein Netzwerk-/Datenschutzhinweis angezeigt; lesen Sie diesen und stimmen Sie nur zu, wenn Sie fortfahren möchten. Warten Sie, bis die Laufzeit bereit ist, und prüfen Sie die Zelle auf Fehler. Durch das reine Importieren des Arbeitsbuchs wurden dessen R-Definitionen noch nicht geladen.</p>
+        <p>Ein weiteres Beispiel mit einer ausführlicheren Anleitung zum Ausführen und Bearbeiten finden Sie in <a href="../tutorial/#run">der Lektion zu Markov Groups</a>. Das ist ein anderes Arbeitsbuch mit vier Python-Zellen; sein <a href="../tutorial/#export">Exportschritt</a> veranschaulicht außerdem, wie eine bearbeitete Kopie des Arbeitsbuchs gespeichert wird.</p>
+        <p class="callout"><strong>Behalten Sie eine Kopie, die Sie kontrollieren.</strong> Die heruntergeladene Datei ist die ursprüngliche Arbeitsmappenkopie, keine Sicherung späterer Bearbeitungen. Exportieren Sie eine Arbeitsmappenkopie, um Ihre Änderungen zu speichern. Das Löschen des App- oder Browserspeichers kann lokale Arbeit entfernen, und Android- sowie Browsersitzungen teilen Ihre Änderungen nicht automatisch.</p>
+      </section>
+
+      <section id="other-formats">
+        <p class="step-label">Andere Formate und Sicherheit</p>
+        <h2>Wissen, was Ihre Datei enthält</h2>
+        <p><strong>Jupyter-Notebooks (.ipynb)</strong> verwenden ebenfalls <strong>Menü → Datei importieren</strong>, aber ihr Ausführungsverhalten unterscheidet sich von <code>.srwb</code>. Wenn <strong>Zellen beim Import der Arbeitsmappe automatisch ausführen</strong> aktiviert ist, kann ein <code>.ipynb</code>-Import automatisch Codezellen ausführen, die keine gespeicherten Ausgaben haben.</p>
+        <p class="callout"><strong>Importieren Sie Notebook-Dateien nur aus Quellen, denen Sie vertrauen.</strong> Öffnen Sie vor dem Importieren eines <code>.ipynb</code> <strong>Menü → Einstellungen → Import und Bearbeitung</strong> und stellen Sie sicher, dass <strong>Zellen beim Import der Arbeitsmappe automatisch ausführen</strong> <strong>aus</strong> (deaktiviert) ist. Es ist standardmäßig ausgeschaltet, aber überprüfen Sie Ihre aktuelle Einstellung. Das Ausschalten ist keine Garantie dafür, dass ein beliebiges Notebook sicher ist; prüfen Sie vertrauenswürdigen Notebook-Code, bevor Sie explizit entscheiden, ob Sie ihn ausführen.</p>
+        <p><strong>Separate Datendateien:</strong> Ein normaler <code>.srwb</code>-Export überträgt keine separaten CSV-Dateien oder andere im virtuellen Dateisystem von SciREPL gespeicherten Daten (die Ansicht <strong>Dateien</strong>). Diese Version von Simpsons Paradoxon erstellt ihre synthetischen Daten im Code, benötigt also keine separate Datendatei. Folgen Sie für eine Arbeitsmappe, die eine CSV liest, den Schritten zum <a href="../../files-export/tutorial/#export">CSV-Paketarchivexport</a> und <a href="../../files-export/tutorial/#reopen">erneuten Öffnen</a> der Anleitung, um sowohl die Arbeitsmappe als auch ihre Daten zu übertragen und wiederherzustellen. Paketarchive und <code>.zip</code>-Importe liegen außerhalb dieser kurzen Lektion zu Arbeitsmappendateien.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">Wenn etwas falsch aussieht</p>
+        <h2>Überprüfen Sie die Datei und den ausgewählten Tab</h2>
+        <ul>
+          <li><strong>Die Dateiauswahl kann die Datei nicht finden:</strong> Überprüfen Sie die Download-Liste Ihres Browsers, um zu sehen, wo sie gespeichert wurde, und navigieren Sie dann zu diesem Ordner. Das Herunterladen auf einem Desktop platziert die Datei nicht im Download-Ordner Ihres Telefons.</li>
+          <li><strong>Der Dateiname endet auf .txt oder .html:</strong> Kehren Sie zum Download-Link der Arbeitsmappe zurück und speichern Sie die eigentliche Datei mit ihrer Dateiendung <code>.srwb</code>. Das Umbenennen einer HTML-Seite in <code>.srwb</code> macht daraus keine Arbeitsmappe.</li>
+          <li><strong>Sie sehen immer noch Ihre alte Arbeitsmappe:</strong> Schließen Sie das Menü und überprüfen Sie die Arbeitsmappenauswahl auf den neuen Titel. Bestehende Tabs bleiben erhalten.</li>
+          <li><strong>Sie haben es zweimal importiert:</strong> Ein weiterer Import fügt eine weitere Kopie hinzu; er aktualisiert oder ersetzt den früheren Tab nicht. Überprüfen Sie vor dem Vornehmen von Änderungen, welche Kopie Sie bearbeiten.</li>
+          <li><strong>Der Titel oder die Zellen stimmen nicht überein:</strong> Überprüfen Sie, ob Sie <code>simpsons-paradox.srwb</code> ausgewählt haben und nicht einen anderen Download oder eine Datei aus einer anderen Lektion. Die Datei auf <code>main</code> kann sich ändern; vergleichen Sie Ihre Kopie mit der <a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">aktuellen GitHub-Datei</a> und überprüfen Sie unbekannten Code, bevor Sie ihn ausführen.</li>
+        </ul>
+        <p>Die Grundlagen zu Arbeitsmappen-Tabs und der Bearbeitung gespeicherter Zellen finden Sie in der <a href="../../interface/tutorial/">Einführung in die Benutzeroberfläche der ersten Arbeitsmappe</a>. Die <a href="../../../workbooks/">Arbeitsmappen-Referenz<span class="english-reference"> (Englische Referenzseite)</span></a> erläutert die Struktur von Arbeitsmappen und Zelltypen.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL-Hilfe</span><nav aria-label="Fußzeilennavigation"><a href="../../../workbooks/">Arbeitsmappen-Referenz<span class="english-reference"> (Englische Referenzseite)</span></a><a href="../../../">Gesamte Hilfe<span class="english-reference"> (Englische Referenzseite)</span></a></nav></footer>
+</body>
+</html>

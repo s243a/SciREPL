@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { ROOT, DATA, BASE, ORIGIN, LOCALES, ROUTES, CHROME, readManifest, readLocale, sha, scan, attributes, extractPage, validateText, validateKeep, renderField, replaceRanges, decoratePage, rewriteReference, localizedUrl } from '../scripts/tutorial_locale_lib.mjs';
+import { ROOT, DATA, BASE, ORIGIN, LOCALES, ROUTES, CHROME, readManifest, readLocale, sha, scan, attributes, decode, extractPage, validateText, validateKeep, renderField, replaceRanges, decoratePage, rewriteReference, localizedUrl } from '../scripts/tutorial_locale_lib.mjs';
 import { inspectLocaleRecord } from '../scripts/tutorial_locale_status.mjs';
 import { verifyEditorialInventory, restoreOperationalNames, editorialReceipt } from '../scripts/tutorial_locale_editorial.mjs';
 
@@ -211,6 +211,25 @@ if (full || requestedLocales.length) {
       const prose = html.replace(/<[^>]*>/g, '');
       for (const row of inventory.occurrences.filter(row => page.fields.some(item => item.id === row.fieldId))) {
         assert.ok(prose.includes(row.identifier.replace(/'/g, '&#39;')) || prose.includes(row.identifier), `${locale}/${page.route}: operational name ${row.identifier} is missing`);
+      }
+    });
+    // Incremental --locale checks may precede rendering the other picker
+    // editions. The final --all gate requires every destination, with no
+    // exception for language navigation, alternates or canonical links.
+    if (full) for (const page of manifest.pages) verify(`${locale}/${page.route}: every generated local reference and fragment resolves`, () => {
+      const html = readFileSync(path.join(ROOT, 'www', 'help', locale, page.route, 'index.html'), 'utf8');
+      for (const token of scan(html).tokens.filter(token => token.type === 'tag')) for (const attr of attributes(token.raw).filter(attr => ['href', 'src', 'poster', 'action'].includes(attr.name))) {
+        const target = new URL(decode(attr.value), localizedUrl(page.route, locale));
+        if (target.origin !== ORIGIN || !target.pathname.startsWith(BASE)) continue;
+        let relative = decodeURIComponent(target.pathname.slice(BASE.length));
+        if (relative.endsWith('/')) relative += 'index.html';
+        const file = path.join(ROOT, 'www', relative);
+        assert.ok(existsSync(file), `${locale}/${page.route}: ${attr.value}: missing local target`);
+        if (target.hash && relative.endsWith('.html')) {
+          const ids = scan(readFileSync(file, 'utf8')).tokens.filter(token => token.type === 'tag')
+            .flatMap(token => attributes(token.raw).filter(attr => attr.name === 'id').map(attr => decode(attr.value)));
+          assert.ok(ids.includes(decodeURIComponent(target.hash.slice(1))), `${locale}/${page.route}: ${attr.value}: missing anchor`);
+        }
       }
     });
   }

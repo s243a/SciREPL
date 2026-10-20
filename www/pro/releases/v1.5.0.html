@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SciREPL Pro v1.5.0 candidate notes: copy or insert Help examples, language-aware online tutorial links, offline Bash and Prolog completion, and execution-consent safeguards.">
+    <meta name="theme-color" content="#071c36">
+    <link rel="canonical" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="SciREPL Pro v1.5.0 — Candidate notes">
+    <meta property="og:description" content="Help example controls, language-aware online tutorials, offline Bash and Prolog completion, and execution-consent safeguards. Local candidate preparation; not a release announcement.">
+    <meta property="og:url" content="https://s243a.github.io/SciREPL/pro/releases/v1.5.0.html">
+    <link rel="icon" type="image/png" href="../assets/SciREPL-Pro-app-icon-512.png">
+    <link rel="stylesheet" href="../styles.css">
+    <title>SciREPL Pro v1.5.0 — Candidate notes (not released)</title>
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+        <a class="brand" href="../" aria-label="SciREPL Pro home">
+            <img src="../assets/SciREPL-Pro-app-icon-512.png" alt="" width="44" height="44">
+            <span>sci<span>REPL</span> <b>PRO</b></span>
+        </a>
+        <nav aria-label="Primary navigation">
+            <a href="../">Pro overview</a>
+            <a href="../privacy.html">Privacy</a>
+            <a class="nav-cta" href="../../">Try free PWA</a>
+        </nav>
+    </header>
+
+    <main id="main" class="release-main">
+        <header class="release-intro">
+            <p class="eyebrow">Android Pro · v1.5.0 · Candidate preparation</p>
+            <h1>SciREPL Pro <span>v1.5.0</span></h1>
+            <p class="lede">This candidate makes Help examples easier to reuse, connects the app to language-aware online guides, and adds offline Bash and Prolog completion. These are the changes since v1.4.0.</p>
+            <p class="release-status"><strong>Not released</strong> <span>These notes are prepared locally, not a publication or rollout announcement. Exact-candidate native CI, signed CLOSED-testing upgrades on both test phones, and the required validation and publication gates must finish before release.</span></p>
+        </header>
+
+        <section class="release-section" aria-labelledby="help-title">
+            <h2 id="help-title">Copy or insert Help examples</h2>
+            <ul>
+                <li>Help examples have <strong>Copy</strong> and <strong>Insert</strong> buttons.</li>
+                <li>Insert adds an example as a new cell at the end of the current notebook. It does not run the example.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="tutorials-title">
+            <h2 id="tutorials-title">Online guides in your display language</h2>
+            <ul>
+                <li>Help and walkthroughs link to the shared <a href="../../help/en/tutorials/">online tutorials</a>, <a href="../../help/en/workbooks/import/">workbook-import guide</a> and <a href="../../help/en/pro/ai/tutorial/">AI and completion guide</a>.</li>
+                <li>The app chooses guide links using the selected display language. The guides are online, not bundled offline help, and their public routes must be available before the app ships.</li>
+                <li>Opening a guide does not grant permissions, run notebook code or send an AI-provider request.</li>
+                <li>Translated tutorial fields have completed their acceptance process; that is not native-speaker approval. App language catalogues retain their draft status, and 22 Russian tutorial fields retain optional manual-review flags.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="completion-title">
+            <h2 id="completion-title">Offline Bash and Prolog completion</h2>
+            <ul>
+                <li>Built-in completion adds Bash commands and Prolog predicates.</li>
+                <li>These suggestions use local tables without a model request or sending code off the device.</li>
+                <li>The optional local code model and online AI suggestions introduced in v1.4.0 are unchanged by these additions.</li>
+            </ul>
+        </section>
+
+        <section class="release-section" aria-labelledby="safety-title">
+            <h2 id="safety-title">Execution consent and interface fixes</h2>
+            <ul>
+                <li>Open mode still requires execution consent, and run ownership and permissions are revalidated before cells execute.</li>
+                <li>Custom-theme icon contrast, scrolling dialogs and walkthrough placement have been improved.</li>
+                <li>Android debug builds use a separate package and marked launcher icon so they can install beside Play Pro. A debug build does not replace signed release-upgrade testing.</li>
+            </ul>
+        </section>
+
+        <p class="release-note">The existing local-model delivery limits remain: Google Play delivers the model; sideloaded APKs cannot download it, and the local engine needs an arm64 device with at least 4 GB of memory. See the <a href="../privacy.html">privacy policy</a> for current data flows. Browser checks, native-language review, public-site publication and signed Android validation are separate release gates.</p>
+        <div class="hero-actions">
+            <a class="button button-secondary" href="../">Back to Pro overview</a>
+            <a class="button button-secondary" href="v1.4.0.html">Read the v1.4.0 notes</a>
+        </div>
+    </main>
+
+    <footer>
+        <a class="brand footer-brand" href="../" aria-label="SciREPL Pro home">
+            <img src="../assets/SciREPL-Pro-app-icon-512.png" alt="" width="36" height="36">
+            <span>sci<span>REPL</span> <b>PRO</b></span>
+        </a>
+        <div>
+            <a href="../privacy.html">Privacy</a>
+            <a href="../../">Free PWA</a>
+        </div>
+        <p>© 2026 SciREPL</p>
+    </footer>
+</body>
+</html>

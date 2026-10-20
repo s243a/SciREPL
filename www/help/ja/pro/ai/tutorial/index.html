@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="ja" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SciREPL Proのウォークスルー：API料金無料のテーブル候補、APIキーの設定、Openエージェントプリセット、オンラインおよびローカル補完、焦点を絞ったAI Promptセル。">
+  <meta name="theme-color" content="#06101d">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ja/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../styles.css">
+  <link rel="stylesheet" href="../../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../../pro/ai/tutorial/tutorial.css">
+  <title>AIと補完のステップバイステップ解説 · SciREPL Pro ヘルプ</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../tutorial-locales.css">
+</head>
+<body data-editions="pro" data-platforms="android windows-preview">
+  <a class="skip-link" href="#main">コンテンツへスキップ</a>
+  <header class="site-header">
+    <a class="brand" href="../../../../">sci<span>REPL</span> Help<span class="english-reference"> (英語のリファレンスページ)</span></a>
+    <nav aria-label="メインナビゲーション">
+      <a href="../../../tutorials/">すべてのチュートリアル</a>
+      <a href="../../../../pro/ai/">AIリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a>
+      <a href="../../../../pro/">Pro ヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="チュートリアルの言語"><details class="tutorial-language-menu"><summary>チュートリアルの言語: <bdi>日本語</bdi></summary><nav aria-label="チュートリアルの言語"><a href="../../../../en/pro/ai/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../../ar/pro/ai/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../../bn/pro/ai/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../../de/pro/ai/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../../es/pro/ai/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../../fr/pro/ai/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../../hi/pro/ai/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../../id/pro/ai/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="./" lang="ja" hreflang="ja" aria-current="page">日本語</a>
+      <a href="../../../../ko/pro/ai/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../../pt-BR/pro/ai/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../../ru/pro/ai/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../../zh/pro/ai/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">機械翻訳されたチュートリアルです。ネイティブによるレビューは保留中です。コードおよび技術的な値は変更されていません。スクリーンショットにはオリジナルの英語インターフェースが表示されています。本文中の翻訳されたコントロール名をアプリと照合してください。</p></aside>
+    <p class="breadcrumbs"><a href="../../../../">ヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a> / <a href="../../../../pro/">Pro<span class="english-reference"> (英語のリファレンスページ)</span></a> / AIと補完</p>
+    <article>
+      <p class="eyebrow">実践しながら学ぶ · Pro</p>
+      <h1>オフラインの入力候補からAI支援コーディングまで</h1>
+      <p class="lede">まずはリクエストごとのコストがかからない、高速なテーブルベースの入力候補から始めましょう。次にアシスタントを設定し、オンラインの代替候補をリクエストし、オンデバイスモデルを試して、最後にコードを解説する焦点を絞ったAI Promptセルで仕上げます。</p>
+      <ul class="meta">
+        <li class="chip chip-pro">Pro限定</li>
+        <li class="chip">Pro 1.4.0 + 今後提供される実行コントロール</li>
+        <li class="chip">ローカルモデル: Android</li>
+      </ul>
+      <p class="screen-note">ほとんどのスクリーンショットはAndroidアプリを示していますが、一部はブラウザのキャプチャです。レイアウトはお使いのアプリのバージョンによって異なる場合があります。</p>
+      <p class="callout"><strong>バージョンを確認してください。</strong> <a href="#execution-permissions">付録</a>にある実行に関する変更は、<strong>提案中のPro 1.5.0</strong>向けに計画されており、これは<strong>未リリース</strong>です。最終的なリリース番号は変更される可能性があります。</p>
+      <p class="callout"><strong>ここでの「Free」はAPI料金が発生しないことを意味します。</strong>テーブルの候補やデバイス上のモデルではプロバイダーへの請求は発生しません。だからといってこれらがFree版の機能というわけではありません。このチュートリアルは<strong>SciREPL Pro</strong>向けです。オンラインリクエストはお客様独自のプロバイダーアカウントを使用するため、費用が発生する可能性があります。</p>
+      <nav class="lesson-nav" aria-label="AIおよび補完チュートリアルの手順">
+        <strong>本レッスンの内容</strong>
+        <ol>
+          <li><a href="#tables">オフラインのテーブル候補から始める</a></li>
+          <li><a href="#key">APIキーを保存する</a></li>
+          <li><a href="#agent">Open agentプリセットで小さな例を作成する</a></li>
+          <li><a href="#online">APIベースの補完をリクエストする</a></li>
+          <li><a href="#local">デバイス上のモデルを試す</a></li>
+          <li><a href="#prompt-cells">AI Promptセルを使用してコードを理解する</a></li>
+        </ol>
+        <p><a href="../../../tutorials/">別のチュートリアルを選択する</a> · <a href="#troubleshooting">正常に動作しない場合</a></p>
+      </nav>
+
+      <section id="tables">
+        <p class="step-label">ステップ1 · APIキーは不要</p>
+        <h2>オフラインのテーブル候補から始める</h2>
+        <p>アプリのヘッダーにある<strong>☰ Menu</strong>を見つけます。これは<strong>三本の水平線</strong>があるボタンです。<strong>補完</strong>を開きます。その<strong>セクション</strong>ピッカーによって<strong>全般</strong>、<strong>AI 候補（オンライン）</strong>、<strong>ローカルモデル（端末上）</strong>に分かれています。Generalから始めます。</p>
+        <ol class="lesson-steps">
+          <li><strong>ローカルコード補完： → オン</strong>に設定します。そうしない場合、デフォルトの<strong>自動（デスクトップではオン、タッチ操作ではオフ）</strong>ではスマートフォン上でオフのままになります。</li>
+          <li><strong>候補チップ → オン</strong>に設定し、<strong>候補： → カーソル位置</strong>のままにします。テーブルを分離するには、以前に有効にしていた場合、オンラインセクションで<strong>AI候補 → オフ</strong>に設定し、ローカルセクションで<strong>ローカルモデルを使う → オフ</strong>に設定します。Generalに戻ります。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-general" role="img" aria-label="ProブラウザのGeneral Completion画面。黄色の枠線はGhost textとSuggestion chipsの見出し、Suggestions: At cursor、およびSuggestion chips: Onの位置を示しています。">
+            <div class="shot-stage shot-stage--completion-general">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general.png" width="414" height="820" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general-overlay.svg" width="414" height="820" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>幅の狭い<strong>ブラウザキャプチャ（Androidのスクリーンショットではありません）</strong>での実際のGeneralコントロール。黄色の枠線は<strong>候補： → カーソル位置</strong>、<strong>候補チップ → オン</strong>、およびそれらのセクションタイトルの位置を示しています。Sectionドロップダウンは最上部にあります。下方の設定を表示するにはスクロールが必要になる場合があります。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-general.png">設定全体のキャプチャを表示</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>Completionを閉じます。新しい練習用ワークブックで、<strong>コード</strong>セルと<strong>JavaScript</strong>言語を選択します。末尾にキャレットを置き、選択を行わずに<code>cons</code>と入力します。この<code>const</code>の先頭の文字は<strong>プレフィックス</strong>と呼ばれます。<code>const</code>を探します。</li>
+          <li>下のスクリーンショットでは、<code>cons</code>の後に薄い<code>t</code>（インラインの<strong>ゴーストテキスト</strong>）が続いています。<strong>採用</strong>をタップするか<kbd>Tab</kbd>を押して候補を挿入し、<code>const</code>にします。代わりに<code>const</code>チップが表示された場合は、それをタップすることでもその候補を受け入れることができます。例えば<code>const values = [12, 15, 18];</code>のように、行をご自身で完成させてください。</li>
+        </ol>
+        <p class="callout"><strong>AcceptはRunではありません。</strong>候補を受け入れるとソースが編集されますが、セルは実行されません。このセクションのJavaScriptおよびPythonの例は、編集中におけるオートコンプリートを示しています。これらの練習用セルを実行することは本セクションの対象外です。オフラインテーブルレイヤーのみが有効になっている場合、プレフィックスを入力しても候補を表示するためだけにAPIリクエストを送信したり言語ランタイムを起動したりすることはありません。</p>
+        <p class="note"><strong>将来のオンラインプリフェッチ:</strong> 入力中にモデルリクエストを送信できるオプトインモードが計画されています。まだ利用できず、リリース番号も割り当てられていません。上記のリクエストを行わないという記述は、この将来のモードではなく、現在のオフラインテーブル層に関するものです。</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-javascript.png" width="1080" height="2340" alt="実際のAndroid Galaxy S24+のスクリーンショットからのコンポーザー下部の詳細: JavaScript consの後に薄いtのゴーストとAcceptボタンが続き、候補チップが有効で、拡張キー行は非表示になっています。" loading="lazy" decoding="async">
+          <figcaption><strong>実際のGalaxy S24+ Androidスクリーンショットの詳細ビュー。</strong> JavaScript のテーブル補完は<code>const</code>を<code>cons</code>に対して提示します。薄い<code>t</code>はゴーストテキストで、<strong>採用</strong>が表示され、チップが有効になっています。APIおよびローカルモデルはオフです。拡張キー行は次の画像と対比させるためにここでは非表示になっています。これは独立したオプションの操作項目であり、補完の必須要件ではありません。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-javascript.png">JavaScript cons → const 補完の変更されていないスマートフォン全体のスクリーンショットを表示</a>
+        </figure>
+        <p><strong>スマートフォンで二つのオフライン表示を確認します。</strong> <strong>候補チップ → オン</strong>のままにして、<strong>Python</strong>を選択し、<code>pri</code>を入力します。キャレットの後の薄い<code>nt</code>は<code>print</code>を提示します。受け入れるまではソースの一部にはなりません。<strong>ゴーストテキストを確認するためにチップをオフにする必要はありません。</strong> 単一の候補はゴーストとして表示される場合があり、複数の候補が当てはまる場合はチップによって選択肢が提供されます。両方の例で<strong>AI候補</strong>と<strong>ローカルモデルを使う</strong>はオフのままにしてください。</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-ghost.png" width="1080" height="2340" alt="Android Galaxy S24+のスクリーンショットからのコンポーザー下部の詳細: Python ソースのpriの後に薄いゴーストテキストntとAcceptボタンが続きます。候補チップは有効です。" loading="lazy" decoding="async">
+          <figcaption><strong>実際のGalaxy S24+ Androidスクリーンショットの詳細ビュー。</strong> オフラインテーブル補完は、<strong>候補チップ → オン</strong>の状態で、キャレット位置に一つの薄い接尾辞を提示します。APIおよびローカルモデルはオフです。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-ghost.png">ゴーストテキストの変更されていないスマートフォン全体のスクリーンショットを表示</a>
+        </figure>
+        <p>チップが<strong>オン</strong>のままの状態で、練習用の入力をこれら三行に置き換え、未完成の<code>sample_m</code>の後にキャレットを残します。この行は自身のソース内の名前から<code>sample_mean</code>および<code>sample_median</code>を提示します。チップをタップして候補を選択します。ゴーストテキストとは異なり、この行には選択肢が表示されます。</p>
+        <pre><code>sample_mean = 0
+sample_median = 0
+sample_m</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-chips.png" width="1080" height="2340" alt="Android Galaxy S24+のスクリーンショットからのコンポーザー下部の詳細: Python ソースがsample_meanとsample_median、続いてsample_mを定義し、候補チップsample_meanおよびsample_medianが表示されています。" loading="lazy" decoding="async">
+          <figcaption><strong>実際のGalaxy S24+ Androidスクリーンショットの詳細ビュー。</strong> チップがオンの場合、ソースから得られたオフライン候補により上記の二つの名前が提示されます。APIおよびローカルモデルはオフのままです。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-chips.png">候補チップの変更されていないスマートフォン全体のスクリーンショットを表示</a>
+        </figure>
+        <p><strong>拡張キー行</strong>（Pythonのスマートフォンの画像に表示）および<strong>入力中の構文の色</strong>は、別個のオプションのProコントロールです。いずれかをオンまたはオフにする方法、およびファイルエディタの独立したハイライトチェックボックスを見つけるには、<a href="../../../interface/appearance/#pro-editor">外観のウォークスルー: 拡張キーと構文の色</a>を参照してください。</p>
+        <p>これらの補完表示を試した後、<strong>JavaScript</strong>に戻し、レッスンの残りの部分ではチップをオンにしたままにしてください。</p>
+        <p><strong>補完 → 全般 → 候補チップ</strong>で有効化される、ここに示されたオフラインチップは、精選された名前テーブルとローカルコード情報を組み合わせたものです。Pythonでは、これにはワークブックのコード内で見つかった変数や関数、キャッシュされたカーネル名やメソッドを含むオブジェクト属性が含まれます。頻度と受け入れ履歴はそれらの順位付けに役立ちます。他の言語では対応範囲が異なります。静的リスト、未実行の定義、または古いスナップショットによって、スコープ内で現在利用できない名前が提案されることがあります。<strong>テーブルベースの補完は言語モデルではなく</strong>、タスクについての推論は行いません。</p>
+        <p>セル内での提案が邪魔になる場合、<strong>セルの末尾のみ</strong>が代替手段となります。選択範囲、文字列、コメント、または途中で分割された名前では、意図的に提案が生成されないことがあります。縦幅の短い横画面では、コード用のスペースを確保するためにオプションの行が表示されなくなることがあります。<a href="../../../interface/appearance/">外観設定</a>を参照してください。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-position">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-position.png" width="1080" height="2340" alt="実際のGalaxy S24+ Android General Completion画面の詳細：Suggestionsドロップダウンが開いており、At cursorが選択され、その下にEnd of cell onlyが表示されています。" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>実際のGalaxy S24+ Androidのスクリーンショット。</strong><strong>補完 → 全般 → ゴーストテキスト → 候補：</strong>で、<strong>カーソル位置</strong>または<strong>セルの末尾のみ</strong>を選択します。後者は各行ではなく、<em>セル全体</em>の末尾を意味します。Androidの展開メニューは近くのインデント設定を覆いますが、それらは別のコントロールであり、この選択の一部ではありません。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-position.png">展開されたSuggestionsメニューの加工されていないスマートフォン全体のスクリーンショットを表示</a>
+        </figure>
+      </section>
+
+      <section id="key">
+        <p class="step-label">ステップ2 · オンライン設定</p>
+        <h2>APIキーの保存</h2>
+        <p>APIキーを使用すると、SciREPLが管理下のプロバイダーアカウントを利用できるようになります。そのプロバイダーからキーを取得し、現在の価格やアカウントの上限を確認した上で、このレッスンでは非公開データを含まない小規模な練習用ワークブックのみを使用してください。</p>
+        <ol class="lesson-steps">
+          <li>開く： <strong>メニュー → 🤖 AI Assistant (Pro)</strong>。パネルの <strong>⚙ 歯車</strong> をタップしてAI Settingsを開きます。
+            <p class="callout"><strong>歯車アイコンが見当たらない場合</strong> キーボードによってAssistantパネルの位置がずれたりスクロールしたりすることがあります。パネルのコンテンツを下にドラッグして上部へスクロールし、歯車アイコンを表示させてください。キーボードを閉じることでも表示スペースを広げられます。</p>
+          </li>
+          <li><strong>モデルを設定する対象 → AIアシスタント</strong>を設定します。<strong>バックエンド</strong>（例：OpenRouter）と<strong>モデル</strong>を選択し、バックエンドで設定可能なエンドポイントを使用している場合はエンドポイントを確認してください。</li>
+          <li>一致する<strong>APIキー</strong>を入力します。他のプロバイダーとエンドポイントの組み合わせのキーを管理するには<strong>保存済みのキー</strong>を使用します。ある送信先用のキーが、別の送信先用のキーとして自動的に使えるわけではありません。</li>
+          <li><strong>保存</strong>をタップします。設定を保存するだけではモデルへのリクエストは行われません。次のステップのためにパネルを開いたままにしておいてください。</li>
+        </ol>
+        <p class="callout"><strong>キーをワークブックに入れないでください。</strong>セル、プロンプト、スクリーンショット、またはエクスポートしたファイルに貼り付けないでください。保存されたキーは、アプリケーションレベルの暗号化なしでローカルのアプリ/ブラウザストレージに保存されます。デバイスを保護し、信頼できないコードを実行しないでください。保存および送信される内容については、<a href="../../../../../pro/privacy.html">Proプライバシーポリシー</a>で説明されています。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--key-setup" role="img" aria-label="キーが入力されていないProブラウザのAI Settings。黄色の枠線はConfigure model for: AI Assistant、Backend: OpenRouter、Model: GLM 5.3 Flash、および空のAPI Keyフィールドを示しています。">
+            <div class="shot-stage shot-stage--key-setup">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup.png" width="390" height="538" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup-overlay.svg" width="390" height="538" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Androidのスクリーンショットではなく、AI Settingsの新規で<strong>キー未入力のブラウザキャプチャ</strong>です。黄色の枠線は設定対象のフィールドを示しています：<strong>モデルを設定する対象</strong>、<strong>バックエンド</strong>、<strong>モデル</strong>、<strong>APIキー</strong>。薄く表示されている<code>sk-…</code>はプレースホルダーであり、保存されたキーではありません。さらに下にスクロールすると<strong>保存</strong>があります。この画像のためにキーが入力されたり、リクエストが送信されたりすることはありませんでした。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-key-setup.png">加工されていないAI設定のスクリーンショットを表示</a>
+        </figure>
+        <p>低コストでツール利用が可能なモデルは、Assistantの出発点として妥当な選択肢です。比較対象の例としては、<a href="https://openrouter.ai/z-ai/glm-5.3-flash">GLM 5.3 Flash</a>、<a href="https://developers.openai.com/api/docs/models/gpt-6-luna">GPT-6 Luna</a>、<a href="https://www.anthropic.com/claude/haiku">Claude Haiku 5.5</a>、<a href="https://api-docs.deepseek.com/quick_start/pricing">DeepSeek V4 Flash</a>などが挙げられます。正確なモデルID、利用可能なバージョン、ツールのサポート状況、価格は、お使いのアプリのバージョンやプロバイダーによって異なります。最新の選択画面やプロバイダーのドキュメントを確認してください。新しく発表されたモデルは、表示されるまでにアプリのアップデートが必要な場合があります。後から、補完専用として別の安価なモデルを選択することもできます。</p>
+        <aside class="callout" id="custom-model">
+          <p><strong>モデルが一覧に見当たらない場合</strong> <strong>AI設定 → モデルを設定する対象 → AIアシスタント</strong>で、最初に正しい<strong>バックエンド</strong>を選択し、次にプロバイダーの<strong>正確なAPIモデルID</strong>をModel選択ツールの下にある<strong>またはカスタムモデルIDを入力</strong>に入力して、<strong>保存</strong>をタップします。このフィールドはPro 1.4.0ですでに利用可能です。</p>
+          <p>モデルのマーケティング名だけでなく、選択したプロバイダーでIDを確認してください。OpenRouterの場合、組織のプレフィックスを含めます。たとえば、<code>anthropic/claude-haiku-5.5</code>（<a href="https://openrouter.ai/anthropic/claude-haiku-5.5">そのモデルページ</a>上）のようになります。そのページのURLではなく、IDを入力してください。カスタムIDはドロップダウンより優先されます。一覧にあるモデルを再度選択すると、カスタムフィールドはクリアされます。</p>
+          <p><strong>IDを指定してもAPIのサポートが追加されるわけではありません。</strong>モデルは、API（SciREPLが使用）を介したツール呼び出しに対応している必要があります。プロバイダーへのアクセス権、互換性、現在の価格を確認してください。保存してもこれらは検証されず、モデルへのリクエストも送信されません。</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--custom-model" role="img" aria-label="キー未設定のProブラウザAI設定。黄色の枠線は、モデル選択ツールの下にある、Backend: OpenRouterとanthropic/claude-haiku-5.5を含むカスタムモデルIDフィールドを示しています。">
+            <div class="shot-stage shot-stage--custom-model">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model.png" width="390" height="456" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model-overlay.svg" width="390" height="456" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Androidのスクリーンショットではなく、実際の<strong>キー未設定のブラウザキャプチャ</strong>です。「Model」の下にある黄色の枠線はカスタムIDフィールドの位置を示しています。ドロップダウンには依然としてGLM 5.3 Flashが表示されていますが、入力されたHaikuのIDは「Save」時に優先されます。APIキーと「Save」はこの切り抜きの下にあります。キーは入力されておらず、「Save」も押されておらず、モデルリクエストも送信されていません。これは設定例であり、モデルが機能することのテストではありません。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-custom-model.png">変更されていないカスタムモデルのスクリーンショットを表示</a>
+        </figure>
+      </section>
+
+      <section id="agent">
+        <p class="step-label">ステップ3 · 慎重なツール使用</p>
+        <h2>Openエージェントプリセットを使用して小さな例を作成する</h2>
+        <p><strong>オープン</strong>は<strong>二番目に制限の緩い</strong>セキュリティプリセットであり、<strong>フルコントロール</strong>に次ぐものです。デフォルトでノートブックの編集を許可し、Cautiousよりも確認の頻度が少なくなっています。実行時に確認を求めるかどうかは、お使いのバージョンと権限設定に依存します。<a href="#execution-permissions">今後の実行承認に関する付録</a>を参照してください。オートコンプリートの要件としてではなく、練習用のワークブックで意図的に使用してください。</p>
+        <ol class="lesson-steps">
+          <li>AI Settingsで、次を選択します <strong>セキュリティレベル → オープン</strong> および <strong>エージェントの書き込み → アクティブなワークシート</strong>。ソースの閲覧はオフのままにし、次をオフにします <strong>AIが作成したセルの自動実行</strong>。次項目の下で、 <strong>カーネル…</strong>、次を設定します <strong>JavaScript → 確認</strong>、その後に保存します。実行ツールのAllowが以前に保存されていた場合でも、このカーネルルールは引き続き確認を求めます。
+            <p class="callout" id="auto-run-warning"><strong>自動実行の無効化は実行ロックではありません。</strong>これにより新しく作成されたセルが自動的に実行されるのを防ぎますが、個別の<code>execute_cell</code>または<code>run_cells</code>リクエストは無効になりません。リリース済みのPro 1.4.0のOpenデフォルトでは、確認なしでそれらを許可できます。今後のOpenデフォルトでは確認を求めますが、明示的なツールまたはカーネルのAllowによりそのデフォルトを変更できます。<strong>AI設定 → カーネル… → JavaScript → 確認</strong>により、この演習のJavaScript実行には確認が必要な状態が保たれます。ユーザー自身による手動のセルRunは引き続き別の操作です。<a href="#execution-permissions">次期リリースの実行制御の詳細は付録に記載されています。</a></p>
+            <aside class="callout" id="sandbox">
+              <p>より多くの確認を希望する場合は、代わりに<strong>慎重</strong>を使用してください。Openは引き続き個別のソース閲覧および書き込みスコープの制御を尊重します。Full controlはこれら二つの大まかな制御をバイパスします。個別の権限やその他の安全対策も引き続き重要です。<strong>レビュー</strong>は読み取り主体とする追加の制限であり、このセル作成のデモを妨げることになります。</p>
+              <h3>ブラウザサンドボックスが保護するもの、および保護しないもの</h3>
+              <p>通常のワークブックの実行はブラウザ／WebViewおよびその言語ランタイム内で実行され、スマートフォンのファイルへの無制限のアクセスではなく仮想ファイルシステムを使用します。これは有用な境界ですが、<strong>コードが悪影響を及ぼさない保証ではありません</strong>。許可されたJavaScriptおよびそこへのブリッジはアプリデータや保存された認証情報にアクセスできます。許可されたコードが開始されると、ネットワーク制限はベストエフォートとなり、機密情報を委ねるべき隔離境界ではありません。これから行う実行プロンプトは承認手順を追加するものであり、アプリのデータからの隔離ではありません。練習用ワークブックを使用し、その内容にはプライベートな情報を含めないようにしてください。</p>
+              <p><strong>リモート／MCPターミナルは異なります。</strong>ブラウザローカルのサンドボックス外にあるブローカーホスト上の実際のシェルを公開する可能性があります。ここではリモートとターミナルをオフのままにしてください。これらを有効にする前に<a href="../../../../pro/remote/">リモートとセキュリティ<span class="english-reference"> (英語のリファレンスページ)</span></a>を確認してください。プロンプトに丁寧な「…しないでください」と記述しても、セキュリティ制御にはなりません。</p>
+            </aside>
+          </li>
+          <li>アシスタントパネルで、 <strong>このワークブック</strong>を選択します。 <strong>レビュー</strong>, <strong>リモート</strong>、および <strong>ターミナル</strong> はこの直接プロバイダーの例ではオフのままにします。
+            <figure class="phone-figure" id="assistant-context-controls">
+              <p class="screen-note">パネルヘッダー</p>
+              <div class="shot-window shot-window--assistant-context-header" role="img" aria-label="Androidアシスタントパネルの上部詳細。黄色の枠線は会話ドロップダウンで選択されている「このワークブック」を強調表示しています。">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <p class="screen-note">下部コントロール</p>
+              <div class="shot-window shot-window--assistant-context-footer" role="img" aria-label="同じAndroidアシスタントパネルの下部詳細。黄色の枠線は、すべて未チェックの「レビュー」、「リモート」、「ターミナル」を強調表示しています。空のメッセージボックスと送信ボタンが表示されています。">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption><strong>実際のGalaxy S24+ Androidスクリーンショットの二つの詳細。</strong>黄色の枠線は<strong>このワークブック</strong>と<strong>レビュー</strong>、<strong>リモート</strong>と<strong>ターミナル</strong>（すべて未チェック）の位置を示しています。パネル中央の空白部分は省略されています。プロンプトは送信されませんでした。</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-assistant-context.png">変更されていないアシスタントパネル全体のスクリーンショットを表示</a>
+            </figure>
+          </li>
+          <li>以下のコールアウトにある練習用プロンプトを送信します。パネルの <strong>送信</strong> で既にエージェントツールループが開始されます。ここには追加の「エージェントモード」の切り替えはありません。全画面エディタの <strong>エージェント</strong> ボタンは別のワークフローです。
+            <div class="callout" id="assistant-practice-prompt">
+              <p><strong>このプロンプトをコピーします。</strong>コードセルではなく<strong>アシスタントのメッセージボックス</strong>に貼り付け、<strong>送信</strong>をタップします。</p>
+              <pre data-translatable-prompt="assistant-practice"><code>この練習用ワークブックで、Markdownによる説明を追加し、
+その後にJavaScriptセル（名前はsummary_demo）を一つ追加してください。
+10個の1から20まで（両端を含む）の疑似乱数整数の入力配列を生成してください。
+初期stateを42とするPark-Millerジェネレーターを使用します。各
+値について、まずstate = (16807 * state) % 2147483647を更新し、
+次に1 + Math.floor(20 * state / 2147483647)を追加します。
+このルールで配列を生成してください。値をハードコードしたり
+Math.randomを使用したりしないでください。セルの実行ごとにstateを42にリセットしてください。
+生成された入力配列を出力し、その個数（配列の
+長さ）、算術平均、最小値、最大値を計算してください。各
+結果をconsole.logでラベル付きの個別の行に出力してください。
+パッケージは使わず、通常のJavaScript配列、算術演算、Math.floor
+を使用してください。
+セルの実行や既存セルの変更はしないでください。ファイル、
+ストレージ、DOM API、ネットワークリクエストは使用しないでください。コードを
+レビューできるように、期待される結果を説明してください。</code></pre>
+            </div>
+          </li>
+          <li>提案された説明と新しい<code>summary_demo</code>セルを確認します。指定されたルールに従って入力を生成し、その配列から要約を計算していることを確認してください。そのセルをご自身で実行し、以下の確認用数値と比較してください。期待される結果は、カウント <strong>10</strong>、平均 <strong>9.3</strong>、最小値 <strong>1</strong>、最大値 <strong>20</strong> です。</li>
+        </ol>
+        <aside class="callout" id="seeded-summary-check">
+          <h3>要約だけでなく入力も確認する</h3>
+          <p>シードによってシーケンスが固定されるため、一見ランダムに見えるこの入力は再現可能です。上記の描画前更新ルールに従うと、次のようになります：</p>
+          <pre><code>Input: [1, 11, 15, 6, 8, 4, 20, 11, 11, 6]
+Count: 10
+Mean: 9.3
+Minimum: 1
+Maximum: 20</code></pre>
+          <p>出力ラベルは異なる場合がありますが、数値は一致するはずです。セルを再度実行すると、同じ入力と要約が生成されます。別のシードを使用すると演習内容が変わります。この小さなジェネレーターは再現可能なデモ用であり、セキュリティ重視の乱数用ではありません。</p>
+        </aside>
+        <figure class="phone-figure" id="assistant-seeded-result">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/phone-agent-result.png" width="1080" height="2340" alt="レビュー済みの JavaScript summary_demo ソースの一部と、そのシード設定された出力を示す実際の Android Galaxy S24+ スクリーンショット：入力 1、11、15、6、8、4、20、11、11、6、個数 10、平均 9.3、最小 1、最大 20。" loading="lazy" decoding="async">
+          <figcaption><strong>上記のシード設定されたベクトル演習の実際の Galaxy S24+ Android スクリーンショット。</strong> GLM 5.3 Flash は練習用セルを作成し、四ステップの上限で一時停止した後、<strong>続行</strong> を一回押すと完了しました。コードはエージェントによって自動的にではなく、手動で検査および実行され、期待通りの入力、個数 10、平均 9.3、最小 1、最大 20 を生成しました。二回目の手動実行でも同じ結果が再現されました。スクリーンショットには出力とソースの一部が表示されています。セルの上方にスクロールして、シードと最初の数行を確認してください。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-agent-result.png">レビューされたコードと結果のスマートフォン全体のスクリーンショットを表示</a>
+        </figure>
+        <p><strong>送信前：</strong>アシスタントは、選択した会話と現在のワークブックのセルの限定されたプレビュー（各セルの先頭 500 文字までとメタデータ）を含めます。許可されたツールはそれ以上を送信できます。ソース閲覧をオフにしても、ワークブックのプレビュー送信は停止<em>されません</em>。これは、後述の補完で使用される、より小さな現在のセルのペイロードとは異なります。<a href="#planned-workbook-context">計画されているワークブックコンテキストの変更については、付録で説明されています。</a></p>
+        <p><strong>Continue ボタンが表示されて一時停止しましたか？</strong> 下で強調表示されている <strong>エージェント制限（実行ごと） → 最大ステップ数</strong> は、一回の制限付き実行における許容ステップ数を制御します。エージェントは完了する前にその制限に達する可能性があります。エージェントがすでに行った内容を確認し、タスクが未完了でもう一回の制限付き実行を行いたい場合は <strong>続行</strong> を押してください。続行すると API 料金がさらに発生する可能性があります。<strong>完了</strong> の後は必要ありません。</p>
+        <figure class="phone-figure" id="assistant-run-controls">
+          <div class="shot-window shot-window--assistant-open" role="img" aria-label="スクロールした Pro ブラウザの AI 設定。黄色の枠線は、「AI が作成したセルを自動実行」：未チェック、「ソースの閲覧を許可」：未チェック、「エージェントの書き込み」：アクティブなワークシート、デフォルトの 25 のヒント付きの「最大ステップ数」、および「セキュリティレベル」：Open を示しています。">
+            <div class="shot-stage shot-stage--assistant-open">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open.png" width="390" height="1100" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open-overlay.svg" width="390" height="1100" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>実行と権限までスクロールした AI 設定。黄色の枠線は、<strong>AIが作成したセルを自動実行する</strong> および <strong>ソースの閲覧を許可</strong>（いずれも未チェック）、<strong>エージェントの書き込み範囲 → アクティブなワークシート</strong>、<strong>最大ステップ数</strong>（<strong>エージェント制限（実行ごと）</strong> 内）、そして <strong>セキュリティレベル → オープン</strong> を示しています。この<strong>ブラウザキャプチャは実行同意の更新前のもの</strong>であり、プロバイダーのリクエストやセキュリティテストではありません。Open ラベルは以前のデフォルトを説明するものであり、狭いドロップダウンに収まらない長さです。今後導入される承認およびオーバーライドのダイアログは示されていません。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-open.png">変更されていないスクロールした設定キャプチャ全体を表示</a>
+        </figure>
+      </section>
+
+      <section id="online">
+        <p class="step-label">ステップ 4 · 必要なときに代替案をリクエストする</p>
+        <h2>API ベースの補完をリクエストする</h2>
+        <ol class="lesson-steps">
+          <li><strong>メニュー → 補完</strong> を開き、<strong>セクション → AI 候補（オンライン）</strong> を選択します。<strong>AI候補 → タップ時</strong> に設定します。</li>
+          <li>そのプロバイダー、エンドポイント、モデルを継承するには、<strong>補完モデル： → AIアシスタントに従う</strong> のままにします。または <strong>プロバイダーとモデルを選ぶ</strong> を選択し、保存済みのプロバイダー／エンドポイントと、短い提案に適した低コストのモデルを選択します。この画面ではキーを入力しません。<strong>AIアシスタント設定を開く</strong> で最初に追加できます。</li>
+          <li>このセクションの <strong>詳細設定</strong> を開いて、応答タイムアウトと利用額制限を確認します。デフォルトは <strong>6 秒</strong>、<strong>$0.25／日</strong>、<strong>$5／月</strong> です。上限を増やす前に価格を確認してください。</li>
+          <li><strong>JavaScript</strong> エディタに戻り、この練習用スニペットを入力します。
+            <pre><code>const values = [12, 15, 18];
+const average = </code></pre>
+            未完成の <code>const average = </code> 行の後にキャレットを残します。候補行の末尾にある <strong>…</strong> をタップするか、<strong>…AI</strong> エクストラキーを使用するか、<kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd> を押します。</li>
+          <li>送信する前に、最初のリクエストの実際のペイロードと宛先を確認してください。AIチップには <strong>✦</strong> マーカーが付いています。タップして受け入れます。切り詰められたチップや複数行のチップは、最初にプレビューを開きます。Run の前に結果のソースを確認してください。</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/completion-online.png" width="414" height="820" alt="「タップ時」および「プロバイダとモデルの選択」が表示された Pro ブラウザのオンライン補完画面。プロバイダキーが保存されていないことを説明し、「AI設定を開く」を表示しています。" loading="lazy" decoding="async">
+          <figcaption>独立モデルコントロールの、意図的に <strong>キーを設定していないブラウザキャプチャ</strong>。その警告は実際のものであり、保存されたキーと有効な宛先がなければ何も送信できません。設定したプロバイダとモデルはステップ 2 の後にここに表示されます。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-online.png">オンライン設定の完全なキャプチャを表示</a>
+        </figure>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-online-chips.png" width="1080" height="2340" alt="Android Galaxy S24+ のスクリーンショットからのコンポーザー下部の詳細：未完成の JavaScript の平均値の式には、それぞれ星印が付いた values.reduce と eval(values の二つの切り詰められたAIチップがあります。" loading="lazy" decoding="async">
+          <figcaption><strong>実際の補完リクエスト後の Galaxy S24+ Android スクリーンショットの詳細ビュー。</strong> 補完には <strong>Gemini 3.5 Flash-Lite via OpenRouter</strong> が使用され、その間アシスタントは <strong>GLM 5.3 Flash</strong> のままでした。二つの ✦ チップは切り詰められています。出力は異なる場合があるため、受け入れる前にプレビューを確認してください。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-online-chips.png">オンライン候補チップの変更されていないスマートフォン全体のスクリーンショットを表示</a>
+        </figure>
+        <p class="callout"><strong>単なるAIチップではなく、コードを選択してください。</strong> このリクエストでは、最初のチップが <code>values.reduce((a, b) => a + b, 0) / values.length;</code> を提案しました。タップして完全なプレビューを確認します。配列を合計してその長さで除算し、この例では <strong>15</strong> になります。二番目のチップは <code>eval(values.join(' + ')) / values.length;</code> を提案しました。<strong>その不要な <code>eval</code> の代替案を拒否してください</strong>。平均の計算で文字列を実行可能コードに変換する必要はありません。受け入れる前に返された独自のコードを確認し、レビュー後にのみ Run してください。</p>
+        <figure class="phone-figure" id="online-completion-preview">
+          <div class="shot-window shot-window--completion-preview" role="img" aria-label="AI提案プレビューの Android Galaxy S24+ での詳細：Cancel ボタンと Insert all ボタンが付いた values.reduce((a, b) =&gt; a + b, 0) / values.length;。キーボードは省略されています。提案は挿入されていません。">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-preview.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Galaxy S24+ 上の完全なコードプレビュー。</strong> 新しい Gemini Flash-Lite リクエストにより、同じ <code>reduce</code> の式が返されました。<strong>指定した行までのみ受け入れる：</strong>複数行の提案の場合は、必要な最後の行をタップまたはクリックします。これにより、最初の行からその行までのすべてがすぐに挿入され、それ以降の行は除外されます。<strong>すべて挿入</strong> は提案全体を受け入れます。<strong>キャンセル</strong> は何も挿入しません。画面上では折り返されていますが、この例は一行のコードであるため、タップすると式全体が受け入れられます。受け入れるとソースが編集されますが、セルは Run されません。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-preview.png">補完プレビューの変更されていないスマートフォン全体のスクリーンショットを表示</a>
+        </figure>
+        <p>リクエストは最大五つの代替案を求めますが、画面に収まる数はそれより少ない場合があります。もう一度タップすると、まず受信済みの代替案が順に表示され、それらを使い果たすとさらにリクエストできます。リクエストの処理中にタップするとキャンセルされます。タイムアウトが切れるとそれ以降の返答は破棄され、入力したりキャレットを移動したりすると古い提案は無効になります。</p>
+        <p><strong>独立とは独立を意味します：</strong>アシスタントのモデルを変更しても、個別の補完の選択肢は分離されたままになります。これは、高性能なエージェントを求めつつ安価なオートコンプリートを使用したい場合に役立ちます。アシスタントに従うと、そのアイデンティティが継承されますが、その会話やエージェントの権限は継承され<em>ません</em>。</p>
+        <aside class="callout" id="completion-privacy">
+          <h3>支払っている対象と送信している内容を把握する</h3>
+          <p>オンライン補完は<strong>オンデマンド</strong>です。通常の入力では何も送信されません。このワークフローでは、<strong>入力中のプリフェッチ</strong>はまだ利用できません。補完では制限された現在のセルコンテキストが送信されます。キャレットの前は最大1,500文字、後ろは200文字、ローカル名は最大12個までであり、アシスタントのチャットやワークブック全体は送信されません。シークレットのマスキングはベストエフォートであるため、ペイロードはご自身で確認してください。</p>
+          <p><strong>常に許可</strong>はその送信先に対する恒久的な同意を付与します。プロバイダー、エンドポイント、またはモデルが変更された場合は、再度確認が行われます。<strong>確認せずに送信</strong>は最初にその選択肢を有効化しますが、実際の初回ペイロードは一度表示されます。学習中は<strong>毎回確認</strong>のままにしておいてください。</p>
+          <p>日／月ごとの金額は<strong>補完専用のソフトな支出制限ガード</strong>であり、プロバイダーの請求上限を保証するものではなく、アシスタントやAIプロンプトリクエストの予算でもありません。失敗やキャンセルによって予約された料金が維持される場合があります。支出履歴を消去しても上限合計はリセットされません。価格が記載されていないモデルには明示的な入力／出力の上限価格が必要であり、設定されていない場合アプリは送信を拒否します。</p>
+        </aside>
+      </section>
+
+      <section id="local">
+        <p class="step-label">ステップ5 · オプションのAndroidダウンロード</p>
+        <h2>オンデバイスモデルを試す</h2>
+        <p>オプションの<strong>Qwen2.5-Coder 0.5B</strong>モデルは、テーブルでは判断がつかない場合にローカルでコードを提案します。これは小規模なコード補完モデルであり、<strong>対話型エージェントの代わりとなるものではありません</strong>。インストール後は、推論によって入力されたコードがプロバイダーに送信されることはなく、APIの料金も発生しません。</p>
+        <ol class="lesson-steps">
+          <li>Proが<strong>Google Play</strong>からインストールされている対象のAndroidスマートフォンで、<strong>メニュー → 補完 → セクション → ローカルモデル（端末上）</strong>を開きます。</li>
+          <li><strong>インストール</strong>をタップし、約<strong>400 MB</strong>のダウンロードに必要な時間とストレージを確保してください。現在サイドロードされたインストールでは、このフローを通じてモデルをダウンロードすることはできません。</li>
+          <li>準備ができたら、<strong>ローカルモデルを使う → 確信がないとき</strong>のままにしておきます。簡単なケースにはテーブルが応答し、不確実な場合にはモデルが補完します。<strong>常に表示</strong>にすると実行頻度が高くなり、<strong>オフ</strong>にするとダウンロードしたデータを削除せずに停止します。</li>
+        </ol>
+        <figure class="phone-figure" id="local-model-settings">
+          <div class="shot-window shot-window--local-model-settings" role="img" aria-label="Galaxy S24+ Androidのローカルモデル設定。黄色の枠線は、ローカルモデルセクション、Ready（このデバイスでは398 MB）、および「Use local model: When unsure」を示しています。すでにインストールされているモデルには、InstallではなくDeleteが表示されます。">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-local-settings.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+              <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-local-settings-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Galaxy S24+でのローカルモデル設定。</strong>黄色の枠線は、セクションピッカー、モデルの<strong>準備完了</strong>ステータス、および<strong>ローカルモデルを使う → 確信がないとき</strong>を示しています。このスマートフォンにはすでにモデルが存在するため、<strong>削除</strong>が<strong>インストール</strong>の代わりに表示されています。削除する必要はありません。このデバッグビルドの画像は設定を示したものであり、Google Play配信のテストではありません。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-local-settings.png">変更されていない端末の全画面スクリーンショットを表示</a>
+        </figure>
+        <ol class="lesson-steps" start="4">
+          <li>コードセルに戻り、未完成の名前または行のところで一時停止します。結果はコンテキストによって異なり、一時停止するたびに提案が生成されるとは限りません。適切なゴーストまたはチップを受け入れ、ソースを確認してから、個別に実行してください。</li>
+        </ol>
+        <h3>どのスマートフォンが快適ですか？</h3>
+        <p>最低要件は<strong>64ビットARM Androidおよび少なくとも4 GBのRAM</strong>ですが、これはスムーズなパフォーマンスを保証するものではありません。<strong>Galaxy S24+クラスのスマートフォン</strong>が、実用面で快適な目安となります。SamsungはS24+向けに<strong>12 GBのRAM</strong>を記載しており、アプリ、カーネル、モデル用により多くの余裕を残しています。これは推奨されるパフォーマンス水準であり、そのモデルの購入を義務付けるものではありません。<a href="https://news.samsung.com/us/enter-new-era-of-mobile-ai-samsung-galaxy-s24-series/">SamsungのS24シリーズ仕様</a>。</p>
+        <p><strong>Galaxy S10+</strong>には、対象となる8 GBまたは12 GBのバリエーションがあります。メンテナーの非公式な使用感としては、ローカル補完は動作するもののAPI補完より遅く感じられる場合があります。この比較はモデルやネットワークに依存します。<strong>記録されたローカルエンジンのベンチマークではS10+は測定されていません</strong>。そのため、これは実測された速度の比較ではなく、すべての端末に対する保証でもありません。大規模なワークブックやメモリを大量に消費するカーネルとモデルを組み合わせる場合は、遅延やアプリの応答停止に注意してください。<a href="https://news.samsung.com/us/galaxy-s10-interactive/">SamsungのS10シリーズ仕様</a>。</p>
+        <p>以前のS24+クラスのネイティブエンジンテストでは、ロード後のウォーム状態における最初の単語の中央値がおよそ<strong>0.10秒</strong>、コールド状態における最初の単語の中央値がおよそ<strong>0.24秒</strong>と測定されました。これらはベンチマーク結果の例であり、保証ではありません。キャッシュされていない初回ロードには数秒かかりました。ロードされたモデルは、約<strong>460〜490 MB</strong>のアプリプロセスメモリを追加しました。これは<em>次のものに加えてです：</em>WebView、Python/Rランタイム、およびオペレーティングシステム。</p>
+        <p class="callout"><strong>古いスマートフォンで動作が重くなった場合：</strong><strong>ローカルモデルを使う → オフ</strong>に設定し、代わりにテーブルまたはタップ時のみのAPI代替手段を使用してください。ローカルの<strong>詳細設定</strong>で、<strong>アプリを離れた後もロード状態を維持 → 0</strong>に設定すると、離脱時にモデルが解放されます。アイドル時アンロードや低バッテリー制御も役立ちます。トラブルシューティングを行う前にワークブックを保存またはエクスポートしてください。API費用ゼロのモデルであっても、ストレージ、メモリ、バッテリーは消費します。</p>
+      </section>
+
+      <section id="prompt-cells">
+        <p class="step-label">ステップ6 · 作成しながらコードを理解する</p>
+        <h2>焦点を絞ったAIプロンプトセルで仕上げる</h2>
+        <p>アシスタントは複数ステップの作業に便利です。特定のコードに関する小さく再現可能な質問には、<strong>AIプロンプト</strong>セルの方が適しています。アシスタントの履歴やツールを使わず、<strong>単一の独立したリクエスト</strong>を行います。計算を拡張する前に、それがなぜ機能するのかを尋ねるために使用してください。</p>
+        <p>ここでは、ステップ3のシード付きランダム<code>summary_demo</code>セルに戻ります。別のランダム配列でもなく、ステップ4の平均値のみの補完例でもなく、その既存の計算についての説明を求めます。</p>
+        <ol class="lesson-steps">
+          <li><strong>AIプロンプト</strong>セルを、ステップ3の<code>summary_demo</code> JavaScriptセルの直後に追加します（下の質問が選択したソースと一致するように、ステップ4の平均値のみのスニペットの後ではありません）。セルタイプは<strong>コード</strong>のままとし、<strong>AIプロンプト</strong>を<strong>言語/モードのドロップダウン</strong>から選択します。表示されていない場合は、<strong>メニュー → 言語とモード</strong>で有効にしてください。</li>
+          <li>下のプロンプトを <strong>AIプロンプトセル</strong>に貼り付けます（アシスタントのメッセージボックスではありません）。その <strong>設定</strong> コントロールを開きます。
+            <div class="callout" id="ai-prompt-practice-prompt">
+              <pre data-translatable-prompt="ai-explanation"><code>選択したJavaScriptセルを一行ずつ説明してください。
+生成ルールとシード42はどのように入力配列を決定しますか？
+なぜカウント10、平均9.3、最小値1、最大値20を報告する必要があるのですか？
+なぜシードをリセットすると結果が再現可能になるのですか？
+空の配列に対して何を変更する必要があるか説明してください。
+短い説明のみを返してください。コードを書き直さないでください。</code></pre>
+            </div>
+            <div class="prompt-config-locations">
+              <figure class="phone-figure" id="ai-prompt-composer-controls">
+                <p class="screen-note"><strong>新規セルコンポーザー</strong></p>
+                <div class="shot-window shot-window--ai-prompt-composer" role="img" aria-label="AIプロンプトが選択されたAndroidの新規セルコンポーザー。黄色の枠線は、下書きの横にあるAI言語セレクターとConfigureボタンの位置を示しています。">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>セルを保存する前：</strong>AIプロンプト（<strong>AI</strong>と表示）を選択し、コンポーザーで強調表示されている<strong>設定</strong>をタップします。作成中の新しいプロンプトを設定します。</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png">コンポーザーのスクリーンショット全体を表示</a>
+              </figure>
+              <figure class="phone-figure" id="ai-prompt-edit-controls">
+                <p class="screen-note"><strong>編集中の既存セル</strong></p>
+                <div class="shot-window shot-window--ai-prompt-edit" role="img" aria-label="編集モードのAndroid保存済みAIプロンプトセル。黄色の枠線は、プロンプトの先頭の上にあるセルヘッダー内のConfigureを示しています。">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>既存のセルの場合：</strong>そのセルのヘッダーにある<strong>設定</strong>をタップします。プロンプトの編集中も引き続き利用できます。どちらのボタンも同じ設定ダイアログを開きます。設定を変更しただけでは何も送信されません。</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png">セル編集のスクリーンショット全体を表示</a>
+              </figure>
+            </div>
+          </li>
+          <li>設定： <strong>最終応答の出力先 → このセルの出力</strong>（デフォルト）。次の項目の下で： <strong>送信するコンテキスト → ソースの取得元</strong>で次を選択します： <strong>前の1セル</strong>。次のチェックを外します： <strong>保存された出力テキストを含める</strong> （このソースのみの演習用）。次を確認します： <strong>コンテキストのプレビュー</strong> に対象名が表示されていること <code>summary_demo</code>。次に下へスクロールしてタップします： <strong>設定を保存</strong>.
+            <figure class="phone-figure" id="ai-prompt-configuration">
+              <div class="shot-window shot-window--ai-prompt-config" role="img" aria-label="AndroidのAIプロンプトセル設定ダイアログ。黄色の枠線は、「このセルの出力」、「前の1セル」、およびチェックが外された「保存された出力テキストを含める」の位置を示しています。">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption><strong>設定</strong>によって開かれたダイアログ。黄色の枠線は応答の出力先、<strong>直前の1セル</strong>、およびチェックの外れた保存出力オプションの位置を示しています。直前の<code>summary_demo</code>のソースのみを送信します。<strong>直前の1セル</strong>はワークブック順で直前にあるセルを意味し、名前による検索は行いません。</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png">設定の全体スクリーンショットを表示</a>
+              <p class="screen-note">ダイアログ内を下にスクロールして<strong>設定を保存</strong>に移動します。</p>
+              <div class="shot-window shot-window--ai-prompt-config-save" role="img" aria-label="AndroidのAIプロンプト設定ダイアログの下部。黄色の枠線が、「キャンセル」の隣にある「設定を保存」の位置を示しています。">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png">スクロールしたダイアログ全体のスクリーンショットを表示</a>
+            </figure>
+          </li>
+          <li>AIプロンプトセルの<strong>実行</strong>をタップします。確認画面で選択されたコンテキストを確認し、<strong>AIプロバイダーに送信</strong>を選択します。ソースと並べて説明を読み、既知の結果と比較してください。</li>
+        </ol>
+        <figure class="phone-figure" id="ai-prompt-explanation">
+          <div class="shot-window shot-window--ai-prompt-result" role="img" aria-label="GLM 5.3 Flashからの実際のAndroid AIプロンプト出力。表示されている抜粋では、summary_demoにおけるシード値付きジェネレーター、配列の長さ、reduce、最小値、最大値について説明しています。">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Galaxy S24+端末における実際のGLM 5.3 Flashによる解説。</strong>一回のみのソース限定リクエストにより、AIプロンプトセルの出力にこの応答が生成されました。JavaScriptセルの変更や再実行は行われていません。画像には説明の冒頭部分が示されています。続きを見るには出力をスクロールし、ソースおよびステップ3の期待される結果と回答を照らし合わせて確認してください。AIによる説明は正確性を保証するものではありません。</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png">解説の全体スクリーンショットを表示</a>
+        </figure>
+        <p class="callout"><strong>APIコストを抑制し理解を深める方法。</strong>焦点を絞ったAIプロンプトは、肥大化するエージェントの会話よりも少ないコンテキストを送信し、複数ステップにわたるツールのループを回避できるため、入力トークン数と潜在的な請求額を削減できます。コーディングの際には、簡潔な推論、前提条件、期待される出力を尋ねてください。節約は<strong>保証されていません</strong>。モデルの料金、応答の長さ、推論トークン、選択したコンテキストが依然として影響します。これらのリクエストは、独立した補完モデルではなく<strong>アシスタントのプロバイダー／モデル</strong>を使用し、補完の支出保護の対象外となります。</p>
+        <div id="ai-prompt-apply-example">
+          <h3>別の例 · セルを置き換える前にプロットを確認する</h3>
+          <p>次に、何かが置き換えられる前に確認を挟みつつ、<em>別の</em>セルにコードを書き込むようAIプロンプトに指示します。多数の小標本全体で推定分散がどのように変化するかをプロットします。これらは新たな正規標本であり、先ほどの<code>summary_demo</code>整数配列ではありません。目標は統計学を習得することではなく、<strong>設定 → プレビュー → 適用 → 実行</strong>の流れを学ぶことです。</p>
+          <p class="callout"><strong>分散はスチューデントのtではありません。</strong>大きさ10の独立な正規標本において、<code>9s² / σ²</code>は自由度9のカイ二乗分布に従います。ここでは真の分散<code>σ² = 1</code>。スチューデントのtは代わりに標準化標本平均<code>(mean − μ) / (s / √10)</code>を表し、推定標準偏差<code>s</code>を使用します。ここでも自由度は9となります。<a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda358.htm">NIST: 分散</a> · <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm">NIST: 平均</a>。</p>
+          <ol class="lesson-steps">
+            <li>練習用ワークブックで、<strong>JavaScript</strong>セルを作成して<code>// Reviewed plot code will go here.</code>を含めます。セルを保存するためにその無害なコメントを実行します。その<strong>In[…]ラベル</strong>を長押しして、名前を<code>variance_plot</code>とします。ワークブック内でその名前が一意になるようにしてください。詳細は<a href="../../../workbooks/named-cells/#name">セルの命名</a>を参照してください。</li>
+            <li>別の <strong>AI Prompt</strong> セルを追加し、そこにこのリクエストを貼り付けます：
+              <div class="callout" id="ai-variance-practice-prompt">
+                <pre data-translatable-prompt="ai-variance"><code>完全なJavaScriptソースのみを返し、Markdownのフェンスは含めないでください。
+推定標本分散の再現可能なヒストグラムを作成してください。
+2,000個の新しい標本をシミュレートしてください。各標本には10個の標準正規N(0,1)値が含まれます。
+summary_demoの以前の整数配列は再利用しないでください。
+標本ごとではなく、実行全体で一度だけstate = 42を初期化してください。各一様乱数の抽出前にstate = (16807 * state) % 2147483647を設定し、次にu = state / 2147483647を設定します。
+各正規乱数の抽出には、連続する二つの一様乱数sqrt(-2 * log(u1)) * cos(2 * PI * u2)を使用してください。余った正弦の結果を再利用したり、Math.randomを使用したりしないでください。
+各標本についてその平均を計算し、次に不偏分散sum((x - mean)^2) / 9を計算してください。
+40個の等幅ビン（0から4まで）を持つ、ラベル付きキャンバスヒストグラムを描画してください。横軸は推定分散、縦軸は標本数です。
+真の母分散1をラベル付きの垂直線でマークしてください。明るい背景、暗いテキスト、読みやすいラベルを使用してください。
+標本サイズ、繰り返し回数、シード、平均推定分散、ヒストグラムの合計、およびオーバーフロー数を表示してください。オーバーフローは隠さずに個別にカウントしてください。
+window.renderImage(canvas.toDataURL("image/png"))でキャンバスを表示してください。
+パッケージ、ネットワーク、ストレージ、ワークブックの編集は使用しないでください。</code></pre>
+              </div>
+            </li>
+            <li>AI Promptの <strong>設定</strong>を開きます。次を設定します： <strong>最終レスポンスの出力先 → セルの置換プレビュー</strong>, <strong>結果セルの言語 → ターゲット言語を保持</strong>, <strong>置換するセル → 名前付きセル</strong>、および <strong>セル名 → variance_plot</strong>。コンテキストでは、 <strong>ソースの取り込み元 → 他のセルを含めない（デフォルト）</strong>のままにして、 <strong>設定を保存</strong>.
+              <figure class="phone-figure" id="ai-variance-configuration">
+                <div class="shot-window shot-window--ai-variance-config" role="img" aria-label="AndroidのAI Promptセル設定ダイアログ。黄色の枠線は、「セルの置換プレビュー」、「ターゲット言語を保持」、「名前付きセル」、「variance_plot」、および「他のセルを含めない」の位置を示しています。">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>確認後にのみ置換してください。</strong> これらの実際のS24+の設定は、一意の名前が付けられたJavaScriptセル<code>variance_plot</code>を選択し、その言語を保持して、他のセルを除外します。<strong>設定を保存</strong>まで下にスクロールします。保存するだけでは何も送信されません。次回のRunでも、確認のためにリクエストが表示されます。</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png">置換設定全体のスクリーンショットを表示</a>
+              </figure>
+            </li>
+            <li><strong>AI Prompt</strong>セルを実行します。送信される内容を確認し、<strong>AIプロバイダーに送信</strong>を選択します。<strong>他のセルを含めない</strong>は余分なワークブックのコンテキストを除外しますが、置換では引き続き<strong>対象セルの完全なソース</strong>が送信されます。ここでのそれは、害のないコメントにすぎません。</li>
+            <li>返された <strong>変更前 / 変更後</strong> プレビューを確認します。完全なJavaScript（シード42、2,000個の標本（各10個）、9で割った分散、予期しないネットワークやストレージの使用がないこと）を確認してください。そのソースを受け入れる場合にのみ <strong>置換を適用</strong> を選択します。 <strong>キャンセル</strong> は <code>variance_plot</code> を変更しません。適用すると変更先セルが編集されますが、 <strong>実行はされません</strong>.
+              <figure class="phone-figure" id="ai-variance-approval">
+                <div class="shot-window shot-window--ai-variance-preview-start" role="img" aria-label="Androidの変更前/変更後置換プレビュー。変更前は害のないコメントで、変更後は生成されたJavaScriptの開始部分（シード42と正規標本ジェネレーターを含む）です。">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <p class="shot-detail-label"><strong>生成されたコードは承認プレビューに表示されます。</strong> これは実際のGLM 5.3 Flashの応答の始まりです。対象セルにはまだコメントのみが含まれています。ここに表示されている行だけでなく、変更後セクション全体を確認してください。</p>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png">プレビュー開始部分の完全なスクリーンショットを表示</a>
+                <div class="shot-window shot-window--ai-variance-preview-apply" role="img" aria-label="同じAndroid生成コードプレビューの末尾です。黄色の枠線は「置換を適用」と「キャンセル」の位置を示しています。どちらの操作も提案されたコードを実行することはありません。">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>末尾までスクロールして承認またはキャンセルします。</strong> 「置換を適用」は指定されたセルのソースを変更しますが、実行はしません。この長いプレビューの中間部分は、これらの詳細ビューでは省略されています。<a href="../../../../pro/ai/tutorial/assets/ai-variance-generated.js">生成された完全なソースを確認する</a>。</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png">承認コントロールの完全なスクリーンショットを表示</a>
+              </figure>
+            </li>
+            <li>
+              <p class="callout"><strong>確認によって小さな見落としが見つかりました。</strong> このモデルの応答は、レポートを出力するのではなく、レポート文字列で終了していました。「適用」の後、実行する前にその最後のレポートのみを<code>console.log(…)</code>へと編集しました。ご自身の応答も確認してください。画像だけでは合計が正しいかどうかはわかりません。<a href="../../../../pro/ai/tutorial/assets/ai-variance-reviewed.js">実行された修正済みソースを確認する</a>。</p>
+              <p><code>variance_plot</code>を見つけて、<strong>その「実行」</strong>をタップします。ヒストグラムの各バーは、個々の観測値ではなく標本分散の推定値をカウントします。上記の正確なジェネレーターを使用した場合、推定分散の平均値は約<strong>0.9852</strong>、ヒストグラムの合計は<strong>2,000</strong>、オーバーフローは<strong>0</strong>になると予想されます。真の分散は1です。有限のシミュレーションでは平均が正確に1になるとは限りません。シード42から再実行すると、プロットが再現されるはずです。</p>
+              <figure class="phone-figure" id="ai-variance-output">
+                <div class="shot-window shot-window--ai-variance-plot" role="img" aria-label="別途手動で実行した後の実際のAndroidプロット：2,000個の標本分散推定値のヒストグラム（サイズ10の正規標本より）。赤い線は真の分散1を示します。出力された平均は0.98521、ヒストグラムの合計は2000、オーバーフローは0です。">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>S24+での適用、確認、および別途手動実行を行った後の出力。</strong> 実際のプロットと出力された確認結果はシード計算と一致しています：推定分散の平均<strong>0.98521</strong>、合計<strong>2,000</strong>、オーバーフロー<strong>0</strong>。赤色の線は母分散であり、適合曲線ではありません。お使いのモデルによっては、コードやグラフのフォーマットが異なる場合があります。</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png">プロットの完全なスクリーンショットを表示</a>
+              </figure>
+            </li>
+          </ol>
+          <p class="callout"><strong>二つの個別の承認：</strong> <strong>AIプロバイダーに送信</strong>は確認済みのリクエストの共有を承認します。<strong>置換を適用</strong>は対象のソースの編集を承認します。どちらも提案されたJavaScriptを実行しません。このデモンストレーションでは<strong>リンクされた新しいセル</strong>を選択しないでください。そのオプションはこの置換承認ステップなしで未実行の結果セルを挿入します。</p>
+        </div>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>正常に動作しない場合</h2>
+        <dl>
+          <dt><strong>スマートフォンでオフライン候補が表示されない</strong></dt>
+          <dd>「一般」→「ローカルコード補完」で「自動」ではなく「オン」を選択します。チップ、キャレット位置、言語、およびオプション行に空きがあるかどうかを確認してください。</dd>
+          <dt><strong>オンラインリクエストが送信されない</strong></dt>
+          <dd>「タップ時」、対象プロバイダー／エンドポイントの保存されたキー、選択したモデルの価格エントリまたは上限、同意状況、および支出合計を確認してください。補完には「開く」は必要ありません。安全なブラウザコンテキストとWeb Locksが必要です。サポートされていないコンテキストではリクエストが拒否されます。</dd>
+          <dt><strong>アシスタントがセルを実行する前に確認する、または確認しない</strong></dt>
+          <dd>アプリのバージョン、「セキュリティ…」の実行権限、および「カーネル…」のルールを確認してください。今後提供される「開く」のデフォルトは「確認」です。Pro 1.4.0のデフォルトでは実行を許可できる場合があります。「自動実行オフ」は実行ツールの「拒否」ではありません。オンライン補完の「常に許可」はセルの実行権限を付与しません。<a href="#execution-permissions">実行の承認</a>を参照してください。</dd>
+          <dt><strong>補完が別のセルを認識しない</strong></dt>
+          <dd>オンライン代替候補はノートブック全体ではなく、現在のセルの限定されたコンテキストを使用します。より広範な説明が必要な場合は、明示的にソースを選択したAIプロンプト、またはアシスタントを使用してください。</dd>
+          <dt><strong>インストールを利用できない場合</strong></dt>
+          <dd>ネイティブのローカルモデルのフローは、対象となるAndroidのGoogle Playインストール向けであり、デスクトップ/ブラウザや現在のサイドロード配信向けではありません。最小RAM要件を満たしていても、速度は保証されません。</dd>
+          <dt><strong>生成された回答がもっともらしく見えるが誤っている場合</strong></dt>
+          <dd>既知の小さな例と比較してください。実行する前に、インポート、単位、空の入力時の動作、および副作用を確認してください。モデルの応答は正しさの証明ではありません。</dd>
+        </dl>
+        <p><a href="../../../../pro/ai/">AI設定とワークフローのリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a> · <a href="../../../../pro/remote/">リモートとセキュリティ<span class="english-reference"> (英語のリファレンスページ)</span></a> · <a href="../../../tutorials/">すべてのチュートリアル</a></p>
+      </section>
+      <aside class="callout" id="execution-permissions" aria-labelledby="execution-appendix-title">
+        <h2 id="execution-appendix-title">付録 · 今後提供される実行承認 · 提案中のPro 1.5.0</h2>
+        <p><strong>未リリース：</strong>これらのコントロールは次期リリースの実装を説明するものであり、お使いの1.4.0インストールに含まれていることを保証するものではありません。リリース番号は暫定的なものです。</p>
+        <ul>
+          <li><strong>AI設定 → セキュリティ… → <code>execute_cell</code> / <code>run_cells</code></strong>には、すでに<strong>Default / Allow / Ask / Deny</strong>が用意されています。今回のアップデートにより、Openの継承されたDefaultは<strong>確認</strong>に変更されます。Full controlはAllowを維持します。明示的なツールまたはカーネルのルールは、継承されたデフォルトを置き換えることができます。両方が明示的な場合は、より安全なルールが優先されます。学習中はDefaultまたはAskのままにしておいてください。Allowはオーバーライドであり、より強力なサンドボックスではありません。カーネルのAsk/Deny、Review、およびグローバルなJavaScriptの無効化は引き続き適用されます。</li>
+          <li><strong>実行</strong>を選択する前に実行リクエストを確認してください。そのリクエストのみを承認するには、<strong>今後のアシスタントのセル実行を確認なしで許可する</strong>のチェックを外したままにしておきます。これにチェックを入れると、リセットされるまで、このセル、会話、またはプロバイダーだけでなく、<strong>すべてのワークブック</strong>にわたる共有実行ツールルールが変更されます。明示的なカーネルのAskが設定されている場合、そのオプションは非表示になります。</li>
+          <li>名前空間の検査および新しく作成されたセルのプロンプトは、<strong>そのような恒久的な許可を作成することはできません</strong>。作成されたセルの実行プロンプトには制限付きのコードプレビューが含まれ、長いプレビューの末尾には省略記号が表示されます。省略されている場合は、Cancelを選択し、新しく作成されたセルの完全なソースを確認した上で、信頼できる場合にのみご自身でRunを実行してください。以前に保存された実行のAllowは、Auto-runがオンになっている場合に作成されたセルの自動実行を引き続き許可する可能性があるため、ここではAuto-runをオフのままにしてください。</li>
+          <li>保存された実行ツールのAllowが有効なままFull control以外のプリセットを選択すると、警告により<strong>デフォルトに戻す</strong>、<strong>「許可」を維持</strong>、または<strong>キャンセル</strong>が提示されます。Resetは、カーネルのオーバーライドをクリアすることなく、選択したプリセットのツールルールを復元します。Keepはオーバーライドを保持します。Cancelは以前のプリセット選択を復元します。ResetおよびKeepは、Settingsを保存するまで下書きの変更のままとなります。</li>
+        </ul>
+        <p><strong>実行の承認は、データを共有するための包括的な許可ではありません。</strong> 実行ツールの出力はAssistantのモデルに返される可能性があり、許可されたコードはネットワークを使用できます。オンライン補完の<strong>常に許可</strong>、AI Promptのコンテキスト確認、およびRemote/MCPのプライバシー開示は別個のままです。MCPノートブックの実行でも同じ実行チェックが使用されます。これらのチェックはブローカーのTerminalシェルをサンドボックス化するものではありません。</p>
+      </aside>
+      <aside class="callout" id="planned-workbook-context" aria-labelledby="context-appendix-title">
+        <h2 id="context-appendix-title">付録 · 計画中のワークブックのコンテキストと履歴</h2>
+        <p><strong>設計提案のみ：</strong>これらの機能は実装されておらず、リリースも割り当てられていません。これらは上記の今後提供される実行承認の変更とは別個のものであり、現在のリリースをブロックするものではありません。</p>
+        <ul>
+          <li><strong>必要なときにワークブックの概要を取得します。</strong> この計画では、繰り返される自動ソースプレビューを、セル名、オプションの説明、言語、タイプ、およびワークブックのリビジョンを含むメタデータのみのディレクトリツールに置き換えます。提案されているツールは<code>list_cells</code>（<code>view: "metadata"</code>付き）であり、Assistantは選択されたソースを別途読み取ります。これは範囲が限定された概要であり、自動生成されたAIの説明ではありません。</li>
+          <li><strong>送信ごとではなく一度だけ添付します。</strong> 提案されている<strong>今回はワークブックの概要を添付</strong>チェックボックスは、新しい会話ではチェックされた状態で開始し、その添付ファイルが実際に送信された後にチェックが外れるようにすることができます。送信前にチェックを外すことも、新しい概要を取得するために再度チェックを入れることも可能です。その初期デフォルトについては、プライバシーと使いやすさのレビューが引き続き必要です。会話を継続しても別の概要が追加されることはなく、タブを切り替えてもサイレントに再度有効化されることはありません。プレビューおよび既存の読み取り/プライバシー権限は引き続き適用され、大規模なワークブックでは追加のページが必要になる場合があります。</li>
+          <li><strong>チェックを外しても履歴は消去されません。</strong> これにより新しい自動添付は停止されますが、すでに会話内にある概要が削除されたり、許可されたツールの読み取りが妨げられたりすることはありません。既存のフルスクリーンのAgent、AI Prompt、および補完のコンテキストコントロールは、引き続き別個のものとして維持されます。</li>
+          <li><strong>送信間の変更の差分は将来のオプションです。</strong> コンパクトな更新には、既知の送信済みコンテキストのベースラインと信頼性の高いリビジョンが必要になります。人間の編集を強調表示することは可能ですが、エージェントによる編集、インポート、未知の変更も重要です。ソースの編集によってセルの説明が自動的に書き換えられることはありません。履歴が欠落しているか古い場合は、推測による更新ではなく、新しい概要が必要になります。</li>
+          <li><strong>オプションのローカル履歴とGitHub同期は、より長期的なProのアイデアです。</strong> ローカルの送信チェックポイントは、何も共有することなくGitベースのdiffをサポートできます。独立した同期により、独自のペイロードプレビューと認証を使用して、ワークブックをGistまたはリポジトリ内の選択したファイルに公開できます。履歴を有効にしても、GitHubにプッシュされたり、AIにdiffが送信されたりすることはありません。Gitはコンテンツの変更を示すものであり、人間がそれを作成したことの証明ではありません。</li>
+        </ul>
+        <p><strong>シークレットGistは非公開ではありません。</strong> そのURLを知っている人なら誰でも閲覧できます。アクセスを制限する必要がある場合は、プライベートリポジトリを使用してください。公開する前に、ワークブックのソースや説明にシークレットを含めないようにしてください。<a href="https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists/creating-gists">GitHubのGistの可視性に関するドキュメント</a>。</p>
+      </aside>
+    </article>
+  </main>
+  <footer class="site-footer">
+    <span>SciREPL Pro ヘルプ</span>
+    <nav aria-label="フッターナビゲーション">
+      <a href="../../../tutorials/">すべてのチュートリアル</a>
+      <a href="../../../../pro/">Pro ヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a>
+      <a href="../../../../../pro/privacy.html">Pro プライバシー</a>
+    </nav>
+  </footer>
+</body>
+</html>

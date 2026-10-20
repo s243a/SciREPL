@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="de" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Zeigen Sie das Durchsuchen-Kürzel von SciREPL an und passen Sie Kopfzeilen-Schaltflächen, die Run-Beschriftung, das Design und den Platz für die Android-Statusleiste über Menu → Appearance an.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/de/interface/appearance/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../interface/appearance/tutorial.css">
+  <title>Erscheinungsbild-Anleitung · SciREPL-Hilfe</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/appearance/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/appearance/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/appearance/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/appearance/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/appearance/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/appearance/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/appearance/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/appearance/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/appearance/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/appearance/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/appearance/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/appearance/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/appearance/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/appearance/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Zum Inhalt springen</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Englische Referenzseite)</span></a>
+    <nav aria-label="Hauptnavigation">
+      <a href="../../../interface/">Oberflächenreferenz<span class="english-reference"> (Englische Referenzseite)</span></a>
+      <a href="../../tutorials/">Alle Anleitungen</a>
+      <a href="../../../">Gesamte Hilfe<span class="english-reference"> (Englische Referenzseite)</span></a>
+      <a href="../../../../">Free PWA öffnen</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Tutorial-Sprache"><details class="tutorial-language-menu"><summary>Tutorial-Sprache: <bdi>Deutsch</bdi></summary><nav aria-label="Tutorial-Sprache"><a href="../../../en/interface/appearance/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/appearance/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/appearance/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="./" lang="de" hreflang="de" aria-current="page">Deutsch</a>
+      <a href="../../../es/interface/appearance/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/appearance/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/appearance/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/appearance/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/appearance/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/interface/appearance/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/appearance/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/appearance/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/appearance/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Maschinell übersetztes Tutorial; die Überprüfung durch Muttersprachler steht noch aus. Code und technische Werte sind unverändert. Screenshots zeigen die englische Originaloberfläche; gleichen Sie die übersetzten Bezeichnungen der Steuerelemente in diesem Text mit Ihrer App ab.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Hilfe<span class="english-reference"> (Englische Referenzseite)</span></a> / <a href="../../../interface/">Benutzeroberfläche<span class="english-reference"> (Englische Referenzseite)</span></a> / Erscheinungsbild-Rundgang</p>
+    <article>
+      <p class="eyebrow">Passen Sie die Benutzeroberfläche an</p>
+      <h1>Browse anzeigen und das Erscheinungsbild anpassen</h1>
+      <p class="lede">Platzieren Sie die Verknüpfung <strong>📦 Browse</strong> in der Kopfzeile von <strong>SciREPL Free</strong>, und wählen Sie dann bequeme Schaltflächen sowie ein helles oder dunkles Design. Gemeinsame Steuerelemente für das Erscheinungsbild sind auch in Pro nützlich; ein separater Abschnitt nur für Pro behandelt die Vollbildbearbeitung, zusätzliche Tasten und Live-Syntaxfarben. Sie können dies tun, ohne Arbeitsmappenzellen zu ändern oder auszuführen.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro (siehe Beschriftungen)</li>
+        <li class="chip">Android-Screenshots</li>
+        <li class="chip">Etwa 3 Minuten</li>
+      </ul>
+      <p class="screen-note">Die fünf Screenshots sind echte Aufnahmen von <strong>SciREPL Free 1.4.0-debug</strong> auf einem <strong>Samsung Galaxy S24+</strong>, aufgenommen am <time datetime="2026-10-06">6. Oktober 2026</time>. Sie zeigen die debug-signierte App, keine Installation aus dem Play Store. Die abgebildeten Schritte nutzen Steuerelemente aus Free 1.4.0. Der Kopfzeilen-Schnellzugriff für Browse ist nur in Free verfügbar; Pro-Benutzer können denselben Katalog über das Menü öffnen. Der folgende Text nur für Pro wurde anhand der Codebasis von Pro 1.4.0 überprüft; diese Steuerelemente sind auf diesen Bildern zu Free nicht dargestellt, und ältere Menüs können abweichen.</p>
+      <nav class="lesson-nav" aria-label="Schritte des Erscheinungsbild-Rundgangs">
+        <strong>In dieser Lektion</strong>
+        <ol>
+          <li><a href="#open-appearance">Erscheinungsbild öffnen</a></li>
+          <li><a href="#browse-shortcut">Den Browse-Schnellzugriff anzeigen</a></li>
+          <li><a href="#buttons">Schaltflächen und Ausführen anpassen</a></li>
+          <li><a href="#pro-editor">Nur Pro: Vollbildbearbeitung, zusätzliche Tasten und Live-Farben</a></li>
+          <li><a href="#theme">Ein Design wählen</a></li>
+          <li><a href="#android-space">Optionaler Android-Speicherplatz und Wiederherstellung</a></li>
+        </ol>
+        <p><a href="../../tutorials/">Alle Tutorials</a></p>
+      </nav>
+
+      <section id="open-appearance">
+        <p class="step-label">Schritt 1</p>
+        <h2>Menü → Erscheinungsbild öffnen</h2>
+        <ol class="lesson-steps">
+          <li>Suchen Sie <strong>☰ Menu</strong>, die Schaltfläche mit den drei horizontalen Linien in der Kopfzeile oben in der App.</li>
+          <li>Tippen Sie darauf und wählen Sie dann <strong>🎨 Erscheinungsbild</strong>. Wenn das Menü höher als Ihr Bildschirm ist, scrollen Sie darin, um den Eintrag zu finden.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-menu" role="img" aria-label="SciREPL-Menü mit gelb hervorgehobenem Eintrag Erscheinungsbild.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Wählen Sie <strong>🎨 Erscheinungsbild</strong> aus dem Menü der App.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-menu.png">Vollständigen Menü-Screenshot anzeigen</a>
+        </figure>
+        <p class="callout"><strong>Änderungen werden sofort wirksam.</strong> Die regulären Steuerelemente unten erfordern keine Schaltfläche zum Speichern oder Anwenden. Das Schließen des Erscheinungsbilds mit <strong>×</strong> bricht Ihre Änderungen nicht ab, und Ihre Auswahl bleibt für den nächsten App-Aufruf erhalten.</p>
+      </section>
+
+      <section id="browse-shortcut">
+        <p class="step-label">Schritt 2</p>
+        <h2>Free 1.4.0: Den Schnellzugriff für 📦 Browse anzeigen</h2>
+        <p><strong>Verwenden Sie Pro?</strong> Überspringen Sie diese Einrichtung der Verknüpfung und nutzen Sie <strong>Menü → Pakete, Bündel &amp; Arbeitsmappen durchsuchen</strong>. Die nächsten Abschnitte behandeln gemeinsame Steuerelemente für das Erscheinungsbild.</p>
+        <ol class="lesson-steps">
+          <li>Öffnen Sie <strong>Menü → Erscheinungsbild</strong> und scrollen Sie dann zu <strong>Verknüpfungen in der Kopfzeile</strong>.</li>
+          <li>Suchen Sie <strong>Durchsuchen-Verknüpfung anzeigen</strong> und wählen Sie <strong>Immer</strong>.</li>
+          <li>Schließen Sie das Erscheinungsbild mit <strong>×</strong>. Die Schaltfläche <strong>📦</strong> befindet sich nun in der Kopfzeile; tippen Sie darauf, um <strong>Pakete, Bündel &amp; Arbeitsmappen durchsuchen</strong> zu öffnen.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-shortcuts" role="img" aria-label="SciREPL Frees Bereich für Kopfzeilen-Verknüpfungen, wobei die Verknüpfung zum Durchsuchen und deren Prioritätspfeile gelb hervorgehoben sind.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-shortcuts.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/shortcuts-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Verwenden Sie in <strong>Free 1.4.0</strong> das Dropdown-Menü neben <strong>Durchsuchen-Verknüpfung anzeigen</strong>, um zu entscheiden, ob die Schaltfläche 📦 sichtbar bleibt.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-shortcuts.png">Vollständigen Screenshot der Verknüpfungen ansehen</a>
+        </figure>
+        <p>Die Auswahlmöglichkeiten dienen unterschiedlichen Zwecken:</p>
+        <ul>
+          <li><strong>Immer:</strong> Die Verknüpfung sichtbar halten, selbst wenn die Kopfzeile eine weitere Zeile benötigt.</li>
+          <li><strong>Wenn Platz vorhanden ist:</strong> der Standardwert für Durchsuchen. Nur anzeigen, wenn Platz vorhanden ist; ein schmalerer Bildschirm, größere Schaltflächen oder eine längere Statusmeldung können dazu führen, dass sie ausgeblendet wird.</li>
+          <li><strong>Nie:</strong> Kopfzeilen-Verknüpfung ausblenden.</li>
+        </ul>
+        <p>Die Schaltflächen <strong>↑</strong> und <strong>↓</strong> bestimmen, welche optionale Verknüpfung bei knappem Platz zuerst weichen muss. Verschieben Sie eine Verknüpfung nach oben, um sie länger beizubehalten, oder nach unten, damit sie früher ausgeblendet wird. Sie ändern die Priorität, nicht die Position der Symbole in der Kopfzeile.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-header" role="img" aria-label="SciREPL Free-Kopfzeile mit der gelb hervorgehobenen Paketbox-Verknüpfung zum Durchsuchen.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-header.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/header-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>In Free öffnet die Kopfzeilen-Verknüpfung <strong>📦</strong> denselben Katalog wie <strong>Menü → Pakete, Bündel &amp; Arbeitsmappen durchsuchen</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-header.png">Vollständigen Screenshot der Kopfzeile ansehen</a>
+        </figure>
+        <p class="callout"><strong>Keine 📦-Schaltfläche?</strong> Der Menüpfad funktioniert weiterhin, wenn die Verknüpfung ausgeblendet ist oder Ihre Version sie nicht anbietet. Für eine kompakte Kopfzeile setzen Sie Durchsuchen wieder auf <strong>Wenn Platz ist</strong>, anstatt das dauerhafte Anzeigen jeder optionalen Verknüpfung zu erzwingen.</p>
+        <p>Wenn Sie hierhergekommen sind, um eine Arbeitsmappe zu suchen, können Sie jetzt <a href="../../workbooks/tutorial/#browse">zur Anleitung für Markov-Gruppen zurückkehren</a> und den Katalog durchsuchen.</p>
+      </section>
+
+      <section id="buttons">
+        <p class="step-label">Schritt 3</p>
+        <h2>Angenehme Schaltflächen und eine Ausführen-Beschriftung wählen</h2>
+        <p>Öffnen Sie erneut <strong>Menü → Erscheinungsbild</strong> und suchen Sie <strong>Schaltflächen</strong>. Bewegen Sie den Schieberegler <strong>Schaltflächengröße</strong>; die Prozentangabe und die nahe gelegene <strong>Vorschau</strong> ändern sich sofort. Der Standardwert ist <strong>100%</strong>. Größere Kopfzeilen-Schaltflächen lassen sich möglicherweise leichter antippen, bieten jedoch weniger Platz für optionale Verknüpfungen.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-options" role="img" aria-label="Layout- und Schaltflächen-Bedienelemente von Darstellung, einschließlich Android-Statusleiste ausblenden und Schaltflächengröße, gelb hervorgehoben.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-options.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/options-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Schaltflächengröße</strong> passt die Kopfzeilen-Bedienelemente an. Die nur für Android verfügbare Statusleisten-Einstellung wird unten erläutert.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-options.png">Vollständigen Screenshot von Layout und Schaltflächen ansehen</a>
+        </figure>
+        <p>Das Dropdown-Menü <strong>Ausführen-Schaltfläche</strong> steuert Ausführen im <em>Bedienfeld für neue Zellen</em>, nicht die Ausführen-Schaltflächen in Editoren für gespeicherte Zellen:</p>
+        <ul>
+          <li><strong>Automatisch (nur Symbol bei knappem Platz):</strong> der Standardwert. Beschriftung beibehalten, wenn Platz vorhanden ist, oder nur das Symbol ▶ verwenden, um Platz für die Eingabe zu lassen.</li>
+          <li><strong>Nur Symbol:</strong> immer die kompakte Schaltfläche ▶ verwenden.</li>
+          <li><strong>Beschriftung immer anzeigen:</strong> den Text beibehalten, selbst auf einem schmalen Bildschirm.</li>
+        </ul>
+        <p>In Darstellung gibt es keinen Schieberegler für den Textzoom. <strong>Schaltflächengröße</strong> ist keine allgemeine Einstellung für die Schriftgröße. Free 1.4.0 und Pro 1.3.0 vergrößern kompakte Kopfzeilen-Bedienelemente automatisch, um den Systemtextzoom von Android zu berücksichtigen.</p>
+      </section>
+
+      <section id="pro-editor">
+        <p class="step-label">Optional · nur Pro</p>
+        <h2>Nur Pro: Vollbildbearbeitung, zusätzliche Tasten und Syntaxfarben</h2>
+        <p>Dies sind Editor-Bedienelemente für <strong>SciREPL Pro 1.4.0</strong>, nicht die in den obigen Screenshots für Free gezeigten Bedienelemente. Zusätzliche Tasten und Live-Farben sind separate Einstellungen.</p>
+        <h3>Vollbildbearbeitung öffnen</h3>
+        <ol class="lesson-steps">
+          <li><strong>Neue Zelle:</strong> Tippen Sie auf die Schaltfläche <strong>⤢ Vollbild</strong> im Codefeld der neuen Zelle. Ihre nach außen zeigenden diagonalen Pfeile bedeuten, dass der Editor vergrößert wird.</li>
+          <li><strong>Gespeicherte Zelle:</strong> Tippen Sie auf das <strong>✎ Stift-Symbol</strong> dieser Zelle, um sie zu bearbeiten, und tippen Sie dann auf <strong>⤢</strong> in der Ecke des Codefelds dieser Zelle.</li>
+        </ol>
+        <p>Der Editor nimmt den gesamten Bildschirm ein, sodass mehr Code hineinpasst. Aktivierte Zusatztasten und Vorschlagschips bleiben über der Tastatur verfügbar; Syntaxfarben verwenden dieselbe unten beschriebene Einstellung. Das Öffnen des Vollbildmodus führt Code <strong>nicht</strong> aus.</p>
+        <p>Tippen Sie oben auf die <strong>Editor-Beschriftung</strong>, um mit weiterhin geöffnetem Entwurf zum Arbeitsbuch zurückzukehren; auch über <strong>Zurück</strong> oder <kbd>Esc</kbd> verlassen Sie den Vollbildmodus. Bei einer gespeicherten Zelle wendet <strong>Fertig</strong> den Entwurf an, ohne ihn auszuführen, während <strong>Abbrechen</strong> die Änderung verwirft. Bei einer neuen Zelle verlassen sowohl „Fertig“ als auch „Abbrechen“ den Vollbildmodus, ohne den Entwurf zu löschen oder eine Zelle zu erstellen; „Ausführen“ ist eine separate Aktion.</p>
+        <p><strong>Nicht dasselbe wie „Bereiche nutzen den Vollbildmodus“.</strong> Diese separate Option unter „Erscheinungsbild“ steuert den oberen Rand von Bereichen und Dialogen; sie öffnet nicht den Vollbild-Code-Editor.</p>
+        <h3>Die Zusatztasten-Zeile anzeigen</h3>
+        <p>Öffnen Sie <strong>Menü → Vervollständigung → Abschnitt → Allgemein</strong>. Setzen Sie <strong>Zusatztasten über der Tastatur → An</strong>; die Standardeinstellung ist <strong>Aus</strong>. Die Zeile bietet Esc, Tab, Einzugsentfernung, Pfeile, Home, Ende, Ausführen und Satzzeichen. Wischen Sie seitwärts darüber, um Tasten zu erreichen, die nicht mehr hineinpassen. Die Auswahl von „Ein“ führt keinen Code aus, die Taste <strong>▶ Ausführen</strong> der Zeile hingegen schon – prüfen Sie den Quelltext, bevor Sie darauf tippen.</p>
+        <p>Im selben Abschnitt wählen <strong>Chips im Hochformat</strong> und <strong>Chips im Querformat</strong> <strong>Eigene Zeile</strong> oder <strong>Zusatztasten ersetzen</strong>. Die Standardeinstellungen sind „Eigene Zeile“ im Hochformat und „Zusatztasten ersetzen“ im Querformat: Während Vorschläge angezeigt werden, können sie vorübergehend den Platz der Tasten einnehmen. Sind die Zusatztasten deaktiviert, nutzen die Chips ihre eigene Zeile. <strong>Zusätzliche Leisten im Querformat</strong> bietet <strong>Aus</strong>, <strong>Wenn Platz ist</strong> (Standard) oder <strong>Immer</strong>. „Wenn Platz vorhanden ist“ nutzt <strong>Mindestanzahl sichtbarer Codezeilen</strong>, anfänglich <strong>8</strong>, sodass eine niedrige Querformatansicht optionale Zeilen ausblenden kann.</p>
+        <h3>Live-Syntaxfarben ein- oder ausschalten</h3>
+        <p>Öffnen Sie <strong>Menü → Erscheinungsbild → Syntaxfarben beim Tippen</strong>. Wählen Sie <strong>An</strong>, um unterstützten Code während der Bearbeitung farblich hervorzuheben, oder <strong>Aus</strong> für reinen Text. Der Standardwert <strong>Automatisch (Desktop an, Touch aus)</strong> aktiviert Farben in Desktop-Browsern und lässt sie auf Telefonen deaktiviert. Wenn sich das Tippen weniger flüssig anfühlt, wählen Sie „Aus“; die Farbgebung kann auf langsameren Geräten die Eingabegeschwindigkeit beeinträchtigen. Code mit mehr als <strong>6000 Zeichen</strong> bleibt auch mit „Ein“ ungefärbt.</p>
+        <p>Farben validieren keinen Code und führen ihn nicht aus, senden keine API-Anfrage und aktivieren nicht die Vervollständigung. Das Ändern dieser Einstellung wird sofort wirksam und verändert Ihren Quellcode nicht.</p>
+        <h3>„Dateien &amp; Speicher“ hat einen eigenen Schalter</h3>
+        <p>Verwenden Sie für eine Textdatei <strong>Menü → Dateien &amp; Speicher (VFS / Pfade)</strong>, wählen Sie die Datei aus und wählen Sie dann <strong>Vollbild</strong>. Das Kontrollkästchen <strong>Syntaxhervorhebung</strong> dieses Editors ist unabhängig von der Live-Farbeinstellung unter „Erscheinungsbild“ und standardmäßig deaktiviert. Es ist für unbekannte Dateitypen oder Dateien mit mehr als 100,000 Zeichen nicht verfügbar. Seine Zusatztasten teilen die Vervollständigungseinstellung, können jedoch ausgeblendet werden, wenn der Datei-Editor zu wenig Platz hat. Datei <strong>Speichern</strong> schreibt Ihre Änderungen; das bloße Umschalten der Farben tut dies nicht.</p>
+      </section>
+
+      <section id="theme">
+        <p class="step-label">Schritt 4</p>
+        <h2>Helles, dunkles oder das Systemdesign wählen</h2>
+        <p>Scrollen Sie zu <strong>Design</strong> und wählen Sie <strong>Dunkel</strong>, <strong>Hell</strong> oder <strong>Systemstandard</strong>. „Dunkel“ ist die Standardeinstellung. „Systemstandard“ folgt der Hell-/Dunkel-Einstellung Ihres Geräts; dies ist eine bewusste Auswahl und nicht der Standard.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-theme" role="img" aria-label="Das Design-Dropdown-Menü unter „Erscheinungsbild“, gelb hervorgehoben.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-theme.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/theme-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Wählen Sie ein integriertes Design und schließen Sie dann das Erscheinungsbild, um die App mit dieser Auswahl weiter zu nutzen.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-theme.png">Den vollständigen Screenshot des Designs ansehen</a>
+        </figure>
+        <p>Sie benötigen für diese Lektion weder <strong>Benutzerdefiniert</strong>, <strong>Anpassen…</strong>, einen Design-JSON-Editor noch <strong>Erweitert: Benutzerdefiniertes CSS</strong>. Diese erweiterten Optionen liegen außerhalb dieser Einführung für Anfänger.</p>
+      </section>
+
+      <section id="android-space">
+        <p class="step-label">Optionale Feinabstimmungen</p>
+        <h2>Android-Platz und Zurücksetzen auf die Standardeinstellungen</h2>
+        <p>Lassen Sie unter <strong>Layout</strong> die Auswahl <strong>Oberer Rand → Automatisch</strong> unverändert. Sie richtet sich nach dem vom Gerät gemeldeten sicheren Bereich, sodass die Kopfzeile nach oben ausreichend Abstand hat; Sie müssen keinen Pixelwert schätzen.</p>
+        <p>In der Android-App bietet <strong>Android-Statusleiste ausblenden</strong> Folgendes:</p>
+        <ul>
+          <li><strong>Nie:</strong> die Standardeinstellung; lässt die Uhr und die Benachrichtigungs-Statusleiste sichtbar.</li>
+          <li><strong>Im Querformat:</strong> blendet diese Leiste aus, während das Smartphone quer gehalten wird; stellt sie im Hochformat wieder her.</li>
+          <li><strong>Immer:</strong> blendet sie in beiden Ausrichtungen aus.</li>
+        </ul>
+        <p>Diese Einstellung betrifft nur die Android-<em>Status</em>leiste, nicht die Navigations- oder Gestenleiste. Sie ist in der Browser-/PWA- und Windows-Benutzeroberfläche nicht vorhanden. Pro 1.3.0 verfügt stattdessen über ein Kontrollkästchen namens <strong>Hide Android status bar in landscape</strong>.</p>
+        <p class="callout"><strong>Möchten Sie die Änderungen am Erscheinungsbild rückgängig machen?</strong> <strong>Auf Standard zurücksetzen</strong> stellt das Standarddesign, die Größe der Kopfzeilen-Schaltflächen, den oberen Rand, Tastenkombinationen und die Statusleisteneinstellung wieder her und entfernt benutzerdefinierte Design- oder CSS-Optionen. Ihre Arbeitsmappen-Zellen werden dadurch nicht gelöscht. Es setzt <em>nicht</em> die separate Run-Schaltfläche oder die Einstellungen für die Oberflächensprache zurück; wählen Sie bei Bedarf selbst die Option <strong>Automatisch</strong> für Run.</p>
+        <p>Schließen Sie die Darstellung mit <strong>×</strong>, wenn Sie fertig sind. Fahren Sie mit der <a href="../../workbooks/tutorial/">Einführung in die Markov-Gruppen-Arbeitsmappe</a> fort oder kehren Sie zur <a href="../../../interface/">kurzen Referenz der Benutzeroberfläche<span class="english-reference"> (Englische Referenzseite)</span></a> zurück.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL-Hilfe</span><nav aria-label="Fußzeilennavigation"><a href="../../../interface/">Oberflächenreferenz<span class="english-reference"> (Englische Referenzseite)</span></a><a href="../../../">Gesamte Hilfe<span class="english-reference"> (Englische Referenzseite)</span></a></nav></footer>
+</body>
+</html>

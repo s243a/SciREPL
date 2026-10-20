@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="de" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Erstellen Sie statische Markdown-Diagramme, erzeugen Sie ein Bild mit JavaScript-Canvas und schreiben Sie KaTeX-Gleichungen in einer SciREPL-Arbeitsmappe, ohne Pakete zu installieren.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/de/workbooks/graphics/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/graphics/tutorial.css">
+  <title>Bilder, Diagramme und Gleichungen · SciREPL-Hilfe</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/graphics/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/graphics/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/graphics/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/graphics/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/graphics/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/graphics/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/graphics/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/graphics/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/graphics/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/graphics/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/graphics/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/graphics/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/graphics/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/graphics/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Zum Inhalt springen</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Englische Referenzseite)</span></a>
+    <nav aria-label="Hauptnavigation">
+      <a href="../../../workbooks/">Arbeitsmappen-Referenz<span class="english-reference"> (Englische Referenzseite)</span></a>
+      <a href="../../tutorials/">Alle Tutorials</a>
+      <a href="../../../">Gesamte Hilfe<span class="english-reference"> (Englische Referenzseite)</span></a>
+      <a href="../../../../">Free PWA öffnen</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Tutorial-Sprache"><details class="tutorial-language-menu"><summary>Tutorial-Sprache: <bdi>Deutsch</bdi></summary><nav aria-label="Tutorial-Sprache"><a href="../../../en/workbooks/graphics/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/graphics/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/graphics/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="./" lang="de" hreflang="de" aria-current="page">Deutsch</a>
+      <a href="../../../es/workbooks/graphics/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/graphics/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/graphics/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/graphics/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/graphics/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/graphics/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/graphics/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/graphics/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/graphics/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Maschinell übersetztes Tutorial; die Überprüfung durch Muttersprachler steht noch aus. Code und technische Werte sind unverändert. Screenshots zeigen die englische Originaloberfläche; gleichen Sie die übersetzten Bezeichnungen der Steuerelemente in diesem Text mit Ihrer App ab.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Hilfe<span class="english-reference"> (Englische Referenzseite)</span></a> / <a href="../../../workbooks/">Arbeitsmappen<span class="english-reference"> (Englische Referenzseite)</span></a> / Bilder, Diagramme und Gleichungen</p>
+    <article>
+      <p class="eyebrow">Lernen durch Ausprobieren</p>
+      <h1>Bilder, Diagramme und Gleichungen hinzufügen</h1>
+      <p class="lede">Eine Arbeitsmappe kann eine Idee sowohl mit einem Bild als auch mit Code erklären. Probieren Sie drei Möglichkeiten aus, um dasselbe einfache Koordinatensystem darzustellen: ein statisches Bild in Markdown, ein von JavaScript gezeichnetes Bild und eine mit KaTeX gesetzte Gleichung. Sie benötigen weder Python noch R, keine Paketinstallation und kein KI-Konto.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro Arbeitsablauf</li>
+        <li class="chip">Im Browser überprüfte Beispiele</li>
+        <li class="chip">Etwa 10 Minuten</li>
+      </ul>
+      <p class="screen-note">Die Beispiele und Screenshots wurden in der <strong>SciREPL Free-Browserversion</strong> am <time datetime="2026-10-06">6. Oktober 2026</time> überprüft. Screenshots verwenden einen schmalen Browser-Viewport; es sind <strong>keine Android-Aufnahmen</strong>. Unter Android werden dieselben Steuerelemente verwendet, ihre Position kann jedoch abweichen. Pro und jede veröffentlichte App-Version wurden für diesen Leitfaden nicht getestet.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Wählen Sie die Methode, die zu Ihrer Erklärung passt</caption>
+          <thead><tr><th scope="col">Was Sie möchten</th><th scope="col">Zelltyp</th><th scope="col">Was das Ergebnis erzeugt</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Ein festes Diagramm oder Bild</th><td>Markdown (<strong>Md</strong>)</td><td>Inline-SVG oder ein eingebettetes PNG, gespeichert im Zellentext</td></tr>
+            <tr><th scope="row">Ein durch Code berechnetes oder gezeichnetes Bild</th><td>Code → JavaScript (<strong>JS</strong>)</td><td>Ein Canvas, angezeigt mit <code>window.renderImage(...)</code></td></tr>
+            <tr><th scope="row">Eine Formel oder Matrix</th><td>Markdown (<strong>Md</strong>)</td><td>Mathematik im TeX-Stil zwischen <code>$$</code>-Trennzeichen, gerendert von KaTeX</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <nav class="lesson-nav" aria-label="Schritte der Grafikanleitung">
+        <strong>In dieser Lektion</strong>
+        <ol>
+          <li><a href="#open">Kleine Beispiel-Arbeitsmappe öffnen</a></li>
+          <li><a href="#static">Ein statisches Bild in Markdown behalten</a></li>
+          <li><a href="#canvas">Ein Bild mit JavaScript zeichnen</a></li>
+          <li><a href="#math">Gleichungen mit KaTeX schreiben</a></li>
+          <li><a href="#save">Ihre Arbeit speichern und erneut öffnen</a></li>
+        </ol>
+        <p><a href="#troubleshooting">Wenn das Ergebnis nicht angezeigt wird</a></p>
+        <p><a href="../../tutorials/">Alle Anleitungen</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">Schritt 1</p>
+        <h2>Beispiel-Arbeitsmappe öffnen</h2>
+        <p>Die Begleitdatei enthält die vollständigen Beispiele, einschließlich eines eingebetteten PNG. Sie behält alles in einer kleinen Arbeitsmappe, sodass Sie keine lange Base64-Bildzeichenfolge eingeben müssen.</p>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/graphics/assets/workbook-graphics.srwb" download="workbook-graphics.srwb">Laden Sie die Grafik-Beispiel-Arbeitsmappe (.srwb) herunter</a>. Speichern Sie die eigentliche Datei und behalten Sie ihre Dateiendung <code>.srwb</code> bei. Wenn Ihr Browser Text anzeigt, verwenden Sie dessen Speicher- oder Download-Aktion. Notieren Sie sich den Ordner, in dem Sie sie gespeichert haben.</li>
+          <li>Öffnen Sie SciREPL. Suchen Sie in der <strong>Kopfzeile oben in der App</strong> nach <strong>☰ Menü</strong>, der Schaltfläche mit <strong>drei horizontalen Linien</strong>. Tippen oder klicken Sie darauf.</li>
+          <li>Wählen Sie <strong>📂 Datei importieren (z. B. .srwb, .ipynb, .csv, .py, .zip)</strong>. Scrollen Sie bei Bedarf <em>innerhalb des Menüs</em>. Wählen Sie in der Dateiauswahl Ihres Geräts <code>workbook-graphics.srwb</code> aus dem Ordner „Downloads“ oder dem von Ihnen gewählten Ordner.</li>
+          <li>Schließen Sie das Menü, falls es geöffnet bleibt, und wählen Sie den neuen Tab <strong>Workbook Graphics</strong> in der Arbeitsmappenauswahl. Ihre bestehenden Tabs bleiben erhalten.</li>
+          <li>Suchen Sie die vier Zellen namens <code>static_axes</code>, <code>embedded_png</code>, <code>canvas_axes</code> und <code>math_axes</code>. Lesen Sie diese, bevor Sie Code ausführen. Die statischen Diagramme und Gleichungen erscheinen aus ihrer Markdown-Quelle; das JavaScript-Bild erscheint erst, nachdem Sie dessen Zelle ausführen.</li>
+        </ol>
+        <p class="callout"><strong>Importieren bedeutet nicht Ausführen.</strong> Ein <code>.srwb</code>-Import führt dessen Code nicht aus, selbst wenn die automatische Ausführung aktiviert ist. In dieser Lektion erfordert nur <code>canvas_axes</code> eine JavaScript-Ausführung. Es gibt keinen <strong>Alle Zellen ausführen</strong>-Schritt.</p>
+        <p>Benötigen Sie weitere Details zum Download oder zur Dateiauswahl? Folgen Sie der <a href="../import/">Anleitung zum manuellen Importieren von Arbeitsmappen</a>. Die oben genannten Namen erscheinen auf den gespeicherten Zellen; die <a href="../named-cells/">Anleitung zu Pfaden benannter Zellen</a> erklärt, wie man diese zuweist und verwendet. Sie können diese Beispiele auch in einer bereits geöffneten Arbeitsmappe anhand der folgenden Schritte erstellen.</p>
+      </section>
+
+      <section id="static">
+        <p class="step-label">Schritt 2 · Methode 1</p>
+        <h2>Ein statisches Diagramm in Markdown behalten</h2>
+        <p>Stellen Sie sich ein Blatt Papier vor, das Ihnen zugewandt ist. <strong>r</strong> zeigt entlang des Papiers nach rechts, <strong>u</strong> zeigt daran nach oben und <strong>n</strong> zeigt aus dem Papier heraus auf Sie zu. Ein Kreis mit einem Punkt stellt diese nach außen gerichtete Richtung dar, ähnlich wie die Spitze eines Pfeils, der auf Sie zukommt.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-static.png" alt="Screenshot eines schmalen Browserfensters einer SciREPL-Markdown-Zelle, die ein Papierdiagramm mit Pfeilen nach rechts und oben sowie einem Punkt in einem Kreis für die Normale zum Betrachter zeigt." loading="lazy" decoding="async">
+          <figcaption>Das statische SVG wird <em>innerhalb einer Markdown-Zelle</em> gerendert. Dies ist eine Browseraufnahme von SciREPL Free, keine Zeichnung, die durch die Ausführung eines Sprach-Kernels erzeugt wurde.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-static.png">Vollständigen Browser-Screenshot anzeigen</a>
+        </figure>
+        <h3>Das importierte Diagramm bearbeiten</h3>
+        <ol class="lesson-steps">
+          <li>Suchen Sie <code>static_axes</code>. Tippen Sie auf dessen <strong>✎ Bleistift</strong> in der Kopfzeile dieser gespeicherten Zelle, nahe <strong>✕</strong>. Dies öffnet den Quelltext der vorhandenen Zelle; das Panel für neue Zellen würde eine weitere Zelle erstellen.</li>
+          <li>Lassen Sie die Zelltyp-Schaltfläche auf <strong>Md</strong> eingestellt. Ändern Sie im SVG-Text <code>r: right</code> zu <code>r: across</code>.</li>
+          <li>Tippen Sie auf die Schaltfläche <strong>▶ Ausführen</strong> dieser Zelle, um das Markdown erneut zu speichern und zu rendern. Bei einer <strong>Md</strong>-Zelle rendert diese Schaltfläche Text; sie führt kein JavaScript aus und startet keine Sprachlaufzeit.</li>
+        </ol>
+        <h3>Oder erstellen Sie Ihre eigene Markdown-Zelle</h3>
+        <ol class="lesson-steps">
+          <li>Suchen Sie das <strong>Panel für neue Zellen</strong>, in dem Sie die nächste Zelle eingeben. Falls es eingeklappt ist, verwenden Sie die Schaltfläche <strong>⌃ Show new-cell panel</strong> nahe dem App-Titel.</li>
+          <li>Tippen Sie auf die mit <strong>Code</strong> beschriftete Zelltyp-Schaltfläche, sodass sie zu <strong>Md</strong> wechselt. Markdown ist ein <em>Zelltyp</em>, kein Eintrag im Sprach-Dropdown-Menü.</li>
+          <li>Kopieren Sie das vollständige SVG unten in das Textfeld, <strong>ohne Markdown-Codeblöcke hinzuzufügen</strong> (<code>```</code>). Lassen Sie eine Leerzeile zwischen dem umgebenden Fließtext und dem SVG.</li>
+          <li>Tippen Sie auf <strong>▶ Ausführen</strong>, um die gerenderte Markdown-Zelle hinzuzufügen. Sie sollten das Papier und alle drei Richtungsbeschriftungen sehen.</li>
+        </ol>
+        <pre><code data-graphic-example="svg">&lt;svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 360 220" width="100%" height="220"
+     role="img" aria-label="Right, up and outward normal on paper"&gt;
+  &lt;title&gt;A paper coordinate frame&lt;/title&gt;
+  &lt;rect x="20" y="18" width="320" height="184"
+        rx="6" fill="#ffffff" stroke="#526170" stroke-width="2" /&gt;
+  &lt;path d="M110 145 H280" fill="none" stroke="#075d69" stroke-width="3" /&gt;
+  &lt;polygon points="280,145 267,138 267,152" fill="#075d69" /&gt;
+  &lt;path d="M110 145 V48" fill="none" stroke="#064d91" stroke-width="3" /&gt;
+  &lt;polygon points="110,48 103,61 117,61" fill="#064d91" /&gt;
+  &lt;circle cx="110" cy="145" r="10" fill="#ffffff" stroke="#14191f" stroke-width="2" /&gt;
+  &lt;circle cx="110" cy="145" r="3" fill="#14191f" /&gt;
+  &lt;text x="204" y="168" fill="#14191f" font-size="16"&gt;r: right&lt;/text&gt;
+  &lt;text x="124" y="62" fill="#14191f" font-size="16"&gt;u: up&lt;/text&gt;
+  &lt;text x="42" y="190" fill="#14191f" font-size="16"&gt;n: toward you&lt;/text&gt;
+&lt;/svg&gt;</code></pre>
+        <p>SciREPL bereinigt Markdown. Dieses Beispiel verwendet gewöhnliche SVG-Formen, Text und explizite <code>fill</code>/<code>stroke</code>-Attribute. Seine Pfeilspitzen sind Polygone: Verlassen Sie sich nicht darauf, dass <code>marker-end="url(...)"</code>, ein <code>&lt;style&gt;</code>-Block, Skripte oder Animationen die Bereinigung überstehen.</p>
+
+        <h3>Stattdessen ein eingebettetes PNG verwenden</h3>
+        <p>Die andere statische Option ist ein PNG, dessen Base64-Daten direkt in der Markdown-Quelle gespeichert sind. Die standardmäßige Markdown-Bildsyntax sieht so aus:</p>
+        <pre><code>![Paper axes](data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE)</code></pre>
+        <p>Diese Zeile zeigt das <em>Format</em>, kein funktionierendes Bild: Ersetzen Sie den Platzhalter durch das vollständige codierte PNG oder verwenden Sie die bereits funktionierende <code>embedded_png</code>-Zelle. Der Teil nach <code>base64,</code> besteht aus Bilddaten, nicht aus einem Dateinamen. Behalten Sie alles in einer Zeile.</p>
+        <p>Für ein Bild, das auf einem kleinen Bildschirm in die Zelle passt, verwendet die <code>embedded_png</code>-Begleitzelle das unten stehende entsprechende Inline-HTML mit <code>width="100%"</code>. Es wird weiterhin in Markdown gespeichert, nicht als Code-Ausgabe:</p>
+        <pre><code>&lt;img alt="Paper axes" width="100%"
+     src="data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE"&gt;</code></pre>
+        <p class="callout"><strong>Wählen Sie einen statischen Weg:</strong> Verwenden Sie ein <em>Inline-SVG-Element</em> für ein kleines bearbeitbares Diagramm oder ein <code>data:image/png;base64,...</code>-Bild für ein Rasterbild. Eine SVG-Daten-URL wie <code>data:image/svg+xml,...</code> ist nicht dasselbe wie Inline-SVG und wird im geprüften Build blockiert. Externe Bild-URLs werden dort ebenfalls blockiert. Diese zwei in sich geschlossenen Beispiele erfordern beim Anzeigen keinen Bild-Download.</p>
+        <p>Beide statischen Beispiele befinden sich im Markdown-Quelltext. Sie können nach dem Importieren der Arbeitsmappe ohne Ausführung von Code angezeigt werden.</p>
+      </section>
+
+      <section id="canvas">
+        <p class="step-label">Schritt 3 · Methode 2</p>
+        <h2>Ein Bild mit JavaScript zeichnen</h2>
+        <p>Ein statisches Bild bleibt unverändert, bis Sie dessen Quelltext bearbeiten. Verwenden Sie für ein Bild, das von einem Programm berechnet oder gezeichnet wird, eine <strong>Code</strong>-Zelle und wählen Sie <strong>JS - JavaScript</strong>. Dieses Beispiel zeichnet auf ein Canvas, konvertiert es in ein PNG und sendet dieses Bild an die Ausgabe der Zelle.</p>
+        <ol class="lesson-steps">
+          <li>Tippen Sie in der importierten Arbeitsmappe auf den <strong>✎ Stift</strong> bei <code>canvas_axes</code>. Vergewissern Sie sich, dass der Zelltyp <strong>Code</strong> ist und die Sprache <strong>JS - JavaScript</strong> lautet (die kompakte Auswahl zeigt möglicherweise nur <strong>JS</strong> an).</li>
+          <li>Lesen Sie den unten stehenden Code, der das vollständige Programm in dieser Zelle darstellt. Er benötigt keine andere Zelle, Datei, kein Paket und keine Netzwerkanfrage.</li>
+          <li>Tippen Sie auf <em>das dieser Zelle zugehörige</em> <strong>▶ Ausführen</strong>. Unter dem JavaScript-Quellcode sollte ein Bild erscheinen.</li>
+        </ol>
+        <p>Um stattdessen eine neue Zelle zu erstellen, öffnen Sie das Panel für neue Zellen, ändern Sie bei Bedarf <strong>Md</strong> zurück zu <strong>Code</strong> und wählen Sie im Sprach-Dropdown <strong>JS - JavaScript</strong>. Fügen Sie den Code ein und tippen Sie anschließend auf <strong>▶ Ausführen</strong>. Falls JavaScript ausgeblendet ist, suchen Sie <strong>☰ Menü → Sprachen</strong> und aktivieren Sie es.</p>
+        <pre><code data-graphic-example="javascript">(() =&gt; {
+  const canvas = document.createElement('canvas');
+  canvas.width = 360;
+  canvas.height = 220;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 360, 220);
+  ctx.strokeStyle = '#526170';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(20, 18, 320, 184);
+
+  function arrow(x1, y1, x2, y2, color) {
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 14 * Math.cos(angle - 0.5),
+               y2 - 14 * Math.sin(angle - 0.5));
+    ctx.lineTo(x2 - 14 * Math.cos(angle + 0.5),
+               y2 - 14 * Math.sin(angle + 0.5));
+    ctx.closePath();
+    ctx.fill();
+  }
+  arrow(110, 145, 280, 145, '#075d69'); // right
+  arrow(110, 145, 110, 48, '#064d91');  // up
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#14191f';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(110, 145, 10, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#14191f';
+  ctx.beginPath();
+  ctx.arc(110, 145, 3, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.font = '16px sans-serif';
+  ctx.fillText('r: right', 204, 168);
+  ctx.fillText('u: up', 124, 62);
+  ctx.fillText('n: toward you', 42, 190);
+  window.renderImage(canvas.toDataURL('image/png'));
+})();</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-canvas.png" alt="Screenshot im schmalen Browserfenster von SciREPL, der das Papier-Koordinatensystem als PNG-Ausgabe unter einer JavaScript-Canvas-Zelle anzeigt." loading="lazy" decoding="async">
+          <figcaption>Dieses ähnlich aussehende Diagramm ist eine <strong>generierte PNG-Ausgabe</strong>, nicht Markdown. Die JavaScript-Zelle erzeugt es, wenn Sie <strong>▶ Ausführen</strong> wählen. Browser-Aufnahme von SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-canvas.png">Den vollständigen Browser-Screenshot ansehen</a>
+        </figure>
+        <p>Versuchen Sie, <code>r: right</code> in <code>ctx.fillText(...)</code> zu ändern, und führen Sie die Zelle dann erneut aus. Der Funktions-Wrapper <code>(() =&gt; { ... })();</code> hält die Variablen dieses Beispiels lokal, sodass Sie es erneut ausführen können, ohne Variablen auf oberster Ebene in <code>const</code> neu deklarieren zu müssen.</p>
+        <p class="callout"><strong>Der Anzeigeaufruf ist wichtig.</strong> Behalten Sie <code>window.renderImage(canvas.toDataURL('image/png'))</code> am Ende bei. Die Rückgabe einer gewöhnlichen Zeichenkette wie <code>'&lt;svg&gt;...&lt;/svg&gt;'</code> aus JavaScript zeigt Text an; sie verwandelt diese Zeichenkette nicht in ein Inline-Diagramm. Sie müssen das Canvas nicht in die Seite der App einfügen.</p>
+      </section>
+
+      <section id="math">
+        <p class="step-label">Schritt 4 · Methode 3</p>
+        <h2>Das Bild mit Gleichungen erklären</h2>
+        <p>Verwenden Sie eine <strong>Markdown (Md)</strong>-Zelle für Mathematik im TeX-Stil. Die Richtungen der Diagramme bilden ein rechtshändiges System: <strong>rechts × oben = äußere Normale</strong>. In der unten stehenden Matrix ist die erste Zeile <strong>r</strong>, die zweite <strong>u</strong> und die dritte <strong>n</strong>; die Indizes sind ihre Komponenten in einem gewählten x-, y-, z-Koordinatensystem.</p>
+        <ol class="lesson-steps">
+          <li>Tippen Sie auf den <strong>✎ Stift</strong> bei <code>math_axes</code> oder erstellen Sie eine neue Zelle über <strong>Code → Md</strong> im Panel für neue Zellen.</li>
+          <li>Verwenden Sie den unten stehenden vollständigen Text. Die <code>$$</code>-Trennzeichen gehören in den Markdown-Quelltext; schließen Sie ihn nicht in einen Code-Block ein.</li>
+          <li>Tippen Sie auf <strong>▶ Ausführen</strong>, um das Markdown zu speichern und zu rendern. Sie sollten eine Kreuzprodukt-Gleichung und eine dreizeilige Matrix sehen, keine reinen Backslash-Befehle. Für diese Zelle wird kein Sprach-Kernel ausgeführt.</li>
+        </ol>
+        <pre><code data-graphic-example="math">Right, up and outward normal form a right-handed frame.
+
+$$\mathbf{r} \times \mathbf{u} = \mathbf{n}$$
+
+Rows of the frame matrix: right, up, then outward normal.
+
+$$
+M = \begin{pmatrix}
+r_x &amp; r_y &amp; r_z \\
+u_x &amp; u_y &amp; u_z \\
+n_x &amp; n_y &amp; n_z
+\end{pmatrix}
+$$</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-equations.png" alt="Screenshot im schmalen Browserfenster von SciREPL, wie es „rechts Kreuz oben gleich Normale“ und eine dreizeilige Koordinatensystem-Matrix mit KaTeX in einer Markdown-Zelle rendert." loading="lazy" decoding="async">
+          <figcaption>KaTeX setzt die Formeln direkt aus der <strong>Markdown-Quelle</strong>. Dies sind Gleichungen, keine TeX-generierte Zeichnung. Browser-Aufnahme von SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-equations.png">Vollständigen Browser-Screenshot anzeigen</a>
+        </figure>
+        <p class="callout"><strong>KaTeX ist kein vollständiger TeX-Compiler.</strong> Es rendert unterstützte mathematische Notation, kompiliert jedoch weder TikZ-Diagramme noch ein ganzes LaTeX-Dokument. Obwohl KaTeX <code>\includegraphics</code> auflistet, erfordert dies eine Trust-Option, die SciREPL im geprüften Renderer nicht aktiviert; es ist hier kein Weg zum Einfügen von Bildern. Verwenden Sie Markdown-SVG/PNG oder JavaScript-Canvas für Bilder.</p>
+        <p>Konsultieren Sie für andere Symbole und mathematische Befehle die <a href="https://katex.org/docs/support_table.html">KaTeX-Support-Tabelle</a>; die Dokumentation beschreibt möglicherweise Funktionen, die neuer sind als die in SciREPL gebündelte Version. Für eine Arbeitsmappe, die diese Richtungen zur Erklärung von Würfelzügen verwendet, siehe die <a href="../tutorial/#open">Markov Groups-Anleitung</a>.</p>
+      </section>
+
+      <section id="save">
+        <p class="step-label">Schritt 5</p>
+        <h2>Eine Kopie speichern und wissen, was erneut auszuführen ist</h2>
+        <ol class="lesson-steps">
+          <li>Öffnen Sie <strong>☰ Menü → Arbeitsmappen &amp; Pakete exportieren</strong>.</li>
+          <li>Wählen Sie <strong>Arbeitsmappe (.srwb)</strong> und <strong>Nur aktuelle Registerkarte</strong> für diese Arbeitsmappe und tippen Sie dann auf <strong>Exportieren</strong>. Speichern Sie die Datei an einem Ort, den Sie kontrollieren.</li>
+          <li>Um diese Kopie erneut zu öffnen, verwenden Sie <strong>Menü → Import File</strong>. Dies fügt einen weiteren Arbeitsmappen-Tab hinzu; es ersetzt Ihren bestehenden nicht.</li>
+          <li>Überprüfen Sie das statische SVG, das eingebettete PNG und die Gleichungen. Sie stammen aus der gespeicherten Markdown-Quelle und erfordern keine Code-Ausführung. Überprüfen Sie <code>canvas_axes</code> und führen Sie diese JavaScript-Zelle erneut aus, um ihr Bild neu zu erzeugen.</li>
+        </ol>
+        <p class="callout"><strong>Generierte Ausgabe ist nicht dasselbe wie Quelltext.</strong> Im geprüften Free-Browser-Build kann der <code>.srwb</code>-Export eine JavaScript-Bildausgabe speichern, aber das manuelle <strong>Menü → Import File</strong> stellt diese Code-Ausgabe nicht wieder her. Der JavaScript-Quelltext bleibt erhalten, führen Sie ihn also erneut aus. Das Inline-SVG, das eingebettete PNG und die Gleichungen sind Markdown-Quelltext und werden beim Importieren angezeigt. Verwenden Sie eine zuvor sichtbare Ausgabe nicht als Beweis dafür, dass Code gerade ausgeführt wurde.</p>
+        <p>Diese Prüfungen decken die obigen Arbeitsmappen-Beispiele ab, nicht die Bildtreue in jedem Exportformat. Gehen Sie nicht davon aus, dass PDF-, DOCX-, Markdown- und andere Dokumentexporte jedes Bild auf dieselbe Weise beibehalten; überprüfen Sie Ihr exportiertes Dokument. Siehe <a href="../../../files-export/">Dateien und Export<span class="english-reference"> (Englische Referenzseite)</span></a> für die verfügbaren Formate.</p>
+        <p>Das Exportieren Ihrer bearbeiteten Arbeitsmappe erstellt eine Sicherungskopie Ihrer Änderungen; das ursprünglich heruntergeladene Beispiel wird nicht aktualisiert, wenn Sie eine Zelle bearbeiten. Der lokale App-Speicher ist kein Backup, und Android- und Browser-Sitzungen teilen ihre Arbeit nicht automatisch.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">Wenn etwas nicht richtig aussieht</p>
+        <h2>Zelltyp und Quelltext überprüfen</h2>
+        <ul>
+          <li><strong>Sie sehen SVG-Code statt eines Diagramms:</strong> Überprüfen Sie, ob der Zelltyp <strong>Md</strong> ist, entfernen Sie alle umgebenden Codeblöcke und rendern Sie die Zelle erneut. Verwenden Sie das vollständige Inline-<code>&lt;svg&gt;...&lt;/svg&gt;</code>-Beispiel, keine SVG-Daten-URL.</li>
+          <li><strong>Das PNG fehlt:</strong> Verwenden Sie die <code>embedded_png</code>-Begleitzelle oder überprüfen Sie, ob Sie die gesamte <code>data:image/png;base64,...</code>-Zeichenkette ohne Leerzeichen oder Zeilenumbrüche eingefügt haben. Ein lokaler Dateiname sind keine eingebetteten Bilddaten.</li>
+          <li><strong>Der Canvas-Code wird nicht ausgeführt:</strong> Setzen Sie dessen Zelltyp auf <strong>Code</strong> und die Sprache auf <strong>JS - JavaScript</strong>, nicht auf Python. Behalten Sie den gesamten Funktions-Wrapper und den abschließenden Aufruf von <code>window.renderImage(...)</code> bei.</li>
+          <li><strong>Eine importierte JavaScript-Zelle hat kein Bild:</strong> Das Importieren dieser Arbeitsmappe führt sie nicht aus und stellt ihre Code-Ausgabe nicht wieder her. Überprüfen Sie <code>canvas_axes</code> und führen Sie es erneut aus.</li>
+          <li><strong>Sie sehen reinen TeX-Code oder einen mathematischen Fehler:</strong> Verwenden Sie <strong>Md</strong>, fügen Sie sowohl öffnende als auch schließende <code>$$</code> ein und prüfen Sie jeden Backslash und jede geschweifte Klammer anhand des Beispiels. Jede Matrixzeile außer der letzten endet mit zwei Backslashes, <code>\\</code>.</li>
+          <li><strong>Durch das Bearbeiten wurde eine zusätzliche Zelle erstellt:</strong> Das Panel für neue Zellen fügt Zellen hinzu. Verwenden Sie den <strong>✎ Stift</strong> der gespeicherten Zelle, um diese vorhandene Zelle zu ändern, und danach ihre eigene <strong>▶ Ausführen</strong>-Schaltfläche. Verwenden Sie <strong>Abbrechen</strong>, falls Sie deren Editor versehentlich geöffnet haben.</li>
+        </ul>
+        <p>Für eine bebilderte Tour zu gespeicherten Zellen, dem Stift und dem Panel für neue Zellen siehe die <a href="../../interface/tutorial/">Anleitung zur ersten Arbeitsmappen-Benutzeroberfläche</a>. Kehren Sie zur <a href="../../../workbooks/">Arbeitsmappen-Referenz<span class="english-reference"> (Englische Referenzseite)</span></a> zurück, um eine kurze Übersicht über die Zelltypen zu erhalten.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL-Hilfe</span><nav aria-label="Fußzeilennavigation"><a href="../../../workbooks/">Arbeitsmappen-Referenz<span class="english-reference"> (Englische Referenzseite)</span></a><a href="../../../">Gesamte Hilfe<span class="english-reference"> (Englische Referenzseite)</span></a></nav></footer>
+</body>
+</html>

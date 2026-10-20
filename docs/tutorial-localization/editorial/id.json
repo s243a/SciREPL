@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "kind": "controller-authored operational-name rendering",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "inventoryHash": "d4d0435e57acacba6635e801dd28a3a9f0821173d20e6ff4b4200f67ae77dcc2",
+  "locale": "id",
+  "modelApproval": false,
+  "nativeLanguageApproval": false,
+  "nativeLanguageReview": "pending",
+  "scope": "Only the explicitly inventoried operational labels; model prose records remain unchanged.",
+  "corrections": [
+    {
+      "fieldId": "tutorials.0044",
+      "kind": "frozen app control label",
+      "controlKey": "aiSecurity.levelOpen",
+      "identifier": "Terbuka",
+      "sourceHash": "7d8a9e811ac9bc37ee2cd2f63d5c5eb09a2191a7d0cbc354ec7376ca3a98a1e1",
+      "changed": true,
+      "beforeHash": "2afe685d5b74e30f0b9a3f090097052fe4844e2c7de2015707bb342bc0846cf7",
+      "afterHash": "aea1022d40a415a9b4b64effa3e45cd6ba2e418bb99fe26695548a61e985b5a3",
+      "protectedTokensPreserved": true
+    },
+    {
+      "fieldId": "files-export.tutorial.0029",
+      "kind": "verified label span",
+      "identifier": "CSV Basics",
+      "sourceHash": "2efcc357ca1b445de878faab3097189e647253c36bad98fb5412d494c3b8ae7e",
+      "changed": false,
+      "beforeHash": "7c736c02de15140441d5ce9d01f0958c90a6843de576d2bcc9b0bb8478731ea5",
+      "afterHash": "7c736c02de15140441d5ce9d01f0958c90a6843de576d2bcc9b0bb8478731ea5",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "files-export.tutorial.0029",
+      "kind": "verified label span",
+      "identifier": "CSV Basics: Seedling Heights",
+      "sourceHash": "2efcc357ca1b445de878faab3097189e647253c36bad98fb5412d494c3b8ae7e",
+      "changed": false,
+      "beforeHash": "7c736c02de15140441d5ce9d01f0958c90a6843de576d2bcc9b0bb8478731ea5",
+      "afterHash": "7c736c02de15140441d5ce9d01f0958c90a6843de576d2bcc9b0bb8478731ea5",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "files-export.tutorial.0035",
+      "kind": "verified label span",
+      "identifier": "CSV Basics",
+      "sourceHash": "02b357133d494b7e1a62075dd132aaac157cd89cc0a860911de362239ed26a96",
+      "changed": false,
+      "beforeHash": "71ce74bf152c83f2c552defce49b996ce08e7e656bbc3ac96a6e46dceea24b30",
+      "afterHash": "71ce74bf152c83f2c552defce49b996ce08e7e656bbc3ac96a6e46dceea24b30",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "files-export.tutorial.0095",
+      "kind": "verified label span",
+      "identifier": "CSV Basics: Seedling Heights",
+      "sourceHash": "0ded80d6b3f3cf820c818518ca31023c53f2af11a56145a264949a5f20dfd1b0",
+      "changed": false,
+      "beforeHash": "8b18d82fcaa5bed40fb6c82637acbf5d60afa7005d270a3168f95f19139554a6",
+      "afterHash": "8b18d82fcaa5bed40fb6c82637acbf5d60afa7005d270a3168f95f19139554a6",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "workbooks.tutorial.0012",
+      "kind": "verified label span",
+      "identifier": "Markov Groups: A Random Walk on Cube Moves",
+      "sourceHash": "e4516b26632c6885cb32cbfd89570a6493c50a39cff02f4d2e48b76ab723b936",
+      "changed": false,
+      "beforeHash": "c7f59ca2abe1fb282f47466e22dfea57bc2eb709204ea6fba8cd4daeb3a38b95",
+      "afterHash": "c7f59ca2abe1fb282f47466e22dfea57bc2eb709204ea6fba8cd4daeb3a38b95",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "workbooks.tutorial.0036",
+      "kind": "verified label span",
+      "identifier": "English",
+      "sourceHash": "4432e224e97a2c9b4ceaf730d05bb06e2a2296067b382eee252d9cedccdb21dc",
+      "changed": false,
+      "beforeHash": "94328aed0dc2775c489ba4c6d86c0d55379728445e8b7c55baec515bb93e35cb",
+      "afterHash": "94328aed0dc2775c489ba4c6d86c0d55379728445e8b7c55baec515bb93e35cb",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "workbooks.tutorial.0040",
+      "kind": "verified label span",
+      "identifier": "Markov Groups",
+      "sourceHash": "e62c756d33f2b4c6b79b8cdb03822fd8add01a66e2b327d632158a27af6e5d1c",
+      "changed": false,
+      "beforeHash": "c8647ae188d863281c747eb5ec1b2410cf8613afb5d2835896f469693e268cd2",
+      "afterHash": "c8647ae188d863281c747eb5ec1b2410cf8613afb5d2835896f469693e268cd2",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "workbooks.tutorial.0040",
+      "kind": "verified label span",
+      "identifier": "Markov Groups: A Random Walk on Cube Moves",
+      "sourceHash": "e62c756d33f2b4c6b79b8cdb03822fd8add01a66e2b327d632158a27af6e5d1c",
+      "changed": false,
+      "beforeHash": "c8647ae188d863281c747eb5ec1b2410cf8613afb5d2835896f469693e268cd2",
+      "afterHash": "c8647ae188d863281c747eb5ec1b2410cf8613afb5d2835896f469693e268cd2",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "workbooks.tutorial.0043",
+      "kind": "verified label span",
+      "identifier": "Markov Groups",
+      "sourceHash": "2ae4b4b9f1c9f752fc0010aaf9a218bd47f58aa7fa3ad12b16f9ecfbe0a58260",
+      "changed": false,
+      "beforeHash": "4db6be358edfb9c611dc893a99850032ce81d00f578828f7418b839af3747601",
+      "afterHash": "4db6be358edfb9c611dc893a99850032ce81d00f578828f7418b839af3747601",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "workbooks.tutorial.0067",
+      "kind": "verified whole-label identifier",
+      "identifier": "Markov Groups: A Random Walk on Cube Moves",
+      "sourceHash": "d02073d0cfe1eba58a30788da919516205f791dbeaedc199ddccfa5adf47c767",
+      "changed": false,
+      "beforeHash": "d02073d0cfe1eba58a30788da919516205f791dbeaedc199ddccfa5adf47c767",
+      "afterHash": "d02073d0cfe1eba58a30788da919516205f791dbeaedc199ddccfa5adf47c767",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "workbooks.import.0012",
+      "kind": "verified label span",
+      "identifier": "Simpson's Paradox",
+      "sourceHash": "af7b0ac38e1dd30e4fbae79640d6453b454947fe69e570b2861e6a8519fb71df",
+      "changed": false,
+      "beforeHash": "f08a17a2efb9c970732f9a3c50c21d621170e5e55f5808554d5d6c1027d2fb0c",
+      "afterHash": "f08a17a2efb9c970732f9a3c50c21d621170e5e55f5808554d5d6c1027d2fb0c",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "workbooks.import.0047",
+      "kind": "verified label span",
+      "identifier": "Simpson's Paradox",
+      "sourceHash": "37d647d74b6983a6c4e635adfe390bc7fb2ebaa504d9ea17bfacd460974b5981",
+      "changed": false,
+      "beforeHash": "73f8fc8cabb930727573067518c1d86b9c0f8f6dc0e550f4ae547bd1daf98053",
+      "afterHash": "73f8fc8cabb930727573067518c1d86b9c0f8f6dc0e550f4ae547bd1daf98053",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "workbooks.import.0047",
+      "kind": "verified label span",
+      "identifier": "Simpson's Paradox: When Every Group Disagrees with the Total",
+      "sourceHash": "37d647d74b6983a6c4e635adfe390bc7fb2ebaa504d9ea17bfacd460974b5981",
+      "changed": false,
+      "beforeHash": "73f8fc8cabb930727573067518c1d86b9c0f8f6dc0e550f4ae547bd1daf98053",
+      "afterHash": "73f8fc8cabb930727573067518c1d86b9c0f8f6dc0e550f4ae547bd1daf98053",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "workbooks.import.0051",
+      "kind": "verified label span",
+      "identifier": "Simpson's Paradox",
+      "sourceHash": "6faed81d478a0d5c67f7e45583fb515aaab5d9c5750c7bbce348a321fa42231a",
+      "changed": false,
+      "beforeHash": "ab9bd913b28cb7477fc6540fc25090bcb8a2081305d07898f44cc915736c95da",
+      "afterHash": "ab9bd913b28cb7477fc6540fc25090bcb8a2081305d07898f44cc915736c95da",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "workbooks.graphics.0045",
+      "kind": "verified label span",
+      "identifier": "Workbook Graphics",
+      "sourceHash": "38a262a59c1daa3a254f80d436b89bfb9708911ee7fee500ec0f76101386fd07",
+      "changed": false,
+      "beforeHash": "1f263fa1c48eb6e68e63c015e33e2f3adfe9cb5af2fdcbe391cfaa7053042d9e",
+      "afterHash": "1f263fa1c48eb6e68e63c015e33e2f3adfe9cb5af2fdcbe391cfaa7053042d9e",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "workbooks.named-cells.0033",
+      "kind": "verified label span",
+      "identifier": "Named Cell Interop",
+      "sourceHash": "3bd1e8556a9bba01a4839904aa3c741d39f647925678e6b12c05801df51c9881",
+      "changed": false,
+      "beforeHash": "2bd446434834fc72bb2cb6c1fa53f1fd207be24709c2b77d582246e78337f94b",
+      "afterHash": "2bd446434834fc72bb2cb6c1fa53f1fd207be24709c2b77d582246e78337f94b",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "workbooks.named-cells.0036",
+      "kind": "verified label span",
+      "identifier": "Named Cell Interop",
+      "sourceHash": "7d41becb9374d1deb6c3b08750cfc48779cb156855ae2a91ddcec3ba45365945",
+      "changed": false,
+      "beforeHash": "4f1749245bd889f95cd94bd5e6fbeb152e2edd3db9809b7b840116ebe3794463",
+      "afterHash": "4f1749245bd889f95cd94bd5e6fbeb152e2edd3db9809b7b840116ebe3794463",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    },
+    {
+      "fieldId": "workbooks.named-cells.0144",
+      "kind": "verified label span",
+      "identifier": "Named Cell Interop",
+      "sourceHash": "67761ef102a5795eca1293fe88480ab6427f2610094bb5ae2aac525154e56629",
+      "changed": false,
+      "beforeHash": "fbee2860b87b78fa17f894c97da915fc884e5ea1e84539610c947158fb442020",
+      "afterHash": "fbee2860b87b78fa17f894c97da915fc884e5ea1e84539610c947158fb442020",
+      "protectedTokensPreserved": true,
+      "directionalIsolation": null
+    }
+  ]
+}

@@ -305,15 +305,12 @@
     function isSourceOnlyCell(code, cellType, language) {
         if (cellType === 'markdown') return false;
 
-        let effectiveLanguage = language;
         let effectiveCode = String(code || '');
         const magicMatch = effectiveCode.match(/^%%(\w+)\s*\n([\s\S]*)$/);
         if (magicMatch) {
-            effectiveLanguage = magicMatch[1].toLowerCase();
             effectiveCode = magicMatch[2];
         }
 
-        if (effectiveLanguage !== 'typr' && effectiveLanguage !== 'lua') return false;
         const firstLine = effectiveCode.trimStart().split(/\r?\n/, 1)[0].trim().toLowerCase();
         return firstLine === '#!source';
     }
@@ -1030,6 +1027,14 @@ _scirepl_modules_for(${JSON.stringify(dist)})
 
     async function executeCode(code, language) {
         language = language || 'python';
+
+        // Source-only cells are notebook data. Keep this central guard even
+        // though the UI paths also skip them, so future callers cannot execute
+        // a stored fragment accidentally.
+        if (isSourceOnlyCell(code, 'code', language)) {
+            return { stdout: '', result: null, error: null };
+        }
+
         const km = window.kernelManager;
 
         if (!km) throw new Error(window.t('app.errors.kernelManagerUnavailable'));
@@ -1800,6 +1805,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
             window._cellCounter++;
             const cellId = window._cellCounter;
             const language = def.language || 'python';
+            const sourceOnly = isSourceOnlyCell(def.code, def.type, language);
 
             const inputCard = createInputCard(def.code, cellId, def.type, language);
             const outputCard = createOutputCard(cellId, def.type);
@@ -1820,6 +1826,11 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 body.innerHTML = renderMarkdown(def.code);
                 const pre = inputCard.querySelector('pre');
                 if (pre) pre.style.display = 'none';
+            } else if (sourceOnly) {
+                // A source fragment is stored and highlighted, never executed,
+                // even when the surrounding import requests auto-execution.
+                outputCard.remove();
+                cell.outputCard = null;
             } else if (def.outputs && def.outputs.length > 0) {
                 // Render pre-existing Jupyter outputs without re-executing
                 window.renderJupyterOutputs(def.outputs, outputCard);
@@ -1895,9 +1906,10 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
 
         const language = getCurrentLanguage();
         const km = window.kernelManager;
+        const sourceOnly = isSourceOnlyCell(code, currentCellType, language);
 
-        // Markdown cells don't need a kernel
-        if (currentCellType === 'code') {
+        // Markdown and source-only cells don't need a kernel
+        if (currentCellType === 'code' && !sourceOnly) {
             if (!km || !km.isReady(language)) {
                 // Try to init on demand
                 try {
@@ -1949,6 +1961,14 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
             const pre = inputCard.querySelector('pre');
             if (pre) pre.style.display = 'none';
 
+            saveCellsToSession();
+        } else if (sourceOnly) {
+            outputCard.remove();
+            cell.outputCard = null;
+            if (window.sessionManager) {
+                window.sessionManager.addToHistory(code);
+                window.sessionManager.session.historyIndex = -1;
+            }
             saveCellsToSession();
         } else {
             setStatus('app.status.running', undefined, 'running');
@@ -2348,6 +2368,7 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
         escapeHtml: escapeHtml,
         highlightCode: highlightCode,
         setPreHighlighted: setPreHighlighted,
+        isSourceOnlyCell: isSourceOnlyCell,
         updateSourceOnlyIndicator: updateSourceOnlyIndicator
     };
 

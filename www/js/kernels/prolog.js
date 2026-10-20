@@ -1013,6 +1013,10 @@ class PrologKernel {
             if (key === 'success' || key === 'done' || key === 'error' || key === 'message' || key.startsWith('$')) continue;
             // Skip anonymous variables
             if (key.startsWith('_')) continue;
+            // swipl-wasm represents unbound variables and opaque handles with
+            // tagged wrapper objects. They are implementation details, not
+            // useful query answers, and otherwise render as "[object Object]".
+            if (this._isHiddenBindingValue(value)) continue;
 
             bindings.push(key + ' = ' + this._formatValue(value));
         }
@@ -1032,6 +1036,8 @@ class PrologKernel {
         if (Array.isArray(value)) {
             return '[' + value.map(v => this._formatValue(v)).join(', ') + ']';
         }
+        if (typeof value === 'object' && value.$t === 'v') return '_';
+        if (typeof value === 'object' && value.$t === 'b') return '<opaque>';
         if (typeof value === 'object' && value.functor) {
             // Compound term
             if (value.args && value.args.length > 0) {
@@ -1040,6 +1046,11 @@ class PrologKernel {
             return value.functor;
         }
         return String(value);
+    }
+
+    _isHiddenBindingValue(value) {
+        return !!value && typeof value === 'object' &&
+            (value.$t === 'v' || value.$t === 'b');
     }
 
     async destroy() {

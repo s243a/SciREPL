@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="de" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Eine SciREPL Pro-Anleitung: Tabellenvorschläge ohne API-Kosten, Einrichtung des API-Schlüssels, die Agent-Voreinstellung „Open“, Online- und lokale Vervollständigung sowie fokussierte KI-Prompt-Zellen.">
+  <meta name="theme-color" content="#06101d">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/de/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../styles.css">
+  <link rel="stylesheet" href="../../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../../pro/ai/tutorial/tutorial.css">
+  <title>KI und Vervollständigung, Schritt für Schritt · SciREPL Pro-Hilfe</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../tutorial-locales.css">
+</head>
+<body data-editions="pro" data-platforms="android windows-preview">
+  <a class="skip-link" href="#main">Zum Inhalt springen</a>
+  <header class="site-header">
+    <a class="brand" href="../../../../">sci<span>REPL</span> Help<span class="english-reference"> (Englische Referenzseite)</span></a>
+    <nav aria-label="Hauptnavigation">
+      <a href="../../../tutorials/">Alle Tutorials</a>
+      <a href="../../../../pro/ai/">KI-Referenz<span class="english-reference"> (Englische Referenzseite)</span></a>
+      <a href="../../../../pro/">Pro-Hilfe<span class="english-reference"> (Englische Referenzseite)</span></a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Tutorial-Sprache"><details class="tutorial-language-menu"><summary>Tutorial-Sprache: <bdi>Deutsch</bdi></summary><nav aria-label="Tutorial-Sprache"><a href="../../../../en/pro/ai/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../../ar/pro/ai/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../../bn/pro/ai/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="./" lang="de" hreflang="de" aria-current="page">Deutsch</a>
+      <a href="../../../../es/pro/ai/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../../fr/pro/ai/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../../hi/pro/ai/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../../id/pro/ai/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../../ja/pro/ai/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../../ko/pro/ai/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../../pt-BR/pro/ai/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../../ru/pro/ai/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../../zh/pro/ai/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Maschinell übersetztes Tutorial; die Überprüfung durch Muttersprachler steht noch aus. Code und technische Werte sind unverändert. Screenshots zeigen die englische Originaloberfläche; gleichen Sie die übersetzten Bezeichnungen der Steuerelemente in diesem Text mit Ihrer App ab.</p></aside>
+    <p class="breadcrumbs"><a href="../../../../">Hilfe<span class="english-reference"> (Englische Referenzseite)</span></a> / <a href="../../../../pro/">Pro<span class="english-reference"> (Englische Referenzseite)</span></a> / KI und Vervollständigung</p>
+    <article>
+      <p class="eyebrow">Praktisch lernen · Pro</p>
+      <h1>Von Offline-Vorschlägen zum KI-gestützten Programmieren</h1>
+      <p class="lede">Beginnen Sie mit schnellen tabellenbasierten Vorschlägen, die pro Anfrage nichts kosten. Richten Sie dann den Assistenten ein, fordern Sie Online-Alternativen an, probieren Sie ein On-Device-Modell aus und schließen Sie mit fokussierten KI-Prompt-Zellen ab, die Ihren Code erklären.</p>
+      <ul class="meta">
+        <li class="chip chip-pro">Nur Pro</li>
+        <li class="chip">Pro 1.4.0 + bevorstehende Ausführungssteuerungen</li>
+        <li class="chip">Lokales Modell: Android</li>
+      </ul>
+      <p class="screen-note">Die meisten Screenshots zeigen die Android-App; einige sind Browser-Aufnahmen. Layouts können je nach App-Version variieren.</p>
+      <p class="callout"><strong>Überprüfen Sie Ihre Version.</strong> Die Ausführungsänderungen im <a href="#execution-permissions">Anhang</a> sind für die <strong>vorgeschlagene Version Pro 1.5.0</strong> geplant, die noch <strong>unveröffentlicht</strong> ist; die endgültige Versionsnummer kann sich ändern.</p>
+      <p class="callout"><strong>„Free“ bedeutet hier ohne API-Gebühren.</strong> Tabellenvorschläge und das On-Device-Modell rechnen nicht über einen Anbieter ab. Das macht sie nicht zu Funktionen der Free-Edition: Diese Anleitung ist für <strong>SciREPL Pro</strong>. Online-Anfragen nutzen Ihr eigenes Anbieterkonto und können Geld kosten.</p>
+      <nav class="lesson-nav" aria-label="Schritte der Anleitung zu KI und Vervollständigung">
+        <strong>In dieser Lektion</strong>
+        <ol>
+          <li><a href="#tables">Mit Offline-Tabellenvorschlägen beginnen</a></li>
+          <li><a href="#key">Einen API-Schlüssel speichern</a></li>
+          <li><a href="#agent">Ein kleines Beispiel mit der Open-Agent-Voreinstellung erstellen</a></li>
+          <li><a href="#online">API-basierte Vervollständigungen anfordern</a></li>
+          <li><a href="#local">Das On-Device-Modell ausprobieren</a></li>
+          <li><a href="#prompt-cells">Eine KI-Prompt-Zelle verwenden, um den Code zu verstehen</a></li>
+        </ol>
+        <p><a href="../../../tutorials/">Ein anderes Tutorial wählen</a> · <a href="#troubleshooting">Wenn etwas nicht funktioniert</a></p>
+      </nav>
+
+      <section id="tables">
+        <p class="step-label">Schritt 1 · Kein API-Schlüssel erforderlich</p>
+        <h2>Mit Offline-Tabellenvorschlägen beginnen</h2>
+        <p>Suchen Sie <strong>☰ Menü</strong> in der Kopfzeile der App: Es ist die Schaltfläche mit <strong>drei horizontalen Linien</strong>. Öffnen Sie <strong>Vervollständigung</strong>. Die Auswahl für <strong>Abschnitt</strong> unterteilt <strong>Allgemein</strong>, <strong>KI-Vorschläge (online)</strong> und <strong>Lokales Modell (auf dem Gerät)</strong>. Beginnen Sie mit Allgemein.</p>
+        <ol class="lesson-steps">
+          <li>Setzen Sie <strong>Lokale Codevervollständigung → An</strong>. Die Standardeinstellung <strong>Automatisch (Desktop an, Touch aus)</strong> würde dies auf einem Telefon sonst deaktiviert lassen.</li>
+          <li>Setzen Sie <strong>Vorschlags-Chips → An</strong> und behalten Sie <strong>Vorschläge → An der Cursorposition</strong> bei. Um die Tabellen zu isolieren, setzen Sie im Online-Bereich <strong>KI-Vorschläge → Aus</strong> und im lokalen Bereich <strong>Lokales Modell verwenden → Aus</strong>, falls eines davon zuvor aktiviert war. Kehren Sie zu Allgemein zurück.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-general" role="img" aria-label="Pro-Browseransicht des Bildschirms „Allgemeine Vervollständigung“. Gelbe Ränder kennzeichnen die Überschriften „Ghost text“ und „Suggestion chips“, „Suggestions: At cursor“ sowie „Suggestion chips: On“.">
+            <div class="shot-stage shot-stage--completion-general">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general.png" width="414" height="820" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general-overlay.svg" width="414" height="820" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Die eigentlichen Bedienelemente unter „Allgemein“ in einer schmalen <strong>Browser-Aufnahme, kein Android-Screenshot</strong>. Gelbe Ränder kennzeichnen <strong>Vorschläge → An der Cursorposition</strong>, <strong>Vorschlags-Chips → An</strong> und deren Abschnittstitel. Das Dropdown-Menü „Bereich“ befindet sich oben; für weiter unten liegende Einstellungen muss möglicherweise gescrollt werden.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-general.png">Vollständige Aufnahme der Einstellungen anzeigen</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>Schließen Sie die Vervollständigung. Wählen Sie in einer neuen Übungs-Arbeitsmappe eine <strong>Code</strong>-Zelle und die Sprache <strong>JavaScript</strong>. Tippen Sie <code>cons</code> ein, mit der Schreibmarke am Ende und ohne Auswahl. Diese ersten Buchstaben von <code>const</code> werden als <strong>Präfix</strong> bezeichnet. Achten Sie auf <code>const</code>.</li>
+          <li>Im Screenshot unten folgt auf <code>cons</code> ein schwaches <code>t</code> – Inline-<strong>Ghost-Text</strong>. Tippen Sie auf <strong>Übernehmen</strong> oder drücken Sie <kbd>Tab</kbd>, um den Vorschlag einzufügen, was <code>const</code> ergibt. Wenn stattdessen ein <code>const</code>-Chip erscheint, ist das Antippen eine weitere Möglichkeit, diesen Kandidaten zu übernehmen. Vervollständigen Sie die Zeile selbst, beispielsweise <code>const values = [12, 15, 18];</code>.</li>
+        </ol>
+        <p class="callout"><strong>Übernehmen ist nicht Ausführen.</strong> Das Übernehmen eines Vorschlags bearbeitet den Quellcode; die Zelle wird dabei nicht ausgeführt. Die JavaScript- und Python-Beispiele in diesem Abschnitt demonstrieren die Autovervollständigung während der Bearbeitung. Das Ausführen dieser Übungszellen ist nicht Bestandteil dieses Abschnitts. Wenn nur die Offline-Tabellenschicht aktiviert ist, sendet die Eingabe eines Präfixes keine API-Anfrage und startet keine Sprach-Laufzeitumgebung nur zur Erstellung von Vorschlägen.</p>
+        <p class="note"><strong>Künftiges Online-Prefetching:</strong> Ein optionaler Modus ist geplant, der Modellanfragen senden könnte, während Sie tippen. Er ist noch nicht verfügbar, und ihm ist noch keine Versionsnummer zugewiesen. Die obige Aussage, dass keine Anfragen gesendet werden, beschreibt die aktuelle Offline-Tabellenschicht, nicht diesen zukünftigen Modus.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-javascript.png" width="1080" height="2340" alt="Unterer Editor-Ausschnitt aus einem echten Android Galaxy S24+-Screenshot: JavaScript cons gefolgt von einem schwachen t als Ghost-Text und einer Schaltfläche „Accept“, mit aktivierten Vorschlags-Chips und ausgeblendeter Zusatztastenleiste." loading="lazy" decoding="async">
+          <figcaption><strong>Detailansicht eines echten Galaxy S24+ Android-Screenshots.</strong> Die JavaScript-Tabellenvervollständigung schlägt <code>const</code> für <code>cons</code> vor: Das schwache <code>t</code> ist Ghost-Text, wobei <strong>Übernehmen</strong> sichtbar und Chips aktiviert sind. Die API und das lokale Modell sind deaktiviert. Die Zusatztastenleiste ist hier ausgeblendet, um den Unterschied zum nächsten Bild zu verdeutlichen; sie ist ein separates, optionales Bedienelement und keine Voraussetzung für die Vervollständigung.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-javascript.png">Unveränderten vollständigen Smartphone-Screenshot der Vervollständigung JavaScript cons → const anzeigen</a>
+        </figure>
+        <p><strong>Sehen Sie sich die beiden Offline-Darstellungen auf einem Smartphone an.</strong> Belassen Sie <strong>Vorschlags-Chips → An</strong>, wählen Sie <strong>Python</strong> und tippen Sie <code>pri</code> ein. Das schwache <code>nt</code> hinter der Schreibmarke schlägt <code>print</code> vor; es wird erst Teil Ihres Quellcodes, wenn Sie es übernehmen. <strong>Sie müssen Chips nicht deaktivieren, um Ghost-Text zu sehen.</strong> Ein einzelner Kandidat kann als Ghost-Text erscheinen, während Chips eine Auswahl bieten, wenn mehrere Kandidaten passen. Behalten Sie <strong>KI-Vorschläge</strong> und <strong>Lokales Modell verwenden</strong> für beide Beispiele deaktiviert.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-ghost.png" width="1080" height="2340" alt="Unterer Editor-Ausschnitt aus einem Android Galaxy S24+-Screenshot: Python-Quellcode pri gefolgt vom schwachen Ghost-Text nt und einer Schaltfläche „Accept“. Vorschlags-Chips sind aktiviert." loading="lazy" decoding="async">
+          <figcaption><strong>Detailansicht eines echten Galaxy S24+ Android-Screenshots.</strong> Die Offline-Tabellenvervollständigung bietet mit <strong>Vorschlags-Chips → An</strong> ein schwaches Suffix an der Schreibmarke an. Die API und das lokale Modell sind deaktiviert.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-ghost.png">Unveränderten vollständigen Smartphone-Screenshot von Ghost-Text anzeigen</a>
+        </figure>
+        <p>Mit den Chips weiterhin auf <strong>An</strong> ersetzen Sie die Übungseingabe durch diese drei Zeilen und lassen Sie die Schreibmarke nach dem unvollständigen <code>sample_m</code> stehen. Die Leiste bietet <code>sample_mean</code> und <code>sample_median</code> aus Namen Ihres eigenen Quellcodes an. Tippen Sie auf einen Chip, um einen Kandidaten auszuwählen; anders als Ghost-Text zeigt die Leiste Alternativen an.</p>
+        <pre><code>sample_mean = 0
+sample_median = 0
+sample_m</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-chips.png" width="1080" height="2340" alt="Unterer Editor-Ausschnitt aus einem Android Galaxy S24+-Screenshot: Python-Quellcode definiert sample_mean und sample_median, dann sample_m, mit den Kandidaten-Chips sample_mean und sample_median." loading="lazy" decoding="async">
+          <figcaption><strong>Detailansicht eines echten Galaxy S24+ Android-Screenshots.</strong> Bei aktivierten Chips bieten aus dem Quellcode abgeleitete Offline-Kandidaten die beiden obigen Namen an. Die API und das lokale Modell bleiben deaktiviert.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-chips.png">Unveränderten vollständigen Smartphone-Screenshot der Kandidaten-Chips anzeigen</a>
+        </figure>
+        <p>Die <strong>Zusatztastenleiste</strong>, die in den Python-Smartphone-Bildern zu sehen ist, und <strong>Syntaxfarben beim Tippen</strong> sind separate, optionale Pro-Bedienelemente. Siehe <a href="../../../interface/appearance/#pro-editor">Erscheinungsbild-Anleitung: Zusatztasten und Syntaxfarben</a>, um diese ein- oder auszuschalten und das separate Hervorhebungs-Kontrollkästchen des Datei-Editors zu finden.</p>
+        <p>Wechseln Sie nach dem Ausprobieren dieser Vervollständigungsanzeigen zurück zu <strong>JavaScript</strong> und lassen Sie die Chips für den Rest der Lektion aktiviert.</p>
+        <p>Die hier gezeigten Offline-Chips, die unter <strong>Vervollständigung → Allgemein → Vorschlags-Chips</strong> aktiviert werden, kombinieren kuratierte Namenstabellen mit lokalen Code-Informationen. In Python umfasst dies Variablen und Funktionen aus dem Arbeitsmappen-Code sowie zwischengespeicherte Kernel-Namen und Objektattribute einschließlich Methoden. Häufigkeit und Annahmeverlauf helfen bei deren Priorisierung. Andere Sprachen bieten eine abweichende Abdeckung: Statische Listen, nicht ausgeführte Definitionen oder veraltete Snapshots schlagen möglicherweise Namen vor, die im aktuellen Gültigkeitsbereich gar nicht verfügbar sind. <strong>Tabellenbasierte Vervollständigung ist kein Sprachmodell</strong> und zieht keine logischen Schlüsse über Ihre Aufgabe.</p>
+        <p><strong>Nur am Zellenende</strong> ist eine Alternative, wenn Vorschläge mitten in der Zelle ablenken. Eine Auswahl, eine Zeichenkette, ein Kommentar oder ein unvollständig getrennter Name erzeugt möglicherweise absichtlich keine Vorschläge. Im Querformat mit geringer Höhe können optionale Leisten ausgeblendet werden, um Platz für Code zu sparen; siehe <a href="../../../interface/appearance/">Erscheinungsbildeinstellungen</a>.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-position">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-position.png" width="1080" height="2340" alt="Detail des tatsächlichen Android Galaxy S24+-Bildschirms „Allgemein“ für die Vervollständigung: Das Dropdown-Menü „Suggestions“ ist geöffnet, wobei „At cursor“ ausgewählt ist und sich „End of cell only“ darunter befindet." loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Tatsächlicher Galaxy S24+ Android-Screenshot.</strong> Wählen Sie unter <strong>Vervollständigung → Allgemein → Ghost-Text → Vorschläge</strong> entweder <strong>An der Cursorposition</strong> oder <strong>Nur am Zellenende</strong>. Letzteres bedeutet das Ende der <em>gesamten Zelle</em>, nicht jeder Zeile. Das geöffnete Menü von Android verdeckt die benachbarten Einrückungseinstellungen; dies sind separate Bedienelemente und nicht Teil dieser Auswahl.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-position.png">Unveränderten vollständigen Smartphone-Screenshot des geöffneten Menüs „Suggestions“ anzeigen</a>
+        </figure>
+      </section>
+
+      <section id="key">
+        <p class="step-label">Schritt 2 · Online-Einrichtung</p>
+        <h2>Einen API-Schlüssel speichern</h2>
+        <p>Ein API-Schlüssel ermöglicht es SciREPL, ein von Ihnen kontrolliertes Anbieterkonto zu nutzen. Beziehen Sie den Schlüssel von diesem Anbieter, prüfen Sie dessen aktuelle Preise und Kontolimits und verwenden Sie für diese Lektion ausschließlich eine kleine Übungs-Arbeitsmappe mit nicht-privaten Daten.</p>
+        <ol class="lesson-steps">
+          <li>Öffnen Sie <strong>Menü → 🤖 KI-Assistent (Pro)</strong>. Tippen Sie im Panel auf das <strong>⚙ Zahnrad</strong> , um die KI-Einstellungen zu öffnen.
+            <p class="callout"><strong>Zahnrad nicht sichtbar?</strong> Die Tastatur kann das Assistenten-Panel verschieben oder scrollen. Ziehen Sie den Inhalt des Panels nach unten, um wieder nach oben zu scrollen und das Zahnrad sichtbar zu machen; das Schließen der Tastatur kann Ihnen ebenfalls mehr Platz verschaffen.</p>
+          </li>
+          <li>Setzen Sie <strong>Modell konfigurieren für → KI-Assistent</strong>. Wählen Sie ein <strong>Backend</strong> (z. B. OpenRouter) und ein <strong>Modell</strong> aus und überprüfen Sie den Endpunkt, falls Ihr Backend einen konfigurierbaren verwendet.</li>
+          <li>Geben Sie den passenden <strong>API-Schlüssel</strong> ein. Verwenden Sie <strong>Gespeicherte Schlüssel</strong>, um Schlüssel für andere Anbieter-/Endpunkt-Kombinationen zu verwalten. Ein Schlüssel für ein Ziel ist nicht automatisch auch ein Schlüssel für ein anderes.</li>
+          <li>Tippen Sie auf <strong>Speichern</strong>. Das bloße Speichern der Einstellungen sendet noch keine Modellanfrage. Lassen Sie das Panel für den nächsten Schritt geöffnet.</li>
+        </ol>
+        <p class="callout"><strong>Schlüssel nicht in die Arbeitsmappe einfügen.</strong> Fügen Sie ihn nicht in eine Zelle, einen Prompt, einen Screenshot oder eine exportierte Datei ein. Gespeicherte Schlüssel verbleiben im lokalen Speicher der App bzw. des Browsers, ohne anwendungsbezogene Verschlüsselung; schützen Sie das Gerät und führen Sie keinen nicht vertrauenswürdigen Code aus. Die <a href="../../../../../pro/privacy.html">Pro-Datenschutzerklärung</a> erläutert, was gespeichert und übertragen wird.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--key-setup" role="img" aria-label="Schlüssellose Pro-Browser-KI-Einstellungen. Gelbe Ränder kennzeichnen „Configure model for: AI Assistant“, „Backend: OpenRouter“, „Model: GLM 5.3 Flash“ und das leere API-Schlüsselfeld.">
+            <div class="shot-stage shot-stage--key-setup">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup.png" width="390" height="538" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup-overlay.svg" width="390" height="538" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Eine neue, <strong>schlüssellose Browser-Aufnahme</strong> der KI-Einstellungen, kein Android-Screenshot. Gelbe Ränder markieren die einzustellenden Felder: <strong>Modell konfigurieren für</strong>, <strong>Backend</strong>, <strong>Modell</strong> und <strong>API-Schlüssel</strong>. Das schwache <code>sk-…</code> ist ein Platzhalter, kein gespeicherter Schlüssel. Scrollen Sie weiter nach unten, um zu <strong>Speichern</strong> zu gelangen; für dieses Bild wurde kein Schlüssel eingegeben und keine Anfrage gesendet.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-key-setup.png">Unveränderten Screenshot der KI-Konfiguration anzeigen</a>
+        </figure>
+        <p>Ein kostengünstiges Modell mit Werkzeugunterstützung ist ein sinnvoller Ausgangspunkt für den Assistenten. Zu den Beispielen für einen Vergleich gehören <a href="https://openrouter.ai/z-ai/glm-5.3-flash">GLM 5.3 Flash</a>, <a href="https://developers.openai.com/api/docs/models/gpt-6-luna">GPT-6 Luna</a>, <a href="https://www.anthropic.com/claude/haiku">Claude Haiku 5.5</a> und <a href="https://api-docs.deepseek.com/quick_start/pricing">DeepSeek V4 Flash</a>. Genaue Modell-IDs, verfügbare Versionen, Werkzeugunterstützung und Preise hängen von Ihrer App-Version und Ihrem Anbieter ab; prüfen Sie die aktuelle Auswahlliste und die Anbieterdokumentation. Ein neu angekündigtes Modell erfordert möglicherweise ein App-Update, bevor es angezeigt wird. Später können Sie ein anderes preiswertes Modell nur für Vervollständigungen auswählen.</p>
+        <aside class="callout" id="custom-model">
+          <p><strong>Modell fehlt in der Liste?</strong> Wählen Sie unter <strong>KI-Einstellungen → Modell konfigurieren für → KI-Assistent</strong> zuerst das richtige <strong>Backend</strong> aus, geben Sie dann die <strong>genaue API-Modell-ID</strong> des Anbieters in <strong>Oder benutzerdefinierte Modell-ID eingeben</strong> unter der Modell-Auswahl ein und tippen Sie auf <strong>Speichern</strong>. Dieses Feld ist bereits in Pro 1.4.0 verfügbar.</p>
+          <p>Überprüfen Sie die ID bei Ihrem ausgewählten Anbieter, nicht nur den Marketingnamen des Modells. Geben Sie für OpenRouter das Organisationspräfix an – beispielsweise <code>anthropic/claude-haiku-5.5</code> auf <a href="https://openrouter.ai/anthropic/claude-haiku-5.5">seiner Modellseite</a>. Geben Sie die ID ein, nicht die URL dieser Seite. Die benutzerdefinierte ID hat Vorrang vor dem Dropdown-Menü; die erneute Auswahl eines aufgelisteten Modells leert das benutzerdefinierte Feld.</p>
+          <p><strong>Eine ID ergänzt keine API-Unterstützung.</strong> Das Modell muss Tool-Aufrufe über die API unterstützen, die SciREPL verwendet. Prüfen Sie Anbieterzugang, Kompatibilität und aktuelle Preise; das Speichern validiert diese nicht und sendet keine Modellanfrage.</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--custom-model" role="img" aria-label="Schlüssellose Pro-Browser-KI-Einstellungen. Gelbe Ränder kennzeichnen „Backend: OpenRouter“ und das Feld für die benutzerdefinierte Modell-ID mit anthropic/claude-haiku-5.5 unter der Modell-Auswahl.">
+            <div class="shot-stage shot-stage--custom-model">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model.png" width="390" height="456" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model-overlay.svg" width="390" height="456" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Eine echte, <strong>schlüssellose Browser-Aufnahme</strong>, kein Android-Screenshot. Der gelbe Rand unter „Model“ verortet das Feld für die benutzerdefinierte ID. Das Dropdown-Menü zeigt immer noch GLM 5.3 Flash, aber die eingegebene Haiku-ID hätte beim Speichern Vorrang. API-Schlüssel und „Save“ befinden sich unterhalb dieses Ausschnitts; es wurde kein Schlüssel eingegeben, „Save“ wurde nicht betätigt und keine Modellanfrage gesendet. Dies ist ein Konfigurationsbeispiel, kein Funktionstest des Modells.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-custom-model.png">Unveränderten Screenshot des benutzerdefinierten Modells anzeigen</a>
+        </figure>
+      </section>
+
+      <section id="agent">
+        <p class="step-label">Schritt 3 · Gezielte Tool-Nutzung</p>
+        <h2>Ein kleines Beispiel mit der Open-Agent-Voreinstellung erstellen</h2>
+        <p><strong>Offen</strong> ist die <strong>zweitdurchlässigste</strong> Sicherheitsvoreinstellung nach <strong>Volle Kontrolle</strong>. Sie erlaubt standardmäßig Notebook-Bearbeitungen mit weniger Nachfragen als „Cautious“. Ob vor der Ausführung nachgefragt wird, hängt von Ihrer Version und den Berechtigungseinstellungen ab; siehe den <a href="#execution-permissions">Anhang zur bevorstehenden Ausführungsgenehmigung</a>. Verwenden Sie diese Einstellung gezielt in einer Übungs-Arbeitsmappe – nicht als Voraussetzung für die Autovervollständigung.</p>
+        <ol class="lesson-steps">
+          <li>Wählen Sie in den KI-Einstellungen <strong>Sicherheitsstufe → Open</strong> und <strong>Agent schreibt → Aktives Arbeitsblatt</strong>. Lassen Sie das Durchsuchen des Quellcodes deaktiviert und schalten Sie <strong>Von KI erstellte Zellen automatisch ausführen</strong>aus. Unter <strong>Kernel…</strong>stellen Sie <strong>JavaScript → Nachfragen</strong>ein und speichern Sie dann. Diese Kernel-Regel fragt auch dann noch nach, wenn zuvor ein „Allow“ für das Ausführungswerkzeug gespeichert wurde.
+            <p class="callout" id="auto-run-warning"><strong>Deaktiviertes automatisches Ausführen ist keine Ausführungssperre.</strong> Es verhindert nur, dass neu erstellte Zellen automatisch ausgeführt werden; separate <code>execute_cell</code>- oder <code>run_cells</code>-Anfragen werden dadurch nicht deaktiviert. Der Open-Standard des veröffentlichten Pro 1.4.0 kann diese ohne Nachfrage zulassen. Der künftige Open-Standard fragt nach, aber ein explizites „Allow“ für ein Tool oder einen Kernel kann diesen Standard ändern. <strong>KI-Einstellungen → Kernel… → JavaScript → Nachfragen</strong> stellt sicher, dass die JavaScript-Ausführung in dieser Übung an eine Bestätigung gebunden bleibt. Die eigene manuelle Ausführung einer Zelle bleibt eine separate Aktion. <a href="#execution-permissions">Ausführungssteuerungen der nächsten Version werden im Anhang ausführlich beschrieben.</a></p>
+            <aside class="callout" id="sandbox">
+              <p>Wenn Sie mehr Bestätigungen bevorzugen, verwenden Sie stattdessen <strong>Vorsichtig</strong>. „Open“ berücksichtigt weiterhin die separaten Steuerungen für das Durchsuchen des Quellcodes und den Schreibbereich; „Full control“ umgeht diese beiden groben Steuerungen. Individuelle Berechtigungen und andere Sicherheitsmechanismen bleiben weiterhin von Bedeutung. <strong>Überprüfung</strong> ist eine zusätzliche Beschränkung auf weitgehendes Lesen, die diese Zellenerstellungs-Demonstration behindern würde.</p>
+              <h3>Was die Browser-Sandbox schützt – und was nicht</h3>
+              <p>Die normale Ausführung der Arbeitsmappe erfolgt im Browser bzw. in der WebView und den zugehörigen Sprach-Laufzeitumgebungen mit einem virtuellen Dateisystem anstelle eines uneingeschränkten Zugriffs auf die Dateien Ihres Smartphones. Das ist eine nützliche Abgrenzung, <strong>aber keine Garantie dafür, dass Code keinen Schaden anrichten kann</strong>. Zulässiges JavaScript und Brücken dorthin können auf App-Daten und gespeicherte Anmeldedaten zugreifen; Netzwerkbeschränkungen bieten nach dem Start von erlaubtem Code lediglich Best-Effort-Schutz und stellen keine Isolationsgrenze dar, der Sie Geheimnisse anvertrauen sollten. Die bevorstehende Ausführungsabfrage ergänzt einen Bestätigungsschritt, keine Isolation von den Daten der App. Verwenden Sie eine Übungs-Arbeitsmappe und achten Sie darauf, dass deren Inhalte nicht privat sind.</p>
+              <p><strong>Remote/MCP-Terminal unterscheidet sich davon:</strong> Es kann eine echte Shell auf dem Broker-Host außerhalb der browserlokalen Sandbox bereitstellen. Lassen Sie „Remote“ und „Terminal“ hier deaktiviert. Siehe <a href="../../../../pro/remote/">Remote und Sicherheit<span class="english-reference"> (Englische Referenzseite)</span></a>, bevor Sie diese aktivieren. Ein höfliches „Tu nicht…“ im Prompt ist keine Sicherheitsmaßnahme.</p>
+            </aside>
+          </li>
+          <li>Wählen Sie im Assistenten-Panel <strong>Diese Arbeitsmappe</strong>aus. Lassen Sie <strong>Review</strong>, <strong>Remote</strong>und <strong>Terminal</strong> für dieses Beispiel mit direktem Anbieter deaktiviert.
+            <figure class="phone-figure" id="assistant-context-controls">
+              <p class="screen-note">Panel-Kopfzeile</p>
+              <div class="shot-window shot-window--assistant-context-header" role="img" aria-label="Oberer Ausschnitt des Android-Assistenten-Panels. Ein gelber Rand hebt die Auswahl „This workbook“ im Konversations-Dropdown hervor.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <p class="screen-note">Untere Bedienelemente</p>
+              <div class="shot-window shot-window--assistant-context-footer" role="img" aria-label="Unterer Ausschnitt desselben Android-Assistenten-Panels. Gelbe Ränder heben „Review“, „Remote“ und „Terminal“ hervor, alle nicht markiert. Das leere Nachrichtenfeld und die Schaltfläche „Send“ sind sichtbar.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption><strong>Zwei Ausschnitte desselben echten Galaxy S24+ Android-Screenshots.</strong> Gelbe Ränder kennzeichnen <strong>Diese Arbeitsmappe</strong> und <strong>Überprüfung</strong>, <strong>Remote</strong> sowie <strong>Terminal</strong> (alle nicht markiert). Der leere Mittelteil des Panels wurde weggelassen. Es wurde kein Prompt gesendet.</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-assistant-context.png">Unveränderten vollständigen Screenshot des Assistenten-Panels anzeigen</a>
+            </figure>
+          </li>
+          <li>Senden Sie den Übungs-Prompt im untenstehenden Hinweisfeld. Die Schaltfläche <strong>Senden</strong> des Panels startet bereits die agentische Werkzeugschleife: Es gibt hier keinen zusätzlichen Umschalter für den „Agent-Modus“. Die Schaltfläche <strong>Agent</strong> des Vollbild-Editors ist ein separater Workflow.
+            <div class="callout" id="assistant-practice-prompt">
+              <p><strong>Kopieren Sie diesen Prompt.</strong> Fügen Sie ihn in das <strong>Nachrichtenfeld des Assistenten</strong> ein, nicht in eine Codezelle, und tippen Sie dann auf <strong>Senden</strong>.</p>
+              <pre data-translatable-prompt="assistant-practice"><code>Fügen Sie in dieser Übungs-Arbeitsmappe eine Markdown-Erklärung ein, gefolgt
+von einer JavaScript-Zelle namens summary_demo. Erzeugen Sie ein Eingabearray
+aus 10 pseudozufälligen Ganzzahlen von 1 bis einschließlich 20.
+Verwenden Sie den Park-Miller-Generator mit dem anfänglichen state 42. Aktualisieren Sie für jeden
+Wert zuerst state = (16807 * state) % 2147483647;
+hängen Sie dann 1 + Math.floor(20 * state / 2147483647) an.
+Erzeugen Sie das Array nach dieser Regel; codieren Sie die Werte nicht fest ein
+und verwenden Sie nicht Math.random. Setzen Sie state bei jeder Zellenausführung auf 42 zurück.
+Geben Sie das erzeugte Eingabearray aus und berechnen Sie anschließend dessen Anzahl (Array-
+Länge), das arithmetische Mittel, das Minimum und das Maximum. Geben Sie jedes
+Ergebnis in einer eigenen beschrifteten Zeile mit console.log aus.
+Verwenden Sie gewöhnliche JavaScript-Arrays, Arithmetik und Math.floor,
+ohne zusätzliche Pakete.
+Führen Sie keine Zellen aus und ändern Sie keine vorhandenen Zellen. Verwenden Sie keine Dateien,
+keinen Speicher, keine DOM-APIs oder Netzwerkanfragen. Erklären Sie die erwarteten
+Ergebnisse, damit ich den Code überprüfen kann.</code></pre>
+            </div>
+          </li>
+          <li>Lesen Sie die vorgeschlagene Erklärung und die neue <code>summary_demo</code>-Zelle. Prüfen Sie, ob sie die Eingabe gemäß der angegebenen Regel erzeugt und die Zusammenfassungen aus diesem Array berechnet. Führen Sie die Zelle selbst aus und vergleichen Sie das Ergebnis mit der folgenden Überprüfung. Die erwarteten Ergebnisse sind Anzahl <strong>10</strong>, Mittelwert <strong>9.3</strong>, Minimum <strong>1</strong>, Maximum <strong>20</strong>.</li>
+        </ol>
+        <aside class="callout" id="seeded-summary-check">
+          <h3>Sowohl die Eingabe als auch die Zusammenfassungen prüfen</h3>
+          <p>Der Seed legt die Sequenz fest, sodass diese zufällig wirkende Eingabe reproduzierbar ist. Bei der oben genannten Aktualisieren-vor-Ziehen-Regel ist Folgendes zu erwarten:</p>
+          <pre><code>Input: [1, 11, 15, 6, 8, 4, 20, 11, 11, 6]
+Count: 10
+Mean: 9.3
+Minimum: 1
+Maximum: 20</code></pre>
+          <p>Die Bezeichnungen in der Ausgabe können abweichen, die Zahlen sollten jedoch übereinstimmen. Ein erneutes Ausführen der Zelle sollte dieselbe Eingabe und dieselben Zusammenfassungen liefern. Ein anderer Seed verändert die Übung; dieser kleine Generator dient einer reproduzierbaren Demonstration, nicht sicherheitskritischer Zufälligkeit.</p>
+        </aside>
+        <figure class="phone-figure" id="assistant-seeded-result">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/phone-agent-result.png" width="1080" height="2340" alt="Tatsächlicher Android Galaxy S24+-Screenshot, der einen Teil des überprüften JavaScript-Quellcodes von summary_demo und dessen Seed-Ausgabe zeigt: Eingabe 1, 11, 15, 6, 8, 4, 20, 11, 11, 6; Anzahl 10, Mittelwert 9.3, Min 1, Max 20." loading="lazy" decoding="async">
+          <figcaption><strong>Tatsächlicher Galaxy S24+ Android-Screenshot der obigen Seed-Vektor-Übung.</strong> GLM 5.3 Flash hat die Übungszellen erstellt, bei einem Limit von vier Schritten pausiert und nach einmaligem Drücken von <strong>Fortfahren</strong> abgeschlossen. Der Code wurde überprüft und manuell ausgeführt – nicht automatisch durch den Agenten – und erzeugte die erwartete Eingabe, Anzahl 10, Mittelwert 9.3, Minimum 1 und Maximum 20. Eine zweite manuelle Ausführung reproduzierte dieselben Ergebnisse. Der Screenshot zeigt die Ausgabe und einen Teil des Quellcodes; scrollen Sie in der Zelle nach oben, um deren Seed und die ersten Zeilen zu prüfen.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-agent-result.png">Vollständigen Smartphone-Screenshot des überprüften Codes und Ergebnisses anzeigen</a>
+        </figure>
+        <p><strong>Vor dem Senden:</strong> Der Assistent bezieht die ausgewählte Konversation und eine begrenzte Vorschau der Zellen der aktuellen Arbeitsmappe mit ein (bis zu den ersten 500 Zeichen jeder Zelle plus Metadaten). Erlaubte Werkzeuge können mehr senden. Das Deaktivieren des Durchsuchens des Quellcodes verhindert <em>nicht</em>, dass Arbeitsmappenvorschauen gesendet werden. Dies unterscheidet sich von den kleineren Nutzdaten der aktuellen Zelle, die unten bei der Vervollständigung verwendet werden. <a href="#planned-workbook-context">Geplante Änderungen am Arbeitsmappen-Kontext werden im Anhang beschrieben.</a></p>
+        <p><strong>Pausiert mit einer „Weiter“-Schaltfläche?</strong> Das unten hervorgehobene <strong>Agenten-Limits (pro Durchlauf) → Max. Schritte</strong> steuert das Schrittkontingent für einen begrenzten Durchlauf. Der Agent kann dieses Limit erreichen, bevor er fertig ist. Lesen Sie, was er bereits getan hat, und drücken Sie dann <strong>Fortfahren</strong>, wenn die Aufgabe noch nicht abgeschlossen ist und Sie einen weiteren begrenzten Durchlauf wünschen. Das Fortsetzen kann weitere API-Gebühren verursachen; nach <strong>Fertig</strong> ist es nicht mehr erforderlich.</p>
+        <figure class="phone-figure" id="assistant-run-controls">
+          <div class="shot-window shot-window--assistant-open" role="img" aria-label="Gescrollte Pro-Browser-KI-Einstellungen. Gelbe Ränder kennzeichnen „Auto-run cells created by AI: deaktiviert“, „Allow source browsing: deaktiviert“, „Agent writes: Active worksheet“, „Max steps“ mit einem Hinweis auf den Standardwert 25 sowie „Security Level: Open“.">
+            <div class="shot-stage shot-stage--assistant-open">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open.png" width="390" height="1100" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open-overlay.svg" width="390" height="1100" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>KI-Einstellungen, zu Ausführung und Berechtigungen gescrollt. Gelbe Ränder kennzeichnen <strong>Von KI erstellte Zellen automatisch ausführen</strong> und <strong>Allow source browsing</strong> (beide deaktiviert), <strong>Schreibrechte des Agenten → Aktives Arbeitsblatt</strong>, <strong>Max. Schritte</strong> unter <strong>Agenten-Limits (pro Durchlauf)</strong> sowie <strong>Sicherheitsstufe → Offen</strong>. Diese <strong>Browser-Aufnahme stammt aus der Zeit vor dem Update zur Ausführungseinwilligung</strong>; sie stellt weder eine Anbieteranfrage noch einen Sicherheitstest dar. Die Bezeichnung „Open“ beschreibt die älteren Standardeinstellungen und ist länger, als das schmale Dropdown-Menü anzeigen kann. Die kommenden Bestätigungs- und Überschreibungsdialoge sind nicht abgebildet.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-open.png">Vollständige, gescrollte Aufnahme der Einstellungen unverändert anzeigen</a>
+        </figure>
+      </section>
+
+      <section id="online">
+        <p class="step-label">Schritt 4 · Alternativen anfordern, wann immer Sie möchten</p>
+        <h2>API-basierte Vervollständigungen anfordern</h2>
+        <ol class="lesson-steps">
+          <li>Öffnen Sie <strong>Menü → Vervollständigung</strong> und wählen Sie dann <strong>Abschnitt → KI-Vorschläge (online)</strong>. Setzen Sie <strong>KI-Vorschläge → Beim Antippen</strong>.</li>
+          <li>Belassen Sie <strong>Vervollständigungsmodell → KI-Assistenten folgen</strong>, um dessen Anbieter, Endpunkt und Modell zu übernehmen. Oder wählen Sie <strong>Anbieter und Modell wählen</strong>, um einen gespeicherten Anbieter/Endpunkt und ein kostengünstiges Modell auszuwählen, das sich für kurze Vorschläge eignet. Auf diesem Bildschirm wird kein Schlüssel eingegeben; über <strong>KI-Einstellungen öffnen</strong> können Sie zuvor einen hinzufügen.</li>
+          <li>Öffnen Sie <strong>Erweitert</strong> dieses Bereichs, um das Antwort-Timeout und die Ausgabenbegrenzungen zu überprüfen. Die Standardwerte sind <strong>6 Sekunden</strong>, <strong>$0.25/Tag</strong> und <strong>$5/Monat</strong>. Prüfen Sie die Preise, bevor Sie diese Werte erhöhen.</li>
+          <li>Kehren Sie zu einem <strong>JavaScript</strong>-Editor zurück und geben Sie dieses Übungs-Snippet ein:
+            <pre><code>const values = [12, 15, 18];
+const average = </code></pre>
+            Lassen Sie die Schreibmarke hinter der unvollständigen <code>const average = </code>-Zeile stehen. Tippen Sie am Ende der Vorschlagsleiste auf <strong>…</strong>, verwenden Sie die Zusatztaste <strong>…AI</strong> oder drücken Sie <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd>.</li>
+          <li>Überprüfen Sie die tatsächlichen Nutzdaten und das Ziel der ersten Anfrage vor dem Senden. KI-Chips sind mit einer <strong>✦</strong>-Markierung versehen. Tippen Sie auf einen Chip, um ihn zu übernehmen; ein gekürzter oder mehrzeiliger Chip öffnet zunächst eine Vorschau. Überprüfen Sie den resultierenden Quellcode vor der Ausführung.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/completion-online.png" width="414" height="820" alt="Pro-Browser-Bildschirm für die Online-Vervollständigung mit „On tap“ und „Choose provider and model“, der erklärt, dass keine Anbieterschlüssel gespeichert sind, und „Open AI Settings“ anbietet." loading="lazy" decoding="async">
+          <figcaption>Eine bewusst <strong>schlüssellose Browser-Aufnahme</strong> der Bedienelemente für das unabhängige Modell. Die Warnung ist real: Ohne gespeicherten Schlüssel und gültiges Ziel kann nichts gesendet werden. Ihr konfigurierter Anbieter und das Modell erscheinen hier nach Schritt 2.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-online.png">Vollständige Aufnahme der Online-Einstellungen anzeigen</a>
+        </figure>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-online-chips.png" width="1080" height="2340" alt="Unterer Editor-Ausschnitt aus einem Android Galaxy S24+-Screenshot: Der unvollständige JavaScript-Ausdruck für den Mittelwert enthält zwei gekürzte KI-Chips, values.reduce und eval(values, jeweils mit einem Sternchen gekennzeichnet." loading="lazy" decoding="async">
+          <figcaption><strong>Detailansicht eines echten Galaxy S24+ Android-Screenshots nach einer tatsächlichen Vervollständigungsanfrage.</strong> Die Vervollständigung nutzte <strong>Gemini 3.5 Flash-Lite über OpenRouter</strong>, während der Assistent auf <strong>GLM 5.3 Flash</strong> blieb. Die beiden ✦-Chips sind gekürzt; die Ausgaben variieren, prüfen Sie daher vor der Übernahme die Vorschau.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-online-chips.png">Unveränderten vollständigen Smartphone-Screenshot der Online-Kandidaten-Chips anzeigen</a>
+        </figure>
+        <p class="callout"><strong>Wählen Sie den Code aus, nicht einfach einen KI-Chip.</strong> Bei dieser Anfrage schlug der erste Chip <code>values.reduce((a, b) => a + b, 0) / values.length;</code> vor. Tippen Sie darauf, um die vollständige Vorschau zu sehen: Er summiert das Array und teilt durch dessen Länge, was für dieses Beispiel <strong>15</strong> ergibt. Der zweite Chip schlug <code>eval(values.join(' + ')) / values.length;</code> vor. <strong>Lehnen Sie diese unnötige <code>eval</code>-Alternative ab</strong>: Die Berechnung eines Mittelwerts erfordert es nicht, eine Zeichenkette in ausführbaren Code umzuwandeln. Prüfen Sie Ihren eigenen zurückgegebenen Code vor der Übernahme und führen Sie ihn erst nach der Prüfung aus.</p>
+        <figure class="phone-figure" id="online-completion-preview">
+          <div class="shot-window shot-window--completion-preview" role="img" aria-label="Android Galaxy S24+-Detail der KI-Vorschau: values.reduce((a, b) =&gt; a + b, 0) / values.length;, mit den Schaltflächen „Cancel“ und „Insert all“. Die Tastatur ist ausgeblendet. Es wurde kein Vorschlag eingefügt.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-preview.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Die vollständige Code-Vorschau auf einem Galaxy S24+.</strong> Eine neue Gemini-Flash-Lite-Anfrage lieferte denselben <code>reduce</code>-Ausdruck zurück. <strong>Nur bis zu einer bestimmten Zeile übernehmen:</strong> Tippen oder klicken Sie bei einem mehrzeiligen Vorschlag auf die letzte Zeile, die Sie wünschen. Dadurch wird sofort alles von der ersten Zeile bis zu dieser Zeile eingefügt, während nachfolgende Zeilen ausgelassen werden. <strong>Alles einfügen</strong> übernimmt den gesamten Vorschlag; <strong>Abbrechen</strong> fügt nichts ein. Dieses Beispiel besteht aus einer einzelnen Codezeile, auch wenn es auf dem Bildschirm umgebrochen wird, sodass ein Antippen den gesamten Ausdruck übernimmt. Das Übernehmen bearbeitet den Quellcode; es führt die Zelle nicht aus.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-preview.png">Unveränderten vollständigen Smartphone-Screenshot der Vervollständigungsvorschau anzeigen</a>
+        </figure>
+        <p>Die Anfrage fordert bis zu fünf Alternativen an, auf Ihren Bildschirm passen jedoch möglicherweise weniger. Ein weiteres Antippen blättert zunächst durch bereits empfangene Alternativen; sind diese erschöpft, können weitere angefordert werden. Tippen Sie während des Ladevorgangs der Anfrage, um sie abzubrechen. Spätere Antworten werden verworfen, sobald das Timeout abläuft, und durch Tippen oder Bewegen der Schreibmarke veralten vorherige Vorschläge.</p>
+        <p><strong>Unabhängig bedeutet unabhängig:</strong> Eine separate Vervollständigungsauswahl bleibt unabhängig, wenn Sie das Modell des Assistenten ändern. Das ist nützlich, wenn Sie einen leistungsfähigen Agenten, aber eine kostengünstige Autovervollständigung wünschen. Das Folgen des Assistenten übernimmt dessen Identität, <em>nicht</em> seine Konversation oder Agentenberechtigungen.</p>
+        <aside class="callout" id="completion-privacy">
+          <h3>Wissen, wofür Sie bezahlen und was Sie senden</h3>
+          <p>Die Online-Vervollständigung erfolgt <strong>auf Abruf</strong>: Gewöhnliches Tippen sendet nichts. <strong>Prefetch while I type</strong> ist in diesem Workflow noch nicht verfügbar. Die Vervollständigung sendet einen begrenzten Kontext der aktuellen Zelle: höchstens 1,500 Zeichen vor der Schreibmarke, 200 danach und bis zu 12 lokale Namen – nicht den Assistenten-Chat oder die gesamte Arbeitsmappe. Das Maskieren von Geheimnissen erfolgt nach dem Best-Effort-Prinzip, überprüfen Sie die Nutzdaten daher selbst.</p>
+          <p><strong>Immer erlauben</strong> erteilt eine dauerhafte Zustimmung für dieses Ziel; bei einem Wechsel von Anbieter, Endpunkt oder Modell wird erneut nachgefragt. <strong>Ohne Nachfrage senden</strong> schaltet diese Auswahl zunächst scharf, zeigt die ersten echten Nutzdaten jedoch einmalig an. Behalten Sie <strong>Jedes Mal fragen</strong> während der Einarbeitung bei.</p>
+          <p>Die Tages- und Monatsbeträge sind <strong>weiche Ausgabenbegrenzungen nur für die Vervollständigung</strong>, keine garantierten Abrechnungslimits des Anbieters und nicht das Budget für Anfragen an den Assistenten oder KI-Prompts. Fehlgeschlagene und abgebrochene Anfragen können ihre reservierten Gebühren einbehalten. Das Löschen des Ausgabenverlaufs setzt die Limits nicht zurück. Ein Modell ohne angegebenen Preis erfordert explizite Preisobergrenzen für Ein- und Ausgabe, andernfalls verweigert die App das Senden.</p>
+        </aside>
+      </section>
+
+      <section id="local">
+        <p class="step-label">Schritt 5 · Optionaler Android-Download</p>
+        <h2>Das On-Device-Modell ausprobieren</h2>
+        <p>Das optionale Modell <strong>Qwen2.5-Coder 0.5B</strong> schlägt Code lokal vor, wenn die Tabellen unsicher sind. Es ist ein kleines Code-Vervollständigungsmodell, <strong>kein Ersatz für den dialogorientierten Agenten</strong>. Nach der Installation sendet die Inferenz keinen eingegebenen Code an einen Anbieter und verursacht keine API-Kosten.</p>
+        <ol class="lesson-steps">
+          <li>Öffnen Sie auf einem geeigneten Android-Smartphone mit Pro, das über <strong>Google Play</strong> installiert wurde, <strong>Menü → Vervollständigung → Abschnitt → Lokales Modell (auf dem Gerät)</strong>.</li>
+          <li>Tippen Sie auf <strong>Installieren</strong> und planen Sie Zeit und Speicherplatz für den etwa <strong>400 MB</strong> großen Download ein. Derzeit per Sideload installierte Versionen können das Modell über diesen Ablauf nicht herunterladen.</li>
+          <li>Behalten Sie nach Fertigstellung <strong>Lokales Modell verwenden → Wenn unsicher</strong> bei. Tabellen decken einfache Fälle ab; das Modell ergänzt Vorschläge, wenn diese unsicher sind. <strong>Immer</strong> führt es häufiger aus; <strong>Aus</strong> stoppt es, ohne den Download zu löschen.</li>
+        </ol>
+        <figure class="phone-figure" id="local-model-settings">
+          <div class="shot-window shot-window--local-model-settings" role="img" aria-label="Galaxy S24+ Android-Einstellungen für das lokale Modell. Gelbe Ränder kennzeichnen den Bereich „Local model“, „Ready“ (398 MB auf diesem Gerät) und „Use local model: When unsure“. Das bereits installierte Modell zeigt „Delete“ statt „Install“ an.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-local-settings.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+              <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-local-settings-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Einstellungen für das lokale Modell auf einem Galaxy S24+.</strong> Gelbe Ränder kennzeichnen die Bereichsauswahl, den Status <strong>Bereit</strong> des Modells sowie <strong>Lokales Modell verwenden → Wenn unsicher</strong>. Dieses Smartphone verfügt bereits über das Modell, daher erscheint <strong>Löschen</strong> anstelle von <strong>Installieren</strong>; Sie müssen es nicht löschen. Diese Aufnahme eines Debug-Builds zeigt die Einstellungen, keinen Test der Bereitstellung über Google Play.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-local-settings.png">Unveränderten vollständigen Smartphone-Screenshot anzeigen</a>
+        </figure>
+        <ol class="lesson-steps" start="4">
+          <li>Kehren Sie zu einer Codezelle zurück und halten Sie bei einem unvollständigen Namen oder einer unvollständigen Zeile kurz inne. Die Ergebnisse variieren je nach Kontext; nicht jedes Innehalten erzeugt einen Vorschlag. Übernehmen Sie einen passenden Ghost-Text oder Chip, prüfen Sie den Quellcode und führen Sie ihn anschließend separat aus.</li>
+        </ol>
+        <h3>Welches Smartphone bietet ein angenehmes Arbeiten?</h3>
+        <p>Die Mindestvoraussetzung ist <strong>64-Bit-ARM-Android mit mindestens 4 GB RAM</strong>, was kein Versprechen für eine reibungslose Leistung darstellt. Ein <strong>Smartphone der Galaxy-S24+-Klasse</strong> ist ein praxisnaher Richtwert für komfortables Arbeiten: Samsung gibt für das S24+ <strong>12 GB RAM</strong> an, was mehr Spielraum für die App, Kernel und das Modell lässt. Dies ist eine Leistungsempfehlung, keine Verpflichtung zum Kauf dieses Modells. <a href="https://news.samsung.com/us/enter-new-era-of-mobile-ai-samsung-galaxy-s24-series/">Spezifikationen der Samsung-S24-Serie</a>.</p>
+        <p>Ein <strong>Galaxy S10+</strong> verfügt über geeignete Varianten mit 8 GB oder 12 GB. Nach den informellen Erfahrungen des Betreuers kann die lokale Vervollständigung dort funktionieren, sich aber langsamer anfühlen als die API-Vervollständigung; der Vergleich hängt vom Modell und dem Netzwerk ab. <strong>Der aufgezeichnete Benchmark der lokalen Engine hat das S10+ nicht gemessen</strong>, daher handelt es sich hierbei nicht um einen gemessenen Geschwindigkeitsvergleich oder eine Garantie für jedes Gerät. Achten Sie auf Verzögerungen oder eine nicht reagierende App, wenn Sie das Modell mit großen Arbeitsmappen und speicherintensiven Kerneln kombinieren. <a href="https://news.samsung.com/us/galaxy-s10-interactive/">Spezifikationen der Samsung-S10-Serie</a>.</p>
+        <p>Der frühere Test der nativen Engine auf einem Gerät der S24+-Klasse ergab nach dem Laden einen Warm-Start-Median für das erste Wort von rund <strong>0.10 Sekunden</strong> und einen Kalt-Start-Median für das erste Wort von rund <strong>0.24 Sekunden</strong>. Dies sind exemplarische Benchmark-Ergebnisse, keine Garantien: Ein ungecachtes anfängliches Laden dauerte mehrere Sekunden. Das geladene Modell belegte etwa <strong>460–490 MB</strong> Speicher im App-Prozess, <em>zusätzlich zu</em> WebView, Python/R-Laufzeitumgebungen und dem Betriebssystem.</p>
+        <p class="callout"><strong>Wenn ein älteres Smartphone träge wird:</strong> Setzen Sie <strong>Lokales Modell verwenden → Aus</strong> und nutzen Sie stattdessen Tabellen oder API-Alternativen auf Abruf. Unter „Lokal“ in <strong>Erweitert</strong> bewirkt das Einstellen von <strong>Keep loaded after leaving the app → 0</strong>, dass das Modell beim Verlassen der App freigegeben wird; die Steuerungen für Leerlauf-Entladung und niedrigen Akkustand helfen ebenfalls. Speichern/exportieren Sie Ihre Arbeitsmappe vor der Fehlersuche. Ein Modell ohne API-Kosten beansprucht dennoch Speicherplatz, Arbeitsspeicher und Akku.</p>
+      </section>
+
+      <section id="prompt-cells">
+        <p class="step-label">Schritt 6 · Den Code beim Erstellen verstehen</p>
+        <h2>Mit einer fokussierten KI-Prompt-Zelle abschließen</h2>
+        <p>Der Assistent ist nützlich für mehrschrittige Aufgaben. Eine <strong>KI-Prompt</strong>-Zelle eignet sich besser für eine kurze, wiederholbare Frage zu einem bestimmten Codeabschnitt: Sie stellt <strong>eine isolierte Anfrage</strong>, ohne den Verlauf oder die Werkzeuge des Assistenten. Nutzen Sie sie, um zu erfragen, warum eine Berechnung funktioniert, bevor Sie diese erweitern.</p>
+        <p>Hier kehren wir zu Schritt 3 und dessen mit einem Seed versehener Zufalls-<code>summary_demo</code>-Zelle zurück. Wir bitten um eine Erklärung dieser bestehenden Berechnung – nicht um ein weiteres Zufallsarray und nicht um das reine Mittelwert-Vervollständigungsbeispiel aus Schritt 4.</p>
+        <ol class="lesson-steps">
+          <li>Fügen Sie eine <strong>KI-Prompt</strong>-Zelle unmittelbar nach der aus Schritt 3 stammenden <code>summary_demo</code>-JavaScript-Zelle ein – nicht nach dem reinen Mittelwert-Snippet aus Schritt 4 –, damit die unten stehende Frage zum ausgewählten Quellcode passt. Behalten Sie den Zellentyp <strong>Code</strong> bei und wählen Sie dann <strong>AI Prompt</strong> aus dem <strong>Dropdown-Menü für Sprache/Modus</strong>. Falls dieser Eintrag fehlt, aktivieren Sie ihn unter <strong>Menü → Sprachen &amp; Modi</strong>.</li>
+          <li>Fügen Sie den unten stehenden Prompt in die <strong>KI-Prompt-Zelle</strong>ein, nicht in das Nachrichtenfeld des Assistenten. Öffnen Sie deren <strong>Konfigurieren</strong> -Bedienelement.
+            <div class="callout" id="ai-prompt-practice-prompt">
+              <pre data-translatable-prompt="ai-explanation"><code>Erklären Sie die ausgewählte JavaScript-Zelle Zeile für Zeile.
+Wie bestimmen die Generatorregel und der Seed 42 deren Eingabearray?
+Warum sollte sie Anzahl 10, Mittelwert 9.3, Minimum 1 und Maximum 20 ausgeben?
+Warum macht das Zurücksetzen des Seeds das Ergebnis reproduzierbar?
+Erklären Sie, was für ein leeres Array geändert werden muss.
+Geben Sie nur eine kurze Erklärung zurück; schreiben Sie den Code nicht um.</code></pre>
+            </div>
+            <div class="prompt-config-locations">
+              <figure class="phone-figure" id="ai-prompt-composer-controls">
+                <p class="screen-note"><strong>Editor für neue Zellen</strong></p>
+                <div class="shot-window shot-window--ai-prompt-composer" role="img" aria-label="Android-Editor für neue Zellen mit ausgewähltem KI-Prompt. Gelbe Ränder kennzeichnen die KI-Sprachauswahl und die Schaltfläche „Configure“ neben dem Entwurf.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Vor dem Speichern der Zelle:</strong> Wählen Sie „AI Prompt“ (angezeigt als <strong>AI</strong>) und tippen Sie auf das hervorgehobene <strong>Konfigurieren</strong> des Editors. Dies konfiguriert den neuen Prompt, den Sie gerade verfassen.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png">Vollständigen Screenshot des Editors anzeigen</a>
+              </figure>
+              <figure class="phone-figure" id="ai-prompt-edit-controls">
+                <p class="screen-note"><strong>Bestehende Zelle während der Bearbeitung</strong></p>
+                <div class="shot-window shot-window--ai-prompt-edit" role="img" aria-label="Gespeicherte Android-KI-Prompt-Zelle im Bearbeitungsmodus. Ein gelber Rand kennzeichnet „Configure“ in der Zell-Kopfzeile oberhalb des Prompt-Beginns.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Bei einer bestehenden Zelle:</strong> Tippen Sie in der Kopfzeile dieser Zelle auf <strong>Konfigurieren</strong>. Die Option bleibt verfügbar, während Sie den Prompt bearbeiten. Beide Schaltflächen öffnen denselben Konfigurationsdialog; das bloße Ändern der Einstellungen sendet noch nichts.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png">Vollständigen Screenshot der Zellenbearbeitung anzeigen</a>
+              </figure>
+            </div>
+          </li>
+          <li>Setzen Sie <strong>Endgültige Antwort einfügen in → Ausgabe dieser Zelle</strong>, die Standardeinstellung. Wählen Sie unter <strong>Zu sendender Kontext → Quellcode einschließen von</strong>die Option <strong>Vorherige 1 Zelle</strong>. Deaktivieren Sie <strong>Gespeicherten Ausgabetext einschließen</strong> für diese reine Quellcode-Übung. Überprüfen Sie, dass die <strong>Kontextvorschau</strong> nennt <code>summary_demo</code>, scrollen Sie dann nach unten und tippen Sie auf <strong>Konfiguration speichern</strong>.
+            <figure class="phone-figure" id="ai-prompt-configuration">
+              <div class="shot-window shot-window--ai-prompt-config" role="img" aria-label="Android-Dialog „Configure AI Prompt cell“. Gelbe Ränder kennzeichnen „This cell&#39;s output“, „Previous 1 cell“ und das nicht markierte „Include saved output text“.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption>Der durch <strong>Konfigurieren</strong> geöffnete Dialog. Gelbe Ränder kennzeichnen das Antwortziel, <strong>1 vorherige Zelle</strong> und die nicht markierte Option für gespeicherte Ausgaben. Senden Sie ausschließlich den Quellcode der vorhergehenden <code>summary_demo</code>-Zelle. <strong>1 vorherige Zelle</strong> bezieht sich auf die in der Arbeitsmappen-Reihenfolge unmittelbar vorhergehende Zelle; es wird nicht nach Namen gesucht.</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png">Vollständigen Screenshot der Konfiguration anzeigen</a>
+              <p class="screen-note">Scrollen Sie im Dialog nach unten, um zu <strong>Konfiguration speichern</strong> zu gelangen.</p>
+              <div class="shot-window shot-window--ai-prompt-config-save" role="img" aria-label="Unterer Teil des Android-Konfigurationsdialogs für KI-Prompts. Ein gelber Rand kennzeichnet „Save configuration“ neben „Cancel“.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png">Vollständigen Screenshot des gescrollten Dialogs anzeigen</a>
+            </figure>
+          </li>
+          <li>Tippen Sie in der KI-Prompt-Zelle auf <strong>Ausführen</strong>. Überprüfen Sie den ausgewählten Kontext in der Vorschau und wählen Sie dann <strong>An AI-Anbieter senden</strong>. Lesen Sie die Erklärung neben dem Quellcode und vergleichen Sie sie mit den bekannten Ergebnissen.</li>
+        </ol>
+        <figure class="phone-figure" id="ai-prompt-explanation">
+          <div class="shot-window shot-window--ai-prompt-result" role="img" aria-label="Tatsächliche Android-KI-Prompt-Ausgabe von GLM 5.3 Flash. Der sichtbare Auszug erklärt den Seed-Generator, die Array-Länge, reduce, Minimum und Maximum in summary_demo.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Eine echte GLM 5.3 Flash-Erklärung auf dem Galaxy S24+.</strong> Eine einzige, rein auf den Quellcode beschränkte Anfrage erzeugte diese Antwort in der Ausgabe der KI-Prompt-Zelle; sie hat die JavaScript-Zelle weder verändert noch erneut ausgeführt. Das Bild zeigt den Anfang der Erklärung. Scrollen Sie in der Ausgabe, um fortzufahren, und vergleichen Sie die Antwort mit dem Quellcode sowie den erwarteten Ergebnissen aus Schritt 3 – eine KI-Erklärung stellt keine Korrektheitsgarantie dar.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png">Vollständigen Screenshot der Erklärung anzeigen</a>
+        </figure>
+        <p class="callout"><strong>Eine Möglichkeit, API-Kosten zu kontrollieren und das Verständnis zu verbessern.</strong> Ein fokussierter KI-Prompt kann weniger Kontext senden als eine anwachsende Agenten-Konversation und vermeidet eine mehrschrittige Werkzeugschleife, was die Eingabe-Tokens und potenziell die Rechnung reduziert. Bitten Sie beim Programmieren um prägnante Erklärungen, Annahmen und erwartete Ausgaben. Einsparungen sind <strong>nicht garantiert</strong>: Modellpreise, Antwortlänge, Reasoning-Tokens und Ihr gewählter Kontext fallen weiterhin ins Gewicht. Diese Anfragen nutzen den <strong>Anbieter und das Modell des Assistenten</strong>, nicht das unabhängige Vervollständigungsmodell, und liegen außerhalb der Ausgabenbegrenzungen für Vervollständigungen.</p>
+        <div id="ai-prompt-apply-example">
+          <h3>Ein weiteres Beispiel · Ein Diagramm vor dem Ersetzen einer Zelle überprüfen</h3>
+          <p>Bitten Sie nun einen KI-Prompt darum, Code in eine <em>andere</em> Zelle zu schreiben, mit einer Überprüfung, bevor etwas ersetzt wird. Wir werden darstellen, wie sich die geschätzte Varianz über viele kleine Stichproben hinweg verändert. Es handelt sich um neue normalverteilte Stichproben – nicht um das frühere <code>summary_demo</code>-Ganzzahl-Array. Ziel ist es, <strong>Konfigurieren → Vorschau → Anwenden → Ausführen</strong> kennenzulernen, nicht die Statistik zu meistern.</p>
+          <p class="callout"><strong>Varianz ist nicht Student-t.</strong> Bei unabhängigen normalverteilten Stichproben des Umfangs 10 folgt <code>9s² / σ²</code> einer Chi-Quadrat-Verteilung mit 9 Freiheitsgraden. Hier beträgt die wahre Varianz <code>σ² = 1</code>. Die Student-t-Verteilung beschreibt stattdessen den standardisierten Stichprobenmittelwert <code>(mean − μ) / (s / √10)</code> unter Verwendung der geschätzten Standardabweichung <code>s</code>; auch sie hat hier 9 Freiheitsgrade. <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda358.htm">NIST: Varianz</a> · <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm">NIST: Mittelwert</a>.</p>
+          <ol class="lesson-steps">
+            <li>Erstellen Sie in der Übungs-Arbeitsmappe eine <strong>JavaScript</strong>-Zelle mit <code>// Reviewed plot code will go here.</code>. Führen Sie diesen harmlosen Kommentar aus, um die Zelle zu speichern. Drücken Sie lange auf deren <strong>In[…] Beschriftung</strong> und benennen Sie sie <code>variance_plot</code>. Halten Sie diesen Namen in der Arbeitsmappe eindeutig; siehe <a href="../../../workbooks/named-cells/#name">Zellen benennen</a>.</li>
+            <li>Fügen Sie eine separate <strong>KI-Prompt</strong> -Zelle hinzu und fügen Sie diese Anfrage dort ein:
+              <div class="callout" id="ai-variance-practice-prompt">
+                <pre data-translatable-prompt="ai-variance"><code>Geben Sie nur vollständigen JavaScript-Quellcode ohne Markdown-Codeblöcke zurück.
+Erstellen Sie ein reproduzierbares Histogramm der geschätzten Stichprobenvarianzen.
+Simulieren Sie 2,000 neue Stichproben, die jeweils 10 standardnormalverteilte N(0,1)-Werte enthalten.
+Verwenden Sie das frühere Ganzzahl-Array aus summary_demo nicht wieder.
+Initialisieren Sie state = 42 einmalig für den gesamten Durchlauf, nicht pro Stichprobe. Setzen Sie vor jeder Gleichverteilungsziehung state = (16807 * state) % 2147483647, dann u = state / 2147483647.
+Verwenden Sie für jede Normalverteilungsziehung zwei aufeinanderfolgende gleichverteilte Werte: sqrt(-2 * log(u1)) * cos(2 * PI * u2). Verwenden Sie das verbleibende Sinusergebnis nicht wieder und nutzen Sie nicht Math.random.
+Berechnen Sie für jede Stichprobe ihren Mittelwert und anschließend die erwartungstreue Varianz sum((x - mean)^2) / 9.
+Zeichnen Sie ein beschriftetes Canvas-Histogramm mit 40 gleich breiten Klassen von 0 bis 4. Die horizontale Achse ist die geschätzte Varianz; die vertikale Achse ist die Anzahl der Stichproben.
+Markieren Sie die wahre Populationsvarianz 1 mit einer beschrifteten vertikalen Linie. Verwenden Sie einen hellen Hintergrund, dunklen Text und gut lesbare Beschriftungen.
+Geben Sie Stichprobengröße, Wiederholungen, Seed, mittlere geschätzte Varianz, Histogramm-Gesamtzahl und etwaige Überläufe aus. Zählen Sie Überläufe separat, anstatt sie zu verbergen.
+Zeigen Sie das Canvas mit window.renderImage(canvas.toDataURL("image/png")) an.
+Verwenden Sie keine Pakete, kein Netzwerk, keinen Speicher und nehmen Sie keine Änderungen an der Arbeitsmappe vor.</code></pre>
+              </div>
+            </li>
+            <li>Öffnen Sie in der KI-Prompt-Zelle <strong>Konfigurieren</strong>. Stellen Sie <strong>Endgültige Antwort einfügen in → Ersetzungsvorschau für eine Zelle</strong>, <strong>Sprache der Ergebniszelle → Zielsprache beibehalten</strong>, <strong>Zu ersetzende Zelle → Benannte Zelle</strong>und <strong>Zellenname → variance_plot</strong>ein. Behalten Sie unter Kontext <strong>Quellcode einschließen von → Keine anderen Zellen (Standard)</strong>bei und wählen Sie dann <strong>Konfiguration speichern</strong>.
+              <figure class="phone-figure" id="ai-variance-configuration">
+                <div class="shot-window shot-window--ai-variance-config" role="img" aria-label="Android-Dialog „Configure AI Prompt cell“. Gelbe Ränder kennzeichnen „Replacement preview for a cell“, „Preserve target language“, „Named cell“, „variance_plot“ und „No other cells“.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Erst nach Prüfung ersetzen.</strong> Diese tatsächlichen S24+-Einstellungen wählen die eindeutig benannte JavaScript-Zelle <code>variance_plot</code> aus, behalten deren Sprache bei und schließen andere Zellen aus. Scrollen Sie nach unten zu <strong>Konfiguration speichern</strong>. Das bloße Speichern sendet noch nichts; die nächste Ausführung legt die Anfrage weiterhin zur Prüfung vor.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png">Vollständigen Screenshot der Ersetzungseinstellungen anzeigen</a>
+              </figure>
+            </li>
+            <li>Führen Sie die <strong>KI-Prompt</strong>-Zelle aus. Überprüfen Sie, was gesendet wird, und wählen Sie dann <strong>An AI-Anbieter senden</strong>. <strong>Keine anderen Zellen</strong> schließt zusätzlichen Arbeitsmappen-Kontext aus; beim Ersetzen wird dennoch der <strong>vollständige Quellcode der Zielzelle</strong> übermittelt. Das ist hier lediglich unser harmloser Kommentar.</li>
+            <li>Lesen Sie die zurückgegebene <strong>Vorher / Nachher</strong> -Vorschau. Prüfen Sie den vollständigen JavaScript-Code: Seed 42, 2,000 Stichproben von 10, Varianz geteilt durch 9 sowie keine unerwarteten Netzwerk- oder Speicheroperationen. Wählen Sie <strong>Ersetzung anwenden</strong> nur dann aus, wenn Sie diesen Quellcode akzeptieren; <strong>Abbrechen</strong> belässt <code>variance_plot</code> unverändert. Das Anwenden bearbeitet die Zielzelle, <strong>führt sie jedoch nicht aus</strong>.
+              <figure class="phone-figure" id="ai-variance-approval">
+                <div class="shot-window shot-window--ai-variance-preview-start" role="img" aria-label="Android Vorher/Nachher-Ersetzungsvorschau. Vorher ist der harmlose Kommentar; Nachher beginnt mit dem generierten JavaScript-Code mit Seed 42 und dem Generator für normalverteilte Stichproben.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <p class="shot-detail-label"><strong>Der generierte Code befindet sich in der Genehmigungsvorschau.</strong> Dies ist der Beginn der tatsächlichen GLM 5.3 Flash-Antwort; das Ziel enthält weiterhin nur unseren Kommentar. Lesen Sie den gesamten Nachher-Abschnitt, nicht nur die hier gezeigten Zeilen.</p>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png">Vollständigen Screenshot vom Beginn der Vorschau anzeigen</a>
+                <div class="shot-window shot-window--ai-variance-preview-apply" role="img" aria-label="Ende derselben Android-Vorschau des generierten Codes. Gelbe Ränder kennzeichnen „Apply replacement“ und „Cancel“; keine der beiden Aktionen führt den vorgeschlagenen Code aus.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Scrollen Sie bis zum Ende, um zuzustimmen oder abzubrechen.</strong> „Apply replacement“ ändert den Quellcode der benannten Zelle; es führt ihn nicht aus. Der mittlere Teil dieser langen Vorschau wurde in diesen Detailansichten weggelassen. <a href="../../../../pro/ai/tutorial/assets/ai-variance-generated.js">Lesen Sie den gesamten generierten Quellcode</a>.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png">Vollständigen Screenshot der Genehmigungs-Bedienelemente anzeigen</a>
+              </figure>
+            </li>
+            <li>
+              <p class="callout"><strong>Bei der Überprüfung fiel eine kleine Auslassung auf.</strong> Diese Modellantwort endete mit einer Berichts-Zeichenkette, anstatt sie auszugeben. Nach dem Anwenden haben wir vor der Ausführung lediglich diesen abschließenden Bericht in <code>console.log(…)</code> geändert. Prüfen Sie auch Ihre Antwort: Ein Bild allein zeigt nicht, ob die Gesamtsummen stimmen. <a href="../../../../pro/ai/tutorial/assets/ai-variance-reviewed.js">Lesen Sie den korrigierten Quellcode, der ausgeführt wurde</a>.</p>
+              <p>Suchen Sie <code>variance_plot</code> und tippen Sie auf <strong>dessen eigene Ausführung</strong>. Jeder Balken des Histogramms zählt Stichprobenvarianz-Schätzungen – keine einzelnen Beobachtungen. Bei dem exakten Generator oben ist eine mittlere geschätzte Varianz nahe <strong>0.9852</strong>, eine Histogramm-Gesamtzahl von <strong>2,000</strong> und ein Überlauf von <strong>0</strong> zu erwarten. Die wahre Varianz beträgt 1; eine endliche Simulation muss im Durchschnitt nicht exakt 1 ergeben. Ein erneutes Ausführen mit Seed 42 sollte das Diagramm exakt reproduzieren.</p>
+              <figure class="phone-figure" id="ai-variance-output">
+                <div class="shot-window shot-window--ai-variance-plot" role="img" aria-label="Tatsächliches Android-Diagramm nach einer separaten manuellen Ausführung: Histogramm von 2,000 Stichprobenvarianz-Schätzungen aus normalverteilten Stichproben des Umfangs 10. Eine rote Linie markiert die wahre Varianz 1; der ausgegebene Mittelwert beträgt 0.98521, die Gesamtzahl im Histogramm 2000 und der Überlauf 0.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Ausgabe nach dem Anwenden, Überprüfen und einer separaten manuellen Ausführung auf dem S24+.</strong> Das tatsächliche Diagramm und die ausgegebenen Kontrollwerte stimmen mit der Seed-Berechnung überein: mittlere geschätzte Varianz <strong>0.98521</strong>, Gesamt <strong>2,000</strong>, Überlauf <strong>0</strong>. Die rote Linie stellt die Populationsvarianz dar, keine angepasste Kurve. Ihr Modell formatiert den Code oder das Diagramm möglicherweise anders.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png">Vollständigen Screenshot des Diagramms anzeigen</a>
+              </figure>
+            </li>
+          </ol>
+          <p class="callout"><strong>Zwei getrennte Genehmigungen:</strong> <strong>An AI-Anbieter senden</strong> genehmigt die Weitergabe der überprüften Anfrage. <strong>Ersetzung anwenden</strong> genehmigt die Bearbeitung des Quellcodes der Zielzelle. Keines von beiden führt das vorgeschlagene JavaScript aus. Wählen Sie für diese Demonstration nicht <strong>Eine neue verknüpfte Zelle</strong>: Diese Option fügt eine nicht ausgeführte Ergebniszelle ohne diesen Ersetzungs-Genehmigungsschritt ein.</p>
+        </div>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>Wenn etwas nicht funktioniert</h2>
+        <dl>
+          <dt><strong>Keine Offline-Vorschläge auf einem Smartphone</strong></dt>
+          <dd>Wählen Sie Allgemein → Lokale Code-Vervollständigung → Ein anstelle von Auto. Prüfen Sie Chips, Schreibmarkenposition, Sprache und ob die optionale Leiste genügend Platz hat.</dd>
+          <dt><strong>Keine Online-Anfrage</strong></dt>
+          <dd>Prüfen Sie „Auf Abruf“, den gespeicherten Schlüssel für den exakten Anbieter/Endpunkt, den Preiseintrag oder die Obergrenzen des gewählten Modells, Einwilligungen und Ausgabensummen. „Open“ ist für die Vervollständigung nicht erforderlich. Ein sicherer Browser-Kontext und Web Locks werden benötigt; nicht unterstützte Kontexte verweigern Anfragen.</dd>
+          <dt><strong>Der Assistent fragt vor der Ausführung einer Zelle nach – oder fragt nicht nach</strong></dt>
+          <dd>Prüfen Sie Ihre App-Version, die Ausführungsberechtigungen unter „Sicherheit…“ und die Regeln unter „Kernels…“. Der künftige Open-Standard ist „Nachfragen“; der Standard von Pro 1.4.0 kann die Ausführung erlauben. Deaktiviertes automatisches Ausführen ist kein „Deny“ des Ausführungswerkzeugs. „Immer erlauben“ bei der Online-Vervollständigung gewährt keine Berechtigung zur Zellenausführung; siehe <a href="#execution-permissions">Ausführungsgenehmigung</a>.</dd>
+          <dt><strong>Die Vervollständigung versteht eine andere Zelle nicht</strong></dt>
+          <dd>Online-Alternativen nutzen einen begrenzten Kontext der aktuellen Zelle, nicht Ihr gesamtes Notebook. Verwenden Sie einen KI-Prompt mit explizit ausgewähltem Quellcode oder den Assistenten, wenn Sie eine umfassendere Erklärung benötigen.</dd>
+          <dt><strong>Installieren ist nicht verfügbar</strong></dt>
+          <dd>Der native Ablauf für das lokale Modell ist für geeignete Android-Installationen über Google Play vorgesehen, nicht für Desktop/Browser oder die aktuelle Sideload-Bereitstellung. Das Erfüllen des RAM-Minimums garantiert keine hohe Geschwindigkeit.</dd>
+          <dt><strong>Die generierte Antwort sieht plausibel aus, ist aber falsch</strong></dt>
+          <dd>Vergleichen Sie sie mit kleinen, bekannten Beispielen. Prüfen Sie Importe, Einheiten, das Verhalten bei leeren Eingaben und Seiteneffekte vor der Ausführung. Eine Modellantwort ist kein Korrektheitsbeweis.</dd>
+        </dl>
+        <p><a href="../../../../pro/ai/">Referenz zu KI-Einrichtung und Workflows<span class="english-reference"> (Englische Referenzseite)</span></a> · <a href="../../../../pro/remote/">Remote und Sicherheit<span class="english-reference"> (Englische Referenzseite)</span></a> · <a href="../../../tutorials/">Alle Tutorials</a></p>
+      </section>
+      <aside class="callout" id="execution-permissions" aria-labelledby="execution-appendix-title">
+        <h2 id="execution-appendix-title">Anhang · Bevorstehende Ausführungsgenehmigung · vorgeschlagenes Pro 1.5.0</h2>
+        <p><strong>Unveröffentlicht:</strong> Diese Steuerungen beschreiben die Implementierung der nächsten Version, nicht ein Versprechen, dass Ihre 1.4.0-Installation diese bereits enthält. Die Versionsnummer ist vorläufig.</p>
+        <ul>
+          <li><strong>KI-Einstellungen → Sicherheit… → <code>execute_cell</code> / <code>run_cells</code></strong> bietet bereits <strong>Default / Allow / Ask / Deny</strong>. Dieses Update ändert das von „Open“ übernommene „Default“ zu <strong>Nachfragen</strong>; „Full control“ behält „Allow“ bei. Explizite Tool- oder Kernel-Regeln können übernommene Standardwerte ersetzen; sind beide explizit definiert, greift die sicherere Regel. Behalten Sie während der Einarbeitung „Default“ oder „Ask“ bei. „Allow“ ist eine Außerkraftsetzung, keine stärkere Sandbox; Kernel-Ask/Deny, „Review“ und die globale Deaktivierung von JavaScript gelten weiterhin.</li>
+          <li>Lesen Sie die Ausführungsanfrage, bevor Sie <strong>Ausführen</strong> wählen; lassen Sie <strong>Zukünftige Ausführung von Assistenten-Zellen ohne Nachfrage erlauben</strong> unmarkiert, um nur diese eine Anfrage zu genehmigen. Das Markieren ändert die gemeinsame Regel für das Ausführungswerkzeug über <strong>alle Arbeitsmappen</strong> hinweg bis zum Zurücksetzen – nicht nur für diese Zelle, Konversation oder diesen Anbieter. Ein explizites „Ask“ für den Kernel blendet diese Option aus.</li>
+          <li>Prompts zur Namensraum-Inspektion und für neu erstellte Zellen <strong>können diese dauerhafte Freigabe nicht erteilen</strong>. Eine Ausführungsabfrage für erstellte Zellen enthält eine begrenzte Code-Vorschau; eine lange Vorschau endet mit Auslassungspunkten. Ist sie gekürzt, wählen Sie „Abbrechen“, prüfen Sie den vollständigen Quellcode der neu erstellten Zelle und führen Sie sie nur dann selbst aus, wenn Sie ihr vertrauen. Ein zuvor gespeichertes „Allow“ für die Ausführung kann bei aktiviertem automatischem Ausführen weiterhin den automatischen Start erstellter Zellen erlauben; belassen Sie das automatische Ausführen hier daher deaktiviert.</li>
+          <li>Wenn Sie eine andere Voreinstellung als „Full control“ wählen, während ein gespeichertes „Allow“ für das Ausführungswerkzeug wirksam bleibt, bietet eine Warnung <strong>Auf Standard zurücksetzen</strong>, <strong>„Erlauben“ beibehalten</strong> oder <strong>Abbrechen</strong> an. „Reset“ stellt die Tool-Regel der gewählten Voreinstellung wieder her, ohne Kernel-Überschreibungen zu löschen. „Keep“ behält die Überschreibung bei. „Cancel“ stellt die vorherige Auswahl der Voreinstellung wieder her. „Reset“ und „Keep“ bleiben Entwurfsänderungen, bis Sie die Einstellungen speichern.</li>
+        </ul>
+        <p><strong>Eine Ausführungsgenehmigung ist keine pauschale Erlaubnis zur Datenweitergabe.</strong> Ausgaben von Ausführungswerkzeugen können an das Modell des Assistenten zurückgesendet werden, und erlaubter Code kann das Netzwerk nutzen. <strong>Immer erlauben</strong> bei der Online-Vervollständigung, die Kontextprüfung bei KI-Prompts sowie die Datenschutzerklärung für Remote/MCP bleiben separat. Die Notebook-Ausführung über MCP verwendet dieselben Ausführungsprüfungen; diese Prüfungen kapseln die Terminal-Shell eines Brokers nicht in einer Sandbox ein.</p>
+      </aside>
+      <aside class="callout" id="planned-workbook-context" aria-labelledby="context-appendix-title">
+        <h2 id="context-appendix-title">Anhang · Geplanter Arbeitsmappen-Kontext und Verlauf</h2>
+        <p><strong>Nur ein Design-Entwurf:</strong> Diese Funktionen sind weder implementiert noch einem Release zugewiesen. Sie sind unabhängig von den oben genannten bevorstehenden Änderungen zur Ausführungsgenehmigung und blockieren nicht die aktuelle Version.</p>
+        <ul>
+          <li><strong>Bei Bedarf eine Arbeitsmappen-Zusammenfassung abrufen.</strong> Der Plan ersetzt wiederholte automatische Quellcode-Vorschauen durch ein reines Metadaten-Verzeichniswerkzeug: Zellnamen, optionale Beschreibungen, Sprachen und Typen sowie eine Arbeitsmappen-Revision. Das vorgeschlagene Werkzeug ist <code>list_cells</code> mit <code>view: "metadata"</code>; der Assistent würde ausgewählten Quellcode separat einlesen. Dies ist eine begrenzte Übersicht, keine automatisch generierte KI-Erklärung.</li>
+          <li><strong>Einmal anhängen statt bei jedem Senden.</strong> Ein vorgeschlagenes Kontrollkästchen <strong>Attach workbook summary this time</strong> könnte bei einer neuen Konversation standardmäßig aktiviert sein und sich deaktivieren, nachdem dieser Anhang tatsächlich gesendet wurde. Sie könnten es vor dem Senden deaktivieren oder für eine neue Übersicht erneut aktivieren. Der anfängliche Standardwert muss noch hinsichtlich Datenschutz und Benutzerfreundlichkeit geprüft werden. Fortsetzungen würden keine weitere Zusammenfassung hinzufügen, und ein Tab-Wechsel würde dies nicht unbemerkt wieder aktivieren. Die Vorschau sowie bestehende Lese- und Datenschutzberechtigungen würden weiterhin gelten; eine große Arbeitsmappe könnte weitere Seiten erfordern.</li>
+          <li><strong>Deaktiviert löscht keinen Verlauf.</strong> Es würde lediglich einen neuen automatischen Anhang verhindern, nicht jedoch bereits in der Konversation vorhandene Zusammenfassungen entfernen oder erlaubte Werkzeug-Lesezugriffe unterbinden. Bestehende Steuerungen für den Vollbild-Agenten, KI-Prompts und den Vervollständigungskontext blieben weiterhin separat.</li>
+          <li><strong>Änderungen zwischen Sendevorgängen sind eine spätere Option.</strong> Kompakte Aktualisierungen würden eine bekannte Ausgangsbasis für den gesendeten Kontext und verlässliche Revisionen erfordern. Manuelle Bearbeitungen durch Menschen könnten hervorgehoben werden, aber auch Bearbeitungen durch Agenten, Importe und unbekannte Änderungen fallen ins Gewicht. Eine Quellcode-Bearbeitung würde die Beschreibung einer Zelle nicht automatisch umschreiben; ein fehlender oder veralteter Verlauf würde eine frische Übersicht erfordern statt einer geratenen Aktualisierung.</li>
+          <li><strong>Ein optionaler lokaler Verlauf und GitHub-Synchronisierung sind längerfristige Pro-Ideen.</strong> Lokale Sende-Prüfpunkte könnten Git-basierte Diffs unterstützen, ohne Daten weiterzugeben. Eine unabhängige Synchronisierung könnte eine Arbeitsmappe in einem Gist oder einer ausgewählten Datei in einem Repository veröffentlichen, mit eigener Nutzdaten-Vorschau und Autorisierung. Das Aktivieren des Verlaufs würde weder zu GitHub übertragen noch ein Diff an die KI senden. Git zeigt inhaltliche Änderungen an, keinen Beweis dafür, dass ein Mensch sie vorgenommen hat.</li>
+        </ul>
+        <p><strong>Ein Secret Gist ist nicht privat.</strong> Jeder, der dessen URL kennt, kann ihn lesen; nutzen Sie ein privates Repository, wenn der Zugriff beschränkt werden muss. Halten Sie vertrauliche Daten vor der Veröffentlichung aus Quellcode und Beschreibungen der Arbeitsmappe heraus. <a href="https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists/creating-gists">Dokumentation von GitHub zur Gist-Sichtbarkeit</a>.</p>
+      </aside>
+    </article>
+  </main>
+  <footer class="site-footer">
+    <span>SciREPL Pro-Hilfe</span>
+    <nav aria-label="Fußzeilennavigation">
+      <a href="../../../tutorials/">Alle Tutorials</a>
+      <a href="../../../../pro/">Pro-Hilfe<span class="english-reference"> (Englische Referenzseite)</span></a>
+      <a href="../../../../../pro/privacy.html">Pro-Datenschutz</a>
+    </nav>
+  </footer>
+</body>
+</html>

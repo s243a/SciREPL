@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="id" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Temukan buku kerja Markov Groups di katalog SciREPL, jalankan sel Python-nya, edit jalan acak, dan ekspor salinan buku kerja Anda sendiri.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/id/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/tutorial/tutorial.css">
+  <script src="../../../workbooks/tutorial/catalogue-link.js" defer></script>
+  <title>Panduan buku kerja Markov Groups · Bantuan SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Lewati ke konten</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+    <nav aria-label="Navigasi utama">
+      <a href="../../../workbooks/">Referensi buku kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+      <a href="../../tutorials/">Semua tutorial</a>
+      <a href="../../../">Semua bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+      <a href="../../../../">Buka PWA Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Bahasa tutorial"><details class="tutorial-language-menu"><summary>Bahasa tutorial: <bdi>Bahasa Indonesia</bdi></summary><nav aria-label="Bahasa tutorial"><a href="../../../en/workbooks/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="./" lang="id" hreflang="id" aria-current="page">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutorial hasil terjemahan mesin; peninjauan oleh penutur asli masih tertunda. Kode dan nilai teknis tidak diubah. Tangkapan layar menampilkan antarmuka asli bahasa Inggris; cocokkan nama kontrol yang diterjemahkan dalam teks ini dengan aplikasi Anda.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / <a href="../../../workbooks/">Buku Kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / Panduan Markov Groups</p>
+    <article>
+      <p class="eyebrow">Belajar sambil mempraktikkan</p>
+      <h1>Jelajahi buku kerja dari katalog</h1>
+      <p class="lede">Temukan buku kerja <strong>Markov Groups: A Random Walk on Cube Moves</strong> yang sudah ada, jalankan keempat sel Python-nya, perpendek jalan acaknya, dan simpan salinan Anda sendiri. Fokusnya adalah menggunakan SciREPL; Anda tidak perlu memahami aljabar matriks atau menyelesaikan Kubus Rubik.</p>
+      <p class="callout"><strong>Ingin mempelajari aplikasinya?</strong> Ikuti Langkah 1–5: temukan, buka, jalankan, edit, dan ekspor buku kerja. Anda dapat berhenti setelah Langkah 5. <a href="#optional-maths">Matematika opsional</a> dibahas sesudahnya; bagian tersebut tidak diperlukan untuk menyelesaikan panduan ini.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Langkah-langkah Android</li>
+        <li class="chip">Sekitar 15 menit</li>
+      </ul>
+      <p class="screen-note">Tangkapan layar ponsel asli menampilkan SciREPL Pro <strong>1.4.0-debug</strong> pada <strong>Samsung Galaxy S24+</strong>, diambil pada <time datetime="2026-10-06">6 Oktober 2026</time>. Gambar-gambar tersebut mengilustrasikan alur kerja buku kerja bersama, bukan build Pro yang dirilis. Free dan versi lainnya mungkin menyusun beberapa kontrol secara berbeda. Contoh ini adalah buku kerja berbahasa Inggris dari Katalog SciREPL <strong>v0.4.0</strong>.</p>
+      <nav class="lesson-nav" aria-label="Langkah-langkah panduan buku kerja">
+        <strong>Dalam pelajaran ini</strong>
+        <p><a href="#find-menu">Pertama, temukan menunya</a></p>
+        <ol>
+          <li><a href="#browse">Jelajahi, filter, dan cari</a></li>
+          <li><a href="#open">Buka buku kerja</a></li>
+          <li><a href="#run">Jalankan sel-selnya secara berurutan</a></li>
+          <li><a href="#edit">Ubah satu nilai dan jalankan ulang</a></li>
+          <li><a href="#export">Ekspor salinan buku kerja Anda</a></li>
+        </ol>
+        <p><a href="#optional-maths">Opsional: matematika di balik contoh kubus</a></p>
+        <p><a href="../../tutorials/">Semua tutorial</a></p>
+      </nav>
+
+      <section id="find-menu">
+        <p class="step-label">Sebelum Anda mulai</p>
+        <h2>Temukan menu</h2>
+        <p>Di SciREPL, periksa <strong>baris header di bagian atas aplikasi</strong> untuk menemukan tombol <strong>☰ Menu</strong>. Ikonnya berupa <strong>tiga garis horizontal</strong>, yang disorot kuning di bawah. Ketuk tombol tersebut untuk membuka menu aplikasi; Langkah 1 menunjukkan item menu yang harus dipilih.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--find-menu" role="img" aria-label="Baris header atas SciREPL, dengan tombol Menu tiga garis horizontal yang disorot kuning di samping tombol Bantuan tanda tanya.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Tombol <strong>☰ Menu</strong> berada di samping tombol <strong>? Help</strong> pada tangkapan layar ini. Gunakan ikon tiga garis meskipun header Anda memiliki susunan yang berbeda.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-workbook.png">Lihat tangkapan layar lengkap</a>
+        </figure>
+      </section>
+
+      <section id="browse">
+        <p class="step-label">Langkah 1</p>
+        <h2>Jelajahi, filter, dan cari</h2>
+        <ol class="lesson-steps">
+          <li>Buka <strong>Menu → Jelajahi paket, bundel &amp; buku kerja</strong>. Di Free, pintasan header opsional <strong>📦</strong> membuka layar yang sama saat terlihat. <a href="../../interface/appearance/#browse-shortcut">Panduan Tampilan</a> menunjukkan cara mengaktifkannya.</li>
+          <li>Jelajahi daftar atau gunakan filternya. Untuk contoh bahasa Inggris ini, pilih <strong>English</strong> di bawah <strong>Bahasa lisan</strong> dan <strong>Python</strong> di bawah <strong>Kernel</strong>. <strong>Semua bahasa lisan</strong> dan opsi <strong>Semua</strong> pada kernel juga berfungsi, tetapi menampilkan lebih banyak entri.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse" role="img" aria-label="Layar Jelajah SciREPL dengan kontrol katalognya yang disorot kuning.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-browse.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Jelajah menyatukan paket, bundel, dan templat buku kerja. Fitur pencarian dan filternya membantu Anda mempersempit daftar.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-browse.png">Lihat tangkapan layar Jelajah lengkap</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>Ketik <strong>Markov Groups</strong> di bidang pencarian. Di bawah <strong>Buku Kerja</strong>, temukan <strong>Markov Groups: A Random Walk on Cube Moves</strong>. Periksa judul lengkapnya sebelum memasang: ini adalah templat buku kerja, bukan paket untuk ditambahkan ke Python.</li>
+          <li>Jika keyboard menutupi hasil, gunakan tombol sembunyikan keyboard atau tekan <strong>Kembali</strong> Android sekali untuk menutupnya. Biarkan Jelajah tetap terbuka dan gulir ke buku kerja yang cocok.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--search" role="img" aria-label="Pencarian Jelajah untuk Markov Groups dengan buku kerja yang cocok dan kontrol Pasangnya disorot kuning.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-search.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/search-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Cari <strong>Markov Groups</strong>, lalu periksa judul buku kerja yang cocok dan tombol <strong>Instal</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-search.png">Lihat tangkapan layar pencarian lengkap</a>
+        </figure>
+        <p><strong>Apa lagi yang tersedia?</strong> <a id="catalogue-workbooks-link" href="https://github.com/s243a/SciREPL-Catalog/tree/main/workbooks/en">Jelajahi daftar buku kerja di GitHub (<bdi id="catalogue-workbooks-language">English</bdi>)</a>. Edisi bahasa dari suatu pelajaran adalah entri terpisah, bukan pelajaran yang berbeda.</p>
+        <div class="catalogue-language-choice" id="catalogue-language-choice" hidden>
+          <label for="catalogue-workbooks-locale">Bahasa buku kerja:</label>
+          <select id="catalogue-workbooks-locale">
+            <option value="ar" lang="ar">العربية</option>
+            <option value="bn" lang="bn">বাংলা</option>
+            <option value="de" lang="de">Deutsch</option>
+            <option value="en" lang="en" selected>English</option>
+            <option value="es" lang="es">Español</option>
+            <option value="fr" lang="fr">Français</option>
+            <option value="hi" lang="hi">हिन्दी</option>
+            <option value="id" lang="id">Bahasa Indonesia</option>
+            <option value="ja" lang="ja">日本語</option>
+            <option value="ko" lang="ko">한국어</option>
+            <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+            <option value="ru" lang="ru">Русский</option>
+            <option value="zh" lang="zh">中文</option>
+          </select>
+        </div>
+        <p>Tautan GitHub menampilkan konten pengembangan terbaru. SciREPL biasanya menggunakan rilis katalog stabil terbaru, sehingga beberapa buku kerja yang ditampilkan di GitHub mungkin belum muncul di Jelajah. Di SciREPL, hapus pencarian dan coba <strong>CSV</strong>, <strong>Prolog</strong>, <strong>Lua</strong>, atau <strong>statistik</strong>; pilih <strong>Semua</strong> di bawah Kernel saat menjelajahi bahasa lain.</p>
+        <p class="callout"><strong>Jika pemberitahuan privasi muncul:</strong> mengambil atau menyegarkan katalog jarak jauh memerlukan koneksi jaringan. Baca pengungkapan tersebut, gulir <em>di dalam dialog</em> hingga ke bagian bawah, dan ketuk <strong>Saya Mengerti</strong> hanya jika Anda setuju. Menutup pemberitahuan akan mencegah penyegaran jaringan tersebut; entri bawaan dan entri katalog yang di-cache sebelumnya mungkin masih muncul. Lihat <a href="../../../privacy/">privasi dan data lokal<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>.</p>
+        <p class="callout"><strong>Tidak ada buku kerja yang cocok?</strong> Periksa filter bahasa dan kernel, lalu gunakan kontrol <strong>Segarkan</strong> katalog. Aplikasi yang lebih lama mungkin tidak memiliki kontrol katalog yang sama. Cara lainnya, <a download="markov-groups.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/v0.4.0/workbooks/en/markov-groups.srwb">simpan file buku kerja v0.4.0 yang disematkan</a> ke perangkat Anda, lalu pilih <strong>Menu → Impor File</strong> dan pilih <code>markov-groups.srwb</code>. Jika browser Anda menampilkan file sebagai teks, gunakan tindakan simpan/unduh miliknya dan pertahankan ekstensi <code>.srwb</code>. <a href="../import/">Panduan impor buku kerja manual</a> menunjukkan langkah-langkahnya menggunakan Simpson's Paradox dari GitHub cabang <code>main</code>; pilih file Markov di atas untuk melanjutkan pelajaran ini.</p>
+      </section>
+
+      <section id="open">
+        <p class="step-label">Langkah 2</p>
+        <h2>Buka buku kerja dan periksa sel-selnya</h2>
+        <ol class="lesson-steps">
+          <li>Ketuk <strong>Instal</strong> pada kartu buku kerja. Jika tombol sudah bertuliskan <strong>Terinstal</strong>, keluar dari menu Jelajah dan pilih buku kerja yang sudah ada dari pemilih buku kerja sebagai gantinya.</li>
+          <li>Buku kerja biasanya otomatis menjadi tab yang dipilih. Jika menu Jelajah tetap terbuka, keluarlah. Jika pengalihan otomatis nonaktif, pilih <strong><bdi lang="en" dir="ltr">Markov Groups: A Random Walk on Cube Moves</bdi></strong> dari <strong><svg role="img" aria-label="panah bawah" width="16" height="16" viewBox="0 0 16 16" style="vertical-align: -.125em;"><path d="M3 5.5 8 10.5 13 5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> pemilih buku kerja</strong> di samping <strong>SciREPL</strong> di header.</li>
+          <li>Baca teks pembuka, lalu gulir melalui sel-selnya. Sel Markdown menjelaskan pelajaran; sel Python berisi kode yang akan Anda jalankan. Setiap sel Python memiliki nama untuk membantu Anda menemukannya.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--workbook" role="img" aria-label="Buku kerja Markov Groups yang terbuka, dengan judul dan kontrol buku kerjanya disorot kuning.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/workbook-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Buku kerja katalog terbuka sebagai sel yang dapat diedit. Bagian pengantarnya memberikan urutan eksekusi Python.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-workbook.png">Lihat tangkapan layar buku kerja lengkap</a>
+        </figure>
+        <p class="callout"><strong>Pasang bukan berarti Jalankan.</strong> Memasang buku kerja katalog jarak jauh ini menambahkan sel-selnya tanpa mengeksekusi kode Python-nya. Templat v0.4.0 tidak memiliki output Python yang tersimpan, jadi periksa kodenya dan jalankan sendiri. Tidak diperlukan akun AI, kunci API, dataset eksternal, atau penginstalan paket tambahan; kode ini menggunakan NumPy pada SciREPL dengan runtime Python.</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">Langkah 3</p>
+        <h2>Jalankan keempat sel Python secara berurutan</h2>
+        <p>Untuk sel yang tersimpan, ketuk <strong>✎ pensil</strong> di header sel tersebut, lalu ketuk <strong>Jalankan</strong> milik sel itu sendiri. Tindakan ini mengeksekusi sel yang ada; panel sel baru di bagian bawah membuat sel yang berbeda.</p>
+        <aside class="callout" data-editions="pro"><strong>Pintasan Pro:</strong> ketuk dua kali kode yang tersimpan untuk membuka editornya, lalu ketuk tombol <strong>Jalankan</strong>. Free menggunakan <strong>✎ pensil</strong> dalam panduan ini.</aside>
+        <p class="callout"><strong>Apa arti nama-nama ini?</strong> <code>cube_moves</code> dan <code>check_moves</code> adalah nama yang ditampilkan pada sel, bukan perintah untuk diketik. Temukan nama yang cocok, lalu gunakan pensil dan Jalankan pada sel tersebut. <a href="../named-cells/">Tutorial sel bernama dan jalur lintas bahasa</a> menunjukkan cara menetapkan nama dan menggunakannya sebagai referensi seperti <code>/nb/cube_moves/.code</code>.</p>
+        <ol class="lesson-steps">
+          <li>Jalankan <code>cube_moves</code>. Bagian ini mendefinisikan gerakan dan fungsi bantuan. Hasil yang diharapkan: <code>Built six clockwise quarter-turn matrices with fixed face centres.</code></li>
+          <li>Jalankan <code>check_moves</code>. Bagian ini memeriksa bahwa tidak ada stiker yang hilang, bagian tengah tetap di posisinya, dan empat pengulangan dari setiap seperempat putaran kembali ke posisi awal. Setelah enam baris lulus pemeriksaan, hasil yang diharapkan: <code>All six moves passed. U and R do not commute.</code></li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--checks" role="img" aria-label="Output check_moves baru pada ponsel, dengan pemeriksaan yang lulus disorot kuning.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-checks.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/checks-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Pemeriksaan yang dicetak adalah hasil baru dari menjalankan <code>check_moves</code>, bukan hasil tersimpan yang disediakan oleh katalog.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-checks.png">Lihat tangkapan layar pemeriksaan lengkap</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>Jalankan <code>show_turn</code>. Bagian ini mencetak siklus putaran U dan label stiker sebelum dan sesudah putaran. Baris atas depan berubah dari <code>[19, 20, 21]</code> menjadi <code>[46, 47, 48]</code>. Perbandingan <code>U then R equals R then U: False</code> menunjukkan bahwa urutan gerakan berpengaruh.</li>
+        </ol>
+        <p><strong>Sebagian dari output yang dicetak:</strong></p>
+        <pre id="show-turn-output" style="white-space: pre-wrap; overflow-wrap: anywhere;"><code>U cycles, shown as one-based sticker positions:
+1 -&gt; 3 -&gt; 9 -&gt; 7 -&gt; 1
+2 -&gt; 6 -&gt; 8 -&gt; 4 -&gt; 2
+19 -&gt; 37 -&gt; 28 -&gt; 46 -&gt; 19
+20 -&gt; 38 -&gt; 29 -&gt; 47 -&gt; 20
+21 -&gt; 39 -&gt; 30 -&gt; 48 -&gt; 21
+
+F top row labels before U: [19, 20, 21]
+F top row labels after U:  [46, 47, 48]
+
+U then R equals R then U: False</code></pre>
+        <p>Daftar huruf sisi yang panjang dihilangkan di sini. Baris siklus menggunakan <strong>posisi berbasis satu</strong>; perbandingan baris menunjukkan <strong>label stiker</strong>. Keduanya memiliki arti yang berbeda, meskipun kubus yang terpecahkan awalnya memberi keduanya nomor yang cocok.</p>
+        <ol class="lesson-steps" start="4">
+          <li>Jalankan <code>random_walk</code>. Bagian ini mencetak total probabilitas satu stiker sebesar <code>1.0</code>, jalur sampel 12 langkah, label huruf sisi akhir, dan pesan yang mengonfirmasi bahwa setiap label stiker dan keenam bagian tengah tetap dipertahankan.</li>
+        </ol>
+        <p>Sel Python sudah berada dalam urutan yang diperlukan. Jangan mengubah urutannya: sel-sel berikutnya menggunakan kembali definisi dari <code>cube_moves</code>. Untuk menjalankan beberapa sel sekaligus, lihat <a href="#batch-run-note">Jalankan Semua di Bawah dan Jalankan Semua Sel</a>.</p>
+        <p class="callout"><strong>Eksekusi pertama lebih lambat?</strong> Python mungkin memerlukan waktu untuk menginisialisasi, dan pengunduhan runtime atau fallback jaringan mungkin memerlukan persetujuan Anda. Tunggu hingga lencana status kembali ke <strong>siap</strong> dan periksa output sel untuk melihat apakah ada kesalahan. Jika sel berikutnya melaporkan nama yang tidak terdefinisi setelah mulai ulang, jalankan sel Python dari awal; output yang tersimpan tidak sama dengan definisi Python langsung.</p>
+        <p>Buku kerja ini mencetak teks dan daftar huruf sisi. Buku kerja ini tidak menggambar atau menganimasikan kubus, dan jalur pendek ber-seed miliknya bukanlah bukti dari acakan yang tercampur secara merata.</p>
+      </section>
+
+      <section id="edit">
+        <p class="step-label">Langkah 4</p>
+        <h2>Perpendek jalan acak dan jalankan ulang sel yang tersimpan</h2>
+        <ol class="lesson-steps">
+          <li>Temukan <code>random_walk</code> dan ketuk ikon <em>milik sel tersebut</em> yaitu <strong>✎ pensil</strong>.</li>
+          <li>Temukan baris ini dan ubah hanya <code>size=12</code> menjadi <code>size=6</code>:
+            <pre><code>moves = rng.choice(MOVE_OPTIONS, size=12).tolist()</code></pre>
+            <p>Biarkan <code>np.random.default_rng(7)</code> tidak berubah. Seed membuat contoh ini dapat direproduksi.</p>
+          </li>
+          <li>Ketuk tombol <strong>Jalankan</strong> di editor sel tersimpan tersebut. Output diperbarui; baris <code>Sampled moves:</code> sekarang berisi enam opsi, bukan dua belas. <code>I</code> dihitung sebagai opsi meskipun kubus tetap diam.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--edit" role="img" aria-label="Sel random_walk yang tersimpan sedang diedit, dengan size sama dengan enam dan kontrol Jalankan sel tersebut disorot kuning.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-edit.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Ubah satu nilai di sel tersimpan, lalu gunakan tombol Jalankan <em>milik sel tersebut</em>. Pengeditan saja tidak memperbarui output sebelumnya.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-edit.png">Lihat tangkapan layar pengeditan lengkap</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--six-moves" role="img" aria-label="Output random_walk baru yang menampilkan enam opsi sampel setelah dijalankan ulang, disorot kuning.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-six-moves.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/six-moves-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Jalur sampel yang lebih pendek adalah hasil nyata dari pengeditan Anda. Pesan akhir tetap mengonfirmasi bahwa lintasan tersebut mempertahankan label stiker dan bagian tengah.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-six-moves.png">Lihat tangkapan layar hasil enam opsi lengkap</a>
+        </figure>
+        <p>Untuk perubahan ini, jalankan ulang hanya <code>random_walk</code> saat definisi sebelumnya dimuat. Jika Anda mengedit <code>cube_moves</code> sebagai gantinya, jalankan ulang sel Python berikutnya juga. Output mencatat eksekusi terakhirnya; output tidak otomatis dihitung ulang saat sel lain berubah.</p>
+        <p>Jika Anda membuka editor secara tidak sengaja, pilih <strong>Batal</strong>. Untuk kembali ke contoh asli, ubah kembali <code>size=6</code> ke <code>size=12</code> dan jalankan sel lagi.</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">Langkah 5</p>
+        <h2>Ekspor salinan buku kerja Anda sendiri</h2>
+        <ol class="lesson-steps">
+          <li>Biarkan buku kerja Markov Groups tetap dipilih, lalu buka <strong>Menu → Ekspor buku kerja &amp; paket</strong>, bukan Ekspor Dokumen.</li>
+          <li>Pilih <strong>Buku kerja (.srwb)</strong> dan <strong>Hanya tab saat ini</strong>.</li>
+          <li>Ketuk <strong>Ekspor</strong> dan simpan salinan di lokasi yang Anda kendalikan. Android akan membuka alur berbagi/simpan; browser akan mengunduh file. Pertahankan ekstensi <code>.srwb</code>.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="Dialog ekspor dengan Buku kerja srwb, Hanya tab saat ini, dan Ekspor disorot kuning.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Format Buku kerja dan Hanya tab saat ini menyimpan buku kerja yang diedit ini tanpa menyertakan tab yang tidak terkait. Opsi khusus Pro yaitu <strong>Sertakan percakapan AI</strong> tidak diperlukan untuk pelajaran ini; biarkan tidak dicentang.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-export.png">Lihat tangkapan layar ekspor lengkap</a>
+        </figure>
+        <p>Buku kerja ini tidak memerlukan file data terpisah, jadi salinan <code>.srwb</code> sudah cukup untuk pelajaran ini. Anda dapat membukanya kembali dengan <strong>Menu → Impor File</strong>; jalankan sel Python-nya dari awal saat memulai runtime baru.</p>
+        <p class="callout"><strong>Pemulihan lokal bukanlah cadangan.</strong> Menghapus penyimpanan aplikasi/situs atau mencopot pemasangan dapat menghapus pekerjaan lokal. Sesi Android dan browser tidak secara otomatis membagikan hasil edit Anda. Ekspor tidak memublikasikan perubahan Anda ke katalog; fitur ini memberi Anda salinan terpisah.</p>
+        <p>Untuk dasar-dasar pengeditan sel tersimpan, lihat <a href="../../interface/tutorial/">panduan antarmuka buku kerja pertama</a>. Untuk contoh yang membaca dan memuat file data terpisah, cobalah <a href="../../files-export/tutorial/">panduan buku kerja CSV</a>. <a href="../../../workbooks/">Referensi buku kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> membahas jenis-jenis sel dan nama sel yang stabil.</p>
+      </section>
+
+      <aside class="callout" id="batch-run-note" aria-labelledby="batch-run-heading">
+        <h3 id="batch-run-heading">Jalankan Semua di Bawah dan Jalankan Semua Sel</h3>
+        <ul>
+          <li><strong>Jalankan Semua di Bawah:</strong> buka sel tersimpan dengan <strong>✎ pensil</strong>-nya, lalu pilih <strong>Jalankan Semua di Bawah</strong> (ikon ringkasnya adalah <strong>▶↓</strong>). Tindakan ini menjalankan sel tersebut <em>dan</em> setiap sel di bawahnya, secara berurutan.</li>
+          <li><strong>Menu → Jalankan Semua Sel:</strong> menjalankan buku kerja yang dipilih dari sel pertama hingga terakhirnya. Ini bukan perintah untuk menjalankan setiap tab buku kerja.</li>
+        </ul>
+        <p>Periksa kodenya terlebih dahulu dan biarkan buku kerja ini tetap dipilih selama batch berjalan. Setelah sesi Python baru, mulailah dari <code>cube_moves</code> agar sel-sel berikutnya memiliki definisinya. Tindakan ini mengeksekusi kode; menyebut suatu penjelasan “opsional” tidak membuat aplikasi melewati sel kodenya.</p>
+      </aside>
+
+      <p class="callout" id="walkthrough-complete"><strong>Anda telah menyelesaikan panduan SciREPL.</strong> Anda telah menemukan, membuka, menjalankan, mengedit, dan mengekspor buku kerja. Jika Anda hanya ingin mempelajari aplikasinya, Anda dapat berhenti di sini. Lanjutkan di bawah jika Anda ingin mendalami matematika kubus dan buku kerja pengembangan.</p>
+
+      <section id="optional-maths">
+        <p class="step-label">Bacaan opsional</p>
+        <h2>Matematika di balik contoh kubus</h2>
+        <h3>Sedikit makna di balik output</h3>
+        <p>Buku kerja melacak <strong>54 stiker berlabel individual</strong>, bukan hanya enam warna. Gerakan yang sah menyusun ulang label-label tersebut. Empat pengulangan dari satu seperempat putaran kembali ke susunan awal, tetapi putaran pada sisi yang berbeda dapat memberikan hasil yang berbeda ketika urutannya berubah.</p>
+        <p>Jalan acak memilih di antara 13 opsi: tetap diam (<code>I</code>), enam seperempat putaran, dan enam inversinya. Matriks probabilitas <strong>54×54-nya menjelaskan lokasi satu stiker</strong>, bukan setiap konfigurasi kubus penuh. Total probabilitas sebesar <code>1.0</code> berarti bahwa probabilitas lokasi stiker ini berjumlah satu; hal ini tidak membuktikan bahwa kubus teracak secara merata.</p>
+        <p class="callout"><strong>Ingin tahu tentang arah sisi kubus?</strong> Sel <code>coordinates</code> buku kerja menyediakan sumbu global serta vektor normal kanan, atas, dan luar dari setiap sisi. <a href="../graphics/">Tutorial gambar, diagram, dan persamaan</a> menunjukkan cara memasukkan penjelasan semacam itu ke dalam buku kerja. Diagram koordinat sedang ditambahkan ke salinan pengembangan katalog; salinan v0.4.0 yang disematkan di atas tidak menyertakannya.</p>
+        <div id="stage4-preview">
+          <h3>Opsional: pratinjau Tahap 4 yang direvisi</h3>
+          <p>Langkah-langkah dan tangkapan layar ponsel di atas menggunakan buku kerja <strong>v0.4.0</strong> yang stabil. <a download="markov-groups-stage4-preview.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/f88d9b9e26364eeb5e7ff1ee9bcce5f27d47c66e/workbooks/en/markov-groups.srwb">Unduhan buku kerja yang direvisi</a> adalah <strong>pratinjau pengembangan</strong>, belum menjadi katalog stabil. Impor buku kerja tersebut dengan <strong>Menu → Impor File</strong> jika Anda ingin mencoba sel penjelasan dan kode yang lebih pendek dan berselang-seling.</p>
+          <p>Pada pratinjau tersebut, jalankan <code>cube_moves</code>, <code>check_moves</code>, dan <code>show_turn</code> terlebih dahulu, seperti di atas. Kemudian:</p>
+          <ol class="lesson-steps">
+            <li>Jalankan <code>transition_matrix</code>. Ini membangun <code>T</code>, matriks probabilitas untuk lokasi satu stiker setelah satu opsi yang dipilih secara merata: <code>I</code>, seperempat putaran sisi, atau inversinya.</li>
+            <li>Jalankan <code>sticker_step</code>. Bagian ini mengikuti <strong>label stiker 1</strong>, yang awalnya berada di <strong>posisi berbasis nol 0</strong>. Jumlah probabilitas lokasinya adalah <code>1.0</code>. Bagan di bawah menunjukkan probabilitas tujuan yang dihitung oleh sel tersebut.</li>
+          </ol>
+          <figure id="sticker-probability-figure" aria-describedby="sticker-probability-caption" style="margin: 24px 0;">
+            <img src="../../../workbooks/tutorial/assets/sticker-one-step.svg" width="400" height="380" style="display: block; width: min(100%, 560px); height: auto;" alt="Setelah satu gerakan acak, label stiker 1 memiliki probabilitas tujuh per tiga belas untuk tetap berada di posisi 0, dan masing-masing satu per tiga belas untuk mencapai posisi 2, 6, 18, 35, 42, atau 47.">
+            <figcaption id="sticker-probability-caption"><strong>Bagan batang probabilitas, bukan histogram binned.</strong> Ilustrasi ini dihitung dari <code>after_one_step = T @ location_probability</code>; ini bukan tangkapan layar ponsel atau output baru yang dihasilkan oleh buku kerja. Posisi berbasis nol. Sebanyak 47 posisi lainnya memiliki probabilitas nol dan dihilangkan. Label stiker tetap 1.</figcaption>
+          </figure>
+          <div class="table-wrap">
+            <table aria-label="Probabilitas satu langkah eksak untuk label stiker 1">
+              <thead><tr><th>Posisi tujuan</th><th>Probabilitas</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>7/13 ≈ 53.85%</td></tr>
+                <tr><td>2, 6, 18, 35, 42, 47 (masing-masing)</td><td>1/13 ≈ 7.69%</td></tr>
+                <tr><td>Semua 47 posisi lainnya</td><td>0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <ol class="lesson-steps" start="3">
+            <li>Jalankan <code>random_walk</code>. Bagian ini mengambil sampel jalur 12 opsi untuk <strong>seluruh kubus</strong>, menggunakan definisi dari <code>transition_matrix</code>. Hal ini berbeda dari probabilitas satu stiker di atas. Pengeditan Langkah 4 pada <code>size=12</code> berfungsi di sel ini pada kedua edisi.</li>
+          </ol>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Bantuan SciREPL</span><nav aria-label="Navigasi footer"><a href="../../../workbooks/">Referensi buku kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a><a href="../../../">Semua bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a></nav></footer>
+</body>
+</html>

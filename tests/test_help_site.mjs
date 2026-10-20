@@ -126,6 +126,29 @@ const helpText = html => html.replace(/<[^>]*>/g, ' ')
   .replace(/&amp;/gi, '&').replace(/&nbsp;|&#160;/gi, ' ')
   .replace(/&#39;|&apos;/gi, "'").replace(/&quot;/gi, '"')
   .replace(/\s+/g, ' ').trim();
+// Translation markers are metadata on the wrapper, not part of the copyable
+// prompt. Preserve the exact prompt bytes instead of flattening/normalizing
+// them, and require one matching marker with one plain code block.
+const copyablePromptText = (markup, marker) => {
+  const blocks = [...markup.matchAll(/<pre\b([^>]*)>\s*<code\b[^>]*>([\s\S]*?)<\/code>\s*<\/pre>/gi)];
+  const marked = blocks.filter(([, attributes]) => {
+    const values = [...attributes.matchAll(/(?:^|\s)data-translatable-prompt\s*=\s*(["'])([^"']*)\1/gi)];
+    return values.length === 1 && values[0][2] === marker;
+  });
+  return marked.length === 1 && !/<[!/?a-z]/i.test(marked[0][2]) ? marked[0][2] : null;
+};
+const promptFixture = 'Keep seed 42.\n  Do not run cells or use network requests.';
+check('Copyable prompt extraction accepts translation metadata without changing whitespace or safety text',
+  copyablePromptText(`<pre class="practice" data-translatable-prompt='fixture'><code class="plain">${promptFixture}</code></pre>`, 'fixture') === promptFixture
+    && copyablePromptText(`<pre data-translatable-prompt="fixture" class="practice"><code>${promptFixture}</code></pre>`, 'fixture') === promptFixture);
+check('Copyable prompt extraction refuses missing, wrong or duplicate translation markers',
+  copyablePromptText(`<pre><code>${promptFixture}</code></pre>`, 'fixture') === null
+    && copyablePromptText(`<pre data-translatable-prompt="other"><code>${promptFixture}</code></pre>`, 'fixture') === null
+    && copyablePromptText(`<pre data-translatable-prompt="fixture" data-translatable-prompt="fixture"><code>${promptFixture}</code></pre>`, 'fixture') === null
+    && copyablePromptText(`<pre data-translatable-prompt="fixture"><code>${promptFixture}</code></pre>`.repeat(2), 'fixture') === null);
+check('Copyable prompt extraction refuses nested markup and additional code blocks',
+  copyablePromptText('<pre data-translatable-prompt="fixture"><code><strong>Do not run cells.</strong></code></pre>', 'fixture') === null
+    && copyablePromptText('<pre data-translatable-prompt="fixture"><code>Do not run cells.</code><code>Extra instructions.</code></pre>', 'fixture') === null);
 
 const aiTutorial = readFileSync(path.join(WWW, 'help/pro/ai/tutorial/index.html'), 'utf8');
 const aiSection = id => helpText((aiTutorial.match(new RegExp(
@@ -283,7 +306,7 @@ check('Pro AI practice prompt is labelled and directly inside instruction 3 befo
     && /id="assistant-practice-prompt"/.test(aiAgentItems[2][1])
     && /Copy this prompt/.test(helpText(aiAgentItems[2][1]))
     && /Assistant's message box\s*, not a code cell/.test(helpText(aiAgentItems[2][1]))
-    && aiAgentItems[2][1].includes(`<pre><code>${aiPracticePrompt}</code></pre>`)
+    && copyablePromptText(aiAgentItems[2][1], 'assistant-practice') === aiPracticePrompt
     && /Read the proposed explanation/.test(helpText(aiAgentItems[3][1]))
     && aiAgentMarkup.split(aiPracticePrompt).length === 2);
 check('Pro AI practice prompt specifies generated input, exact seed and rule, and separately labelled summaries',
@@ -864,7 +887,7 @@ check('Pro AI Prompt actual output immediately follows the four instructions wit
 const aiPromptReceipt = JSON.parse(readFileSync(path.join(aiAssets, 'capture-pro-ai-prompt-phone.json'), 'utf8'));
 const aiPromptPractice = (aiPromptItems[1]?.[1].match(
   /<div\b[^>]*\bid="ai-prompt-practice-prompt"[^>]*>([\s\S]*?)<\/div>/i) || [])[1] || '';
-const aiPromptPracticeText = (aiPromptPractice.match(/<pre><code>([\s\S]*?)<\/code><\/pre>/i) || [])[1] || '';
+const aiPromptPracticeText = copyablePromptText(aiPromptPractice, 'ai-explanation');
 check('Pro AI Prompt copyable exercise matches its source-only recorded request and seeded cell names',
   aiPromptPracticeText === aiPromptReceipt.exercise.prompt
     && aiPromptReceipt.exercise.summaryName === 'summary_demo'
@@ -972,7 +995,7 @@ const aiVarianceSteps = aiVarianceMarkup.match(/<ol\b[^>]*>([\s\S]*?)<\/ol>/i);
 const aiVarianceItems = [...(aiVarianceSteps?.[1] || '').matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)];
 const aiVariancePractice = (aiVarianceItems[1]?.[1].match(
   /<div\b[^>]*\bid="ai-variance-practice-prompt"[^>]*>([\s\S]*?)<\/div>/i) || [])[1] || '';
-const aiVariancePracticeText = (aiVariancePractice.match(/<pre><code>([\s\S]*?)<\/code><\/pre>/i) || [])[1] || '';
+const aiVariancePracticeText = copyablePromptText(aiVariancePractice, 'ai-variance');
 const aiVarianceExpectedPrompt = `Return only complete JavaScript source, without Markdown fences.
 Create a reproducible histogram of estimated sample variances.
 Simulate 2,000 fresh samples, each containing 10 standard-normal N(0,1) values.

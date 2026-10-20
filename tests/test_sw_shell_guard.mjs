@@ -1,6 +1,6 @@
 // Node test: the service-worker shell-version guard cannot be bypassed.
 //
-//   node test_sw_shell_guard.mjs
+//   node tests/test_sw_shell_guard.mjs
 //
 // Runs scripts/check-sw-shell.mjs against a throwaway copy of www/ so it can
 // mutate assets, sw.js and the lock without touching the real tree.
@@ -19,9 +19,22 @@ const check = (name, ok, detail = '') => {
 };
 
 // A sandbox that mirrors the repo layout the script expects (scripts/ + www/).
+// The fetched runtimes are not in APP_SHELL and run to ~80 MB, so they are not
+// copied. Handling SIGINT/SIGTERM/SIGHUP stops an interrupt from killing the
+// run mid-way and leaking the sandbox: the run is synchronous, so the signal is
+// held until it ends, by which point the finally block below has removed it.
 const sandbox = mkdtempSync(path.join(tmpdir(), 'sw-guard-'));
+for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+    process.on(signal, () => {
+        rmSync(sandbox, { recursive: true, force: true });
+        process.exit(1);
+    });
+}
+const SKIP = new Set(['vendor/pyodide', 'vendor/swipl', 'vendor/webr', 'test_fixtures']
+    .map(rel => path.join(ROOT, 'www', rel)));
 cpSync(path.join(ROOT, 'scripts'), path.join(sandbox, 'scripts'), { recursive: true });
-cpSync(path.join(ROOT, 'www'), path.join(sandbox, 'www'), { recursive: true });
+cpSync(path.join(ROOT, 'www'), path.join(sandbox, 'www'),
+    { recursive: true, filter: src => !SKIP.has(src) });
 const SCRIPT = path.join(sandbox, 'scripts', 'check-sw-shell.mjs');
 const SW = path.join(sandbox, 'www', 'sw.js');
 const INDEX = path.join(sandbox, 'www', 'index.html');

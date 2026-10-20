@@ -55,10 +55,36 @@ or the downloadable example workbook files have been translated by this task.
 
 ## Campaign status and publication dependency
 
-The smaller-batch campaign was authorized on October 14, 2026. Its first French
-chunk passed the draft, independent fresh review, deterministic checks and a
-separate fidelity read. The remaining chunks are in progress; this is not yet a
-publication-ready set of translated tutorials.
+The accepted translation inventory is complete: 13,632 target-language fields
+across twelve translated editions, with no missing or unreviewed fields. All
+117 local tutorial routes (nine routes in thirteen languages, including English)
+have been rendered with separate deterministic editorial receipts. Twenty-two
+accepted Russian fields retain optional manual-review flags; list them with
+`node scripts/tutorial_locale_status.mjs --locale ru --manual-review`.
+
+Acceptance and local rendering are not publication or native-speaker approval.
+Run the complete all-locale checks below, verify public routes after authorized
+publication, and preserve the machine-translated/native-review-pending notices.
+Original English reference pages, screenshots and shared companion workbook
+downloads remain outside the translated tutorial-prose inventory.
+
+### Deferred post-merge review
+
+- [ ] Perform a separate post-merge review after Help publication; the owner
+  requested this follow-up without an immediate deadline.
+- Source branch: `feat/localized-tutorials`. Publication PR: pending creation;
+  record its number and URL here before merging.
+- Review the deployed locale routes, language switching, links/assets and
+  narrow/RTL layouts, and retain the machine-translated/native-review-pending
+  notices and the distinction between optional Russian flags and missing text.
+- Record the merged commit and deployed result. This follow-up does not clear
+  Pro native/signing/release gates or authorize a Pro release tag or Play upload.
+
+The campaign history below is retained evidence, not a statement that a worker
+is currently running. The smaller-batch campaign was authorized on October 14,
+2026; its first French chunk passed draft, independent fresh review,
+deterministic checks and a separate fidelity read before the later completion
+and bounded correction passes.
 
 Earlier campaigns remain held and are not replayed. An earlier French pilot
 produced complete draft and fresh review JSON, but a product-name fidelity issue

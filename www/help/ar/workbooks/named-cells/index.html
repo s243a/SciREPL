@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="قم بتسمية خلايا SciREPL، واقرأ مصدرها ومخرجاتها عبر نظام الملفات الافتراضي /nb، ومرر البيانات أو التعليمات البرمجية المولدة بين JavaScript وBash وPython.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ar/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/named-cells/tutorial.css">
+  <title>الخلايا المسماة والمسارات عابرة اللغات · مساعدة SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/named-cells/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/named-cells/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/named-cells/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/named-cells/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/named-cells/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/named-cells/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/named-cells/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/named-cells/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/named-cells/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">الانتقال إلى المحتوى</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+    <nav aria-label="التنقل الأساسي"><a href="../../../workbooks/">مرجع دفاتر العمل<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a><a href="../../tutorials/">جميع الدروس التعليمية</a><a href="../../../">كل المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a><a href="../../../../">فتح تطبيق الويب التقدمي (PWA) لـ Free</a></nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="لغة البرنامج التعليمي"><details class="tutorial-language-menu"><summary>لغة البرنامج التعليمي: <bdi>العربية</bdi></summary><nav aria-label="لغة البرنامج التعليمي"><a href="../../../en/workbooks/named-cells/" lang="en" hreflang="en">English</a>
+      <a href="./" lang="ar" hreflang="ar" aria-current="page">العربية</a>
+      <a href="../../../bn/workbooks/named-cells/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/named-cells/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/named-cells/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/named-cells/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/named-cells/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/named-cells/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/named-cells/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/named-cells/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/named-cells/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/named-cells/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/named-cells/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">برنامج تعليمي مترجم آليًا؛ والمراجعة بواسطة متحدث أصلي باللغة قيد الانتظار. لم تتغير التعليمات البرمجية والقيم التقنية. تُظهر لقطات الشاشة الواجهة الأصلية باللغة الإنجليزية؛ يرجى مطابقة أسماء عناصر التحكم المترجمة في هذا النص مع ما يظهر في تطبيقك.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> / <a href="../../../workbooks/">دفاتر العمل<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> / الخلايا والمسارات المسماة</p>
+    <article>
+      <p class="eyebrow">تعلم بالممارسة</p>
+      <h1>تسمية الخلايا وربط البرامج</h1>
+      <p class="lede">يمكن أن تحمل الخلية اسماً مفيداً مثل <code>numbers</code>، بدلاً من معرفتها بموضعها فقط. وتستطيع الخلايا الأخرى قراءة أحدث مخرجات نصية لها عبر <code>/nb/numbers/.output</code>، أو تبادل البيانات عبر ملف عادي في <code>/shared/</code>. جرب كلا المسارين باستخدام JavaScript وBash، ثم قم بتوليد برنامج Bash صغير في خلية أخرى—دون تشغيل التعليمات البرمجية المولدة تلقائياً.</p>
+      <ul class="meta"><li class="chip chip-free">سير عمل Free + Pro</li><li class="chip">أمثلة تم التحقق منها عبر المتصفح</li><li class="chip">حوالي 15 دقيقة</li></ul>
+      <p class="screen-note">تم التحقق من الدليل الإرشادي ولقطات الشاشة في <strong>إصدار المتصفح لـ SciREPL Free</strong> بتاريخ <time datetime="2026-10-06">6 أكتوبر 2026</time>. هذه لقطات كاملة لمتصفح ضيق، و<strong>ليست لقطات شاشة لنظام أندرويد</strong>. لم يتم فحص Pro وكل إصدار تم إطلاقه لهذا الدليل. يستخدم التمرين الرئيسي حزمتي JavaScript وBash المضمنتين: فلا حاجة إلى حزم برمجية، أو استدعاءات لنماذج، أو تنزيلات لبيئات التشغيل. وتعد خطوة Python خطوة أخيرة اختيارية.</p>
+      <p class="callout"><strong>المقصود بكلمة ”المسارات“ هنا:</strong> يُعد <code>/nb/</code> عرضاً افتراضياً لـ <em>خلايا دفتر العمل المحدد حالياً</em>، وهو متاح للبرامج. وهو ليس مجلداً في تنزيلات أندرويد، وليس شاشة منفصلة باسم ”عرض المسار“. وفي إصدار Free الذي تم التحقق منه، لا تتصفح شاشة <strong>الملفات والتخزين</strong> مسار <code>/nb/</code>؛ وسنقوم لاحقاً بنسخ بعض البيانات عمداً إلى ملف مشترك يمكن للشاشة عرضه.</p>
+      <nav class="lesson-nav" aria-label="خطوات الدليل الإرشادي للخلايا المسماة">
+        <strong>في هذا الدرس</strong>
+        <ol>
+          <li><a href="#open">استيراد دفتر العمل النموذجي الصغير</a></li>
+          <li><a href="#name">العثور على اسم خلية وتغييره</a></li>
+          <li><a href="#produce">تشغيل الخلية المنتجة للبيانات</a></li>
+          <li><a href="#paths">قراءة الخلايا عبر مساراتها</a></li>
+          <li><a href="#shared-file">تبادل البيانات عبر ملف JSON مشترك</a></li>
+          <li><a href="#generate">توليد مصدر خلية أخرى، ثم تشغيله بنفسك</a></li>
+          <li><a href="#update">تغيير البيانات وتحديث النتائج</a></li>
+        </ol>
+        <p><a href="#python">قارئ Python اختياري</a> · <a href="#more">أمثلة أخرى لدفاتر العمل</a> · <a href="#troubleshooting">إذا حدث خطأ ما</a></p>
+        <p><a href="../../tutorials/">جميع الدروس التعليمية</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">الخطوة 1</p>
+        <h2>استيراد النموذج دون تشغيله</h2>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/named-cells/assets/named-cell-interop.srwb" download="named-cell-interop.srwb">قم بتنزيل دفتر العمل النموذجي للخلايا المسماة (.srwb)</a>. احفظ الملف نفسه واحتفظ بامتداده <code>.srwb</code>. إذا أظهر المتصفح نصاً، فاستخدم إجراء الحفظ/التنزيل الخاص به.</li>
+          <li>في الشريط العلوي لـ SciREPL، ابحث عن <strong>☰ القائمة</strong>—الزر الذي يحتوي على <strong>ثلاثة خطوط أفقية</strong>. افتحه واختر <strong>📂 استيراد ملف (مثل .srwb, .ipynb, .csv, .py, .zip)</strong>. مرر داخل القائمة إذا لزم الأمر.</li>
+          <li>حدد <code>named-cell-interop.srwb</code> في منتقي الملفات بجهازك. اخرج من القائمة إذا ظلت مفتوحة، ثم حدد علامة التبويب الجديدة <strong><bdi lang="en" dir="ltr">Named Cell Interop</bdi></strong> في أداة اختيار دفاتر العمل. يوجد سهم <strong>▾</strong> الخاص بأداة الاختيار بالقرب من عنوان التطبيق. وستبقى دفاتر العمل الحالية لديك كما هي.</li>
+          <li>اقرأ المقدمة، ثم ابحث عن خلايا التعليمات البرمجية السبع المسماة <code>numbers</code>، و<code>inspect_cells</code>، و<code>write_shared</code>، و<code>read_shared</code>، و<code>generate_report</code>، و<code>bash_report</code>، و<code>python_total</code>. وهي مسماة بالفعل لتتمكن من متابعة التمرين.</li>
+        </ol>
+        <p class="callout"><strong>الاستيراد ليس تشغيلاً.</strong> الاستيراد العادي في <code>.srwb</code> لا ينفذ التعليمات البرمجية، حتى عند تفعيل التشغيل التلقائي. لا تختر ”تشغيل جميع الخلايا“ في هذا الدرس: فالترتيب مهم، وخلية Python الأخيرة اختيارية. تفحص التعليمات البرمجية غير المألوفة قبل تشغيلها.</p>
+        <p>هل تحتاج إلى خطوات التنزيل وأداة الاختيار بمزيد من التفصيل؟ استخدم <a href="../import/">الدليل الإرشادي للاستيراد اليدوي لدفاتر العمل</a>. لمتابعة هذا الدرس، أبقِ <strong><bdi lang="en" dir="ltr">Named Cell Interop</bdi></strong> محدداً: يشير <code>/nb/</code> إلى دفتر العمل النشط، وليس إلى كل علامة تبويب مفتوحة.</p>
+      </section>
+
+      <section id="name">
+        <p class="step-label">الخطوة 2</p>
+        <h2>العثور على اسم خلية وتغييره</h2>
+        <p>تحتوي خلية التعليمات البرمجية المحفوظة على <strong>تسمية محث In[…]</strong> في رأسها الخاص، كما تظهر الخلية المسماة اسمها أيضاً. هذه هي التسمية المستخدمة للتسمية—وليس <strong>✎ القلم</strong> الذي يحرر مصدر الخلية. يحدد الرقم المعروض البطاقة المحفوظة؛ وبعد إعادة الترتيب، ليس بالضرورة أن يطابق الموضع الحالي للخلية في مسار <code>/nb/In[N]/...</code>. ويفضل استخدام الأسماء للإسناد.</p>
+        <figure class="phone-figure">
+          <div class="annotated-shot" role="img" aria-label="لقطة شاشة للمتصفح مع تحديد تسمية In وعنصر التحكم بالقلم لخلية numbers باللون الأصفر؛ ويظهر مصدرها ومخرجات JSON أدناه.">
+            <img src="../../../workbooks/named-cells/assets/browser-named-cell.png" alt="" loading="lazy" decoding="async">
+            <img class="shot-annotation" src="../../../workbooks/named-cells/assets/browser-named-cell-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          </div>
+          <figcaption>يحدد الإطاران الأصفران <strong>تسمية In[…]</strong> للخلية المحفوظة، والتي تفتح مربع حوار التسمية بالنقر المزدوج أو الضغط المطول، و<strong>✎ القلم</strong> الذي يفتح محرر المصدر. يظهر الاسم <code>numbers</code> على اليمين. تُظهر لقطة المتصفح هذه المخرجات بعد الخطوة 3؛ وعلى أجهزة سطح المكتب، مرر مؤشر الفأرة فوق البطاقة لإظهار عناصر التحكم الخاصة بها.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-named-cell.png">عرض لقطة شاشة المتصفح الكاملة</a>
+        </figure>
+        <ol class="lesson-steps">
+          <li>ابحث عن <code>numbers</code>. على أجهزة سطح المكتب، <strong>انقر نقراً مزدوجاً على تسمية In[…] الخاصة بها</strong>. وعلى الأجهزة التي تعمل باللمس، <strong>اضغط مع الاستمرار على تلك التسمية</strong>. فالنقر المفرد ليس إيماءة التسمية في الإصدار الذي تم التحقق منه.</li>
+          <li>في مربع الحوار، استبدل <code>numbers</code> بـ <code>measurements</code>، ثم أكد باستخدام <strong>موافق</strong>. يتغير الاسم في رأس الخلية؛ بينما لا يتغير المصدر ولا اللغة.</li>
+          <li>افتح مربع الحوار نفسه مرة أخرى وأعد تغيير الاسم <strong>إلى <code>numbers</code></strong>، ثم اختر <strong>موافق</strong>. تستخدم الخلايا التالية هذا الاسم، لذا استعده قبل المتابعة.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-name-dialog.png" alt="لقطة شاشة لمتصفح ضيق لمربع حوار اسم الخلية في SciREPL Free مع إدخال القياسات وعناصر التحكم في التأكيد والإلغاء." loading="lazy" decoding="async">
+          <figcaption>يتم تحرير الاسم في مربع الحوار الخاص به. ولا تؤدي إعادة تسمية الخلية إلى إعادة كتابة الإسنادات في الخلايا الأخرى: وسيتعين تغيير <code>/nb/numbers/.output</code> أيضاً إذا احتفظت بالاسم الجديد.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-name-dialog.png">عرض لقطة شاشة المتصفح الكاملة لمربع حوار التسمية</a>
+        </figure>
+        <p>اختر أسماءً مميزة وبسيطة مثل <code>cube_moves</code> أو <code>check_moves</code>. يجب أن تكون الأسماء فريدة داخل دفتر العمل؛ ولا يمكن أن تحتوي على <code>/</code>، أو تبدأ بـ <code>.</code>، أو تكون تسمية موضعية محجوزة مثل <code>In[2]</code>. ويؤدي إفراغ الاسم إلى إزالته.</p>
+        <p>لهذا السبب يمكن لدرس تعليمي أن يقول <strong>”شغّل <code>cube_moves</code>، ثم <code>check_moves</code>“</strong>: فهذه أسماء خلايا تبحث عنها في دفتر العمل، وليست ملفات يتعين عليك تنزيلها بشكل منفصل. وتعد الأسماء مراجع أفضل من المواضع عند إدراج الخلايا أو نقلها.</p>
+      </section>
+
+      <section id="produce">
+        <p class="step-label">الخطوة 3</p>
+        <h2>تشغيل الخلية التي تنتج البيانات</h2>
+        <p>ابحث عن <code>numbers</code>. اضغط على <strong>✎ القلم</strong> الخاص بها، وتفحص المصدر، وتأكد من أن الخلية مضبوطة على <strong>كود → JS - JavaScript</strong>. ثم استخدم في <em>تلك الخلية المحفوظة</em> زر <strong>▶ تشغيل</strong>—وليس لوحة الخلية الجديدة، التي تضيف خلية أخرى.</p>
+        <p class="callout"><strong>اختصار Pro:</strong> يمكنك أيضاً فتح محرر الخلية المحفوظة عن طريق <strong>النقر المزدوج على نص مصدر الخلية</strong> في Pro. ويعمل <strong>✎ القلم</strong> في كلا الإصدارين. ويختلف اختصار التحرير هذا عن النقر المزدوج أو الضغط المطول على <strong>تسمية In[…]</strong> لتغيير اسمها.</p>
+        <pre><code data-cell-example="numbers">console.log(JSON.stringify({values: [3, 5, 8]}));</code></pre>
+        <p>توقع ظهور هذه المخرجات في سطر واحد:</p>
+        <pre><code>{"values":[3,5,8]}</code></pre>
+        <p>النتيجة هي نص <strong>JSON</strong>. وتجعل بنيته قراءته أسهل للغة أخرى مقارنة برسالة نصية عادية. ونحن هنا لا نمرر كائناً حياً لـ JavaScript ولا نشارك متغيرات JavaScript مع Bash أو Python.</p>
+      </section>
+
+      <section id="paths">
+        <p class="step-label">الخطوة 4</p>
+        <h2>قراءة خلية عبر نظام الملفات الافتراضي</h2>
+        <p>يحتوي الدليل الافتراضي لـ <code>numbers</code> على خصائص مسبوقة بنقطة. ويجمع المسار بين نقطة وصل دفتر العمل ومعرّف الخلية والخاصية التي تريدها:</p>
+        <pre class="path-tree" aria-label="المسارات الافتراضية لخلية numbers"><code>/nb/                         current workbook's cells
+└── numbers/                 this named cell
+    ├── .code                source text
+    ├── .output              latest text output
+    ├── .language            javascript
+    ├── .type                code
+    └── .name                numbers</code></pre>
+        <div class="table-wrap">
+          <table>
+            <caption>خصائص الخلية المستخدمة بواسطة واجهة مسار دفتر العمل</caption>
+            <thead><tr><th scope="col">الخاصية</th><th scope="col">ما تمنحه لك قراءتها</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>.code</code></th><td>المصدر الحالي، سواء تم تشغيل هذا المصدر أم لا.</td></tr>
+              <tr><th scope="row"><code>.output</code></th><td>آخر مخرجات نصية. وهي للقراءة فقط: حيث يوفرها التنفيذ. ويمكن أن تكون فارغة أو قديمة.</td></tr>
+              <tr><th scope="row"><code>.language</code></th><td>معرّف اللغة المخزن، مثل <code>javascript</code> أو <code>bash</code>.</td></tr>
+              <tr><th scope="row"><code>.type</code></th><td>نوع الخلية، مثل <code>code</code> أو <code>markdown</code>.</td></tr>
+              <tr><th scope="row"><code>.name</code></th><td>الاسم المعين، أو نص فارغ إذا كانت الخلية بدون اسم.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>الآن افتح <strong>✎ القلم</strong> في <code>inspect_cells</code>، وتحقق من <strong>كود → Bash</strong>، ثم قم بتشغيلها. يقرأ هذا مصدر الخلية المنتجة ومخرجات JSON الخاصة بها ولغتها، ثم يسرد معرّفات خلايا دفتر العمل الحالي. ولا يقوم بكتابة أو تغيير أي خلايا أو ملفات.</p>
+        <pre><code data-cell-example="inspect_cells">printf 'Source:\n'
+cat /nb/numbers/.code
+printf '\nOutput:\n'
+cat /nb/numbers/.output
+printf '\nLanguage:\n'
+cat /nb/numbers/.language
+printf '\nCell names and positions:\n'
+ls /nb/</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-cell-paths.png" alt="لقطة شاشة لمتصفح ضيق لخلية Bash المسماة inspect_cells تُظهر مصدر خلية numbers، ومخرجات JSON، واللغة، وقائمة الخلايا الافتراضية." loading="lazy" decoding="async">
+          <figcaption>يقرأ Bash خصائص الخلية باستخدام مسارات <code>cat</code> ذات مظهر اعتيادي. وتصل هذه المسارات إلى بيانات دفتر العمل؛ دون استخدام غلاف أندرويد أو أي مجلد فعلي على الهاتف. لقطة متصفح لـ SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-cell-paths.png">عرض لقطة شاشة المتصفح الكاملة لمسار الخلية</a>
+        </figure>
+        <h3>الأسماء والمواضع والمراجع النسبية</h3>
+        <p>يمكن أيضاً الوصول إلى الخلية نفسها عبر <strong>موضعها الحالي المستند إلى 1</strong>، فعلى سبيل المثال يعني <code>/nb/In[2]/.output</code> الخلية الثانية في الترتيب الحالي. وتُحسب خلايا Markdown أيضاً. ولا يعد هذا معرّف بطاقة دائماً: فبعد إعادة الترتيب، قد يختلف رقم In[…] المطبوع عن الموضع المستخدم بواسطة هذا المسار. وتتغير دلالة مراجع المواضع عند إعادة ترتيب الخلايا أو إدراجها؛ بينما تواصل مراجع الأسماء تحديد الخلية المسماة.</p>
+        <p>يدعم Bash وJavaScript أيضاً المراجع النسبية بالنسبة للخلية قيد التنفيذ: إذ يعني <code>/nb/-1/.output</code> الخلية السابقة، ويعني <code>/nb/./.code</code> الخلية الحالية. وهي تتطلب سياق تنفيذ وتعتمد على ترتيب الخلايا. ويستخدم هذا الدرس التعليمي أسماءً صريحة بدلاً من ذلك؛ ولا يعتمد على تصرف المراجع النسبية بشكل متطابق في كل لغة.</p>
+      </section>
+
+      <section id="shared-file">
+        <p class="step-label">الخطوة 5</p>
+        <h2>تبادل البيانات عبر ملف مشترك</h2>
+        <p>يحتوي <strong>نظام الملفات الافتراضي المشترك</strong> على ملفات عادية يمكن لنوى اللغات المختلفة استخدامها. وهنا، يعني <code>/shared/</code> سعة تخزين تتم إدارتها داخل جلسة المتصفح/التطبيق في SciREPL—وليس تنزيلات أندرويد، أو مجلداً على جهاز الكمبيوتر الخاص بك، أو مزامنة سحابية. وتحمل الملفات المشتركة نصوصاً أو بايتات؛ ولا تجعل المتغيرات الحية للغة ما متاحة للغة أخرى.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>طريقتان يمكن للبرامج من خلالهما الإشارة إلى البيانات</caption>
+            <thead><tr><th scope="col">المسار</th><th scope="col">ما يصل إليه</th><th scope="col">ما يقوم بتحديثه</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>/nb/numbers/.output</code></th><td>آخر مخرجات نصية لخلية في دفتر العمل المحدد.</td><td>إعادة تشغيل تلك الخلية.</td></tr>
+              <tr><th scope="row"><code>/shared/data/named-cell-tutorial/values.json</code></th><td>ملف JSON عادي، متاح عبر النوى وعلامات تبويب دفاتر العمل.</td><td>برنامج أو محرر ملفات يكتب ذلك الملف بشكل صريح.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>كتابة ملف JSON عادي</h3>
+        <p>افتح <strong>✎ القلم</strong> في <code>write_shared</code>، وتحقق من <strong>كود → JS - JavaScript</strong>، ثم قم بتشغيلها. يقرأ هذا آخر مخرجات نصية للخلية المنتجة ويحفظها كملف نصي JSON مشترك. وينشئ نظام الملفات المشترك المجلدات الأصلية حسب الحاجة.</p>
+        <pre><code data-cell-example="write_shared">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+window.sharedVFS.writeFile('/shared/data/named-cell-tutorial/values.json', text, 'javascript');
+console.log('Saved JSON to /shared/data/named-cell-tutorial/values.json');</code></pre>
+        <p>النتيجة هي <strong>ملف منفصل يحتوي على نسخة</strong> من مخرجات JSON، وليس اسماً آخر لـ <code>/nb/numbers/.output</code>. ويحافظ المجلد المخصص على بقاء ملف المسودة الصغير الخاص بالمثال منفصلاً عن بياناتك الأخرى؛ وتؤدي إعادة تشغيل <code>write_shared</code> إلى الكتابة فوق ملف هذا الدرس تحديداً.</p>
+        <h3>قراءة الملف من برنامج مختلف</h3>
+        <p>افتح <strong>✎ القلم</strong> في <code>read_shared</code>، وتحقق من <strong>كود → JS - JavaScript</strong>، ثم قم بتشغيلها. يقرأ هذا البرنامج المستقل الملف المحفوظ، وليس خلية <code>numbers</code>:</p>
+        <pre><code data-cell-example="read_shared">const text = window.sharedVFS.readFile('/shared/data/named-cell-tutorial/values.json', 'utf8');
+if (!text) throw new Error('Run write_shared first.');
+const record = JSON.parse(text);
+console.log(record.values.reduce((sum, value) =&gt; sum + value, 0));</code></pre>
+        <p>توقع <code>16</code>. يقرأ الأمر الصريح <code>'utf8'</code> بايتات الملف كنص لتحليله عبر JSON. وتمتلك كل نواة واجهة API خاصة بها للملفات: حيث تستخدم JavaScript الأداة المساعدة لنظام الملفات المشترك هنا؛ ويمكن لـ Python استخدام <code>open(...)</code>، كما هو موضح في الخطوة الاختيارية أدناه. ولا يعد هذا نظام ملفات كاملاً لنظام تشغيل.</p>
+        <p>لإجراء فحص منفصل عابر للغات، يمكنك إضافة خلية جديدة <strong>كود → Bash</strong> وتشغيل هذا الأمر. حيث يقرأ الملف العادي نفسه ويطبع <code>{"values":[3,5,8]}</code>:</p>
+        <pre><code>cat /shared/data/named-cell-tutorial/values.json</code></pre>
+        <h3>عرض الملف نفسه في واجهة المستخدم الرسومية للملفات</h3>
+        <ol class="lesson-steps">
+          <li>افتح <strong>☰ القائمة → الملفات والتخزين</strong>.</li>
+          <li>ابحث عن المجلد المشترك <code>data</code>، ثم <code>named-cell-tutorial</code> و<code>values.json</code>. حدد الملف لعرض نص JSON الخاص به.</li>
+          <li>تحقق من أنه يحتوي على <code>{"values":[3,5,8]}</code>، ثم أغلق ”الملفات وسعة التخزين“ للمتابعة مع دفتر العمل.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-shared-values.png" alt="لقطة شاشة لمتصفح ضيق لشاشة ”الملفات وسعة التخزين“ في SciREPL Free تُظهر ملف values.json المنسوخ ومحتوى JSON الخاص به." loading="lazy" decoding="async">
+          <figcaption>إن إجراء نسخ متعمد إلى نظام الملفات المشترك يجعل بيانات JSON متاحة في واجهة المستخدم الرسومية للملفات. ولا تسرد شاشة نسخة Free المفحوصة مسار <code>/nb/</code> نفسه. لقطة متصفح لـ SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-shared-values.png">عرض لقطة شاشة المتصفح الكاملة للملف المشترك</a>
+        </figure>
+        <p class="callout"><strong>لا يتم تحديث النسخة تلقائياً.</strong> يؤدي تغيير أو إعادة تشغيل <code>numbers</code> إلى تغيير أحدث مخرجات للخلية، وليس ملف <code>values.json</code> الموجود. أعد تشغيل <code>write_shared</code> لتحديث النسخة، ثم <code>read_shared</code> لإعادة الحساب منها. ويتم الاحتفاظ بالملفات في سعة التخزين المحلية للتطبيق/المتصفح، ولكن مسح تلك السعة أو إلغاء تثبيت التطبيق قد يؤدي إلى حذفها. ولا يعد الحفظ المحلي نسخة احتياطية؛ لذا قم بتصدير الملفات التي تحتاج إلى الاحتفاظ بها.</p>
+        <p>لعرض الملفات المشتركة وتحريرها وتصديرها، راجع <a href="../../files-export/tutorial/#edit-file">الدليل الإرشادي لـ CSV والملفات وسعة التخزين</a>. لا يتضمن تصدير <code>.srwb</code> الخاص بدفتر العمل فقط الملفات المنفصلة مثل نسخة JSON هذه؛ استخدم <a href="../../files-export/tutorial/#export">تصدير أرشيف الحزمة</a> لتضمين دفتر العمل وملفات البيانات المحددة معاً.</p>
+      </section>
+
+      <section id="generate">
+        <p class="step-label">الخطوة 6</p>
+        <h2>توليد التعليمات البرمجية لخلية أخرى، ثم تشغيلها بنفسك</h2>
+        <p>حتى الآن قرأ Bash مخرجات JavaScript. والآن سيستخدم JavaScript نص JSON نفسه لحساب المجموع، وكتابة برنامج Bash قصير داخل الخلية <em>الموجودة</em> <code>bash_report</code>. وتعد كتابة التعليمات البرمجية وتشغيلها إجراءين منفصلين.</p>
+        <ol class="program-flow" aria-label="تدفق البيانات والتعليمات البرمجية المولدة">
+          <li><code>numbers</code><span>تشغيل → نص JSON</span></li>
+          <li><code>generate_report</code><span>قراءة JSON → كتابة مصدر Bash</span></li>
+          <li><code>bash_report</code><span>فحص → تشغيل يدوياً</span></li>
+        </ol>
+        <p class="callout"><strong>تستبدل عملية الكتابة هذه المصدر.</strong> استخدم خلية المسودة <code>bash_report</code> المرفقة، وليس خلية تحتوي على عمل تحتاج إلى الاحتفاظ به. أنشئ نسخة احتياطية قبل تجربة عمليات الكتابة في المصدر في دفتر العمل الخاص بك. لا تكتب فوق المولد نفسه أو تغير <code>.language</code> برمجياً في هذا التمرين.</p>
+        <ol class="lesson-steps">
+          <li>تحقق من وجود <code>bash_report</code> وأن لغتها هي <strong>Bash</strong>. ومصدرها الأولي معروض أدناه؛ لا تقم بتشغيلها بعد.</li>
+          <li>افتح <strong>☰ القائمة → الإعدادات → VFS لدفتر الملاحظات</strong>. يجب تحديد <strong>السماح للخلايا بتعديل خلايا أخرى</strong> لإجراء كتابة المولد. وهو مفعل افتراضياً في الإصدار المفحوص، ولكن تحقق من الإعداد لديك. وأنت <em>لا</em> تحتاج إلى تمكين القراءة عبر دفاتر الملاحظات، أو الكتابة عبر دفاتر الملاحظات، أو التنفيذ البرمجي. أغلق الإعدادات.</li>
+          <li>افتح <strong>✎ القلم</strong> في <code>generate_report</code>، وتحقق من <strong>كود → JS - JavaScript</strong>، ثم قم بتشغيلها.</li>
+        </ol>
+        <pre><code data-cell-example="generate_report">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+const data = JSON.parse(text);
+const total = data.values.reduce((sum, value) =&gt; sum + value, 0);
+const updated = window.notebookVFS.writeFile(
+  '/nb/bash_report/.code', `echo "Total: ${total}"`
+);
+if (!updated) throw new Error('Check bash_report exists and cell writes are allowed.');
+console.log('Updated bash_report source; inspect it, then run it yourself.');</code></pre>
+        <p>تبدأ الخلية الهدف بهذا العنصر النائب:</p>
+        <pre><code data-cell-example="bash_report">echo "Run generate_report first"</code></pre>
+        <p>بعد نجاح المولد، يصبح مصدر <code>bash_report</code> هو <code>echo "Total: 16"</code>. ولم تقم عملية الكتابة بـ <strong>تشغيل Bash</strong>. افتح <strong>✎ القلم</strong> لتلك الخلية لتفحص المصدر الجديد، ثم اضغط على الزر <em>الخاص بها</em> <strong>▶ تشغيل</strong>. توقع <code>Total: 16</code>.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-generated-report.png" alt="لقطة شاشة لمتصفح ضيق لـ SciREPL Free تعرض مصدر Bash المولد echo Total: 16 في bash_report وTotal: 16 بعد تشغيل يدوي." loading="lazy" decoding="async">
+          <figcaption>لا تزال الخلية الهدف خلية Bash. وقد وفّر JavaScript مصدرها؛ بينما أنتج إجراء <strong>▶ تشغيل</strong> المنفصل الذي قمت به المخرجات الموجودة أسفلها. لقطة متصفح لـ SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-generated-report.png">عرض لقطة شاشة المتصفح الكاملة للتقرير المولد</a>
+        </figure>
+        <p>يُرجع <code>readFile(...)</code> نصاً؛ بينما تُرجع الخلية أو الخاصية غير المعروفة <code>null</code>. ويفيد <code>writeFile(...)</code> بما إذا كانت الكتابة قد نجحت. وتؤدي عمليات الفحص في المولد إلى إيقافه إذا لم يكن لدى الخلية المنتجة أي مخرجات أو إذا تعذرت الكتابة في الوجهة. وتتحسس الأسماء لحالة الأحرف: لذا احتفظ بالتهجئة الدقيقة.</p>
+      </section>
+
+      <section id="update">
+        <p class="step-label">الخطوة 7</p>
+        <h2>تغيير البيانات وتحديث كل خطوة تابعة</h2>
+        <ol class="lesson-steps">
+          <li>قم بتحرير <code>numbers</code> باستخدام <strong>✎ القلم</strong> الخاص بها. غيّر <code>[3, 5, 8]</code> إلى <code>[4, 5, 8]</code>، ثم شغّل تلك الخلية. يحتوي JSON الخاص بها الآن على <code>4</code>.</li>
+          <li>انظر إلى <code>bash_report</code> قبل تشغيل أي شيء آخر. يظل مصدرها ومخرجاتها السابقة دون تغيير: فلا يوجد تحديث تلقائي للتبعيات.</li>
+          <li>أعد تشغيل <code>generate_report</code>. يؤدي هذا إلى تغيير مصدر التقرير إلى <code>echo "Total: 17"</code>، ولكن يمكن أن تظل مخرجاته القديمة <code>Total: 16</code> مرئية.</li>
+          <li>تفحص <code>bash_report</code> وأعد تشغيلها. الآن أصبحت مخرجاتها <code>Total: 17</code>.</li>
+          <li>قبل تحديث الملف، أعد تشغيل <code>read_shared</code>: فما زالت تعرض <code>16</code> من نسخة JSON الأقدم. والآن أعد تشغيل <code>write_shared</code>، ثم <code>read_shared</code>؛ حيث يُظهر مسار الملف أيضاً <code>17</code>. أعد فتح <code>values.json</code> في ”الملفات وسعة التخزين“ لتفحص الملف الذي تم تغييره.</li>
+        </ol>
+        <p class="callout"><strong>المصدر والمخرجات والملفات المنسوخة أشياء مختلفة.</strong> أنهِ تحرير المصدر المفتوح باستخدام زر <strong>▶ تشغيل</strong> الخاص بتلك الخلية قبل الخلايا المستهلكة لها؛ فمسودة المحرر غير المحفوظة ليست هي <code>.code</code> المخزن. ولا تنفذ عملية كتابة المصدر الخلية الوجهة، كما أن الملف المنسوخ لا يتبع التغييرات اللاحقة. اتبع الترتيب الصريح: الخلية المنتجة → المولد → التقرير. ولا تعد المخرجات القديمة المرئية دليلاً على تشغيل المصدر الحالي.</p>
+        <p>قم بتصدير دفتر العمل للاحتفاظ بتعديلات المصدر والأسماء. ويؤدي الاستيراد العادي في <code>.srwb</code> حالياً إلى تجاهل مخرجات التعليمات البرمجية المحفوظة، لذا بعد إعادة الفتح، أعد تشغيل <code>numbers</code> قبل الخلايا القارئة له، ثم المولد والتقرير. وتتطلب ملفات البيانات المشتركة المنفصلة تصدير ملف أو حزمة. راجع <a href="../../../files-export/">مرجع الملفات والتصدير<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>.</p>
+      </section>
+
+      <section id="python">
+        <p class="step-label">اختياري</p>
+        <h2>قراءة كلا المسارين من Python</h2>
+        <p>يمكنك التوقف هنا دون بدء Python. ولتجربة لغة ثالثة، شغّل أولاً <code>numbers</code> و<code>write_shared</code>، ثم تفحص <code>python_total</code> وشغّلها كـ <strong>كود → Python</strong>:</p>
+        <pre><code data-cell-example="python_total">import json
+record = json.loads(nb_read('numbers', '.output'))
+print('Cell output:', sum(record['values']))
+with open('/shared/data/named-cell-tutorial/values.json') as source:
+    saved = json.load(source)
+print('Shared file:', sum(saved['values']))</code></pre>
+        <p>توقع ظهور <code>Cell output: 16</code> و<code>Shared file: 16</code> للبيانات الأصلية، أو <code>17</code> في كلا السطرين بعد تحديث كلا المسارين في الخطوة 7. وفي Python، يقرأ <code>nb_read('numbers', '.output')</code> آخر مخرجات نصية للخلية المسماة. ويقرأ الكود المنفصل <code>open(...)</code> الملف المشترك باستخدام بنية ملفات Python المعتادة. وتقوم وحدة <code>json</code> القياسية بتحليل كليهما؛ دون الحاجة إلى <code>%pip install</code>. وإذا تم تحديث الخلية المنتجة فقط، فقد يختلف الإجماليان.</p>
+        <p>عند الاستخدام الأول، قد يحتاج Python إلى التهيئة أو تنزيل بيئة التشغيل الخاصة به. وقد يظهر إشعار الخصوصية/الشبكة اعتماداً على إصدارك وموافقتك الحالية؛ فاقرأه قبل الموافقة. هذه الخطوة الاختيارية غير مطلوبة لتمرين JavaScript/Bash، ولا يؤدي استيراد دفتر العمل المرفق بمفرده إلى بدء تشغيل Python.</p>
+      </section>
+
+      <section id="more">
+        <p class="step-label">متابعة الاستكشاف</p>
+        <h2>التعرف على النمط في دفاتر العمل الأخرى</h2>
+        <p>توفر الخلايا المسماة حداً بسيطاً للتوافق التشغيلي: حيث ينتج أحد البرامج نصاً، ويقرؤه برنامج آخر أو يستخدمه لتوليد المصدر. ويحتوي الدليل بالفعل على أمثلة أكبر لتفحصها:</p>
+        <ul>
+          <li>يقرأ <strong>تحليل متوسط العمر المتوقع</strong> ملفات CSV عادية من <code>/shared/data/</code> بلغة Python ولغة R: وهو مسار الملفات المشتركة، وليس قراءة الخلايا المسماة. حيث يقوم بتنزيل مجموعات البيانات ويستخدم الحزم؛ فاقرأ متطلبات الإعداد والموافقة الخاصة به قبل تشغيله.</li>
+          <li>يقرأ <strong>Prolog يولد R</strong> مصدر Prolog المسمى باستخدام <code>nb_read(..., '.code', ...)</code> ويكتب مصدر R المولد باستخدام <code>nb_write('r_factorial', '.code', ...)</code>. ويتم تشغيل خلية R بشكل منفصل.</li>
+          <li>يجمع <strong>Prolog يولد TypR</strong> بين التعريفات المولدة وخلية استعلام مسماة للمصدر فقط، ثم يكتب <code>typr_output</code>. ويمكن قراءة خلية <code>#!source</code> كمصدر دون تنفيذها.</li>
+        </ul>
+        <p>ابحث عن هذه العناوين في <strong>☰ القائمة → استعراض الحزم…</strong>. وهي للقراءة الإضافية، <strong>وليست أدلة إرشادية معتمدة للتنفيذ في هذا الدليل</strong>؛ إذ تختلف الإصدارات المتاحة واحتياجات الإعداد. وتتطلب دفاتر العمل التي تولد Prolog تثبيت تبعية <strong>unifyweaver-scirepl</strong> عبر Browse؛ فاستيراد دفتر عمل أولي بمفرده لا يثبت تلك التبعية. وبالنسبة لملف <code>.ipynb</code> المستورد يدوياً، تحقق أولاً من إيقاف <strong>القائمة → الإعدادات → الاستيراد والتحرير → تنفيذ الخلايا تلقائيًا عند استيراد المصنف</strong>، نظراً لأن عمليات استيراد Jupyter يمكنها تنفيذ التعليمات البرمجية في ظل هذا الإعداد. راجع <a href="../tutorial/">الدليل الإرشادي للاستعراض</a> و<a href="../import/">دليل الاستيراد اليدوي</a>.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">إذا بدا شيء ما غير صحيح</p>
+        <h2>التحقق من الاسم ودفتر العمل وترتيب التشغيل</h2>
+        <ul>
+          <li><strong>مربع حوار التسمية لا يفتح:</strong> انقر نقراً مزدوجاً أو اضغط مطولاً على <strong>تسمية In[…]</strong> للخلية المحفوظة، وليس على مصدرها أو مخرجاتها أو القلم. فالنقر المفرد ليس إيماءة التسمية.</li>
+          <li><strong>تعذر العثور على الخلية المنتجة:</strong> أبقِ <strong><bdi lang="en" dir="ltr">Named Cell Interop</bdi></strong> محدداً، واستعد الاسم الدقيق <code>numbers</code>، وتحقق من التهجئة وحالة الأحرف. ولا تؤدي إعادة التسمية إلى إعادة كتابة المسارات في الخلايا الأخرى.</li>
+          <li><strong>يقول المولد ”Run numbers first“:</strong> تفحص <code>numbers</code> وشغّلها. فالاستيراد أو مجرد تحرير مصدرها لا يملأ <code>.output</code>.</li>
+          <li><strong>فشل تحليل JSON:</strong> قارن الخلية المنتجة بالمثال الكامل. يجب أن تكون مخرجاتها بتنسيق JSON فقط، وليست عنواناً أو رسالة مطبوعة إضافية.</li>
+          <li><strong>تعذرت كتابة التقرير:</strong> تحقق من وجود خلية <code>bash_report</code> الحالية في دفتر العمل هذا ومن تحديد <strong>السماح للخلايا بتعديل خلايا أخرى</strong>. لا تقم بتمكين التنفيذ البرمجي لحل مشكلة كتابة المصدر.</li>
+          <li><strong>لا يزال التقرير 16:</strong> بعد تحرير البيانات، شغّل <code>numbers</code>، ثم <code>generate_report</code>، ثم <code>bash_report</code>. وحدّث الملف المنسوخ بشكل منفصل باستخدام <code>write_shared</code>، ثم أعد تشغيل <code>read_shared</code>.</li>
+          <li><strong>لا يمكنك العثور على /nb في ”الملفات وسعة التخزين“:</strong> تُظهر تلك الشاشة الملفات المشتركة، وليس نقطة وصل الخلايا الافتراضية هذه في الإصدار الذي تم التحقق منه. شغّل <code>write_shared</code> وابحث بدلاً من ذلك عن نسختها المتعمدة في <code>values.json</code>.</li>
+        </ul>
+        <p>يشرح <a href="../../interface/tutorial/">الدرس التعليمي لواجهة دفتر العمل الأول</a> الرأس وقلم الخلية المحفوظة؛ بينما يوضح <a href="../graphics/">الدرس التعليمي للرسومات</a> طرقاً أخرى يمكن للخلية من خلالها إنتاج نتيجة.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>مساعدة SciREPL</span><nav aria-label="التنقل في تذييل الصفحة"><a href="../../../workbooks/">مرجع دفاتر العمل<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a><a href="../../../">كل المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a></nav></footer>
+</body>
+</html>

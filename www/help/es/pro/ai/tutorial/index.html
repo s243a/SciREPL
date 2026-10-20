@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="es" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Una guía paso a paso de SciREPL Pro: sugerencias de tabla sin coste de API, configuración de clave de API, el ajuste preestablecido de agente Open, completado en línea y local, y celdas AI Prompt dirigidas.">
+  <meta name="theme-color" content="#06101d">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/es/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../styles.css">
+  <link rel="stylesheet" href="../../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../../pro/ai/tutorial/tutorial.css">
+  <title>IA y completado, paso a paso · Ayuda de SciREPL Pro</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../tutorial-locales.css">
+</head>
+<body data-editions="pro" data-platforms="android windows-preview">
+  <a class="skip-link" href="#main">Saltar al contenido</a>
+  <header class="site-header">
+    <a class="brand" href="../../../../">sci<span>REPL</span> Help<span class="english-reference"> (Página de referencia en inglés)</span></a>
+    <nav aria-label="Navegación principal">
+      <a href="../../../tutorials/">Todos los tutoriales</a>
+      <a href="../../../../pro/ai/">Referencia de IA<span class="english-reference"> (Página de referencia en inglés)</span></a>
+      <a href="../../../../pro/">Ayuda de Pro<span class="english-reference"> (Página de referencia en inglés)</span></a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Idioma del tutorial"><details class="tutorial-language-menu"><summary>Idioma del tutorial: <bdi>Español</bdi></summary><nav aria-label="Idioma del tutorial"><a href="../../../../en/pro/ai/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../../ar/pro/ai/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../../bn/pro/ai/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../../de/pro/ai/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="./" lang="es" hreflang="es" aria-current="page">Español</a>
+      <a href="../../../../fr/pro/ai/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../../hi/pro/ai/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../../id/pro/ai/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../../ja/pro/ai/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../../ko/pro/ai/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../../pt-BR/pro/ai/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../../ru/pro/ai/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../../zh/pro/ai/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutorial traducido automáticamente; la revisión por un hablante nativo está pendiente. El código y los valores técnicos no han cambiado. Las capturas de pantalla muestran la interfaz original en inglés; haz coincidir los nombres de los controles traducidos en este texto con tu aplicación.</p></aside>
+    <p class="breadcrumbs"><a href="../../../../">Ayuda<span class="english-reference"> (Página de referencia en inglés)</span></a> / <a href="../../../../pro/">Pro<span class="english-reference"> (Página de referencia en inglés)</span></a> / IA y completado</p>
+    <article>
+      <p class="eyebrow">Aprender haciendo · Pro</p>
+      <h1>De sugerencias sin conexión a programación asistida por IA</h1>
+      <p class="lede">Comience con sugerencias rápidas basadas en tablas que no tienen coste por solicitud. A continuación, configure el Asistente, solicite alternativas en línea, pruebe un modelo en el dispositivo y finalice con celdas AI Prompt dirigidas que expliquen su código.</p>
+      <ul class="meta">
+        <li class="chip chip-pro">Solo Pro</li>
+        <li class="chip">Pro 1.4.0 + próximos controles de ejecución</li>
+        <li class="chip">Modelo local: Android</li>
+      </ul>
+      <p class="screen-note">La mayoría de las capturas de pantalla muestran la aplicación para Android; algunas son capturas del navegador. Los diseños pueden variar según la versión de su aplicación.</p>
+      <p class="callout"><strong>Compruebe su versión.</strong> Los cambios de ejecución en el <a href="#execution-permissions">apéndice</a> están previstos para la <strong>propuesta de Pro 1.5.0</strong>, que <strong>aún no se ha publicado</strong>; el número de versión final puede cambiar.</p>
+      <p class="callout"><strong>«Free» aquí significa sin cargos de API.</strong> Las sugerencias de tabla y el modelo en el dispositivo no facturan a un proveedor. Eso no las convierte en funciones de la edición Free: este recorrido es para <strong>SciREPL Pro</strong>. Las solicitudes en línea utilizan su propia cuenta de proveedor y pueden costar dinero.</p>
+      <nav class="lesson-nav" aria-label="Pasos de la guía de IA y completado">
+        <strong>En esta lección</strong>
+        <ol>
+          <li><a href="#tables">Comenzar con sugerencias de tabla sin conexión</a></li>
+          <li><a href="#key">Guardar una clave de API</a></li>
+          <li><a href="#agent">Crear un pequeño ejemplo con el ajuste preestablecido de agente Open</a></li>
+          <li><a href="#online">Solicitar completados basados en API</a></li>
+          <li><a href="#local">Probar el modelo en el dispositivo</a></li>
+          <li><a href="#prompt-cells">Usar una celda AI Prompt para entender el código</a></li>
+        </ol>
+        <p><a href="../../../tutorials/">Elegir otro tutorial</a> · <a href="#troubleshooting">Si algo no funciona</a></p>
+      </nav>
+
+      <section id="tables">
+        <p class="step-label">Paso 1 · No se necesita clave de API</p>
+        <h2>Comenzar con sugerencias de tabla sin conexión</h2>
+        <p>Busque <strong>☰ Menú</strong> en el encabezado de la aplicación: es el botón con <strong>tres líneas horizontales</strong>. Abra <strong>Completado</strong>. Su selector de <strong>Sección</strong> separa <strong>General</strong>, <strong>Sugerencias de IA (en línea)</strong> y <strong>Modelo local (en el dispositivo)</strong>. Comience con General.</p>
+        <ol class="lesson-steps">
+          <li>Establezca <strong>Autocompletado de código local → Activado</strong>. El valor predeterminado <strong>Automático (activado en escritorio, desactivado en dispositivos táctiles)</strong> de lo contrario lo dejaría desactivado en un teléfono.</li>
+          <li>Establezca <strong>Chips de sugerencias → Activado</strong> y mantenga <strong>Sugerencias → En el cursor</strong>. Para aislar las tablas, establezca <strong>Sugerencias de IA → Desactivado</strong> en la sección en línea y <strong>Usar el modelo local → Desactivado</strong> en la sección local, si alguna de ellas estaba habilitada previamente. Vuelva a General.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-general" role="img" aria-label="Pantalla de completado General del navegador de Pro. Los bordes amarillos ubican los encabezados Ghost text y Suggestion chips, Suggestions: At cursor y Suggestion chips: On.">
+            <div class="shot-stage shot-stage--completion-general">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general.png" width="414" height="820" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general-overlay.svg" width="414" height="820" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Los controles reales de General en una <strong>captura de navegador estrecha, no una captura de pantalla de Android</strong>. Los bordes amarillos ubican <strong>Sugerencias → En el cursor</strong>, <strong>Chips de sugerencias → Activado</strong> y los títulos de sus secciones. El menú desplegable Sección está en la parte superior; los ajustes inferiores pueden requerir desplazamiento.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-general.png">Ver la captura completa de la configuración</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>Cierre Completado. En un nuevo libro de trabajo de práctica, elija una celda de <strong>Código</strong> y el lenguaje <strong>JavaScript</strong>. Escriba <code>cons</code>, con el cursor al final y sin selección. Estas primeras letras de <code>const</code> se denominan <strong>prefijo</strong>. Busque <code>const</code>.</li>
+          <li>En la captura de pantalla siguiente, <code>cons</code> va seguido de una tenue <code>t</code>—<strong>texto fantasma</strong> en línea. Toque <strong>Aceptar</strong> o presione <kbd>Tab</kbd> para insertar la sugerencia, lo que da como resultado <code>const</code>. Si en su lugar aparece un chip <code>const</code>, tocarlo es otra forma de aceptar ese candidato. Termine la línea usted mismo, por ejemplo <code>const values = [12, 15, 18];</code>.</li>
+        </ol>
+        <p class="callout"><strong>Aceptar no es Ejecutar.</strong> Aceptar una sugerencia edita el código fuente; no ejecuta la celda. Los ejemplos de JavaScript y Python de esta sección muestran el autocompletado durante la edición. La ejecución de estas celdas de práctica no forma parte de esta sección. Con solo la capa de tablas sin conexión habilitada, escribir un prefijo no envía una solicitud de API ni inicia un entorno de ejecución de lenguaje solo para generar sugerencias.</p>
+        <p class="note"><strong>Recuperación previa en línea futura:</strong> está planeado un modo opcional que podría enviar solicitudes al modelo mientras escribe. Aún no está disponible y no tiene asignado ningún número de versión. La afirmación anterior de no realizar solicitudes describe la capa actual de tablas sin conexión, no este modo futuro.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-javascript.png" width="1080" height="2340" alt="Detalle inferior del editor en una captura de pantalla real de Android Galaxy S24+: JavaScript cons seguido de una t tenue como texto fantasma y un botón Aceptar, con los chips de sugerencias habilitados y la fila de teclas adicionales oculta." loading="lazy" decoding="async">
+          <figcaption><strong>Vista de detalle de una captura de pantalla real de Android Galaxy S24+.</strong> El completado de tabla de JavaScript ofrece <code>const</code> para <code>cons</code>: la tenue <code>t</code> es texto fantasma, con <strong>Aceptar</strong> visible y los chips habilitados. La API y el modelo local están desactivados. La fila de teclas adicionales está oculta aquí para contrastar con la siguiente imagen; es un control opcional independiente, no un requisito para el completado.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-javascript.png">Ver la captura de pantalla completa sin modificar del teléfono del completado de JavaScript cons → const</a>
+        </figure>
+        <p><strong>Vea las dos visualizaciones sin conexión en un teléfono.</strong> Deje <strong>Chips de sugerencias → Activado</strong>, elija <strong>Python</strong> y escriba <code>pri</code>. El tenue <code>nt</code> después del cursor ofrece <code>print</code>; no forma parte de su código fuente hasta que lo acepte. <strong>No es necesario desactivar los chips para ver el texto fantasma.</strong> Un único candidato puede aparecer como texto fantasma, mientras que los chips ofrecen una opción cuando encajan varios candidatos. Mantenga <strong>Sugerencias de IA</strong> y <strong>Usar el modelo local</strong> desactivados para ambos ejemplos.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-ghost.png" width="1080" height="2340" alt="Detalle inferior del editor en una captura de pantalla de Android Galaxy S24+: código fuente de Python pri seguido del tenue texto fantasma nt y un botón Aceptar. Los chips de sugerencias están habilitados." loading="lazy" decoding="async">
+          <figcaption><strong>Vista de detalle de una captura de pantalla real de Android Galaxy S24+.</strong> El completado de tabla sin conexión ofrece un sufijo tenue en el cursor con <strong>Chips de sugerencias → Activado</strong>. La API y el modelo local están desactivados.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-ghost.png">Ver la captura de pantalla completa sin modificar del teléfono del texto fantasma</a>
+        </figure>
+        <p>Con los chips aún en <strong>Activado</strong>, reemplace la entrada de práctica con estas tres líneas, dejando el cursor después de <code>sample_m</code> sin terminar. La fila ofrece <code>sample_mean</code> y <code>sample_median</code> a partir de nombres en su propio código fuente. Toque un chip para elegir un candidato; a diferencia del texto fantasma, la fila muestra alternativas.</p>
+        <pre><code>sample_mean = 0
+sample_median = 0
+sample_m</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-chips.png" width="1080" height="2340" alt="Detalle inferior del editor en una captura de pantalla de Android Galaxy S24+: el código fuente de Python define sample_mean y sample_median, luego sample_m, con chips candidatos sample_mean y sample_median." loading="lazy" decoding="async">
+          <figcaption><strong>Vista de detalle de una captura de pantalla real de Android Galaxy S24+.</strong> Con los chips activados, los candidatos sin conexión derivados del código fuente ofrecen los dos nombres anteriores. La API y el modelo local permanecen desactivados.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-chips.png">Ver la captura de pantalla completa sin modificar del teléfono de los chips candidatos</a>
+        </figure>
+        <p>La <strong>fila de teclas adicionales</strong> visible en las imágenes del teléfono de Python y los <strong>colores de sintaxis al escribir</strong> son controles opcionales e independientes de Pro. Consulte el <a href="../../../interface/appearance/#pro-editor">Recorrido de apariencia: teclas adicionales y colores de sintaxis</a> para activar o desactivar cualquiera de los dos, y para encontrar la casilla de verificación de resaltado independiente del editor de archivos.</p>
+        <p>Después de probar estas visualizaciones de completado, vuelva a cambiar a <strong>JavaScript</strong> y deje los chips activados durante el resto de la lección.</p>
+        <p>Los chips sin conexión que se muestran aquí, habilitados en <strong>Completado → General → Chips de sugerencias</strong>, combinan tablas de nombres seleccionadas con información de código local. En Python, eso incluye variables y funciones encontradas en el código del libro de trabajo, así como nombres del kernel y atributos de objetos en caché, incluidos los métodos. La frecuencia y el historial de aceptación ayudan a clasificarlos. Otros lenguajes tienen una cobertura diferente: listas estáticas, definiciones no ejecutadas o instantáneas obsoletas pueden sugerir un nombre que actualmente no está disponible en el ámbito. El <strong>completado basado en tablas no es un modelo de lenguaje</strong> y no razona sobre su tarea.</p>
+        <p><strong>Solo al final de la celda</strong> es una alternativa si las sugerencias en medio de la celda le distraen. Una selección, cadena, comentario o nombre dividido a la mitad puede no generar sugerencias intencionadamente. En orientación horizontal de poca altura, las filas opcionales pueden desaparecer para dejar espacio al código; consulte la <a href="../../../interface/appearance/">Configuración de apariencia</a>.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-position">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-position.png" width="1080" height="2340" alt="Detalle de la pantalla real de Completado General de Android Galaxy S24+: el menú desplegable Sugerencias está abierto con En el cursor seleccionado y Solo al final de la celda debajo de él." loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Captura de pantalla real de Android Galaxy S24+.</strong> En <strong>Completado → General → Texto fantasma → Sugerencias</strong>, elija <strong>En el cursor</strong> o <strong>Solo al final de la celda</strong>. Esto último significa el final de <em>toda la celda</em>, no de cada línea. El menú desplegable expandido de Android cubre los ajustes de sangría cercanos; esos son controles independientes, no forman parte de esta elección.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-position.png">Ver la captura de pantalla completa sin modificar del teléfono del menú desplegable Sugerencias expandido</a>
+        </figure>
+      </section>
+
+      <section id="key">
+        <p class="step-label">Paso 2 · Configuración en línea</p>
+        <h2>Guardar una clave de API</h2>
+        <p>Una clave de API permite que SciREPL use una cuenta de proveedor que usted controla. Obtenga la clave de ese proveedor, consulte sus precios actuales y los límites de la cuenta, y use solo un libro de trabajo de práctica pequeño con datos no privados para esta lección.</p>
+        <ol class="lesson-steps">
+          <li>Abra <strong>Menú → 🤖 Asistente de IA (Pro)</strong>. En el panel, toque el <strong>⚙ engranaje</strong> para abrir Ajustes de IA.
+            <p class="callout"><strong>¿No ve el engranaje?</strong> El teclado puede desplazar el panel del Asistente. Arrastre el contenido del panel hacia abajo para volver a desplazarse hacia la parte superior y mostrar el engranaje; ocultar el teclado también puede dejarle más espacio.</p>
+          </li>
+          <li>Establezca <strong>Configurar modelo para → Asistente de IA</strong>. Elija un <strong>Backend</strong> (por ejemplo, OpenRouter) y un <strong>Modelo</strong>, y compruebe el punto de conexión si su backend utiliza uno configurable.</li>
+          <li>Introduzca la <strong>Clave API</strong> correspondiente. Use <strong>Claves guardadas</strong> para gestionar claves para otros pares de proveedor/punto de conexión. Una clave para un destino no es automáticamente una clave para otro.</li>
+          <li>Toque <strong>Guardar</strong>. Guardar la configuración por sí sola no realiza una solicitud al modelo. Mantenga el panel abierto para el siguiente paso.</li>
+        </ol>
+        <p class="callout"><strong>Mantenga la clave fuera del libro de trabajo.</strong> No la pegue en una celda, prompt, captura de pantalla ni archivo exportado. Las claves guardadas permanecen en el almacenamiento local de la aplicación/navegador, sin cifrado a nivel de aplicación; proteja el dispositivo y no ejecute código que no sea de confianza. La política de privacidad de <a href="../../../../../pro/privacy.html">Pro</a> explica qué se almacena y qué se envía.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--key-setup" role="img" aria-label="Ajustes de IA en el navegador de Pro sin clave. Los bordes amarillos identifican Configure model for: AI Assistant, Backend: OpenRouter, Model: GLM 5.3 Flash y el campo vacío API Key.">
+            <div class="shot-stage shot-stage--key-setup">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup.png" width="390" height="538" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup-overlay.svg" width="390" height="538" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Una captura nueva y <strong>sin clave en el navegador</strong> de Ajustes de IA, no una captura de pantalla de Android. Los bordes amarillos marcan los campos que se deben configurar: <strong>Configurar modelo para</strong>, <strong>Backend</strong>, <strong>Modelo</strong> y <strong>Clave API</strong>. El tenue <code>sk-…</code> es un marcador de posición, no una clave guardada. Desplácese más hacia abajo para llegar a <strong>Guardar</strong>; no se introdujo ninguna clave ni se envió ninguna solicitud para esta imagen.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-key-setup.png">Ver la captura de pantalla de configuración de IA sin modificar</a>
+        </figure>
+        <p>Un modelo de bajo coste y compatible con herramientas es un punto de partida sensato para el Asistente. Entre los ejemplos para comparar se incluyen <a href="https://openrouter.ai/z-ai/glm-5.3-flash">GLM 5.3 Flash</a>, <a href="https://developers.openai.com/api/docs/models/gpt-6-luna">GPT-6 Luna</a>, <a href="https://www.anthropic.com/claude/haiku">Claude Haiku 5.5</a> y <a href="https://api-docs.deepseek.com/quick_start/pricing">DeepSeek V4 Flash</a>. Los identificadores exactos de los modelos, las versiones disponibles, la compatibilidad con herramientas y los precios dependen de la versión de su aplicación y del proveedor; consulte el selector actual y la documentación del proveedor. Es posible que un modelo anunciado recientemente requiera una actualización de la aplicación antes de aparecer. Más adelante, podrá elegir un modelo económico diferente solo para completados.</p>
+        <aside class="callout" id="custom-model">
+          <p><strong>¿El modelo no aparece en la lista?</strong> En <strong>Configuración de IA → Configurar modelo para → Asistente de IA</strong>, elija primero el <strong>Backend</strong> correcto, luego introduzca el <strong>ID de modelo de API exacto</strong> del proveedor en <strong>O ingrese un ID de modelo personalizado</strong>, debajo del selector de Model, y toque <strong>Guardar</strong>. Este campo ya está disponible en Pro 1.4.0.</p>
+          <p>Verifique el ID con el proveedor seleccionado, no solo el nombre comercial del modelo. Para OpenRouter, incluya el prefijo de la organización; por ejemplo, <code>anthropic/claude-haiku-5.5</code> en <a href="https://openrouter.ai/anthropic/claude-haiku-5.5">su página de modelo</a>. Introduzca el ID, no la URL de esa página. El ID personalizado tiene prioridad sobre el menú desplegable; volver a elegir un modelo de la lista borra el campo personalizado.</p>
+          <p><strong>Un ID no añade compatibilidad con API.</strong> El modelo debe admitir llamadas a herramientas a través de la API que utiliza SciREPL. Compruebe el acceso del proveedor, la compatibilidad y los precios actuales; guardar no los valida ni realiza una solicitud al modelo.</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--custom-model" role="img" aria-label="Ajustes de IA en el navegador de Pro sin clave. Los bordes amarillos identifican Backend: OpenRouter y el campo de ID de modelo personalizado que contiene anthropic/claude-haiku-5.5, debajo del selector de Model.">
+            <div class="shot-stage shot-stage--custom-model">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model.png" width="390" height="456" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model-overlay.svg" width="390" height="456" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Una captura real <strong>sin clave en el navegador</strong>, no una captura de pantalla de Android. El borde amarillo debajo de Model ubica el campo de ID personalizado. El menú desplegable todavía muestra GLM 5.3 Flash, pero el ID de Haiku escrito tendría prioridad al pulsar Save. API Key y Save están debajo de este recorte; no se introdujo ninguna clave, no se pulsó Save y no se envió ninguna solicitud al modelo. Este es un ejemplo de configuración, no una prueba de que el modelo funcione.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-custom-model.png">Ver la captura de pantalla del modelo personalizado sin modificar</a>
+        </figure>
+      </section>
+
+      <section id="agent">
+        <p class="step-label">Paso 3 · Uso deliberado de herramientas</p>
+        <h2>Crear un pequeño ejemplo con el ajuste preestablecido de agente Open</h2>
+        <p><strong>Abierto</strong> es el ajuste preestablecido de seguridad <strong>segundo más permisivo</strong>, después de <strong>Control total</strong>. Permite modificaciones en el cuaderno por defecto, con menos solicitudes de confirmación que Cautious. Que la ejecución solicite confirmación depende de su versión y de la configuración de permisos; consulte el <a href="#execution-permissions">apéndice sobre la próxima aprobación de ejecución</a>. Úselo deliberadamente en un libro de trabajo de práctica, no como un requisito para el autocompletado.</p>
+        <ol class="lesson-steps">
+          <li>En Ajustes de IA, seleccione <strong>Nivel de seguridad → Open</strong> y <strong>Escritura del agente → Hoja de trabajo activa</strong>. Deje la exploración del código fuente desactivada y desactive <strong>Ejecutar automáticamente las celdas creadas por IA</strong>. En <strong>Kernels…</strong>, establezca <strong>JavaScript → Preguntar</strong>, luego guarde. Esta regla del kernel seguirá solicitando confirmación incluso si se guardó previamente un Permitir para la herramienta de ejecución.
+            <p class="callout" id="auto-run-warning"><strong>Desactivar la ejecución automática no es un bloqueo de ejecución.</strong> Evita que las celdas recién creadas se ejecuten automáticamente; no deshabilita las solicitudes independientes de <code>execute_cell</code> o <code>run_cells</code>. El valor predeterminado Open de Pro 1.4.0 publicado puede permitirlas sin preguntar. El próximo valor predeterminado Open preguntará, pero un Permitir explícito en la herramienta o el kernel puede cambiar ese valor predeterminado. <strong>Configuración de IA → Kernels… → JavaScript → Preguntar</strong> mantiene la ejecución de JavaScript de este ejercicio sujeta a confirmación. Su propia acción manual de Ejecutar en la celda sigue siendo una acción independiente. <a href="#execution-permissions">Los controles de ejecución del próximo lanzamiento se detallan en el apéndice.</a></p>
+            <aside class="callout" id="sandbox">
+              <p>Si prefiere más confirmación, use <strong>Cauteloso</strong> en su lugar. Open sigue respetando los controles independientes de exploración del código fuente y de alcance de escritura; Full control elude esos dos controles generales. Los permisos individuales y otras barreras de seguridad siguen siendo importantes. <strong>Revisión</strong> es una restricción adicional principalmente de solo lectura, que obstaculizaría esta demostración de creación de celdas.</p>
+              <h3>Qué protege —y qué no— el entorno aislado del navegador</h3>
+              <p>La ejecución habitual del libro de trabajo se realiza en el navegador/WebView y en sus entornos de ejecución de lenguajes, con un sistema de archivos virtual en lugar de un acceso sin restricciones a los archivos de su teléfono. Ese es un límite útil, <strong>no una garantía de que el código no pueda causar daños</strong>. El JavaScript permitido y los puentes hacia él pueden acceder a los datos de la aplicación y a las credenciales guardadas; las restricciones de red se aplican de la mejor manera posible una vez que se inicia el código permitido, no como un límite de aislamiento en el que deba confiar para guardar secretos. El próximo aviso de ejecución añade un paso de aprobación, no aislamiento respecto a los datos de la aplicación. Utilice un libro de trabajo de práctica y mantenga su contenido como no privado.</p>
+              <p><strong>El terminal remoto/MCP es diferente:</strong> puede exponer una shell real en el host intermediario, fuera del entorno aislado local del navegador. Mantenga Remote y Terminal desactivados aquí. Consulte <a href="../../../../pro/remote/">Acceso remoto y seguridad<span class="english-reference"> (Página de referencia en inglés)</span></a> antes de habilitarlos. Un cortés «no haga...» en el prompt no es un control de seguridad.</p>
+            </aside>
+          </li>
+          <li>En el panel del Asistente, elija <strong>Este libro de trabajo</strong>. Deje <strong>Review</strong>, <strong>Remote</strong>, y <strong>Terminal</strong> desactivados para este ejemplo directo con el proveedor.
+            <figure class="phone-figure" id="assistant-context-controls">
+              <p class="screen-note">Encabezado del panel</p>
+              <div class="shot-window shot-window--assistant-context-header" role="img" aria-label="Detalle superior del panel del Asistente de Android. Un borde amarillo resalta Este libro de trabajo seleccionado en el menú desplegable de conversación.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <p class="screen-note">Controles inferiores</p>
+              <div class="shot-window shot-window--assistant-context-footer" role="img" aria-label="Detalle inferior del mismo panel del Asistente de Android. Los bordes amarillos resaltan Review, Remote y Terminal, todos desactivados. El cuadro de mensaje vacío y el botón Enviar están visibles.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption><strong>Dos detalles de la misma captura de pantalla real de Android Galaxy S24+.</strong> Los bordes amarillos ubican <strong>Este libro de trabajo</strong> y <strong>Revisión</strong>, <strong>Remoto</strong> y <strong>Terminal</strong> (todos desmarcados). Se omite el centro vacío del panel. No se envió ningún prompt.</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-assistant-context.png">Ver la captura de pantalla completa sin modificar del panel del Asistente</a>
+            </figure>
+          </li>
+          <li>Envíe el prompt de práctica en el cuadro destacado a continuación. En el panel, <strong>Enviar</strong> ya inicia el bucle de herramientas del agente: aquí no hay ningún interruptor adicional de «Modo agente». El botón <strong>Agente</strong> del editor de pantalla completa es un flujo de trabajo independiente.
+            <div class="callout" id="assistant-practice-prompt">
+              <p><strong>Copie este prompt.</strong> Péguelo en el <strong>cuadro de mensaje del Asistente</strong>, no en una celda de código, y luego toque <strong>Enviar</strong>.</p>
+              <pre data-translatable-prompt="assistant-practice"><code>En este libro de trabajo de práctica, añada una explicación en Markdown seguida
+de una celda de JavaScript llamada summary_demo. Genere una matriz
+de entrada de 10 enteros pseudoaleatorios del 1 al 20 inclusive.
+Utilice el generador Park-Miller con un valor inicial de state de 42. Para cada
+valor, primero actualice state = (16807 * state) % 2147483647;
+luego agregue 1 + Math.floor(20 * state / 2147483647).
+Genere la matriz con esta regla; no codifique directamente sus valores
+ni utilice Math.random. Restablezca state a 42 en cada ejecución de la celda.
+Imprima la matriz de entrada generada, luego calcule su recuento (longitud
+de la matriz), media aritmética, mínimo y máximo. Imprima cada
+resultado en su propia línea etiquetada con console.log.
+Utilice matrices de JavaScript ordinarias, aritmética y Math.floor,
+sin paquetes.
+No ejecute celdas ni modifique las celdas existentes. No utilice archivos,
+almacenamiento, API del DOM ni solicitudes de red. Explique los resultados
+esperados para que pueda revisar el código.</code></pre>
+            </div>
+          </li>
+          <li>Lea la explicación propuesta y la nueva celda de <code>summary_demo</code>. Compruebe que genera la entrada utilizando la regla indicada y que calcula los resúmenes a partir de esa matriz. Ejecute esa celda usted mismo y luego compare con la comprobación siguiente. Los resultados esperados son recuento <strong>10</strong>, media <strong>9.3</strong>, mínimo <strong>1</strong>, máximo <strong>20</strong>.</li>
+        </ol>
+        <aside class="callout" id="seeded-summary-check">
+          <h3>Compruebe la entrada así como los resúmenes</h3>
+          <p>La semilla fija la secuencia, por lo que esta entrada de aspecto aleatorio es reproducible. Con la regla de actualización previa a la extracción anterior, espere:</p>
+          <pre><code>Input: [1, 11, 15, 6, 8, 4, 20, 11, 11, 6]
+Count: 10
+Mean: 9.3
+Minimum: 1
+Maximum: 20</code></pre>
+          <p>Las etiquetas de salida pueden diferir, pero los números deben coincidir. Ejecutar la celda nuevamente debería producir la misma entrada y los mismos resúmenes. Una semilla diferente cambia el ejercicio; este pequeño generador es para una demostración reproducible, no para aleatoriedad sensible a la seguridad.</p>
+        </aside>
+        <figure class="phone-figure" id="assistant-seeded-result">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/phone-agent-result.png" width="1080" height="2340" alt="Captura de pantalla real de Android Galaxy S24+ que muestra parte del código fuente revisado de JavaScript summary_demo y su salida con semilla: entrada 1, 11, 15, 6, 8, 4, 20, 11, 11, 6; recuento 10, media 9.3, mín 1, máx 20." loading="lazy" decoding="async">
+          <figcaption><strong>Captura de pantalla real de Android Galaxy S24+ del ejercicio de vector con semilla anterior.</strong> GLM 5.3 Flash creó las celdas de práctica, se detuvo en un límite de cuatro pasos y finalizó tras presionar <strong>Continuar</strong> una vez. El código se inspeccionó y ejecutó manualmente —no automáticamente por el agente— y produjo la entrada esperada, recuento 10, media 9.3, mínimo 1 y máximo 20. Una segunda ejecución manual reprodujo los mismos resultados. La captura de pantalla muestra la salida y parte del código fuente; desplácese hacia arriba en la celda para inspeccionar su semilla y las primeras líneas.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-agent-result.png">Ver la captura de pantalla completa del teléfono del código revisado y el resultado</a>
+        </figure>
+        <p><strong>Antes de Enviar:</strong> el Asistente incluye la conversación seleccionada y una vista previa acotada de las celdas del libro de trabajo actual (hasta los primeros 500 caracteres de cada celda, más metadatos). Las herramientas permitidas pueden enviar más. Desactivar la exploración del código fuente <em>no</em> impide que se envíen las vistas previas del libro de trabajo. Eso es diferente de la carga útil más pequeña de la celda actual utilizada por el completado a continuación. <a href="#planned-workbook-context">Los cambios planeados en el contexto del libro de trabajo se describen en el apéndice.</a></p>
+        <p><strong>¿Se detuvo con un botón Continuar?</strong> <strong>Límites del agente (por ejecución) → Pasos máximos</strong>, resaltado a continuación, controla el límite de pasos permitido para una ejecución acotada. El agente puede alcanzar ese límite antes de terminar. Lea lo que ya ha hecho y luego presione <strong>Continuar</strong> si la tarea no ha finalizado y desea otra ejecución acotada. Continuar puede generar más cargos de API; no es necesario después de <strong>Listo</strong>.</p>
+        <figure class="phone-figure" id="assistant-run-controls">
+          <div class="shot-window shot-window--assistant-open" role="img" aria-label="Ajustes de IA en el navegador de Pro con desplazamiento. Los bordes amarillos ubican Auto-run cells created by AI: desmarcado, Allow source browsing: desmarcado, Agent writes: Active worksheet, Max steps con una sugerencia predeterminada de 25, y Security Level: Open.">
+            <div class="shot-stage shot-stage--assistant-open">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open.png" width="390" height="1100" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open-overlay.svg" width="390" height="1100" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Ajustes de IA desplazados hasta ejecución y permisos. Los bordes amarillos identifican <strong>Ejecutar automáticamente las celdas creadas por la IA</strong> y <strong>Permitir exploración del código fuente</strong> (ambos desmarcados), <strong>Alcance de escritura del agente → Hoja de trabajo activa</strong>, <strong>Pasos máximos</strong> debajo de <strong>Límites del agente (por ejecución)</strong>, y <strong>Nivel de seguridad → Abierto</strong>. Esta <strong>captura del navegador es anterior a la actualización de consentimiento de ejecución</strong>; no es una solicitud al proveedor ni una prueba de seguridad. Su etiqueta Open describe los valores predeterminados anteriores y es más larga de lo que el menú desplegable estrecho puede mostrar. Los próximos cuadros de diálogo de aprobación y anulación no aparecen en la imagen.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-open.png">Ver la captura completa sin modificar de la configuración con desplazamiento</a>
+        </figure>
+      </section>
+
+      <section id="online">
+        <p class="step-label">Paso 4 · Solicite alternativas cuando las desee</p>
+        <h2>Solicitar completados basados en API</h2>
+        <ol class="lesson-steps">
+          <li>Abra <strong>Menú → Completado</strong>, luego elija <strong>Sección → Sugerencias de IA (en línea)</strong>. Establezca <strong>Sugerencias de IA → Al tocar</strong>.</li>
+          <li>Mantenga <strong>Modelo de completado → Seguir al Asistente de IA</strong> para heredar su proveedor, punto de conexión y modelo. O elija <strong>Elegir proveedor y modelo</strong>, seleccione un proveedor/punto de conexión guardado y un modelo de bajo coste adecuado para sugerencias cortas. No se introduce ninguna clave en esta pantalla; <strong>Abrir Ajustes de IA</strong> le permite añadir una primero.</li>
+          <li>Abra <strong>Avanzado</strong> en esta sección para inspeccionar el tiempo de espera de respuesta y los límites de protección de gasto. Los valores predeterminados son <strong>6 segundos</strong>, <strong>$0.25/día</strong> y <strong>$5/mes</strong>. Compruebe los precios antes de aumentarlos.</li>
+          <li>Vuelva a un editor de <strong>JavaScript</strong> e introduzca este fragmento de práctica:
+            <pre><code>const values = [12, 15, 18];
+const average = </code></pre>
+            Deje el cursor después de la línea <code>const average = </code> inacabada. Toque <strong>…</strong> al final de la fila de sugerencias, use la tecla adicional <strong>…AI</strong> o presione <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd>.</li>
+          <li>Revise la carga útil real y el destino de la primera solicitud antes de enviarla. Los chips de IA llevan un marcador <strong>✦</strong>. Toque uno para aceptarlo; un chip truncado o de varias líneas abre primero una vista previa. Revise el código fuente resultante antes de Ejecutar.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/completion-online.png" width="414" height="820" alt="Pantalla de completado en línea del navegador de Pro con Al tocar y Elegir proveedor y modelo, que explica que no hay claves de proveedor guardadas y ofrece Abrir Ajustes de IA." loading="lazy" decoding="async">
+          <figcaption>Una captura del navegador deliberadamente <strong>sin clave</strong> de los controles de modelo independiente. Su advertencia es real: sin una clave guardada y un destino válido, no se puede enviar nada. Su proveedor y modelo configurados aparecen aquí después del Paso 2.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-online.png">Ver la captura completa de la configuración en línea</a>
+        </figure>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-online-chips.png" width="1080" height="2340" alt="Detalle inferior del editor en una captura de pantalla de Android Galaxy S24+: la expresión de promedio de JavaScript sin terminar tiene dos chips de IA truncados, values.reduce y eval(values, cada uno marcado con una estrella." loading="lazy" decoding="async">
+          <figcaption><strong>Vista de detalle de una captura de pantalla real de Android Galaxy S24+ tras una solicitud de completado real.</strong> El completado utilizó <strong>Gemini 3.5 Flash-Lite a través de OpenRouter</strong> mientras el Asistente permanecía en <strong>GLM 5.3 Flash</strong>. Los dos chips ✦ están truncados; los resultados varían, por lo que debe inspeccionar la vista previa antes de aceptar.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-online-chips.png">Ver la captura de pantalla completa sin modificar del teléfono de los chips candidatos en línea</a>
+        </figure>
+        <p class="callout"><strong>Elija el código, no solo un chip de IA.</strong> En esta solicitud, el primer chip propuso <code>values.reduce((a, b) => a + b, 0) / values.length;</code>. Tóquelo para inspeccionar la vista previa completa: suma la matriz y la divide por su longitud, dando <strong>15</strong> para este ejemplo. El segundo propuso <code>eval(values.join(' + ')) / values.length;</code>. <strong>Rechace esa alternativa innecesaria de <code>eval</code></strong>: calcular una media no necesita convertir una cadena en código ejecutable. Compruebe el código devuelto antes de aceptarlo y pulse Ejecutar solo después de revisarlo.</p>
+        <figure class="phone-figure" id="online-completion-preview">
+          <div class="shot-window shot-window--completion-preview" role="img" aria-label="Detalle de Android Galaxy S24+ de la vista previa de sugerencia de IA: values.reduce((a, b) =&gt; a + b, 0) / values.length;, con los botones Cancelar e Insertar todo. Se omite el teclado. No se ha insertado ninguna sugerencia.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-preview.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>La vista previa completa del código en un Galaxy S24+.</strong> Una nueva solicitud de Gemini Flash-Lite devolvió la misma expresión <code>reduce</code>. <strong>Aceptar solo hasta una línea:</strong> para una sugerencia de varias líneas, toque o haga clic en la última línea que desee. Esto inserta inmediatamente todo desde la primera línea hasta esa línea, omitiendo las líneas posteriores. <strong>Insertar todo</strong> acepta toda la sugerencia; <strong>Cancelar</strong> no inserta nada. Este ejemplo es una sola línea de código, aunque se ajusta en pantalla, por lo que tocarla acepta toda la expresión. Aceptar edita el código fuente; no ejecuta la celda.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-preview.png">Ver la captura de pantalla completa sin modificar del teléfono de la vista previa de completado</a>
+        </figure>
+        <p>La solicitud pide hasta cinco alternativas, pero en su pantalla pueden caber menos. Otro toque primero pasa página entre las alternativas ya recibidas; una vez que se agotan, puede solicitar más. Toque mientras la solicitud gira para cancelarla. Las respuestas posteriores se descartan cuando expira el tiempo de espera, y escribir o mover el cursor hace que las sugerencias anteriores queden obsoletas.</p>
+        <p><strong>Independiente significa independiente:</strong> una elección de completado independiente permanece separada cuando cambia el modelo del Asistente. Esto resulta útil cuando desea un agente competente pero un autocompletado económico. Seguir al Asistente hereda su identidad, <em>no</em> su conversación ni los permisos del agente.</p>
+        <aside class="callout" id="completion-privacy">
+          <h3>Sepa qué está pagando y qué está enviando</h3>
+          <p>El completado en línea es <strong>a petición</strong>: la escritura habitual no envía nada. La <strong>recuperación previa al escribir</strong> aún no está disponible en este flujo de trabajo. El completado envía un contexto acotado de la celda actual: como máximo 1,500 caracteres antes del cursor, 200 después de él y hasta 12 nombres locales; no el chat del Asistente ni el libro de trabajo completo. El enmascaramiento de secretos se realiza con el mayor esfuerzo posible, por lo que debe revisar la carga útil usted mismo.</p>
+          <p><strong>Permitir siempre</strong> concede un consentimiento permanente para ese destino; un cambio de proveedor, punto de conexión o modelo volverá a preguntar. <strong>Enviar sin preguntar</strong> activa inicialmente esa opción, pero sigue mostrando la primera carga útil real una vez. Mantenga <strong>Preguntar cada vez</strong> mientras aprende.</p>
+          <p>Los importes por día/mes son <strong>límites de protección de gasto flexibles solo para completado</strong>, no límites de facturación garantizados por el proveedor ni el presupuesto para solicitudes del Asistente o de AI Prompt. Los fallos y cancelaciones pueden retener su cargo reservado. Borrar el historial de gastos no restablece los totales del límite. Un modelo sin precio indicado necesita límites de precio explícitos de entrada/salida, o la aplicación se negará a enviar.</p>
+        </aside>
+      </section>
+
+      <section id="local">
+        <p class="step-label">Paso 5 · Descarga opcional para Android</p>
+        <h2>Probar el modelo en el dispositivo</h2>
+        <p>El modelo opcional <strong>Qwen2.5-Coder 0.5B</strong> sugiere código localmente cuando las tablas no están seguras. Es un modelo pequeño de completado de código, <strong>no un sustituto del agente conversacional</strong>. Una vez instalado, la inferencia no envía código escrito a ningún proveedor y no tiene ningún cargo de API.</p>
+        <ol class="lesson-steps">
+          <li>En un teléfono Android compatible con Pro instalado desde <strong>Google Play</strong>, abra <strong>Menú → Completado → Sección → Modelo local (en el dispositivo)</strong>.</li>
+          <li>Toque <strong>Instalar</strong> y conceda tiempo y espacio de almacenamiento para la descarga de aproximadamente <strong>400 MB</strong>. Las instalaciones actuales descargadas externamente no pueden descargar el modelo a través de este flujo.</li>
+          <li>Cuando esté listo, mantenga <strong>Usar el modelo local → Cuando haya dudas</strong>. Las tablas responden a casos sencillos; el modelo contribuye cuando están indecisas. <strong>Siempre</strong> lo ejecuta con más frecuencia; <strong>Desactivado</strong> lo detiene sin eliminar la descarga.</li>
+        </ol>
+        <figure class="phone-figure" id="local-model-settings">
+          <div class="shot-window shot-window--local-model-settings" role="img" aria-label="Ajustes de Modelo local en Android Galaxy S24+. Los bordes amarillos ubican la sección Modelo local, Listo (398 MB en este dispositivo) y Usar modelo local: Cuando no esté seguro. El modelo ya instalado muestra Eliminar en lugar de Instalar.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-local-settings.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+              <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-local-settings-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Ajustes del modelo local en un Galaxy S24+.</strong> Los bordes amarillos ubican el selector de sección, el estado <strong>Listo</strong> del modelo y <strong>Usar el modelo local → Cuando haya dudas</strong>. Este teléfono ya dispone del modelo, por lo que aparece <strong>Eliminar</strong> en lugar de <strong>Instalar</strong>; no necesita eliminarlo. Esta imagen de compilación de depuración muestra los ajustes, no una prueba de entrega de Google Play.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-local-settings.png">Ver la captura de pantalla completa sin modificar del teléfono</a>
+        </figure>
+        <ol class="lesson-steps" start="4">
+          <li>Vuelva a una celda de código y haga una pausa en un nombre o línea inacabados. Los resultados varían según el contexto; no todas las pausas generan una sugerencia. Acepte un texto fantasma o un chip adecuado, inspeccione el código fuente y luego ejecute por separado.</li>
+        </ol>
+        <h3>¿Qué teléfono resulta cómodo?</h3>
+        <p>Los requisitos mínimos son <strong>Android ARM de 64 bits con al menos 4 GB de RAM</strong>, no una promesa de rendimiento fluido. Un <strong>teléfono de la clase Galaxy S24+</strong> es un objetivo práctico de comodidad: Samsung indica <strong>12 GB de RAM</strong> para el S24+, lo que deja más margen para la aplicación, los kernels y el modelo. Este es un nivel de rendimiento recomendado, no una obligación de comprar ese modelo. <a href="https://news.samsung.com/us/enter-new-era-of-mobile-ai-samsung-galaxy-s24-series/">Especificaciones de la serie S24 de Samsung</a>.</p>
+        <p>Un <strong>Galaxy S10+</strong> tiene variantes válidas de 8 GB o 12 GB. La experiencia informal del mantenedor es que el completado local puede funcionar allí, pero sentirse más lento que el completado por API; la comparación depende del modelo y de la red. <strong>La prueba de rendimiento registrada del motor local no midió el S10+</strong>, por lo que no es una comparación de velocidad medida ni una garantía para todos los terminales. Preste atención a posibles retrasos o a una aplicación que no responda cuando combine el modelo con libros de trabajo grandes y kernels que consuman mucha memoria. <a href="https://news.samsung.com/us/galaxy-s10-interactive/">Especificaciones de la serie S10 de Samsung</a>.</p>
+        <p>La prueba anterior del motor nativo en la clase S24+ midió una mediana en caliente para la primera palabra de alrededor de <strong>0.10 segundos</strong> y una mediana en frío para la primera palabra de alrededor de <strong>0.24 segundos</strong>, tras la carga. Estos son resultados de referencia de muestra, no garantías: una carga inicial sin caché tardó varios segundos. El modelo cargado añadió aproximadamente <strong>460–490 MB</strong> de memoria del proceso de la aplicación, <em>además de</em> WebView, los entornos de ejecución de Python/R y el sistema operativo.</p>
+        <p class="callout"><strong>Si un teléfono antiguo se vuelve lento:</strong> establezca <strong>Usar el modelo local → Desactivado</strong> y utilice en su lugar tablas o alternativas de API al tocar. En la sección local <strong>Avanzado</strong>, configurar <strong>Mantener cargado tras salir de la aplicación → 0</strong> lo libera cuando sale; los controles de descarga por inactividad y de batería baja también ayudan. Guarde/exporte su libro de trabajo antes de solucionar problemas. Un modelo sin coste de API sigue consumiendo almacenamiento, memoria y batería.</p>
+      </section>
+
+      <section id="prompt-cells">
+        <p class="step-label">Paso 6 · Comprenda el código a medida que lo crea</p>
+        <h2>Finalizar con una celda AI Prompt dirigida</h2>
+        <p>El Asistente es útil para tareas de varios pasos. Una celda <strong>AI Prompt</strong> es más adecuada para una pregunta pequeña y repetible sobre un fragmento de código concreto: realiza <strong>una sola solicitud aislada</strong>, sin el historial ni las herramientas del Asistente. Utilícela para preguntar por qué funciona un cálculo antes de ampliarlo.</p>
+        <p>Aquí volvemos a la celda del Paso 3 de <code>summary_demo</code> aleatorio con semilla. Solicitamos una explicación de ese cálculo existente: no otra matriz aleatoria ni el ejemplo de completado solo de promedio del Paso 4.</p>
+        <ol class="lesson-steps">
+          <li>Añada una celda <strong>AI Prompt</strong> inmediatamente después de la celda del Paso 3 de <code>summary_demo</code> JavaScript —no del fragmento solo de promedio del Paso 4— para que la pregunta que figura a continuación coincida con el código fuente seleccionado. Mantenga el tipo de celda como <strong>Código</strong>, luego elija <strong>AI Prompt</strong> en el <strong>menú desplegable de lenguajes/modos</strong>. Si no está presente, habilítelo en <strong>Menú → Lenguajes y modos</strong>.</li>
+          <li>Pegue el prompt siguiente en la <strong>celda AI Prompt</strong>, no en el cuadro de mensaje del Asistente. Abra su control <strong>Configurar</strong> .
+            <div class="callout" id="ai-prompt-practice-prompt">
+              <pre data-translatable-prompt="ai-explanation"><code>Explique la celda de JavaScript seleccionada línea por línea.
+¿Cómo determinan la regla del generador y la semilla 42 su matriz de entrada?
+¿Por qué debería reportar recuento 10, media 9.3, mínimo 1 y máximo 20?
+¿Por qué restablecer la semilla hace que el resultado sea repetible?
+Explique qué es necesario cambiar para una matriz vacía.
+Devuelva solo una breve explicación; no reescriba el código.</code></pre>
+            </div>
+            <div class="prompt-config-locations">
+              <figure class="phone-figure" id="ai-prompt-composer-controls">
+                <p class="screen-note"><strong>Editor de nueva celda</strong></p>
+                <div class="shot-window shot-window--ai-prompt-composer" role="img" aria-label="Editor de nueva celda de Android con AI Prompt seleccionado. Los bordes amarillos ubican su selector de lenguaje de IA y el botón Configurar junto al borrador.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Antes de guardar la celda:</strong> elija AI Prompt (mostrado como <strong>AI</strong>) y toque el <strong>Configurar</strong> resaltado del editor. Configura el nuevo prompt que está escribiendo.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png">Ver la captura de pantalla completa del editor</a>
+              </figure>
+              <figure class="phone-figure" id="ai-prompt-edit-controls">
+                <p class="screen-note"><strong>Celda existente durante la edición</strong></p>
+                <div class="shot-window shot-window--ai-prompt-edit" role="img" aria-label="Celda de AI Prompt guardada en Android en modo de edición. Un borde amarillo ubica Configurar en el encabezado de la celda encima del inicio del prompt.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Para una celda existente:</strong> toque <strong>Configurar</strong> en el encabezado de esa celda. Permanece disponible mientras edita el prompt. Ambos botones abren el mismo cuadro de diálogo de configuración; cambiar solo los ajustes no envía nada.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png">Ver la captura de pantalla completa de la edición de la celda</a>
+              </figure>
+            </div>
+          </li>
+          <li>Establezca <strong>Colocar respuesta final en → Salida de esta celda</strong>, el valor predeterminado. En <strong>Contexto para enviar → Incluir código fuente de</strong>, elija <strong>Celda 1 anterior</strong>. Desmarque <strong>Incluir texto de salida guardado</strong> para este ejercicio de solo código fuente. Compruebe que <strong>Vista previa del contexto</strong> lo mencione <code>summary_demo</code>, luego desplácese hacia abajo y toque <strong>Guardar configuración</strong>.
+            <figure class="phone-figure" id="ai-prompt-configuration">
+              <div class="shot-window shot-window--ai-prompt-config" role="img" aria-label="Cuadro de diálogo Configurar celda AI Prompt en Android. Los bordes amarillos ubican Salida de esta celda, Celda 1 anterior e Incluir texto de salida guardado desmarcado.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption>El cuadro de diálogo abierto por <strong>Configurar</strong>. Los bordes amarillos ubican el destino de la respuesta, <strong>1 celda anterior</strong> y la opción de salida guardada desmarcada. Envíe solo el código fuente de <code>summary_demo</code> precedente. <strong>1 celda anterior</strong> significa la celda inmediatamente anterior en el orden del libro de trabajo; no busca por nombre.</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png">Ver la captura de pantalla completa de la configuración</a>
+              <p class="screen-note">Desplácese hacia abajo en el cuadro de diálogo para llegar a <strong>Guardar configuración</strong>.</p>
+              <div class="shot-window shot-window--ai-prompt-config-save" role="img" aria-label="Parte inferior del cuadro de diálogo de configuración de AI Prompt en Android. Un borde amarillo ubica Guardar configuración junto a Cancelar.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png">Ver la captura de pantalla completa del cuadro de diálogo con desplazamiento</a>
+            </figure>
+          </li>
+          <li>Toque <strong>Ejecutar</strong> en la celda AI Prompt. Compruebe el contexto seleccionado en la revisión y luego elija <strong>Enviar al proveedor de IA</strong>. Lea la explicación junto al código fuente y compárela con los resultados conocidos.</li>
+        </ol>
+        <figure class="phone-figure" id="ai-prompt-explanation">
+          <div class="shot-window shot-window--ai-prompt-result" role="img" aria-label="Salida real de AI Prompt en Android de GLM 5.3 Flash. El extracto visible explica el generador con semilla, la longitud de la matriz, reduce, el mínimo y el máximo en summary_demo.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Una explicación real de GLM 5.3 Flash en el Galaxy S24+.</strong> Una sola solicitud de solo código fuente produjo esta respuesta en la salida de la celda AI Prompt; no modificó ni volvió a ejecutar la celda de JavaScript. La imagen muestra el comienzo de la explicación. Desplace la salida para continuar y compruebe la respuesta con el código fuente y los resultados esperados del Paso 3; una explicación de IA no es una garantía de corrección.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png">Ver la captura de pantalla completa de la explicación</a>
+        </figure>
+        <p class="callout"><strong>Una forma de controlar los costes de API y mejorar la comprensión.</strong> Un AI Prompt dirigido puede enviar menos contexto que una conversación de agente en continuo crecimiento y evitar un bucle de herramientas de varios pasos, lo que reduce los tokens de entrada y potencialmente la factura. Solicite razonamientos concisos, suposiciones y la salida esperada mientras programa. El ahorro <strong>no está garantizado</strong>: las tarifas del modelo, la longitud de la respuesta, los tokens de razonamiento y el contexto elegido siguen influyendo. Estas solicitudes utilizan el <strong>proveedor/modelo del Asistente</strong>, no el modelo de completado independiente, y quedan fuera de los límites de protección de gasto de completado.</p>
+        <div id="ai-prompt-apply-example">
+          <h3>Otro ejemplo · Revisar un gráfico antes de reemplazar una celda</h3>
+          <p>Ahora pida a un AI Prompt que escriba código en una celda <em>diferente</em>, con una revisión antes de reemplazar nada. Graficaremos cómo cambia la varianza estimada a lo largo de muchas muestras pequeñas. Se trata de muestras normales nuevas, no de la matriz de enteros anterior de <code>summary_demo</code>. El objetivo es aprender <strong>Configurar → vista previa → Aplicar → Ejecutar</strong>, no dominar la estadística.</p>
+          <p class="callout"><strong>La varianza no es la t de Student.</strong> Para muestras normales independientes de tamaño 10, <code>9s² / σ²</code> sigue una distribución chi-cuadrado con 9 grados de libertad. Aquí la varianza verdadera <code>σ² = 1</code>. En cambio, la t de Student describe la media muestral estandarizada <code>(mean − μ) / (s / √10)</code>, utilizando la desviación estándar estimada <code>s</code>; aquí también tiene 9 grados de libertad. <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda358.htm">NIST: varianza</a> · <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm">NIST: media</a>.</p>
+          <ol class="lesson-steps">
+            <li>En el libro de trabajo de práctica, cree una celda de <strong>JavaScript</strong> que contenga <code>// Reviewed plot code will go here.</code> Ejecute ese comentario inofensivo para guardar la celda. Mantenga presionada su etiqueta <strong>In[…] </strong> y asígnele el nombre <code>variance_plot</code>. Mantenga ese nombre único en el libro de trabajo; consulte <a href="../../../workbooks/named-cells/#name">asignar nombres a las celdas</a>.</li>
+            <li>Añada una celda independiente de <strong>AI Prompt</strong> y pegue esta solicitud en ella:
+              <div class="callout" id="ai-variance-practice-prompt">
+                <pre data-translatable-prompt="ai-variance"><code>Devuelva solo código fuente completo de JavaScript, sin bloques de código de Markdown.
+Cree un histograma reproducible de varianzas muestrales estimadas.
+Simule 2,000 muestras nuevas, cada una con 10 valores N(0,1) normales estándar.
+No reutilice la matriz de enteros anterior de summary_demo.
+Inicialice state = 42 una vez para toda la ejecución, no por muestra. Antes de cada extracción uniforme establezca state = (16807 * state) % 2147483647, luego u = state / 2147483647.
+Para cada extracción normal utilice dos uniformes sucesivas: sqrt(-2 * log(u1)) * cos(2 * PI * u2). No reutilice el resultado de seno sobrante ni use Math.random.
+Para cada muestra calcule su media, luego la varianza insesgada sum((x - mean)^2) / 9.
+Dibuje un histograma en canvas etiquetado con 40 intervalos de igual ancho desde 0 hasta 4. El eje horizontal es la varianza estimada; el eje vertical es el recuento de muestras.
+Marque la varianza poblacional verdadera 1 con una línea vertical etiquetada. Utilice un fondo claro, texto oscuro y etiquetas legibles.
+Imprima el tamaño de la muestra, las repeticiones, la semilla, la varianza estimada media, el total del histograma y cualquier recuento de desbordamiento. Cuente el desbordamiento por separado en lugar de ocultarlo.
+Muestre el canvas con window.renderImage(canvas.toDataURL("image/png")).
+No utilice paquetes, red, almacenamiento ni ediciones del libro de trabajo.</code></pre>
+              </div>
+            </li>
+            <li>Abra en el AI Prompt <strong>Configurar</strong>. Establezca <strong>Colocar respuesta final en → Vista previa de reemplazo para una celda</strong>, <strong>Lenguaje de la celda resultante → Conservar lenguaje de destino</strong>, <strong>Celda para reemplazar → Celda con nombre</strong>y <strong>Nombre de celda → variance_plot</strong>. En contexto, mantenga <strong>Incluir código fuente de → Ninguna otra celda (predeterminado)</strong>, luego <strong>Guardar configuración</strong>.
+              <figure class="phone-figure" id="ai-variance-configuration">
+                <div class="shot-window shot-window--ai-variance-config" role="img" aria-label="Cuadro de diálogo Configurar celda AI Prompt en Android. Los bordes amarillos ubican Vista previa de reemplazo para una celda, Conservar lenguaje de destino, Celda con nombre, variance_plot y Ninguna otra celda.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Reemplace solo tras revisar.</strong> Esta configuración real del S24+ selecciona la celda de JavaScript con nombre exclusivo <code>variance_plot</code>, conserva su lenguaje y omite otras celdas. Desplácese hacia abajo hasta <strong>Guardar configuración</strong>. Guardar por sí solo no envía nada; la siguiente Ejecución aún presenta la solicitud para su revisión.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png">Ver la captura de pantalla completa de la configuración de reemplazo</a>
+              </figure>
+            </li>
+            <li>Ejecute la celda <strong>AI Prompt</strong>. Revise lo que se enviará y luego elija <strong>Enviar al proveedor de IA</strong>. <strong>Ninguna otra celda</strong> excluye contexto adicional del libro de trabajo; el reemplazo sigue enviando el <strong>código fuente completo de la celda de destino</strong>. Aquí se trata únicamente de nuestro comentario inofensivo.</li>
+            <li>Lea la vista previa devuelta de <strong>Antes / Después</strong> . Compruebe el JavaScript completo: semilla 42, 2,000 muestras de 10, varianza dividida por 9, y sin operaciones inesperadas de red o almacenamiento. Elija <strong>Aplicar reemplazo</strong> solo si acepta ese código fuente; <strong>Cancelar</strong> lo deja <code>variance_plot</code> sin cambios. Aplicar edita la celda de destino pero <strong>no la ejecuta</strong>.
+              <figure class="phone-figure" id="ai-variance-approval">
+                <div class="shot-window shot-window--ai-variance-preview-start" role="img" aria-label="Vista previa de reemplazo Antes/Después en Android. Antes es el comentario inofensivo; Después comienza con el JavaScript generado con semilla 42 y el generador de muestras normales.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <p class="shot-detail-label"><strong>El código generado se encuentra en la vista previa de aprobación.</strong> Este es el inicio de la respuesta real de GLM 5.3 Flash; el destino todavía contiene solo nuestro comentario. Lea toda la sección Después, no solo las líneas que se muestran aquí.</p>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png">Ver la captura de pantalla completa del inicio de la vista previa</a>
+                <div class="shot-window shot-window--ai-variance-preview-apply" role="img" aria-label="Final de la misma vista previa de código generado en Android. Los bordes amarillos ubican Aplicar reemplazo y Cancelar; ninguna de las dos acciones ejecuta el código propuesto.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Desplácese hasta el final para aprobar o cancelar.</strong> Aplicar reemplazo modifica el código fuente de la celda con nombre; no lo ejecuta. La parte central de esta larga vista previa se omite en estas vistas de detalle. <a href="../../../../pro/ai/tutorial/assets/ai-variance-generated.js">Lea el código fuente generado completo</a>.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png">Ver la captura de pantalla completa de los controles de aprobación</a>
+              </figure>
+            </li>
+            <li>
+              <p class="callout"><strong>La revisión detectó una pequeña omisión.</strong> Esta respuesta del modelo finalizaba con una cadena de informe en lugar de imprimirla. Tras Aplicar, editamos únicamente ese informe final en <code>console.log(…)</code> antes de Ejecutar. Compruebe también su respuesta: una imagen por sí sola no muestra si los totales son correctos. <a href="../../../../pro/ai/tutorial/assets/ai-variance-reviewed.js">Lea el código fuente corregido que se ejecutó</a>.</p>
+              <p>Busque <code>variance_plot</code> y toque <strong>su propio botón Ejecutar</strong>. Cada barra del histograma cuenta estimaciones de varianza muestral, no observaciones individuales. Con el generador exacto anterior, espere una varianza estimada media cercana a <strong>0.9852</strong>, un total en el histograma de <strong>2,000</strong> y un desbordamiento de <strong>0</strong>. La varianza verdadera es 1; una simulación finita no tiene por qué promediar exactamente 1. Volver a ejecutar desde la semilla 42 debería reproducir el gráfico.</p>
+              <figure class="phone-figure" id="ai-variance-output">
+                <div class="shot-window shot-window--ai-variance-plot" role="img" aria-label="Gráfico real de Android tras una ejecución manual independiente: histograma de 2,000 estimaciones de varianza muestral a partir de muestras normales de tamaño 10. Una línea roja marca la varianza verdadera 1; la media impresa es 0.98521, el total del histograma 2000 y el desbordamiento 0.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Salida tras Aplicar, revisar y realizar una ejecución manual independiente en el S24+.</strong> El gráfico real y las comprobaciones impresas coinciden con el cálculo con semilla: varianza estimada media <strong>0.98521</strong>, total <strong>2,000</strong>, desbordamiento <strong>0</strong>. La línea roja es la varianza poblacional, no una curva ajustada. Su modelo puede formatear el código o el gráfico de forma diferente.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png">Ver la captura de pantalla completa del gráfico</a>
+              </figure>
+            </li>
+          </ol>
+          <p class="callout"><strong>Dos aprobaciones independientes:</strong> <strong>Enviar al proveedor de IA</strong> aprueba compartir la solicitud revisada. <strong>Aplicar reemplazo</strong> aprueba editar el código fuente de destino. Ninguna de las dos ejecuta el JavaScript propuesto. No elija <strong>Una nueva celda vinculada</strong> para esta demostración: esa opción inserta una celda de resultados sin ejecutar sin este paso de aprobación de reemplazo.</p>
+        </div>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>Si algo no funciona</h2>
+        <dl>
+          <dt><strong>No hay sugerencias sin conexión en un teléfono</strong></dt>
+          <dd>Elija General → Completado de código local → Activado en lugar de Automático. Compruebe los chips, la posición del cursor, el lenguaje y si la fila opcional tiene espacio.</dd>
+          <dt><strong>No hay solicitud en línea</strong></dt>
+          <dd>Compruebe Al tocar, la clave guardada para el proveedor/punto de conexión exacto, la entrada de precio o los límites de precio del modelo seleccionado, el consentimiento y los totales de gasto. Open no es obligatorio para el completado. Se requiere un contexto de navegador seguro y Web Locks; los contextos no admitidos rechazan las solicitudes.</dd>
+          <dt><strong>El Asistente pregunta antes de ejecutar una celda (o no pregunta)</strong></dt>
+          <dd>Compruebe la versión de su aplicación, los permisos de ejecución de Seguridad… y las reglas de Kernels…. El próximo valor predeterminado de Open es Preguntar; el valor predeterminado de Pro 1.4.0 puede permitir la ejecución. Desactivar la ejecución automática no es un Denegar en la herramienta de ejecución. Permitir siempre del completado en línea no concede permiso de ejecución de celdas; consulte <a href="#execution-permissions">aprobación de ejecución</a>.</dd>
+          <dt><strong>El completado no entiende otra celda</strong></dt>
+          <dd>Las alternativas en línea utilizan un contexto acotado de la celda actual, no el cuaderno completo. Utilice un AI Prompt con el código fuente seleccionado explícitamente, o el Asistente, cuando necesite una explicación más amplia.</dd>
+          <dt><strong>Instalar no está disponible</strong></dt>
+          <dd>El flujo del modelo local nativo está destinado a instalaciones compatibles de Android desde Google Play, no para versiones de escritorio/navegador ni para descargas externas actuales. Cumplir con el requisito mínimo de RAM no garantiza rapidez.</dd>
+          <dt><strong>La respuesta generada parece plausible pero es incorrecta</strong></dt>
+          <dd>Compárela con ejemplos pequeños conocidos. Compruebe importaciones, unidades, comportamiento ante entradas vacías y efectos secundarios antes de ejecutar. La respuesta de un modelo no es una prueba de corrección.</dd>
+        </dl>
+        <p><a href="../../../../pro/ai/">Referencia de flujos de trabajo y configuración de IA<span class="english-reference"> (Página de referencia en inglés)</span></a> · <a href="../../../../pro/remote/">Acceso remoto y seguridad<span class="english-reference"> (Página de referencia en inglés)</span></a> · <a href="../../../tutorials/">Todos los tutoriales</a></p>
+      </section>
+      <aside class="callout" id="execution-permissions" aria-labelledby="execution-appendix-title">
+        <h2 id="execution-appendix-title">Apéndice · Próxima aprobación de ejecución · propuesta de Pro 1.5.0</h2>
+        <p><strong>No publicado:</strong> estos controles describen la implementación de la próxima versión, no una promesa de que su instalación 1.4.0 disponga de ella. El número de versión es provisional.</p>
+        <ul>
+          <li><strong>Configuración de IA → Seguridad… → <code>execute_cell</code> / <code>run_cells</code></strong> ya ofrece <strong>Predeterminado / Permitir / Preguntar / Denegar</strong>. Esta actualización cambia el valor Predeterminado heredado de Open a <strong>Preguntar</strong>; Full control mantiene Permitir. Las reglas explícitas de herramientas o kernel pueden reemplazar los valores predeterminados heredados; cuando ambas son explícitas, prevalece la regla más segura. Deje Predeterminado o Preguntar mientras aprende. Permitir es una anulación, no un entorno aislado más estricto; las opciones Preguntar/Denegar del kernel, Revisión y la deshabilitación global de JavaScript siguen aplicándose.</li>
+          <li>Lea la solicitud de ejecución antes de elegir <strong>Ejecutar</strong>; deje <strong>Permitir la ejecución futura de celdas del Asistente sin preguntar</strong> desmarcado para aprobar únicamente esa solicitud. Marcarlo cambia la regla de la herramienta de ejecución compartida en <strong>todos los libros de trabajo</strong> hasta que se restablezca, no solo en esta celda, conversación o proveedor. Una regla explícita de Preguntar en el kernel oculta esa opción.</li>
+          <li>Los avisos de inspección del espacio de nombres y de celdas recién creadas <strong>no pueden crear esa concesión permanente</strong>. Un aviso de ejecución de celda creada incluye una vista previa acotada del código; una vista previa larga termina con puntos suspensivos. Si está truncada, elija Cancelar, inspeccione el código fuente completo de la celda recién creada y ejecútela usted mismo solo si confía en ella. Una autorización de ejecución guardada previamente aún puede permitir la ejecución automática de celdas creadas cuando Ejecución automática está activada, por lo que debe mantener Ejecución automática desactivada aquí.</li>
+          <li>Si selecciona un ajuste preestablecido distinto de Full control mientras un Permitir guardado para la herramienta de ejecución sigue vigente, una advertencia ofrece <strong>Restablecer a Predeterminado</strong>, <strong>Mantener Permitir</strong> o <strong>Cancelar</strong>. Restablecer restaura la regla de herramienta del ajuste preestablecido seleccionado sin borrar las anulaciones del kernel. Conservar mantiene la anulación. Cancelar restablece la selección del ajuste preestablecido anterior. Restablecer y Conservar permanecen como cambios en borrador hasta que guarde los Ajustes.</li>
+        </ul>
+        <p><strong>La aprobación de ejecución no es un permiso general para compartir datos.</strong> Las salidas de las herramientas de ejecución pueden volver al modelo del Asistente, y el código permitido puede utilizar la red. Las opciones de <strong>Permitir siempre</strong> del completado en línea, la revisión de contexto de AI Prompt y la declaración de privacidad de Remote/MCP permanecen independientes. La ejecución de cuadernos con MCP utiliza las mismas comprobaciones de ejecución; esas comprobaciones no aíslan la shell de Terminal de un intermediario.</p>
+      </aside>
+      <aside class="callout" id="planned-workbook-context" aria-labelledby="context-appendix-title">
+        <h2 id="context-appendix-title">Apéndice · Contexto e historial del libro de trabajo planificados</h2>
+        <p><strong>Solo propuesta de diseño:</strong> estas funciones no están implementadas ni asignadas a una versión. Son independientes de los próximos cambios de aprobación de ejecución mencionados anteriormente y no bloquean la versión actual.</p>
+        <ul>
+          <li><strong>Obtener un resumen del libro de trabajo cuando sea necesario.</strong> El plan reemplaza las vistas previas automáticas repetidas del código fuente con una herramienta de directorio de solo metadatos: nombres de celdas, descripciones opcionales, lenguajes y tipos, además de una revisión del libro de trabajo. La herramienta propuesta es <code>list_cells</code> con <code>view: "metadata"</code>; el Asistente leería el código fuente seleccionado por separado. Esta es una descripción general acotada, no una explicación de IA generada automáticamente.</li>
+          <li><strong>Adjuntar una vez en lugar de en cada Enviar.</strong> Una casilla de verificación propuesta <strong>Adjuntar resumen del libro de trabajo esta vez</strong> podría comenzar marcada para una conversación nueva y desmarcarse después de que ese archivo adjunto se envíe efectivamente. Podría desmarcarla antes de enviar o marcarla de nuevo para obtener una descripción general actualizada. Su valor predeterminado inicial aún necesita una revisión de privacidad y usabilidad. Las continuaciones no añadirían otro resumen, y cambiar de pestaña no la volvería a activar silenciosamente. La vista previa y los permisos existentes de lectura/privacidad seguirían aplicándose; un libro de trabajo grande podría requerir más páginas.</li>
+          <li><strong>Estar desmarcado no borra el historial.</strong> Detendría un nuevo archivo adjunto automático, no eliminaría los resúmenes que ya están en la conversación ni impediría las lecturas permitidas de herramientas. Los controles de contexto existentes de Agente a pantalla completa, AI Prompt y completado seguirían siendo independientes.</li>
+          <li><strong>Los cambios entre envíos son una opción posterior.</strong> Las actualizaciones compactas necesitarían una base de referencia conocida del contexto enviado y revisiones fiables. Las modificaciones humanas podrían resaltarse, pero las ediciones del agente, las importaciones y los cambios desconocidos también son importantes. Una edición del código fuente no reescribiría automáticamente la descripción de una celda; un historial faltante u obsoleto requeriría una descripción general nueva en lugar de una actualización estimada.</li>
+          <li><strong>El historial local opcional y la sincronización con GitHub son ideas a más largo plazo para Pro.</strong> Los puntos de control locales de Enviar podrían admitir diffs respaldados por Git sin compartir nada. La sincronización independiente podría publicar un libro de trabajo en un Gist o en un archivo seleccionado en un repositorio, con su propia vista previa de carga útil y autorización. Habilitar el historial no haría push a GitHub ni enviaría un diff a la IA. Git muestra cambios de contenido, no una prueba de que un humano los haya realizado.</li>
+        </ul>
+        <p><strong>Un Gist secreto no es privado.</strong> Cualquier persona con su URL puede leerlo; utilice un repositorio privado cuando el acceso deba ser restringido. Mantenga los secretos fuera del código fuente y de las descripciones del libro de trabajo antes de publicar. <a href="https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists/creating-gists">Documentación de visibilidad de Gists de GitHub</a>.</p>
+      </aside>
+    </article>
+  </main>
+  <footer class="site-footer">
+    <span>Ayuda de SciREPL Pro</span>
+    <nav aria-label="Navegación del pie de página">
+      <a href="../../../tutorials/">Todos los tutoriales</a>
+      <a href="../../../../pro/">Ayuda de Pro<span class="english-reference"> (Página de referencia en inglés)</span></a>
+      <a href="../../../../../pro/privacy.html">Privacidad de Pro</a>
+    </nav>
+  </footer>
+</body>
+</html>

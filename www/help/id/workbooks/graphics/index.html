@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="id" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Buat diagram Markdown statis, buat gambar dengan kanvas JavaScript, dan tulis persamaan KaTeX dalam buku kerja SciREPL tanpa menginstal paket.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/id/workbooks/graphics/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/graphics/tutorial.css">
+  <title>Gambar, diagram, dan persamaan · Bantuan SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/graphics/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/graphics/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/graphics/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/graphics/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/graphics/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/graphics/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/graphics/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/graphics/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/graphics/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/graphics/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/graphics/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/graphics/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/graphics/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/graphics/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Lompat ke konten</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+    <nav aria-label="Navigasi utama">
+      <a href="../../../workbooks/">Referensi buku kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+      <a href="../../tutorials/">Semua tutorial</a>
+      <a href="../../../">Semua bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+      <a href="../../../../">Buka PWA Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Bahasa tutorial"><details class="tutorial-language-menu"><summary>Bahasa tutorial: <bdi>Bahasa Indonesia</bdi></summary><nav aria-label="Bahasa tutorial"><a href="../../../en/workbooks/graphics/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/graphics/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/graphics/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/graphics/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/graphics/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/graphics/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/graphics/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="./" lang="id" hreflang="id" aria-current="page">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/graphics/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/graphics/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/graphics/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/graphics/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/graphics/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutorial hasil terjemahan mesin; peninjauan oleh penutur asli masih tertunda. Kode dan nilai teknis tidak diubah. Tangkapan layar menampilkan antarmuka asli bahasa Inggris; cocokkan nama kontrol yang diterjemahkan dalam teks ini dengan aplikasi Anda.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / <a href="../../../workbooks/">Buku Kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / Gambar, diagram, dan persamaan</p>
+    <article>
+      <p class="eyebrow">Belajar sambil mempraktikkan</p>
+      <h1>Tambahkan gambar, diagram, dan persamaan</h1>
+      <p class="lede">Buku kerja dapat menjelaskan suatu gagasan dengan gambar maupun kode. Coba tiga cara untuk menampilkan kerangka koordinat sederhana yang sama: gambar statis di Markdown, gambar yang digambar oleh JavaScript, dan persamaan yang diatur hurufnya dengan KaTeX. Anda tidak memerlukan Python, R, penginstalan paket, atau akun AI.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Alur kerja Free + Pro</li>
+        <li class="chip">Contoh yang diverifikasi di peramban</li>
+        <li class="chip">Sekitar 10 menit</li>
+      </ul>
+      <p class="screen-note">Contoh dan cuplikan layar diperiksa dalam <strong>build peramban SciREPL Free</strong> pada <time datetime="2026-10-06">6 Oktober 2026</time>. Cuplikan layar menggunakan viewport peramban yang sempit; tangkapan tersebut <strong>bukan tangkapan Android</strong>. Kontrol yang sama digunakan di Android, tetapi posisinya mungkin berbeda. Pro dan setiap versi aplikasi yang dirilis belum diuji untuk panduan ini.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Pilih metode yang sesuai dengan penjelasan Anda</caption>
+          <thead><tr><th scope="col">Yang Anda inginkan</th><th scope="col">Tipe sel</th><th scope="col">Yang membuat hasilnya</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Diagram atau gambar tetap</th><td>Markdown (<strong>Md</strong>)</td><td>SVG sebaris atau PNG tersemat, disimpan dalam teks sel</td></tr>
+            <tr><th scope="row">Gambar yang dihitung atau digambar oleh kode</th><td>Kode → JavaScript (<strong>JS</strong>)</td><td>Kanvas, ditampilkan dengan <code>window.renderImage(...)</code></td></tr>
+            <tr><th scope="row">Rumus atau matriks</th><td>Markdown (<strong>Md</strong>)</td><td>Matematika bergaya TeX di antara pembatas <code>$$</code>, yang dirender oleh KaTeX</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <nav class="lesson-nav" aria-label="Langkah-langkah panduan grafik">
+        <strong>Dalam pelajaran ini</strong>
+        <ol>
+          <li><a href="#open">Buka buku kerja contoh kecil</a></li>
+          <li><a href="#static">Simpan gambar statis di Markdown</a></li>
+          <li><a href="#canvas">Buat gambar dengan JavaScript</a></li>
+          <li><a href="#math">Tulis persamaan dengan KaTeX</a></li>
+          <li><a href="#save">Simpan dan buka kembali pekerjaan Anda</a></li>
+        </ol>
+        <p><a href="#troubleshooting">Jika hasilnya tidak muncul</a></p>
+        <p><a href="../../tutorials/">Semua tutorial</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">Langkah 1</p>
+        <h2>Buka buku kerja contoh</h2>
+        <p>File pendamping berisi contoh lengkap, termasuk PNG tersemat. File ini menyimpan semuanya dalam satu buku kerja kecil sehingga Anda tidak perlu mengetikkan string gambar Base64 yang panjang.</p>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/graphics/assets/workbook-graphics.srwb" download="workbook-graphics.srwb">Unduh buku kerja contoh grafik (.srwb)</a>. Simpan file sebenarnya, dengan tetap mempertahankan ekstensi <code>.srwb</code>-nya. Jika peramban Anda menampilkan teks, gunakan tindakan simpan/unduh peramban. Catat folder tempat Anda menyimpannya.</li>
+          <li>Buka SciREPL. Di <strong>header di bagian atas aplikasi</strong>, temukan <strong>☰ Menu</strong>, tombol dengan <strong>tiga garis horizontal</strong>. Ketuk atau klik tombol tersebut.</li>
+          <li>Pilih <strong>📂 Impor berkas (misalnya .srwb, .ipynb, .csv, .py, .zip)</strong>. Gulir <em>di dalam menu</em> jika diperlukan. Di pemilih file perangkat Anda, pilih <code>workbook-graphics.srwb</code> dari Unduhan atau folder yang Anda pilih.</li>
+          <li>Tutup menu jika tetap terbuka, dan pilih tab <strong>Workbook Graphics</strong> yang baru di pemilih buku kerja. Tab yang sudah ada tetap dipertahankan.</li>
+          <li>Temukan empat sel bernama <code>static_axes</code>, <code>embedded_png</code>, <code>canvas_axes</code>, dan <code>math_axes</code>. Baca sel-sel tersebut sebelum menjalankan kode. Diagram dan persamaan statis muncul dari sumber Markdown-nya; gambar JavaScript hanya muncul setelah Anda menjalankan selnya.</li>
+        </ol>
+        <p class="callout"><strong>Mengimpor bukanlah menjalankan.</strong> Impor <code>.srwb</code> tidak mengeksekusi kodenya, bahkan saat pengaturan eksekusi otomatis diaktifkan. Hanya <code>canvas_axes</code> yang memerlukan eksekusi JavaScript dalam pelajaran ini. Tidak ada langkah <strong>Jalankan semua sel</strong>.</p>
+        <p>Perlu detail lebih lanjut tentang unduhan atau pemilih file? Ikuti <a href="../import/">panduan impor buku kerja manual</a>. Nama-nama di atas muncul pada sel yang disimpan; <a href="../named-cells/">tutorial jalur sel bernama</a> menjelaskan cara menetapkan dan menggunakannya. Anda juga dapat membuat contoh-contoh ini di buku kerja yang sudah Anda buka, menggunakan langkah-langkah di bawah.</p>
+      </section>
+
+      <section id="static">
+        <p class="step-label">Langkah 2 · Metode 1</p>
+        <h2>Simpan diagram statis di Markdown</h2>
+        <p>Bayangkan selembar kertas yang menghadap Anda. <strong>r</strong> mengarah ke kanan sepanjang kertas, <strong>u</strong> mengarah ke atas sepanjang kertas, dan <strong>n</strong> mengarah keluar dari kertas ke arah Anda. Lingkaran dengan sebuah titik mewakili arah ke luar tersebut, seperti melihat ujung anak panah yang mengarah ke Anda.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-static.png" alt="Cuplikan layar peramban sempit dari sel SciREPL Markdown yang menampilkan diagram kertas dengan panah kanan dan atas serta titik di dalam lingkaran untuk garis normal ke arah pemirsa." loading="lazy" decoding="async">
+          <figcaption>SVG statis dirender <em>di dalam sel Markdown</em>. Ini adalah tangkapan peramban dari SciREPL Free, bukan gambar yang dihasilkan dari menjalankan kernel bahasa.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-static.png">Lihat cuplikan layar peramban lengkap</a>
+        </figure>
+        <h3>Edit diagram yang diimpor</h3>
+        <ol class="lesson-steps">
+          <li>Temukan <code>static_axes</code>. Ketuk ikon <strong>✎ pensil</strong> di header sel tersimpan itu sendiri, di dekat <strong>✕</strong>. Tindakan ini membuka sumber sel yang ada; panel sel baru akan membuat sel lain.</li>
+          <li>Biarkan tombol tipe sel disetel ke <strong>Md</strong>. Dalam teks SVG, ubah <code>r: right</code> menjadi <code>r: across</code>.</li>
+          <li>Ketuk tombol <strong>▶ Jalankan</strong> pada sel tersebut untuk menyimpan dan merender Markdown kembali. Untuk sel <strong>Md</strong>, tombol ini merender teks; tombol ini tidak mengeksekusi JavaScript atau memulai runtime bahasa.</li>
+        </ol>
+        <h3>Atau buat sel Markdown Anda sendiri</h3>
+        <ol class="lesson-steps">
+          <li>Temukan <strong>panel sel baru</strong> tempat Anda mengetikkan sel berikutnya. Jika diciutkan, gunakan tombol <strong>⌃ Show new-cell panel</strong> di dekat judul aplikasi.</li>
+          <li>Ketuk tombol tipe sel yang bertanda <strong>kode</strong> agar berubah menjadi <strong>Md</strong>. Markdown adalah <em>tipe sel</em>, bukan entri dalam menu drop-down bahasa.</li>
+          <li>Salin SVG lengkap di bawah ke dalam bidang teks, <strong>tanpa menambahkan pembatas kode Markdown</strong> (<code>```</code>). Berikan baris kosong antara teks prosa di sekitarnya dan SVG.</li>
+          <li>Ketuk <strong>▶ Jalankan</strong> untuk menambahkan sel Markdown yang dirender. Anda akan melihat kertas dan ketiga label arah.</li>
+        </ol>
+        <pre><code data-graphic-example="svg">&lt;svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 360 220" width="100%" height="220"
+     role="img" aria-label="Right, up and outward normal on paper"&gt;
+  &lt;title&gt;A paper coordinate frame&lt;/title&gt;
+  &lt;rect x="20" y="18" width="320" height="184"
+        rx="6" fill="#ffffff" stroke="#526170" stroke-width="2" /&gt;
+  &lt;path d="M110 145 H280" fill="none" stroke="#075d69" stroke-width="3" /&gt;
+  &lt;polygon points="280,145 267,138 267,152" fill="#075d69" /&gt;
+  &lt;path d="M110 145 V48" fill="none" stroke="#064d91" stroke-width="3" /&gt;
+  &lt;polygon points="110,48 103,61 117,61" fill="#064d91" /&gt;
+  &lt;circle cx="110" cy="145" r="10" fill="#ffffff" stroke="#14191f" stroke-width="2" /&gt;
+  &lt;circle cx="110" cy="145" r="3" fill="#14191f" /&gt;
+  &lt;text x="204" y="168" fill="#14191f" font-size="16"&gt;r: right&lt;/text&gt;
+  &lt;text x="124" y="62" fill="#14191f" font-size="16"&gt;u: up&lt;/text&gt;
+  &lt;text x="42" y="190" fill="#14191f" font-size="16"&gt;n: toward you&lt;/text&gt;
+&lt;/svg&gt;</code></pre>
+        <p>SciREPL membersihkan Markdown. Contoh ini menggunakan bentuk SVG biasa, teks, dan atribut <code>fill</code>/<code>stroke</code> eksplisit. Ujung panahnya berupa poligon: jangan mengandalkan <code>marker-end="url(...)"</code>, blok <code>&lt;style&gt;</code>, skrip, atau animasi untuk lolos dari pembersih sanitasi.</p>
+
+        <h3>Gunakan PNG tersemat sebagai gantinya</h3>
+        <p>Opsi statis lainnya adalah PNG dengan data Base64-nya disimpan langsung di sumber Markdown. Sintaks gambar Markdown standar terlihat seperti ini:</p>
+        <pre><code>![Paper axes](data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE)</code></pre>
+        <p>Baris ini menunjukkan <em>format</em>, bukan gambar yang berfungsi: ganti placeholder dengan PNG terenkode lengkap, atau gunakan sel <code>embedded_png</code> yang sudah berfungsi. Bagian setelah <code>base64,</code> adalah data gambar, bukan nama file. Pertahankan dalam satu baris.</p>
+        <p>Untuk gambar yang pas dengan sel di layar kecil, sel <code>embedded_png</code> pendamping menggunakan HTML sebaris yang setara di bawah ini, dengan <code>width="100%"</code>. Gambar ini tetap disimpan di dalam Markdown, bukan sebagai output kode:</p>
+        <pre><code>&lt;img alt="Paper axes" width="100%"
+     src="data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE"&gt;</code></pre>
+        <p class="callout"><strong>Pilih salah satu jalur statis:</strong> gunakan <em>elemen SVG sebaris</em> untuk diagram kecil yang dapat diedit, atau gambar <code>data:image/png;base64,...</code> untuk gambar raster. URL data SVG seperti <code>data:image/svg+xml,...</code> tidak sama dengan SVG sebaris dan diblokir dalam build yang diperiksa. URL gambar jarak jauh juga diblokir di sana. Kedua contoh mandiri ini tidak memerlukan pengunduhan gambar saat ditampilkan.</p>
+        <p>Kedua contoh statis berada di dalam sumber Markdown. Keduanya dapat ditampilkan setelah impor buku kerja tanpa menjalankan kode.</p>
+      </section>
+
+      <section id="canvas">
+        <p class="step-label">Langkah 3 · Metode 2</p>
+        <h2>Buat gambar dengan JavaScript</h2>
+        <p>Gambar statis tetap sama sampai Anda mengedit sumbernya. Untuk gambar yang dihitung atau digambar oleh program, gunakan sel <strong>kode</strong> dan pilih <strong>JS - JavaScript</strong>. Contoh ini menggambar ke kanvas, mengonversinya menjadi PNG, dan mengirim gambar tersebut ke output sel.</p>
+        <ol class="lesson-steps">
+          <li>Di buku kerja yang diimpor, ketuk ikon <strong>✎ pensil</strong> pada <code>canvas_axes</code>. Periksa bahwa tipe selnya adalah <strong>kode</strong> dan bahasanya adalah <strong>JS - JavaScript</strong> (pemilih ringkas dapat hanya menampilkan <strong>JS</strong>).</li>
+          <li>Baca kode di bawah, yang merupakan program lengkap dalam sel tersebut. Kode ini tidak memerlukan sel, file, paket, atau permintaan jaringan lain.</li>
+          <li>Pada <em>sel tersebut</em>, ketuk <strong>▶ Jalankan</strong>. Gambar akan muncul di bawah sumber JavaScript.</li>
+        </ol>
+        <p>Untuk membuat sel baru sebagai gantinya, buka panel sel baru, ubah kembali <strong>Md</strong> ke <strong>kode</strong> jika diperlukan, dan pilih <strong>JS - JavaScript</strong> dari dropdown bahasa. Tempel kodenya, lalu ketuk <strong>▶ Jalankan</strong>. Jika JavaScript tersembunyi, temukan <strong>☰ Menu → Bahasa</strong> dan aktifkan.</p>
+        <pre><code data-graphic-example="javascript">(() =&gt; {
+  const canvas = document.createElement('canvas');
+  canvas.width = 360;
+  canvas.height = 220;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 360, 220);
+  ctx.strokeStyle = '#526170';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(20, 18, 320, 184);
+
+  function arrow(x1, y1, x2, y2, color) {
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 14 * Math.cos(angle - 0.5),
+               y2 - 14 * Math.sin(angle - 0.5));
+    ctx.lineTo(x2 - 14 * Math.cos(angle + 0.5),
+               y2 - 14 * Math.sin(angle + 0.5));
+    ctx.closePath();
+    ctx.fill();
+  }
+  arrow(110, 145, 280, 145, '#075d69'); // right
+  arrow(110, 145, 110, 48, '#064d91');  // up
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#14191f';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(110, 145, 10, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#14191f';
+  ctx.beginPath();
+  ctx.arc(110, 145, 3, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.font = '16px sans-serif';
+  ctx.fillText('r: right', 204, 168);
+  ctx.fillText('u: up', 124, 62);
+  ctx.fillText('n: toward you', 42, 190);
+  window.renderImage(canvas.toDataURL('image/png'));
+})();</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-canvas.png" alt="Cuplikan layar peramban sempit dari SciREPL yang menampilkan kerangka koordinat kertas sebagai output PNG di bawah sel kanvas JavaScript." loading="lazy" decoding="async">
+          <figcaption>Diagram yang tampak serupa ini adalah <strong>output PNG yang dihasilkan</strong>, bukan Markdown. Sel JavaScript membuatnya saat Anda memilih <strong>▶ Jalankan</strong>. Tangkapan peramban dari SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-canvas.png">Lihat cuplikan layar peramban lengkap</a>
+        </figure>
+        <p>Coba ubah <code>r: right</code> di <code>ctx.fillText(...)</code>, lalu jalankan sel kembali. Pembungkus fungsi <code>(() =&gt; { ... })();</code> menjaga variabel contoh ini tetap lokal, sehingga Anda dapat menjalankannya kembali tanpa mendeklarasikan ulang variabel tingkat atas <code>const</code>.</p>
+        <p class="callout"><strong>Panggilan tampilan sangat penting.</strong> Pertahankan <code>window.renderImage(canvas.toDataURL('image/png'))</code> di akhir. Mengembalikan string biasa seperti <code>'&lt;svg&gt;...&lt;/svg&gt;'</code> dari JavaScript akan menampilkan teks; hal ini tidak mengubah string tersebut menjadi diagram sebaris. Anda tidak perlu menyisipkan kanvas ke dalam halaman aplikasi.</p>
+      </section>
+
+      <section id="math">
+        <p class="step-label">Langkah 4 · Metode 3</p>
+        <h2>Jelaskan gambar dengan persamaan</h2>
+        <p>Gunakan sel <strong>Markdown (Md)</strong> untuk matematika bergaya TeX. Arah diagram membentuk kerangka tangan kanan: <strong>kanan × atas = normal ke luar</strong>. Dalam matriks di bawah, baris pertama adalah <strong>r</strong>, yang kedua adalah <strong>u</strong>, dan yang ketiga adalah <strong>n</strong>; subskripnya adalah komponen-komponennya dalam sistem koordinat x, y, z yang dipilih.</p>
+        <ol class="lesson-steps">
+          <li>Ketuk ikon <strong>✎ pensil</strong> pada <code>math_axes</code>, atau buat sel baru menggunakan <strong>kode → Md</strong> di panel sel baru.</li>
+          <li>Gunakan teks lengkap di bawah ini. Pembatas <code>$$</code> berada di dalam sumber Markdown; jangan membungkusnya dalam pembatas kode.</li>
+          <li>Ketuk <strong>▶ Jalankan</strong> untuk menyimpan dan merender Markdown. Anda akan melihat persamaan perkalian silang dan matriks tiga baris, bukan perintah garis miring terbalik mentah. Tidak ada kernel bahasa yang berjalan untuk sel ini.</li>
+        </ol>
+        <pre><code data-graphic-example="math">Right, up and outward normal form a right-handed frame.
+
+$$\mathbf{r} \times \mathbf{u} = \mathbf{n}$$
+
+Rows of the frame matrix: right, up, then outward normal.
+
+$$
+M = \begin{pmatrix}
+r_x &amp; r_y &amp; r_z \\
+u_x &amp; u_y &amp; u_z \\
+n_x &amp; n_y &amp; n_z
+\end{pmatrix}
+$$</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-equations.png" alt="Cuplikan layar peramban sempit dari SciREPL yang merender perkalian silang kanan dan atas sama dengan normal serta matriks kerangka koordinat tiga baris dengan KaTeX di dalam sel Markdown." loading="lazy" decoding="async">
+          <figcaption>KaTeX mengatur huruf matematika secara langsung dari <strong>sumber Markdown</strong>. Ini adalah persamaan, bukan gambar yang dihasilkan TeX. Tangkapan peramban dari SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-equations.png">Lihat cuplikan layar peramban lengkap</a>
+        </figure>
+        <p class="callout"><strong>KaTeX bukanlah pengompilasi TeX lengkap.</strong> Alat ini merender notasi matematika yang didukung, tetapi tidak mengompilasi diagram TikZ atau seluruh dokumen LaTeX. Meskipun KaTeX mencantumkan <code>\includegraphics</code>, fitur tersebut memerlukan opsi kepercayaan yang tidak diaktifkan oleh SciREPL di perender yang diperiksa; ini bukan jalur penyisipan gambar di sini. Gunakan Markdown SVG/PNG atau kanvas JavaScript untuk gambar.</p>
+        <p>Untuk simbol dan perintah matematika lainnya, lihat <a href="https://katex.org/docs/support_table.html">tabel dukungan KaTeX</a>; dokumentasi mungkin menjelaskan fitur-fitur yang lebih baru daripada versi bawaan SciREPL. Untuk buku kerja yang menggunakan petunjuk arah ini guna menjelaskan gerakan kubus, lihat <a href="../tutorial/#open">panduan Grup Markov</a>.</p>
+      </section>
+
+      <section id="save">
+        <p class="step-label">Langkah 5</p>
+        <h2>Simpan salinan, lalu ketahui apa yang harus dijalankan kembali</h2>
+        <ol class="lesson-steps">
+          <li>Buka <strong>☰ Menu → Ekspor buku kerja &amp; paket</strong>.</li>
+          <li>Pilih <strong>Buku kerja (.srwb)</strong> dan <strong>Hanya tab saat ini</strong> untuk buku kerja ini, lalu ketuk <strong>Ekspor</strong>. Simpan file di tempat yang Anda kontrol.</li>
+          <li>Untuk membuka kembali salinan tersebut, gunakan <strong>Menu → Import File</strong>. Ini menambahkan tab buku kerja lain; ini tidak menggantikan tab yang sudah ada.</li>
+          <li>Periksa SVG statis, PNG tersemat, dan persamaan. Semuanya berasal dari sumber Markdown yang disimpan dan tidak memerlukan eksekusi kode. Periksa <code>canvas_axes</code> dan jalankan kembali sel JavaScript tersebut untuk menghasilkan gambarnya lagi.</li>
+        </ol>
+        <p class="callout"><strong>Output yang dihasilkan tidak sama dengan sumber.</strong> Dalam build peramban Free yang diperiksa, ekspor <code>.srwb</code> dapat menyimpan output gambar JavaScript, tetapi tindakan manual <strong>Menu → Import File</strong> tidak memulihkan output kode tersebut. Sumber JavaScript tetap ada, jadi jalankan kembali. SVG sebaris, PNG tersemat, dan persamaan adalah sumber Markdown dan ditampilkan saat diimpor. Jangan gunakan output yang terlihat sebelumnya sebagai bukti bahwa kode baru saja dijalankan.</p>
+        <p>Pemeriksaan ini mencakup contoh buku kerja di atas, bukan keakuratan gambar di setiap format ekspor. Jangan berasumsi bahwa ekspor dokumen PDF, DOCX, Markdown, dan dokumen lainnya mempertahankan setiap gambar dengan cara yang sama; periksa dokumen yang Anda ekspor. Lihat <a href="../../../files-export/">file dan ekspor<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> untuk format yang tersedia.</p>
+        <p>Mengekspor buku kerja yang Anda edit akan membuat cadangan dari perubahan Anda; contoh asli yang diunduh tidak diperbarui saat Anda mengedit sel. Penyimpanan aplikasi lokal bukanlah cadangan, dan sesi Android serta peramban tidak membagikan pekerjaan secara otomatis.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">Jika ada yang terlihat salah</p>
+        <h2>Periksa tipe sel dan sumber</h2>
+        <ul>
+          <li><strong>Anda melihat kode SVG dan bukan diagram:</strong> periksa bahwa tipe sel adalah <strong>Md</strong>, hapus pembatas kode di sekitarnya, dan render sel kembali. Gunakan contoh sebaris <code>&lt;svg&gt;...&lt;/svg&gt;</code> lengkap, bukan URL data SVG.</li>
+          <li><strong>PNG tidak ditemukan:</strong> gunakan sel <code>embedded_png</code> pendamping, atau periksa apakah Anda telah menempelkan seluruh string <code>data:image/png;base64,...</code> tanpa spasi atau jeda baris. Nama file lokal bukanlah data gambar tersemat.</li>
+          <li><strong>Kode kanvas tidak berjalan:</strong> setel tipe selnya ke <strong>kode</strong> dan bahasanya ke <strong>JS - JavaScript</strong>, bukan Python. Pertahankan seluruh pembungkus fungsi dan panggilan akhir <code>window.renderImage(...)</code>.</li>
+          <li><strong>Sel JavaScript yang diimpor tidak memiliki gambar:</strong> mengimpor buku kerja ini tidak menjalankannya atau memulihkan output kodenya. Periksa dan jalankan kembali <code>canvas_axes</code>.</li>
+          <li><strong>Anda melihat TeX mentah atau kesalahan matematika:</strong> gunakan <strong>Md</strong>, sertakan <code>$$</code> pembuka dan penutup, dan periksa setiap garis miring terbalik serta kurung kurawal terhadap contoh. Setiap baris matriks kecuali yang terakhir diakhiri dengan dua garis miring terbalik, <code>\\</code>.</li>
+          <li><strong>Pengeditan membuat sel tambahan:</strong> panel sel baru menambahkan sel. Gunakan <strong>✎ pensil</strong> pada sel tersimpan untuk mengubah sel yang sudah ada, lalu tombol <strong>▶ Jalankan</strong> miliknya sendiri. Gunakan <strong>Batal</strong> jika Anda membuka editornya secara tidak sengaja.</li>
+        </ul>
+        <p>Untuk tur bergambar mengenai sel tersimpan, pensil, dan panel sel baru, lihat <a href="../../interface/tutorial/">panduan antarmuka buku kerja pertama</a>. Kembali ke <a href="../../../workbooks/">referensi buku kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> untuk pengingat ringkas tentang tipe sel.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Bantuan SciREPL</span><nav aria-label="Navigasi footer"><a href="../../../workbooks/">Referensi buku kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a><a href="../../../">Semua bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a></nav></footer>
+</body>
+</html>
