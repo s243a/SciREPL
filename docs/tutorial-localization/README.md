@@ -72,8 +72,8 @@ downloads remain outside the translated tutorial-prose inventory.
 
 - [ ] Perform a separate post-merge review after Help publication; the owner
   requested this follow-up without an immediate deadline.
-- Source branch: `feat/localized-tutorials`. Publication PR: pending creation;
-  record its number and URL here before merging.
+- Source branch: `feat/localized-tutorials`. Publication PR:
+  [s243a/SciREPL#119](https://github.com/s243a/SciREPL/pull/119).
 - Review the deployed locale routes, language switching, links/assets and
   narrow/RTL layouts, and retain the machine-translated/native-review-pending
   notices and the distinction between optional Russian flags and missing text.
