@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "locale": "ar",
+  "chunk": "18",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "originalReviewHash": "bf9de6ba59219862c077eb953e382f5c4b593a85b7539d133931a0e1deb43eb5",
+  "reviewer": "Codex controller with independent Codex fidelity audit",
+  "reviewScope": "All 30 complete Arabic review fields were independently compared with the frozen source. The sole correction restores the exact Samsung Galaxy S24+ identifier; Android/browser evidence distinctions, version/date tokens, file formats, and surrounding Arabic prose remain unchanged.",
+  "nativeLanguageReview": "pending",
+  "corrections": [
+    {
+      "fieldId": "workbooks.import.0016",
+      "before": "سامسونج جالاكسي إس أربعة وعشرون بلس",
+      "after": "Samsung Galaxy S24+",
+      "reason": "Restore the literal source product identifier instead of spelling its digits and plus sign as words; the original device meaning and all protected tokens are preserved."
+    }
+  ]
+}

@@ -25,6 +25,7 @@
     "Session-AppState": "会话"
   },
   "strings": {
+    "help.keyboardTrustNotice": "SciREPL 与这些项目没有关联。键盘应用可以读取您输入的所有内容，包括密码和 API 密钥。请仅安装您信任的键盘，检查其权限，并保持更新。",
     "__literal": [
       "app.search.position",
       "export.docx",

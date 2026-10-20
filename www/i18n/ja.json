@@ -25,6 +25,7 @@
     "Session-AppState": "セッション"
   },
   "strings": {
+    "help.keyboardTrustNotice": "SciREPL はこれらのプロジェクトとは提携していません。キーボードアプリは、パスワードや API キーを含め、入力したすべての内容を読み取ることができます。信頼できるキーボードだけをインストールし、権限を確認して、常に最新の状態に保ってください。",
     "__literal": [
       "app.search.position",
       "common.ok",

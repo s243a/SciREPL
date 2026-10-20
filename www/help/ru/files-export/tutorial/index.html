@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ru" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Установите рабочую книгу CSV, запустите и отредактируйте ее данные в Files &amp; Storage, затем экспортируйте и снова откройте пакет из рабочей книги и CSV. Включает дополнительную подсветку файлов в Pro.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ru/files-export/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../files-export/tutorial/tutorial.css">
+  <title>Пошаговое руководство по рабочей книге CSV · Справка SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/files-export/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/files-export/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/files-export/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/files-export/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/files-export/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/files-export/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/files-export/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/files-export/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/files-export/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/files-export/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/files-export/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/files-export/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/files-export/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/files-export/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+    <nav aria-label="Основная навигация">
+      <a href="../../../files-export/">Файлы и экспорт<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+      <a href="../../tutorials/">Все руководства</a>
+      <a href="../../../">Вся справка<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+      <a href="../../../../">Открыть Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Язык руководства"><details class="tutorial-language-menu"><summary>Язык руководства: <bdi>Русский</bdi></summary><nav aria-label="Язык руководства"><a href="../../../en/files-export/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/files-export/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/files-export/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/files-export/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/files-export/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/files-export/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/files-export/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/files-export/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/files-export/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/files-export/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/files-export/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="./" lang="ru" hreflang="ru" aria-current="page">Русский</a>
+      <a href="../../../zh/files-export/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Машинный перевод руководства; ожидает проверки носителем языка. Код и технические значения оставлены без изменений. На снимках экрана показан оригинальный интерфейс на английском языке; сопоставляйте переведенные названия элементов управления в этом тексте с вашим приложением.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Справка<span class="english-reference"> (Справочная страница на английском языке)</span></a> / <a href="../../../files-export/">Файлы и экспорт<span class="english-reference"> (Справочная страница на английском языке)</span></a> / руководство по CSV</p>
+    <article>
+      <p class="eyebrow">Обучение на практике</p>
+      <h1>Исследуйте CSV в рабочей книге</h1>
+      <p class="lede">Начните в <strong>Обзор пакетов, коллекций и книг</strong>. Установите небольшой пример, запустите его ячейки, отредактируйте его CSV, затем экспортируйте и снова откройте рабочую книгу с ее данными. Данные являются вымышленными, а коду Python не требуются дополнительные пакеты или аккаунт ИИ.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Шаги для Android</li>
+        <li class="chip">Около 15 минут</li>
+      </ul>
+      <p class="screen-note">Снимки экрана были сделаны на телефоне серии Samsung Galaxy S24. На изображениях Browse и исходного вывода показана версия Free; на изображениях нового редактора файлов и выбора пакета показана Pro 1.4.0, и они подписаны ниже. В Pro можно использовать прямое скачивание рабочей книги и путь Import File; окружающие элементы управления могут отличаться, а этот новый пункт Browse может там отсутствовать.</p>
+      <p class="callout"><strong>Все еще не видите эту рабочую книгу в Browse?</strong> Этот пример встроен в Free 1.4.0 и более поздние версии; ранее установленное приложение или кэшированное PWA могут не отображать его. <a download="csv-basics-seedlings.srwb" href="../../../files-export/tutorial/assets/csv-basics-seedlings.srwb">Скачайте рабочую книгу напрямую</a>, затем выберите <strong>Меню → Импорт файла</strong>, чтобы открыть ее. Теперь вы можете продолжить этот урок.</p>
+      <nav class="lesson-nav" aria-label="Шаги руководства по CSV">
+        <strong>В этом уроке</strong>
+        <ol>
+          <li><a href="#install">Установите пример из Browse</a></li>
+          <li><a href="#run">Запустите его ячейки Python</a></li>
+          <li><a href="#change">Измените измерение в Files &amp; Storage</a></li>
+          <li><a href="#import">Импортируйте файл CSV</a></li>
+          <li><a href="#export">Экспортируйте рабочую книгу и данные</a></li>
+          <li><a href="#reopen">Откройте пакет снова и проверьте его данные</a></li>
+        </ol>
+        <p><a href="../../tutorials/">Все руководства</a></p>
+      </nav>
+
+      <section id="install">
+        <p class="step-label">Шаг 1</p>
+        <h2>Найдите рабочую книгу в Browse</h2>
+        <ol class="lesson-steps">
+          <li>Откройте <strong>Меню → Обзор пакетов, коллекций и книг</strong>. Необязательный ярлык 📦 в заголовке открывает тот же экран, если он виден.</li>
+          <li>Выполните поиск <strong>CSV Basics</strong>. В разделе <strong>Рабочие книги</strong> найдите <strong>CSV Basics: Seedling Heights</strong>. Это встроенный пример на английском языке, а не пакет, требующий установки в Python.</li>
+          <li>Нажмите <strong>Установить</strong>. Обычно рабочая книга становится выбранной вкладкой. Если вы отключили автоматическое переключение, используйте селектор рабочих книг, чтобы выбрать ее.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse-menu" role="img" aria-label="Меню SciREPL с пунктом Browse Packages, Bundles and Workbooks, обведенным желтым цветом.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Желтая рамка отмечает <strong>Обзор пакетов, коллекций и книг</strong> в Menu.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">Посмотреть полный снимок экрана Menu</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--catalog" role="img" aria-label="Экран Browse, отфильтрованный по CSV Basics, с полем поиска и кнопкой Install, обведенными желтым цветом.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-catalog.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/catalog-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Найдите <strong>CSV Basics</strong>, затем нажмите <strong>Установить</strong> на карточке рабочей книги. Удаленный каталог был недоступен во время этого снимка; встроенные элементы по-прежнему отображались.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-catalog.png">Посмотреть полный снимок экрана Browse</a>
+        </figure>
+        <p class="callout"><strong>Если появится Политика конфиденциальности:</strong> Browse может проверять проверенный каталог в сети. Прочитайте уведомление, прокрутите <em>внутри диалогового окна</em> до самого низа и нажмите <strong>I Understand</strong>, только если вы согласны. Вместо этого вы можете закрыть уведомление и продолжить использовать встроенные элементы; удаленный каталог будет недоступен. Самому этому примеру не требуется внешний набор данных или пакет Python.</p>
+        <p>Установка рабочей книги добавляет ее ячейки; она <em>не</em> запускает их. Это позволяет вам проверить код перед его выполнением.</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">Шаг 2</p>
+        <h2>Запустите ячейки по порядку</h2>
+        <p>Начальный текст объясняет пример. Три ячейки Python имеют имена: <code>create_csv</code>, <code>read_csv</code> и <code>compare_groups</code>. Для сохраненной ячейки нажмите на ее значок <strong>✎ карандаша</strong>, чтобы открыть редактор, затем нажмите <strong>Выполнить</strong> этой ячейки. В Pro вы также можете дважды коснуться кода ячейки, чтобы отредактировать его.</p>
+        <ol class="lesson-steps">
+          <li>Запустите <code>create_csv</code>. Она записывает шесть фиктивных строк в <code>/shared/data/seedling-heights.csv</code>. Вы должны увидеть <code>Saved 6 fictional rows</code>.</li>
+          <li>Запустите <code>read_csv</code>. Она открывает только что созданный файл и выводит все шесть строк.</li>
+          <li>Запустите <code>compare_groups</code>. Она выводит среднее значение для света <strong>13.0 см</strong>, среднее значение для тени <strong>8.0 см</strong> и разницу <strong>5.0 см</strong>.</li>
+        </ol>
+        <p>Файл также виден в <strong>Меню → Файлы и хранилище</strong>. Вы можете прочитать его там или использовать <strong>Правка</strong> и <strong>Сохранить</strong>, чтобы изменить его напрямую. <a href="#edit-file">Следующий шаг показывает, как это сделать.</a></p>
+        <p>Итоговый вывод должен выглядеть следующим образом:</p>
+        <pre><code>Light mean: 13.0 cm
+Shade mean: 8.0 cm
+Difference: 5.0 cm</code></pre>
+        <p class="callout"><strong>Первый запуск медленнее?</strong> Python может потребоваться некоторое время для инициализации. Подождите, пока на значке состояния не появится <strong>готово</strong>, прежде чем судить о завершении работы ячейки. Последующие ячейки обычно повторно используют загруженную среду выполнения. Если для загрузки среды выполнения требуется согласие, прочитайте уведомление о конфиденциальности перед принятием; эта рабочая книга не вызывает <code>%pip install</code>.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--csv-output" role="img" aria-label="Вывод SciREPL, показывающий среднее для света 13.0 сантиметров, среднее для тени 8.0 сантиметров и разницу 5.0 сантиметров.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-output.png" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Вывод третьей ячейки на телефоне после запуска примера рабочей книги.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-output.png">Посмотреть полный снимок экрана вывода</a>
+        </figure>
+        <p>Эти вымышленные значения иллюстрируют чтение и вычисления, а не научный вывод об освещении и росте растений.</p>
+      </section>
+
+      <section id="change">
+        <p class="step-label">Шаг 3</p>
+        <h2>Измените одно значение и перезапустите</h2>
+        <div id="edit-file">
+          <p>Вам не нужно редактировать ячейку Python, чтобы изменить ее данные. Откройте сам CSV:</p>
+          <ol class="lesson-steps">
+            <li>Выберите <strong>Меню → Файлы и хранилище</strong> (в меню к названию может быть добавлено <strong>VFS / Paths</strong>).</li>
+            <li>Выберите <strong>/ (Постоянное хранилище)</strong> или <strong>Все файловые системы</strong>. Прокрутите до <code>/shared/data/seedling-heights.csv</code> и нажмите на имя файла, а не на значок скачивания или удаления.</li>
+            <li>Нажмите <strong>Правка</strong>. Измените строку <code>light,14</code> на <code>light,15</code>. Оставьте заголовок <code>group,height_cm</code>, запятые и другие строки без изменений.</li>
+            <li>Нажмите <strong>Сохранить</strong>, затем закройте Files &amp; Storage. Сохранение файла не запускает никакой код.</li>
+          </ol>
+          <figure class="phone-figure">
+            <div class="shot-window shot-window--file-edit" role="img" aria-label="Файл CSV редактируется в Files and Storage, кнопка Save обведена желтым цветом. В Pro также отображается Full screen.">
+              <div class="shot-stage">
+                <img src="../../../files-export/tutorial/assets/phone-file-edit.png" alt="" loading="lazy" decoding="async">
+                <img src="../../../files-export/tutorial/assets/file-edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              </div>
+            </div>
+            <figcaption><strong>Pro 1.4.0:</strong> CSV открыт в редакторе предварительного просмотра файлов. Желтая рамка отмечает <strong>Сохранить</strong>. В Free также есть элементы предварительного просмотра Edit/Save; пункт <strong>Во весь экран</strong> доступен только в Pro.</figcaption>
+            <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-file-edit.png">Посмотреть полный снимок экрана редактирования в Files &amp; Storage</a>
+          </figure>
+        </div>
+        <p>Перезапустите только <code>read_csv</code> и <code>compare_groups</code>. Среднее значение для света теперь составляет около <strong>13.3 см</strong>, а разница — около <strong>5.3 см</strong>. <strong>Не</strong> перезапускайте <code>create_csv</code>: это перезапишет ваши изменения файла значениями, которые все еще находятся в этой ячейке.</p>
+        <p>Или же отредактируйте <code>create_csv</code> с помощью ее значка <strong>✎ карандаша</strong>, измените измерение <code>14</code> на <code>15</code> и запустите все три ячейки Python по порядку. Это изменит код, который генерирует файл, а не просто сам файл.</p>
+        <p>Зачем перезапускать последующие ячейки? Их сохраненный вывод представляет собой запись предыдущего выполнения; изменение файла не пересчитывает автоматически более ранние результаты. Каждая ячейка считывает файл при ее запуске.</p>
+        <aside class="callout" id="pro-syntax-highlighting" data-editions="pro">
+          <h3>Pro: полноэкранное редактирование файлов и дополнительная подсветка</h3>
+          <p>В предварительном просмотре файла нажмите <strong>Во весь экран</strong>, чтобы открыть редактор большего размера. Файл CSV остается <strong>Обычный текст</strong>, поэтому его флажок <strong>Подсветка синтаксиса</strong> отключен.</p>
+          <p>Для поддерживаемых файлов кода подсветка синтаксиса необязательна и <strong>отключена по умолчанию</strong>. Включите ее с помощью флажка в этом редакторе файлов, а не в настройках внешнего вида блокнота. Расширение определяет язык: например, <code>.py</code> — это Python, <code>.js</code> — это JavaScript, <code>.R</code> — это R, а <code>.pl</code> — это <strong>Prolog</strong>, а не Perl. Неизвестные расширения остаются обычным текстом.</p>
+          <figure class="phone-figure">
+            <div class="shot-window shot-window--file-highlight" role="img" aria-label="Pro: полноэкранный редактор файлов Python с выбранной подсветкой синтаксиса и цветным кодом Python. Кнопки Save и Close находятся на панели инструментов.">
+              <div class="shot-stage">
+                <img src="../../../files-export/tutorial/assets/phone-python-highlight.png" alt="" loading="lazy" decoding="async">
+                <img src="../../../files-export/tutorial/assets/file-highlight-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              </div>
+            </div>
+            <figcaption><strong>Pro 1.4.0:</strong> отдельный демонстрационный файл <code>seedling-summary.py</code>, содержащий код сравнения, с включенной подсветкой. Этот необязательный файл не требуется для урока по CSV. Длинные строки можно прокручивать по горизонтали.</figcaption>
+            <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-python-highlight.png">Посмотреть полный снимок экрана редактора файлов с подсветкой</a>
+          </figure>
+          <p><strong>Сохранить</strong> записывает файл и оставляет редактор открытым. Используйте <strong>× Close</strong>, чтобы вернуться в Files &amp; Storage; приложение запросит подтверждение перед отменой несохраненных изменений. Редактирование или сохранение файла никогда не выполняет его.</p>
+          <p><a href="../../../files-export/tutorial/assets/phone-csv-fullscreen.png">Посмотрите тот же полноэкранный редактор с CSV, открытым как обычный текст.</a></p>
+        </aside>
+      </section>
+
+      <section id="import">
+        <p class="step-label">Шаг 4</p>
+        <h2>Импортируйте исходный CSV</h2>
+        <ol class="lesson-steps">
+          <li><a download="seedling-heights.csv" href="../../../files-export/tutorial/assets/seedling-heights.csv">Скачайте исходный пример CSV<span class="english-reference"> (Справочная страница на английском языке)</span></a> в папку, которую может открыть инструмент выбора файлов вашего устройства.</li>
+          <li>В SciREPL выберите <strong>Меню → Import File</strong> и укажите <code>seedling-heights.csv</code>. В подтверждении должно быть указано, что он был загружен в <code>/shared/data/seedling-heights.csv</code>.</li>
+          <li>Это заменит измененный локальный файл исходными шестью строками. Перезапустите <code>read_csv</code> и <code>compare_groups</code>; оба средних значения должны вернуться к <strong>13.0</strong> и <strong>8.0 см</strong>.</li>
+        </ol>
+        <p class="callout"><strong>Важно:</strong> не перезапускайте <code>create_csv</code> после импорта другого файла с тем же именем, если только вы не намерены перезаписать его. Для собственного CSV обратите внимание на точный путь в подтверждении и измените <code>path</code> в считывающих ячейках на это имя файла. Средство выбора файлов может отображать загрузки Android, облачное хранилище или и то, и другое.</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">Шаг 5</p>
+        <h2>Сохраните переносимую копию</h2>
+        <p>Откройте <strong>Меню → Экспорт книг и пакетов</strong>. Если вам нужны только ячейки, выберите <strong>Книга (.srwb)</strong> и <strong>Только текущая вкладка</strong>. <code>.srwb</code> <strong>не</strong> включает отдельный CSV в SharedVFS.</p>
+        <p>Чтобы переместить рабочую книгу <em>вместе с ее данными</em>, выберите <strong>Пакет (архив)</strong> и оставьте <strong>.zip</strong>. В дереве <strong>Содержимое</strong> выберите:</p>
+        <ul>
+          <li>Рабочую книгу <code>CSV_Basics__Seedling_Heights.ipynb</code> в <strong>notebooks/</strong>. Экспорт пакета сохраняет ячейки в формате блокнота Jupyter.</li>
+          <li>Файл <code>seedling-heights.csv</code> в <strong>shared/data/</strong>.</li>
+        </ul>
+        <p>Снимите флажки с не относящихся к делу рабочих книг и файлов. При необходимости разверните папки с помощью стрелки; не думайте, что <strong>Только текущая вкладка</strong> ограничивает содержимое пакета. Для этого урока дополнительные копии из <strong>shared/notebooks/</strong> не нужны. В Pro оставьте <strong>Включить диалог с ИИ</strong> неотмеченным, если только вы специально не хотите поделиться им.</p>
+        <p>Нажмите <strong>Экспорт</strong>. На Android откроется панель общего доступа: сохраните архив в таком месте, где вы сможете его найти, например на своем диске или в папке назначения файлового менеджера. В браузере будет скачан файл. Предлагаемое имя файла — <code>scirepl_package.zip</code>; переименование его в <code>seedling-project.zip</code> упростит его распознавание.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--package-selection" role="img" aria-label="Pro: экспорт пакета с выбранным архивом пакета и отмеченными только рабочей книгой CSV Basics и файлом CSV seedling-heights. Желтые рамки отмечают эти два файла.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-package-selection.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/package-selection-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pro 1.4.0:</strong> выбран вариант Package, и два обведенных желтым пункта отмечены. Другие рабочие книги, необязательный демонстрационный файл Python и сохраненные копии рабочих книг не включены. В Free используется тот же выбор рабочей книги и данных, но без параметра беседы с ИИ.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-package-selection.png">Посмотреть полный снимок экрана выбора пакета</a>
+        </figure>
+        <p class="callout"><strong>Локальное восстановление не является резервной копией.</strong> Хранилище приложения Android, PWA в Chrome и другой браузер не предоставляют общий доступ к этим файлам автоматически. Храните экспортированную копию там, где вы ее контролируете. См. раздел <a href="../../../files-export/">Files, import, and export<span class="english-reference"> (Справочная страница на английском языке)</span></a> для информации о других форматах.</p>
+      </section>
+
+      <section id="reopen">
+        <p class="step-label">Шаг 6</p>
+        <h2>Снова откройте пакет и проверьте обе части</h2>
+        <p>Прежде чем доверять резервной копии, убедитесь, что вы можете ее открыть. Это можно сделать в другой установке SciREPL или профиле браузера. Импорт здесь добавляет еще одну рабочую книгу; он также заменяет файлы по путям назначения пакета, поэтому сохраните отдельную копию любого более нового файла перед импортом более старого пакета.</p>
+        <ol class="lesson-steps">
+          <li>Выберите <strong>Меню → Import Package (.zip / .tar.gz)</strong> и укажите архив, который вы сохранили. Для этого урока это <code>.zip</code>, а не отдельная загрузка CSV или <code>.srwb</code>.</li>
+          <li>Выберите недавно импортированную рабочую книгу <strong>CSV Basics: Seedling Heights</strong>, если она не выбрана автоматически. Если вы импортировали ее в то же приложение, старая и новая вкладки могут иметь одинаковое имя.</li>
+          <li>Откройте <strong>Меню → Файлы и хранилище</strong> и проверьте <code>/shared/data/seedling-heights.csv</code>. Его шесть строк должны соответствовать экспортированному вами файлу. После проверки закройте предварительный просмотр.</li>
+          <li>Запустите <strong>вторую ячейку Python</strong> (код <code>read_csv</code>), затем <strong>третью ячейку Python</strong> (код <code>compare_groups</code>). Экспорт пакета использует формат Jupyter и может не сохранить имена ячеек; определяйте их по порядку и коду. После шага 4 с исходным CSV ожидайте <strong>13.0 см</strong>, <strong>8.0 см</strong> и <strong>5.0 см</strong>. Если же вы экспортировали отредактированный файл <code>light,15</code>, ожидайте <strong>13.3 см</strong>, <strong>8.0 см</strong> и <strong>5.3 см</strong>.</li>
+        </ol>
+        <p class="callout"><strong>Не перезапускайте <code>create_csv</code> для этой проверки восстановления.</strong> Она перезаписывает импортированные данные значениями из своего кода. Первоочередное чтение восстановленного CSV доказывает, что данные были перенесены вместе с рабочей книгой; сам по себе старый сохраненный вывод этого не доказывает.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--restored-output" role="img" aria-label="Свежий вывод после восстановления пакета и запуска ячейки сравнения: среднее для света 13.0 сантиметров, среднее для тени 8.0, разница 5.0.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-restored-output.png" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pro 1.4.0:</strong> новый вывод на телефоне после импорта экспортированного архива и запуска только ячеек чтения и сравнения. CSV восстановил исходные шесть строк.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-restored-output.png">Посмотреть полный снимок экрана восстановленного вывода</a>
+        </figure>
+        <p>Если файл отсутствует или рабочей книги нет, вернитесь к шагу 5 и убедитесь, что были выбраны <em>оба</em> пункта. Обычный экспорт рабочей книги не может перенести CSV за вас.</p>
+      </section>
+
+      <section id="what-next">
+        <h2>Что дальше?</h2>
+        <p>Попробуйте создать собственный CSV. Сохраните столбцы <code>group</code> и <code>height_cm</code>, используйте числовые значения высоты и добавьте хотя бы одну строку <code>light</code> и одну строку <code>shade</code> — либо адаптируйте два групповых фильтра в <code>compare_groups</code>. Вы можете проверить локальный файл в <strong>Меню → Файлы и хранилище</strong>. Об элементах управления на телефоне, использованных здесь, читайте в <a href="../../interface/tutorial/">руководстве по интерфейсу первой рабочей книги</a>.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Справка SciREPL</span><nav aria-label="Нижняя навигация"><a href="../../../files-export/">Файлы и экспорт<span class="english-reference"> (Справочная страница на английском языке)</span></a><a href="../../../">Вся справка<span class="english-reference"> (Справочная страница на английском языке)</span></a></nav></footer>
+</body>
+</html>

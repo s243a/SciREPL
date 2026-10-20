@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ko" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="작은 통합 문서를 생성, 실행, 편집 및 내보내면서 SciREPL 인터페이스를 익혀보세요.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ko/interface/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <title>인터페이스 둘러보기 · SciREPL 도움말</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (영어 참조 페이지)</span></a>
+    <nav aria-label="기본 탐색">
+      <a href="../../../interface/">인터페이스 참조<span class="english-reference"> (영어 참조 페이지)</span></a>
+      <a href="../../tutorials/">모든 자습서</a>
+      <a href="../../../">모든 도움말<span class="english-reference"> (영어 참조 페이지)</span></a>
+      <a href="../../../../">Free PWA 열기</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="튜토리얼 언어"><details class="tutorial-language-menu"><summary>튜토리얼 언어: <bdi>한국어</bdi></summary><nav aria-label="튜토리얼 언어"><a href="../../../en/interface/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="./" lang="ko" hreflang="ko" aria-current="page">한국어</a>
+      <a href="../../../pt-BR/interface/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">기계 번역된 튜토리얼이며 원어민 검토 대기 중입니다. 코드 및 기술적 값은 변경되지 않았습니다. 스크린샷에는 원본 영어 인터페이스가 표시되므로, 본문의 번역된 컨트롤 이름을 앱과 대조하여 확인하세요.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">도움말<span class="english-reference"> (영어 참조 페이지)</span></a> / <a href="../../../interface/">인터페이스<span class="english-reference"> (영어 참조 페이지)</span></a> / 둘러보기</p>
+    <article>
+      <p class="eyebrow">직접 해보며 배우기</p>
+      <h1>첫 번째 통합 문서 만들기</h1>
+      <p class="lede">이 문서는 <a href="../../../interface/">인터페이스 참조<span class="english-reference"> (영어 참조 페이지)</span></a>의 더 길고 실용적인 실습 안내서입니다. 하나의 Python 셀을 실행하고 변경한 다음, 직접 관리할 수 있는 복사본을 저장하게 됩니다. AI 계정이나 API 키는 필요하지 않습니다.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Android 단계</li>
+        <li class="chip">약 5분</li>
+      </ul>
+      <p class="screen-note">스크린샷은 SciREPL Free v1.3.2 버전을 Samsung Galaxy S24 시리즈 스마트폰에서 보여줍니다. 이 학습 내용은 Pro에도 적용되지만, 일부 컨트롤은 다르게 보일 수 있습니다.</p>
+      <nav class="lesson-nav" aria-label="둘러보기 단계">
+        <strong>이번 학습 내용</strong>
+        <ol>
+          <li><a href="#find-your-place">앱 내 위치 찾기</a></li>
+          <li><a href="#write-a-cell">셀 작성 및 실행</a></li>
+          <li><a href="#edit-a-cell">저장된 셀 편집</a></li>
+          <li><a href="#save-a-copy">통합 문서 사본 내보내기</a></li>
+          <li><a href="#what-next">다음으로 시도해 볼 작업</a></li>
+        </ol>
+        <p><a href="../../tutorials/">모든 자습서</a></p>
+      </nav>
+
+      <section id="find-your-place">
+        <p class="step-label">1단계</p>
+        <h2>앱에서 위치 찾기</h2>
+        <p>맨 위 행은 <strong>헤더</strong>입니다. 여기에는 메뉴, 도움말 및 상태 배지가 포함되어 있습니다. 통합 문서 선택기를 통해 열려 있는 통합 문서를 선택합니다.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--header" role="img" aria-label="통합 문서 선택기, 메뉴 버튼 및 도움말 버튼이 노란색 윤곽선으로 표시된 휴대전화 헤더입니다.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>노란색 윤곽선은 통합 문서 선택기, 메뉴 및 도움말을 나타냅니다.</figcaption>
+          <p>헤더 행 아래에는 저장된 셀과 해당 결과가 포함된 통합 문서가 있습니다.</p>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">휴대폰 전체 스크린샷 보기</a>
+        </figure>
+        <p><strong>새 셀 패널</strong>은 다음 셀을 입력하는 곳입니다. 화면이 좁을 때는 선택적 헤더 버튼이 사라질 수 있지만, 해당 동작은 해당되는 경우 메뉴 또는 도움말에서 계속 사용할 수 있습니다.</p>
+      </section>
+
+      <section id="write-a-cell">
+        <p class="step-label">단계 2</p>
+        <h2>Python 셀 작성 및 실행</h2>
+        <p>첫 실행 전에 상태 배지에 <strong>준비 완료</strong> 표시가 나타날 때까지 기다리세요.</p>
+        <ol class="lesson-steps">
+          <li>새 셀 패널의 언어 선택기에서 <strong>Python</strong> 항목을 선택하세요. 화면이 좁은 휴대폰에서는 닫힌 선택기에 <strong>Py</strong>만 표시될 수 있습니다.</li>
+          <li>다음과 같은 간단한 프로그램을 입력하세요:
+            <pre><code>print("Hello from SciREPL")</code></pre>
+          </li>
+          <li><strong>실행</strong> 버튼을 탭하세요. 저장된 셀이 워크북에 나타납니다. 그 아래에 <code>Hello from SciREPL</code> 표시가 보여야 합니다.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--composer" role="img" aria-label="Py가 선택되어 있고 코드 필드에 print Hello from SciREPL 문구가 있으며 실행 버튼이 노란색 윤곽선으로 표시된 새 셀 패널입니다.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>하단 패널은 <em>새</em> 셀을 생성합니다: <strong>Py</strong> 항목을 선택하고 코드를 입력한 다음 <strong>실행</strong> 항목을 탭하세요.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">휴대폰 전체 스크린샷 보기</a>
+        </figure>
+        <p class="callout"><strong>첫 실행은 시간이 더 걸릴 수 있습니다.</strong> Python 런타임이 한 번 시작되어야 합니다. 상태가 <strong>준비 완료</strong> 상태로 돌아올 때까지 기다리세요. 이후의 Python 셀은 대개 해당 런타임을 재사용합니다.</p>
+        <aside class="callout">
+          <p><strong>개인정보 보호 안내가 나타나는 경우:</strong> Python 버전은 보통 함께 제공되므로 이 예제에서는 런타임 다운로드가 필요하지 않습니다. R이나 Lua(Free의)과 같은 네트워크 런타임은 먼저 SciREPL 개인정보 처리방침을 표시할 수 있으며, Python 역시 번들 복사본에 네트워크 폴백이 필요한 경우 그럴 수 있습니다. 내용을 읽고 <em>대화상자 내부</em>에서 맨 아래로 스크롤한 후, 동의하면 <strong>이해했습니다</strong>를 탭하세요. 이후 별도의 런타임 다운로드 메시지가 표시되면 <strong>다운로드</strong> 버튼을 탭하라는 안내가 나타날 수 있습니다.</p>
+          <p><a href="../../../interface/tutorial/assets/privacy-policy-top.jpg">개인정보 처리방침 대화상자의 예를 확인하세요<span class="english-reference"> (영어 참조 페이지)</span></a> (스크린샷에는 상단이 표시되어 있으며 버튼은 더 아래에 있습니다). Free 1.4.0 및 Pro 1.4.0에서는 유효한 <code>%pip install</code> 명령 역시 패키지 설치를 시도하기 전에 현재 네트워크 고지를 수락하지 않은 경우 이 안내를 엽니다. 네트워크 기능을 사용하기 전에 <a href="../../../privacy/">개인정보 및 로컬 데이터<span class="english-reference"> (영어 참조 페이지)</span></a> 항목을 확인하세요.</p>
+        </aside>
+      </section>
+
+      <section id="edit-a-cell">
+        <p class="step-label">단계 3</p>
+        <h2>저장된 셀 편집</h2>
+        <ol class="lesson-steps">
+          <li>저장된 셀 자체 헤더에서 연필 <strong>✎</strong> 모양을 탭하세요. 오른쪽 상단 <strong>✕</strong> 바로 왼쪽에 위치합니다. 이렇게 하면 해당 셀이 편집을 위해 열립니다. 새 셀 패널에 입력하면 또 다른 셀이 생성됩니다.</li>
+          <li><code>Hello from SciREPL</code>을(를) <code>Hello again</code>로 변경하세요.</li>
+          <li>변경사항을 저장하고 실행하려면 <strong>실행</strong> 항목을 선택하세요. 이제 해당 셀 아래에 <code>Hello again</code> 내용이 표시됩니다.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--editing" role="img" aria-label="print Hello again 문구가 포함된 저장된 셀 편집기입니다. 노란색 윤곽선은 오른쪽 상단의 저장된 셀 연필 아이콘, 편집 가능한 코드 필드, 실행 버튼을 표시합니다. 실행을 탭하기 전까지는 이전 출력에 Hello from SciREPL 문구가 계속 표시됩니다.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-edit-draft.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/edit-draft-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>노란색 윤곽선은 저장된 셀의 <strong>✎ 연필</strong> 위치, 편집 중인 코드, 해당 셀의 <strong>실행</strong> 버튼을 보여줍니다. 이 스크린샷에서는 편집 모드가 이미 열려 있어 연필 아이콘이 흐리게 표시됩니다. 실행은 수정사항을 저장하고 실행하며, 그때까지는 이전 출력이 계속 표시됩니다.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-edit-draft.png">키보드를 포함한 휴대폰 전체 스크린샷 보기</a>
+        </figure>
+        <aside class="callout">
+          <p><strong>Pro 단축 기능:</strong> 터치스크린에서는 저장된 셀의 코드를 두 번 탭하여 편집할 수 있습니다. 현재 Free 버전에서는 <strong>✎</strong> 버튼을 사용합니다.</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--result" role="img" aria-label="print Hello again 문구가 포함된 저장된 Python 셀이며, 강조 표시된 Hello again 출력이 이어집니다.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-rerun.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/rerun-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>실행</strong> 이후 저장된 셀 아래의 출력에 <code>Hello again</code> 내용이 표시됩니다.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-rerun.png">휴대전화 전체 스크린샷 보기</a>
+        </figure>
+        <p>실수로 편집기를 열었다면 <strong>취소</strong>을 사용하여 실행하지 않고 닫으세요. 저장된 셀 내부의 언어 선택기는 해당 셀을 변경하지만, 새 셀 선택기는 변경하지 않습니다.</p>
+      </section>
+
+      <section id="save-a-copy">
+        <p class="step-label">4단계</p>
+        <h2>워크북 사본 내보내기</h2>
+        <ol class="lesson-steps">
+          <li><strong>메뉴 → 워크북 및 패키지 내보내기</strong> 열기.</li>
+          <li><strong>현재 탭만</strong> 또는 <strong>모든 탭</strong>을 선택한 후, SciREPL 형식의 <strong>워크북 (.srwb)</strong>을 선택하세요(SciREPL 관련 상태를 유지하려는 경우).</li>
+          <li><strong>내보내기</strong>을 탭하고 직접 제어할 수 있는 저장 위치를 선택하세요.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--menu" role="img" aria-label="문서 내보내기와 파일 가져오기 사이에 노란색 윤곽선으로 표시된 워크북 및 패키지 내보내기 메뉴 행.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>문서 내보내기가 아니라 <strong>워크북 및 패키지 내보내기</strong>을 선택하세요.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">메뉴 전체 스크린샷 보기</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="워크북 srwb 형식, 현재 탭 전용 범위 및 내보내기 버튼이 노란색 윤곽선으로 표시된 내보내기 대화상자.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>한 탭의 경우 <strong>워크북 (.srwb)</strong> 및 <strong>현재 탭만</strong>을 유지한 다음 <strong>내보내기</strong>을 탭하세요. 전체 워크북을 포함하려면 <strong>모든 탭</strong>을 선택하세요.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-export.png">내보내기 대화상자 전체 스크린샷 보기</a>
+        </figure>
+        <p class="callout"><strong>왜 내보내야 하나요?</strong> SciREPL은 로컬 세션을 복원하지만, 로컬 저장소는 백업이 아니며 Android 앱과 브라우저 간에 자동으로 공유되지 않습니다. <a href="../../../files-export/">파일 및 내보내기<span class="english-reference"> (영어 참조 페이지)</span></a>에서 다른 형식을 확인하세요(<code>.ipynb</code> 및 PDF 포함).</p>
+      </section>
+
+      <section id="what-next">
+        <p class="step-label">5단계</p>
+        <h2>다음으로 시도해 볼 사항</h2>
+        <p><code>2 + 2</code>을 다른 Python 셀에서 실행해 보세요. 그런 다음 워크북 선택기를 사용하여 탭을 전환하세요. <a href="../../files-export/tutorial/">CSV 워크북 둘러보기</a>는 <strong>메뉴 → 패키지, 번들 및 워크북 찾아보기</strong>에서 시작하여 예제를 설치하고 해당 셀이 로컬 파일과 어떻게 작동하는지 보여줍니다.</p>
+        <p><a href="../../workbooks/tutorial/">Markov Groups 둘러보기</a>에서는 더 넓은 카탈로그를 검색하고, 큐브 이동에 관한 기존 워크북을 열고, 셀을 순서대로 실행하며, 하나의 매개변수를 변경하는 방법을 보여줍니다.</p>
+        <p>컨트롤 위치를 빠르게 다시 확인하려면 <a href="../../../interface/">인터페이스 참조<span class="english-reference"> (영어 참조 페이지)</span></a>로 돌아가세요. 다른 언어를 배우거나 패키지를 추가하려면 <a href="../../../languages-packages/">언어 및 패키지<span class="english-reference"> (영어 참조 페이지)</span></a>로 계속 진행하세요.</p>
+        <aside class="callout"><strong>Pro 사용 중이신가요?</strong> 기본 워크플로는 동일합니다. Pro에는 전체 화면 편집기와 선택적 AI 기능도 제공됩니다. 다음을 참조하세요: <a href="../../../pro/ai/#full-screen">Pro AI 및 전체 화면 워크플로<span class="english-reference"> (영어 참조 페이지)</span></a> 일반 셀에 익숙해진 후에 확인하세요.</aside>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL 도움말</span><nav aria-label="바닥글 탐색"><a href="../../../interface/">간략한 인터페이스 참조<span class="english-reference"> (영어 참조 페이지)</span></a><a href="../../../">모든 도움말<span class="english-reference"> (영어 참조 페이지)</span></a></nav></footer>
+</body>
+</html>

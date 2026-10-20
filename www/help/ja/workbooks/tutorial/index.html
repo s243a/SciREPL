@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ja" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SciREPLのカタログでMarkov Groupsワークブックを見つけ、そのPythonセルを実行し、ランダムウォークを編集して、ご自身のワークブックのコピーをエクスポートします。">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ja/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/tutorial/tutorial.css">
+  <script src="../../../workbooks/tutorial/catalogue-link.js" defer></script>
+  <title>Markov Groupsワークブックのウォークスルー · SciREPLヘルプ</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">コンテンツへスキップ</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (英語のリファレンスページ)</span></a>
+    <nav aria-label="プライマリナビゲーション">
+      <a href="../../../workbooks/">ワークブックリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a>
+      <a href="../../tutorials/">すべてのチュートリアル</a>
+      <a href="../../../">すべてのヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a>
+      <a href="../../../../">Free PWAを開く</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="チュートリアルの言語"><details class="tutorial-language-menu"><summary>チュートリアルの言語: <bdi>日本語</bdi></summary><nav aria-label="チュートリアルの言語"><a href="../../../en/workbooks/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="./" lang="ja" hreflang="ja" aria-current="page">日本語</a>
+      <a href="../../../ko/workbooks/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">機械翻訳されたチュートリアルです。ネイティブによるレビューは保留中です。コードおよび技術的な値は変更されていません。スクリーンショットにはオリジナルの英語インターフェースが表示されています。本文中の翻訳されたコントロール名をアプリと照合してください。</p></aside>
+    <p class="breadcrumbs"><a href="../../../">ヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a> / <a href="../../../workbooks/">ワークブック<span class="english-reference"> (英語のリファレンスページ)</span></a> / Markov Groupsウォークスルー</p>
+    <article>
+      <p class="eyebrow">実践しながら学ぶ</p>
+      <h1>カタログからワークブックを探索する</h1>
+      <p class="lede">既存の<strong>Markov Groups: A Random Walk on Cube Moves</strong>ワークブックを見つけ、その四つのPythonセルを実行し、ランダムウォークを短縮して、独自のコピーを保存します。ここではSciREPLの使用に焦点を当てているため、行列代数を知っている必要やルービックキューブを解く必要はありません。</p>
+      <p class="callout"><strong>アプリの使い方を学ぶためにお越しですか？</strong> ステップ1～5に従って、ワークブックを見つけ、開き、実行し、編集してエクスポートします。ステップ5の後に終了してもかまいません。<a href="#optional-maths">任意の数学の解説</a>はその後に続きますが、このチュートリアルを完了するのに必須ではありません。</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Androidの手順</li>
+        <li class="chip">約15分</li>
+      </ul>
+      <p class="screen-note">実際のスマートフォンのスクリーンショットは、SciREPL Pro <strong>1.4.0-debug</strong>を<strong>Samsung Galaxy S24+</strong>上で表示したもので、<time datetime="2026-10-06">6日、十月、2026年</time>に撮影されました。これらは公開されたProビルドではなく、共有ワークブックのワークフローを示しています。Freeや他のバージョンでは、一部のコントロールの配置が異なる場合があります。この例は、SciREPLカタログ<strong>v0.4.0</strong>の英語版ワークブックです。</p>
+      <nav class="lesson-nav" aria-label="ワークブックチュートリアルの手順">
+        <strong>このレッスンで学ぶこと</strong>
+        <p><a href="#find-menu">まずメニューを見つける</a></p>
+        <ol>
+          <li><a href="#browse">閲覧、絞り込み、検索</a></li>
+          <li><a href="#open">ワークブックを開く</a></li>
+          <li><a href="#run">セルを順番に実行する</a></li>
+          <li><a href="#edit">一つの値を変更して再実行する</a></li>
+          <li><a href="#export">ワークブックのコピーをエクスポートする</a></li>
+        </ol>
+        <p><a href="#optional-maths">任意：キューブの例の背後にある数学</a></p>
+        <p><a href="../../tutorials/">すべてのチュートリアル</a></p>
+      </nav>
+
+      <section id="find-menu">
+        <p class="step-label">始める前に</p>
+        <h2>メニューを見つける</h2>
+        <p>SciREPLの<strong>アプリ上部のヘッダー行</strong>で<strong>☰ Menu</strong>ボタンを探します。そのアイコンは、下で黄色く強調表示されている<strong>三本の水平線</strong>です。タップしてアプリのメニューを開きます。選択するメニュー項目はステップ1に示されています。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--find-menu" role="img" aria-label="SciREPLの上部ヘッダー行。疑問符のHelpボタンの横にある三本線のMenuボタンが黄色で強調表示されています。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>このスクリーンショットでは、<strong>☰ Menu</strong>ボタンは<strong>? Help</strong>ボタンの横にあります。ヘッダーの配置が異なる場合でも、三本線のアイコンを使用してください。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-workbook.png">完全なスクリーンショットを表示</a>
+        </figure>
+      </section>
+
+      <section id="browse">
+        <p class="step-label">ステップ1</p>
+        <h2>閲覧、絞り込み、検索</h2>
+        <ol class="lesson-steps">
+          <li><strong>メニュー → パッケージ、バンドル、ワークブックを参照</strong>を開きます。Freeでは、表示されている場合、オプションの<strong>📦</strong>ヘッダーショートカットからも同じ画面が開きます。有効にする方法は<a href="../../interface/appearance/#browse-shortcut">外観のウォークスルー</a>に記載されています。</li>
+          <li>リストを参照するか、フィルターを使用します。この英語の例では、<strong>English</strong>を<strong>使用言語</strong>で、<strong>Python</strong>を<strong>カーネル</strong>で選択します。<strong>すべての使用言語</strong>やカーネルの<strong>すべて</strong>オプションも機能しますが、表示される項目が多くなります。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse" role="img" aria-label="カタログのコントロールが黄色で強調表示されているSciREPLのBrowse画面。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-browse.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Browseでは、パッケージ、バンドル、およびワークブックテンプレートが集約されています。検索とフィルターを使用すると、リストを絞り込むことができます。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-browse.png">完全なBrowseのスクリーンショットを表示</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>検索欄に<strong>Markov Groups</strong>と入力します。<strong>ワークブック</strong>の下にある<strong>Markov Groups: A Random Walk on Cube Moves</strong>を見つけてください。インストールする前に完全なタイトルを確認してください。これはワークブックのテンプレートであり、Pythonに追加するパッケージではありません。</li>
+          <li>キーボードで結果が隠れている場合は、キーボードを非表示にするボタンを使うか、Androidの<strong>戻る</strong>を一度押して閉じます。Browseを開いたまま、一致するワークブックまでスクロールしてください。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--search" role="img" aria-label="一致するワークブックとそのインストール操作部が黄色で強調表示されている、Markov GroupsのBrowse検索。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-search.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/search-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Markov Groups</strong>を検索し、一致するワークブックのタイトルと<strong>インストール</strong>ボタンを確認します。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-search.png">検索の完全なスクリーンショットを表示</a>
+        </figure>
+        <p><strong>他には何が利用できますか？</strong> <a id="catalogue-workbooks-link" href="https://github.com/s243a/SciREPL-Catalog/tree/main/workbooks/en">GitHub上のワークブック一覧（<bdi id="catalogue-workbooks-language">英語</bdi>）をご覧ください</a>。レッスンの言語版は個別の項目であり、異なるレッスンではありません。</p>
+        <div class="catalogue-language-choice" id="catalogue-language-choice" hidden>
+          <label for="catalogue-workbooks-locale">ワークブックの言語:</label>
+          <select id="catalogue-workbooks-locale">
+            <option value="ar" lang="ar">العربية</option>
+            <option value="bn" lang="bn">বাংলা</option>
+            <option value="de" lang="de">Deutsch</option>
+            <option value="en" lang="en" selected>English</option>
+            <option value="es" lang="es">Español</option>
+            <option value="fr" lang="fr">Français</option>
+            <option value="hi" lang="hi">हिन्दी</option>
+            <option value="id" lang="id">Bahasa Indonesia</option>
+            <option value="ja" lang="ja">日本語</option>
+            <option value="ko" lang="ko">한국어</option>
+            <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+            <option value="ru" lang="ru">Русский</option>
+            <option value="zh" lang="zh">中文</option>
+          </select>
+        </div>
+        <p>GitHubのリンク先には最新の開発内容が表示されます。SciREPLは通常、最新の安定版カタログリリースを使用するため、GitHubに表示されている一部のワークブックはBrowseにまだ表示されない場合があります。SciREPLで検索をクリアし、<strong>CSV</strong>、<strong>Prolog</strong>、<strong>Lua</strong>、または<strong>statistics</strong>を試してみてください。他の言語を調べる際はKernelで<strong>すべて</strong>を選択してください。</p>
+        <p class="callout"><strong>プライバシーに関する通知が表示された場合：</strong>リモートカタログの取得または更新にはネットワーク接続が必要です。開示事項を読み、<em>ダイアログ内</em>を一番下までスクロールして、同意する場合にのみ<strong>I Understand</strong>をタップしてください。通知を閉じるとそのネットワーク更新は行われませんが、組み込みの項目や以前キャッシュされたカタログ項目は引き続き表示される場合があります。<a href="../../../privacy/">プライバシーとローカルデータ<span class="english-reference"> (英語のリファレンスページ)</span></a>を参照してください。</p>
+        <p class="callout"><strong>一致するワークブックがありませんか？</strong>言語とカーネルのフィルターを確認し、カタログの<strong>更新</strong>操作部を使用してください。古いアプリには同じカタログ操作部がない場合があります。または、<a download="markov-groups.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/v0.4.0/workbooks/en/markov-groups.srwb">固定されたv0.4.0ワークブックファイルを端末に保存</a>し、<strong>メニュー → Import File</strong>を選択して<code>markov-groups.srwb</code>を選びます。ブラウザでファイルがテキストとして表示される場合は、ブラウザの保存/ダウンロード機能を使用して<code>.srwb</code>拡張子を維持してください。<a href="../import/">手動でのワークブックインポート手順</a>では、GitHubの<code>main</code>ブランチにあるSimpson's Paradoxを使用した手順を説明しています。このレッスンを続けるには、上記のMarkovファイルを選択してください。</p>
+      </section>
+
+      <section id="open">
+        <p class="step-label">ステップ 2</p>
+        <h2>ワークブックを開いてセルを確認する</h2>
+        <ol class="lesson-steps">
+          <li>ワークブックカードの<strong>インストール</strong>をタップします。ボタンがすでに<strong>インストール済み</strong>と表示されている場合は、Browseメニューを終了し、代わりにワークブックセレクターから既存のワークブックを選択してください。</li>
+          <li>通常、ワークブックが選択されたタブになります。Browseメニューが開いたままの場合は終了してください。自動切り替えがオフになっている場合は、 <strong><bdi lang="en" dir="ltr">Markov Groups: A Random Walk on Cube Moves</bdi></strong> から <strong><svg role="img" aria-label="下向きシェブロン" width="16" height="16" viewBox="0 0 16 16" style="vertical-align: -.125em;"><path d="M3 5.5 8 10.5 13 5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> ワークブックセレクター</strong> の隣の <strong>SciREPL</strong> （ヘッダー内）。</li>
+          <li>冒頭の文章を読み、セルをスクロールしてください。Markdownセルはレッスンを説明し、Pythonセルには実行するコードが含まれています。見つけやすいように、各Pythonセルには名前が付いています。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--workbook" role="img" aria-label="開かれたマルコフ群のワークブック。タイトルとワークブックの操作パネルが黄色で強調表示されています。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/workbook-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>カタログのワークブックは編集可能なセルとして開きます。その導入部分にPythonの実行順序が示されています。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-workbook.png">ワークブック全体のスクリーンショットを表示</a>
+        </figure>
+        <p class="callout"><strong>インストールは実行を意味しません。</strong>このリモートカタログワークブックをインストールすると、そのPythonコードを実行せずにセルが追加されます。v0.4.0テンプレートには保存されたPython出力がないため、コードを確認してご自身で実行してください。AIアカウント、APIキー、外部データセット、追加パッケージのインストールは不要です。コードはNumPyを使用し、SciREPLのPythonランタイムで動作します。</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">ステップ3</p>
+        <h2>四つのPythonセルを順番に実行</h2>
+        <p>保存されたセルの場合、そのセルのヘッダーにある<strong>✎ 鉛筆</strong>をタップし、次にそのセル自体の<strong>実行</strong>をタップします。これにより既存のセルが実行されます。下部にある新規セルパネルは別のセルを作成します。</p>
+        <aside class="callout" data-editions="pro"><strong>Proのショートカット：</strong> 保存されたコードをダブルタップしてエディタを開き、そのセル自体の <strong>実行</strong>。Freeでは <strong>✎ 鉛筆</strong> をこのウォークスルーで使用します。</aside>
+        <p class="callout"><strong>これらの名前は何を意味していますか？</strong> <code>cube_moves</code>と<code>check_moves</code>はセルに表示される名前であり、入力するコマンドではありません。該当する名前を見つけ、そのセルの鉛筆と実行を使用してください。<a href="../named-cells/">名前付きセルと言語間パスのチュートリアル</a>では、名前を割り当てて<code>/nb/cube_moves/.code</code>などの参照として使用する方法を説明しています。</p>
+        <ol class="lesson-steps">
+          <li><code>cube_moves</code>を実行します。操作とヘルパーを定義します。想定される結果：<code>Built six clockwise quarter-turn matrices with fixed face centres.</code></li>
+          <li><code>check_moves</code>を実行します。ステッカーが失われていないこと、中心が固定されたままであること、および各四分の一回転を四回繰り返すと最初に戻ることを確認します。合格行が六行表示された後、<code>All six moves passed. U and R do not commute.</code>が表示されるはずです。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--checks" role="img" aria-label="携帯電話上の新しいcheck_movesの出力。合格したチェックが黄色で強調表示されています。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-checks.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/checks-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>出力されたチェック結果は<code>check_moves</code>を実行した最新の結果であり、カタログから提供された保存済みの結果ではありません。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-checks.png">チェック結果全体のスクリーンショットを表示</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li><code>show_turn</code>を実行します。Uターンのサイクルと、回転前後のステッカーラベルが出力されます。前面の最上段が<code>[19, 20, 21]</code>から<code>[46, 47, 48]</code>に変化します。比較<code>U then R equals R then U: False</code>は、操作の順序が重要であることを示しています。</li>
+        </ol>
+        <p><strong>出力結果の一部：</strong></p>
+        <pre id="show-turn-output" style="white-space: pre-wrap; overflow-wrap: anywhere;"><code>U cycles, shown as one-based sticker positions:
+1 -&gt; 3 -&gt; 9 -&gt; 7 -&gt; 1
+2 -&gt; 6 -&gt; 8 -&gt; 4 -&gt; 2
+19 -&gt; 37 -&gt; 28 -&gt; 46 -&gt; 19
+20 -&gt; 38 -&gt; 29 -&gt; 47 -&gt; 20
+21 -&gt; 39 -&gt; 30 -&gt; 48 -&gt; 21
+
+F top row labels before U: [19, 20, 21]
+F top row labels after U:  [46, 47, 48]
+
+U then R equals R then U: False</code></pre>
+        <p>面の文字の長いリストはここでは省略されています。サイクルの行では<strong>一から始まる位置</strong>が使用され、行の比較では<strong>ステッカーラベル</strong>が示されます。揃った状態のキューブでは最初これらに一致する番号が付けられていますが、これらは異なる意味を持っています。</p>
+        <ol class="lesson-steps" start="4">
+          <li><code>random_walk</code>を実行します。単一ステッカーの確率の合計である<code>1.0</code>、12ステップのサンプリングされたパス、最終的な面の文字ラベル、およびすべてのステッカーラベルと六つの中心すべてが保持されたことを確認するメッセージが出力されます。</li>
+        </ol>
+        <p>Pythonセルはすでに必要な順序で配置されています。順序を変更しないでください。後続のセルは<code>cube_moves</code>の定義を再利用します。複数のセルを一度に実行するには、<a href="#batch-run-note">これより下をすべて実行およびすべてのセルを実行</a>を参照してください。</p>
+        <p class="callout"><strong>初回実行が遅いですか？</strong> Pythonの初期化に時間がかかる場合があり、ランタイムのダウンロードやネットワークフォールバックに同意が必要になることがあります。ステータスバッジが<strong>準備完了</strong>に戻るのを待ち、セルの出力にエラーがないか確認してください。再起動後に以降のセルで未定義の名前が報告された場合は、最初からPythonセルを実行してください。保存された出力はライブのPython定義と同じではありません。</p>
+        <p>このワークブックはテキストと面の文字リストを出力します。立方体の描画やアニメーション表示は行わず、シード値による短い経路は一様に混合されたスクランブルの証拠ではありません。</p>
+      </section>
+
+      <section id="edit">
+        <p class="step-label">ステップ4</p>
+        <h2>ウォークを短縮して保存されたセルを再実行する</h2>
+        <ol class="lesson-steps">
+          <li><code>random_walk</code>を見つけて、<em>その</em> <strong>✎ 鉛筆</strong>をタップします。</li>
+          <li>この行を見つけて、次のみを変更します <code>size=12</code> 変更後: <code>size=6</code>:
+            <pre><code>moves = rng.choice(MOVE_OPTIONS, size=12).tolist()</code></pre>
+            <p><code>np.random.default_rng(7)</code>は変更しないでください。シードにより、この例の再現性が確保されます。</p>
+          </li>
+          <li>その保存されたセルのエディタで<strong>実行</strong>ボタンをタップします。出力が更新され、<code>Sampled moves:</code>の行には十二個ではなく六個の選択肢が含まれるようになります。<code>I</code>は立方体を静止させたままですが、選択肢の一つとしてカウントされます。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--edit" role="img" aria-label="サイズが六に等しく、セルの実行コントロールが黄色で強調表示された状態で編集中の、保存された random_walk セル。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-edit.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>保存されたセルで一つの値を変更し、<em>そのセルの</em>実行を使用します。編集しただけでは以前の出力は更新されません。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-edit.png">編集の完全なスクリーンショットを表示</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--six-moves" role="img" aria-label="再実行後にサンプリングされた六つの選択肢を示す、黄色で強調表示された新しい random_walk の出力。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-six-moves.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/six-moves-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>短縮されたサンプリング経路は、編集による目に見える結果です。最後のメッセージは、軌跡がステッカーのラベルと中心を保持していることを引き続き確認しています。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-six-moves.png">六つの選択肢の結果の完全なスクリーンショットを表示</a>
+        </figure>
+        <p>この変更では、以前の定義が読み込まれている間に<code>random_walk</code>のみを再実行してください。代わりに<code>cube_moves</code>を編集した場合は、以降のPythonセルも再実行してください。出力には前回の実行が記録され、別のセルが変更されても自動的には再計算されません。</p>
+        <p>誤ってエディタを開いた場合は、<strong>キャンセル</strong>を選択してください。元の例に戻すには、<code>size=6</code>を<code>size=12</code>に戻してセルを再度実行します。</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">ステップ5</p>
+        <h2>独自のワークブックのコピーをエクスポートする</h2>
+        <ol class="lesson-steps">
+          <li>Markov Groups ワークブックを選択したまま、「ドキュメントのエクスポート」ではなく <strong>メニュー → ワークブックとパッケージをエクスポート</strong> を開きます。</li>
+          <li><strong>ワークブック (.srwb)</strong>と<strong>現在のタブのみ</strong>を選択します。</li>
+          <li><strong>エクスポート</strong>をタップし、ご自身が管理する場所にコピーを保存します。Android では共有/保存フローが開き、ブラウザではファイルがダウンロードされます。<code>.srwb</code>拡張子はそのまま保持してください。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="「Workbook srwb」、「Current tab only」および「Export」が黄色で強調表示されたエクスポートダイアログ。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>ワークブック形式と「現在のタブのみ」により、無関係なタブを含めずにこの編集済みワークブックが保存されます。このレッスンではPro専用の<strong>AI会話を含める</strong>オプションは不要です。チェックを外したままにしてください。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-export.png">エクスポートの完全なスクリーンショットを表示</a>
+        </figure>
+        <p>このワークブックには個別のデータファイルが不要なため、このレッスンでは<code>.srwb</code>のコピーで十分です。<strong>メニュー → Import File</strong> で再度開くことができます。新しいランタイムを開始するときは、そのPythonセルを最初から実行してください。</p>
+        <p class="callout"><strong>ローカル復旧はバックアップではありません。</strong>アプリやサイトのストレージを消去したり、アンインストールしたりすると、ローカルの作業内容が削除される可能性があります。Androidとブラウザのセッション間で編集内容は自動的に共有されません。エクスポートしてもカタログに変更は公開されず、別のコピーが作成されます。</p>
+        <p>保存済みセルの編集の基本については、<a href="../../interface/tutorial/">最初のワークブックのインターフェースウォークスルー</a>をご覧ください。独立したデータファイルを読み込んで保持する例については、<a href="../../files-export/tutorial/">CSVワークブックウォークスルー</a>をお試しください。<a href="../../../workbooks/">ワークブックリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a>では、セルの種類と不変のセル名について説明しています。</p>
+      </section>
+
+      <aside class="callout" id="batch-run-note" aria-labelledby="batch-run-heading">
+        <h3 id="batch-run-heading">下をすべて実行とすべてのセルを実行</h3>
+        <ul>
+          <li><strong>下をすべて実行：</strong>保存済みセルをその<strong>✎ 鉛筆</strong>で開き、<strong>これ以降をすべて実行</strong>を選択します（コンパクトアイコンは<strong>▶↓</strong>です）。これにより、そのセル<em>および</em>その下にあるすべてのセルが順番に実行されます。</li>
+          <li><strong>メニュー → すべてのセルを実行：</strong>選択したワークブックを最初のセルから最後のセルまで実行します。すべてのワークブックタブを実行するコマンドではありません。</li>
+        </ul>
+        <p>最初にコードを確認し、バッチの実行中はこのワークブックを選択したままにしてください。新しいPythonセッションの後は、以降のセルで定義が利用できるように<code>cube_moves</code>から開始してください。これらの操作はコードを実行します。説明を「任意」と呼んでも、アプリがそのコードセルをスキップすることはありません。</p>
+      </aside>
+
+      <p class="callout" id="walkthrough-complete"><strong>SciREPLのウォークスルーが完了しました。</strong>ワークブックの検索、起動、実行、編集、エクスポートを行いました。アプリの使い方を学ぶだけであれば、ここで終了してもかまいません。キューブの数学や開発用ワークブックを調べたい場合は、以下に進んでください。</p>
+
+      <section id="optional-maths">
+        <p class="step-label">任意の読み物</p>
+        <h2>キューブの例の背後にある数学</h2>
+        <h3>出力結果が持つ意味</h3>
+        <p>このワークブックは、単に六つの色だけでなく、<strong>54個の個別にラベル付けされたステッカー</strong>を追跡します。正当な操作によってそれらのラベルが並べ替えられます。一つの四分の一回転を四回繰り返すと元の配置に戻りますが、異なる面を回転させる場合は、その順序が変わると異なる結果が生じる可能性があります。</p>
+        <p>ランダムウォークは13個の選択肢から選択します。静止（<code>I</code>）、六つの四分の一回転、およびそれらの六つの逆操作です。その<strong>54×54の確率行列は、キューブ全体のすべての配置ではなく、一枚のステッカー</strong>の位置を表します。確率の合計が<code>1.0</code>であることは、このステッカーの位置確率の総和が一であることを意味しますが、キューブが一様にスクランブルされていることを証明するものではありません。</p>
+        <p class="callout"><strong>面の向きについて興味がありますか？</strong>ワークブックの<code>coordinates</code>セルは、全体座標軸と各面の右方向、上方向、および外向きの法線を示します。<a href="../graphics/">写真、図、数式のチュートリアル</a>では、そのような説明をワークブックに組み込む方法を紹介しています。座標図はカタログの開発版に追加中であり、上記の固定されたv0.4.0のコピーには含まれていません。</p>
+        <div id="stage4-preview">
+          <h3>任意：改訂されたステージ4のプレビュー</h3>
+          <p>上記の手順とスマートフォンのスクリーンショットでは、安定版の<strong>v0.4.0</strong>ワークブックを使用しています。<a download="markov-groups-stage4-preview.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/f88d9b9e26364eeb5e7ff1ee9bcce5f27d47c66e/workbooks/en/markov-groups.srwb">改訂版ワークブックのダウンロード</a>は<strong>開発プレビュー</strong>であり、まだ安定版カタログには含まれていません。より短く、説明とコードセルが交互に配置された構成を試したい場合は、<strong>メニュー → ファイルのインポート</strong>からインポートしてください。</p>
+          <p>そのプレビューでは、上記と同様にまず<code>cube_moves</code>、<code>check_moves</code>、<code>show_turn</code>を実行します。その後：</p>
+          <ol class="lesson-steps">
+            <li><code>transition_matrix</code>を実行します。これにより<code>T</code>が構築されます。これは、一様に選ばれた一つの選択肢（<code>I</code>、面の四分の一回転、またはその逆操作）の後における一枚のステッカーの位置の確率行列です。</li>
+            <li><code>sticker_step</code>を実行します。これは<strong>ステッカーラベル1</strong>を追跡するもので、このステッカーは最初<strong>ゼロ起算の位置0</strong>にあります。その位置確率の合計は<code>1.0</code>になります。下のグラフは、そのセルによって計算された移動先確率を示しています。</li>
+          </ol>
+          <figure id="sticker-probability-figure" aria-describedby="sticker-probability-caption" style="margin: 24px 0;">
+            <img src="../../../workbooks/tutorial/assets/sticker-one-step.svg" width="400" height="380" style="display: block; width: min(100%, 560px); height: auto;" alt="一回のランダムな移動の後、ステッカーラベル1が位置0にとどまる確率は十三分の七であり、位置2、6、18、35、42、または47のそれぞれに到達する確率は十三分の一です。">
+            <figcaption id="sticker-probability-caption"><strong>ビン分割されたヒストグラムではなく、確率の棒グラフです。</strong>この図は<code>after_one_step = T @ location_probability</code>から計算されたものであり、スマートフォンのスクリーンショットやワークブックによって生成された新しい出力ではありません。位置はゼロ始まりです。他の47箇所の位置は確率がゼロであるため省略されています。ステッカーのラベルは1のままです。</figcaption>
+          </figure>
+          <div class="table-wrap">
+            <table aria-label="ステッカーラベル1の正確な一ステップ確率">
+              <thead><tr><th>移動先の位置</th><th>確率</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>7/13 ≈ 53.85%</td></tr>
+                <tr><td>2、6、18、35、42、47（それぞれ）</td><td>1/13 ≈ 7.69%</td></tr>
+                <tr><td>他のすべての47箇所の位置</td><td>0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <ol class="lesson-steps" start="3">
+            <li><code>random_walk</code>を実行します。これは12通りの選択肢のパスを<strong>キューブ全体</strong>についてサンプリングし、<code>transition_matrix</code>の定義を使用します。これは上記の一つのステッカーの確率とは異なります。ステップ4の<code>size=12</code>の編集は、どちらのエディションでもこのセルで機能します。</li>
+          </ol>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL ヘルプ</span><nav aria-label="フッターナビゲーション"><a href="../../../workbooks/">ワークブックリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a><a href="../../../">すべてのヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a></nav></footer>
+</body>
+</html>

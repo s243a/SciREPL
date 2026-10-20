@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "locale": "hi",
+  "chunk": "02",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "originalReviewHash": "e7c6792586fb7a1778653e2bafb78a1f83b9f1d419cc86607d96f675ebe4be82",
+  "reviewer": "Codex controller with independent Codex fidelity audit",
+  "reviewScope": "All 40 complete Hindi review fields were independently compared with the frozen English source. Its numeric values were already correct; this small clause reorder matches the strict source numeric order without changing the meaning or the second sentence.",
+  "nativeLanguageReview": "pending",
+  "corrections": [
+    {
+      "fieldId": "interface.tutorial.0015",
+      "before": "Samsung Galaxy S24-सीरीज़ फ़ोन पर {{P000}} {{P001}} v1.{{P002}}",
+      "after": "{{P000}} {{P001}} v1.{{P002}} Samsung Galaxy S24-सीरीज़ फ़ोन पर",
+      "reason": "Put the app/version before the phone model, preserving every numeric value and protected token. This is a clear Hindi clause reorder for the source-order guard, not a correction of factual values."
+    }
+  ]
+}

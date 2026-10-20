@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="bn" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SciREPL-এর Browse শর্টকাট প্রদর্শন করুন এবং Menu → Appearance-এর মাধ্যমে হেডার বোতাম, Run লেবেল, থিম ও অ্যান্ড্রয়েড স্ট্যাটাস-বার স্পেস সমন্বয় করুন।">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/bn/interface/appearance/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../interface/appearance/tutorial.css">
+  <title>Appearance নির্দেশিকা · SciREPL সহায়তা</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/appearance/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/appearance/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/appearance/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/appearance/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/appearance/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/appearance/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/appearance/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/appearance/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/appearance/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/appearance/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/appearance/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/appearance/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/appearance/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/appearance/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">সরাসরি মূল বিষয়ে যান</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+    <nav aria-label="প্রধান নেভিগেশন">
+      <a href="../../../interface/">ইন্টারফেস রেফারেন্স<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+      <a href="../../tutorials/">সকল টিউটোরিয়াল</a>
+      <a href="../../../">সকল সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+      <a href="../../../../">Free PWA খুলুন</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="টিউটোরিয়ালের ভাষা"><details class="tutorial-language-menu"><summary>টিউটোরিয়ালের ভাষা: <bdi>বাংলা</bdi></summary><nav aria-label="টিউটোরিয়ালের ভাষা"><a href="../../../en/interface/appearance/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/appearance/" lang="ar" hreflang="ar">العربية</a>
+      <a href="./" lang="bn" hreflang="bn" aria-current="page">বাংলা</a>
+      <a href="../../../de/interface/appearance/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/appearance/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/appearance/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/appearance/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/appearance/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/appearance/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/interface/appearance/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/appearance/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/appearance/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/appearance/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">মেশিন-অনূদিত টিউটোরিয়াল; স্থানীয় ভাষায় পর্যালোচনা প্রক্রিয়াধীন। কোড এবং প্রযুক্তিগত মানসমূহ অপরিবর্তিত। স্ক্রিনশটগুলোতে মূল ইংরেজি ইন্টারফেস দেখানো হয়েছে; আপনার অ্যাপের সাথে এই টেক্সটের অনূদিত কন্ট্রোল নামগুলো মিলিয়ে নিন।</p></aside>
+    <p class="breadcrumbs"><a href="../../../">সাহায্য<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / <a href="../../../interface/">ইন্টারফেস<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / অ্যাপিয়ারেন্স ওয়াকথ্রু</p>
+    <article>
+      <p class="eyebrow">ইন্টারফেসটি নিজের মতো করে সাজিয়ে নিন</p>
+      <h1>ব্রাউজ প্রদর্শন করুন এবং অ্যাপিয়ারেন্স সামঞ্জস্য করুন</h1>
+      <p class="lede"><strong>📦 Browse</strong> শর্টকাটটি <strong>SciREPL Free-এর</strong> হেডারে রাখুন, তারপর সুবিধাজনক বোতাম এবং হালকা বা গাঢ় থিম বেছে নিন। শেয়ার করা অ্যাপিয়ারেন্স নিয়ন্ত্রণগুলো Pro-এও দরকারি; একটি পৃথক কেবল-Pro বিভাগে ফুল-স্ক্রিন সম্পাদনা, অতিরিক্ত কি এবং লাইভ সিনট্যাক্স রং অন্তর্ভুক্ত রয়েছে। কোনো ওয়ার্কবুক সেল পরিবর্তন বা রান না করেই আপনি এটি করতে পারেন।</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro (লেবেল দেখুন)</li>
+        <li class="chip">অ্যান্ড্রয়েড স্ক্রিনশট</li>
+        <li class="chip">প্রায় 3 মিনিট</li>
+      </ul>
+      <p class="screen-note">পাঁচটি স্ক্রিনশট হলো <strong>SciREPL Free 1.4.0-debug</strong>-এর বাস্তব ক্যাপচার, যা একটি <strong>Samsung Galaxy S24+</strong>-এ <time datetime="2026-10-06">6 অক্টোবর 2026</time> তারিখে তোলা হয়েছে। এগুলোতে ডিবাগ-স্বাক্ষরিত অ্যাপটি দেখানো হয়েছে, Play Store থেকে কোনো ইনস্টলেশন নয়। ছবিতে দেখানো ধাপগুলোতে Free 1.4.0 নিয়ন্ত্রণ ব্যবহার করা হয়েছে। Browse-এর হেডার শর্টকাটটি কেবল-Free; Pro ব্যবহারকারীরা Menu থেকে একই ক্যাটালগ খুলতে পারেন। নিচের কেবল-Pro পাঠ্যটি Pro 1.4.0 কোডবেসের সাথে যাচাই করা হয়েছে; সেই নিয়ন্ত্রণগুলো এই Free ছবিগুলোতে দেখানো হয়নি, এবং পুরোনো মেনু ভিন্ন হতে পারে।</p>
+      <nav class="lesson-nav" aria-label="অ্যাপিয়ারেন্স ওয়াকথ্রুর ধাপসমূহ">
+        <strong>এই পাঠে</strong>
+        <ol>
+          <li><a href="#open-appearance">অ্যাপিয়ারেন্স খুলুন</a></li>
+          <li><a href="#browse-shortcut">Browse শর্টকাটটি প্রদর্শন করুন</a></li>
+          <li><a href="#buttons">বোতাম এবং Run সামঞ্জস্য করুন</a></li>
+          <li><a href="#pro-editor">কেবল Pro: ফুল-স্ক্রিন সম্পাদনা, অতিরিক্ত কি এবং লাইভ রং</a></li>
+          <li><a href="#theme">একটি থিম বেছে নিন</a></li>
+          <li><a href="#android-space">ঐচ্ছিক অ্যান্ড্রয়েড স্পেস এবং পুনরুদ্ধার</a></li>
+        </ol>
+        <p><a href="../../tutorials/">সকল টিউটোরিয়াল</a></p>
+      </nav>
+
+      <section id="open-appearance">
+        <p class="step-label">ধাপ 1</p>
+        <h2>Menu → Appearance খুলুন</h2>
+        <ol class="lesson-steps">
+          <li><strong>☰ Menu</strong> খুঁজুন, যা অ্যাপের শীর্ষে হেডারে থাকা তিনটি অনুভূমিক রেখার বোতাম।</li>
+          <li>এটিতে ট্যাপ করুন, তারপর <strong>🎨 চেহারা ও রূপ</strong> বেছে নিন। মেনুটি আপনার স্ক্রিনের চেয়ে বড় হলে, এন্ট্রিটি খুঁজে পেতে এর ভেতরে স্ক্রোল করুন।</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-menu" role="img" aria-label="SciREPL Menu, যেখানে Appearance এন্ট্রিটি হলুদ রঙে হাইলাইট করা হয়েছে।">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>অ্যাপের মেনু থেকে <strong>🎨 চেহারা ও রূপ</strong> বেছে নিন।</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-menu.png">সম্পূর্ণ Menu স্ক্রিনশটটি দেখুন</a>
+        </figure>
+        <p class="callout"><strong>আপনি নির্বাচন করার সাথে সাথেই পরিবর্তনগুলো কার্যকর হয়।</strong> নিচের সাধারণ নিয়ন্ত্রণগুলোর জন্য কোনো Save বা Apply বোতামের প্রয়োজন নেই। <strong>×</strong> দিয়ে Appearance বন্ধ করলেও আপনার পরিবর্তনগুলো বাতিল হয় না, এবং অ্যাপে পরবর্তী পরিদর্শনের জন্য আপনার পছন্দগুলো সংরক্ষিত থাকে।</p>
+      </section>
+
+      <section id="browse-shortcut">
+        <p class="step-label">ধাপ 2</p>
+        <h2>Free 1.4.0: 📦 Browse শর্টকাটটি প্রদর্শন করুন</h2>
+        <p><strong>Pro ব্যবহার করছেন?</strong> এই শর্টকাট সেটআপ এড়িয়ে যান এবং <strong>মেনু → প্যাকেজ, বান্ডিল ও ওয়ার্কবুক ব্রাউজ করুন</strong> ব্যবহার করুন। পরবর্তী বিভাগগুলোতে শেয়ার করা Appearance নিয়ন্ত্রণগুলো আলোচনা করা হয়েছে।</p>
+        <ol class="lesson-steps">
+          <li><strong>মেনু → চেহারা ও রূপ</strong> খুলুন, তারপর <strong>হেডার শর্টকাট</strong>-এ স্ক্রোল করুন।</li>
+          <li><strong>ব্রাউজ শর্টকাট দেখান</strong> খুঁজুন এবং <strong>সর্বদা</strong> বেছে নিন।</li>
+          <li><strong>×</strong> দিয়ে Appearance বন্ধ করুন। <strong>📦</strong> বোতামটি এখন হেডারে রয়েছে; <strong>প্যাকেজ, বান্ডিল ও ওয়ার্কবুক ব্রাউজ করুন</strong> খুলতে এটিতে ট্যাপ করুন।</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-shortcuts" role="img" aria-label="SciREPL Free-এর হেডার শর্টকাট বিভাগ, যেখানে ব্রাউজ শর্টকাট প্রদর্শন এবং এর অগ্রাধিকার তীরগুলো হলুদ রঙে চিহ্নিত করা রয়েছে।">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-shortcuts.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/shortcuts-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Free 1.4.0</strong>-এ, 📦 বোতামটি দৃশ্যমান থাকবে কি না তা নির্ধারণ করতে <strong>ব্রাউজ শর্টকাট দেখান</strong>-এর পাশের ড্রপডাউনটি ব্যবহার করুন।</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-shortcuts.png">শর্টকাটের সম্পূর্ণ স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p>বিকল্পগুলোর আলাদা আলাদা উদ্দেশ্য রয়েছে:</p>
+        <ul>
+          <li><strong>সর্বদা:</strong> হেডারে আরেকটি সারির প্রয়োজন হলেও শর্টকাটটি দৃশ্যমান রাখুন।</li>
+          <li><strong>জায়গা থাকলে:</strong> ব্রাউজের জন্য ডিফল্ট। এটি কেবল জায়গা হলেই দেখান; স্ক্রিন ছোট হলে, বোতাম বড় হলে কিংবা স্ট্যাটাস বার্তা দীর্ঘ হলে এটি অদৃশ্য হয়ে যেতে পারে।</li>
+          <li><strong>কখনও নয়:</strong> হেডার শর্টকাটটি লুকিয়ে রাখুন।</li>
+        </ul>
+        <p><strong>↑</strong> এবং <strong>↓</strong> বোতামগুলো পরিবর্তন করে যে জায়গা কম থাকলে কোন ঐচ্ছিক শর্টকাটটি প্রথমে জায়গা ছেড়ে দেবে। কোনো শর্টকাট বেশিক্ষণ রাখতে সেটিকে উপরে সরান, অথবা দ্রুত অদৃশ্য করতে নিচে নামান। এগুলো অগ্রাধিকার পরিবর্তন করে, হেডারে আইকনগুলোর অবস্থান নয়।</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-header" role="img" aria-label="SciREPL Free হেডার, যেখানে প্যাকেজ-বক্স ব্রাউজ শর্টকাটটি হলুদ রঙে হাইলাইট করা রয়েছে।">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-header.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/header-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Free-এর <strong>📦</strong> হেডার শর্টকাটটি ঠিক সেই ক্যাটালগ খোলে যা <strong>মেনু → প্যাকেজ, বান্ডিল ও ওয়ার্কবুক ব্রাউজ করুন</strong> খোলে।</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-header.png">হেডারের সম্পূর্ণ স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p class="callout"><strong>কোনো 📦 বোতাম নেই?</strong> শর্টকাটটি লুকানো থাকলে বা আপনার সংস্করণে এটি না থাকলে মেনু পথটি তখনও কাজ করে। একটি সংহত হেডারের জন্য, প্রতিটি ঐচ্ছিক শর্টকাট দৃশ্যমান রাখতে বাধ্য করার পরিবর্তে ব্রাউজকে <strong>যখন জায়গা থাকে</strong>-এ ফিরিয়ে নিন।</p>
+        <p>আপনি যদি কোনও ওয়ার্কবুক খুঁজতে এখানে এসে থাকেন, তবে এখন <a href="../../workbooks/tutorial/#browse">মার্কভ গ্রুপস নির্দেশিকায় ফিরে যেতে পারেন</a> এবং ক্যাটালগ অনুসন্ধান করতে পারেন।</p>
+      </section>
+
+      <section id="buttons">
+        <p class="step-label">ধাপ 3</p>
+        <h2>সুবিধাজনক বোতাম এবং একটি রান লেবেল বেছে নিন</h2>
+        <p><strong>মেনু → চেহারা ও রূপ</strong> আবার খুলুন এবং <strong>বোতামসমূহ</strong> খুঁজুন। <strong>বোতামের আকার</strong> স্লাইডারটি সরান; এর শতাংশ এবং পাশের <strong>প্রাকদর্শন</strong> অবিলম্বে পরিবর্তিত হবে। ডিফল্ট হলো <strong>100%</strong>। হেডারের বড় বোতামগুলোতে ট্যাপ করা সহজ হতে পারে, তবে তা ঐচ্ছিক শর্টকাটের জন্য কম জায়গা রাখে।</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-options" role="img" aria-label="হলুদ রঙে হাইলাইট করা অ্যাপিয়ারেন্সের লেআউট এবং বোতাম নিয়ন্ত্রণ, যার মধ্যে অ্যান্ড্রয়েড স্ট্যাটাস বার লুকানো এবং বোতামের আকার অন্তর্ভুক্ত।">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-options.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/options-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>বোতামের আকার</strong> হেডার নিয়ন্ত্রণগুলো সমন্বয় করে। শুধুমাত্র অ্যান্ড্রয়েডের জন্য প্রযোজ্য স্ট্যাটাস-বার সেটিংটি নিচে ব্যাখ্যা করা হয়েছে।</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-options.png">লেআউট এবং বোতামের সম্পূর্ণ স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p><strong>রান বোতাম</strong> ড্রপডাউনটি <em>নতুন-সেল প্যানেলে</em> রান নিয়ন্ত্রণ করে, সংরক্ষিত-সেল এডিটরের ভেতরের রান বোতামগুলো নয়:</p>
+        <ul>
+          <li><strong>স্বয়ংক্রিয় (জায়গা কম থাকলে কেবল আইকন):</strong> ডিফল্ট মান। জায়গা থাকলে লেবেলটি রাখুন, অথবা টাইপ করার জায়গা রাখতে কেবল ▶ আইকনটি ব্যবহার করুন।</li>
+          <li><strong>শুধুমাত্র আইকন:</strong> সর্বদা সংহত ▶ বোতামটি ব্যবহার করুন।</li>
+          <li><strong>সর্বদা লেবেল দেখান:</strong> ছোট স্ক্রিনেও লেখাটি বজায় রাখুন।</li>
+        </ul>
+        <p>অ্যাপিয়ারেন্সে কোনো টেক্সট-জুম স্লাইডার নেই। <strong>বোতামের আকার</strong> কোনো সাধারণ ফন্ট-আকার সেটিং নয়। অ্যান্ড্রয়েডের সিস্টেম টেক্সট জুমের সাথে মানিয়ে নিতে Free 1.4.0 এবং Pro 1.3.0 স্বয়ংক্রিয়ভাবে সংহত হেডার নিয়ন্ত্রণগুলোকে বড় করে।</p>
+      </section>
+
+      <section id="pro-editor">
+        <p class="step-label">ঐচ্ছিক · শুধুমাত্র Pro</p>
+        <h2>শুধুমাত্র Pro: ফুল-স্ক্রিন এডিটিং, অতিরিক্ত কি এবং সিনট্যাক্স রঙ</h2>
+        <p>এগুলো হলো <strong>SciREPL Pro 1.4.0</strong> এডিটর নিয়ন্ত্রণ, উপরের Free স্ক্রিনশটে প্রদর্শিত নিয়ন্ত্রণ নয়। অতিরিক্ত কি এবং লাইভ রঙ আলাদা সেটিং।</p>
+        <h3>সম্পূর্ণ-স্ক্রিন সম্পাদনায় প্রবেশ করুন</h3>
+        <ol class="lesson-steps">
+          <li><strong>নতুন সেল:</strong> নতুন-সেলের কোড ফিল্ডে থাকা <strong>⤢ Full screen</strong> বোতামটিতে আলতো চাপুন। এর বাইরের দিকের তির্যক তিরচিহ্নগুলোর অর্থ হলো সম্পাদকটি প্রসারিত করা।</li>
+          <li><strong>সংরক্ষিত সেল:</strong> সম্পাদনা করার জন্য সেই সেলের <strong>✎ pencil</strong>-এ আলতো চাপুন, তারপর সেই সেলের কোড ফিল্ডের কোণায় থাকা <strong>⤢</strong>-এ আলতো চাপুন।</li>
+        </ol>
+        <p>সম্পাদকটি পুরো স্ক্রিন জুড়ে অবস্থান নেয় যাতে আরও কোড আঁটতে পারে। সক্ষম করা অতিরিক্ত কী এবং প্রস্তাবনা চিপগুলো কীবোর্ডের উপরে উপলব্ধ থাকে; সিনট্যাক্সের রঙগুলো নিচে বর্ণিত একই সেটিংস ব্যবহার করে। সম্পূর্ণ স্ক্রিনে প্রবেশ করলে কোড রান হয় <strong>না</strong>।</p>
+        <p><strong>শীর্ষে থাকা সম্পাদকের লেবেলে</strong> আলতো চাপুন আপনার ড্রাফটটি খোলা রেখেই ওয়ার্কবুকে ফিরে যেতে; <strong>পূর্ববর্তী</strong> বা <kbd>Esc</kbd> সম্পূর্ণ-স্ক্রিন মোড থেকেও বেরিয়ে আসে। সংরক্ষিত সেলের ক্ষেত্রে, <strong>সম্পন্ন</strong> ড্রাফটটি না চালিয়েই প্রয়োগ করে, যখন <strong>বাতিল</strong> সম্পাদনাটি বাতিল করে। একটি নতুন সেলের জন্য, Done এবং Cancel উভয়ই ড্রাফটটি না মুছে বা সেল তৈরি না করে সম্পূর্ণ স্ক্রিন থেকে বেরিয়ে আসে; Run একটি পৃথক ক্রিয়া।</p>
+        <p><strong>“Panels use the full screen”-এর মতো এক নয়।</strong> সেই পৃথক Appearance বিকল্পটি প্যানেল এবং ডায়ালগের শীর্ষ মার্জিন নিয়ন্ত্রণ করে; এটি সম্পূর্ণ-স্ক্রিন কোড সম্পাদক খোলে না।</p>
+        <h3>অতিরিক্ত কী-এর সারি প্রদর্শন করুন</h3>
+        <p><strong>মেনু → কমপ্লিশন → বিভাগ → সাধারণ</strong> খুলুন। <strong>কীবোর্ডের উপরে অতিরিক্ত কী → চালু</strong> সেট করুন; ডিফল্ট হলো <strong>বন্ধ</strong>। সারিটি Esc, Tab, ইনডেন্ট অপসারণ, তিরচিহ্ন, Home, End, Run এবং বিরামচিহ্ন সরবরাহ করে। যে কীগুলো আঁটছে না সেগুলোতে পৌঁছাতে এটি পাশাপাশি সোয়াইপ করুন। On নির্বাচন করলে কোড রান হয় না, তবে সারির <strong>▶ রান</strong> কী তা করে—এটিতে আলতো চাপার আগে সোর্সটি পর্যালোচনা করুন।</p>
+        <p>একই বিভাগে, <strong>পোর্ট্রেটে চিপ</strong> এবং <strong>ল্যান্ডস্কেপে চিপ</strong> নির্বাচন করে <strong>আলাদা সারি</strong> বা <strong>অতিরিক্ত কী প্রতিস্থাপন</strong>। ডিফল্ট হলো প্রতিকৃতিতে Own row এবং ল্যান্ডস্কেপে Replace extra keys: বিকল্পগুলো উপস্থিত থাকার সময়, তারা সাময়িকভাবে কীগুলোর স্থান নিতে পারে। অতিরিক্ত কী বন্ধ থাকলে, চিপগুলো তাদের নিজস্ব সারি ব্যবহার করে। <strong>ল্যান্ডস্কেপে অতিরিক্ত সারি</strong> প্রদান করে <strong>বন্ধ</strong>, <strong>যখন জায়গা থাকে</strong> (ডিফল্ট), বা <strong>সর্বদা</strong>। When there is room ব্যবহার করে <strong>ন্যূনতম দৃশ্যমান কোড লাইন</strong>, প্রাথমিকভাবে <strong>8</strong>, যাতে একটি ছোট ল্যান্ডস্কেপ ভিউ ঐচ্ছিক সারিগুলো লুকিয়ে রাখতে পারে।</p>
+        <h3>লাইভ সিনট্যাক্সের রঙ চালু বা বন্ধ করুন</h3>
+        <p><strong>মেনু → চেহারা ও রূপ → টাইপ করার সময় সিনট্যাক্স রঙ</strong> খুলুন। সম্পাদনা করার সময় সমর্থিত কোড রঙিন করতে <strong>চালু</strong> বেছে নিন, অথবা সাধারণ পাঠ্যের জন্য <strong>বন্ধ</strong> বেছে নিন। ডিফল্ট, <strong>স্বয়ংক্রিয় (ডেস্কটপে চালু, টাচে বন্ধ)</strong>, ডেস্কটপ ব্রাউজারে রঙ সক্ষম করে এবং ফোনে সেগুলো বন্ধ রাখে। যদি টাইপিং কম প্রতিক্রিয়াশীল মনে হয়, তবে Off বেছে নিন; ধীরগতির ডিভাইসে রঙ করার ফলে টাইপিংয়ের গতি কমতে পারে। <strong>6000 অক্ষরের</strong> চেয়ে দীর্ঘ কোড On থাকা সত্ত্বেও রঙহীন থাকে।</p>
+        <p>রঙগুলো কোড যাচাই বা কার্যকর করে না, কোনো API অনুরোধ পাঠায় না, বা সমাপ্তি চালু করে না। এই সেটিং পরিবর্তন করলে তা অবিলম্বে কার্যকর হয় এবং আপনার সোর্স পরিবর্তন করে না।</p>
+        <h3>Files &amp; Storage-এর একটি পৃথক সুইচ রয়েছে</h3>
+        <p>একটি টেক্সট ফাইলের জন্য, <strong>মেনু → Files &amp; Storage (VFS / Paths)</strong> ব্যবহার করুন, ফাইলটি নির্বাচন করুন, তারপর <strong>ফুল স্ক্রিন</strong> বেছে নিন। সেই সম্পাদকের <strong>সিনট্যাক্স হাইলাইটিং</strong> চেকবক্সটি Appearance-এর লাইভ-কালার সেটিং থেকে স্বাধীন এবং ডিফল্টভাবে বন্ধ থাকে। এটি অচেনা ফাইলের ধরন বা 100,000 অক্ষরের বেশি ফাইলের জন্য অনুপলব্ধ। এর অতিরিক্ত কীগুলো Completion পছন্দটি ভাগ করে নেয়, তবে ফাইল সম্পাদকে খুব কম জায়গা থাকলে তা লুকিয়ে যেতে পারে। ফাইল <strong>সংরক্ষণ করুন</strong> আপনার সম্পাদনাগুলো লেখে; কেবল রঙ পরিবর্তন করলে তা হয় না।</p>
+      </section>
+
+      <section id="theme">
+        <p class="step-label">ধাপ 4</p>
+        <h2>হালকা, গাঢ়, বা আপনার সিস্টেম থিম বেছে নিন</h2>
+        <p><strong>থিম</strong>-এ স্ক্রোল করুন এবং <strong>ডার্ক</strong>, <strong>লাইট</strong>, অথবা <strong>সিস্টেম অনুযায়ী</strong> বেছে নিন। Dark হলো ডিফল্ট। Match system আপনার ডিভাইসের হালকা/গাঢ় পছন্দ অনুসরণ করে; এটি আপনার করা একটি পছন্দ, ডিফল্ট নয়।</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-theme" role="img" aria-label="হলুদ রঙে হাইলাইট করা Appearance-এর Theme ড্রপডাউন।">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-theme.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/theme-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>একটি অন্তর্নির্মিত থিম বেছে নিন, তারপর সেই পছন্দের সাথে অ্যাপটি ব্যবহার চালিয়ে যেতে Appearance বন্ধ করুন।</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-theme.png">সম্পূর্ণ থিম স্ক্রিনশটটি দেখুন</a>
+        </figure>
+        <p>এই পাঠের জন্য আপনার <strong>কাস্টম</strong>, <strong>কাস্টমাইজ করুন…</strong>, থিম JSON সম্পাদক বা <strong>উন্নত: কাস্টম CSS</strong>-এর প্রয়োজন নেই। সেই উন্নত বিকল্পগুলি এই প্রাথমিক নির্দেশিকার আওতাভুক্ত নয়।</p>
+      </section>
+
+      <section id="android-space">
+        <p class="step-label">ঐচ্ছিক সমাপ্তি কাজ</p>
+        <h2>অ্যান্ড্রয়েডের ফাঁকা জায়গা এবং পূর্বনির্ধারিত মানে ফিরে যাওয়া</h2>
+        <p><strong>লেআউট</strong>-এর অধীনে, <strong>উপরের মার্জিন → স্বয়ংক্রিয়</strong> নির্বাচিত রাখুন। এটি ডিভাইসের জানানো নিরাপদ অঞ্চল অনুসরণ করে যাতে হেডারের উপরে যথাযথ ফাঁকা জায়গা থাকে; আপনাকে পিক্সেল মান অনুমান করতে হবে না।</p>
+        <p>অ্যান্ড্রয়েড অ্যাপে, <strong>Android স্ট্যাটাস বার লুকান</strong> প্রদান করে:</p>
+        <ul>
+          <li><strong>কখনও নয়:</strong> পূর্বনির্ধারিত মান; ঘড়ি এবং বিজ্ঞপ্তির স্ট্যাটাস বার দৃশ্যমান রাখুন।</li>
+          <li><strong>ল্যান্ডস্কেপে:</strong> ফোনটি আড়াআড়ি থাকলে সেই বারটি লুকান; প্রতিকৃতি মোডে তা ফিরিয়ে আনুন।</li>
+          <li><strong>সর্বদা:</strong> উভয় ওরিয়েন্টেশনেই এটি লুকান।</li>
+        </ul>
+        <p>এই সেটিংটি কেবল অ্যান্ড্রয়েড <em>স্ট্যাটাস</em> বারকে প্রভাবিত করে, নেভিগেশন বা জেসচার বারকে নয়। ব্রাউজার/PWA এবং উইন্ডোজ ইন্টারফেসে এটি অনুপস্থিত। Pro 1.3.0-এ এর পরিবর্তে <strong>Hide Android status bar in landscape</strong> নামের একটি চেকবক্স রয়েছে।</p>
+        <p class="callout"><strong>চেহারার পরিবর্তনগুলি পূর্বাবস্থায় ফিরিয়ে আনতে চান?</strong> <strong>ডিফল্ট পুনরুদ্ধার করুন</strong> পূর্বনির্ধারিত থিম, হেডার বোতামের আকার, শীর্ষ মার্জিন, শর্টকাট এবং স্ট্যাটাস-বার পছন্দ পুনরুদ্ধার করে এবং কাস্টম থিম/CSS পছন্দগুলি সরিয়ে দেয়। এটি আপনার ওয়ার্কবুক সেলগুলি মুছে ফেলে না। এটি পৃথক রান বোতাম বা ইন্টারফেস-ভাষার পছন্দগুলি পুনরায় সেট করে <em>না</em>; প্রয়োজনে রানের <strong>স্বয়ংক্রিয়</strong> বিকল্পটি নিজে বেছে নিন।</p>
+        <p>আপনার কাজ শেষ হলে <strong>×</strong> দিয়ে Appearance বন্ধ করুন। <a href="../../workbooks/tutorial/">Markov Groups ওয়ার্কবুক নির্দেশিকা</a> দিয়ে এগিয়ে যান, অথবা <a href="../../../interface/">সংক্ষিপ্ত ইন্টারফেস সহায়িকায়<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> ফিরে যান।</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL সহায়তা</span><nav aria-label="ফুটার নেভিগেশন"><a href="../../../interface/">ইন্টারফেস সহায়িকা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a><a href="../../../">সকল সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a></nav></footer>
+</body>
+</html>

@@ -25,6 +25,7 @@
     "Session-AppState": "session"
   },
   "strings": {
+    "help.keyboardTrustNotice": "SciREPL n’est affilié à aucun de ces projets. Les applications de clavier peuvent lire tout ce que vous saisissez, y compris vos mots de passe et clés API. N’installez qu’un clavier auquel vous faites confiance, vérifiez ses autorisations et maintenez-le à jour.",
     "__literal": [
       "app.search.position",
       "common.ok",

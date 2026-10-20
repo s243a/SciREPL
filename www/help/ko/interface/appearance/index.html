@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ko" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="메뉴 → 모양을 통해 SciREPL의 찾아보기 바로가기를 표시하고 헤더 버튼, 실행 레이블, 테마 및 Android 상태 표시줄 공간을 조정하세요.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ko/interface/appearance/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../interface/appearance/tutorial.css">
+  <title>모양 둘러보기 · SciREPL 도움말</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/appearance/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/appearance/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/appearance/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/appearance/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/appearance/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/appearance/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/appearance/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/appearance/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/appearance/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/appearance/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/appearance/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/appearance/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/appearance/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/appearance/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (영어 참조 페이지)</span></a>
+    <nav aria-label="기본 탐색">
+      <a href="../../../interface/">인터페이스 참조<span class="english-reference"> (영어 참조 페이지)</span></a>
+      <a href="../../tutorials/">모든 튜토리얼</a>
+      <a href="../../../">모든 도움말<span class="english-reference"> (영어 참조 페이지)</span></a>
+      <a href="../../../../">Free PWA 열기</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="튜토리얼 언어"><details class="tutorial-language-menu"><summary>튜토리얼 언어: <bdi>한국어</bdi></summary><nav aria-label="튜토리얼 언어"><a href="../../../en/interface/appearance/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/appearance/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/appearance/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/appearance/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/appearance/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/appearance/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/appearance/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/appearance/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/appearance/" lang="ja" hreflang="ja">日本語</a>
+      <a href="./" lang="ko" hreflang="ko" aria-current="page">한국어</a>
+      <a href="../../../pt-BR/interface/appearance/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/appearance/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/appearance/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">기계 번역된 튜토리얼이며 원어민 검토 대기 중입니다. 코드 및 기술적 값은 변경되지 않았습니다. 스크린샷에는 원본 영어 인터페이스가 표시되므로, 본문의 번역된 컨트롤 이름을 앱과 대조하여 확인하세요.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">도움말<span class="english-reference"> (영어 참조 페이지)</span></a> / <a href="../../../interface/">인터페이스<span class="english-reference"> (영어 참조 페이지)</span></a> / 모양 둘러보기</p>
+    <article>
+      <p class="eyebrow">인터페이스를 나만의 스타일로 꾸미기</p>
+      <h1>둘러보기 표시 및 모양 조정</h1>
+      <p class="lede"><strong>📦 둘러보기</strong> 바로가기를 <strong>SciREPL Free의</strong> 헤더에 배치한 다음, 편안한 버튼과 밝은 테마 또는 어두운 테마를 선택하세요. 공통 모양 제어 기능은 Pro에서도 유용하며, 별도의 Pro 전용 섹션에서 전체 화면 편집, 추가 키 및 실시간 구문 색상을 다룹니다. 워크북 셀을 변경하거나 실행하지 않고도 이 작업을 수행할 수 있습니다.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro (레이블 참조)</li>
+        <li class="chip">Android 스크린샷</li>
+        <li class="chip">약 3분</li>
+      </ul>
+      <p class="screen-note">다섯 장의 스크린샷은 <strong>SciREPL Free 1.4.0-debug</strong> 버전을 <strong>Samsung Galaxy S24+</strong>에서 <time datetime="2026-10-06">6일 시월 2026년</time>에 실제로 캡처한 것입니다. 이는 Play Store에서 설치한 것이 아니라 디버그 서명된 앱을 보여줍니다. 그림에 나와 있는 단계는 Free 1.4.0 제어 기능을 사용합니다. 둘러보기의 헤더 바로가기는 Free 전용이며, Pro 사용자는 메뉴에서 동일한 카탈로그를 열 수 있습니다. 아래의 Pro 전용 텍스트는 Pro 1.4.0 코드베이스를 기준으로 검증되었습니다. 해당 제어 기능은 이 Free 사진들에는 설명되어 있지 않으며, 이전 메뉴는 다를 수 있습니다.</p>
+      <nav class="lesson-nav" aria-label="모양 둘러보기 단계">
+        <strong>이번 학습 내용</strong>
+        <ol>
+          <li><a href="#open-appearance">모양 열기</a></li>
+          <li><a href="#browse-shortcut">둘러보기 바로가기 표시</a></li>
+          <li><a href="#buttons">버튼 및 실행 조정</a></li>
+          <li><a href="#pro-editor">Pro 전용: 전체 화면 편집, 추가 키 및 실시간 색상</a></li>
+          <li><a href="#theme">테마 선택</a></li>
+          <li><a href="#android-space">선택 사항인 Android 공간 및 복구</a></li>
+        </ol>
+        <p><a href="../../tutorials/">모든 튜토리얼</a></p>
+      </nav>
+
+      <section id="open-appearance">
+        <p class="step-label">1단계</p>
+        <h2>메뉴 → 모양 열기</h2>
+        <ol class="lesson-steps">
+          <li>앱 상단 헤더에서 세 개의 가로줄 버튼인 <strong>☰ 메뉴</strong>를 찾으세요.</li>
+          <li>해당 버튼을 탭한 다음 <strong>🎨 모양 및 화면</strong>을(를) 선택하세요. 메뉴가 화면보다 길면 메뉴 내부를 스크롤하여 항목을 찾으세요.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-menu" role="img" aria-label="모양 항목이 노란색으로 강조 표시된 SciREPL 메뉴입니다.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>앱 메뉴에서 <strong>🎨 모양 및 화면</strong>을(를) 선택하세요.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-menu.png">전체 메뉴 스크린샷 보기</a>
+        </figure>
+        <p class="callout"><strong>변경 사항은 선택하는 즉시 적용됩니다.</strong> 아래의 일반적인 제어 기능에는 저장 또는 적용 버튼이 필요하지 않습니다. <strong>×</strong> 기호로 모양 창을 닫아도 변경 사항이 취소되지 않으며 선택한 항목은 다음 앱 실행 시에도 유지됩니다.</p>
+      </section>
+
+      <section id="browse-shortcut">
+        <p class="step-label">2단계</p>
+        <h2>Free 1.4.0: 📦 둘러보기 바로가기 표시</h2>
+        <p><strong>Pro을(를) 사용 중이신가요?</strong> 이 바로가기 설정을 건너뛰고 <strong>메뉴 → 패키지, 번들 및 워크북 찾아보기</strong>을(를) 사용하세요. 다음 섹션에서는 공통 모양 제어 기능을 다룹니다.</p>
+        <ol class="lesson-steps">
+          <li><strong>메뉴 → 모양 및 화면</strong>을(를) 연 다음, <strong>헤더 바로가기</strong>까지 스크롤하세요.</li>
+          <li><strong>찾아보기 바로가기 표시</strong>을(를) 찾아 <strong>항상</strong>을(를) 선택하세요.</li>
+          <li><strong>×</strong> 기호로 모양 창을 닫으세요. 이제 헤더에 <strong>📦</strong> 버튼이 표시되며, 이를 탭하여 <strong>패키지, 번들 및 워크북 찾아보기</strong>을(를) 열 수 있습니다.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-shortcuts" role="img" aria-label="SciREPL Free의 헤더 바로가기 섹션으로, 둘러보기 바로가기 표시와 우선순위 화살표가 노란색으로 강조 표시되어 있습니다.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-shortcuts.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/shortcuts-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Free 1.4.0</strong>에서는 <strong>찾아보기 바로가기 표시</strong> 옆의 드롭다운을 사용하여 📦 버튼을 계속 표시할지 결정합니다.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-shortcuts.png">전체 바로가기 스크린샷 보기</a>
+        </figure>
+        <p>각 선택 항목은 서로 다른 용도를 가집니다:</p>
+        <ul>
+          <li><strong>항상:</strong> 헤더에 다른 행이 필요하더라도 바로가기를 계속 표시합니다.</li>
+          <li><strong>공간이 있을 때:</strong> 둘러보기의 기본값입니다. 공간이 충분할 때만 표시되며, 화면이 더 좁아지거나 버튼이 커지거나 상태 메시지가 길어지면 사라질 수 있습니다.</li>
+          <li><strong>표시 안 함:</strong> 헤더 바로가기를 숨깁니다.</li>
+        </ul>
+        <p><strong>↑</strong> 및 <strong>↓</strong> 버튼은 공간이 부족할 때 어떤 선택적 바로가기가 먼저 자리를 양보할지를 변경합니다. 바로가기를 위로 이동하면 더 오래 유지되고, 아래로 이동하면 더 빨리 사라집니다. 이 버튼은 헤더 내 아이콘 위치가 아니라 우선순위를 변경합니다.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-header" role="img" aria-label="SciREPL Free 헤더에서 패키지 상자 모양의 둘러보기 바로가기가 노란색으로 강조 표시되어 있습니다.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-header.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/header-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Free의 <strong>📦</strong> 헤더 바로가기는 <strong>메뉴 → 패키지, 번들 및 워크북 찾아보기</strong>와 동일한 카탈로그를 엽니다.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-header.png">전체 헤더 스크린샷 보기</a>
+        </figure>
+        <p class="callout"><strong>📦 버튼이 없나요?</strong> 바로가기가 숨겨져 있거나 사용 중인 버전에서 제공하지 않는 경우에도 메뉴 경로는 계속 작동합니다. 간결한 헤더를 위해 모든 선택적 바로가기를 강제로 표시하는 대신 둘러보기를 <strong>공간이 있을 때</strong>(으)로 되돌리세요.</p>
+        <p>워크북을 찾으러 오셨다면, 이제 <a href="../../workbooks/tutorial/#browse">Markov Groups 연습으로 돌아가</a> 카탈로그를 검색할 수 있습니다.</p>
+      </section>
+
+      <section id="buttons">
+        <p class="step-label">3단계</p>
+        <h2>편리한 버튼과 실행 레이블 선택</h2>
+        <p><strong>메뉴 → 모양 및 화면</strong>을 다시 열고 <strong>버튼</strong>을(를) 찾으세요. <strong>버튼 크기</strong> 슬라이더를 움직이면 백분율과 근처의 <strong>미리보기</strong>이(가) 즉시 변경됩니다. 기본값은 <strong>100%</strong>입니다. 헤더 버튼이 더 크면 탭하기는 쉬워질 수 있지만, 선택적 바로가기를 위한 공간이 줄어듭니다.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-options" role="img" aria-label="Android 상태 표시줄 숨기기 및 버튼 크기를 포함하여 노란색으로 강조 표시된 모양의 레이아웃 및 버튼 제어 항목입니다.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-options.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/options-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>버튼 크기</strong>은(는) 헤더 컨트롤을 조정합니다. Android 전용 상태 표시줄 설정은 아래에 설명되어 있습니다.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-options.png">전체 레이아웃 및 버튼 스크린샷 보기</a>
+        </figure>
+        <p><strong>실행 버튼</strong> 드롭다운은 저장된 셀 편집기 내부의 실행 버튼이 아니라 <em>새 셀 패널</em>의 실행을 제어합니다:</p>
+        <ul>
+          <li><strong>자동(공간이 부족할 때 아이콘만 표시):</strong> 기본값입니다. 공간이 충분할 때는 레이블을 유지하고, 입력 공간을 남기려면 ▶ 아이콘만 사용합니다.</li>
+          <li><strong>아이콘만:</strong> 항상 간결한 ▶ 버튼을 사용합니다.</li>
+          <li><strong>항상 레이블 표시:</strong> 화면이 좁더라도 텍스트를 항상 유지합니다.</li>
+        </ul>
+        <p>모양에는 텍스트 확대 슬라이더가 없습니다. <strong>버튼 크기</strong>은(는) 일반적인 글꼴 크기 설정이 아닙니다. Free 1.4.0 및 Pro 1.3.0에서는 Android의 시스템 텍스트 확대를 수용하기 위해 작은 헤더 컨트롤을 자동으로 확대합니다.</p>
+      </section>
+
+      <section id="pro-editor">
+        <p class="step-label">선택 사항 · Pro 전용</p>
+        <h2>Pro 전용: 전체 화면 편집, 추가 키 및 구문 색상</h2>
+        <p>이 컨트롤은 <strong>SciREPL Pro 1.4.0</strong> 편집기 컨트롤이며, 위의 Free 스크린샷에 표시된 컨트롤이 아닙니다. 추가 키와 실시간 색상은 별도의 설정입니다.</p>
+        <h3>전체 화면 편집 시작하기</h3>
+        <ol class="lesson-steps">
+          <li><strong>새 셀:</strong> 새 셀 코드 필드에서 <strong>⤢ Full screen</strong> 버튼을 누르세요. 바깥쪽 대각선 화살표는 편집기 확장을 의미합니다.</li>
+          <li><strong>저장된 셀:</strong> 편집하려는 해당 셀의 <strong>✎ pencil</strong> 아이콘을 누른 다음, 해당 셀의 코드 필드 모서리에 있는 <strong>⤢</strong> 아이콘을 누르세요.</li>
+        </ol>
+        <p>더 많은 코드가 표시되도록 편집기가 화면 전체를 차지합니다. 활성화된 추가 키와 추천 칩은 키보드 위에 계속 표시되며, 구문 색상은 아래에 설명된 것과 동일한 설정을 사용합니다. 전체 화면으로 전환해도 코드가 실행되지는 <strong>않습니다</strong>.</p>
+        <p>작성 중인 초안을 열어 둔 채 워크북으로 돌아가려면 <strong>상단의 편집기 라벨</strong>을 누르세요. <strong>이전</strong> 또는 <kbd>Esc</kbd> 버튼으로도 전체 화면 모드에서 나갈 수 있습니다. 저장된 셀의 경우, <strong>완료</strong> 버튼은 코드를 실행하지 않고 초안을 적용하는 반면, <strong>취소</strong> 버튼은 편집 내용을 취소합니다. 새 셀의 경우 Done과 Cancel 모두 초안을 지우거나 셀을 만들지 않고 전체 화면을 종료하며, Run은 별도의 동작입니다.</p>
+        <p><strong>“패널에 전체 화면 사용”과 동일하지 않습니다.</strong> 이 별도의 모양 옵션은 패널과 대화 상자의 상단 여백을 제어하며, 전체 화면 코드 편집기를 열지 않습니다.</p>
+        <h3>추가 키 행 표시</h3>
+        <p><strong>메뉴 → 자동완성 → 섹션 → 일반</strong> 메뉴를 엽니다. <strong>키보드 위 추가 키 → 켜기</strong> 항목을 설정하세요. 기본값은 <strong>꺼짐</strong>입니다. 이 행은 Esc, Tab, 들여쓰기 삭제, 화살표, Home, End, Run 및 구두점을 제공합니다. 화면에 맞지 않는 키를 보려면 옆으로 스와이프하세요. On을 선택해도 코드가 실행되지는 않지만, 해당 행의 <strong>▶ 실행</strong> 키는 코드를 실행하므로 누르기 전에 소스를 검토하세요.</p>
+        <p>동일한 섹션에서 <strong>세로 모드의 칩</strong> 및 <strong>가로 모드의 칩</strong> 항목은 <strong>별도 줄</strong> 또는 <strong>추가 키 대체</strong> 옵션을 선택합니다. 기본값은 세로 모드에서 Own row, 가로 모드에서 Replace extra keys입니다. 후보가 나타나는 동안 키의 자리를 일시적으로 대체할 수 있습니다. 추가 키가 꺼져 있으면 칩이 전용 행을 사용합니다. <strong>가로 화면의 추가 행</strong> 항목은 <strong>꺼짐</strong>, <strong>공간이 있을 때</strong>(기본값) 또는 <strong>항상</strong> 옵션을 제공합니다. When there is room 옵션은 <strong>표시할 최소 코드 줄 수</strong> 설정을 사용하며(초기값 <strong>8</strong>), 높이가 낮은 가로 보기에서 선택적 행을 숨길 수 있습니다.</p>
+        <h3>실시간 구문 색상 켜기 또는 끄기</h3>
+        <p><strong>메뉴 → 모양 및 화면 → 입력 중 구문 색상 표시</strong> 메뉴를 엽니다. 편집 중에 지원되는 코드에 색상을 적용하려면 <strong>켜기</strong>을, 일반 텍스트로 보려면 <strong>꺼짐</strong>를 선택하세요. 기본값인 <strong>자동(데스크톱에서 켜짐, 터치에서 꺼짐)</strong>는 데스크톱 브라우저에서는 색상을 활성화하고 스마트폰에서는 비활성화합니다. 입력 반응이 느리게 느껴지면 Off를 선택하세요. 성능이 낮은 기기에서는 색상 표시로 인해 입력 속도가 느려질 수 있습니다. <strong>6000자</strong>를 초과하는 코드는 On 상태에서도 색상이 적용되지 않은 상태로 유지됩니다.</p>
+        <p>색상 표시는 코드를 유효성 검사하거나 실행하지 않고, API 요청을 보내거나 자동 완성을 켜지도 않습니다. 이 설정을 변경하면 즉시 적용되며 소스 코드는 변경되지 않습니다.</p>
+        <h3>Files &amp; Storage에는 별도의 스위치가 있습니다</h3>
+        <p>텍스트 파일의 경우 <strong>메뉴 → Files &amp; Storage (VFS / Paths)</strong> 메뉴를 사용하여 파일을 선택한 다음 <strong>전체 화면</strong>을 선택하세요. 해당 편집기의 <strong>구문 강조 표시</strong> 체크박스는 모양 설정의 실시간 색상 설정과 독립적이며 기본적으로 꺼져 있습니다. 인식할 수 없는 파일 형식이거나 100,000자를 초과하는 파일에는 사용할 수 없습니다. 추가 키는 자동 완성 환경설정을 공유하지만, 파일 편집기 공간이 너무 부족하면 숨겨질 수 있습니다. 파일 <strong>저장</strong> 동작은 편집 내용을 저장하지만, 색상 전환만으로는 저장되지 않습니다.</p>
+      </section>
+
+      <section id="theme">
+        <p class="step-label">단계 4</p>
+        <h2>라이트, 다크 또는 시스템 테마 선택</h2>
+        <p><strong>테마</strong> 항목으로 스크롤하여 <strong>다크</strong>, <strong>라이트</strong> 또는 <strong>시스템 설정 따름</strong>을 선택하세요. 다크가 기본값입니다. Match system은 기기의 라이트/다크 설정을 따르며, 기본값이 아니라 사용자가 직접 선택하는 옵션입니다.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-theme" role="img" aria-label="노란색으로 강조 표시된 모양의 Theme 드롭다운입니다.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-theme.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/theme-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>내장 테마를 선택한 다음 모양 창을 닫으면 해당 선택 사항이 적용된 상태로 앱을 계속 사용할 수 있습니다.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-theme.png">전체 테마 스크린샷 보기</a>
+        </figure>
+        <p>이번 단원에서는 <strong>사용자 지정</strong>, <strong>사용자 지정…</strong>, 테마 JSON 편집기 또는 <strong>고급: 사용자 지정 CSS</strong>이 필요하지 않습니다. 이러한 고급 옵션은 이 초보자용 안내서의 범위를 벗어납니다.</p>
+      </section>
+
+      <section id="android-space">
+        <p class="step-label">선택적 마무리 작업</p>
+        <h2>Android 여백 및 기본값으로 복원</h2>
+        <p><strong>레이아웃</strong> 아래에서 <strong>상단 여백 → 자동</strong> 선택 상태를 그대로 유지합니다. 기기에서 보고된 안전 영역을 따르므로 헤더 위에 적절한 공간이 확보되며, 픽셀 값을 직접 추측할 필요가 없습니다.</p>
+        <p>Android 앱의 <strong>Android 상태 표시줄 숨기기</strong>에서는 다음 옵션을 제공합니다.</p>
+        <ul>
+          <li><strong>안 함:</strong> 기본값이며, 시계와 알림 상태 표시줄을 계속 표시합니다.</li>
+          <li><strong>가로 모드일 때:</strong> 휴대전화를 가로로 놓았을 때 해당 표시줄을 숨기고 세로 모드에서 다시 표시합니다.</li>
+          <li><strong>항상:</strong> 두 방향 모두에서 표시줄을 숨깁니다.</li>
+        </ul>
+        <p>이 설정은 Android <em>상태</em> 표시줄에만 영향을 주며 탐색 또는 제스처 바에는 영향을 주지 않습니다. 브라우저/PWA 및 Windows 인터페이스에는 이 설정이 없습니다. 대신 Pro 1.3.0에는 <strong>Hide Android status bar in landscape</strong>라는 확인란이 있습니다.</p>
+        <p class="callout"><strong>모양 변경 사항을 취소하시겠습니까?</strong> <strong>기본값으로 복원</strong>을 사용하면 기본 테마, 헤더 버튼 크기, 위쪽 여백, 단축키, 상태 표시줄 환경설정이 복원되고 사용자 지정 테마/CSS 선택 항목이 제거됩니다. 통합 문서 셀은 지워지지 않습니다. 별도의 실행 버튼이나 인터페이스 언어 환경설정은 재설정되지 <em>않으므로</em>, 필요한 경우 실행의 <strong>자동</strong> 옵션을 직접 선택하십시오.</p>
+        <p>완료되면 <strong>×</strong>로 모양 설정을 닫습니다. <a href="../../workbooks/tutorial/">Markov Groups 통합 문서 둘러보기</a>를 계속 진행하거나, <a href="../../../interface/">간략한 인터페이스 참조<span class="english-reference"> (영어 참조 페이지)</span></a>로 돌아가십시오.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL 도움말</span><nav aria-label="바닥글 탐색"><a href="../../../interface/">인터페이스 참조<span class="english-reference"> (영어 참조 페이지)</span></a><a href="../../../">모든 도움말<span class="english-reference"> (영어 참조 페이지)</span></a></nav></footer>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="制作静态 Markdown 图表、使用 JavaScript canvas 生成图片，并编写 KaTeX 公式，全部在无需安装软件包的 SciREPL 工作簿中进行。">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/zh/workbooks/graphics/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/graphics/tutorial.css">
+  <title>图片、图表和公式 · SciREPL 帮助</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/graphics/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/graphics/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/graphics/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/graphics/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/graphics/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/graphics/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/graphics/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/graphics/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/graphics/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/graphics/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/graphics/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/graphics/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/graphics/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/graphics/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">跳转至主要内容</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (英文参考页面)</span></a>
+    <nav aria-label="主导航">
+      <a href="../../../workbooks/">工作簿参考<span class="english-reference"> (英文参考页面)</span></a>
+      <a href="../../tutorials/">所有教程</a>
+      <a href="../../../">所有帮助<span class="english-reference"> (英文参考页面)</span></a>
+      <a href="../../../../">打开 Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="教程语言"><details class="tutorial-language-menu"><summary>教程语言: <bdi>简体中文</bdi></summary><nav aria-label="教程语言"><a href="../../../en/workbooks/graphics/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/graphics/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/graphics/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/graphics/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/graphics/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/graphics/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/graphics/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/graphics/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/graphics/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/graphics/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/graphics/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/graphics/" lang="ru" hreflang="ru">Русский</a>
+      <a href="./" lang="zh" hreflang="zh" aria-current="page">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">本教程为机器翻译，母语审校待完成。代码和技术参数保持不变。屏幕截图显示原始英文界面；请将本文中翻译的控件名称与您的应用相对应。</p></aside>
+    <p class="breadcrumbs"><a href="../../../">帮助<span class="english-reference"> (英文参考页面)</span></a> / <a href="../../../workbooks/">工作簿<span class="english-reference"> (英文参考页面)</span></a> / 图片、图表和公式</p>
+    <article>
+      <p class="eyebrow">边做边学</p>
+      <h1>添加图片、图表和公式</h1>
+      <p class="lede">工作簿不仅可以用代码解释概念，也可以用图片。尝试通过三种方式展示同一个简单的坐标系：Markdown 中的静态图像、由 JavaScript 绘制的图片，以及用 KaTeX 排版的公式。您不需要 Python、R、安装软件包或 AI 账户。</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro 工作流</li>
+        <li class="chip">经浏览器验证的示例</li>
+        <li class="chip">约 10 分钟</li>
+      </ul>
+      <p class="screen-note">示例和屏幕截图已在 <strong>SciREPL Free 浏览器构建版本</strong>中于 <time datetime="2026-10-06">6 日十月 2026 年</time>完成检查。屏幕截图使用的是较窄的浏览器视口；它们<strong>并非 Android 截屏</strong>。Android 上使用了相同的控件，但其位置可能会有所不同。本指南未对 Pro 以及每个已发布的应用版本进行测试。</p>
+      <div class="table-wrap">
+        <table>
+          <caption>选择适合您说明的方法</caption>
+          <thead><tr><th scope="col">您的需求</th><th scope="col">单元格类型</th><th scope="col">结果生成方式</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">固定图表或图片</th><td>Markdown (<strong>Md</strong>)</td><td>内联 SVG 或嵌入式 PNG，存储在单元格的文本中</td></tr>
+            <tr><th scope="row">由代码计算或绘制的图片</th><td>代码 → JavaScript (<strong>JS</strong>)</td><td>一个 canvas 画布，使用 <code>window.renderImage(...)</code> 显示</td></tr>
+            <tr><th scope="row">公式或矩阵</th><td>Markdown (<strong>Md</strong>)</td><td>位于 <code>$$</code> 定界符之间的 TeX 风格数学公式，由 KaTeX 渲染</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <nav class="lesson-nav" aria-label="图形演练步骤">
+        <strong>本课内容</strong>
+        <ol>
+          <li><a href="#open">打开小型示例工作簿</a></li>
+          <li><a href="#static">在 Markdown 中保留静态图片</a></li>
+          <li><a href="#canvas">使用 JavaScript 绘制图片</a></li>
+          <li><a href="#math">使用 KaTeX 编写公式</a></li>
+          <li><a href="#save">保存并重新打开您的工作</a></li>
+        </ol>
+        <p><a href="#troubleshooting">如果结果未显示</a></p>
+        <p><a href="../../tutorials/">所有教程</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">步骤 1</p>
+        <h2>打开示例工作簿</h2>
+        <p>配套文件包含完整的示例，包括一个嵌入式 PNG。它将所有内容保留在一个小型工作簿中，因此您无需输入长长的 Base64 图像字符串。</p>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/graphics/assets/workbook-graphics.srwb" download="workbook-graphics.srwb">下载图形示例工作簿 (.srwb)</a>。保存实际文件并保留其 <code>.srwb</code> 扩展名。如果浏览器显示文本，请使用其保存/下载操作。记下保存文件的文件夹。</li>
+          <li>打开 SciREPL。在应用顶部的<strong>页眉</strong>中，找到 <strong>☰ 菜单</strong>（即带有<strong>三条水平线</strong>的按钮）。轻点或点击它。</li>
+          <li>选择 <strong>📂 导入文件（如 .srwb、.ipynb、.csv、.py、.zip）</strong>。如有需要，可在<em>菜单内部</em>滚动。在设备的文件选择器中，从“下载”或您选择的文件夹中选择 <code>workbook-graphics.srwb</code>。</li>
+          <li>如果菜单仍处于打开状态，请将其关闭，并在工作簿选择器中选择新的 <strong>Workbook Graphics</strong> 标签页。您现有的标签页将被保留。</li>
+          <li>找到名为 <code>static_axes</code>、<code>embedded_png</code>、<code>canvas_axes</code> 和 <code>math_axes</code> 的四个单元格。在运行代码前请先阅读它们。静态图表和公式会直接由其 Markdown 源码显示；JavaScript 图片仅在您运行其单元格后才会显示。</li>
+        </ol>
+        <p class="callout"><strong>导入并不等于运行。</strong>即使启用了自动执行设置，<code>.srwb</code>导入也不会执行其代码。在本课中，只有 <code>canvas_axes</code> 需要进行 JavaScript 执行。这里没有 <strong>运行所有单元格</strong> 步骤。</p>
+        <p>需要有关下载或选择器的更多详细信息？请遵循<a href="../import/">手动工作簿导入演练</a>。上述名称会出现在已保存的单元格上；<a href="../named-cells/">命名单元格路径教程</a>解释了如何分配和使用它们。您也可以使用以下步骤在已打开的工作簿中创建这些示例。</p>
+      </section>
+
+      <section id="static">
+        <p class="step-label">步骤 2 · 方法 1</p>
+        <h2>在 Markdown 中保留静态图表</h2>
+        <p>想象一张正对着您的纸。<strong>r</strong> 沿纸面指向右方，<strong>u</strong> 沿纸面指向上方，而 <strong>n</strong> 则垂直穿出纸面指向您。带有点的圆圈表示朝外的方向，就像看到箭尖朝您指来一样。</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-static.png" alt="窄浏览器屏幕截图，展示了一个 SciREPL Markdown 单元格，其中显示了带有向右和向上箭头以及圆圈内一点（表示面向观察者的法线）的纸面图表。" loading="lazy" decoding="async">
+          <figcaption>静态 SVG 是在<em>Markdown 单元格内部</em>渲染的。这是 SciREPL Free 的浏览器截屏，而不是通过运行语言内核生成的绘图。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-static.png">查看完整的浏览器屏幕截图</a>
+        </figure>
+        <h3>编辑导入的图表</h3>
+        <ol class="lesson-steps">
+          <li>找到 <code>static_axes</code>。在该已保存单元格自身的页眉中轻点其 <strong>✎ 铅笔</strong>（位于 <strong>✕</strong> 附近）。这会打开现有单元格的源码；新建单元格面板则会创建另一个单元格。</li>
+          <li>将单元格类型按钮保持设置为 <strong>Md</strong>。在 SVG 文本中，将 <code>r: right</code> 更改为 <code>r: across</code>。</li>
+          <li>轻点该单元格的 <strong>▶ 运行</strong> 按钮以重新保存并渲染 Markdown。对于 <strong>Md</strong> 单元格，此按钮用于渲染文本；它不会执行 JavaScript 或启动语言运行时。</li>
+        </ol>
+        <h3>或者创建您自己的 Markdown 单元格</h3>
+        <ol class="lesson-steps">
+          <li>找到用于输入下一个单元格的<strong>新建单元格面板</strong>。如果它已折叠，请使用应用标题附近的 <strong>⌃ 显示新建单元格面板</strong> 按钮。</li>
+          <li>轻点标有 <strong>代码</strong> 的单元格类型按钮，使其变为 <strong>Md</strong>。Markdown 是一种<em>单元格类型</em>，而不是语言下拉菜单中的条目。</li>
+          <li>将下方完整的 SVG 复制到文本字段中，<strong>且无需添加 Markdown 代码围栏</strong> (<code>```</code>)。在周围的文本与 SVG 之间保留一行空行。</li>
+          <li>轻点 <strong>▶ 运行</strong> 添加渲染后的 Markdown 单元格。您应该会看到纸张以及全部三个方向标签。</li>
+        </ol>
+        <pre><code data-graphic-example="svg">&lt;svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 360 220" width="100%" height="220"
+     role="img" aria-label="Right, up and outward normal on paper"&gt;
+  &lt;title&gt;A paper coordinate frame&lt;/title&gt;
+  &lt;rect x="20" y="18" width="320" height="184"
+        rx="6" fill="#ffffff" stroke="#526170" stroke-width="2" /&gt;
+  &lt;path d="M110 145 H280" fill="none" stroke="#075d69" stroke-width="3" /&gt;
+  &lt;polygon points="280,145 267,138 267,152" fill="#075d69" /&gt;
+  &lt;path d="M110 145 V48" fill="none" stroke="#064d91" stroke-width="3" /&gt;
+  &lt;polygon points="110,48 103,61 117,61" fill="#064d91" /&gt;
+  &lt;circle cx="110" cy="145" r="10" fill="#ffffff" stroke="#14191f" stroke-width="2" /&gt;
+  &lt;circle cx="110" cy="145" r="3" fill="#14191f" /&gt;
+  &lt;text x="204" y="168" fill="#14191f" font-size="16"&gt;r: right&lt;/text&gt;
+  &lt;text x="124" y="62" fill="#14191f" font-size="16"&gt;u: up&lt;/text&gt;
+  &lt;text x="42" y="190" fill="#14191f" font-size="16"&gt;n: toward you&lt;/text&gt;
+&lt;/svg&gt;</code></pre>
+        <p>SciREPL 会对 Markdown 进行清理过滤。此示例使用普通的 SVG 形状、文本以及显式的 <code>fill</code>/<code>stroke</code> 属性。其箭头为多边形：请勿依赖 <code>marker-end="url(...)"</code>、<code>&lt;style&gt;</code> 块、脚本或动画能在清理过滤后保留下来。</p>
+
+        <h3>改用嵌入式 PNG</h3>
+        <p>另一种静态方案是直接在 Markdown 源码中存储 Base64 数据的 PNG。标准的 Markdown 图像语法如下所示：</p>
+        <pre><code>![Paper axes](data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE)</code></pre>
+        <p>该行显示的是<em>格式</em>，而不是可正常显示的图片：请将占位符替换为完整编码的 PNG，或者使用已可正常工作的 <code>embedded_png</code> 单元格。<code>base64,</code> 之后的部分是图像数据，而不是文件名。请将其保持在同一行上。</p>
+        <p>为了让图片在小屏幕上也能适应单元格大小，配套文件中的 <code>embedded_png</code> 单元格使用了下方带有 <code>width="100%"</code> 的等效内联 HTML。它仍存储在 Markdown 内部，而不是作为代码输出：</p>
+        <pre><code>&lt;img alt="Paper axes" width="100%"
+     src="data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE"&gt;</code></pre>
+        <p class="callout"><strong>选择一种静态途径：</strong>使用<em>内联 SVG 元素</em>制作小型可编辑图表，或使用 <code>data:image/png;base64,...</code> 图像制作光栅图片。像 <code>data:image/svg+xml,...</code> 这样的 SVG 数据 URL 与内联 SVG 不同，并且在经过检查的构建版本中会被阻止。远程图像 URL 在该版本中也会被阻止。这两个自包含示例在显示时均无需下载图像。</p>
+        <p>这两个静态示例均存在于 Markdown 源码中。它们可以在工作簿导入后直接显示，无需运行代码。</p>
+      </section>
+
+      <section id="canvas">
+        <p class="step-label">步骤 3 · 方法 2</p>
+        <h2>使用 JavaScript 绘制图片</h2>
+        <p>静态图片会一直保持不变，直到您编辑其源码。对于由程序计算或绘制的图片，请使用 <strong>代码</strong> 单元格并选择 <strong>JS - JavaScript</strong>。此示例在 canvas 上进行绘制，将其转换为 PNG，并将该图像发送至单元格的输出中。</p>
+        <ol class="lesson-steps">
+          <li>在导入的工作簿中，轻点 <strong>✎ 铅笔</strong>（在 <code>canvas_axes</code> 上）。检查单元格类型是否为 <strong>代码</strong>，且其语言为 <strong>JS - JavaScript</strong>（紧凑选择器可仅显示 <strong>JS</strong>）。</li>
+          <li>阅读下方的代码，它是该单元格中的完整程序。它不需要其他单元格、文件、软件包或网络请求。</li>
+          <li>轻点<em>该单元格的</em> <strong>▶ 运行</strong>。JavaScript 源码下方应会出现一张图片。</li>
+        </ol>
+        <p>若要改为创建新单元格，请转到新建单元格面板，根据需要将 <strong>Md</strong> 改回 <strong>代码</strong>，并从语言下拉菜单中选择 <strong>JS - JavaScript</strong>。粘贴代码，然后轻点 <strong>▶ 运行</strong>。如果 JavaScript 被隐藏，请找到 <strong>☰ 菜单 → 语言</strong> 并将其启用。</p>
+        <pre><code data-graphic-example="javascript">(() =&gt; {
+  const canvas = document.createElement('canvas');
+  canvas.width = 360;
+  canvas.height = 220;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 360, 220);
+  ctx.strokeStyle = '#526170';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(20, 18, 320, 184);
+
+  function arrow(x1, y1, x2, y2, color) {
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 14 * Math.cos(angle - 0.5),
+               y2 - 14 * Math.sin(angle - 0.5));
+    ctx.lineTo(x2 - 14 * Math.cos(angle + 0.5),
+               y2 - 14 * Math.sin(angle + 0.5));
+    ctx.closePath();
+    ctx.fill();
+  }
+  arrow(110, 145, 280, 145, '#075d69'); // right
+  arrow(110, 145, 110, 48, '#064d91');  // up
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#14191f';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(110, 145, 10, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#14191f';
+  ctx.beginPath();
+  ctx.arc(110, 145, 3, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.font = '16px sans-serif';
+  ctx.fillText('r: right', 204, 168);
+  ctx.fillText('u: up', 124, 62);
+  ctx.fillText('n: toward you', 42, 190);
+  window.renderImage(canvas.toDataURL('image/png'));
+})();</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-canvas.png" alt="窄浏览器屏幕截图，展示了 SciREPL 在 JavaScript canvas 单元格下方将纸面坐标系显示为 PNG 输出。" loading="lazy" decoding="async">
+          <figcaption>这个外观相似的图表是<strong>生成的 PNG 输出</strong>，而不是 Markdown。JavaScript 单元格会在您选择 <strong>▶ 运行</strong> 时创建它。SciREPL Free 的浏览器截屏。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-canvas.png">查看完整的浏览器屏幕截图</a>
+        </figure>
+        <p>尝试修改 <code>r: right</code>（在 <code>ctx.fillText(...)</code> 中），然后再次运行该单元格。函数包装器 <code>(() =&gt; { ... })();</code> 可以使此示例的变量保持为局部变量，因此您可以重新运行它而无需重新声明顶层 <code>const</code> 变量。</p>
+        <p class="callout"><strong>display 调用至关重要。</strong>请在末尾保留 <code>window.renderImage(canvas.toDataURL('image/png'))</code>。返回普通字符串（如 <code>'&lt;svg&gt;...&lt;/svg&gt;'</code>，从 JavaScript 返回）只会显示文本；并不会将该字符串转化为内联图表。您不需要将 canvas 插入到应用的页面中。</p>
+      </section>
+
+      <section id="math">
+        <p class="step-label">步骤 4 · 方法 3</p>
+        <h2>通过公式解释图片</h2>
+        <p>使用 <strong>Markdown (Md)</strong> 单元格编写 TeX 风格的数学公式。图表的方向构成右手坐标系：<strong>右 × 上 = 向外法线</strong>。在下方的矩阵中，第一行为 <strong>r</strong>，第二行为 <strong>u</strong>，第三行为 <strong>n</strong>；下标是它们在所选 x、y、z 坐标系中的分量。</p>
+        <ol class="lesson-steps">
+          <li>轻点 <strong>✎ 铅笔</strong>（在 <code>math_axes</code> 上），或在新建单元格面板中使用 <strong>代码 → Md</strong> 创建新单元格。</li>
+          <li>使用下方的完整文本。<code>$$</code> 定界符属于 Markdown 源码的一部分；请勿将其包裹在代码围栏中。</li>
+          <li>轻点 <strong>▶ 运行</strong> 保存并渲染 Markdown。您应该会看到叉积公式和一个三行矩阵，而不是原始的反斜杠命令。此单元格不会运行任何语言内核。</li>
+        </ol>
+        <pre><code data-graphic-example="math">Right, up and outward normal form a right-handed frame.
+
+$$\mathbf{r} \times \mathbf{u} = \mathbf{n}$$
+
+Rows of the frame matrix: right, up, then outward normal.
+
+$$
+M = \begin{pmatrix}
+r_x &amp; r_y &amp; r_z \\
+u_x &amp; u_y &amp; u_z \\
+n_x &amp; n_y &amp; n_z
+\end{pmatrix}
+$$</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-equations.png" alt="窄浏览器屏幕截图，展示了 SciREPL 渲染“右叉乘上等于法线”及三行坐标系矩阵，这是通过 KaTeX 在 Markdown 单元格中完成的。" loading="lazy" decoding="async">
+          <figcaption>KaTeX 直接从 <strong>Markdown 源码</strong>中排版数学公式。这些是公式，而不是 TeX 生成的绘图。SciREPL Free 的浏览器截屏。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-equations.png">查看完整的浏览器屏幕截图</a>
+        </figure>
+        <p class="callout"><strong>KaTeX 并不是完整的 TeX 编译器。</strong>它仅渲染受支持的数学记号，但不会编译 TikZ 图表或整个 LaTeX 文档。尽管 KaTeX 列出了 <code>\includegraphics</code>，但它需要一个 SciREPL 在经过检查的渲染器中未启用的信任选项；此处它不能作为插入图像的途径。对于图片，请使用 Markdown SVG/PNG 或 JavaScript canvas。</p>
+        <p>有关其他符号和数学命令，请参阅 <a href="https://katex.org/docs/support_table.html">KaTeX 支持表</a>；该文档描述的功能可能比 SciREPL 的内置版本更新。有关使用这些方向来解释魔方转动的工作簿，请参阅<a href="../tutorial/#open">马尔可夫群演练</a>。</p>
+      </section>
+
+      <section id="save">
+        <p class="step-label">步骤 5</p>
+        <h2>保存副本，明确需重新运行的内容</h2>
+        <ol class="lesson-steps">
+          <li>打开 <strong>☰ 菜单 → 导出工作簿与软件包</strong>。</li>
+          <li>为此工作簿选择 <strong>工作簿 (.srwb)</strong> 和 <strong>仅当前标签页</strong>，然后轻点 <strong>导出</strong>。将文件保存在您能掌控的位置。</li>
+          <li>要重新打开该副本，请使用 <strong>菜单 → 导入文件</strong>。这会添加另一个工作簿标签页；它不会替换现有的标签页。</li>
+          <li>检查静态 SVG、嵌入式 PNG 和公式。它们来自已保存的 Markdown 源码，无需执行代码。检查 <code>canvas_axes</code> 并再次运行该 JavaScript 单元格以重新生成其图片。</li>
+        </ol>
+        <p class="callout"><strong>生成的输出不等于源码。</strong>在经过检查的 Free 浏览器构建版本中，<code>.srwb</code> 导出可以存储 JavaScript 图像输出，但手动执行 <strong>菜单 → 导入文件</strong> 并不会恢复该代码输出。JavaScript 源码依然保留，因此请重新运行它。内联 SVG、嵌入式 PNG 和公式属于 Markdown 源码，在导入时即可显示。切勿将先前可见的输出作为代码刚刚运行过的凭据。</p>
+        <p>这些检查涵盖上述工作簿示例，并不涵盖每种导出格式下的图像保真度。切勿假设 PDF、DOCX、Markdown 和其他文档导出格式都能以相同方式保留每张图像；请检查您导出的文档。有关可用格式，请参阅<a href="../../../files-export/">文件与导出<span class="english-reference"> (英文参考页面)</span></a>。</p>
+        <p>导出编辑后的工作簿会为您的更改创建备份；当您编辑单元格时，原来下载的示例不会更新。本地应用存储并不是备份，且 Android 与浏览器会话之间不会自动共享工作成果。</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">如果出现异常情况</p>
+        <h2>检查单元格类型和源码</h2>
+        <ul>
+          <li><strong>如果看到的是 SVG 代码而非图表：</strong>请检查单元格类型是否为 <strong>Md</strong>，移除周围所有的代码围栏，并重新渲染该单元格。请使用完整的内联 <code>&lt;svg&gt;...&lt;/svg&gt;</code> 示例，而不是 SVG 数据 URL。</li>
+          <li><strong>如果 PNG 缺失：</strong>请使用配套文件中的 <code>embedded_png</code> 单元格，或检查是否粘贴了完整的 <code>data:image/png;base64,...</code> 字符串且不含空格或换行符。本地文件名并不等于嵌入式图像数据。</li>
+          <li><strong>如果 canvas 代码未运行：</strong>请将其单元格类型设置为 <strong>代码</strong>，语言设置为 <strong>JS - JavaScript</strong>，而非 Python。保留整个函数包装器以及最后的 <code>window.renderImage(...)</code> 调用。</li>
+          <li><strong>导入的 JavaScript 单元格没有图片：</strong>导入此工作簿并不会运行它或恢复其代码输出。请检查并重新运行 <code>canvas_axes</code>。</li>
+          <li><strong>如果看到原始 TeX 或数学公式错误：</strong>请使用 <strong>Md</strong>，包含起始和结束的 <code>$$</code>，并对照示例检查每个反斜杠和大括号。除最后一行外，每个矩阵行均以两个反斜杠结尾，即 <code>\\</code>。</li>
+          <li><strong>编辑创建了多余的单元格：</strong>新建单元格面板会添加单元格。请使用已保存单元格的 <strong>✎ 铅笔</strong> 修改该现有单元格，然后使用其自身的 <strong>▶ 运行</strong> 按钮。如果您误打开了编辑器，请使用 <strong>取消</strong>。</li>
+        </ul>
+        <p>有关已保存单元格、铅笔和新建单元格面板的图文指南，请参阅<a href="../../interface/tutorial/">首个工作簿界面演练</a>。如需单元格类型的简明提示，请返回<a href="../../../workbooks/">工作簿参考<span class="english-reference"> (英文参考页面)</span></a>。</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL 帮助</span><nav aria-label="页脚导航"><a href="../../../workbooks/">工作簿参考<span class="english-reference"> (英文参考页面)</span></a><a href="../../../">所有帮助<span class="english-reference"> (英文参考页面)</span></a></nav></footer>
+</body>
+</html>

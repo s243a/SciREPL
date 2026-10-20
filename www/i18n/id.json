@@ -25,6 +25,7 @@
     "Session-AppState": "sesi"
   },
   "strings": {
+    "help.keyboardTrustNotice": "SciREPL tidak berafiliasi dengan proyek-proyek ini. Aplikasi papan ketik dapat membaca semua yang Anda ketik, termasuk kata sandi dan kunci API. Hanya instal papan ketik yang Anda percayai, tinjau izinnya, dan selalu perbarui.",
     "__literal": [
       "app.search.position",
       "common.ok",

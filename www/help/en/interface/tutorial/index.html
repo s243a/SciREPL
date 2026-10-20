@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Learn the SciREPL interface by creating, running, editing, and exporting a small workbook.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/en/interface/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <title>Interface walkthrough · SciREPL Help</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help</a>
+    <nav aria-label="Primary navigation">
+      <a href="../../../interface/">Interface reference</a>
+      <a href="../../tutorials/">All tutorials</a>
+      <a href="../../../">All help</a>
+      <a href="../../../../">Open Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Tutorial language"><details class="tutorial-language-menu"><summary>Tutorial language: <bdi>English</bdi></summary><nav aria-label="Tutorial language"><a href="./" lang="en" hreflang="en" aria-current="page">English</a>
+      <a href="../../../ar/interface/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/interface/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details></aside>
+    <p class="breadcrumbs"><a href="../../../">Help</a> / <a href="../../../interface/">Interface</a> / Walkthrough</p>
+    <article>
+      <p class="eyebrow">Learn by doing</p>
+      <h1>Make your first workbook</h1>
+      <p class="lede">This is the longer, practical companion to the <a href="../../../interface/">interface reference</a>. You will run one Python cell, change it, and save a copy you control. No AI account or API key is needed.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Android steps</li>
+        <li class="chip">About 5 minutes</li>
+      </ul>
+      <p class="screen-note">Screenshots show SciREPL Free v1.3.2 on a Samsung Galaxy S24-series phone. The lesson also applies to Pro, though some controls there may look different.</p>
+      <nav class="lesson-nav" aria-label="Walkthrough steps">
+        <strong>In this lesson</strong>
+        <ol>
+          <li><a href="#find-your-place">Find your place</a></li>
+          <li><a href="#write-a-cell">Write and run a cell</a></li>
+          <li><a href="#edit-a-cell">Edit the saved cell</a></li>
+          <li><a href="#save-a-copy">Export a workbook copy</a></li>
+          <li><a href="#what-next">What to try next</a></li>
+        </ol>
+        <p><a href="../../tutorials/">All tutorials</a></p>
+      </nav>
+
+      <section id="find-your-place">
+        <p class="step-label">Step 1</p>
+        <h2>Find your place in the app</h2>
+        <p>The top row is the <strong>header</strong>. It includes Menu, Help, and a status badge. The workbook selector chooses which workbook is open.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--header" role="img" aria-label="Phone header with the workbook selector, Menu button and Help button outlined in yellow.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>The yellow outlines mark the workbook selector, Menu and Help.</figcaption>
+          <p>Below the header row is the workbook: saved cells and their results.</p>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">View the complete phone screenshot</a>
+        </figure>
+        <p>The <strong>new-cell panel</strong> is where you type the next cell. Optional header buttons can disappear when the screen is narrow; their actions remain available from Menu or Help where applicable.</p>
+      </section>
+
+      <section id="write-a-cell">
+        <p class="step-label">Step 2</p>
+        <h2>Write and run a Python cell</h2>
+        <p>Wait until the status badge says <strong>ready</strong> before the first run.</p>
+        <ol class="lesson-steps">
+          <li>In the new-cell panel, choose <strong>Python</strong> from the language selector. On a narrow phone, the closed selector may show only <strong>Py</strong>.</li>
+          <li>Type this short program:
+            <pre><code>print("Hello from SciREPL")</code></pre>
+          </li>
+          <li>Tap <strong>Run</strong>. A saved cell appears in the workbook. Beneath it, you should see <code>Hello from SciREPL</code>.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--composer" role="img" aria-label="New-cell panel with Py selected, print Hello from SciREPL in the code field, and Run outlined in yellow.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>The lower panel creates a <em>new</em> cell: choose <strong>Py</strong>, enter code, then tap <strong>Run</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">View the complete phone screenshot</a>
+        </figure>
+        <p class="callout"><strong>The first run may take longer.</strong> Python's runtime has to start once. Wait for the status to return to <strong>ready</strong>; later Python cells usually reuse that runtime.</p>
+        <aside class="callout">
+          <p><strong>If a privacy notice appears:</strong> Python is normally bundled, so this example should not need a runtime download. A network runtime, such as R or Lua in Free, may first show SciREPL's Privacy Policy; Python can too if its bundled copy needs a network fallback. Read it, scroll <em>inside the dialog</em> to the bottom, and tap <strong>I Understand</strong> if you agree. A separate Runtime Download prompt may then ask you to tap <strong>Download</strong>.</p>
+          <p><a href="../../../interface/tutorial/assets/privacy-policy-top.jpg">See an example of the Privacy Policy dialog</a> (the screenshot shows its top; the button is farther down). In Free 1.4.0 and Pro 1.4.0, a valid <code>%pip install</code> command also opens this notice if you have not accepted the current network disclosure, before it tries to install a package. See <a href="../../../privacy/">privacy and local data</a> before using network features.</p>
+        </aside>
+      </section>
+
+      <section id="edit-a-cell">
+        <p class="step-label">Step 3</p>
+        <h2>Edit the saved cell</h2>
+        <ol class="lesson-steps">
+          <li>Tap the pencil <strong>✎</strong> in the saved cell's own header, at the upper right just left of <strong>✕</strong>. It opens that cell for editing; typing in the new-cell panel would create another cell.</li>
+          <li>Change <code>Hello from SciREPL</code> to <code>Hello again</code>.</li>
+          <li>Choose <strong>Run</strong> to save and run the change. You should now see <code>Hello again</code> below that cell.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--editing" role="img" aria-label="Saved-cell editor containing print Hello again. Yellow outlines mark the saved cell&#39;s pencil at the upper right, the editable code field, and its Run button. The previous output still says Hello from SciREPL until Run is tapped.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-edit-draft.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/edit-draft-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>The yellow outlines show where the saved cell's <strong>✎ pencil</strong> sits, the code you are editing, and that cell's <strong>Run</strong> button. The pencil is dim in this screenshot because edit mode is already open. Run saves and executes the revision; the old output remains visible until then.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-edit-draft.png">View the complete phone screenshot, including keyboard</a>
+        </figure>
+        <aside class="callout">
+          <p><strong>Pro shortcut:</strong> On a touch screen, double-tap the saved cell's code to edit it. Free currently uses the <strong>✎</strong> button.</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--result" role="img" aria-label="Saved Python cell containing print Hello again, followed by highlighted output Hello again.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-rerun.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/rerun-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>After <strong>Run</strong>, the output beneath the saved cell reads <code>Hello again</code>.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-rerun.png">View the complete phone screenshot</a>
+        </figure>
+        <p>If you open the editor by mistake, use <strong>Cancel</strong> to close it without running. The language selector inside a saved cell changes that cell; the new-cell selector does not.</p>
+      </section>
+
+      <section id="save-a-copy">
+        <p class="step-label">Step 4</p>
+        <h2>Export a workbook copy</h2>
+        <ol class="lesson-steps">
+          <li>Open <strong>Menu → Export Workbooks &amp; Packages</strong>.</li>
+          <li>Choose <strong>Current tab only</strong> or <strong>All tabs</strong>, then the SciREPL format <strong>Workbook (.srwb)</strong> when you want to keep SciREPL-specific state.</li>
+          <li>Tap <strong>Export</strong> and choose a destination you control.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--menu" role="img" aria-label="Menu row Export Workbooks and Packages outlined in yellow, between Export Document and Import File.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Choose <strong>Export Workbooks &amp; Packages</strong>, not Export Document.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">View the complete Menu screenshot</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="Export dialog with Workbook srwb format, Current tab only scope and Export button outlined in yellow.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>For one tab, keep <strong>Workbook (.srwb)</strong> and <strong>Current tab only</strong>, then tap <strong>Export</strong>. Choose <strong>All tabs</strong> to include the whole workbook.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-export.png">View the complete export dialog screenshot</a>
+        </figure>
+        <p class="callout"><strong>Why export?</strong> SciREPL restores local sessions, but local storage is not a backup and is not automatically shared between the Android app and a browser. See <a href="../../../files-export/">files and export</a> for other formats, including <code>.ipynb</code> and PDF.</p>
+      </section>
+
+      <section id="what-next">
+        <p class="step-label">Step 5</p>
+        <h2>What to try next</h2>
+        <p>Try <code>2 + 2</code> in another Python cell. Then use the workbook selector to switch tabs. The <a href="../../files-export/tutorial/">CSV workbook walkthrough</a> starts from <strong>Menu → Browse Packages, Bundles &amp; Workbooks</strong>, installs an example, and shows how its cells work with a local file.</p>
+        <p>The <a href="../../workbooks/tutorial/">Markov Groups walkthrough</a> shows how to search the wider catalogue, open an existing workbook about cube moves, run its cells in order, and change one parameter.</p>
+        <p>For a quick reminder of where controls live, return to the <a href="../../../interface/">interface reference</a>. To learn another language or add packages, continue with <a href="../../../languages-packages/">Languages &amp; packages</a>.</p>
+        <aside class="callout"><strong>Using Pro?</strong> The basic workflow is the same. Pro also has a full-screen editor and optional AI features; see <a href="../../../pro/ai/#full-screen">Pro AI and full-screen workflows</a> after you are comfortable with ordinary cells.</aside>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL Help</span><nav aria-label="Footer navigation"><a href="../../../interface/">Concise interface reference</a><a href="../../../">All help</a></nav></footer>
+</body>
+</html>

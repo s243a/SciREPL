@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="id" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Beri nama sel SciREPL, baca kode sumber dan outputnya melalui sistem berkas virtual /nb, serta teruskan data atau kode yang dihasilkan antara JavaScript, Bash, dan Python.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/id/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/named-cells/tutorial.css">
+  <title>Sel bernama dan jalur lintas bahasa · Bantuan SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/named-cells/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/named-cells/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/named-cells/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/named-cells/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/named-cells/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/named-cells/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/named-cells/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/named-cells/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/named-cells/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Lompat ke konten</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+    <nav aria-label="Navigasi utama"><a href="../../../workbooks/">Referensi buku kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a><a href="../../tutorials/">Semua tutorial</a><a href="../../../">Semua bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a><a href="../../../../">Buka PWA Free</a></nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Bahasa tutorial"><details class="tutorial-language-menu"><summary>Bahasa tutorial: <bdi>Bahasa Indonesia</bdi></summary><nav aria-label="Bahasa tutorial"><a href="../../../en/workbooks/named-cells/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/named-cells/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/named-cells/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/named-cells/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/named-cells/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/named-cells/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/named-cells/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="./" lang="id" hreflang="id" aria-current="page">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/named-cells/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/named-cells/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/named-cells/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/named-cells/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/named-cells/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutorial hasil terjemahan mesin; peninjauan oleh penutur asli masih tertunda. Kode dan nilai teknis tidak diubah. Tangkapan layar menampilkan antarmuka asli bahasa Inggris; cocokkan nama kontrol yang diterjemahkan dalam teks ini dengan aplikasi Anda.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / <a href="../../../workbooks/">Buku Kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / Sel bernama dan jalur</p>
+    <article>
+      <p class="eyebrow">Belajar sambil mempraktikkan</p>
+      <h1>Beri nama sel dan hubungkan program</h1>
+      <p class="lede">Sel dapat memiliki nama yang bermakna seperti <code>numbers</code>, alih-alih hanya dikenali dari posisinya. Sel lain dapat membaca output teks terbarunya melalui <code>/nb/numbers/.output</code>, atau bertukar data melalui berkas biasa di <code>/shared/</code>. Coba kedua rute tersebut dengan JavaScript dan Bash, lalu hasilkan program Bash kecil di sel lain—tanpa menjalankan kode yang dihasilkan secara otomatis.</p>
+      <ul class="meta"><li class="chip chip-free">Alur kerja Free + Pro</li><li class="chip">Contoh yang diverifikasi di peramban</li><li class="chip">Sekitar 15 menit</li></ul>
+      <p class="screen-note">Panduan dan tangkapan layar telah diperiksa pada versi peramban <strong>SciREPL Free</strong> pada <time datetime="2026-10-06">6 Oktober 2026</time>. Ini adalah tangkapan peramban sempit yang lengkap, <strong>bukan tangkapan layar Android</strong>. Pro dan setiap versi yang dirilis belum diperiksa untuk panduan ini. Latihan utama menggunakan JavaScript dan Bash bawaan: tidak diperlukan paket, panggilan model, atau pengunduhan runtime. Python adalah langkah terakhir yang bersifat opsional.</p>
+      <p class="callout"><strong>Arti “jalur” di sini:</strong> <code>/nb/</code> adalah tampilan virtual dari <em>sel buku kerja yang saat ini dipilih</em>, yang tersedia bagi program. Ini bukan folder di Unduhan Android, dan bukan layar “Tampilan Jalur” terpisah. Pada versi Free yang diperiksa, layar <strong>Berkas &amp; penyimpanan</strong> tidak menelusuri <code>/nb/</code>; nantinya kita sengaja menyalin beberapa data ke dalam berkas bersama yang dapat ditampilkan layar tersebut.</p>
+      <nav class="lesson-nav" aria-label="Langkah-langkah panduan sel bernama">
+        <strong>Dalam pelajaran ini</strong>
+        <ol>
+          <li><a href="#open">Impor buku kerja contoh kecil</a></li>
+          <li><a href="#name">Temukan dan ubah nama sel</a></li>
+          <li><a href="#produce">Jalankan sel penghasil data</a></li>
+          <li><a href="#paths">Baca sel melalui jalurnya</a></li>
+          <li><a href="#shared-file">Bertukar data melalui berkas JSON bersama</a></li>
+          <li><a href="#generate">Hasilkan kode sumber sel lain, lalu jalankan sendiri</a></li>
+          <li><a href="#update">Ubah data dan perbarui hasilnya</a></li>
+        </ol>
+        <p><a href="#python">Pembaca Python opsional</a> · <a href="#more">Contoh buku kerja lainnya</a> · <a href="#troubleshooting">Jika terjadi masalah</a></p>
+        <p><a href="../../tutorials/">Semua tutorial</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">Langkah 1</p>
+        <h2>Impor contoh tanpa menjalankannya</h2>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/named-cells/assets/named-cell-interop.srwb" download="named-cell-interop.srwb">Unduh buku kerja contoh sel bernama (.srwb)</a>. Simpan berkas itu sendiri dan pertahankan ekstensi <code>.srwb</code>-nya. Jika peramban menampilkan teks, gunakan tindakan simpan/unduh.</li>
+          <li>Di header atas SciREPL, temukan <strong>☰ Menu</strong>—tombol dengan <strong>tiga garis horizontal</strong>. Buka dan pilih <strong>📂 Impor berkas (misalnya .srwb, .ipynb, .csv, .py, .zip)</strong>. Gulir di dalam menu jika diperlukan.</li>
+          <li>Pilih <code>named-cell-interop.srwb</code> di pemilih berkas perangkat Anda. Keluar dari menu jika masih terbuka, lalu pilih tab <strong>Named Cell Interop</strong> baru di pemilih buku kerja. Tanda panah <strong>▾</strong> pada pemilih berada di dekat judul aplikasi. Buku kerja Anda yang sudah ada tetap ada.</li>
+          <li>Baca bagian pengantar, lalu temukan tujuh sel kode bernama <code>numbers</code>, <code>inspect_cells</code>, <code>write_shared</code>, <code>read_shared</code>, <code>generate_report</code>, <code>bash_report</code>, dan <code>python_total</code>. Sel-sel tersebut sudah diberi nama agar Anda dapat mengikuti latihan ini.</li>
+        </ol>
+        <p class="callout"><strong>Impor bukanlah Menjalankan.</strong> Impor <code>.srwb</code> biasa tidak mengeksekusi kode, bahkan ketika eksekusi otomatis diaktifkan. Jangan pilih Jalankan Semua Sel untuk pelajaran ini: urutannya berpengaruh, dan sel Python terakhir bersifat opsional. Periksa kode yang tidak dikenal sebelum menjalankannya.</p>
+        <p>Memerlukan langkah pengunduhan dan pemilih secara lebih terperinci? Gunakan <a href="../import/">panduan impor buku kerja manual</a>. Untuk mengikuti pelajaran ini, biarkan <strong>Named Cell Interop</strong> tetap dipilih: <code>/nb/</code> merujuk ke buku kerja aktif, bukan ke setiap tab yang terbuka.</p>
+      </section>
+
+      <section id="name">
+        <p class="step-label">Langkah 2</p>
+        <h2>Temukan dan ubah nama sel</h2>
+        <p>Sel kode yang tersimpan memiliki <strong>label prompt In[…] </strong> di header-nya sendiri, dan sel bernama juga menampilkan namanya. Ini adalah label yang digunakan untuk penamaan—bukan <strong>✎ pensil</strong>, yang mengedit kode sumber sel. Angka yang ditampilkan mengidentifikasi kartu yang tersimpan; setelah disusun ulang, angka tersebut tidak harus cocok dengan posisi sel saat ini dalam jalur <code>/nb/In[N]/...</code>. Utamakan nama untuk referensi.</p>
+        <figure class="phone-figure">
+          <div class="annotated-shot" role="img" aria-label="Tangkapan layar peramban dengan label In dan kontrol pensil pada sel numbers yang diberi garis batas kuning; kode sumber dan output JSON-nya muncul di bawah.">
+            <img src="../../../workbooks/named-cells/assets/browser-named-cell.png" alt="" loading="lazy" decoding="async">
+            <img class="shot-annotation" src="../../../workbooks/named-cells/assets/browser-named-cell-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          </div>
+          <figcaption>Dua garis batas kuning mengidentifikasi <strong>label In[…] </strong> sel yang tersimpan, yang membuka dialog penamaan dengan klik dua kali atau tekan lama, dan <strong>✎ pensil</strong>-nya, yang membuka editor kode sumber. Nama <code>numbers</code> muncul di sebelah kanan. Tangkapan peramban ini menampilkan output setelah Langkah 3; di desktop, arahkan kursor ke kartu untuk menampilkan kontrolnya.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-named-cell.png">Lihat tangkapan layar peramban lengkap</a>
+        </figure>
+        <ol class="lesson-steps">
+          <li>Temukan <code>numbers</code>. Di desktop, <strong>klik dua kali label In[…] miliknya</strong>. Pada perangkat layar sentuh, <strong>tekan dan tahan label tersebut</strong>. Satu klik bukanlah gestur penamaan pada build yang diperiksa.</li>
+          <li>Di dalam dialog, ganti <code>numbers</code> dengan <code>measurements</code>, lalu konfirmasi dengan <strong>OK</strong>. Nama di header sel akan berubah; kode sumber dan bahasa tidak.</li>
+          <li>Buka dialog yang sama lagi dan ubah namanya <strong>kembali ke <code>numbers</code></strong>, lalu pilih <strong>OK</strong>. Sel-sel berikutnya menggunakan nama tersebut, jadi pulihkan sebelum melanjutkan.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-name-dialog.png" alt="Tangkapan layar peramban sempit dari dialog nama sel SciREPL Free dengan nama measurements yang dimasukkan serta kontrol konfirmasi dan batal." loading="lazy" decoding="async">
+          <figcaption>Nama diedit di dialognya sendiri. Mengganti nama sel tidak menulis ulang referensi di sel lain: <code>/nb/numbers/.output</code> juga perlu diubah jika Anda tetap menggunakan nama baru tersebut.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-name-dialog.png">Lihat tangkapan layar dialog penamaan peramban lengkap</a>
+        </figure>
+        <p>Pilih nama yang khas dan sederhana seperti <code>cube_moves</code> atau <code>check_moves</code>. Nama harus unik di dalam buku kerja; tidak boleh memuat <code>/</code>, diawali dengan <code>.</code>, atau berupa label posisi khusus seperti <code>In[2]</code>. Mengosongkan nama akan menghapusnya.</p>
+        <p>Inilah sebabnya tutorial dapat menyatakan <strong>“Jalankan <code>cube_moves</code>, lalu <code>check_moves</code>”</strong>: itu adalah nama sel yang dapat ditemukan di buku kerja, bukan berkas yang harus Anda unduh secara terpisah. Nama merupakan referensi yang lebih baik daripada posisi saat Anda menyisipkan atau memindahkan sel.</p>
+      </section>
+
+      <section id="produce">
+        <p class="step-label">Langkah 3</p>
+        <h2>Jalankan sel yang menghasilkan data</h2>
+        <p>Temukan <code>numbers</code>. Ketuk <strong>✎ pensil</strong>-nya sendiri, periksa kode sumbernya, dan pastikan sel tersebut adalah <strong>kode → JS - JavaScript</strong>. Kemudian pada <em>sel yang tersimpan tersebut</em>, gunakan tombol <strong>▶ Jalankan</strong>—bukan panel sel baru, yang akan menambahkan sel lain.</p>
+        <p class="callout"><strong>Pintasan Pro:</strong> Anda juga dapat membuka editor sel yang tersimpan dengan <strong>mengetuk dua kali teks kode sumber sel</strong> di Pro. <strong>✎ pensil</strong> berfungsi di kedua edisi. Pintasan pengeditan ini berbeda dari mengeklik dua kali atau menekan lama <strong>label In[…] </strong> untuk mengubah namanya.</p>
+        <pre><code data-cell-example="numbers">console.log(JSON.stringify({values: [3, 5, 8]}));</code></pre>
+        <p>Harapkan output satu baris ini:</p>
+        <pre><code>{"values":[3,5,8]}</code></pre>
+        <p>Hasilnya berupa <strong>teks JSON</strong>. Strukturnya membuatnya lebih mudah dibaca oleh bahasa lain daripada pesan teks biasa. Kita tidak meneruskan objek JavaScript aktif atau membagikan variabel JavaScript dengan Bash atau Python.</p>
+      </section>
+
+      <section id="paths">
+        <p class="step-label">Langkah 4</p>
+        <h2>Baca sel melalui sistem berkas virtual</h2>
+        <p>Direktori virtual untuk <code>numbers</code> memiliki properti berawalan titik. Jalur menggabungkan titik kait buku kerja, pengidentifikasi sel, dan properti yang Anda inginkan:</p>
+        <pre class="path-tree" aria-label="Jalur virtual untuk sel numbers"><code>/nb/                         current workbook's cells
+└── numbers/                 this named cell
+    ├── .code                source text
+    ├── .output              latest text output
+    ├── .language            javascript
+    ├── .type                code
+    └── .name                numbers</code></pre>
+        <div class="table-wrap">
+          <table>
+            <caption>Properti sel yang digunakan oleh antarmuka jalur buku kerja</caption>
+            <thead><tr><th scope="col">Properti</th><th scope="col">Informasi yang diperoleh saat membacanya</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>.code</code></th><td>Kode sumber saat ini, terlepas dari apakah kode sumber tersebut sudah dijalankan atau belum.</td></tr>
+              <tr><th scope="row"><code>.output</code></th><td>Output teks terakhir. Bersifat hanya-baca: eksekusi yang menyediakannya. Bisa kosong atau kedaluwarsa.</td></tr>
+              <tr><th scope="row"><code>.language</code></th><td>Pengidentifikasi bahasa yang tersimpan, seperti <code>javascript</code> atau <code>bash</code>.</td></tr>
+              <tr><th scope="row"><code>.type</code></th><td>Jenis sel, seperti <code>code</code> atau <code>markdown</code>.</td></tr>
+              <tr><th scope="row"><code>.name</code></th><td>Nama yang ditetapkan, atau teks kosong jika sel tidak diberi nama.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Sekarang buka <strong>✎ pensil</strong> pada <code>inspect_cells</code>, periksa <strong>kode → Bash</strong>, dan jalankan. Ini membaca kode sumber penghasil, output JSON, dan bahasanya, lalu mencantumkan pengidentifikasi sel buku kerja saat ini. Tindakan ini tidak menulis atau mengubah sel maupun berkas apa pun.</p>
+        <pre><code data-cell-example="inspect_cells">printf 'Source:\n'
+cat /nb/numbers/.code
+printf '\nOutput:\n'
+cat /nb/numbers/.output
+printf '\nLanguage:\n'
+cat /nb/numbers/.language
+printf '\nCell names and positions:\n'
+ls /nb/</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-cell-paths.png" alt="Tangkapan layar peramban sempit dari sel Bash inspect_cells yang menampilkan kode sumber sel numbers, output JSON, bahasa, dan daftar sel virtual." loading="lazy" decoding="async">
+          <figcaption>Bash membaca properti sel dengan jalur <code>cat</code> yang tampak biasa. Jalur-jalur ini mengalamatkan data buku kerja; tidak melibatkan shell Android atau folder ponsel fisik. Tangkapan peramban dari SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-cell-paths.png">Lihat tangkapan layar jalur sel peramban lengkap</a>
+        </figure>
+        <h3>Nama, posisi, dan referensi relatif</h3>
+        <p>Sel yang sama juga dapat dialamatkan berdasarkan <strong>posisi berbasis-1 saat ini</strong>, misalnya <code>/nb/In[2]/.output</code> berarti sel kedua dalam urutan saat ini. Hitung sel Markdown juga. Ini bukan id kartu permanen: setelah disusun ulang, nomor In[…] yang tercetak dapat berbeda dari posisi yang digunakan oleh jalur ini. Referensi posisi berubah maknanya saat Anda menyusun ulang atau menyisipkan sel; referensi nama tetap mengidentifikasi sel bernama tersebut.</p>
+        <p>Bash dan JavaScript juga mendukung referensi relatif terhadap sel yang dieksekusi: <code>/nb/-1/.output</code> berarti sel sebelumnya, dan <code>/nb/./.code</code> berarti sel saat ini. Keduanya memerlukan konteks eksekusi dan bergantung pada urutan sel. Tutorial ini menggunakan nama eksplisit sebagai gantinya; ini tidak bergantung pada referensi relatif yang berperilaku identik di setiap bahasa.</p>
+      </section>
+
+      <section id="shared-file">
+        <p class="step-label">Langkah 5</p>
+        <h2>Bertukar data melalui berkas bersama</h2>
+        <p><strong>Sistem berkas virtual bersama</strong> menampung berkas biasa yang dapat digunakan oleh kernel berbagai bahasa berbeda. Di sini, <code>/shared/</code> berarti penyimpanan yang dikelola di dalam sesi peramban/aplikasi SciREPL Anda—bukan Unduhan Android, folder di komputer Anda, atau sinkronisasi cloud. Berkas bersama membawa teks atau bita; berkas tersebut tidak membuat variabel aktif suatu bahasa tersedia untuk bahasa lain.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Dua cara program dapat merujuk ke data</caption>
+            <thead><tr><th scope="col">Jalur</th><th scope="col">Apa yang dialamatkannya</th><th scope="col">Apa yang memperbaruinya</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>/nb/numbers/.output</code></th><td>Output teks terakhir dari sebuah sel dalam buku kerja yang dipilih.</td><td>Menjalankan kembali sel tersebut.</td></tr>
+              <tr><th scope="row"><code>/shared/data/named-cell-tutorial/values.json</code></th><td>Berkas JSON biasa, tersedia di berbagai kernel dan tab buku kerja.</td><td>Program atau editor berkas yang menulis berkas tersebut secara eksplisit.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Tulis berkas JSON biasa</h3>
+        <p>Buka <strong>✎ pensil</strong> pada <code>write_shared</code>, periksa <strong>kode → JS - JavaScript</strong>, lalu jalankan. Ini membaca output teks terakhir penghasil dan menyimpannya sebagai berkas teks JSON bersama. Sistem berkas bersama membuat folder induk sesuai kebutuhan.</p>
+        <pre><code data-cell-example="write_shared">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+window.sharedVFS.writeFile('/shared/data/named-cell-tutorial/values.json', text, 'javascript');
+console.log('Saved JSON to /shared/data/named-cell-tutorial/values.json');</code></pre>
+        <p>Hasilnya adalah <strong>berkas terpisah yang berisi salinan</strong> output JSON, bukan nama lain untuk <code>/nb/numbers/.output</code>. Folder khusus menjaga agar berkas coretan kecil contoh ini terpisah dari data Anda yang lain; menjalankan ulang <code>write_shared</code> akan menimpa berkas pelajaran ini secara persis.</p>
+        <h3>Baca berkas dari program yang berbeda</h3>
+        <p>Buka <strong>✎ pensil</strong> pada <code>read_shared</code>, periksa <strong>kode → JS - JavaScript</strong>, lalu jalankan. Program independen ini membaca berkas yang tersimpan, bukan sel <code>numbers</code>:</p>
+        <pre><code data-cell-example="read_shared">const text = window.sharedVFS.readFile('/shared/data/named-cell-tutorial/values.json', 'utf8');
+if (!text) throw new Error('Run write_shared first.');
+const record = JSON.parse(text);
+console.log(record.values.reduce((sum, value) =&gt; sum + value, 0));</code></pre>
+        <p>Harapkan <code>16</code>. Perintah eksplisit <code>'utf8'</code> membaca bita berkas sebagai teks untuk penguraian JSON. Setiap kernel memiliki API berkasnya sendiri: JavaScript menggunakan pembantu sistem berkas bersama di sini; Python dapat menggunakan <code>open(...)</code>, seperti yang ditunjukkan pada langkah opsional di bawah. Ini bukan sistem berkas sistem operasi yang lengkap.</p>
+        <p>Untuk pemeriksaan lintas bahasa terpisah, Anda dapat menambahkan sel <strong>kode → Bash</strong> baru dan menjalankan perintah ini. Ini membaca berkas biasa yang sama dan mencetak <code>{"values":[3,5,8]}</code>:</p>
+        <pre><code>cat /shared/data/named-cell-tutorial/values.json</code></pre>
+        <h3>Lihat berkas yang sama di GUI berkas</h3>
+        <ol class="lesson-steps">
+          <li>Buka <strong>☰ Menu → Berkas &amp; penyimpanan</strong>.</li>
+          <li>Temukan folder <code>data</code> bersama, lalu <code>named-cell-tutorial</code> dan <code>values.json</code>. Pilih berkas untuk melihat teks JSON-nya.</li>
+          <li>Pastikan berkas berisi <code>{"values":[3,5,8]}</code>, lalu tutup Files &amp; Storage untuk melanjutkan buku kerja.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-shared-values.png" alt="Tangkapan layar peramban sempit dari layar Files &amp; Storage SciREPL Free yang menampilkan berkas values.json yang disalin dan konten JSON-nya." loading="lazy" decoding="async">
+          <figcaption>Penyalinan yang disengaja ke dalam sistem berkas bersama membuat JSON tersedia di GUI berkas. Layar Free yang diperiksa tidak mencantumkan <code>/nb/</code> itu sendiri. Tangkapan peramban dari SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-shared-values.png">Lihat tangkapan layar berkas bersama peramban lengkap</a>
+        </figure>
+        <p class="callout"><strong>Salinan tidak diperbarui secara otomatis.</strong> Mengubah atau menjalankan ulang <code>numbers</code> akan mengubah output sel terbarunya, bukan <code>values.json</code> yang sudah ada. Jalankan ulang <code>write_shared</code> untuk memperbarui salinan, lalu <code>read_shared</code> untuk menghitung ulang darinya. Berkas disimpan di penyimpanan lokal aplikasi/peramban, tetapi mengosongkan penyimpanan tersebut atau mencopot pemasangan aplikasi dapat menghapusnya. Persistensi lokal bukanlah cadangan; ekspor berkas yang perlu Anda simpan.</p>
+        <p>Untuk melihat, mengedit, dan mengekspor berkas bersama, lihat panduan <a href="../../files-export/tutorial/#edit-file">CSV dan Files &amp; Storage</a>. Ekspor <code>.srwb</code> khusus buku kerja tidak menyertakan berkas terpisah seperti salinan JSON ini; gunakan <a href="../../files-export/tutorial/#export">Ekspor arsip paket</a> untuk menyertakan buku kerja dan berkas data yang dipilih secara bersama-sama.</p>
+      </section>
+
+      <section id="generate">
+        <p class="step-label">Langkah 6</p>
+        <h2>Hasilkan kode sel lain, lalu jalankan sendiri</h2>
+        <p>Sejauh ini Bash telah membaca output JavaScript. Sekarang JavaScript akan menggunakan teks JSON yang sama tersebut untuk menghitung total, dan menulis program Bash pendek ke dalam sel <em>yang sudah ada</em> <code>bash_report</code>. Menulis kode dan menjalankan kode adalah dua tindakan yang terpisah.</p>
+        <ol class="program-flow" aria-label="Alur data dan kode yang dihasilkan">
+          <li><code>numbers</code><span>Jalankan → teks JSON</span></li>
+          <li><code>generate_report</code><span>Baca JSON → tulis kode sumber Bash</span></li>
+          <li><code>bash_report</code><span>Periksa → jalankan secara manual</span></li>
+        </ol>
+        <p class="callout"><strong>Penulisan ini menggantikan kode sumber.</strong> Gunakan sel coretan <code>bash_report</code> pendamping, bukan sel dengan pekerjaan yang perlu Anda pertahankan. Buat cadangan sebelum mencoba penulisan kode sumber di buku kerja Anda sendiri. Jangan menimpa generator itu sendiri atau mengubah <code>.language</code> secara terprogram dalam latihan ini.</p>
+        <ol class="lesson-steps">
+          <li>Pastikan bahwa <code>bash_report</code> ada dan bahasanya adalah <strong>Bash</strong>. Kode sumber awalnya ditampilkan di bawah; jangan jalankan dulu.</li>
+          <li>Buka <strong>☰ Menu → Pengaturan → VFS Buku Catatan</strong>. <strong>Izinkan sel memodifikasi sel lain</strong> harus dicentang untuk penulisan generator. Opsi ini aktif secara default pada build yang diperiksa, tetapi periksa pengaturan Anda. Anda <em>tidak</em> perlu mengaktifkan pembacaan lintas buku catatan, penulisan lintas buku catatan, atau eksekusi terprogram. Tutup Pengaturan.</li>
+          <li>Buka <strong>✎ pensil</strong> pada <code>generate_report</code>, periksa <strong>kode → JS - JavaScript</strong>, lalu jalankan.</li>
+        </ol>
+        <pre><code data-cell-example="generate_report">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+const data = JSON.parse(text);
+const total = data.values.reduce((sum, value) =&gt; sum + value, 0);
+const updated = window.notebookVFS.writeFile(
+  '/nb/bash_report/.code', `echo "Total: ${total}"`
+);
+if (!updated) throw new Error('Check bash_report exists and cell writes are allowed.');
+console.log('Updated bash_report source; inspect it, then run it yourself.');</code></pre>
+        <p>Target dimulai dengan placeholder ini:</p>
+        <pre><code data-cell-example="bash_report">echo "Run generate_report first"</code></pre>
+        <p>Setelah generator berhasil, kode sumber <code>bash_report</code> menjadi <code>echo "Total: 16"</code>. Penulisan tersebut <strong>tidak menjalankan Bash</strong>. Buka <strong>✎ pensil</strong> sel tersebut untuk memeriksa kode sumber baru, lalu ketuk tombol <em>miliknya sendiri</em> <strong>▶ Jalankan</strong>. Harapkan <code>Total: 16</code>.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-generated-report.png" alt="Tangkapan layar peramban sempit dari SciREPL Free yang menampilkan kode sumber Bash yang dihasilkan echo Total: 16 di bash_report dan Total: 16 setelah dijalankan secara manual." loading="lazy" decoding="async">
+          <figcaption>Target masih berupa sel Bash. JavaScript menyediakan kode sumbernya; tindakan <strong>▶ Jalankan</strong> terpisah Anda menghasilkan output di bawahnya. Tangkapan peramban dari SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-generated-report.png">Lihat tangkapan layar peramban laporan yang dihasilkan lengkap</a>
+        </figure>
+        <p><code>readFile(...)</code> mengembalikan teks; sel atau properti yang tidak dikenal mengembalikan <code>null</code>. <code>writeFile(...)</code> melaporkan apakah penulisan berhasil. Pemeriksaan pada generator akan menghentikannya jika penghasil tidak memiliki output atau tujuan tidak dapat ditulis. Nama peka huruf besar-kecil: pertahankan ejaan yang persis sama.</p>
+      </section>
+
+      <section id="update">
+        <p class="step-label">Langkah 7</p>
+        <h2>Ubah data dan perbarui setiap langkah dependen</h2>
+        <ol class="lesson-steps">
+          <li>Edit <code>numbers</code> dengan <strong>✎ pensil</strong>-nya. Ubah <code>[3, 5, 8]</code> menjadi <code>[4, 5, 8]</code>, lalu jalankan sel tersebut. JSON-nya sekarang berisi <code>4</code>.</li>
+          <li>Perhatikan <code>bash_report</code> sebelum menjalankan apa pun yang lain. Kode sumber dan output sebelumnya tetap tidak berubah: tidak ada pembaruan dependensi otomatis.</li>
+          <li>Jalankan ulang <code>generate_report</code>. Ini mengubah kode sumber laporan menjadi <code>echo "Total: 17"</code>, tetapi output <code>Total: 16</code> lamanya masih dapat tetap terlihat.</li>
+          <li>Periksa dan jalankan ulang <code>bash_report</code>. Sekarang outputnya adalah <code>Total: 17</code>.</li>
+          <li>Sebelum menyegarkan berkas, jalankan ulang <code>read_shared</code>: ini masih menampilkan <code>16</code> dari salinan JSON yang lebih lama. Sekarang jalankan ulang <code>write_shared</code>, lalu <code>read_shared</code>; rute berkas juga menampilkan <code>17</code>. Buka kembali <code>values.json</code> di Files &amp; Storage untuk memeriksa berkas yang telah berubah.</li>
+        </ol>
+        <p class="callout"><strong>Kode sumber, output, dan berkas yang disalin adalah hal yang berbeda.</strong> Selesaikan pengeditan kode sumber yang terbuka dengan tombol <strong>▶ Jalankan</strong> pada sel tersebut sebelum konsumennya; draf editor yang belum disimpan bukanlah <code>.code</code> yang tersimpan. Penulisan kode sumber tidak mengeksekusi tujuan, dan berkas yang disalin tidak mengikuti perubahan selanjutnya. Ikuti urutan eksplisit: penghasil → generator → laporan. Output lama yang terlihat bukanlah bukti bahwa kode sumber saat ini telah dijalankan.</p>
+        <p>Ekspor buku kerja untuk mempertahankan pengeditan kode sumber dan nama Anda. Impor <code>.srwb</code> biasa saat ini membuang output kode yang tersimpan, jadi setelah membuka kembali, jalankan ulang <code>numbers</code> sebelum pembacanya, lalu generator dan laporan. Berkas data bersama yang terpisah memerlukan ekspor berkas atau paket. Lihat <a href="../../../files-export/">referensi berkas dan ekspor<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>.</p>
+      </section>
+
+      <section id="python">
+        <p class="step-label">Opsional</p>
+        <h2>Baca kedua rute dari Python</h2>
+        <p>Anda dapat berhenti di sini tanpa memulai Python. Untuk mencoba bahasa ketiga, pertama-tama jalankan <code>numbers</code> dan <code>write_shared</code>, lalu periksa dan jalankan <code>python_total</code> sebagai <strong>kode → Python</strong>:</p>
+        <pre><code data-cell-example="python_total">import json
+record = json.loads(nb_read('numbers', '.output'))
+print('Cell output:', sum(record['values']))
+with open('/shared/data/named-cell-tutorial/values.json') as source:
+    saved = json.load(source)
+print('Shared file:', sum(saved['values']))</code></pre>
+        <p>Harapkan <code>Cell output: 16</code> dan <code>Shared file: 16</code> untuk data asli, atau <code>17</code> di kedua baris setelah menyegarkan kedua rute di Langkah 7. Pada Python, <code>nb_read('numbers', '.output')</code> membaca output teks terakhir sel bernama. Perintah <code>open(...)</code> yang terpisah membaca berkas bersama menggunakan sintaksis berkas Python yang normal. Modul standar <code>json</code> mengurai keduanya; <code>%pip install</code> tidak diperlukan. Jika hanya penghasil yang disegarkan, kedua total dapat berbeda.</p>
+        <p>Pada penggunaan pertama, Python mungkin perlu menginisialisasi atau mengunduh runtime-nya. Pemberitahuan privasi/jaringan dapat muncul bergantung pada build dan izin Anda yang sudah ada; bacalah sebelum menyetujui. Langkah opsional ini tidak diperlukan untuk latihan JavaScript/Bash, dan hanya mengimpor buku kerja pendamping saja tidak akan memulai Python.</p>
+      </section>
+
+      <section id="more">
+        <p class="step-label">Lanjutkan eksplorasi</p>
+        <h2>Kenali polanya di buku kerja lain</h2>
+        <p>Sel bernama menyediakan batas interoperabilitas yang sederhana: satu program menghasilkan teks, program lain membacanya atau menggunakannya untuk menghasilkan kode sumber. Katalog sudah memiliki contoh lebih besar untuk diperiksa:</p>
+        <ul>
+          <li><strong>Analisis Harapan Hidup</strong> membaca berkas CSV biasa dari <code>/shared/data/</code> dalam Python dan R: rute berkas bersama, bukan pembacaan sel bernama. Ini mengunduh himpunan data dan menggunakan paket; baca persyaratan pengaturan dan izinnya sebelum menjalankannya.</li>
+          <li><strong>Prolog Menghasilkan R</strong> membaca kode sumber Prolog bernama dengan <code>nb_read(..., '.code', ...)</code> dan menulis kode sumber R yang dihasilkan dengan <code>nb_write('r_factorial', '.code', ...)</code>. Sel R dijalankan secara terpisah.</li>
+          <li><strong>Prolog Menghasilkan TypR</strong> menggabungkan definisi yang dihasilkan dengan sel kueri khusus-kode-sumber bernama, lalu menulis <code>typr_output</code>. Sel <code>#!source</code> dapat dibaca sebagai kode sumber tanpa mengeksekusinya.</li>
+        </ul>
+        <p>Cari judul-judul ini di <strong>☰ Menu → Browse Packages…</strong>. Itu adalah bacaan lebih lanjut, <strong>bukan panduan eksekusi bersertifikasi untuk panduan ini</strong>; edisi yang tersedia dan kebutuhan pengaturannya berbeda. Buku kerja tempat Prolog menghasilkan kode memerlukan dependensi <strong>unifyweaver-scirepl</strong> yang diinstal melalui Browse; mengimpor buku kerja mentah saja tidak menginstal dependensi tersebut. Untuk <code>.ipynb</code> yang diimpor secara manual, pertama-tama pastikan <strong>Menu → Pengaturan → Impor &amp; Pengeditan → Jalankan sel otomatis saat mengimpor buku kerja</strong> nonaktif, karena impor Jupyter dapat mengeksekusi kode di bawah pengaturan tersebut. Lihat <a href="../tutorial/">panduan Browse</a> dan <a href="../import/">panduan impor manual</a>.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">Jika ada yang tampak keliru</p>
+        <h2>Periksa nama, buku kerja, dan urutan eksekusi</h2>
+        <ul>
+          <li><strong>Dialog penamaan tidak terbuka:</strong> klik dua kali atau tekan lama <strong>label In[…] </strong> sel yang tersimpan, bukan kode sumber, output, atau pensilnya. Satu klik bukanlah gestur penamaan.</li>
+          <li><strong>Penghasil tidak dapat ditemukan:</strong> biarkan <strong>Named Cell Interop</strong> tetap dipilih, pulihkan nama persis <code>numbers</code>, dan periksa ejaan serta huruf besar-kecilnya. Mengganti nama tidak menulis ulang jalur di sel lain.</li>
+          <li><strong>Generator menampilkan pesan “Run numbers first”:</strong> periksa dan jalankan <code>numbers</code>. Mengimpor atau sekadar mengedit kode sumbernya tidak akan mengisi <code>.output</code>.</li>
+          <li><strong>Penguraian JSON gagal:</strong> bandingkan penghasil dengan contoh lengkap. Outputnya harus hanya berupa JSON, bukan judul atau pesan cetak tambahan.</li>
+          <li><strong>Laporan tidak dapat ditulis:</strong> pastikan bahwa sel <code>bash_report</code> yang ada berada di buku kerja ini dan bahwa <strong>Izinkan sel memodifikasi sel lain</strong> telah dicentang. Jangan aktifkan eksekusi terprogram untuk mengatasi masalah penulisan kode sumber.</li>
+          <li><strong>Laporan masih bernilai 16:</strong> setelah mengedit data, jalankan <code>numbers</code>, lalu <code>generate_report</code>, lalu <code>bash_report</code>. Perbarui berkas yang disalin secara terpisah dengan <code>write_shared</code>, lalu jalankan ulang <code>read_shared</code>.</li>
+          <li><strong>Anda tidak dapat menemukan /nb di Files &amp; Storage:</strong> layar tersebut menampilkan berkas bersama, bukan titik kait sel virtual ini pada build yang diperiksa. Sebagai gantinya, jalankan <code>write_shared</code> dan cari salinan <code>values.json</code>-nya yang memang disengaja.</li>
+        </ul>
+        <p><a href="../../interface/tutorial/">Tutorial antarmuka buku kerja pertama</a> menjelaskan tentang header dan pensil sel tersimpan; <a href="../graphics/">tutorial grafis</a> menunjukkan cara-cara lain sel dapat menghasilkan hasil.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Bantuan SciREPL</span><nav aria-label="Navigasi footer"><a href="../../../workbooks/">Referensi buku kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a><a href="../../../">Semua bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a></nav></footer>
+</body>
+</html>

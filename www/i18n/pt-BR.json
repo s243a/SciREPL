@@ -25,6 +25,7 @@
     "Session-AppState": "sessão"
   },
   "strings": {
+    "help.keyboardTrustNotice": "O SciREPL não é afiliado a esses projetos. Aplicativos de teclado podem ler tudo o que você digita, incluindo senhas e chaves de API. Instale apenas um teclado em que confie, revise suas permissões e mantenha-o atualizado.",
     "__literal": [
       "app.search.position",
       "appearance.layout",

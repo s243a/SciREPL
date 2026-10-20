@@ -25,6 +25,7 @@
     "Session-AppState": "세션"
   },
   "strings": {
+    "help.keyboardTrustNotice": "SciREPL은 이 프로젝트들과 제휴 관계가 없습니다. 키보드 앱은 비밀번호와 API 키를 포함하여 사용자가 입력하는 모든 내용을 읽을 수 있습니다. 신뢰할 수 있는 키보드만 설치하고 권한을 검토하며 최신 상태로 유지하세요.",
     "__literal": [
       "app.search.position",
       "export.docx",

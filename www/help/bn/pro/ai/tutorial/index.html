@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="bn" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="একটি SciREPL Pro নির্দেশিকা: API-খরচ মুক্ত টেবিল সাজেশন, API-কী সেটআপ, Open এজেন্ট প্রিসেট, অনলাইন ও লোকাল কমপ্লিশন, এবং ফোকাসড AI Prompt সেল।">
+  <meta name="theme-color" content="#06101d">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/bn/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../styles.css">
+  <link rel="stylesheet" href="../../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../../pro/ai/tutorial/tutorial.css">
+  <title>AI এবং কমপ্লিশন, ধাপে ধাপে · SciREPL Pro সহায়তা</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../tutorial-locales.css">
+</head>
+<body data-editions="pro" data-platforms="android windows-preview">
+  <a class="skip-link" href="#main">মূল বিষয়বস্তুতে যান</a>
+  <header class="site-header">
+    <a class="brand" href="../../../../">sci<span>REPL</span> Help<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+    <nav aria-label="প্রাথমিক নেভিগেশন">
+      <a href="../../../tutorials/">সকল টিউটোরিয়াল</a>
+      <a href="../../../../pro/ai/">AI রেফারেন্স<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+      <a href="../../../../pro/">Pro সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="টিউটোরিয়ালের ভাষা"><details class="tutorial-language-menu"><summary>টিউটোরিয়ালের ভাষা: <bdi>বাংলা</bdi></summary><nav aria-label="টিউটোরিয়ালের ভাষা"><a href="../../../../en/pro/ai/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../../ar/pro/ai/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="./" lang="bn" hreflang="bn" aria-current="page">বাংলা</a>
+      <a href="../../../../de/pro/ai/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../../es/pro/ai/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../../fr/pro/ai/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../../hi/pro/ai/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../../id/pro/ai/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../../ja/pro/ai/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../../ko/pro/ai/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../../pt-BR/pro/ai/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../../ru/pro/ai/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../../zh/pro/ai/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">মেশিন-অনূদিত টিউটোরিয়াল; স্থানীয় ভাষায় পর্যালোচনা প্রক্রিয়াধীন। কোড এবং প্রযুক্তিগত মানসমূহ অপরিবর্তিত। স্ক্রিনশটগুলোতে মূল ইংরেজি ইন্টারফেস দেখানো হয়েছে; আপনার অ্যাপের সাথে এই টেক্সটের অনূদিত কন্ট্রোল নামগুলো মিলিয়ে নিন।</p></aside>
+    <p class="breadcrumbs"><a href="../../../../">সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / <a href="../../../../pro/">Pro<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / AI এবং কমপ্লিশন</p>
+    <article>
+      <p class="eyebrow">কাজের মাধ্যমে শিখুন · Pro</p>
+      <h1>অফলাইন সাজেশন থেকে AI-সহায়তাপ্রাপ্ত কোডিং</h1>
+      <p class="lede">দ্রুত টেবিল-ভিত্তিক সাজেশন দিয়ে শুরু করুন যার জন্য প্রতি অনুরোধে কোনো খরচ হয় না। তারপর Assistant সেট আপ করুন, অনলাইন বিকল্পের জন্য অনুরোধ করুন, একটি অন-ডিভাইস মডেল পরীক্ষা করে দেখুন, এবং আপনার কোড ব্যাখ্যা করে এমন ফোকাসড AI Prompt সেল দিয়ে শেষ করুন।</p>
+      <ul class="meta">
+        <li class="chip chip-pro">শুধুমাত্র Pro</li>
+        <li class="chip">Pro 1.4.0 + আসন্ন এক্সিকিউশন নিয়ন্ত্রণসমূহ</li>
+        <li class="chip">লোকাল মডেল: Android</li>
+      </ul>
+      <p class="screen-note">বেশিরভাগ স্ক্রিনশটে Android অ্যাপ দেখানো হয়েছে; কিছু ব্রাউজারের ক্যাপচার। আপনার অ্যাপের সংস্করণের উপর নির্ভর করে লেআউট ভিন্ন হতে পারে।</p>
+      <p class="callout"><strong>আপনার সংস্করণ পরীক্ষা করুন।</strong> <a href="#execution-permissions">পরিশিষ্টে</a> উল্লিখিত এক্সিকিউশন পরিবর্তনগুলি <strong>প্রস্তাবিত Pro 1.5.0</strong>-এর জন্য পরিকল্পিত, যা <strong>অপ্রকাশিত</strong>; চূড়ান্ত রিলিজ নম্বর পরিবর্তিত হতে পারে।</p>
+      <p class="callout"><strong>এখানে “Free” বলতে কোনো API চার্জ না থাকাকে বোঝায়।</strong> টেবিল সাজেশন এবং অন-ডিভাইস মডেল কোনো প্রোভাইডারকে বিল করে না। এটি সেগুলোকে Free-সংস্করণের ফিচার বানায় না: এই নির্দেশিকাটি <strong>SciREPL Pro</strong>-এর জন্য। অনলাইন অনুরোধগুলো আপনার নিজস্ব প্রোভাইডার অ্যাকাউন্ট ব্যবহার করে এবং এতে অর্থ ব্যয় হতে পারে।</p>
+      <nav class="lesson-nav" aria-label="AI এবং কমপ্লিশন নির্দেশিকার ধাপসমূহ">
+        <strong>এই পাঠে</strong>
+        <ol>
+          <li><a href="#tables">অফলাইন টেবিল সাজেশন দিয়ে শুরু করুন</a></li>
+          <li><a href="#key">একটি API কী সংরক্ষণ করুন</a></li>
+          <li><a href="#agent">Open এজেন্ট প্রিসেট দিয়ে একটি ছোট উদাহরণ তৈরি করুন</a></li>
+          <li><a href="#online">API-ভিত্তিক কমপ্লিশনের জন্য অনুরোধ করুন</a></li>
+          <li><a href="#local">অন-ডিভাইস মডেলটি পরীক্ষা করে দেখুন</a></li>
+          <li><a href="#prompt-cells">কোড বোঝার জন্য একটি AI Prompt সেল ব্যবহার করুন</a></li>
+        </ol>
+        <p><a href="../../../tutorials/">অন্য একটি টিউটোরিয়াল বেছে নিন</a> · <a href="#troubleshooting">যদি কোনো কিছু কাজ না করে</a></p>
+      </nav>
+
+      <section id="tables">
+        <p class="step-label">ধাপ 1 · কোনো API কী প্রয়োজন নেই</p>
+        <h2>অফলাইন টেবিল সাজেশন দিয়ে শুরু করুন</h2>
+        <p>অ্যাপের হেডারে <strong>☰ Menu</strong> খুঁজুন: এটি <strong>তিনটি অনুভূমিক রেখা</strong> বিশিষ্ট বোতাম। <strong>কমপ্লিশন</strong> খুলুন। এর <strong>বিভাগ</strong> পিকার <strong>সাধারণ</strong>, <strong>এআই সাজেশন (অনলাইন)</strong>, এবং <strong>লোকাল মডেল (ডিভাইসে)</strong>-কে পৃথক করে। General দিয়ে শুরু করুন।</p>
+        <ol class="lesson-steps">
+          <li><strong>স্থানীয় কোড সম্পূর্ণকরণ → চালু</strong> সেট করুন। অন্যথায় ডিফল্ট <strong>স্বয়ংক্রিয় (ডেস্কটপে চালু, টাচে বন্ধ)</strong> এটিকে ফোনে বন্ধ রাখবে।</li>
+          <li><strong>সাজেশন চিপ → চালু</strong> সেট করুন এবং <strong>পরামর্শ → কার্সরের অবস্থানে</strong> বজায় রাখুন। টেবিলগুলোকে আলাদা রাখতে, অনলাইন সেকশনে <strong>এআই সাজেশন → বন্ধ</strong> এবং লোকাল সেকশনে <strong>লোকাল মডেল ব্যবহার করুন → বন্ধ</strong> সেট করুন, যদি এর যেকোনো একটি পূর্বে সক্ষম করা থাকে। General-এ ফিরে যান।</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-general" role="img" aria-label="Pro ব্রাউজারের General Completion স্ক্রিন। হলুদ বর্ডারগুলো Ghost text এবং Suggestion chips শিরোনাম, Suggestions: At cursor, এবং Suggestion chips: On নির্দেশ করে।">
+            <div class="shot-stage shot-stage--completion-general">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general.png" width="414" height="820" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general-overlay.svg" width="414" height="820" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>একটি সংকীর্ণ <strong>ব্রাউজার ক্যাপচারে আসল General নিয়ন্ত্রণসমূহ, Android স্ক্রিনশট নয়</strong>। হলুদ বর্ডারগুলো <strong>পরামর্শ → কার্সরের অবস্থানে</strong>, <strong>সাজেশন চিপ → চালু</strong>, এবং সেগুলোর সেকশন শিরোনাম নির্দেশ করে। Section ড্রপডাউনটি শীর্ষে রয়েছে; নিচের সেটিংস দেখার জন্য স্ক্রোল করার প্রয়োজন হতে পারে।</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-general.png">সম্পূর্ণ সেটিংস ক্যাপচার দেখুন</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>Completion বন্ধ করুন। একটি নতুন অনুশীলন ওয়ার্কবুকে, একটি <strong>কোড</strong> সেল এবং <strong>JavaScript</strong> ভাষা বেছে নিন। শেষে ক্যারেট রেখে কোনো কিছু নির্বাচন না করে <code>cons</code> টাইপ করুন। <code>const</code>-এর এই প্রথম অক্ষরগুলোকে <strong>প্রিফিক্স</strong> বলা হয়। <code>const</code>-এর জন্য লক্ষ্য করুন।</li>
+          <li>নিচের স্ক্রিনশটে, <code>cons</code>-এর পরে একটি অস্পষ্ট <code>t</code> রয়েছে—ইন-লাইন <strong>গোস্ট টেক্সট</strong>। সাজেশনটি সন্নিবেশ করতে <strong>গ্রহণ করুন</strong>-এ ট্যাপ করুন অথবা <kbd>Tab</kbd> চাপুন, যার ফলে <code>const</code> তৈরি হবে। এর পরিবর্তে যদি কোনো <code>const</code> চিপ প্রদর্শিত হয়, তবে সেই প্রার্থী গ্রহণ করার আরেকটি উপায় হলো সেটিতে ট্যাপ করা। লাইনটি নিজেই সমাপ্ত করুন, উদাহরণস্বরূপ <code>const values = [12, 15, 18];</code>।</li>
+        </ol>
+        <p class="callout"><strong>Accept করা মানে Run করা নয়।</strong> কোনো সাজেশন গ্রহণ করলে সোর্স এডিট হয়; এটি সেল এক্সিকিউট করে না। এই সেকশনের JavaScript এবং Python উদাহরণগুলো সম্পাদনার সময় অটো-কমপ্লিট প্রদর্শন করে। এই অনুশীলন সেলগুলো রান করা এই সেকশনের অংশ নয়। কেবল অফলাইন টেবিল লেয়ার সক্রিয় থাকলে, কোনো প্রিফিক্স টাইপ করার ফলে শুধুমাত্র সাজেশন তৈরির জন্য কোনো API অনুরোধ পাঠানো হয় না বা ল্যাঙ্গুয়েজ রানটাইম শুরু করা হয় না।</p>
+        <p class="note"><strong>ভবিষ্যতের অনলাইন প্রিফেচ:</strong> একটি অপ্ট-ইন মোডের পরিকল্পনা রয়েছে যা আপনার টাইপ করার সময় মডেল অনুরোধ পাঠাতে পারে। এটি এখনও উপলব্ধ নয় এবং এর জন্য কোনো রিলিজ নম্বর নির্ধারণ করা হয়নি। উপরের অনুরোধ-হীন বিবৃতিটি বর্তমান অফলাইন টেবিল লেয়ার বর্ণনা করে, এই ভবিষ্যৎ মোডকে নয়।</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-javascript.png" width="1080" height="2340" alt="একটি আসল Android Galaxy S24+ স্ক্রিনশট থেকে লোয়ার কম্পোজার বিবরণ: JavaScript cons-এর পরে অস্পষ্ট t গোস্ট এবং একটি Accept বোতাম, যেখানে সাজেশন চিপ সক্ষম এবং অতিরিক্ত কী-এর সারি লুকানো রয়েছে।" loading="lazy" decoding="async">
+          <figcaption><strong>একটি আসল Galaxy S24+ Android স্ক্রিনশটের বিস্তারিত দৃশ্য।</strong> JavaScript টেবিল কমপ্লিশন <code>const</code> প্রস্তাব করে <code>cons</code>-এর জন্য: অস্পষ্ট <code>t</code> হলো গোস্ট টেক্সট, যেখানে <strong>গ্রহণ করুন</strong> দৃশ্যমান এবং চিপস সক্রিয়। API এবং লোকাল মডেল বন্ধ রয়েছে। পরবর্তী ছবির সাথে বৈসাদৃশ্য দেখানোর জন্য এখানে অতিরিক্ত কী-এর সারি লুকানো হয়েছে; এটি একটি পৃথক ঐচ্ছিক নিয়ন্ত্রণ, কমপ্লিশনের জন্য আবশ্যক নয়।</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-javascript.png">JavaScript cons → const কমপ্লিশনের অপরিবর্তিত সম্পূর্ণ ফোন স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p><strong>ফোনে দুটি অফলাইন প্রদর্শন দেখুন।</strong> <strong>সাজেশন চিপ → চালু</strong> রাখুন, <strong>Python</strong> বেছে নিন, এবং <code>pri</code> টাইপ করুন। ক্যারেটের পরে অস্পষ্ট <code>nt</code> অংশটি <code>print</code> প্রস্তাব করে; আপনি এটি গ্রহণ না করা পর্যন্ত এটি আপনার সোর্সের অংশ নয়। <strong>গোস্ট টেক্সট দেখতে আপনাকে চিপস বন্ধ করতে হবে না।</strong> একটি একক প্রার্থী গোস্ট হিসেবে প্রদর্শিত হতে পারে, আর একাধিক প্রার্থী উপযুক্ত হলে চিপস পছন্দের সুযোগ দেয়। উভয় উদাহরণের জন্যই <strong>এআই সাজেশন</strong> এবং <strong>লোকাল মডেল ব্যবহার করুন</strong> বন্ধ রাখুন।</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-ghost.png" width="1080" height="2340" alt="একটি Android Galaxy S24+ স্ক্রিনশট থেকে লোয়ার কম্পোজার বিবরণ: Python সোর্স pri-এর পরে অস্পষ্ট গোস্ট টেক্সট nt এবং একটি Accept বোতাম। সাজেশন চিপ সক্রিয় রয়েছে।" loading="lazy" decoding="async">
+          <figcaption><strong>একটি আসল Galaxy S24+ Android স্ক্রিনশটের বিস্তারিত দৃশ্য।</strong> <strong>সাজেশন চিপ → চালু</strong>-এর সাথে অফলাইন টেবিল কমপ্লিশন ক্যারেটে একটি অস্পষ্ট প্রত্যয় প্রস্তাব করে। API এবং লোকাল মডেল বন্ধ রয়েছে।</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-ghost.png">গোস্ট টেক্সটের অপরিবর্তিত সম্পূর্ণ ফোন স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p>চিপস তখনও <strong>চালু</strong> থাকা অবস্থায়, অনুশীলনী ইনপুটটি এই তিনটি লাইন দিয়ে প্রতিস্থাপন করুন, অসমাপ্ত <code>sample_m</code>-এর পরে ক্যারেট রাখুন। সারিটি আপনার নিজস্ব সোর্সের নামগুলো থেকে <code>sample_mean</code> এবং <code>sample_median</code> প্রস্তাব করে। একটি প্রার্থী নির্বাচন করতে কোনো চিপে ট্যাপ করুন; গোস্ট টেক্সটের বিপরীতে, সারিটি বিকল্পগুলো প্রদর্শন করে।</p>
+        <pre><code>sample_mean = 0
+sample_median = 0
+sample_m</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-chips.png" width="1080" height="2340" alt="একটি Android Galaxy S24+ স্ক্রিনশট থেকে লোয়ার কম্পোজার বিবরণ: Python সোর্স sample_mean এবং sample_median, এরপর sample_m সংজ্ঞায়িত করে, যার সাথে প্রার্থী চিপ sample_mean এবং sample_median রয়েছে।" loading="lazy" decoding="async">
+          <figcaption><strong>একটি আসল Galaxy S24+ Android স্ক্রিনশটের বিস্তারিত দৃশ্য।</strong> চিপস চালু থাকলে, সোর্স থেকে প্রাপ্ত অফলাইন প্রার্থীরা উপরের দুটি নাম প্রস্তাব করে। API এবং লোকাল মডেল বন্ধ থাকে।</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-chips.png">প্রার্থী চিপগুলোর অপরিবর্তিত সম্পূর্ণ ফোন স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p><strong>অতিরিক্ত কী-এর সারি</strong> যা Python ফোনের ছবিতে দৃশ্যমান এবং <strong>টাইপ করার সময় সিনট্যাক্স রং</strong> হলো পৃথক, ঐচ্ছিক Pro নিয়ন্ত্রণ। যেকোনো একটি চালু বা বন্ধ করতে এবং ফাইল এডিটরের পৃথক হাইলাইটিং চেকবাক্স খুঁজে পেতে <a href="../../../interface/appearance/#pro-editor">Appearance নির্দেশিকা: অতিরিক্ত কী এবং সিনট্যাক্স রং</a> দেখুন।</p>
+        <p>এই কমপ্লিশন ডিসপ্লেগুলো চেষ্টা করার পর, পুনরায় <strong>JavaScript</strong>-এ ফিরে যান এবং পাঠের বাকি অংশের জন্য চিপস চালু রাখুন।</p>
+        <p>এখানে দেখানো অফলাইন চিপস, যা <strong>কমপ্লিশন → সাধারণ → সাজেশন চিপ</strong>-এর অধীনে সক্রিয় করা হয়, কিউরেট করা নামের টেবিলের সাথে লোকাল কোড তথ্যকে একত্রিত করে। Python-এ, এর মধ্যে ওয়ার্কবুক কোডে থাকা ভেরিয়েবল ও ফাংশন এবং মেথডসহ ক্যাশ করা কার্নেল নাম ও অবজেক্ট অ্যাট্রিবিউট অন্তর্ভুক্ত। ফ্রিকোয়েন্সি এবং গ্রহণের ইতিহাস সেগুলোকে র্যাঙ্ক করতে সাহায্য করে। অন্যান্য ভাষার কভারেজ ভিন্ন: স্ট্যাটিক তালিকা, আনরান করা সংজ্ঞা বা পুরানো স্ন্যাপশট এমন একটি নাম প্রস্তাব করতে পারে যা বর্তমানে স্কোপে উপলব্ধ নেই। <strong>টেবিল-ভিত্তিক কমপ্লিশন কোনো ল্যাঙ্গুয়েজ মডেল নয়</strong> এবং এটি আপনার কাজের যুক্তি বিশ্লেষণ করে না।</p>
+        <p>সেলের মাঝামাঝি সাজেশন যদি আপনার মনোযোগ বিভ্রান্ত করে তবে <strong>শুধু সেলের শেষে</strong> একটি বিকল্প। কোনো নির্বাচন, স্ট্রিং, মন্তব্য বা অর্ধেক বিভক্ত নাম ইচ্ছাকৃতভাবেই কোনো সাজেশন নাও তৈরি করতে পারে। শর্ট ল্যান্ডস্কেপে, কোডের জন্য জায়গা রাখতে ঐচ্ছিক সারিগুলো অদৃশ্য হয়ে যেতে পারে; <a href="../../../interface/appearance/">Appearance সেটিংস</a> দেখুন।</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-position">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-position.png" width="1080" height="2340" alt="আসল Galaxy S24+ Android General Completion স্ক্রিনের বিস্তারিত বিবরণ: Suggestions ড্রপডাউনটি খোলা রয়েছে যেখানে At cursor নির্বাচিত এবং এর নিচে End of cell only রয়েছে।" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>আসল Galaxy S24+ Android স্ক্রিনশট।</strong> <strong>কমপ্লিশন → সাধারণ → ঘোস্ট টেক্সট → পরামর্শ</strong>-এ, <strong>কার্সরের অবস্থানে</strong> অথবা <strong>শুধু সেলের শেষে</strong> বেছে নিন। শেষেরটি বলতে প্রতিটি লাইন নয়, বরং <em>পুরো সেলের</em> শেষ বোঝায়। Android-এর প্রসারিত মেনুটি কাছাকাছি থাকা ইন্ডেন্টেশন সেটিংস ঢেকে ফেলে; সেগুলো পৃথক নিয়ন্ত্রণ, এই পছন্দের অংশ নয়।</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-position.png">প্রসারিত Suggestions মেনুর অপরিবর্তিত সম্পূর্ণ ফোন স্ক্রিনশট দেখুন</a>
+        </figure>
+      </section>
+
+      <section id="key">
+        <p class="step-label">ধাপ 2 · অনলাইন সেটআপ</p>
+        <h2>একটি API কী সংরক্ষণ করুন</h2>
+        <p>একটি API কী SciREPL-কে আপনার নিয়ন্ত্রিত কোনো প্রোভাইডার অ্যাকাউন্ট ব্যবহারের সুবিধা দেয়। সেই প্রোভাইডারের কাছ থেকে কী সংগ্রহ করুন, এর বর্তমান মূল্য এবং অ্যাকাউন্টের সীমা যাচাই করুন, এবং এই পাঠের জন্য শুধুমাত্র অ-ব্যক্তিগত ডেটাসহ একটি ছোট অনুশীলন ওয়ার্কবুক ব্যবহার করুন।</p>
+        <ol class="lesson-steps">
+          <li>খুলুন <strong>Menu → 🤖 AI Assistant (Pro)</strong>। প্যানেলের <strong>⚙ গিয়ার</strong> আইকনে ট্যাপ করে AI Settings খুলুন।
+            <p class="callout"><strong>গিয়ারটি দেখতে পাচ্ছেন না?</strong> কীবোর্ড Assistant প্যানেলটিকে স্থানান্তরিত বা স্ক্রোল করতে পারে। প্যানেলের বিষয়বস্তু নিচের দিকে টেনে এর ওপরের অংশে ফিরে যান এবং গিয়ারটি দৃশ্যমান করুন; কীবোর্ড সরিয়ে দিলেও আপনি আরও জায়গা পেতে পারেন।</p>
+          </li>
+          <li><strong>যার জন্য মডেল কনফিগার করবেন → এআই অ্যাসিস্ট্যান্ট</strong> সেট করুন। একটি <strong>ব্যাকএন্ড</strong> (যেমন OpenRouter) এবং <strong>মডেল</strong> বেছে নিন, এবং আপনার ব্যাকএন্ড কনফিগারযোগ্য এন্ডপয়েন্ট ব্যবহার করলে সেটি যাচাই করুন।</li>
+          <li>সংশ্লিষ্ট <strong>API কী</strong> লিখুন। অন্যান্য প্রোভাইডার/এন্ডপয়েন্ট জোড়ার জন্য কী পরিচালনা করতে <strong>সংরক্ষিত কী</strong> ব্যবহার করুন। একটি গন্তব্যের কী স্বয়ংক্রিয়ভাবে অন্যটির জন্য প্রযোজ্য হয় না।</li>
+          <li><strong>সংরক্ষণ করুন</strong>-এ ট্যাপ করুন। শুধুমাত্র সেটিংস সংরক্ষণ করলেই কোনো মডেল অনুরোধ পাঠানো হয় না। পরবর্তী ধাপের জন্য প্যানেলটি খোলা রাখুন।</li>
+        </ol>
+        <p class="callout"><strong>কী-টি ওয়ার্কবুকের বাইরে রাখুন।</strong> এটি কোনো সেল, প্রম্পট, স্ক্রিনশট বা এক্সপোর্ট করা ফাইলে পেস্ট করবেন না। সংরক্ষিত কী-গুলো কোনো অ্যাপ্লিকেশন-স্তরের এনক্রিপশন ছাড়াই লোকাল অ্যাপ/ব্রাউজার স্টোরেজে থাকে; ডিভাইস সুরক্ষিত রাখুন এবং কোনো অনির্ভরযোগ্য কোড রান করবেন না। কী সংরক্ষিত এবং প্রেরিত হয় তা <a href="../../../../../pro/privacy.html">Pro গোপনীয়তা নীতি</a>-তে ব্যাখ্যা করা হয়েছে।</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--key-setup" role="img" aria-label="কী-বিহীন Pro ব্রাউজার AI Settings। হলুদ বর্ডারগুলো Configure model for: AI Assistant, Backend: OpenRouter, Model: GLM 5.3 Flash, এবং খালি API Key ফিল্ড চিহ্নিত করে।">
+            <div class="shot-stage shot-stage--key-setup">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup.png" width="390" height="538" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup-overlay.svg" width="390" height="538" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>AI Settings-এর একটি নতুন, <strong>কী-বিহীন ব্রাউজার ক্যাপচার</strong>, কোনো Android স্ক্রিনশট নয়। হলুদ বর্ডারগুলো সেট করার ফিল্ডগুলোকে চিহ্নিত করে: <strong>যার জন্য মডেল কনফিগার করবেন</strong>, <strong>ব্যাকএন্ড</strong>, <strong>মডেল</strong> এবং <strong>API কী</strong>। অস্পষ্ট <code>sk-…</code> হলো একটি প্লেসহোল্ডার, কোনো সংরক্ষিত কী নয়। <strong>সংরক্ষণ করুন</strong>-এ পৌঁছানোর জন্য আরও নিচে স্ক্রোল করুন; এই ছবির জন্য কোনো কী প্রবেশ করানো হয়নি বা অনুরোধ পাঠানো হয়নি।</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-key-setup.png">অপরিবর্তিত AI কনফিগারেশন স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p>একটি স্বল্পমূল্যের, টুল-সক্ষম মডেল হলো Assistant-এর জন্য একটি উপযুক্ত সূচনা বিন্দু। তুলনা করার মতো উদাহরণগুলোর মধ্যে রয়েছে <a href="https://openrouter.ai/z-ai/glm-5.3-flash">GLM 5.3 Flash</a>, <a href="https://developers.openai.com/api/docs/models/gpt-6-luna">GPT-6 Luna</a>, <a href="https://www.anthropic.com/claude/haiku">Claude Haiku 5.5</a>, এবং <a href="https://api-docs.deepseek.com/quick_start/pricing">DeepSeek V4 Flash</a>। সঠিক মডেল আইডি, উপলব্ধ সংস্করণ, টুল সমর্থন এবং মূল্য আপনার অ্যাপের সংস্করণ এবং প্রোভাইডারের ওপর নির্ভর করে; বর্তমান পিকার এবং প্রোভাইডারের ডকুমেন্টেশন পরীক্ষা করুন। নতুন ঘোষিত মডেল উপস্থিত হওয়ার আগে একটি অ্যাপ আপডেটের প্রয়োজন হতে পারে। পরবর্তীতে, আপনি শুধুমাত্র কমপ্লিশনের জন্য একটি ভিন্ন সাশ্রয়ী মডেল বেছে নিতে পারেন।</p>
+        <aside class="callout" id="custom-model">
+          <p><strong>তালিকায় মডেল খুঁজে পাচ্ছেন না?</strong> <strong>এআই সেটিংস → যার জন্য মডেল কনফিগার করবেন → এআই অ্যাসিস্ট্যান্ট</strong>-এ, প্রথমে সঠিক <strong>ব্যাকএন্ড</strong> বেছে নিন, তারপর প্রোভাইডারের <strong>সঠিক API মডেল আইডি</strong> Model পিকারের নিচে থাকা <strong>অথবা কাস্টম মডেল আইডি লিখুন</strong>-এ লিখুন এবং <strong>সংরক্ষণ করুন</strong>-এ ট্যাপ করুন। এই ফিল্ডটি ইতিমধ্যে Pro 1.4.0-এ উপলব্ধ।</p>
+          <p>শুধুমাত্র মডেলটির বাণিজ্যিক নাম নয়, আপনার নির্বাচিত প্রোভাইডারের সাথে আইডিটি যাচাই করুন। OpenRouter-এর জন্য, প্রতিষ্ঠানের প্রিফিক্স অন্তর্ভুক্ত করুন—উদাহরণস্বরূপ, <code>anthropic/claude-haiku-5.5</code>, যা <a href="https://openrouter.ai/anthropic/claude-haiku-5.5">এর মডেল পেজে</a> রয়েছে। আইডি প্রবেশ করান, সেই পৃষ্ঠার URL নয়। কাস্টম আইডিটি ড্রপডাউনের চেয়ে অগ্রাধিকার পায়; তালিকায় থাকা একটি মডেল পুনরায় নির্বাচন করলে কাস্টম ফিল্ডটি মুছে যায়।</p>
+          <p><strong>একটি আইডি API সমর্থন যোগ করে না।</strong> মডেলটিকে সেই API-এর মাধ্যমে টুল কল সমর্থন করতে হবে যা SciREPL ব্যবহার করে। প্রোভাইডার অ্যাক্সেস, সামঞ্জস্যতা এবং বর্তমান মূল্য যাচাই করুন; সেভ করা সেগুলোকে যাচাই করে না বা কোনো মডেল অনুরোধ তৈরি করে না।</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--custom-model" role="img" aria-label="কী-বিহীন Pro ব্রাউজার AI Settings। হলুদ বর্ডারগুলো Backend: OpenRouter এবং Model পিকারের নিচে থাকা anthropic/claude-haiku-5.5 ধারণকারী কাস্টম মডেল আইডি ফিল্ড চিহ্নিত করে।">
+            <div class="shot-stage shot-stage--custom-model">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model.png" width="390" height="456" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model-overlay.svg" width="390" height="456" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>একটি আসল, <strong>কী-বিহীন ব্রাউজার ক্যাপচার</strong>, কোনো Android স্ক্রিনশট নয়। Model-এর নিচের হলুদ বর্ডারটি কাস্টম-আইডি ফিল্ড নির্দেশ করে। ড্রপডাউনে এখনও GLM 5.3 Flash দেখাচ্ছে, তবে Save করার সময় টাইপ করা Haiku আইডি অগ্রাধিকার পাবে। API Key এবং Save এই ক্রপ করা অংশের নিচে রয়েছে; কোনো কী প্রবেশ করানো হয়নি, Save চাপানো হয়নি এবং কোনো মডেল অনুরোধ পাঠানো হয়নি। এটি একটি কনফিগারেশন উদাহরণ, মডেলটি কাজ করে কিনা তার পরীক্ষা নয়।</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-custom-model.png">অপরিবর্তিত কাস্টম-মডেল স্ক্রিনশট দেখুন</a>
+        </figure>
+      </section>
+
+      <section id="agent">
+        <p class="step-label">ধাপ 3 · উদ্দেশ্যমূলক টুল ব্যবহার</p>
+        <h2>Open এজেন্ট প্রিসেট দিয়ে একটি ছোট উদাহরণ তৈরি করুন</h2>
+        <p><strong>উন্মুক্ত</strong> হলো <strong>দ্বিতীয় সর্বাধিক অনুমতিপ্রাপ্ত</strong> নিরাপত্তা প্রিসেট, <strong>সম্পূর্ণ নিয়ন্ত্রণ</strong>-এর পরে। এটি ডিফল্টভাবে নোটবুক সম্পাদনার অনুমতি দেয়, Cautious-এর চেয়ে কম প্রম্পট সহ। এক্সিকিউশন অনুমতি চাইবে কিনা তা আপনার সংস্করণ এবং অনুমতি সেটিংসের ওপর নির্ভর করে; <a href="#execution-permissions">আসন্ন এক্সিকিউশন-অনুমোদন পরিশিষ্ট</a> দেখুন। একটি অনুশীলন ওয়ার্কবুকে এটি সতর্কভাবে ব্যবহার করুন—অটো-কমপ্লিটের পূর্বশর্ত হিসেবে নয়।</p>
+        <ol class="lesson-steps">
+          <li>AI Settings-এ, নির্বাচন করুন <strong>Security Level → Open</strong> এবং <strong>Agent writes → সক্রিয় ওয়ার্কশিট</strong>। সোর্স ব্রাউজিং বন্ধ রাখুন এবং বন্ধ করুন <strong>AI দ্বারা তৈরি সেলের Auto-run</strong>। নিচে <strong>Kernels…</strong>, সেট করুন <strong>JavaScript → Ask</strong>, তারপর সংরক্ষণ করুন। পূর্বে কোনো এক্সিকিউশন-টুল Allow সংরক্ষিত থাকলেও এই কার্নেল নিয়মটি অনুমতি চাইবে।
+            <p class="callout" id="auto-run-warning"><strong>Auto-run বন্ধ থাকা মানে এক্সিকিউশন লক নয়।</strong> এটি নতুন তৈরি সেলগুলোকে স্বয়ংক্রিয়ভাবে রান হওয়া থেকে বিরত রাখে; এটি পৃথক <code>execute_cell</code> বা <code>run_cells</code> অনুরোধগুলোকে নিষ্ক্রিয় করে না। প্রকাশিত Pro 1.4.0-এর Open ডিফল্ট কোনো জিজ্ঞাসা ছাড়াই সেগুলোর অনুমতি দিতে পারে। আসন্ন Open ডিফল্ট জিজ্ঞাসা করবে, তবে কোনো সুস্পষ্ট টুল বা কার্নেল Allow সেই ডিফল্ট পরিবর্তন করতে পারে। <strong>এআই সেটিংস → কার্নেল… → JavaScript → জিজ্ঞাসা করুন</strong> এই অনুশীলনের JavaScript এক্সিকিউশনকে নিশ্চিতকরণের অধীনে রাখে। আপনার নিজের ম্যানুয়াল সেল Run একটি পৃথক ক্রিয়া হিসেবে বহাল থাকে। <a href="#execution-permissions">পরবর্তী রিলিজের এক্সিকিউশন নিয়ন্ত্রণসমূহ পরিশিষ্টে বিস্তারিত রয়েছে।</a></p>
+            <aside class="callout" id="sandbox">
+              <p>আপনি যদি আরও নিশ্চিতকরণ চান, তবে পরিবর্তে <strong>সতর্ক</strong> ব্যবহার করুন। Open এখনও পৃথক সোর্স-ব্রাউজিং এবং রাইট-স্কোপ নিয়ন্ত্রণসমূহ মেনে চলে; Full control এই দুটি নিয়ন্ত্রণের বাইরে কাজ করে। পৃথক অনুমতি এবং অন্যান্য নিরাপত্তা শর্ত এখনও গুরুত্বপূর্ণ। <strong>পর্যালোচনা</strong> হলো একটি অতিরিক্ত মূলত-পঠনযোগ্য সীমাবদ্ধতা, যা সেল তৈরির এই প্রদর্শনীতে বাধা সৃষ্টি করবে।</p>
+              <h3>ব্রাউজার স্যান্ডবক্স কী সুরক্ষা দেয়—এবং কী দেয় না</h3>
+              <p>স্বাভাবিক ওয়ার্কবুক এক্সিকিউশন ব্রাউজার/ওয়েবভিউ এবং এর ভাষা রানটাইমে চলে, যেখানে আপনার ফোনের ফাইলগুলোতে অবাধ অ্যাক্সেসের পরিবর্তে একটি ভার্চুয়াল ফাইলসিস্টেম থাকে। এটি একটি কার্যকর সীমানা, <strong>কোড কোনো ক্ষতি করতে পারবে না এমন কোনো নিশ্চয়তা নয়</strong>। অনুমোদিত JavaScript এবং এর সাথে থাকা সংযোগগুলো অ্যাপের ডেটা এবং সংরক্ষিত ক্রেডেনশিয়াল পর্যন্ত পৌঁছাতে পারে; অনুমোদিত কোড শুরু হওয়ার পরে নেটওয়ার্ক বিধিনিষেধগুলো সর্বোচ্চ চেষ্টার ভিত্তিতে কাজ করে, এটি এমন কোনো আইসোলেশন সীমানা নয় যা গোপন তথ্যের জন্য বিশ্বাস করা উচিত। আসন্ন এক্সিকিউশন প্রম্পট একটি অনুমোদনের ধাপ যুক্ত করে, অ্যাপের ডেটা থেকে বিচ্ছিন্নতা নয়। একটি অনুশীলন ওয়ার্কবুক ব্যবহার করুন এবং এর বিষয়বস্তু অ-ব্যক্তিগত রাখুন।</p>
+              <p><strong>Remote/MCP Terminal ভিন্ন:</strong> এটি ব্রাউজার-লোকাল স্যান্ডবক্সের বাইরে, ব্রোকার হোস্টের একটি আসল শেল প্রকাশ করতে পারে। এখানে Remote এবং Terminal বন্ধ রাখুন। সেগুলো সক্রিয় করার আগে <a href="../../../../pro/remote/">Remote এবং নিরাপত্তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> দেখুন। প্রম্পটে একটি বিনীত “করবেন না…” কোনো নিরাপত্তা নিয়ন্ত্রণ নয়।</p>
+            </aside>
+          </li>
+          <li>Assistant প্যানেলে, বেছে নিন <strong>This workbook</strong>। বন্ধ রাখুন <strong>Review</strong>, <strong>Remote</strong>, এবং <strong>Terminal</strong> এই সরাসরি-প্রোভাইডার উদাহরণের জন্য।
+            <figure class="phone-figure" id="assistant-context-controls">
+              <p class="screen-note">প্যানেল হেডার</p>
+              <div class="shot-window shot-window--assistant-context-header" role="img" aria-label="Android Assistant প্যানেলের শীর্ষ অংশের বিবরণ। হলুদ বর্ডার কনভারসেশন ড্রপডাউনে নির্বাচিত This workbook-কে হাইলাইট করে।">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <p class="screen-note">নিচের নিয়ন্ত্রণসমূহ</p>
+              <div class="shot-window shot-window--assistant-context-footer" role="img" aria-label="একই Android Assistant প্যানেলের নিচের অংশের বিবরণ। হলুদ বর্ডার Review, Remote এবং Terminal-কে হাইলাইট করে, যার সবকটি আনচেক করা। খালি মেসেজ বক্স এবং Send বোতাম দৃশ্যমান।">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption><strong>একই আসল Galaxy S24+ Android স্ক্রিনশটের দুটি বিবরণ।</strong> হলুদ বর্ডারগুলো <strong>এই ওয়ার্কবুক</strong> এবং <strong>পর্যালোচনা</strong>, <strong>রিমোট</strong> এবং <strong>টার্মিনাল</strong> (সব আনচেক করা) নির্দেশ করে। প্যানেলের খালি মাঝের অংশটি বাদ দেওয়া হয়েছে। কোনো প্রম্পট পাঠানো হয়নি।</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-assistant-context.png">Assistant-প্যানেলের অপরিবর্তিত সম্পূর্ণ স্ক্রিনশট দেখুন</a>
+            </figure>
+          </li>
+          <li>নিচের কলআউটে থাকা অনুশীলন প্রম্পটটি পাঠান। প্যানেলের <strong>Send</strong> ইতিমধ্যে এজেন্টিক টুল লুপ শুরু করে: এখানে অতিরিক্ত কোনো “Agent mode” টগল নেই। ফুল-স্ক্রিন এডিটরের <strong>Agent</strong> বোতামটি একটি পৃথক ওয়ার্কফ্লো।
+            <div class="callout" id="assistant-practice-prompt">
+              <p><strong>এই প্রম্পটটি কপি করুন।</strong> এটি কোড সেলে নয়, <strong>Assistant-এর মেসেজ বক্সে</strong> পেস্ট করুন, তারপর <strong>পাঠান</strong>-এ ট্যাপ করুন।</p>
+              <pre data-translatable-prompt="assistant-practice"><code>এই অনুশীলন ওয়ার্কবুকে, একটি Markdown ব্যাখ্যা যোগ করুন যার পর
+একটি JavaScript সেল থাকবে যার নাম summary_demo। 10টি সিউডোর্যান্ডম পূর্ণসংখ্যার একটি ইনপুট
+অ্যারে তৈরি করুন 1 থেকে 20 পর্যন্ত অন্তর্ভুক্ত করে।
+প্রাথমিক state 42 সহ Park-Miller জেনারেটর ব্যবহার করুন। প্রতিটি
+মানের জন্য, প্রথমে state = (16807 * state) % 2147483647 আপডেট করুন;
+তারপর 1 + Math.floor(20 * state / 2147483647) যুক্ত করুন।
+এই নিয়মে অ্যারেটি তৈরি করুন; এর মানগুলো হার্ড-কোড করবেন না
+বা Math.random ব্যবহার করবেন না। প্রতি সেল Run-এ state-কে 42-এ রিসেট করুন।
+তৈরি করা ইনপুট অ্যারে প্রিন্ট করুন, তারপর এর সংখ্যা (অ্যারে
+দৈর্ঘ্য), গাণিতিক গড়, সর্বনিম্ন এবং সর্বোচ্চ মান গণনা করুন। প্রতিটি
+ফলাফল console.log দিয়ে নিজস্ব লেবেলযুক্ত লাইনে প্রিন্ট করুন।
+কোনো প্যাকেজ ছাড়া সাধারণ JavaScript অ্যারে, পাটিগণিত এবং Math.floor
+ব্যবহার করুন।
+সেল রান করবেন না বা বিদ্যমান সেল পরিবর্তন করবেন না। ফাইল,
+স্টোরেজ, DOM API বা নেটওয়ার্ক অনুরোধ ব্যবহার করবেন না। প্রত্যাশিত
+ফলাফল ব্যাখ্যা করুন যাতে আমি কোডটি পর্যালোচনা করতে পারি।</code></pre>
+            </div>
+          </li>
+          <li>প্রস্তাবিত ব্যাখ্যা এবং নতুন <code>summary_demo</code> সেলটি পড়ুন। এটি উল্লিখিত নিয়ম ব্যবহার করে ইনপুট তৈরি করে এবং সেই অ্যারে থেকে সারসংক্ষেপ গণনা করে কিনা তা পরীক্ষা করুন। সেই সেলটি নিজেই রান করুন, তারপর নিচের যাচাইকরণের সাথে তুলনা করুন। প্রত্যাশিত ফলাফল হলো count <strong>10</strong>, mean <strong>9.3</strong>, minimum <strong>1</strong>, maximum <strong>20</strong>।</li>
+        </ol>
+        <aside class="callout" id="seeded-summary-check">
+          <h3>সারসংক্ষেপের পাশাপাশি ইনপুটও পরীক্ষা করুন</h3>
+          <p>সিড ক্রমটিকে নির্দিষ্ট করে, তাই এলোমেলো মনে হওয়া এই ইনপুটটি পুনরুৎপাদনযোগ্য। উপরের আপডেট-বিফোর-ড্র নিয়মে, প্রত্যাশিত:</p>
+          <pre><code>Input: [1, 11, 15, 6, 8, 4, 20, 11, 11, 6]
+Count: 10
+Mean: 9.3
+Minimum: 1
+Maximum: 20</code></pre>
+          <p>আউটপুট লেবেল ভিন্ন হতে পারে, তবে সংখ্যাগুলো মিল থাকা উচিত। সেলটি পুনরায় রান করলে একই ইনপুট এবং সারসংক্ষেপ তৈরি হওয়া উচিত। একটি ভিন্ন সিড অনুশীলনটিকে পরিবর্তন করে; এই ছোট জেনারেটরটি একটি পুনরুৎপাদনযোগ্য প্রদর্শনীর জন্য, নিরাপত্তা-সংবেদনশীল র্যান্ডমনেসের জন্য নয়।</p>
+        </aside>
+        <figure class="phone-figure" id="assistant-seeded-result">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/phone-agent-result.png" width="1080" height="2340" alt="আসল Android Galaxy S24+ স্ক্রিনশট যা পর্যালোচিত JavaScript summary_demo সোর্সের অংশ এবং এর সিডেড আউটপুট দেখাচ্ছে: input 1, 11, 15, 6, 8, 4, 20, 11, 11, 6; count 10, mean 9.3, min 1, max 20।" loading="lazy" decoding="async">
+          <figcaption><strong>উপরের সিডেড-ভেক্টর অনুশীলনের আসল Galaxy S24+ Android স্ক্রিনশট।</strong> GLM 5.3 Flash অনুশীলন সেল তৈরি করেছে, চার-ধাপের সীমায় বিরতি নিয়েছে এবং একবার <strong>চালিয়ে যান</strong> চাপার পর শেষ হয়েছে। কোডটি পরিদর্শন করা হয়েছে এবং ম্যানুয়ালি রান করা হয়েছে—এজেন্ট দ্বারা স্বয়ংক্রিয়ভাবে নয়—এবং প্রত্যাশিত ইনপুট, count 10, mean 9.3, minimum 1 এবং maximum 20 তৈরি করেছে। দ্বিতীয়বার ম্যানুয়াল Run একই ফলাফল পুনরুৎপাদন করেছে। স্ক্রিনশটটি আউটপুট এবং সোর্সের কিছু অংশ দেখাচ্ছে; এর সিড এবং প্রথম লাইনগুলো পরিদর্শন করতে সেলের ওপরের দিকে স্ক্রোল করুন।</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-agent-result.png">পর্যালোচিত কোড এবং ফলাফলের সম্পূর্ণ ফোন স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p><strong>Send-এর আগে:</strong> Assistant নির্বাচিত কথোপকথন এবং বর্তমান ওয়ার্কবুকের সেলগুলোর একটি নির্দিষ্ট সীমার প্রিভিউ অন্তর্ভুক্ত করে (প্রতিটি সেলের প্রথম 500 অক্ষর পর্যন্ত, সাথে মেটাডেটা)। অনুমোদিত টুলগুলো আরও পাঠাতে পারে। সোর্স ব্রাউজিং বন্ধ রাখলেও ওয়ার্কবুক প্রিভিউ পাঠানো বন্ধ হয় <em>না</em>। এটি নিচের কমপ্লিশন দ্বারা ব্যবহৃত ছোট কারেন্ট-সেল পেলোড থেকে ভিন্ন। <a href="#planned-workbook-context">পরিকল্পিত ওয়ার্কবুক-কনটেক্সট পরিবর্তনগুলি পরিশিষ্টে বর্ণিত হয়েছে।</a></p>
+        <p><strong>একটি Continue বোতাম সহ বিরতি নিয়েছে?</strong> নিচে হাইলাইট করা <strong>এজেন্ট সীমা (প্রতি রানে) → সর্বোচ্চ ধাপ</strong>, একটি নির্দিষ্ট রানের জন্য অনুমোদিত ধাপের সংখ্যা নিয়ন্ত্রণ করে। কাজ শেষ করার আগেই এজেন্ট সেই সীমায় পৌঁছাতে পারে। এটি ইতিমধ্যে কী করেছে তা পড়ুন, তারপর কাজটি অসমাপ্ত থাকলে এবং আপনি আরেকটি নির্দিষ্ট রান চাইলে <strong>চালিয়ে যান</strong> চাপুন। চালিয়ে যাওয়ার ফলে অতিরিক্ত API চার্জ লাগতে পারে; <strong>সম্পন্ন</strong>-এর পরে এটি প্রয়োজন হয় না।</p>
+        <figure class="phone-figure" id="assistant-run-controls">
+          <div class="shot-window shot-window--assistant-open" role="img" aria-label="স্ক্রোল করা Pro ব্রাউজার AI Settings। হলুদ বর্ডারগুলো Auto-run cells created by AI: আনচেক করা, Allow source browsing: আনচেক করা, Agent writes: Active worksheet, ডিফল্ট 25 ইঙ্গিত সহ Max steps, এবং Security Level: Open নির্দেশ করে।">
+            <div class="shot-stage shot-stage--assistant-open">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open.png" width="390" height="1100" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open-overlay.svg" width="390" height="1100" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>AI Settings স্ক্রোল করে এক্সিকিউশন এবং পারমিশন অংশে নেওয়া হয়েছে। হলুদ বর্ডারগুলো <strong>এআই দ্বারা তৈরি সেল স্বয়ংক্রিয়ভাবে চালান</strong> এবং <strong>Allow source browsing</strong> (উভয়ই আনচেক করা), <strong>এজেন্টের লেখার পরিসর → সক্রিয় ওয়ার্কশীট</strong>, <strong>সর্বোচ্চ ধাপ</strong> (যা <strong>এজেন্ট সীমা (প্রতি রানে)</strong>-এর অধীনে রয়েছে), এবং <strong>নিরাপত্তা স্তর → উন্মুক্ত</strong> চিহ্নিত করে। এই <strong>ব্রাউজার ক্যাপচারটি এক্সিকিউশন-সম্মতি আপডেটের পূর্বের</strong>; এটি কোনো প্রোভাইডার অনুরোধ বা নিরাপত্তা পরীক্ষা নয়। এর Open লেবেলটি পুরানো ডিফল্ট বর্ণনা করে এবং সংকীর্ণ ড্রপডাউনে প্রদর্শনের ক্ষমতার চেয়ে দীর্ঘ। আসন্ন অনুমোদন এবং ওভাররাইড ডায়ালগগুলো ছবিতে দেখানো হয়নি।</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-open.png">সম্পূর্ণ স্ক্রোল করা সেটিংস ক্যাপচারের অপরিবর্তিত রূপ দেখুন</a>
+        </figure>
+      </section>
+
+      <section id="online">
+        <p class="step-label">ধাপ 4 · প্রয়োজন অনুযায়ী বিকল্পগুলোর জন্য অনুরোধ করুন</p>
+        <h2>API-ভিত্তিক কমপ্লিশনের জন্য অনুরোধ করুন</h2>
+        <ol class="lesson-steps">
+          <li><strong>মেনু → কমপ্লিশন</strong> খুলুন, তারপর <strong>বিভাগ → এআই সাজেশন (অনলাইন)</strong> বেছে নিন। <strong>এআই সাজেশন → ট্যাপ করলে</strong> সেট করুন।</li>
+          <li>এর প্রোভাইডার, এন্ডপয়েন্ট এবং মডেল ইনহেরিট করতে <strong>কমপ্লিশন মডেল → এআই অ্যাসিস্ট্যান্টের সেটিং অনুসরণ করুন</strong> রাখুন। অথবা <strong>প্রদানকারী ও মডেল বেছে নিন</strong> বেছে নিন, একটি সংরক্ষিত প্রোভাইডার/এন্ডপয়েন্ট এবং সংক্ষিপ্ত সাজেশনের জন্য উপযুক্ত একটি স্বল্পমূল্যের মডেল নির্বাচন করুন। এই স্ক্রিনে কোনো কী প্রবেশ করানো হয় না; <strong>এআই সেটিংস খুলুন</strong> আপনাকে প্রথমে একটি যোগ করার সুযোগ দেয়।</li>
+          <li>রিপ্লাই টাইমআউট এবং স্পেন্ডিং গার্ড পরীক্ষা করতে এই সেকশনের <strong>উন্নত</strong> খুলুন। ডিফল্ট মান হলো <strong>6 সেকেন্ড</strong>, <strong>$0.25/দিন</strong> এবং <strong>$5/মাস</strong>। সীমা বাড়ানোর আগে মূল্য যাচাই করে নিন।</li>
+          <li>একটি <strong>JavaScript</strong> এডিটরে ফিরে যান এবং এই অনুশীলনী স্নিপেটটি প্রবেশ করান:
+            <pre><code>const values = [12, 15, 18];
+const average = </code></pre>
+            অসমাপ্ত <code>const average = </code> লাইনের পরে ক্যারেট রাখুন। সাজেশন সারির শেষে <strong>…</strong>-এ ট্যাপ করুন, <strong>…AI</strong> অতিরিক্ত কী ব্যবহার করুন, অথবা <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd> চাপুন।</li>
+          <li>প্রথম অনুরোধটি পাঠানোর আগে এর আসল পেলোড এবং গন্তব্য পর্যালোচনা করুন। AI চিপগুলোতে একটি <strong>✦</strong> চিহ্ন থাকে। কোনোটি গ্রহণ করতে সেটিতে ট্যাপ করুন; ট্রাঙ্কেট করা বা একাধিক লাইনের চিপ প্রথমে একটি প্রিভিউ খোলে। Run করার আগে ফলাফল হিসেবে প্রাপ্ত সোর্সটি পর্যালোচনা করুন।</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/completion-online.png" width="414" height="820" alt="On tap এবং Choose provider and model সহ Pro ব্রাউজারের অনলাইন কমপ্লিশন স্ক্রিন, যা ব্যাখ্যা করে যে কোনো প্রোভাইডার কী সংরক্ষিত নেই এবং Open AI Settings-এর প্রস্তাব দেয়।" loading="lazy" decoding="async">
+          <figcaption>ইন্ডিপেন্ডেন্ট-মডেল কন্ট্রোলের ইচ্ছাকৃতভাবে সংগৃহীত একটি <strong>কী-বিহীন ব্রাউজার ক্যাপচার</strong>। এর সতর্কতাটি বাস্তব: সংরক্ষিত কী এবং বৈধ গন্তব্য ছাড়া কিছুই পাঠানো যাবে না। আপনার কনফিগার করা প্রোভাইডার এবং মডেল ধাপ 2-এর পরে এখানে প্রদর্শিত হবে।</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-online.png">সম্পূর্ণ অনলাইন সেটিংস ক্যাপচার দেখুন</a>
+        </figure>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-online-chips.png" width="1080" height="2340" alt="Android Galaxy S24+ স্ক্রিনশট থেকে লোয়ার কম্পোজার বিবরণ: অসমাপ্ত JavaScript average এক্সপ্রেশনে দুটি ট্রাঙ্কেট করা AI চিপ রয়েছে, values.reduce এবং eval(values, যার প্রতিটিতে একটি তারকাচিহ্ন রয়েছে।" loading="lazy" decoding="async">
+          <figcaption><strong>একটি আসল কমপ্লিশন অনুরোধের পর একটি বাস্তব Galaxy S24+ Android স্ক্রিনশটের বিস্তারিত দৃশ্য।</strong> কমপ্লিশনে <strong>Gemini 3.5 Flash-Lite via OpenRouter</strong> ব্যবহার করা হয়েছে যখন Assistant <strong>GLM 5.3 Flash</strong>-এ বহাল ছিল। দুটি ✦ চিপ ট্রাঙ্কেট করা হয়েছে; আউটপুট পরিবর্তিত হতে পারে, তাই গ্রহণ করার আগে প্রিভিউটি পরীক্ষা করুন।</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-online-chips.png">অনলাইন প্রার্থী চিপগুলোর অপরিবর্তিত সম্পূর্ণ ফোন স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p class="callout"><strong>শুধুমাত্র একটি AI চিপ নয়, কোডটি বেছে নিন।</strong> এই অনুরোধে, প্রথম চিপটি <code>values.reduce((a, b) => a + b, 0) / values.length;</code> প্রস্তাব করেছে। সম্পূর্ণ প্রিভিউটি পরীক্ষা করতে এতে ট্যাপ করুন: এটি অ্যারেটির যোগফল বের করে এবং এর দৈর্ঘ্য দিয়ে ভাগ করে, যা এই উদাহরণের জন্য <strong>15</strong> দেয়। দ্বিতীয়টি <code>eval(values.join(' + ')) / values.length;</code> প্রস্তাব করেছে। <strong>সেই অপ্রয়োজনীয় <code>eval</code> বিকল্পটি প্রত্যাখ্যান করুন</strong>: গড় গণনার জন্য কোনো স্ট্রিংকে এক্সিকিউটেবল কোডে রূপান্তরিত করার প্রয়োজন নেই। গ্রহণ করার আগে আপনার নিজের ফেরত আসা কোড পরীক্ষা করুন, এবং পর্যালোচনার পরেই কেবল Run করুন।</p>
+        <figure class="phone-figure" id="online-completion-preview">
+          <div class="shot-window shot-window--completion-preview" role="img" aria-label="AI সাজেশন প্রিভিউটির Android Galaxy S24+ বিবরণ: values.reduce((a, b) =&gt; a + b, 0) / values.length;, সাথে Cancel এবং Insert all বোতাম। কীবোর্ড বাদ দেওয়া হয়েছে। কোনো সাজেশন সন্নিবেশ করা হয়নি।">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-preview.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>একটি Galaxy S24+-এ সম্পূর্ণ কোড প্রিভিউ।</strong> একটি নতুন Gemini Flash-Lite অনুরোধ একই <code>reduce</code> এক্সপ্রেশন ফেরত দিয়েছে। <strong>কেবল একটি নির্দিষ্ট লাইন পর্যন্ত গ্রহণ করুন:</strong> একাধিক লাইনের সাজেশনের জন্য, আপনি যে শেষ লাইনটি চান তাতে ট্যাপ বা ক্লিক করুন। এটি অবিলম্বে প্রথম লাইন থেকে শুরু করে সেই লাইন পর্যন্ত সবকিছু সন্নিবেশ করে, পরের লাইনগুলোকে বাদ রাখে। <strong>সব বসান</strong> পুরো সাজেশনটি গ্রহণ করে; <strong>বাতিল</strong> কিছুই সন্নিবেশ করে না। এই উদাহরণটি একটি কোড লাইন, যদিও এটি স্ক্রিনে র্যাপ করে দেখাচ্ছে, তাই এতে ট্যাপ করলে পুরো এক্সপ্রেশনটি গৃহীত হয়। গ্রহণযোগ্যতা সোর্স সম্পাদনা করে; এটি সেল Run করে না।</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-preview.png">কমপ্লিশন প্রিভিউয়ের অপরিবর্তিত সম্পূর্ণ ফোন স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p>অনুরোধটি পাঁচটি পর্যন্ত বিকল্প চায়, তবে আপনার স্ক্রিনে আরও কম জায়গা হতে পারে। আরেকটি ট্যাপ প্রথমে ইতিমধ্যে প্রাপ্ত বিকল্পগুলোর মধ্য দিয়ে পেজ করে; সেগুলো শেষ হয়ে গেলে এটি আরও অনুরোধ করতে পারে। অনুরোধ চলার সময় বাতিল করতে ট্যাপ করুন। টাইমআউট শেষ হলে পরবর্তী উত্তরগুলো বাদ দেওয়া হয়, এবং টাইপ করা বা ক্যারেট স্থানান্তর করা পুরানো সাজেশনগুলোকে অকার্যকর করে দেয়।</p>
+        <p><strong>ইন্ডিপেন্ডেন্ট মানে ইন্ডিপেন্ডেন্ট:</strong> আপনি Assistant-এর মডেল পরিবর্তন করলেও একটি পৃথক কমপ্লিশন পছন্দ পৃথকই থাকে। এটি কার্যকর যখন আপনি একটি দক্ষ এজেন্ট চান কিন্তু সাশ্রয়ী অটো-কমপ্লিট চান। Assistant অনুসরণ করলে তার পরিচয় ইনহেরিট হয়, তার কথোপকথন বা এজেন্টের অনুমতি <em>নয়</em>।</p>
+        <aside class="callout" id="completion-privacy">
+          <h3>আপনি কিসের জন্য অর্থ দিচ্ছেন এবং কী পাঠাচ্ছেন তা জানুন</h3>
+          <p>অনলাইন কমপ্লিশন হলো <strong>চাহিদা অনুযায়ী</strong>: সাধারণ টাইপিং কোনো কিছু পাঠায় না। <strong>আমি টাইপ করার সময় প্রিফেচ</strong> এই ওয়ার্কফ্লোতে এখনও উপলব্ধ নয়। কমপ্লিশন বর্তমান-সেলের একটি নির্দিষ্ট সীমার কনটেক্সট পাঠায়: ক্যারেটের আগে সর্বোচ্চ 1,500 অক্ষর, পরে 200 অক্ষর, এবং 12টি পর্যন্ত লোকাল নাম—Assistant চ্যাট বা পুরো ওয়ার্কবুক নয়। গোপনীয় তথ্য মাস্কিং সর্বোচ্চ চেষ্টার ভিত্তিতে হয়, তাই পেলোড নিজেই পর্যালোচনা করুন।</p>
+          <p><strong>সবসময় অনুমতি দিন</strong> সেই গন্তব্যের জন্য স্থায়ী সম্মতি প্রদান করে; প্রোভাইডার, এন্ডপয়েন্ট বা মডেল পরিবর্তন হলে আবার জিজ্ঞাসা করা হয়। <strong>জিজ্ঞাসা না করে পাঠান</strong> প্রাথমিকভাবে সেই পছন্দ সক্রিয় করে তবে প্রথম আসল পেলোডটি একবার দেখায়। শেখার সময় <strong>প্রতিবার জিজ্ঞাসা করুন</strong> বহাল রাখুন।</p>
+          <p>দিন/মাসের পরিমাণগুলো হলো <strong>শুধুমাত্র-কমপ্লিশনের সফট স্পেন্ডিং গার্ড</strong>, কোনো নিশ্চিত প্রোভাইডার বিলিং সীমা নয় এবং Assistant বা AI Prompt অনুরোধের বাজেট নয়। ব্যর্থতা এবং বাতিলের ক্ষেত্রে তাদের সংরক্ষিত চার্জ বহাল থাকতে পারে। স্পেন্ডিং ইতিহাস মুছে ফেললেও ক্যাপের মোট সীমা রিসেট হয় না। তালিকাভুক্ত কোনো মূল্য না থাকা মডেলের জন্য সুস্পষ্ট ইনপুট/আউটপুট মূল্যের সর্বোচ্চ সীমা প্রয়োজন, অন্যথায় অ্যাপটি পাঠাতে অস্বীকার করে।</p>
+        </aside>
+      </section>
+
+      <section id="local">
+        <p class="step-label">ধাপ 5 · ঐচ্ছিক Android ডাউনলোড</p>
+        <h2>অন-ডিভাইস মডেলটি পরীক্ষা করে দেখুন</h2>
+        <p>টেবিলগুলো নিশ্চিত না হলে ঐচ্ছিক <strong>Qwen2.5-Coder 0.5B</strong> মডেলটি লোকালি কোড প্রস্তাব করে। এটি একটি ছোট কোড-কমপ্লিশন মডেল, <strong>কথোপকথনমূলক এজেন্টের প্রতিস্থাপন নয়</strong>। একবার ইনস্টল করা হলে, ইনফারেন্স প্রোভাইডারের কাছে কোনো টাইপ করা কোড পাঠায় না এবং এতে কোনো API চার্জ নেই।</p>
+        <ol class="lesson-steps">
+          <li>একটি উপযুক্ত Android ফোনে Pro যা <strong>Google Play</strong> থেকে ইনস্টল করা হয়েছে, তাতে <strong>মেনু → কমপ্লিশন → বিভাগ → লোকাল মডেল (ডিভাইসে)</strong> খুলুন।</li>
+          <li><strong>ইনস্টল করুন</strong>-এ ট্যাপ করুন এবং প্রায় <strong>400 MB</strong> ডাউনলোডের জন্য সময় ও স্টোরেজের অনুমতি দিন। বর্তমান সাইডলোড করা ইনস্টলেশনগুলো এই প্রক্রিয়ার মাধ্যমে মডেল ডাউনলোড করতে পারে না।</li>
+          <li>প্রস্তুত হলে, <strong>লোকাল মডেল ব্যবহার করুন → অনিশ্চিত হলে</strong> রাখুন। টেবিলগুলো সহজ ক্ষেত্রগুলোতে সাড়া দেয়; যখন সেগুলো নিশ্চিত নয় তখন মডেলটি অবদান রাখে। <strong>সর্বদা</strong> এটিকে আরও ঘন ঘন চালায়; <strong>বন্ধ</strong> ডাউনলোড মুছে ফেলা ছাড়াই এটিকে বন্ধ করে।</li>
+        </ol>
+        <figure class="phone-figure" id="local-model-settings">
+          <div class="shot-window shot-window--local-model-settings" role="img" aria-label="Galaxy S24+ Android Local model সেটিংস। হলুদ বর্ডারগুলো Local model সেকশন, Ready (এই ডিভাইসে 398 MB), এবং Use local model: When unsure নির্দেশ করে। ইতিমধ্যে ইনস্টল করা মডেলে Install-এর পরিবর্তে Delete দেখানো হয়েছে।">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-local-settings.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+              <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-local-settings-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>একটি Galaxy S24+-এ Local model সেটিংস।</strong> হলুদ বর্ডারগুলো সেকশন পিকার, মডেলটির <strong>প্রস্তুত</strong> স্ট্যাটাস, এবং <strong>লোকাল মডেল ব্যবহার করুন → অনিশ্চিত হলে</strong> নির্দেশ করে। এই ফোনে ইতিমধ্যে মডেলটি রয়েছে, তাই <strong>মুছুন</strong> দেখা যায় <strong>ইনস্টল করুন</strong>-এর বদলে; আপনার এটি মুছে ফেলার প্রয়োজন নেই। এই ডিবাগ-বিল্ড ছবিটি সেটিংস দেখায়, Google Play ডেলিভারির পরীক্ষা নয়।</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-local-settings.png">অপরিবর্তিত সম্পূর্ণ ফোন স্ক্রিনশট দেখুন</a>
+        </figure>
+        <ol class="lesson-steps" start="4">
+          <li>একটি কোড সেলে ফিরে যান এবং একটি অসমাপ্ত নাম বা লাইনে বিরতি দিন। কনটেক্সটের ওপর ভিত্তি করে ফলাফল পরিবর্তিত হতে পারে; প্রতিটি বিরতি সাজেশন তৈরি করে না। একটি উপযুক্ত গোস্ট বা চিপ গ্রহণ করুন, সোর্সটি পরীক্ষা করুন, তারপর আলাদাভাবে Run করুন।</li>
+        </ol>
+        <h3>কোন ফোনটি আরামদায়ক?</h3>
+        <p>সর্বনিম্ন যোগ্যতা হলো <strong>64-বিট ARM Android যাতে কমপক্ষে 4 GB র্যাম</strong> থাকে, যা মসৃণ পারফরম্যান্সের প্রতিশ্রুতি নয়। একটি <strong>Galaxy S24+-ক্লাস ফোন</strong> হলো একটি ব্যবহারিক স্বাচ্ছন্দ্যের লক্ষ্য: স্যামসাং S24+-এর জন্য <strong>12 GB র্যামের</strong> তালিকা দিয়েছে, যা অ্যাপ, কার্নেল এবং মডেলের জন্য আরও বেশি হেডরুম রাখে। এটি একটি প্রস্তাবিত পারফরম্যান্স স্তর, সেই মডেলটি কেনার কোনো বাধ্যবাধকতা নয়। <a href="https://news.samsung.com/us/enter-new-era-of-mobile-ai-samsung-galaxy-s24-series/">স্যামসাংয়ের S24-সিরিজের স্পেসিফিকেশন</a>।</p>
+        <p>একটি <strong>Galaxy S10+</strong>-এর উপযুক্ত 8 GB বা 12 GB ভ্যারিয়েন্ট রয়েছে। মেইনটেইনারের অনানুষ্ঠানিক অভিজ্ঞতা হলো যে লোকাল কমপ্লিশন সেখানে কাজ করতে পারে তবে API কমপ্লিশনের চেয়ে ধীরগতির মনে হতে পারে; এই তুলনা মডেল এবং নেটওয়ার্কের ওপর নির্ভর করে। <strong>রেকর্ড করা লোকাল-ইঞ্জিন বেঞ্চমার্ক S10+ পরিমাপ করেনি</strong>, তাই এটি কোনো পরিমাপকৃত গতির তুলনা নয় বা প্রতিটি হ্যান্ডসেটের জন্য নিশ্চয়তা নয়। বড় ওয়ার্কবুক এবং মেমরি-ভারী কার্নেলের সাথে মডেলটি একত্রিত করার সময় ল্যাগ বা প্রতিক্রিয়াহীন অ্যাপের ব্যাপারে সতর্ক থাকুন। <a href="https://news.samsung.com/us/galaxy-s10-interactive/">স্যামসাংয়ের S10-সিরিজের স্পেসিফিকেশন</a>।</p>
+        <p>পূর্ববর্তী S24+-ক্লাস নেটিভ-ইঞ্জিন পরীক্ষায় লোড হওয়ার পর ওয়ার্ম ফার্স্ট-ওয়ার্ড মিডিয়ান প্রায় <strong>0.10 সেকেন্ড</strong> এবং কোল্ড ফার্স্ট-ওয়ার্ড মিডিয়ান প্রায় <strong>0.24 সেকেন্ড</strong> পরিমাপ করা হয়েছে। এগুলো নমুনা বেঞ্চমার্ক ফলাফল, কোনো নিশ্চয়তা নয়: একটি আনক্যাশড প্রাথমিক লোডে কয়েক সেকেন্ড সময় লেগেছিল। লোড করা মডেলটি অ্যাপ-প্রসেস মেমরিতে প্রায় <strong>460–490 MB</strong> যুক্ত করেছে, <em>এর পাশাপাশি</em> WebView, Python/R রানটাইম এবং অপারেটিং সিস্টেম।</p>
+        <p class="callout"><strong>যদি কোনো পুরানো ফোন ধীরগতির হয়ে পড়ে:</strong> <strong>লোকাল মডেল ব্যবহার করুন → বন্ধ</strong> সেট করুন এবং পরিবর্তে টেবিল বা অন-ট্যাপ API বিকল্প ব্যবহার করুন। লোকাল <strong>উন্নত</strong>-এর অধীনে, <strong>Keep loaded after leaving the app → 0</strong> সেট করলে আপনি অ্যাপ থেকে বের হলে এটি মেমরি ছেড়ে দেয়; নিষ্ক্রিয়-আনলোড এবং কম-ব্যাটারির নিয়ন্ত্রণগুলোও সাহায্য করে। সমস্যা সমাধানের আগে আপনার ওয়ার্কবুক সংরক্ষণ/রপ্তানি করুন। কোনো API-খরচহীন মডেলও স্টোরেজ, মেমরি এবং ব্যাটারি ব্যবহার করে।</p>
+      </section>
+
+      <section id="prompt-cells">
+        <p class="step-label">ধাপ 6 · কোড তৈরির সাথে সাথে এটি বুঝুন</p>
+        <h2>একটি ফোকাসড AI Prompt সেল দিয়ে শেষ করুন</h2>
+        <p>বহু-ধাপের কাজের জন্য Assistant কার্যকর। নির্দিষ্ট কোনো কোড সম্পর্কে ছোট, পুনরাবৃত্তিযোগ্য প্রশ্নের জন্য একটি <strong>AI Prompt</strong> সেল আরও ভালো: এটি Assistant-এর ইতিহাস বা টুল ছাড়াই <strong>একটি পৃথক অনুরোধ</strong> পাঠায়। কোনো গণনাকে সম্প্রসারিত করার আগে এটি কেন কাজ করে তা জিজ্ঞাসা করতে এটি ব্যবহার করুন।</p>
+        <p>এখানে আমরা ধাপ 3-এর সিডেড-র্যান্ডম <code>summary_demo</code> সেলে ফিরে আসি। আমরা সেই বিদ্যমান গণনার ব্যাখ্যার জন্য অনুরোধ করি—অন্য কোনো র্যান্ডম অ্যারে নয়, এবং ধাপ 4-এর শুধুমাত্র-গড়ের কমপ্লিশন উদাহরণও নয়।</p>
+        <ol class="lesson-steps">
+          <li>একটি <strong>AI Prompt</strong> সেল যোগ করুন ধাপ 3-এর <code>summary_demo</code> JavaScript সেলের ঠিক পরেই—ধাপ 4-এর শুধুমাত্র-গড়ের স্নিপেটের পরে নয়—যাতে নিচের প্রশ্নটি নির্বাচিত সোর্সের সাথে মেলে। সেলের ধরন <strong>কোড</strong> হিসেবে রাখুন, তারপর <strong>AI Prompt</strong> বেছে নিন <strong>ভাষা/মোড ড্রপডাউন</strong> থেকে। এটি অনুপস্থিত থাকলে, <strong>মেনু → ভাষা ও মোড</strong>-এর অধীনে এটি সক্ষম করুন।</li>
+          <li>নিচের প্রম্পটটি পেস্ট করুন <strong>AI Prompt সেলে</strong>, Assistant-এর মেসেজ বক্সে নয়। এর <strong>Configure</strong> কন্ট্রোলটি খুলুন।
+            <div class="callout" id="ai-prompt-practice-prompt">
+              <pre data-translatable-prompt="ai-explanation"><code>নির্বাচিত JavaScript সেলটি লাইন ধরে ধরে ব্যাখ্যা করুন।
+জেনারেটরের নিয়ম এবং সিড 42 কীভাবে এর ইনপুট অ্যারে নির্ধারণ করে?
+কেন এটি count 10, mean 9.3, minimum 1 এবং maximum 20 রিপোর্ট করবে?
+সিড রিসেট করলে কেন ফলাফলটি পুনরাবৃত্তিযোগ্য হয়?
+একটি খালি অ্যারের জন্য কী পরিবর্তন করতে হবে তা ব্যাখ্যা করুন।
+শুধুমাত্র একটি সংক্ষিপ্ত ব্যাখ্যা দিন; কোডটি পুনরায় লিখবেন না।</code></pre>
+            </div>
+            <div class="prompt-config-locations">
+              <figure class="phone-figure" id="ai-prompt-composer-controls">
+                <p class="screen-note"><strong>নতুন-সেল কম্পোজার</strong></p>
+                <div class="shot-window shot-window--ai-prompt-composer" role="img" aria-label="AI Prompt নির্বাচিত অবস্থায় Android-এর নতুন-সেল কম্পোজার। হলুদ বর্ডারগুলো ড্রাফটের পাশে এর AI ল্যাঙ্গুয়েজ সিলেক্টর এবং Configure বোতাম নির্দেশ করে।">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>সেলটি সংরক্ষণ করার আগে:</strong> AI Prompt বেছে নিন (যা <strong>AI</strong> হিসেবে প্রদর্শিত) এবং কম্পোজারের হাইলাইট করা <strong>কনফিগার করুন</strong>-এ ট্যাপ করুন। এটি আপনার লেখা নতুন প্রম্পটটি কনফিগার করে।</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png">সম্পূর্ণ কম্পোজার স্ক্রিনশট দেখুন</a>
+              </figure>
+              <figure class="phone-figure" id="ai-prompt-edit-controls">
+                <p class="screen-note"><strong>সম্পাদনার সময় বিদ্যমান সেল</strong></p>
+                <div class="shot-window shot-window--ai-prompt-edit" role="img" aria-label="এডিট মোডে সংরক্ষিত Android AI Prompt সেল। প্রম্পটের শুরুর ওপরে সেল হেডারে একটি হলুদ বর্ডার Configure নির্দেশ করে।">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>বিদ্যমান সেলের জন্য:</strong> সেই সেলের হেডারের <strong>কনফিগার করুন</strong>-এ ট্যাপ করুন। প্রম্পট সম্পাদনা করার সময় এটি উপলব্ধ থাকে। উভয় বোতামই একই কনফিগারেশন ডায়ালগ খোলে; শুধুমাত্র সেটিংস পরিবর্তন করলে কিছুই পাঠানো হয় না।</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png">সম্পূর্ণ সেল-এডিট স্ক্রিনশট দেখুন</a>
+              </figure>
+            </div>
+          </li>
+          <li>সেট করুন <strong>চূড়ান্ত প্রতিক্রিয়া রাখুন → এই সেলের আউটপুট</strong>, যা ডিফল্ট। এর অধীনে: <strong>প্রেরণ করার কনটেক্সট → সোর্স অন্তর্ভুক্তির উৎস</strong>, বেছে নিন <strong>Previous 1 cell</strong>। আনচেক করুন <strong>সংরক্ষিত আউটপুট টেক্সট অন্তর্ভুক্ত করুন</strong> শুধুমাত্র-সোর্সের এই অনুশীলনের জন্য। নিশ্চিত করুন যে <strong>Context preview</strong> নামগুলো দেখায় <code>summary_demo</code>, তারপর নিচে স্ক্রোল করে ট্যাপ করুন <strong>Save configuration</strong>.
+            <figure class="phone-figure" id="ai-prompt-configuration">
+              <div class="shot-window shot-window--ai-prompt-config" role="img" aria-label="Android-এর Configure AI Prompt সেল ডায়ালগ। হলুদ বর্ডারগুলো This cell&#39;s output, Previous 1 cell, এবং আনচেক করা Include saved output text নির্দেশ করে।">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption><strong>কনফিগার করুন</strong> দ্বারা খোলা ডায়ালগ। হলুদ বর্ডারগুলো রেসপন্সের গন্তব্য, <strong>আগের ১টি সেল</strong> এবং আনচেক করা সেভড-আউটপুট বিকল্পটি চিহ্নিত করে। শুধুমাত্র পূর্ববর্তী <code>summary_demo</code> সোর্স পাঠান। <strong>আগের ১টি সেল</strong> বলতে ওয়ার্কবুকের ক্রমানুসারে ঠিক পূর্ববর্তী সেলটিকে বোঝায়; এটি নাম দিয়ে সন্ধান করে না।</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png">সম্পূর্ণ কনফিগারেশন স্ক্রিনশট দেখুন</a>
+              <p class="screen-note"><strong>কনফিগারেশন সংরক্ষণ করুন</strong>-এ পৌঁছানোর জন্য ডায়ালগে নিচে স্ক্রোল করুন।</p>
+              <div class="shot-window shot-window--ai-prompt-config-save" role="img" aria-label="Android AI Prompt কনফিগারেশন ডায়ালগের নিচের অংশ। একটি হলুদ বর্ডার Cancel-এর পাশে Save configuration নির্দেশ করে।">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png">সম্পূর্ণ স্ক্রোল করা ডায়ালগ স্ক্রিনশট দেখুন</a>
+            </figure>
+          </li>
+          <li>AI Prompt সেলের <strong>রান করুন</strong>-এ ট্যাপ করুন। পর্যালোচনার সময় নির্বাচিত কনটেক্সট যাচাই করুন, তারপর <strong>AI প্রদানকারীর কাছে পাঠান</strong> বেছে নিন। সোর্সের পাশাপাশি ব্যাখ্যাটি পড়ুন এবং পরিচিত ফলাফলের সাথে এটি তুলনা করুন।</li>
+        </ol>
+        <figure class="phone-figure" id="ai-prompt-explanation">
+          <div class="shot-window shot-window--ai-prompt-result" role="img" aria-label="GLM 5.3 Flash থেকে প্রাপ্ত আসল Android AI Prompt আউটপুট। দৃশ্যমান অংশটি summary_demo-তে সিডেড জেনারেটর, অ্যারে দৈর্ঘ্য, reduce, সর্বনিম্ন এবং সর্বোচ্চ ব্যাখ্যা করে।">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Galaxy S24+-এ একটি বাস্তব GLM 5.3 Flash ব্যাখ্যা।</strong> শুধুমাত্র একটি সোর্স-অনুরোধ AI Prompt সেলের আউটপুটে এই উত্তরটি তৈরি করেছে; এটি JavaScript সেলটিকে পরিবর্তন বা পুনরায় রান করেনি। ছবিটি ব্যাখ্যার শুরুটি দেখাচ্ছে। চালিয়ে যেতে আউটপুটটি স্ক্রোল করুন, এবং সোর্স ও ধাপ 3-এর প্রত্যাশিত ফলাফলের সাথে উত্তরটি যাচাই করুন—একটি AI ব্যাখ্যা কোনো নির্ভুলতার নিশ্চয়তা নয়।</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png">সম্পূর্ণ ব্যাখ্যার স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p class="callout"><strong>API খরচ নিয়ন্ত্রণ করার এবং বোধগম্যতা বাড়ানোর একটি উপায়।</strong> একটি ফোকাসড AI Prompt কোনো ক্রমাগত বর্ধনশীল এজেন্ট কথোপকথনের চেয়ে কম কনটেক্সট পাঠাতে পারে এবং বহু-ধাপের টুল লুপ এড়াতে পারে, যা ইনপুট টোকেন এবং সম্ভাব্য বিল কমাতে পারে। কোডিং করার সময় সংক্ষিপ্ত যুক্তি, অনুমান এবং প্রত্যাশিত আউটপুটের জন্য অনুরোধ করুন। সঞ্চয় <strong>নিশ্চিত নয়</strong>: মডেলের রেট, উত্তরের দৈর্ঘ্য, রিজনিং টোকেন এবং আপনার নির্বাচিত কনটেক্সট এখনও গুরুত্বপূর্ণ। এই অনুরোধগুলো স্বাধীন কমপ্লিশন মডেলের নয়, বরং <strong>Assistant-এর প্রোভাইডার/মডেল</strong> ব্যবহার করে এবং এগুলো কমপ্লিশন স্পেন্ডিং গার্ডের বাইরে।</p>
+        <div id="ai-prompt-apply-example">
+          <h3>আরেকটি উদাহরণ · সেল প্রতিস্থাপনের আগে একটি প্লট পর্যালোচনা করুন</h3>
+          <p>এখন কোনো কিছু প্রতিস্থাপনের পূর্বে পর্যালোচনাসহ একটি <em>ভিন্ন</em> সেলে কোড লেখার জন্য AI Prompt-কে অনুরোধ করুন। আমরা প্লট করব কীভাবে অনেকগুলো ছোট নমুনায় আনুমানিক ভ্যারিয়েন্স পরিবর্তিত হয়। এগুলো নতুন সাধারণ নমুনা—পূর্বের <code>summary_demo</code> পূর্ণসংখ্যার অ্যারে নয়। লক্ষ্য হলো <strong>কনফিগার করুন → প্রিভিউ → প্রয়োগ করুন → রান করুন</strong> শেখা, পরিসংখ্যানে দক্ষতা অর্জন নয়।</p>
+          <p class="callout"><strong>ভ্যারিয়েন্স Student's t নয়।</strong> 10 আকারের স্বাধীন স্বাভাবিক নমুনার জন্য, <code>9s² / σ²</code> একটি কাই-স্কয়ার ডিস্ট্রিবিউশন অনুসরণ করে যার স্বাধীনতার মাত্রা 9। এখানে আসল ভ্যারিয়েন্স <code>σ² = 1</code>। Student's t এর পরিবর্তে আদর্শকৃত নমুনা গড় <code>(mean − μ) / (s / √10)</code>-কে বর্ণনা করে, আনুমানিক মানক বিচ্যুতি <code>s</code> ব্যবহার করে; এখানে এর স্বাধীনতার মাত্রাও 9। <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda358.htm">NIST: variance</a> · <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm">NIST: mean</a>।</p>
+          <ol class="lesson-steps">
+            <li>অনুশীলন ওয়ার্কবুকে, একটি <strong>JavaScript</strong> সেল তৈরি করুন যাতে <code>// Reviewed plot code will go here.</code> থাকে। সেলটি সংরক্ষণ করতে সেই ক্ষতিকর-নয় এমন মন্তব্যটি রান করুন। এর <strong>In[…] লেবেলে</strong> দীর্ঘক্ষণ চাপুন এবং এর নাম দিন <code>variance_plot</code>। ওয়ার্কবুকে সেই নামটি অনন্য রাখুন; <a href="../../../workbooks/named-cells/#name">সেলের নামকরণ</a> দেখুন।</li>
+            <li>একটি পৃথক <strong>AI Prompt</strong> সেল যোগ করুন এবং এতে এই অনুরোধটি পেস্ট করুন:
+              <div class="callout" id="ai-variance-practice-prompt">
+                <pre data-translatable-prompt="ai-variance"><code>শুধুমাত্র সম্পূর্ণ JavaScript সোর্স প্রদান করুন, Markdown ফেন্স ছাড়া।
+আনুমানিক নমুনা ভ্যারিয়েন্সের একটি পুনরুৎপাদনযোগ্য হিস্টোগ্রাম তৈরি করুন।
+2,000টি নতুন নমুনা সিমুলেট করুন, যার প্রতিটিতে 10টি স্ট্যান্ডার্ড-নরমাল N(0,1) মান থাকবে।
+summary_demo থেকে আগের পূর্ণসংখ্যার অ্যারে পুনরায় ব্যবহার করবেন না।
+প্রতি নমুনার জন্য নয়, পুরো রানের জন্য একবার state = 42 ইনিশিয়ালাইজ করুন। প্রতিটি ইউনিফর্ম ড্র-এর আগে state = (16807 * state) % 2147483647 সেট করুন, তারপর u = state / 2147483647।
+প্রতিটি স্বাভাবিক ড্র-এর জন্য পরপর দুটি ইউনিফর্ম ব্যবহার করুন: sqrt(-2 * log(u1)) * cos(2 * PI * u2)। অতিরিক্ত সাইন ফলাফলটি পুনরায় ব্যবহার করবেন না বা Math.random ব্যবহার করবেন না।
+প্রতিটি নমুনার জন্য এর গড় গণনা করুন, তারপর নিরপেক্ষ ভ্যারিয়েন্স sum((x - mean)^2) / 9।
+সমান প্রস্থের 40টি বিন সহ একটি লেবেলযুক্ত ক্যানভাস হিস্টোগ্রাম আঁকুন, 0 থেকে 4 পর্যন্ত। অনুভূমিক অক্ষ হলো আনুমানিক ভ্যারিয়েন্স; উল্লম্ব অক্ষ হলো নমুনা সংখ্যা।
+একটি লেবেলযুক্ত উল্লম্ব রেখা দিয়ে প্রকৃত পপুলেশন ভ্যারিয়েন্স 1 চিহ্নিত করুন। একটি হালকা ব্যাকগ্রাউন্ড, গাঢ় টেক্সট এবং পাঠযোগ্য লেবেল ব্যবহার করুন।
+নমুনার আকার, পুনরাবৃত্তি, সিড, আনুমানিক গড় ভ্যারিয়েন্স, হিস্টোগ্রাম মোট এবং যেকোনো ওভারফ্লো সংখ্যা প্রিন্ট করুন। ওভারফ্লো আড়াল করার পরিবর্তে আলাদাভাবে গণনা করুন।
+window.renderImage(canvas.toDataURL("image/png")) দিয়ে ক্যানভাস প্রদর্শন করুন।
+কোনো প্যাকেজ, নেটওয়ার্ক, স্টোরেজ বা ওয়ার্কবুক সম্পাদনা ব্যবহার করবেন না।</code></pre>
+              </div>
+            </li>
+            <li>AI Prompt-এর <strong>Configure</strong>। সেট করুন <strong>চূড়ান্ত প্রতিক্রিয়া রাখুন → একটি সেলের জন্য প্রতিস্থাপন প্রিভিউ</strong>, <strong>ফলাফল সেলের ভাষা → লক্ষ্য ভাষা সংরক্ষণ করুন</strong>, <strong>প্রতিস্থাপনের সেল → নামযুক্ত সেল</strong>, এবং <strong>Cell name → variance_plot</strong>। context-এর অধীনে, রাখুন <strong>সোর্স অন্তর্ভুক্তির উৎস → অন্য কোনো সেল নয় (ডিফল্ট)</strong>, তারপর <strong>Save configuration</strong>.
+              <figure class="phone-figure" id="ai-variance-configuration">
+                <div class="shot-window shot-window--ai-variance-config" role="img" aria-label="Android-এর Configure AI Prompt সেল ডায়ালগ। হলুদ বর্ডারগুলো Replacement preview for a cell, Preserve target language, Named cell, variance_plot, এবং No other cells নির্দেশ করে।">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>পর্যালোচনার পরেই কেবল প্রতিস্থাপন করুন।</strong> এই বাস্তব S24+ সেটিংস অনন্য নামযুক্ত JavaScript সেল <code>variance_plot</code> নির্বাচন করে, এর ভাষা সংরক্ষণ করে এবং অন্যান্য সেল বাদ দেয়। <strong>কনফিগারেশন সংরক্ষণ করুন</strong>-এ নিচে স্ক্রোল করুন। শুধুমাত্র সংরক্ষণ করলে কিছুই পাঠানো হয় না; পরবর্তী Run তখনও পর্যালোচনার জন্য অনুরোধটি উপস্থাপন করে।</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png">সম্পূর্ণ প্রতিস্থাপন-সেটিংসের স্ক্রিনশট দেখুন</a>
+              </figure>
+            </li>
+            <li><strong>AI Prompt</strong> সেলটি Run করুন। কী পাঠানো হবে তা পর্যালোচনা করুন, তারপর <strong>AI প্রদানকারীর কাছে পাঠান</strong> বেছে নিন। <strong>No other cells</strong> অতিরিক্ত ওয়ার্কবুক কনটেক্সট বাদ দেয়; প্রতিস্থাপন এখনও লক্ষ্য সেলের <strong>সম্পূর্ণ সোর্স</strong> পাঠায়। এখানে তা কেবল আমাদের ক্ষতিকর-নয় এমন মন্তব্য।</li>
+            <li>ফেরত আসা <strong>Before / After</strong> প্রিভিউটি পড়ুন। সম্পূর্ণ JavaScript পরীক্ষা করুন: সিড 42, 2,000টি নমুনা যার প্রতিটির মান 10, ভ্যারিয়েন্স 9 দিয়ে ভাগ করা, এবং অপ্রত্যাশিত কোনো নেটওয়ার্কিং বা স্টোরেজ নেই। বেছে নিন <strong>Apply replacement</strong> শুধুমাত্র যদি আপনি সেই সোর্স গ্রহণ করেন; <strong>Cancel</strong> রাখবে <code>variance_plot</code> অপরিবর্তিত। Applying লক্ষ্য সেলটি সম্পাদনা করে কিন্তু <strong>এটি রান করে না</strong>.
+              <figure class="phone-figure" id="ai-variance-approval">
+                <div class="shot-window shot-window--ai-variance-preview-start" role="img" aria-label="Android-এর Before/After প্রতিস্থাপন প্রিভিউ। Before হলো ক্ষতিকর-নয় মন্তব্যটি; After শুরু করে তৈরি হওয়া JavaScript, যাতে রয়েছে সিড 42 এবং স্বাভাবিক-নমুনা জেনারেটর।">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <p class="shot-detail-label"><strong>উৎপন্ন কোডটি অনুমোদনের প্রিভিউতে রয়েছে।</strong> এটি প্রকৃত GLM 5.3 Flash উত্তরের শুরু; লক্ষ্য সেলে এখনও কেবল আমাদের মন্তব্য রয়েছে। শুধু এখানে দেখানো লাইনগুলো নয়, পুরো After সেকশনটি পড়ুন।</p>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png">প্রিভিউ-এর শুরুর সম্পূর্ণ স্ক্রিনশট দেখুন</a>
+                <div class="shot-window shot-window--ai-variance-preview-apply" role="img" aria-label="একই Android উৎপন্ন-কোড প্রিভিউয়ের শেষ অংশ। হলুদ বর্ডার Apply replacement এবং Cancel নির্দেশ করে; কোনো ক্রিয়াতেই প্রস্তাবিত কোড রান হয় না।">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>অনুমোদন বা বাতিল করতে শেষ পর্যন্ত স্ক্রোল করুন।</strong> Apply replacement নির্দিষ্ট সেলের সোর্স পরিবর্তন করে; এটি তা এক্সিকিউট করে না। এই দীর্ঘ প্রিভিউয়ের মাঝের অংশটি এই বিস্তারিত দৃশ্যগুলো থেকে বাদ দেওয়া হয়েছে। <a href="../../../../pro/ai/tutorial/assets/ai-variance-generated.js">সম্পূর্ণ উৎপন্ন সোর্সটি পড়ুন</a>।</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png">সম্পূর্ণ অনুমোদন-নিয়ন্ত্রণের স্ক্রিনশট দেখুন</a>
+              </figure>
+            </li>
+            <li>
+              <p class="callout"><strong>পর্যালোচনায় একটি ছোট ভুল ধরা পড়েছে।</strong> এই মডেলের প্রতিক্রিয়াটি প্রিন্ট করার পরিবর্তে একটি রিপোর্ট স্ট্রিং দিয়ে শেষ হয়েছিল। Apply-এর পরে, Run করার আগে আমরা শুধুমাত্র সেই চূড়ান্ত রিপোর্টটিকে <code>console.log(…)</code>-এ সম্পাদনা করেছি। আপনার প্রতিক্রিয়াটিও যাচাই করুন: শুধুমাত্র একটি ছবি দেখে বোঝা যায় না যে মোট সংখ্যা সঠিক কিনা। <a href="../../../../pro/ai/tutorial/assets/ai-variance-reviewed.js">সংশোধিত সোর্সটি পড়ুন যা রান করা হয়েছিল</a>।</p>
+              <p><code>variance_plot</code> খুঁজুন এবং <strong>এর নিজস্ব Run-এ</strong> ট্যাপ করুন। প্রতিটি হিস্টোগ্রাম বার নমুনা-ভ্যারিয়েন্সের অনুমান গণনা করে—ব্যক্তিগত পর্যবেক্ষণ নয়। উপরের হুবহু জেনারেটরের সাথে, প্রায় <strong>0.9852</strong>-এর কাছাকাছি একটি গড় আনুমানিক ভ্যারিয়েন্স, <strong>2,000</strong>-এর একটি হিস্টোগ্রাম মোট এবং ওভারফ্লো <strong>0</strong> প্রত্যাশা করুন। আসল ভ্যারিয়েন্স হলো 1; একটি নির্দিষ্ট সিমুলেশনের গড় হুবহু 1 হওয়ার প্রয়োজন নেই। সিড 42 থেকে পুনরায় রান করলে প্লটটি পুনরায় তৈরি হওয়া উচিত।</p>
+              <figure class="phone-figure" id="ai-variance-output">
+                <div class="shot-window shot-window--ai-variance-plot" role="img" aria-label="একটি পৃথক ম্যানুয়াল Run-এর পরে আসল Android প্লট: 2,000টি নমুনা-ভ্যারিয়েন্স অনুমানের হিস্টোগ্রাম, যা 10 আকারের সাধারণ নমুনা থেকে প্রাপ্ত। একটি লাল রেখা প্রকৃত ভ্যারিয়েন্স 1 চিহ্নিত করে; মুদ্রিত গড় হলো 0.98521, হিস্টোগ্রাম মোট 2000 এবং ওভারফ্লো 0।">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>S24+-এ Apply, পর্যালোচনা এবং একটি পৃথক ম্যানুয়াল Run-এর পরের আউটপুট।</strong> আসল প্লট এবং মুদ্রিত যাচাইকরণগুলো সিডেড গণনার সাথে মেলে: গড় আনুমানিক ভ্যারিয়েন্স <strong>0.98521</strong>, মোট <strong>2,000</strong>, ওভারফ্লো <strong>0</strong>। লাল রেখাটি পপুলেশন ভ্যারিয়েন্স, কোনো ফিট করা কার্ভ নয়। আপনার মডেল কোড বা চার্ট ভিন্নভাবে ফরম্যাট করতে পারে।</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png">সম্পূর্ণ প্লটের স্ক্রিনশট দেখুন</a>
+              </figure>
+            </li>
+          </ol>
+          <p class="callout"><strong>দুটি পৃথক অনুমোদন:</strong> <strong>AI প্রদানকারীর কাছে পাঠান</strong> পর্যালোচিত অনুরোধ শেয়ার করার অনুমোদন দেয়। <strong>প্রতিস্থাপন প্রয়োগ করুন</strong> লক্ষ্য সেলের সোর্স সম্পাদনার অনুমোদন দেয়। কোনোটিই প্রস্তাবিত JavaScript রান করে না। এই প্রদর্শনীর জন্য <strong>সংযুক্ত নতুন সেলে</strong> বেছে নেবেন না: সেই বিকল্পটি এই প্রতিস্থাপন-অনুমোদন পদক্ষেপ ছাড়াই একটি আনরান করা ফলাফল সেল সন্নিবেশ করে।</p>
+        </div>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>যদি কোনো কিছু কাজ না করে</h2>
+        <dl>
+          <dt><strong>ফোনে কোনো অফলাইন সাজেশন নেই</strong></dt>
+          <dd>Auto-এর পরিবর্তে General → Local code completion → On বেছে নিন। চিপস, ক্যারেটের অবস্থান, ভাষা এবং ঐচ্ছিক সারির জন্য পর্যাপ্ত জায়গা আছে কিনা তা যাচাই করুন।</dd>
+          <dt><strong>কোনো অনলাইন অনুরোধ নেই</strong></dt>
+          <dd>On tap, সঠিক প্রোভাইডার/এন্ডপয়েন্টের সংরক্ষিত কী, নির্বাচিত মডেলের মূল্য এন্ট্রি বা সিলিং, সম্মতি এবং স্পেন্ডিং মোট পরীক্ষা করুন। কমপ্লিশনের জন্য Open আবশ্যক নয়। একটি সুরক্ষিত ব্রাউজার কনটেক্সট এবং Web Locks প্রয়োজন; অসমর্থিত কনটেক্সট অনুরোধ প্রত্যাখ্যান করে।</dd>
+          <dt><strong>সেল রান করার আগে Assistant জিজ্ঞাসা করে—অথবা জিজ্ঞাসা করে না</strong></dt>
+          <dd>আপনার অ্যাপের সংস্করণ, Security… এক্সিকিউশন অনুমতি এবং Kernels… নিয়মগুলো যাচাই করুন। আসন্ন Open ডিফল্ট হলো Ask; Pro 1.4.0-এর ডিফল্ট এক্সিকিউশনের অনুমতি দিতে পারে। Auto-run বন্ধ থাকা মানে এক্সিকিউশন-টুল Deny নয়। অনলাইন কমপ্লিশনের Always allow সেল-এক্সিকিউশনের অনুমতি দেয় না; <a href="#execution-permissions">এক্সিকিউশন অনুমোদন</a> দেখুন।</dd>
+          <dt><strong>কমপ্লিশন অন্য সেল বোঝে না</strong></dt>
+          <dd>অনলাইন বিকল্পগুলো বর্তমান-সেলের সীমিত কনটেক্সট ব্যবহার করে, আপনার পুরো নোটবুক নয়। যখন আরও বিস্তৃত ব্যাখ্যার প্রয়োজন হয়, তখন সুস্পষ্টভাবে নির্বাচিত সোর্স সহ একটি AI Prompt অথবা Assistant ব্যবহার করুন।</dd>
+          <dt><strong>Install অনুপলব্ধ</strong></dt>
+          <dd>নেটিভ লোকাল-মডেল প্রক্রিয়াটি উপযুক্ত Android Google Play ইনস্টলেশনের জন্য, ডেস্কটপ/ব্রাউজার বা বর্তমান সাইডলোড সরবরাহের জন্য নয়। সর্বনিম্ন র্যামের শর্ত পূরণ করলেও গতির নিশ্চয়তা পাওয়া যায় না।</dd>
+          <dt><strong>উৎপন্ন উত্তরটি বিশ্বাসযোগ্য মনে হলেও ভুল</strong></dt>
+          <dd>ছোট পরিচিত উদাহরণগুলোর সাথে এটি তুলনা করুন। রান করার আগে ইমপোর্ট, ইউনিট, খালি-ইনপুট আচরণ এবং পার্শ্বপ্রতিক্রিয়া পরীক্ষা করুন। মডেলের প্রতিক্রিয়া কোনো নির্ভুলতার প্রমাণ নয়।</dd>
+        </dl>
+        <p><a href="../../../../pro/ai/">AI সেটআপ এবং ওয়ার্কফ্লো রেফারেন্স<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> · <a href="../../../../pro/remote/">রিমোট এবং নিরাপত্তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> · <a href="../../../tutorials/">সকল টিউটোরিয়াল</a></p>
+      </section>
+      <aside class="callout" id="execution-permissions" aria-labelledby="execution-appendix-title">
+        <h2 id="execution-appendix-title">পরিশিষ্ট · আসন্ন এক্সিকিউশন অনুমোদন · প্রস্তাবিত Pro 1.5.0</h2>
+        <p><strong>অপ্রকাশিত:</strong> এই নিয়ন্ত্রণগুলো পরবর্তী রিলিজের বাস্তবায়ন বর্ণনা করে, আপনার 1.4.0 ইনস্টলেশনে এটি রয়েছে এমন কোনো প্রতিশ্রুতি নয়। রিলিজ নম্বরটি অস্থায়ী।</p>
+        <ul>
+          <li><strong>এআই সেটিংস → নিরাপত্তা… → <code>execute_cell</code> / <code>run_cells</code></strong> ইতিমধ্যে <strong>Default / Allow / Ask / Deny</strong> অফার করে। এই আপডেট Open-এর ইনহেরিট করা Default-কে <strong>জিজ্ঞাসা করুন</strong>-এ পরিবর্তন করে; Full control Allow বহাল রাখে। সুস্পষ্ট টুল বা কার্নেল নিয়ম ইনহেরিট করা ডিফল্টগুলোকে প্রতিস্থাপন করতে পারে; যখন উভয়ই সুস্পষ্ট হয়, তখন নিরাপদ নিয়মটি অগ্রাধিকার পায়। শেখার সময় Default বা Ask রাখুন। Allow হলো একটি ওভাররাইড, কোনো শক্তিশালী স্যান্ডবক্স নয়; কার্নেল Ask/Deny, Review এবং বৈশ্বিক JavaScript নিষ্ক্রিয়করণ এখনও প্রযোজ্য থাকে।</li>
+          <li><strong>রান করুন</strong> বেছে নেওয়ার আগে এক্সিকিউশন অনুরোধটি পড়ুন; শুধুমাত্র সেই অনুরোধ অনুমোদন করতে <strong>ভবিষ্যতে জিজ্ঞাসা না করেই অ্যাসিস্ট্যান্ট সেল রান করার অনুমতি দিন</strong> আনচেক করা রাখুন। এটি চেক করলে রিসেট না হওয়া পর্যন্ত <strong>সমস্ত ওয়ার্কবুক</strong> জুড়ে শেয়ার করা এক্সিকিউশন-টুল নিয়ম পরিবর্তিত হয়—শুধুমাত্র এই সেল, কথোপকথন বা প্রোভাইডারের জন্য নয়। একটি সুস্পষ্ট কার্নেল Ask সেই বিকল্পটি লুকিয়ে রাখে।</li>
+          <li>নেমস্পেস-পরিদর্শন এবং নতুন তৈরি সেলের প্রম্পটগুলো <strong>সেই স্থায়ী অনুমতি তৈরি করতে পারে না</strong>। একটি তৈরি করা সেলের এক্সিকিউশন প্রম্পটে সীমিত কোড প্রিভিউ অন্তর্ভুক্ত থাকে; একটি দীর্ঘ প্রিভিউ ইলিপসিস (...) দিয়ে শেষ হয়। এটি ট্রাঙ্কেট করা থাকলে, Cancel বেছে নিন, নতুন তৈরি সেলের সম্পূর্ণ সোর্স পরীক্ষা করুন, এবং এটি বিশ্বাস করলেই কেবল নিজে Run করুন। Auto-run চালু থাকলে পূর্বে সংরক্ষিত কোনো এক্সিকিউশন Allow তৈরি করা সেলের অটো-রান অনুমোদন করতে পারে, তাই এখানে Auto-run বন্ধ রাখুন।</li>
+          <li>সংরক্ষিত এক্সিকিউশন-টুল Allow কার্যকর থাকা অবস্থায় আপনি যদি Full control ছাড়া অন্য কোনো প্রিসেট নির্বাচন করেন, তবে একটি সতর্কতা <strong>ডিফল্ট পুনরুদ্ধার করুন</strong>, <strong>'অনুমতি দিন' বজায় রাখুন</strong>, বা <strong>বাতিল</strong>-এর বিকল্প দেয়। Reset কার্নেল ওভাররাইড না মুছে নির্বাচিত প্রিসেটের টুল নিয়ম পুনরুদ্ধার করে। Keep ওভাররাইডটি ধরে রাখে। Cancel পূর্ববর্তী প্রিসেট নির্বাচন পুনরুদ্ধার করে। Settings সংরক্ষণ না করা পর্যন্ত Reset এবং Keep ড্রাফ্ট পরিবর্তন হিসেবে থাকে।</li>
+        </ul>
+        <p><strong>এক্সিকিউশন অনুমোদন ডেটা শেয়ার করার সর্বজনীন অনুমতি নয়।</strong> এক্সিকিউশন-টুল আউটপুট Assistant-এর মডেলে ফেরত যেতে পারে এবং অনুমোদিত কোড নেটওয়ার্কিং ব্যবহার করতে পারে। অনলাইন কমপ্লিশনের <strong>সবসময় অনুমতি দিন</strong>, AI Prompt-এর কনটেক্সট পর্যালোচনা এবং Remote/MCP-এর গোপনীয়তা প্রকাশ পৃথক থাকে। MCP নোটবুক এক্সিকিউশন একই এক্সিকিউশন চেক ব্যবহার করে; সেই চেকগুলো ব্রোকারের Terminal শেলকে স্যান্ডবক্স করে না।</p>
+      </aside>
+      <aside class="callout" id="planned-workbook-context" aria-labelledby="context-appendix-title">
+        <h2 id="context-appendix-title">পরিশিষ্ট · পরিকল্পিত ওয়ার্কবুক কনটেক্সট এবং ইতিহাস</h2>
+        <p><strong>শুধুমাত্র ডিজাইন প্রস্তাবনা:</strong> এই ফিচারগুলো বাস্তবায়িত হয়নি বা কোনো রিলিজে অন্তর্ভুক্ত করা হয়নি। এগুলো উপরের আসন্ন এক্সিকিউশন-অনুমোদন পরিবর্তন থেকে পৃথক এবং বর্তমান রিলিজকে আটকে রাখে না।</p>
+        <ul>
+          <li><strong>প্রয়োজনে ওয়ার্কবুকের সারসংক্ষেপ সংগ্রহ করুন।</strong> এই পরিকল্পনাটি বারবার স্বয়ংক্রিয় সোর্স প্রিভিউকে শুধুমাত্র-মেটাডেটা ডিরেক্টরি টুল দিয়ে প্রতিস্থাপন করে: সেলের নাম, ঐচ্ছিক বিবরণ, ভাষা এবং ধরন, সাথে একটি ওয়ার্কবুক রিভিশন। প্রস্তাবিত টুলটি হলো <code>list_cells</code> যার সাথে রয়েছে <code>view: "metadata"</code>; Assistant নির্বাচিত সোর্স আলাদাভাবে পড়বে। এটি একটি নির্দিষ্ট সীমার ওভারভিউ, স্বয়ংক্রিয়ভাবে উৎপন্ন কোনো AI ব্যাখ্যা নয়।</li>
+          <li><strong>প্রতিটি Send-এর পরিবর্তে একবার সংযুক্ত করুন।</strong> একটি প্রস্তাবিত <strong>Attach workbook summary this time</strong> চেকবাক্স একটি নতুন কথোপকথনের জন্য চেক করা অবস্থায় শুরু হতে পারে এবং সেই সংযুক্তিটি প্রকৃতপক্ষে পাঠানোর পরে আনচেক হয়ে যেতে পারে। আপনি পাঠানোর আগে এটি আনচেক করতে পারেন বা একটি নতুন ওভারভিউয়ের জন্য এটি পুনরায় চেক করতে পারেন। এর প্রাথমিক ডিফল্টের ক্ষেত্রে এখনও গোপনীয়তা এবং ব্যবহারযোগ্যতা পর্যালোচনার প্রয়োজন। ধারাবাহিকতায় আরেকটি সারসংক্ষেপ যোগ করা হবে না এবং ট্যাব পরিবর্তন করলে এটি নীরবে পুনরায় সক্ষম হবে না। প্রিভিউ এবং বিদ্যমান পঠন/গোপনীয়তা অনুমতিগুলো তখনও প্রযোজ্য থাকবে; একটি বড় ওয়ার্কবুকের জন্য আরও পৃষ্ঠার প্রয়োজন হতে পারে।</li>
+          <li><strong>আনচেক করা থাকলে ইতিহাস মুছে যায় না।</strong> এটি একটি নতুন স্বয়ংক্রিয় সংযুক্তি বন্ধ করবে, ইতিমধ্যে কথোপকথনে থাকা সারসংক্ষেপগুলো অপসারণ করবে না বা অনুমোদিত টুলের পড়া প্রতিরোধ করবে না। বিদ্যমান ফুল-স্ক্রিন Agent, AI Prompt এবং কমপ্লিশন কনটেক্সট নিয়ন্ত্রণসমূহ পৃথক থাকবে।</li>
+          <li><strong>পাঠানোর মধ্যবর্তী পরিবর্তনগুলো পরবর্তী বিকল্প।</strong> কমপ্যাক্ট আপডেটের জন্য একটি পরিচিত প্রেরিত-কনটেক্সট বেসলাইন এবং নির্ভরযোগ্য রিভিশন প্রয়োজন হবে। মানুষের করা সম্পাদনা হাইলাইট করা যেতে পারে, তবে এজেন্টের সম্পাদনা, ইমপোর্ট এবং অজানা পরিবর্তনগুলোও গুরুত্বপূর্ণ। কোনো সোর্স সম্পাদনা স্বয়ংক্রিয়ভাবে সেলের বিবরণ পুনরায় লিখবে না; অনুপস্থিত বা পুরানো ইতিহাসের জন্য অনুমিত আপডেটের পরিবর্তে একটি নতুন ওভারভিউ প্রয়োজন হবে।</li>
+          <li><strong>ঐচ্ছিক লোকাল ইতিহাস এবং GitHub সিঙ্ক হলো দীর্ঘমেয়াদী Pro ধারণা।</strong> লোকাল Send চেকপয়েন্ট কোনো কিছু শেয়ার না করেই Git-ভিত্তিক ডিফের সুবিধা দিতে পারে। স্বাধীন সিঙ্ক একটি ওয়ার্কবুককে কোনো Gist বা রিপোজিটরির নির্বাচিত ফাইলে প্রকাশ করতে পারে, যার নিজস্ব পেলোড প্রিভিউ এবং অনুমোদন থাকবে। ইতিহাস সক্রিয় করলে তা GitHub-এ পুশ করবে না বা AI-এর কাছে কোনো ডিফ পাঠাবে না। Git বিষয়বস্তুর পরিবর্তন দেখায়, কোনো মানুষ এটি তৈরি করেছে তার প্রমাণ নয়।</li>
+        </ul>
+        <p><strong>একটি সিক্রেট Gist ব্যক্তিগত নয়।</strong> এর URL জানা যে কেউ এটি পড়তে পারে; অ্যাক্সেস সীমাবদ্ধ করার প্রয়োজন হলে একটি প্রাইভেট রিপোজিটরি ব্যবহার করুন। প্রকাশের আগে ওয়ার্কবুক সোর্স এবং বিবরণ থেকে গোপনীয় তথ্য বাইরে রাখুন। <a href="https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists/creating-gists">GitHub-এর Gist দৃশ্যমানতা ডকুমেন্টেশন</a>।</p>
+      </aside>
+    </article>
+  </main>
+  <footer class="site-footer">
+    <span>SciREPL Pro সহায়তা</span>
+    <nav aria-label="ফুটার নেভিগেশন">
+      <a href="../../../tutorials/">সকল টিউটোরিয়াল</a>
+      <a href="../../../../pro/">Pro সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+      <a href="../../../../../pro/privacy.html">Pro গোপনীয়তা</a>
+    </nav>
+  </footer>
+</body>
+</html>

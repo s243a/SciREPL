@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "locale": "fr",
+  "chunk": "08",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "originalReviewHash": "29d973a3ff9ad31a0e43752858a98fb540f3f9afb42648f79c46d05dd76e4fb8",
+  "reviewer": "Codex controller with independent Codex fidelity audit",
+  "reviewScope": "All 30 fields in the complete French chunk were independently compared with the frozen English source. No other fidelity or structural issue was found.",
+  "nativeLanguageReview": "pending",
+  "corrections": [
+    {
+      "fieldId": "files-export.tutorial.0015",
+      "before": "Samsung Galaxy S vingt-quatre",
+      "after": "Samsung Galaxy S24",
+      "reason": "Keep the source hardware model identifier S24 literal rather than spelling its numeric component in French. This restores the unchanged source numeric value and does not change tutorial meaning."
+    }
+  ]
+}

@@ -25,6 +25,7 @@
     "Session-AppState": "جلسة"
   },
   "strings": {
+    "help.keyboardTrustNotice": "SciREPL غير تابع لهذه المشاريع. يمكن لتطبيقات لوحة المفاتيح قراءة كل ما تكتبه، بما في ذلك كلمات المرور ومفاتيح API. ثبّت فقط لوحة مفاتيح تثق بها، وراجع صلاحياتها، وحافظ على تحديثها.",
     "__literal": [
       "app.search.position",
       "export.docx",

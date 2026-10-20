@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="دليل إرشادي لـ SciREPL Pro: اقتراحات جداول خالية من رسوم API، وإعداد مفتاح API، والإعداد المسبق لوكيل Open، والإكمال المتصل بالإنترنت والمحلي، وخلايا AI Prompt المركّزة.">
+  <meta name="theme-color" content="#06101d">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ar/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../styles.css">
+  <link rel="stylesheet" href="../../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../../pro/ai/tutorial/tutorial.css">
+  <title>الذكاء الاصطناعي والإكمال خطوة بخطوة · مساعدة SciREPL Pro</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../tutorial-locales.css">
+</head>
+<body data-editions="pro" data-platforms="android windows-preview">
+  <a class="skip-link" href="#main">الانتقال إلى المحتوى</a>
+  <header class="site-header">
+    <a class="brand" href="../../../../">sci<span>REPL</span> Help<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+    <nav aria-label="التنقل الأساسي">
+      <a href="../../../tutorials/">جميع الدروس التعليمية</a>
+      <a href="../../../../pro/ai/">مرجع الذكاء الاصطناعي<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+      <a href="../../../../pro/">مساعدة Pro<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="لغة البرنامج التعليمي"><details class="tutorial-language-menu"><summary>لغة البرنامج التعليمي: <bdi>العربية</bdi></summary><nav aria-label="لغة البرنامج التعليمي"><a href="../../../../en/pro/ai/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="./" lang="ar" hreflang="ar" aria-current="page">العربية</a>
+      <a href="../../../../bn/pro/ai/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../../de/pro/ai/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../../es/pro/ai/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../../fr/pro/ai/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../../hi/pro/ai/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../../id/pro/ai/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../../ja/pro/ai/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../../ko/pro/ai/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../../pt-BR/pro/ai/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../../ru/pro/ai/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../../zh/pro/ai/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">برنامج تعليمي مترجم آليًا؛ والمراجعة بواسطة متحدث أصلي باللغة قيد الانتظار. لم تتغير التعليمات البرمجية والقيم التقنية. تُظهر لقطات الشاشة الواجهة الأصلية باللغة الإنجليزية؛ يرجى مطابقة أسماء عناصر التحكم المترجمة في هذا النص مع ما يظهر في تطبيقك.</p></aside>
+    <p class="breadcrumbs"><a href="../../../../">المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> / <a href="../../../../pro/">Pro<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> / الذكاء الاصطناعي والإكمال</p>
+    <article>
+      <p class="eyebrow">تعلّم بالممارسة · Pro</p>
+      <h1>من الاقتراحات دون اتصال بالإنترنت إلى البرمجة بمساعدة الذكاء الاصطناعي</h1>
+      <p class="lede">ابدأ باقتراحات سريعة مستندة إلى الجداول ولا تكلف شيئاً لكل طلب. بعد ذلك، قم بإعداد المساعد، واطلب بدائل عبر الإنترنت، وجرّب نموذجاً يعمل على الجهاز، واختتم بخلايا AI Prompt مركزة تشرح الكود البرمجي الخاص بك.</p>
+      <ul class="meta">
+        <li class="chip chip-pro">خاص بـ Pro فقط</li>
+        <li class="chip">Pro 1.4.0 + عناصر التحكم القادمة في التنفيذ</li>
+        <li class="chip">النموذج المحلي: Android</li>
+      </ul>
+      <p class="screen-note">تُظهر معظم لقطات الشاشة تطبيق Android؛ وبعضها لقطات من المتصفح. قد تختلف التنسيقات باختلاف إصدار التطبيق لديك.</p>
+      <p class="callout"><strong>تحقق من إصدارك.</strong> التغييرات في التنفيذ الواردة في <a href="#execution-permissions">الملحق</a> مخطط لها في <strong>الإصدار المقترح Pro 1.5.0</strong>، وهو <strong>غير مُصدر بعد</strong>؛ قد يتغير رقم الإصدار النهائي.</p>
+      <p class="callout"><strong>تعني كلمة "Free" هنا عدم وجود رسوم API.</strong> لا تفرض اقتراحات الجداول والنموذج الموجود على الجهاز أي فواتير على مزود الخدمة. هذا لا يجعلها ميزات خاصة بالإصدار Free: هذا الدليل مخصص لـ <strong>SciREPL Pro</strong>. تستخدم الطلبات عبر الإنترنت حساب المزود الخاص بك ويمكن أن تكلف مالاً.</p>
+      <nav class="lesson-nav" aria-label="خطوات الدليل الإرشادي للذكاء الاصطناعي والإكمال">
+        <strong>في هذا الدرس</strong>
+        <ol>
+          <li><a href="#tables">البدء باقتراحات الجداول دون اتصال بالإنترنت</a></li>
+          <li><a href="#key">حفظ مفتاح API</a></li>
+          <li><a href="#agent">إنشاء مثال صغير باستخدام الإعداد المسبق Open agent</a></li>
+          <li><a href="#online">طلب عمليات إكمال مستندة إلى API</a></li>
+          <li><a href="#local">تجربة النموذج الموجود على الجهاز</a></li>
+          <li><a href="#prompt-cells">استخدام خلية AI Prompt لفهم الكود</a></li>
+        </ol>
+        <p><a href="../../../tutorials/">اختيار درس تعليمي آخر</a> · <a href="#troubleshooting">إذا لم يعمل شيء ما</a></p>
+      </nav>
+
+      <section id="tables">
+        <p class="step-label">الخطوة 1 · لا يلزم وجود مفتاح API</p>
+        <h2>البدء باقتراحات الجداول دون اتصال بالإنترنت</h2>
+        <p>ابحث عن <strong>☰ Menu</strong> في ترويسة التطبيق: إنه الزر الذي يحتوي على <strong>ثلاثة خطوط أفقية</strong>. افتح <strong>الإكمال</strong>. يفصل منتقي <strong>القسم</strong> الخاص به بين <strong>عام</strong>، و<strong>اقتراحات الذكاء الاصطناعي (عبر الإنترنت)</strong>، و<strong>النموذج المحلي (على الجهاز)</strong>. ابدأ بالقسم العام.</p>
+        <ol class="lesson-steps">
+          <li>اضبط <strong>إكمال التعليمات البرمجية المحلي → تشغيل</strong>. وإلا فإن الإعداد الافتراضي <strong>تلقائي (مفعّل على سطح المكتب، معطّل باللمس)</strong> سيتركه معطلاً على الهاتف.</li>
+          <li>اضبط <strong>شرائح الاقتراحات → تشغيل</strong> وأبقِ <strong>الاقتراحات → عند موضع المؤشر</strong>. ولعزل الجداول، اضبط <strong>اقتراحات الذكاء الاصطناعي → معطّل</strong> في القسم المتصل بالإنترنت و<strong>استخدام النموذج المحلي → معطّل</strong> في القسم المحلي، إذا كان أي منهما مفعّلاً مسبقاً. عد إلى عام.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-general" role="img" aria-label="شاشة الإكمال العام في متصفح Pro. تحدد الحدود الصفراء عناوين Ghost text وSuggestion chips، بالإضافة إلى Suggestions: At cursor وSuggestion chips: On.">
+            <div class="shot-stage shot-stage--completion-general">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general.png" width="414" height="820" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general-overlay.svg" width="414" height="820" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>عناصر التحكم الفعلية للقسم عام في <strong>لقطة متصفح ضيقة، وليست لقطة شاشة لنظام Android</strong>. تحدد الحدود الصفراء <strong>الاقتراحات → عند موضع المؤشر</strong>، و<strong>شرائح الاقتراحات → تشغيل</strong>، وعناوين أقسامها. توجد القائمة المنسدلة Section في الأعلى؛ وقد تتطلب الإعدادات السفلية التمرير.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-general.png">عرض لقطة الإعدادات الكاملة</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>أغلق نافذة الإكمال. في دفتر عمل تدريبي جديد، اختر خلية <strong>كود</strong> ولغة <strong>JavaScript</strong>. اكتب <code>cons</code>، مع وضع مؤشر الكتابة في النهاية وبدون أي تحديد. تُسمى هذه الأحرف الأولى من <code>const</code> <strong>بادئة</strong>. ابحث عن <code>const</code>.</li>
+          <li>في لقطة الشاشة أدناه، يتبع <code>cons</code> نص باهت <code>t</code>—وهو <strong>نص خافت</strong> مضمن. اضغط على <strong>قبول</strong> أو اضغط على <kbd>Tab</kbd> لإدراج الاقتراح، للحصول على <code>const</code>. وإذا ظهرت شريحة <code>const</code> بدلاً من ذلك، فإن النقر عليها طريقة أخرى لقبول هذا المرشح. أكمل السطر بنفسك، على سبيل المثال <code>const values = [12, 15, 18];</code>.</li>
+        </ol>
+        <p class="callout"><strong>القبول ليس تشغيلاً.</strong> يؤدي قبول الاقتراح إلى تعديل الكود المصدري؛ ولا يؤدي إلى تنفيذ الخلية. توضح أمثلة JavaScript وPython في هذا القسم الإكمال التلقائي أثناء التحرير. تشغيل هذه الخلايا التدريبية ليس جزءاً من هذا القسم. مع تفعيل طبقة الجداول دون اتصال بالإنترنت فقط، فإن كتابة بادئة لا ترسل طلب API ولا تبدأ بيئة تشغيل اللغة لمجرد تقديم اقتراحات.</p>
+        <p class="note"><strong>الجلب المسبق المستقبلي عبر الإنترنت:</strong> يُخطط لوضع اختياري يمكنه إرسال طلبات النموذج أثناء الكتابة. وهو غير متوفر بعد، ولم يتم تعيين رقم إصدار له. تصف عبارة عدم إرسال الطلبات المذكورة أعلاه طبقة الجداول الحالية دون اتصال بالإنترنت، وليس هذا الوضع المستقبلي.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-javascript.png" width="1080" height="2340" alt="تفاصيل منشئ الأكواد السفلي من لقطة شاشة حقيقية لجهاز Android Galaxy S24+: كود JavaScript cons متبوعاً بحرف t خافت وزر Accept، مع تفعيل شرائح الاقتراحات وإخفاء صف المفاتيح الإضافية." loading="lazy" decoding="async">
+          <figcaption><strong>عرض تفصيلي للقطة شاشة حقيقية لنظام Android على جهاز Galaxy S24+.</strong> يقدم إكمال جداول JavaScript الخيار <code>const</code> لـ <code>cons</code>: الحرف الباهت <code>t</code> هو نص خافت، مع ظهور <strong>قبول</strong> وتفعيل الشرائح. الـ API والنموذج المحلي معطلان. تم إخفاء صف المفاتيح الإضافية هنا للتباين مع الصورة التالية؛ وهو عنصر تحكم اختياري منفصل، وليس متطلباً للإكمال.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-javascript.png">عرض لقطة شاشة الهاتف الكاملة غير المعدلة لإكمال cons → const في JavaScript</a>
+        </figure>
+        <p><strong>شاهد طريقتي العرض دون اتصال بالإنترنت على الهاتف.</strong> اترك <strong>شرائح الاقتراحات → تشغيل</strong>، واختر <strong>Python</strong>، واكتب <code>pri</code>. يقدم الحرف الباهت <code>nt</code> بعد مؤشر الكتابة <code>print</code>؛ وهو ليس جزءاً من كودك المصدري حتى تقبله. <strong>لا تحتاج إلى إيقاف تشغيل الشرائح لرؤية النص الخافت.</strong> يمكن أن يظهر مرشح واحد كنص خافت، بينما توفر الشرائح خياراً عندما تتطابق عدة مرشحات. أبقِ <strong>اقتراحات الذكاء الاصطناعي</strong> و<strong>استخدام النموذج المحلي</strong> معطلين لكلا المثالين.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-ghost.png" width="1080" height="2340" alt="تفاصيل منشئ الأكواد السفلي من لقطة شاشة لجهاز Android Galaxy S24+: كود Python المصدري pri متبوعاً بنص خافت باهت nt وزر Accept. شرائح الاقتراحات مفعّلة." loading="lazy" decoding="async">
+          <figcaption><strong>عرض تفصيلي للقطة شاشة حقيقية لنظام Android على جهاز Galaxy S24+.</strong> يقدم إكمال الجداول دون اتصال بالإنترنت لاحقة باهتة واحدة عند مؤشر الكتابة مع <strong>شرائح الاقتراحات → تشغيل</strong>. الـ API والنموذج المحلي معطلان.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-ghost.png">عرض لقطة شاشة الهاتف الكاملة غير المعدلة للنص الخافت</a>
+        </figure>
+        <p>مع بقاء الشرائح <strong>تشغيل</strong>، استبدل المدخلات التدريبية بهذه الأسطر الثلاثة، مع ترك مؤشر الكتابة بعد الجزء غير المكتمل <code>sample_m</code>. يقدم الصف <code>sample_mean</code> و<code>sample_median</code> من الأسماء الموجودة في كودك المصدري نفسه. اضغط على شريحة لاختيار مرشح؛ وخلافاً للنص الخافت، يعرض الصف بدائل متعددة.</p>
+        <pre><code>sample_mean = 0
+sample_median = 0
+sample_m</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-chips.png" width="1080" height="2340" alt="تفاصيل منشئ الأكواد السفلي من لقطة شاشة لجهاز Android Galaxy S24+: يعرف كود Python المصدري sample_mean وsample_median، ثم sample_m، مع شرائح المرشحين sample_mean وsample_median." loading="lazy" decoding="async">
+          <figcaption><strong>عرض تفصيلي للقطة شاشة حقيقية لنظام Android على جهاز Galaxy S24+.</strong> مع تشغيل الشرائح، تقدم المرشحات المشتقة من المصدر دون اتصال بالإنترنت الاسمين المذكورين أعلاه. يظل الـ API والنموذج المحلي معطلين.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-chips.png">عرض لقطة شاشة الهاتف الكاملة غير المعدلة لشرائح المرشحين</a>
+        </figure>
+        <p>إن <strong>صف المفاتيح الإضافية</strong> الظاهر في صور هاتف Python و<strong>ألوان بناء الجملة أثناء الكتابة</strong> هما عنصرا تحكم اختياريان ومنفصلان في Pro. راجع <a href="../../../interface/appearance/#pro-editor">دليل المظهر الإرشادي: المفاتيح الإضافية وألوان بناء الجملة</a> لتشغيل أو إيقاف تشغيل أي منهما، وللعثور على مربع اختيار التمييز المنفصل الخاص بمحرر الملفات.</p>
+        <p>بعد تجربة طرق عرض الإكمال هذه، ارجع إلى <strong>JavaScript</strong> واترك الشرائح مفعّلة لبقية الدرس.</p>
+        <p>تجمع الشرائح غير المتصلة بالإنترنت الموضحة هنا، والمفعلة ضمن <strong>الإكمال → عام → شرائح الاقتراحات</strong>، بين جداول أسماء منتقاة ومعلومات الكود المحلي. في Python، يتضمن ذلك المتغيرات والدوال الموجودة في كود دفتر العمل وأسماء النواة المخزنة مؤقتاً وسمات الكائنات، بما في ذلك التوابع. ويساعد تكرار الاستخدام وسجل القبول في ترتيبها. تتمتع اللغات الأخرى بتغطية مختلفة: قد تقترح القوائم الثابتة أو التعريفات غير المشغلة أو اللقطات القديمة اسماً غير متوفر حالياً في النطاق. <strong>الإكمال المستند إلى الجداول ليس نموذج لغة</strong> ولا يمتلك قدرة على التفكير المنطقي بشأن مهمتك.</p>
+        <p>يعد <strong>عند نهاية الخلية فقط</strong> بديلاً إذا كانت الاقتراحات في منتصف الخلية تشتت انتباهك. قد لا ينتج عن تحديد نص، أو سلسلة نصية، أو تعليق، أو اسم مجزأ عمداً أي اقتراحات. في الوضع الأفقي القصير، يمكن أن تختفي الصفوف الاختيارية لتوفير مساحة للكود؛ راجع <a href="../../../interface/appearance/">إعدادات المظهر</a>.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-position">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-position.png" width="1080" height="2340" alt="تفاصيل شاشة الإكمال العام الفعلية لنظام Android على جهاز Galaxy S24+: القائمة المنسدلة Suggestions مفتوحة مع تحديد At cursor وخيار End of cell only أسفله." loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>لقطة شاشة حقيقية لنظام Android على جهاز Galaxy S24+.</strong> في <strong>الإكمال → عام → النص الخافت → الاقتراحات</strong>، اختر <strong>عند موضع المؤشر</strong> أو <strong>عند نهاية الخلية فقط</strong>. يعني الخيار الأخير نهاية <em>الخلية بأكملها</em>، وليس كل سطر. تغطي قائمة Android الموسعة إعدادات المسافة البادئة المجاورة؛ وتلك عناصر تحكم منفصلة وليست جزءاً من هذا الخيار.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-position.png">عرض لقطة شاشة الهاتف الكاملة غير المعدلة لقائمة Suggestions الموسعة</a>
+        </figure>
+      </section>
+
+      <section id="key">
+        <p class="step-label">الخطوة 2 · الإعداد عبر الإنترنت</p>
+        <h2>حفظ مفتاح API</h2>
+        <p>يتيح مفتاح API لـ SciREPL استخدام حساب موفر خدمة تتحكم فيه. احصل على المفتاح من ذلك الموفر، وتحقق من أسعاره الحالية وحدود الحساب، واستخدم فقط دفتر عمل تدريبي صغير يحتوي على بيانات غير خاصة لهذا الدرس.</p>
+        <ol class="lesson-steps">
+          <li>افتح <strong>القائمة → 🤖 مساعد الذكاء الاصطناعي (Pro)</strong>. اضغط على <strong>⚙ الترس</strong> الخاص باللوحة لفتح إعدادات الذكاء الاصطناعي.
+            <p class="callout"><strong>ألا ترى رمز الترس؟</strong> يمكن للوحة المفاتيح أن تزيح لوحة المساعد أو تمررها. اسحب محتويات اللوحة إلى الأسفل للتمرير مرة أخرى نحو أعلاها وإظهار الترس؛ كما يمكن أن يمنحك إخفاء لوحة المفاتيح مساحة أكبر أيضاً.</p>
+          </li>
+          <li>اضبط <strong>إعداد النموذج لـ → مساعد الذكاء الاصطناعي</strong>. اختر <strong>الواجهة الخلفية</strong> (على سبيل المثال OpenRouter) و<strong>النموذج</strong>، وتحقق من نقطة النهاية إذا كانت واجهتك الخلفية تستخدم نقطة نهاية قابلة للتكوين.</li>
+          <li>أدخل <strong>مفتاح API</strong> المطابق. استخدم <strong>المفاتيح المحفوظة</strong> لإدارة المفاتيح الخاصة بأزواج الموفرين/نقاط النهاية الأخرى. المفتاح المخصص لوجهة معينة ليس بالضرورة مفتاحاً لوجهة أخرى.</li>
+          <li>اضغط على <strong>حفظ</strong>. حفظ الإعدادات وحدها لا يُنشئ طلباً للنموذج. أبقِ اللوحة مفتوحة للخطوة التالية.</li>
+        </ol>
+        <p class="callout"><strong>احرص على إبقاء المفتاح خارج دفتر العمل.</strong> لا تلصقه في خلية، أو موجه، أو لقطة شاشة، أو ملف تم تصديره. تبقى المفاتيح المحفوظة في وحدة التخزين المحلية للتطبيق/المتصفح، دون تشفير على مستوى التطبيق؛ احمِ الجهاز ولا تشغل كوداً غير موثوق به. توضح <a href="../../../../../pro/privacy.html">سياسة خصوصية Pro</a> ما يتم تخزينه وإرساله.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--key-setup" role="img" aria-label="شاشة إعدادات الذكاء الاصطناعي في متصفح Pro الخالية من المفاتيح. تحدد الحدود الصفراء Configure model for: AI Assistant، وBackend: OpenRouter، وModel: GLM 5.3 Flash، وحقل مفتاح API الفارغ.">
+            <div class="shot-stage shot-stage--key-setup">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup.png" width="390" height="538" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup-overlay.svg" width="390" height="538" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>لقطة متصفح حديثة وخالية من المفاتيح</strong> لإعدادات الذكاء الاصطناعي، وليست لقطة شاشة لنظام Android. تحدد الحدود الصفراء الحقول المراد ضبطها: <strong>إعداد النموذج لـ</strong>، و<strong>الواجهة الخلفية</strong>، و<strong>النموذج</strong>، و<strong>مفتاح API</strong>. الرمز الباهت <code>sk-…</code> هو نص نائب، وليس مفتاحاً محفوظاً. مرر للأسفل أكثر للوصول إلى <strong>حفظ</strong>؛ لم يتم إدخال أي مفتاح أو إرسال أي طلب لهذه الصورة.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-key-setup.png">عرض لقطة الشاشة الكاملة غير المعدلة لتكوين الذكاء الاصطناعي</a>
+        </figure>
+        <p>يعد النموذج منخفض التكلفة والقادر على استخدام الأدوات نقطة انطلاق مناسبة للمساعد. تشمل الأمثلة للمقارنة <a href="https://openrouter.ai/z-ai/glm-5.3-flash">GLM 5.3 Flash</a>، و<a href="https://developers.openai.com/api/docs/models/gpt-6-luna">GPT-6 Luna</a>، و<a href="https://www.anthropic.com/claude/haiku">Claude Haiku 5.5</a>، و<a href="https://api-docs.deepseek.com/quick_start/pricing">DeepSeek V4 Flash</a>. تعتمد معرفات النماذج الدقيقة والإصدارات المتاحة ودعم الأدوات والأسعار على إصدار تطبيقك والمزود؛ تحقق من أداة الانتقاء الحالية ووثائق المزود. قد يحتاج النموذج المعلن عنه حديثاً إلى تحديث التطبيق قبل ظهوره. لاحقاً، يمكنك اختيار نموذج غير مكلف مختلف لعمليات الإكمال فقط.</p>
+        <aside class="callout" id="custom-model">
+          <p><strong>هل النموذج مفقود من القائمة؟</strong> في <strong>إعدادات الذكاء الاصطناعي → إعداد النموذج لـ → مساعد الذكاء الاصطناعي</strong>، اختر <strong>الواجهة الخلفية</strong> الصحيح أولاً، ثم أدخل <strong>معرف نموذج API الدقيق</strong> الخاص بالمزود في <strong>أو أدخل معرّف نموذج مخصص</strong>، أسفل أداة انتقاء النموذج، واضغط على <strong>حفظ</strong>. هذا الحقل متوفر بالفعل في Pro 1.4.0.</p>
+          <p>تحقق من المعرّف مع الموفر الذي حددته، وليس فقط الاسم التسويقي للنموذج. بالنسبة إلى OpenRouter، قم بتضمين بادئة المؤسسة—على سبيل المثال، <code>anthropic/claude-haiku-5.5</code> في <a href="https://openrouter.ai/anthropic/claude-haiku-5.5">صفحة النموذج الخاصة به</a>. أدخل المعرّف، وليس عنوان URL لتلك الصفحة. تكون الأولوية للمعرّف المخصص على القائمة المنسدلة؛ ويؤدي اختيار نموذج مدرج مرة أخرى إلى مسح الحقل المخصص.</p>
+          <p><strong>لا يضيف المعرّف دعماً لـ API.</strong> يجب أن يدعم النموذج استدعاءات الأدوات من خلال API التي يستخدمها SciREPL. تحقق من إمكانية وصول الموفر والتوافق والأسعار الحالية؛ الحفظ لا يتحقق منها ولا يُنشئ طلباً للنموذج.</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--custom-model" role="img" aria-label="شاشة إعدادات الذكاء الاصطناعي في متصفح Pro الخالية من المفاتيح. تحدد الحدود الصفراء Backend: OpenRouter وحقل معرف النموذج المخصص الذي يحتوي على anthropic/claude-haiku-5.5، أسفل أداة انتقاء Model.">
+            <div class="shot-stage shot-stage--custom-model">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model.png" width="390" height="456" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model-overlay.svg" width="390" height="456" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>لقطة متصفح حقيقية وخالية من المفاتيح</strong>، وليست لقطة شاشة لنظام Android. يحدد الإطار الأصفر أسفل Model حقل المعرف المخصص. لا تزال القائمة المنسدلة تعرض GLM 5.3 Flash، ولكن معرّف Haiku المكتوب ستكون له الأولوية عند الحفظ. يوجد مفتاح API وزر الحفظ أسفل هذا الجزء المقتص؛ لم يتم إدخال أي مفتاح، ولم يتم الضغط على Save، ولم يتم إرسال أي طلب للنموذج. هذا مجرد مثال على التكوين، وليس اختباراً لعمل النموذج.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-custom-model.png">عرض لقطة الشاشة الكاملة غير المعدلة للنموذج المخصص</a>
+        </figure>
+      </section>
+
+      <section id="agent">
+        <p class="step-label">الخطوة 3 · الاستخدام المتأني للأداة</p>
+        <h2>إنشاء مثال صغير باستخدام الإعداد المسبق Open agent</h2>
+        <p>يُعد <strong>مفتوح</strong> <strong>ثاني أكثر الإعدادات المسبقة تساهلاً</strong> من حيث الأمان، بعد <strong>تحكم كامل</strong>. وهو يتيح تعديل دفتر الملاحظات افتراضياً، مع مطالبات تأكيد أقل مقارنة بالإعداد Cautious. يعتمد طلب الإذن بالتنفيذ على إصدارك وإعدادات الأذونات؛ راجع <a href="#execution-permissions">ملحق الموافقة على التنفيذ القادم</a>. استخدمه بعناية في دفتر عمل تدريبي—وليس كمتطلب للإكمال التلقائي.</p>
+        <ol class="lesson-steps">
+          <li>في إعدادات الذكاء الاصطناعي، حدد <strong>مستوى الأمان → مفتوح</strong> و <strong>كتابة الوكيل → ورقة العمل النشطة</strong>. اترك تصفح المصدر معطلاً وأوقف تشغيل <strong>التشغيل التلقائي للخلايا المنشأة بواسطة الذكاء الاصطناعي</strong>. وضمن <strong>النوى…</strong>، اضبط <strong>JavaScript → طلب الإذن</strong>، ثم احفظ. لا تزال قاعدة النواة هذه تطلب الإذن حتى لو تم حفظ خيار السماح لأداة التنفيذ سابقاً.
+            <p class="callout" id="auto-run-warning"><strong>إيقاف التشغيل التلقائي ليس قفلاً للتنفيذ.</strong> فهو يمنع الخلايا المنشأة حديثاً من العمل تلقائياً؛ لكنه لا يعطل طلبات <code>execute_cell</code> أو <code>run_cells</code> المنفصلة. قد يسمح الإعداد الافتراضي Open في الإصدار المُطلق Pro 1.4.0 بها دون طلب إذن. أما الإعداد الافتراضي Open القادم فيطلب الإذن، ولكن السماح الصريح للأداة أو النواة يمكن أن يغير هذا الوضع الافتراضي. يحافظ <strong>إعدادات الذكاء الاصطناعي → الأنوية… → JavaScript → طلب إذن</strong> على إبقاء تنفيذ JavaScript في هذا التمرين مشروطاً بالتأكيد. يظل تشغيل الخلية يدوياً بنفسك إجراءً منفصلاً. <a href="#execution-permissions">تم تفصيل عناصر التحكم في التنفيذ للإصدار التالي في الملحق.</a></p>
+            <aside class="callout" id="sandbox">
+              <p>إذا كنت تفضل مزيداً من التأكيد، فاستخدم <strong>حذر</strong> بدلاً من ذلك. يظل الإعداد Open يحترم عناصر التحكم المنفصلة لتصفح المصدر ونطاق الكتابة؛ بينما يتجاوز الإعداد Full control هذين العنصرين العامين للتحكم. تظل الأذونات الفردية وبوابات الأمان الأخرى مهمة. يُعد <strong>مراجعة</strong> قيداً إضافياً للقراءة فقط في الغالب، مما يعيق هذا العرض التوضيحي لإنشاء الخلايا.</p>
+              <h3>ما تحميه بيئة الحماية للمتصفح—وما لا تحميه</h3>
+              <p>يتم تنفيذ دفتر العمل المعتاد داخل المتصفح/WebView وبيئات تشغيل اللغات الخاصة به، مع نظام ملفات افتراضي بدلاً من الوصول غير المقيد إلى ملفات هاتفك. يُعد هذا حداً مفيداً، <strong>وليس ضماناً بأن الكود لا يمكنه إلحاق الضرر</strong>. يمكن لكود JavaScript المسموح به والجسور الموصلة إليه الوصول إلى بيانات التطبيق وبيانات الاعتماد المحفوظة؛ وتعمل القيود المفروضة على الشبكة بأقصى جهد ممكن بمجرد بدء تشغيل الكود المسموح به، وليست حداً لعزل البيانات يمكنك الوثوق به لحماية الأسرار. تضيف مطالبة التنفيذ القادمة خطوة موافقة، وليس عزلاً عن بيانات التطبيق. استخدم دفتر عمل تدريبياً واحرص على ألا تكون محتوياته خاصة.</p>
+              <p><strong>يختلف Remote/طرفية MCP:</strong> إذ يمكنه كشف غلاف حقيقي على المضيف الوسيط، خارج بيئة الحماية المحلية للمتصفح. أبقِ Remote وTerminal معطلين هنا. راجع <a href="../../../../pro/remote/">العمل عن بُعد والأمان<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> قبل تمكينهما. إن عبارة مهذبة مثل "لا تفعل..." في الموجه ليست عنصر تحكم أمنياً.</p>
+            </aside>
+          </li>
+          <li>في لوحة المساعد، اختر <strong>دفتر العمل هذا</strong>. واترك خيارات <strong>المراجعة</strong>, <strong>وعن بُعد</strong>، و <strong>الطرفية</strong> معطلة في هذا المثال المعتمد على الموفر المباشر.
+            <figure class="phone-figure" id="assistant-context-controls">
+              <p class="screen-note">ترويسة اللوحة</p>
+              <div class="shot-window shot-window--assistant-context-header" role="img" aria-label="تفاصيل الجزء العلوي من لوحة المساعد في Android. يحدد إطار أصفر خيار This workbook المحدد في القائمة المنسدلة للمحادثة.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <p class="screen-note">عناصر التحكم السفلية</p>
+              <div class="shot-window shot-window--assistant-context-footer" role="img" aria-label="تفاصيل الجزء السفلي من لوحة المساعد نفسها في Android. تبرز الحدود الصفراء كلاً من Review وRemote وTerminal، وكلها غير محددة. يظهر مربع الرسالة الفارغ وزر Send.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption><strong>تفصيلان للقطة الشاشة الحقيقية نفسها لنظام Android على جهاز Galaxy S24+.</strong> تحدد الحدود الصفراء <strong>هذا المصنف</strong> و<strong>مراجعة</strong> و<strong>عن بُعد</strong> و<strong>طرفية</strong> (وجميعها غير محددة). تم حذف الجزء الأوسط الفارغ من اللوحة. لم يتم إرسال أي موجه.</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-assistant-context.png">عرض لقطة الشاشة الكاملة غير المعدلة للوحة المساعد</a>
+            </figure>
+          </li>
+          <li>أرسل الموجه التدريبي الوارد في مربع الملاحظات أدناه. إن زر <strong>إرسال</strong> في اللوحة يبدأ بالفعل حلقة أدوات الوكيل: لا يوجد مفتاح تبديل إضافي لـ "وضع الوكيل" هنا. أما زر <strong>الوكيل</strong> في محرر ملء الشاشة فهو سير عمل منفصل.
+            <div class="callout" id="assistant-practice-prompt">
+              <p><strong>انسخ هذا الموجه.</strong> والصقه في <strong>مربع رسائل المساعد</strong>، وليس في خلية كود، ثم اضغط على <strong>إرسال</strong>.</p>
+              <pre data-translatable-prompt="assistant-practice"><code>في دفتر العمل التدريبي هذا، أضف شرحاً بتنسيق <bdi dir="ltr">Markdown</bdi> متبوعاً
+بخلية <bdi dir="ltr">JavaScript</bdi> واحدة باسم <bdi dir="ltr">summary_demo</bdi>. أنشئ مصفوفة
+إدخال مكونة من <bdi dir="ltr">10</bdi> أعداد صحيحة شبه عشوائية من <bdi dir="ltr">1</bdi> إلى <bdi dir="ltr">20</bdi> ضمناً.
+استخدم مولد بارك-ميلر (Park-Miller) مع القيمة الأولية لـ <bdi dir="ltr">state</bdi> وهي <bdi dir="ltr">42</bdi>. لكل
+قيمة، حدّث أولاً <bdi dir="ltr">state = (16807 * state) % 2147483647</bdi>؛
+ثم ألحق <bdi dir="ltr">1 + Math.floor(20 * state / 2147483647)</bdi>.
+أنشئ المصفوفة باستخدام هذه القاعدة؛ ولا تضع قيمها بشكل ثابت
+أو تستخدم <bdi dir="ltr">Math.random</bdi>. أعد تعيين <bdi dir="ltr">state</bdi> إلى <bdi dir="ltr">42</bdi> عند كل تشغيل للخلية.
+اطبع مصفوفة الإدخال المُنشأة، ثم احسب عدد عناصرها (طول
+المصفوفة)، ومتوسطها الحسابي، والحد الأدنى والأقصى. اطبع كل
+نتيجة في سطر مسمّى خاص بها باستخدام <bdi dir="ltr">console.log</bdi>.
+استخدم مصفوفات <bdi dir="ltr">JavaScript</bdi> العادية والحساب و<bdi dir="ltr">Math.floor</bdi>،
+دون أي حزم إضافية.
+لا تقم بتشغيل الخلايا أو تغيير الخلايا الموجودة. لا تستخدم الملفات،
+أو التخزين، أو واجهات برمجة تطبيقات DOM أو طلبات الشبكة. اشرح النتائج
+المتوقعة حتى أتمكن من مراجعة الكود.</code></pre>
+            </div>
+          </li>
+          <li>اقرأ الشرح المقترح وخلية <code>summary_demo</code> الجديدة. تأكد من أنها تنشئ المدخلات باستخدام القاعدة المذكورة وتحسب الملخصات من تلك المصفوفة. شغّل تلك الخلية بنفسك، ثم قارن مع التحقق أدناه. النتائج المتوقعة هي: العدد <strong>10</strong>، والمتوسط <strong>9.3</strong>، والحد الأدنى <strong>1</strong>، والحد الأقصى <strong>20</strong>.</li>
+        </ol>
+        <aside class="callout" id="seeded-summary-check">
+          <h3>تحقق من المدخلات وكذلك الملخصات</h3>
+          <p>تحدد القيمة الأولية التسلسل، لذا فإن هذه المدخلات التي تبدو عشوائية قابلة للتكرار بدقة. مع قاعدة التحديث قبل السحب المذكورة أعلاه، توقع ما يلي:</p>
+          <pre><code>Input: [1, 11, 15, 6, 8, 4, 20, 11, 11, 6]
+Count: 10
+Mean: 9.3
+Minimum: 1
+Maximum: 20</code></pre>
+          <p>قد تختلف تسميات المخرجات، لكن الأرقام يجب أن تتطابق. ينبغي أن يؤدي تشغيل الخلية مرة أخرى إلى إنتاج نفس المدخلات والملخصات. استخدام قيمة أولية مختلفة يغير التمرين؛ هذا المولد الصغير مخصص لعرض توضيحي قابل للتكرار، وليس لتوليد عشوائية حساسة من الناحية الأمنية.</p>
+        </aside>
+        <figure class="phone-figure" id="assistant-seeded-result">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/phone-agent-result.png" width="1080" height="2340" alt="لقطة شاشة حقيقية لنظام Android على جهاز Galaxy S24+ تظهر جزءاً من كود JavaScript المصدري لـ summary_demo الذي تمت مراجعته ومخرجاته ذات القيمة الأولية: المدخلات 1، 11، 15، 6، 8، 4، 20، 11، 11، 6؛ والعدد 10، والمتوسط 9.3، والحد الأدنى 1، والحد الأقصى 20." loading="lazy" decoding="async">
+          <figcaption><strong>لقطة شاشة حقيقية لنظام Android على جهاز Galaxy S24+ لتمرين المتجه ذي القيمة الأولية أعلاه.</strong> أنشأ GLM 5.3 Flash الخلايا التدريبية، وتوقف مؤقتاً عند حد الخطوات الأربع، واكتمل بعد ضغطة واحدة على <strong>متابعة</strong>. تم فحص الكود وتشغيله يدوياً—وليس تلقائياً بواسطة الوكيل—وأنتج المدخلات المتوقعة، العدد 10، والمتوسط 9.3، والحد الأدنى 1، والحد الأقصى 20. وأعاد تشغيل يدوي ثانٍ إنتاج نفس النتائج. تظهر لقطة الشاشة المخرجات وجزءاً من الكود المصدري؛ مرر لأعلى في الخلية لفحص قيمتها الأولية وأسطرها الأولى.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-agent-result.png">عرض لقطة الشاشة الكاملة للهاتف للكود والنتيجة بعد المراجعة</a>
+        </figure>
+        <p><strong>قبل الإرسال:</strong> يضمّن المساعد المحادثة المحددة ومعاينة محدودة لخلايا دفتر العمل الحالي (حتى أول 500 حرف من كل خلية، بالإضافة إلى البيانات الوصفية). ويمكن للأدوات المسموح بها إرسال المزيد. إن إيقاف تشغيل تصفح المصدر <em>لا</em> يمنع إرسال معاينات دفتر العمل. يختلف ذلك عن حمولة الخلية الحالية الأصغر حجماً والمستخدمة في الإكمال أدناه. <a href="#planned-workbook-context">تغييرات سياق دفتر العمل المخطط لها موصوفة في الملحق.</a></p>
+        <p><strong>هل توقف مؤقتاً مع ظهور زر متابعة؟</strong> يتحكم <strong>حدود الوكيل (لكل تشغيل) → أقصى عدد للخطوات</strong>، المميز أدناه، في حد الخطوات المسموح به لعملية تشغيل محددة واحدة. قد يصل الوكيل إلى هذا الحد قبل الانتهاء. اقرأ ما أنجزه بالفعل، ثم اضغط على <strong>متابعة</strong> إذا كانت المهمة غير مكتملة وتريد جولة تشغيل محددة أخرى. قد يؤدي الاستمرار إلى فرض مزيد من رسوم API؛ ولا يلزم ذلك بعد <strong>تم</strong>.</p>
+        <figure class="phone-figure" id="assistant-run-controls">
+          <div class="shot-window shot-window--assistant-open" role="img" aria-label="شاشة إعدادات الذكاء الاصطناعي التي تم تمريرها في متصفح Pro. تحدد الحدود الصفراء Auto-run cells created by AI: غير محدد، وAllow source browsing: غير محدد، وAgent writes: Active worksheet، وMax steps مع تلميح افتراضي بالقيمة 25، وSecurity Level: Open.">
+            <div class="shot-stage shot-stage--assistant-open">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open.png" width="390" height="1100" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open-overlay.svg" width="390" height="1100" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>تم تمرير إعدادات الذكاء الاصطناعي إلى التنفيذ والأذونات. تحدد الحدود الصفراء <strong>تشغيل الخلايا المنشأة بواسطة الذكاء الاصطناعي تلقائيًا</strong> و<strong>Allow source browsing</strong> (كلاهما غير محدد)، و<strong>نطاق كتابة الوكيل → ورقة العمل النشطة</strong>، و<strong>أقصى عدد للخطوات</strong> ضمن <strong>حدود الوكيل (لكل تشغيل)</strong>، و<strong>مستوى الأمان → مفتوح</strong>. <strong>تسبق لقطة المتصفح هذه تحديث الموافقة على التنفيذ</strong>؛ وليست طلباً للموفر أو اختباراً للأمان. يصف خيار Open الخاص بها الإعدادات الافتراضية الأقدم وهو أطول مما يمكن للقائمة المنسدلة الضيقة عرضه. لم يتم تصوير مربعات حوار الموافقة والتجاوز القادمة.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-open.png">عرض لقطة الإعدادات الممررة الكاملة غير المعدلة</a>
+        </figure>
+      </section>
+
+      <section id="online">
+        <p class="step-label">الخطوة 4 · طلب البدائل عندما تريدها</p>
+        <h2>طلب إكمالات تستند إلى API</h2>
+        <ol class="lesson-steps">
+          <li>افتح <strong>القائمة → الإكمال</strong>، ثم اختر <strong>القسم → اقتراحات الذكاء الاصطناعي (عبر الإنترنت)</strong>. واضبط <strong>اقتراحات الذكاء الاصطناعي → عند النقر</strong>.</li>
+          <li>أبقِ <strong>نموذج الإكمال → اتّباع إعدادات مساعد الذكاء الاصطناعي</strong> لوراثة المزود ونقطة النهاية والنموذج الخاص به. أو اختر <strong>اختيار مزوّد ونموذج</strong>، وحدد مزودًا/نقطة نهاية محفوظة ونموذجًا منخفض التكلفة مناسبًا للاقتراحات القصيرة. لا يتم إدخال أي مفتاح في هذه الشاشة؛ يتيح لك <strong>فتح إعدادات الذكاء الاصطناعي</strong> إضافة مفتاح أولاً.</li>
+          <li>افتح <strong>خيارات متقدمة</strong> في هذا القسم لفحص مهلة الرد وحواجز حماية الإنفاق. القيم الافتراضية هي <strong>6 ثوانٍ</strong>، و<strong>$0.25/يوم</strong>، و<strong>$5/شهر</strong>. تحقق من الأسعار قبل زيادتها.</li>
+          <li>عد إلى محرر <strong>JavaScript</strong> وأدخل مقتطف التدريب هذا:
+            <pre><code>const values = [12, 15, 18];
+const average = </code></pre>
+            اترك مؤشر الكتابة بعد سطر <code>const average = </code> غير المكتمل. اضغط على <strong>…</strong> في نهاية صف الاقتراحات، أو استخدم المفتاح الإضافي <strong>…AI</strong>، أو اضغط على <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd>.</li>
+          <li>راجع الحمولة الفعلية والوجهة للطلب الأول قبل إرساله. تحمل شرائح الذكاء الاصطناعي علامة <strong>✦</strong>. اضغط على إحداها لقبولها؛ تفتح الشريحة المقتطعة أو متعددة الأسطر معاينة أولاً. راجع المصدر الناتج قبل Run.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/completion-online.png" width="414" height="820" alt="شاشة الإكمال عبر الإنترنت في متصفح Pro مع On tap وChoose provider and model، موضحةً أنه لم يتم حفظ مفاتيح للمزود وموفرةً Open AI Settings." loading="lazy" decoding="async">
+          <figcaption><strong>لقطة متصفح مجردة من المفاتيح</strong> عمدًا لعناصر التحكم في النموذج المستقل. تحذيرها حقيقي: بدون مفتاح محفوظ ووجهة صالحة، لا يمكن إرسال أي شيء. سيظهر المزود والنموذج اللذان قمت بتكوينهما هنا بعد الخطوة 2.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-online.png">عرض لقطة الشاشة الكاملة للإعدادات عبر الإنترنت</a>
+        </figure>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-online-chips.png" width="1080" height="2340" alt="تفاصيل جزء الإنشاء السفلي من لقطة شاشة لهاتف Android Galaxy S24+: يحتوي تعبير المتوسط غير المكتمل بلغة JavaScript على شريحتي ذكاء اصطناعي مقتطعتين، values.reduce وeval(values، وكل منهما مميزة بنجمة." loading="lazy" decoding="async">
+          <figcaption><strong>عرض تفصيلي للقطة شاشة حقيقية من هاتف Galaxy S24+ Android بعد طلب إكمال فعلي.</strong> استخدم الإكمال <strong>Gemini 3.5 Flash-Lite عبر OpenRouter</strong> بينما ظل المساعد على <strong>GLM 5.3 Flash</strong>. الشريحتان ✦ مقتطعتان؛ تختلف المخرجات، لذا عاين المعاينة قبل القبول.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-online-chips.png">عرض لقطة شاشة الهاتف الكاملة غير المعدلة لشرائح المرشحين عبر الإنترنت</a>
+        </figure>
+        <p class="callout"><strong>اختر التعليمات البرمجية، وليس مجرد شريحة ذكاء اصطناعي.</strong> في هذا الطلب، اقترحت الشريحة الأولى <code>values.reduce((a, b) => a + b, 0) / values.length;</code>. اضغط عليها لفحص المعاينة الكاملة: فهي تجمع المصفوفة وتقسمها على طولها، مما يعطي <strong>15</strong> لهذا المثال. بينما اقترحت الثانية <code>eval(values.join(' + ')) / values.length;</code>. <strong>ارفض بديل <code>eval</code> غير الضروري هذا</strong>: فحساب المتوسط لا يتطلب تحويل سلسلة نصية إلى تعليمات برمجية قابلة للتنفيذ. تحقق من التعليمات البرمجية الخاصة بك التي تم إرجاعها قبل قبولها، ولا تقم بالتشغيل (Run) إلا بعد المراجعة.</p>
+        <figure class="phone-figure" id="online-completion-preview">
+          <div class="shot-window shot-window--completion-preview" role="img" aria-label="تفاصيل معاينة اقتراح الذكاء الاصطناعي على Android Galaxy S24+: values.reduce((a, b) =&gt; a + b, 0) / values.length;، مع زري Cancel وInsert all. تم حذف لوحة المفاتيح. لم يتم إدراج أي اقتراح.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-preview.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>المعاينة الكاملة للتعليمات البرمجية على Galaxy S24+.</strong> أدى طلب جديد إلى Gemini Flash-Lite إلى إرجاع نفس تعبير <code>reduce</code>. <strong>القبول حتى سطر محدد فقط:</strong> بالنسبة للاقتراح متعدد الأسطر، اضغط أو انقر على السطر الأخير الذي تريده. يؤدي هذا على الفور إلى إدراج كل شيء بدءًا من السطر الأول حتى ذلك السطر، مع استبعاد الأسطر اللاحقة. يقبل <strong>إدراج الكل</strong> الاقتراح بأكمله؛ ولا يدرج <strong>إلغاء</strong> أي شيء. هذا المثال عبارة عن سطر برمجيات واحد، على الرغم من أنه يلتف على الشاشة، لذا فإن الضغط عليه يقبل التعبير بالكامل. يؤدي القبول إلى تعديل المصدر؛ ولا يقوم بتشغيل (Run) الخلية.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-preview.png">عرض لقطة شاشة الهاتف الكاملة غير المعدلة لمعاينة الإكمال</a>
+        </figure>
+        <p>يطلب الطلب ما يصل إلى خمسة بدائل، ولكن قد تتسع شاشتك لعدد أقل. يؤدي الضغط مرة أخرى أولاً إلى التصفح عبر البدائل التي تم استلامها بالفعل؛ وبمجرد استنفادها، يمكنه طلب المزيد. اضغط أثناء دوران مؤشر الطلب لإلغائه. يتم تجاهل الردود المتأخرة عند انتهاء المهلة، كما أن الكتابة أو تحريك مؤشر الكتابة يجعلان الاقتراحات القديمة قديمة وغير صالحة.</p>
+        <p><strong>المستقل يعني مستقلاً:</strong> يظل خيار الإكمال المنفصل منفصلاً عند تغيير نموذج المساعد. وهذا مفيد عندما تريد وكيلاً ذا قدرات عالية مع إكمال تلقائي غير مكلف. يؤدي اتباع المساعد إلى وراثة هويته، <em>وليس</em> محادثته أو أذونات الوكيل الخاصة به.</p>
+        <aside class="callout" id="completion-privacy">
+          <h3>معرفة ما تدفع ثمنه وما ترسله</h3>
+          <p>الإكمال عبر الإنترنت يكون <strong>عند الطلب</strong>: فالكتابة العادية لا ترسل أي شيء. ميزة <strong>الجلب المسبق أثناء الكتابة</strong> ليست متوفرة بعد في سير العمل هذا. يرسل الإكمال سياقًا محدودًا للخلية الحالية: بحد أقصى 1,500 حرف قبل مؤشر الكتابة، و200 بعده، وما يصل إلى 12 اسم محلي—وليس محادثة المساعد أو دفتر العمل بأكمله. يتم حجب البيانات السرية بأفضل جهد ممكن، لذا راجع الحمولة بنفسك.</p>
+          <p>يمنح <strong>السماح دائمًا</strong> موافقة دائمة لتلك الوجهة؛ وسيطلب التغيير في المزود أو نقطة النهاية أو النموذج الموافقة مرة أخرى. يقوم <strong>الإرسال دون سؤال</strong> في البداية بتهيئة هذا الخيار ولكنه لا يزال يعرض أول حمولة حقيقية مرة واحدة. احتفظ بـ <strong>السؤال في كل مرة</strong> أثناء التعلم.</p>
+          <p>المبالغ اليومية/الشهرية هي <strong>ضوابط إنفاق مرنة خاصة بالإكمال فقط</strong>، وليست حدود فوترة مضمونة من المزود وليست الميزانية المخصصة لطلبات المساعد أو موجه الذكاء الاصطناعي (AI Prompt). يمكن أن تحتفظ حالات الفشل والإلغاء بالرسوم المحجوزة لها. مسح سجل الإنفاق لا يعيد تعيين إجماليات الحدود القصوى. يحتاج النموذج الذي ليس له سعر مدرج إلى حدود قصوى واضحة لأسعار الإدخال/الإخراج، وإلا سيرفض التطبيق الإرسال.</p>
+        </aside>
+      </section>
+
+      <section id="local">
+        <p class="step-label">الخطوة 5 · تنزيل اختياري لنظام Android</p>
+        <h2>تجربة النموذج على الجهاز</h2>
+        <p>يقترح نموذج <strong>Qwen2.5-Coder 0.5B</strong> الاختياري التعليمات البرمجية محليًا عندما تكون الجداول غير متأكدة. إنه نموذج صغير لإكمال التعليمات البرمجية، <strong>وليس بديلاً عن الوكيل الحواري</strong>. بمجرد تثبيته، لا يرسل الاستدلال أي تعليمات برمجية مكتوبة إلى أي مزود ولا يترتب عليه أي رسوم API.</p>
+        <ol class="lesson-steps">
+          <li>على هاتف Android مؤهل ومثبت عليه Pro من <strong>Google Play</strong>، افتح <strong>القائمة → الإكمال → القسم → النموذج المحلي (على الجهاز)</strong>.</li>
+          <li>اضغط على <strong>تثبيت</strong> ووفّر الوقت ومساحة التخزين لعملية التنزيل التي تبلغ مساحتها تقريبًا <strong>400 MB</strong>. لا يمكن للتثبيتات الحالية المحملة جانبيًا تنزيل النموذج من خلال سير العمل هذا.</li>
+          <li>عندما تكون جاهزًا، أبقِ <strong>استخدام النموذج المحلي → عند عدم التأكد</strong>. تجيب الجداول على الحالات السهلة؛ بينما يساهم النموذج عندما تكون غير متأكدة. يؤدي خيار <strong>دائمًا</strong> إلى تشغيله بشكل أكثر تكرارًا؛ بينما يوقفه <strong>معطّل</strong> دون حذف الملف المنزّل.</li>
+        </ol>
+        <figure class="phone-figure" id="local-model-settings">
+          <div class="shot-window shot-window--local-model-settings" role="img" aria-label="إعدادات النموذج المحلي على Galaxy S24+ Android. تحدد الحدود الصفراء قسم Local model، والحالة Ready (398 MB على هذا الجهاز)، وUse local model: When unsure. يُظهر النموذج المثبت بالفعل خيار Delete بدلاً من Install.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-local-settings.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+              <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-local-settings-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>إعدادات النموذج المحلي على هاتف Galaxy S24+.</strong> تحدد الحدود الصفراء أداة اختيار القسم، وحالة <strong>جاهز</strong> للنموذج، و<strong>استخدام النموذج المحلي → عند عدم التأكد</strong>. يحتوي هذا الهاتف بالفعل على النموذج، لذا يظهر <strong>حذف</strong> بدلاً من <strong>تثبيت</strong>؛ ولست بحاجة إلى حذفه. تُظهر صورة بنية تصحيح الأخطاء هذه الإعدادات، وليست اختبارًا لتقديم Google Play.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-local-settings.png">عرض لقطة شاشة الهاتف الكاملة غير المعدلة</a>
+        </figure>
+        <ol class="lesson-steps" start="4">
+          <li>عد إلى خلية تعليمات برمجية وتوقف مؤقتًا عند اسم أو سطر غير مكتمل. تختلف النتائج باختلاف السياق؛ ولا ينتج عن كل توقف مؤقت اقتراح. اقبل نصًا رماديًا أو شريحة مناسبة، وافحص المصدر، ثم قم بالتشغيل (Run) بشكل منفصل.</li>
+        </ol>
+        <h3>أي هاتف يوفر أداءً مريحًا؟</h3>
+        <p>الحد الأدنى للأهلية هو نظام Android بمعمارية ARM من فئة <strong>64 بت مع ما لا يقل عن 4 GB من ذاكرة الوصول العشوائي</strong>، وهو ما لا يضمن أداءً سلسًا. يُعد الهاتف من فئة <strong>Galaxy S24+</strong> هدفًا عمليًا للراحة: تدرج Samsung سعة <strong>12 GB من ذاكرة الوصول العشوائي</strong> لهاتف S24+، مما يترك مساحة إضافية أكبر للتطبيق والنوى والنموذج. هذا مستوى أداء موصى به، وليس متطلبًا لشراء ذلك الطراز. <a href="https://news.samsung.com/us/enter-new-era-of-mobile-ai-samsung-galaxy-s24-series/">مواصفات سلسلة Samsung S24</a>.</p>
+        <p>يحتوي هاتف <strong>Galaxy S10+</strong> على إصدارات مؤهلة بسعة 8 GB أو 12 GB. تشير التجربة غير الرسمية للمشرف إلى أن الإكمال المحلي يمكن أن يعمل هناك ولكنه يبدو أبطأ من إكمال API؛ وتعتمد المقارنة على النموذج والشبكة. <strong>لم يقس اختبار قياس أداء المحرك المحلي المسجل هاتف S10+</strong>، لذا فإن هذه ليست مقارنة سرعة مقاسة أو ضمانًا لكل جهاز. انتبه إلى حدوث بطء أو عدم استجابة التطبيق عند دمج النموذج مع دفاتر عمل كبيرة ونوى تستهلك الذاكرة بكثافة. <a href="https://news.samsung.com/us/galaxy-s10-interactive/">مواصفات سلسلة Samsung S10</a>.</p>
+        <p>قاس اختبار المحرك الأصلي السابق على جهاز من فئة S24+ متوسط كلمة أولى في حالة الاستعداد يبلغ حوالي <strong>0.10 ثانية</strong> ومتوسط كلمة أولى في حالة التشغيل البارد يبلغ حوالي <strong>0.24 ثانية</strong>، بعد التحميل. هذه نتائج اختبارات معيارية نموذجية وليست ضمانات: فقد استغرق التحميل الأولي غير المخزن مؤقتًا عدة ثوانٍ. أضاف النموذج المحمّل ما يقرب من <strong>460–490 MB</strong> من ذاكرة عملية التطبيق، <em>بالإضافة إلى</em> WebView وبيئات تشغيل Python/R ونظام التشغيل.</p>
+        <p class="callout"><strong>إذا أصبح الهاتف الأقدم بطيئًا:</strong> اضبط <strong>استخدام النموذج المحلي → معطّل</strong> واستخدم الجداول أو بدائل API عند الضغط بدلاً من ذلك. وتحت <strong>خيارات متقدمة</strong> المحلي، فإن ضبط <strong>Keep loaded after leaving the app → 0</strong> يحرره عند المغادرة؛ كما تساعد عناصر التحكم في التفريغ عند الخمول وانخفاض مستوى البطارية. احفظ/صدّر دفتر عملك قبل استكشاف الأخطاء وإصلاحها. فالنموذج الذي لا يتطلب تكلفة API لا يزال يستهلك مساحة التخزين والذاكرة والبطارية.</p>
+      </section>
+
+      <section id="prompt-cells">
+        <p class="step-label">الخطوة 6 · فهم التعليمات البرمجية أثناء بنائها</p>
+        <h2>الختام بخلية AI Prompt مركزة</h2>
+        <p>يُعد المساعد مفيدًا للعمل متعدد الخطوات. أما خلية <strong>AI Prompt</strong> فهي أفضل لطرح سؤال صغير وقابل للتكرار حول جزء معين من التعليمات البرمجية: فهي تُجري <strong>طلبًا واحدًا معزولاً</strong>، دون سجل المساعد أو أدواته. استخدمها للسؤال عن سبب نجاح عملية حسابية قبل توسيعها.</p>
+        <p>هنا نعود إلى الخطوة 3 مع خلية <code>summary_demo</code> العشوائية ذات البذرة. نطلب شرحًا لتلك العملية الحسابية الحالية—وليس مصفوفة عشوائية أخرى، وليس مثال الإكمال الخاص بالمتوسط فقط من الخطوة 4.</p>
+        <ol class="lesson-steps">
+          <li>أضف خلية <strong>AI Prompt</strong> مباشرة بعد الخطوة 3 لخلية <code>summary_demo</code> JavaScript—وليس المقتطف الخاص بالمتوسط فقط من الخطوة 4—حتى يتطابق السؤال أدناه مع المصدر المحدد. أبقِ نوع الخلية كـ <strong>كود</strong>، ثم اختر <strong>AI Prompt</strong> من <strong>القائمة المنسدلة للغة/الوضع</strong>. وإذا لم تكن موجودة، فقم بتمكينها ضمن <strong>القائمة → اللغات والأوضاع</strong>.</li>
+          <li>الصق الموجه أدناه في <strong>خلية AI Prompt</strong>، وليس في مربع رسائل المساعد. وافتح عنصر التحكم <strong>تكوين</strong> الخاص بها.
+            <div class="callout" id="ai-prompt-practice-prompt">
+              <pre data-translatable-prompt="ai-explanation"><code>اشرح خلية <bdi dir="ltr">JavaScript</bdi> المحددة سطرًا بسطر.
+كيف تحدد قاعدة المولد والبذرة <bdi dir="ltr">42</bdi> مصفوفة الإدخال الخاصة بها؟
+لماذا يجب أن تُبلغ عن عدد <bdi dir="ltr">10</bdi>، ومتوسط <bdi dir="ltr">9.3</bdi>، وحد أدنى <bdi dir="ltr">1</bdi> وحد أقصى <bdi dir="ltr">20</bdi>؟
+لماذا يجعل إعادة تعيين البذرة النتيجة قابلة للتكرار؟
+اشرح ما يجب تغييره في حالة المصفوفة الفارغة.
+أعد شرحًا موجزًا فقط؛ ولا تُعد كتابة التعليمات البرمجية.</code></pre>
+            </div>
+            <div class="prompt-config-locations">
+              <figure class="phone-figure" id="ai-prompt-composer-controls">
+                <p class="screen-note"><strong>مُنشئ الخلايا الجديدة</strong></p>
+                <div class="shot-window shot-window--ai-prompt-composer" role="img" aria-label="مُنشئ الخلايا الجديدة في Android مع تحديد AI Prompt. تحدد الحدود الصفراء أداة اختيار لغة الذكاء الاصطناعي وزر Configure بجانب المسودة.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>قبل حفظ الخلية:</strong> اختر AI Prompt (المعروض كـ <strong>AI</strong>) واضغط على <strong>تهيئة</strong> المميز في المُنشئ. يؤدي هذا إلى تكوين الموجه الجديد الذي تكتبه.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png">عرض لقطة الشاشة الكاملة للمُنشئ</a>
+              </figure>
+              <figure class="phone-figure" id="ai-prompt-edit-controls">
+                <p class="screen-note"><strong>خلية موجودة أثناء التحرير</strong></p>
+                <div class="shot-window shot-window--ai-prompt-edit" role="img" aria-label="خلية AI Prompt محفوظة على Android في وضع التحرير. يحدد إطار أصفر خيار Configure في رأس الخلية أعلى بداية الموجه.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>بالنسبة لخلية موجودة:</strong> اضغط على <strong>تهيئة</strong> في رأس تلك الخلية. يظل متاحًا أثناء تحرير الموجه. يفتح كلا الزرين مربع حوار التكوين نفسه؛ ولا يؤدي تغيير الإعدادات بمفرده إلى إرسال أي شيء.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png">عرض لقطة الشاشة الكاملة لتحرير الخلية</a>
+              </figure>
+            </div>
+          </li>
+          <li>اضبط <strong>وضع الاستجابة النهائية في ← مخرجات هذه الخلية</strong>، وهو الخيار الافتراضي. وتحت <strong>السياق المراد إرساله ← تضمين المصدر من</strong>، اختر <strong>خلية 1 السابقة</strong>. وقم بإلغاء تحديد <strong>تضمين نص المخرجات المحفوظ</strong> لهذا التمرين المقتصر على المصدر فقط. وتحقق من أن <strong>معاينة السياق</strong> تذكر اسم <code>summary_demo</code>، ثم مرر لأسفل واضغط على <strong>حفظ التكوين</strong>.
+            <figure class="phone-figure" id="ai-prompt-configuration">
+              <div class="shot-window shot-window--ai-prompt-config" role="img" aria-label="مربع حوار Configure AI Prompt cell على Android. تحدد الحدود الصفراء خيارات This cell&#39;s output، وPrevious 1 cell، وخيار Include saved output text غير محدد.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption>مربع الحوار الذي يفتحه <strong>تهيئة</strong>. تحدد الحدود الصفراء وجهة الاستجابة، و<strong>الخلية السابقة الواحدة</strong> وخيار المخرجات المحفوظة غير المحدد. أرسل فقط مصدر <code>summary_demo</code> السابق. يعني <strong>الخلية السابقة الواحدة</strong> الخلية السابقة مباشرة بترتيب دفتر العمل؛ ولا يبحث بالاسم.</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png">عرض لقطة الشاشة الكاملة للتكوين</a>
+              <p class="screen-note">مرر لأسفل في مربع الحوار للوصول إلى <strong>حفظ التهيئة</strong>.</p>
+              <div class="shot-window shot-window--ai-prompt-config-save" role="img" aria-label="الجزء السفلي من مربع حوار تكوين AI Prompt على Android. يحدد إطار أصفر Save configuration بجانب Cancel.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png">عرض لقطة الشاشة الكاملة لمربع الحوار بعد التمرير</a>
+            </figure>
+          </li>
+          <li>اضغط على <strong>تشغيل</strong> لخلية AI Prompt. تحقق من السياق المحدد في المراجعة، ثم اختر <strong>إرسال إلى مزوّد الذكاء الاصطناعي</strong>. اقرأ الشرح بجانب المصدر وقارنه بالنتائج المعروفة.</li>
+        </ol>
+        <figure class="phone-figure" id="ai-prompt-explanation">
+          <div class="shot-window shot-window--ai-prompt-result" role="img" aria-label="مخرجات AI Prompt الفعلية على Android من GLM 5.3 Flash. يشرح المقتطف المرئي المولد ذا البذرة، وطول المصفوفة، وreduce، والحد الأدنى والأقصى في summary_demo.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>شرح حقيقي من GLM 5.3 Flash على Galaxy S24+.</strong> أنتج طلب واحد مقتصر على المصدر هذا الرد في مخرجات خلية AI Prompt؛ ولم يغير خلية JavaScript أو يُعد تشغيلها. تُظهر الصورة بداية الشرح. مرر المخرجات للمتابعة، وتحقق من الإجابة مقارنة بالمصدر والنتائج المتوقعة للخطوة 3—فشرح الذكاء الاصطناعي ليس ضمانًا للدقة.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png">عرض لقطة الشاشة الكاملة للشرح</a>
+        </figure>
+        <p class="callout"><strong>طريقة للتحكم في تكاليف API وتحسين الفهم.</strong> يمكن لـ AI Prompt المركز إرسال سياق أقل من محادثة الوكيل المتنامية وتجنب حلقة أدوات متعددة الخطوات، مما يقلل من رموز الإدخال وربما الفاتورة. اطلب استدلالاً موجزًا وافتراضات ومخرجات متوقعة أثناء البرمجة. التوفير <strong>غير مضمون</strong>: فأسعار النموذج وطول الاستجابة ورموز الاستدلال والسياق المختار تظل مهمة. تستخدم هذه الطلبات <strong>مزود/نموذج المساعد</strong>، وليس نموذج الإكمال المستقل، وهي خارج ضوابط الإنفاق الخاصة بالإكمال.</p>
+        <div id="ai-prompt-apply-example">
+          <h3>مثال آخر · مراجعة الرسم البياني قبل استبدال الخلية</h3>
+          <p>اطلب الآن من AI Prompt كتابة تعليمات برمجية في خلية <em>مختلفة</em>، مع إجراء مراجعة قبل استبدال أي شيء. سنرسم بيانيًا كيف يتغير التباين التقديري عبر العديد من العينات الصغيرة. هذه عينات طبيعية جديدة—وليست مصفوفة الأعداد الصحيحة <code>summary_demo</code> السابقة. الهدف هو تعلم <strong>تهيئة → المعاينة → تطبيق → تشغيل</strong>، وليس إتقان الإحصاء.</p>
+          <p class="callout"><strong>التباين ليس توزيع t لستيودنت.</strong> بالنسبة للعينات الطبيعية المستقلة ذات الحجم 10، يتبع <code>9s² / σ²</code> توزيع مربع كاي بـ 9 درجات من الحرية. هنا التباين الحقيقي <code>σ² = 1</code>. بينما يصف توزيع t لستيودنت متوسط العينة المعياري <code>(mean − μ) / (s / √10)</code>، باستخدام الانحراف المعياري المقدر <code>s</code>؛ وله أيضًا 9 درجات من الحرية هنا. <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda358.htm">NIST: التباين</a> · <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm">NIST: المتوسط</a>.</p>
+          <ol class="lesson-steps">
+            <li>في دفتر عمل التدريب، أنشئ خلية <strong>JavaScript</strong> تحتوي على <code>// Reviewed plot code will go here.</code> وشغّل ذلك التعليق غير الضار لحفظ الخلية. اضغط مطولاً على تسمية <strong>In[…] الخاصة بها</strong> وسمّها <code>variance_plot</code>. حافظ على أن يكون هذا الاسم فريدًا في دفتر العمل؛ راجع <a href="../../../workbooks/named-cells/#name">تسمية الخلايا</a>.</li>
+            <li>أضف خلية <strong>مطالبة الذكاء الاصطناعي</strong> منفصلة والصق هذا الطلب فيها:
+              <div class="callout" id="ai-variance-practice-prompt">
+                <pre data-translatable-prompt="ai-variance"><code>أعد فقط مصدر <bdi dir="ltr">JavaScript</bdi> كاملاً، دون أسوار <bdi dir="ltr">Markdown</bdi>.
+أنشئ مدرجًا تكراريًا قابلاً لإعادة الإنتاج لتباينات العينات المقدرة.
+حاكَ <bdi dir="ltr">2,000</bdi> عينة جديدة، تحتوي كل منها على <bdi dir="ltr">10</bdi> قيم طبيعية قياسية <bdi dir="ltr">N(0,1)</bdi>.
+لا تُعد استخدام مصفوفة الأعداد الصحيحة السابقة من <bdi dir="ltr">summary_demo</bdi>.
+قم بتهيئة <bdi dir="ltr">state = 42</bdi> مرة واحدة للتشغيل بأكمله، وليس لكل عينة. قبل كل سحب منتظم، اضبط <bdi dir="ltr">state = (16807 * state) % 2147483647</bdi>، ثم <bdi dir="ltr">u = state / 2147483647</bdi>.
+لكل سحب طبيعي، استخدم قيمتين منتظمتين متتاليتين: <bdi dir="ltr">sqrt(-2 * log(u1)) * cos(2 * PI * u2)</bdi>. لا تُعد استخدام نتيجة الجيب الإضافية ولا تستخدم <bdi dir="ltr">Math.random</bdi>.
+لكل عينة، احسب متوسطها، ثم التباين غير المتحيز <bdi dir="ltr">sum((x - mean)^2) / 9</bdi>.
+ارسم مدرجًا تكراريًا على لوحة قماشية بتسميات توضيحية مع <bdi dir="ltr">40</bdi> فئة متساوية العرض من <bdi dir="ltr">0</bdi> إلى <bdi dir="ltr">4</bdi>. المحور الأفقي هو التباين المقدر؛ والمحور الرأسي هو عدد العينات.
+حدد تباين المجتمع الحقيقي <bdi dir="ltr">1</bdi> بخط رأسي يحمل تسمية توضيحية. استخدم خلفية فاتحة، ونصًا داكنًا، وتسميات مقروءة.
+اطبع حجم العينة، والتكرارات، والبذرة، ومتوسط التباين المقدر، وإجمالي المدرج التكراري وأي عدد للفائض. احسب الفائض بشكل منفصل بدلاً من إخفائه.
+اعرض اللوحة القماشية باستخدام <bdi dir="ltr">window.renderImage(canvas.toDataURL("image/png"))</bdi>.
+لا تستخدم أي حزم أو شبكة أو مساحة تخزين أو تعديلات على دفتر العمل.</code></pre>
+              </div>
+            </li>
+            <li>افتح في AI Prompt خيار <strong>تكوين</strong>. واضبط <strong>وضع الاستجابة النهائية في ← معاينة الاستبدال لخلية</strong>, <strong>لغة الخلية الناتجة ← الحفاظ على لغة الهدف</strong>, <strong>الخلية المراد استبدالها ← الخلية المسماة</strong>، و <strong>اسم الخلية ← variance_plot</strong>. وتحت السياق، احتفظ بـ <strong>تضمين المصدر من ← لا توجد خلايا أخرى (افتراضي)</strong>، ثم <strong>حفظ التكوين</strong>.
+              <figure class="phone-figure" id="ai-variance-configuration">
+                <div class="shot-window shot-window--ai-variance-config" role="img" aria-label="مربع حوار Configure AI Prompt cell على Android. تحدد الحدود الصفراء Replacement preview for a cell، وPreserve target language، وNamed cell، وvariance_plot، وNo other cells.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>لا تستبدل إلا بعد المراجعة.</strong> تحدد إعدادات S24+ الفعلية هذه خلية JavaScript ذات الاسم الفريد <code>variance_plot</code>، وتحافظ على لغتها، وتستبعد الخلايا الأخرى. مرر لأسفل إلى <strong>حفظ التهيئة</strong>. الحفظ بمفرده لا يرسل أي شيء؛ وسيظل تشغيل (Run) التالي يعرض الطلب للمراجعة.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png">عرض لقطة الشاشة الكاملة لإعدادات الاستبدال</a>
+              </figure>
+            </li>
+            <li>شغّل خلية <strong>AI Prompt</strong>. راجع ما سيتم إرساله، ثم اختر <strong>إرسال إلى مزوّد الذكاء الاصطناعي</strong>. يستبعد خيار <strong>لا توجد خلايا أخرى</strong> سياق دفتر العمل الإضافي؛ ولا يزال الاستبدال يرسل <strong>المصدر الكامل للخلية الهدف</strong>. وذلك مجرد تعليقنا غير الضار هنا.</li>
+            <li>اقرأ معاينة <strong>قبل / بعد</strong> الراجعة. تحقق من كود JavaScript الكامل: البذرة 42، و2,000 عينة من 10، والتباين مقسومًا على 9، مع عدم وجود اتصالات شبكية أو تخزين غير متوقع. اختر <strong>تطبيق الاستبدال</strong> فقط إذا كنت تقبل ذلك المصدر؛ بينما <strong>إلغاء</strong> يترك <code>variance_plot</code> دون تغيير. يؤدي التطبيق إلى تعديل الخلية الوجهة ولكنه <strong>لا يُشغّلها</strong>.
+              <figure class="phone-figure" id="ai-variance-approval">
+                <div class="shot-window shot-window--ai-variance-preview-start" role="img" aria-label="معاينة استبدال Before/After على Android. الجزء Before هو التعليق غير الضار؛ بينما يبدأ الجزء After كود JavaScript الذي تم إنشاؤه بالبذرة 42 ومولد العينات الطبيعية.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <p class="shot-detail-label"><strong>التعليمات البرمجية التي تم إنشاؤها موجودة في معاينة الموافقة.</strong> هذه بداية استجابة GLM 5.3 Flash الفعلية؛ ولا يزال الهدف يحتوي فقط على تعليقنا. اقرأ قسم After بالكامل، وليس فقط الأسطر المعروضة هنا.</p>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png">عرض لقطة الشاشة الكاملة لبداية المعاينة</a>
+                <div class="shot-window shot-window--ai-variance-preview-apply" role="img" aria-label="نهاية المعاينة نفسها للتعليمات البرمجية التي تم إنشاؤها على Android. تحدد الحدود الصفراء Apply replacement وCancel؛ ولا يقوم أي من الإجراءين بتشغيل التعليمات البرمجية المقترحة.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>مرر إلى النهاية للموافقة أو الإلغاء.</strong> يؤدي خيار Apply replacement إلى تغيير مصدر الخلية المسماة؛ ولا يقوم بتنفيذها. تم حذف منتصف هذه المعاينة الطويلة من عروض التفاصيل هذه. <a href="../../../../pro/ai/tutorial/assets/ai-variance-generated.js">اقرأ المصدر المُنشأ بالكامل</a>.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png">عرض لقطة الشاشة الكاملة لعناصر التحكم في الموافقة</a>
+              </figure>
+            </li>
+            <li>
+              <p class="callout"><strong>كشفت المراجعة عن سهو صغير.</strong> انتهت استجابة هذا النموذج بسلسلة تقرير نصية بدلاً من طباعتها. بعد Apply، قمنا بتعديل ذلك التقرير النهائي فقط إلى <code>console.log(…)</code> قبل Run. تحقق من استجابتك أيضًا: فالصورة وحدها لا تُظهر ما إذا كانت الإجماليات صحيحة أم لا. <a href="../../../../pro/ai/tutorial/assets/ai-variance-reviewed.js">اقرأ المصدر المصحح الذي تم تشغيله</a>.</p>
+              <p>ابحث عن <code>variance_plot</code> واضغط على <strong>زر Run الخاص بها</strong>. يحسب كل شريط في المدرج التكراري تقديرات تباين العينات—وليس المشاهدات الفردية. مع المولد الدقيق أعلاه، توقع متوسط تباين مقدر يقارب <strong>0.9852</strong>، وإجمالي مدرج تكراري قدره <strong>2,000</strong> وفائضًا قدره <strong>0</strong>. التباين الحقيقي هو 1؛ ولا يلزم أن يكون متوسط المحاكاة المحدودة بالضبط 1. ومن المفترض أن تؤدي إعادة التشغيل من البذرة 42 إلى إعادة إنتاج الرسم البياني نفسه.</p>
+              <figure class="phone-figure" id="ai-variance-output">
+                <div class="shot-window shot-window--ai-variance-plot" role="img" aria-label="الرسم البياني الفعلي على Android بعد تشغيل يدوي منفصل: مدرج تكراري لـ 2,000 من تقديرات تباين العينات من عينات طبيعية بحجم 10. يحدد خط أحمر التباين الحقيقي 1؛ والمتوسط المطبوع هو 0.98521، وإجمالي المدرج التكراري 2000 والفائض 0.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>المخرجات بعد Apply والمراجعة والتشغيل اليدوي المنفصل على هاتف S24+.</strong> يتطابق الرسم البياني الفعلي وعمليات التحقق المطبوعة مع الحساب ذي البذرة: متوسط التباين المقدر <strong>0.98521</strong>، والإجمالي <strong>2,000</strong>، والفائض <strong>0</strong>. الخط الأحمر هو تباين المجتمع، وليس منحنى ملائمًا. قد يقوم نموذجك بتنسيق التعليمات البرمجية أو المخطط بشكل مختلف.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png">عرض لقطة الشاشة الكاملة للرسم البياني</a>
+              </figure>
+            </li>
+          </ol>
+          <p class="callout"><strong>موافقتان منفصلتان:</strong> يوافق <strong>إرسال إلى مزوّد الذكاء الاصطناعي</strong> على مشاركة الطلب الذي تمت مراجعته. ويوافق <strong>تطبيق الاستبدال</strong> على تعديل مصدر الخلية الهدف. ولا يقوم أي منهما بتشغيل كود JavaScript المقترح. لا تختر <strong>خلية جديدة مرتبطة</strong> في هذا العرض التوضيحي: فهذا الخيار يدرج خلية نتيجة غير مشغلة دون خطوة الموافقة على الاستبدال هذه.</p>
+        </div>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>إذا لم يعمل شيء ما</h2>
+        <dl>
+          <dt><strong>لا توجد اقتراحات بلا اتصال بالإنترنت على الهاتف</strong></dt>
+          <dd>اختر General ← Local code completion ← On بدلاً من Auto. تحقق من الشرائح، وموضع مؤشر الكتابة، واللغة، وما إذا كان هناك متسع في الصف الاختياري.</dd>
+          <dt><strong>لا يوجد طلب عبر الإنترنت</strong></dt>
+          <dd>تحقق من On tap، والمفتاح المحفوظ للمزود/نقطة النهاية بالضبط، ومدخل سعر النموذج المحدد أو حدوده القصوى، والموافقة وإجماليات الإنفاق. لا يلزم Open للإكمال. يلزم وجود سياق متصفح آمن وWeb Locks؛ وترفض السياقات غير المدعومة الطلبات.</dd>
+          <dt><strong>يسأل المساعد قبل تشغيل الخلية—أو لا يسأل</strong></dt>
+          <dd>تحقق من إصدار تطبيقك، وأذونات التنفيذ في …Security، وقواعد …Kernels. القيمة الافتراضية القادمة لـ Open هي Ask؛ ويمكن للافتراضي في Pro 1.4.0 السماح بالتنفيذ. إيقاف تشغيل Auto-run ليس Deny لأداة التنفيذ. لا يمنح Always allow الخاص بالإكمال عبر الإنترنت إذن تنفيذ الخلية؛ راجع <a href="#execution-permissions">الموافقة على التنفيذ</a>.</dd>
+          <dt><strong>لا يفهم الإكمال خلية أخرى</strong></dt>
+          <dd>تستخدم البدائل عبر الإنترنت سياقًا محدودًا للخلية الحالية، وليس دفتر الملاحظات بالكامل. استخدم AI Prompt مع مصدر محدد صراحة، أو استخدم المساعد، عندما تحتاج إلى شرح أوسع.</dd>
+          <dt><strong>خيار Install غير متاح</strong></dt>
+          <dd>سير عمل النموذج المحلي الأصلي مخصص لعمليات تثبيت Android المؤهلة من Google Play، وليس لأجهزة سطح المكتب/المتصفح أو التوزيع الحالي بالتحميل الجانبي. إن استيفاء الحد الأدنى لذاكرة الوصول العشوائي لا يضمن السرعة.</dd>
+          <dt><strong>تبدو الإجابة التي تم إنشاؤها معقولة ولكنها خاطئة</strong></dt>
+          <dd>قارنها بأمثلة صغيرة معروفة. تحقق من عمليات الاستيراد والوحدات وسلوك المدخلات الفارغة والآثار الجانبية قبل التشغيل. استجابة النموذج ليست إثباتًا للصحة.</dd>
+        </dl>
+        <p><a href="../../../../pro/ai/">مرجع إعداد وسير عمل الذكاء الاصطناعي<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> · <a href="../../../../pro/remote/">العمل عن بُعد والأمان<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> · <a href="../../../tutorials/">جميع الدروس التعليمية</a></p>
+      </section>
+      <aside class="callout" id="execution-permissions" aria-labelledby="execution-appendix-title">
+        <h2 id="execution-appendix-title">ملحق · الموافقة القادمة على التنفيذ · المقترحة لـ Pro 1.5.0</h2>
+        <p><strong>لم يُصدر بعد:</strong> تصف عناصر التحكم هذه التنفيذ في الإصدار التالي، وليست وعدًا بأن تثبيت 1.4.0 لديك يحتوي عليه. رقم الإصدار مؤقت.</p>
+        <ul>
+          <li>يوفر <strong>إعدادات الذكاء الاصطناعي → الأمان… → <code>execute_cell</code> / <code>run_cells</code></strong> بالفعل <strong>Default / Allow / Ask / Deny</strong>. يغير هذا التحديث قيمة Default الموروثة في Open إلى <strong>طلب إذن</strong>؛ بينما يحتفظ Full control بـ Allow. يمكن لقواعد الأدوات أو النواة الصريحة أن تحل محل الإعدادات الافتراضية الموروثة؛ وعندما تكون كلتاهما صريحة، تسري القاعدة الأكثر أمانًا. اترك Default أو Ask أثناء التعلم. يُعد Allow تجاوزًا وليس بيئة معزولة أقوى؛ ولا تزال خيارات Ask/Deny للنواة، وReview، والتعطيل العام لـ JavaScript سارية.</li>
+          <li>اقرأ طلب التنفيذ قبل اختيار <strong>تشغيل</strong>؛ واترك <strong>السماح بتشغيل خلايا المساعد مستقبلًا دون طلب إذن</strong> دون تحديد للموافقة على ذلك الطلب فقط. يؤدي تحديده إلى تغيير قاعدة أداة التنفيذ المشتركة عبر <strong>جميع دفاتر العمل</strong> حتى إعادة الضبط—وليس فقط هذه الخلية أو المحادثة أو المزود. ويؤدي خيار Ask الصريح للنواة إلى إخفاء هذا الخيار.</li>
+          <li>لا يمكن لموجهات فحص مساحة الأسماء وموجهات الخلايا المنشأة حديثًا <strong>إنشاء هذا المنح الدائم</strong>. يتضمن موجه تنفيذ الخلية المنشأة معاينة محدودة للتعليمات البرمجية؛ وتنتهي المعاينة الطويلة بنقاط حذف (...). وإذا كانت مقتطعة، فاختر Cancel، وافحص المصدر الكامل للخلية المنشأة حديثًا، وشغلها بنفسك فقط إذا كنت تثق بها. لا يزال بإمكان إذن Allow للتنفيذ المحفوظ مسبقًا السماح بالتشغيل التلقائي للخلايا المنشأة عند تفعيل Auto-run، لذا أبقِ Auto-run معطلاً هنا.</li>
+          <li>إذا حددت إعدادًا مسبقًا بخلاف Full control بينما لا يزال إذن Allow لأداة التنفيذ المحفوظ ساريًا، يُقدم تحذير خيارات <strong>إعادة الضبط إلى الافتراضي</strong> أو <strong>الاحتفاظ بـ «سماح»</strong> أو <strong>إلغاء</strong>. يعيد Reset قاعدة أداة الإعداد المسبق المحدد دون مسح تجاوزات النواة. ويحتفظ خيار Keep بالتجاوز. ويعيد Cancel تحديد الإعداد المسبق السابق. وتظل خيارات Reset وKeep تغييرات مسودة حتى تحفظ Settings.</li>
+        </ul>
+        <p><strong>الموافقة على التنفيذ ليست إذنًا شاملاً لمشاركة البيانات.</strong> يمكن أن تعود مخرجات أداة التنفيذ إلى نموذج المساعد، ويمكن للتعليمات البرمجية المسموح بها استخدام الشبكة. يظل كل من <strong>السماح دائمًا</strong> للإكمال عبر الإنترنت، ومراجعة السياق لـ AI Prompt، والإفصاح عن الخصوصية لـ Remote/MCP منفصلة. يستخدم تنفيذ دفتر ملاحظات MCP فحوصات التنفيذ نفسها؛ ولا تعزل هذه الفحوصات بيئة غلاف Terminal الخاص بالوسيط.</p>
+      </aside>
+      <aside class="callout" id="planned-workbook-context" aria-labelledby="context-appendix-title">
+        <h2 id="context-appendix-title">ملحق · سياق وسجل دفتر العمل المخطط لهما</h2>
+        <p><strong>مقترح تصميم فقط:</strong> هذه الميزات لم يتم تنفيذها أو تخصيصها لأي إصدار. وهي منفصلة عن تغييرات الموافقة على التنفيذ القادمة أعلاه ولا تعطل الإصدار الحالي.</p>
+        <ul>
+          <li><strong>جلب ملخص دفتر العمل عند الحاجة.</strong> تستبدل الخطة المعاينات التلقائية المتكررة للمصدر بأداة دليل للبيانات الوصفية فقط: أسماء الخلايا، والأوصاف الاختيارية، واللغات والأنواع، بالإضافة إلى مراجعة دفتر العمل. الأداة المقترحة هي <code>list_cells</code> مع <code>view: "metadata"</code>؛ حيث سيقرأ المساعد المصدر المحدد بشكل منفصل. هذه نظرة عامة محدودة، وليست شرحًا مُنشأ تلقائيًا بواسطة الذكاء الاصطناعي.</li>
+          <li><strong>الإرفاق مرة واحدة بدلاً من كل عملية إرسال.</strong> يمكن أن تبدأ خانة الاختيار المقترحة <strong>Attach workbook summary this time</strong> محددة لمحادثة جديدة وتُلغى بعد إرسال ذلك المرفق بالفعل. يمكنك إلغاء تحديدها قبل الإرسال أو تحديدها مرة أخرى للحصول على نظرة عامة جديدة. لا يزال الإعداد الافتراضي الأولي لها بحاجة إلى مراجعة الخصوصية وسهولة الاستخدام. ولن تضيف المتابعات ملخصًا آخر، كما أن التبديل بين علامات التبويب لن يعيد تمكينها تلقائيًا في صمت. ستظل المعاينة وأذونات القراءة/الخصوصية الحالية سارية؛ وقد يتطلب دفتر العمل الكبير صفحات إضافية.</li>
+          <li><strong>عدم التحديد لا يمسح السجل.</strong> سيؤدي ذلك إلى إيقاف المرفق التلقائي الجديد، وليس إزالة الملخصات الموجودة بالفعل في المحادثة أو منع قراءات الأدوات المسموح بها. وستظل عناصر التحكم في سياق ملء الشاشة لكل من الوكيل وAI Prompt والإكمال منفصلة.</li>
+          <li><strong>التغييرات بين عمليات الإرسال هي خيار لاحق.</strong> ستحتاج التحديثات المدمجة إلى خط أساس معروف للسياق المرسل ومراجعات موثوقة. يمكن تمييز التعديلات البشرية، لكن تعديلات الوكيل وعمليات الاستيراد والتغييرات غير المعروفة مهمة أيضًا. لن يؤدي تعديل المصدر تلقائيًا إلى إعادة كتابة وصف الخلية؛ وسيحتاج السجل المفقود أو القديم إلى نظرة عامة جديدة بدلاً من تحديث مبني على التخمين.</li>
+          <li><strong>يُعد السجل المحلي الاختياري ومزامنة GitHub أفكارًا طويلة المدى لـ Pro.</strong> يمكن لنقاط فحص الإرسال المحلية أن تدعم فروقات مدعومة بـ Git دون مشاركة أي شيء. ويمكن للمزامنة المستقلة نشر دفتر عمل في Gist أو في ملف مختار داخل مستودع، مع معاينة الحمولة وتفويض خاصين بها. لن يؤدي تمكين السجل إلى الدفع إلى GitHub أو إرسال فروقات إلى الذكاء الاصطناعي. يُظهر Git تغييرات المحتوى، وليس إثباتًا على أن إنسانًا هو من أجراها.</li>
+        </ul>
+        <p><strong>إن Gist السري ليس خاصًا.</strong> يمكن لأي شخص لديه عنوان URL الخاص به قراءته؛ استخدم مستودعًا خاصًا عندما يجب تقييد الوصول. احتفظ بالأسرار خارج مصدر دفتر العمل وأوصافه قبل النشر. <a href="https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists/creating-gists">وثائق رؤية Gist في GitHub</a>.</p>
+      </aside>
+    </article>
+  </main>
+  <footer class="site-footer">
+    <span>مساعدة SciREPL Pro</span>
+    <nav aria-label="التنقل في التذييل">
+      <a href="../../../tutorials/">جميع الدروس التعليمية</a>
+      <a href="../../../../pro/">مساعدة Pro<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+      <a href="../../../../../pro/privacy.html">خصوصية Pro</a>
+    </nav>
+  </footer>
+</body>
+</html>
