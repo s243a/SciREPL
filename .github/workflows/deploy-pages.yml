@@ -6,12 +6,15 @@ on:
       - main
     tags:
       - 'v*'  # Triggers on version tags like v0.1.0, v1.0.0-beta, etc.
-    # Publish when public help, the Pro landing page, or policy changes on main without moving
-    # an existing release tag.
+    # Publish public-page or publication-validation changes on main without
+    # moving an existing release tag.
     # GitHub does not evaluate path filters for tag pushes, so all v* tags still deploy.
     paths:
       - 'www/pro/**'
       - 'www/help/**'
+      - '.github/workflows/deploy-pages.yml'
+      - 'scripts/prepare-public-pages-sw.mjs'
+      - 'tests/test_help_site.mjs'
 
 permissions:
   contents: read
@@ -45,7 +48,6 @@ jobs:
           cp -a www/pro/. "${pages_overlay}/pro/"
           cp -a www/help/. "${pages_overlay}/help/"
           cp tests/test_help_site.mjs "${pages_overlay}/test_help_site.mjs"
-          cp tests/test_pwa_release.mjs "${pages_overlay}/test_pwa_release.mjs"
           cp scripts/prepare-public-pages-sw.mjs "${pages_overlay}/scripts/prepare-public-pages-sw.mjs"
 
           stable_tag=""
@@ -66,20 +68,21 @@ jobs:
           mkdir -p www/pro www/help
           cp -a "${pages_overlay}/pro/." www/pro/
           cp -a "${pages_overlay}/help/." www/help/
-          # The overlaid suites resolve www/ and scripts/ as ../ from tests/,
-          # so they live in tests/ even when the stable tag predates that
-          # layout (its own suites then stay at the root; see TEST_DIR below).
+          # Current Help checks cover the overlaid pages, so retain their
+          # tests/ layout even when the stable app's suites live at the root.
+          # Keep the selected stable tag's PWA suite byte-identical: main's
+          # newer runtime regressions must run against main, not this old app.
           mkdir -p tests
           cp "${pages_overlay}/test_help_site.mjs" tests/test_help_site.mjs
-          cp "${pages_overlay}/test_pwa_release.mjs" tests/test_pwa_release.mjs
           mkdir -p scripts
           cp "${pages_overlay}/scripts/prepare-public-pages-sw.mjs" scripts/prepare-public-pages-sw.mjs
           echo "Publishing public pages over stable Free release ${stable_tag} ($(git rev-parse HEAD))."
 
       - name: Locate the test suites for this ref
         # Tags from before the suites moved into tests/ keep them at the root.
-        # test_help_site.mjs and test_pwa_release.mjs are overlaid into tests/
-        # on the main path, so they are located separately.
+        # Only the current Help suite is overlaid into tests/ on the main path.
+        # Locate the unchanged PWA suite independently, and never silently skip
+        # its offline/runtime and public Help/Pro cache checks.
         run: |
           if test -f tests/test_cell_ops.mjs; then
             echo "TEST_DIR=tests" >> "$GITHUB_ENV"
@@ -90,6 +93,14 @@ jobs:
             echo "PAGES_TEST_DIR=tests" >> "$GITHUB_ENV"
           else
             echo "PAGES_TEST_DIR=." >> "$GITHUB_ENV"
+          fi
+          if test -f tests/test_pwa_release.mjs; then
+            echo "PWA_TEST_DIR=tests" >> "$GITHUB_ENV"
+          elif test -f test_pwa_release.mjs; then
+            echo "PWA_TEST_DIR=." >> "$GITHUB_ENV"
+          else
+            echo "Required PWA release suite is missing from the selected ref." >&2
+            exit 1
           fi
 
       - name: Set up Node.js
@@ -290,7 +301,7 @@ jobs:
 
       - name: Run PWA offline catalog tests
         timeout-minutes: 15
-        run: node "$PAGES_TEST_DIR/test_pwa_release.mjs"
+        run: node "$PWA_TEST_DIR/test_pwa_release.mjs"
 
       # Upload the exact prepared www/ tree that passed the tests above.
       # A fresh checkout here would omit the generated, gitignored runtimes.
