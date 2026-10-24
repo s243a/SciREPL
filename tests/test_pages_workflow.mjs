@@ -23,7 +23,7 @@ verify('every Linux Chromium job uses a runner supported by locked Playwright', 
       browserJobs++;
     }
   }
-  assert.equal(browserJobs, 4, 'Cover PR, offline PWA, tagged release and Pages browser gates');
+  assert.equal(browserJobs, 5, 'Cover PR, offline PWA, tagged test/build and Pages browser gates');
 });
 
 function step(name) {

@@ -146,7 +146,8 @@ jobs:
     needs:
       - test
       - windows-portable
-    runs-on: ubuntu-latest
+    # This job also runs Chromium before packaging Android/PWA assets.
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: write  # Required to create releases
