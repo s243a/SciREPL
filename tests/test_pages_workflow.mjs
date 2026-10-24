@@ -13,6 +13,19 @@ const ci = readFileSync(path.join(ROOT, '.github/workflows/ci.yml'), 'utf8');
 let checks = 0;
 const verify = (name, fn) => { fn(); checks++; console.log(`PASS ${name}`); };
 
+verify('every Linux Chromium job uses a runner supported by locked Playwright', () => {
+  let browserJobs = 0;
+  for (const name of ['ci.yml', 'build-release.yml', 'deploy-pages.yml']) {
+    const source = readFileSync(path.join(ROOT, '.github/workflows', name), 'utf8');
+    for (const job of source.split(/(?=^  [\w-]+:\n)/m)) {
+      if (!/npx playwright install chromium/.test(job)) continue;
+      assert.match(job, /^    runs-on: ubuntu-24\.04$/m, name);
+      browserJobs++;
+    }
+  }
+  assert.equal(browserJobs, 4, 'Cover PR, offline PWA, tagged release and Pages browser gates');
+});
+
 function step(name) {
   const start = workflow.indexOf(`      - name: ${name}\n`);
   assert.ok(start >= 0, `Missing workflow step: ${name}`);

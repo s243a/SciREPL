@@ -14,7 +14,8 @@ jobs:
   # the same gate as ci.yml; build depends on it, so a red suite blocks the
   # APK/PWA from being built or released.
   test:
-    runs-on: ubuntu-latest
+    # Match the Chromium platform supported by locked Playwright.
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
