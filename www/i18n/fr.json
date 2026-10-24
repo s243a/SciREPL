@@ -282,6 +282,8 @@
     "help.shortcutAtEndOfLine": "à la fin de la ligne",
     "help.shortcutSuppressOutput": "Ne pas afficher la sortie",
     "help.documentation": "Documentation",
+    "help.tutorialIndex": "Tutoriels (en ligne)",
+    "vfs.workbookImportTutorial": "Tutoriel d’importation de classeurs (en ligne)",
     "help.supportOnKoFi": "Me soutenir sur Ko-fi",
     "help.fullDocumentationGithubReadme": "Documentation complète : <a href=\"https://github.com/s243a/SciREPL#readme\" target=\"_blank\">README sur GitHub</a>",
     "help.version": "Version",

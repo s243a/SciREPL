@@ -271,6 +271,8 @@
     "help.shortcutAtEndOfLine": "行末",
     "help.shortcutSuppressOutput": "出力を抑制",
     "help.documentation": "ドキュメント",
+    "help.tutorialIndex": "チュートリアル（オンライン）",
+    "vfs.workbookImportTutorial": "ワークブックのインポートガイド（オンライン）",
     "help.supportOnKoFi": "Ko-fi で支援する",
     "help.fullDocumentationGithubReadme": "完全なドキュメント: <a href=\"https://github.com/s243a/SciREPL#readme\" target=\"_blank\">GitHub README</a>",
     "help.version": "バージョン",

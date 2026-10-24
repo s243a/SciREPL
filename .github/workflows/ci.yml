@@ -15,7 +15,8 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Locked Playwright does not support ubuntu-latest after its 26.04 rollout.
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - name: Checkout code
@@ -100,6 +101,9 @@ jobs:
       - name: Onboarding tour
         run: node tests/test_onboarding.mjs
 
+      - name: App tutorial entry links
+        run: node tests/test_tutorial_links.mjs
+
       - name: Android status-bar hiding and the status-bar allowance
         run: npm run test:status-bar
 
@@ -176,7 +180,7 @@ jobs:
   # offline/reload cycle, so it runs in a dedicated job rather than sharing the
   # long-running suite above.
   pwa-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4

@@ -14,7 +14,8 @@ jobs:
   # the same gate as ci.yml; build depends on it, so a red suite blocks the
   # APK/PWA from being built or released.
   test:
-    runs-on: ubuntu-latest
+    # Match the Chromium platform supported by locked Playwright.
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -45,6 +46,7 @@ jobs:
       - run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
       - run: node tests/test_appearance.mjs
       - run: node tests/test_onboarding.mjs
+      - run: npm run test:tutorial-links
       - run: npm run test:status-bar
       - run: npm run test:landscape-composer
       - run: node tests/test_help_examples.mjs
@@ -144,7 +146,8 @@ jobs:
     needs:
       - test
       - windows-portable
-    runs-on: ubuntu-latest
+    # This job also runs Chromium before packaging Android/PWA assets.
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: write  # Required to create releases

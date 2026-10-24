@@ -270,6 +270,8 @@
     "help.shortcutAtEndOfLine": "في نهاية السطر",
     "help.shortcutSuppressOutput": "منع الإخراج",
     "help.documentation": "التوثيق",
+    "help.tutorialIndex": "دروس تعليمية (عبر الإنترنت)",
+    "vfs.workbookImportTutorial": "دليل استيراد المصنفات (عبر الإنترنت)",
     "help.supportOnKoFi": "ادعمني على Ko-fi",
     "help.fullDocumentationGithubReadme": "التوثيق الكامل: <a href=\"https://github.com/s243a/SciREPL#readme\" target=\"_blank\">ملف README على GitHub</a>",
     "help.version": "الإصدار",

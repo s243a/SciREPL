@@ -2255,6 +2255,15 @@ html, body {
     border-color: var(--accent);
 }
 
+.tutorial-link {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-block-size: 44px;
+    max-inline-size: 100%;
+    white-space: normal;
+}
+
 .vfs-option {
     display: flex;
     align-items: center;

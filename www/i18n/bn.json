@@ -270,6 +270,8 @@
     "help.shortcutAtEndOfLine": "লাইনের শেষে",
     "help.shortcutSuppressOutput": "আউটপুট দমন করুন",
     "help.documentation": "ডকুমেন্টেশন",
+    "help.tutorialIndex": "টিউটোরিয়াল (অনলাইনে)",
+    "vfs.workbookImportTutorial": "ওয়ার্কবুক ইমপোর্টের টিউটোরিয়াল (অনলাইনে)",
     "help.supportOnKoFi": "Ko-fi-তে আমাকে সহায়তা করুন",
     "help.fullDocumentationGithubReadme": "সম্পূর্ণ ডকুমেন্টেশন: <a href=\"https://github.com/s243a/SciREPL#readme\" target=\"_blank\">GitHub README</a>",
     "help.version": "সংস্করণ",

@@ -278,6 +278,8 @@
     "help.shortcutAtEndOfLine": "di akhir baris",
     "help.shortcutSuppressOutput": "Jangan tampilkan keluaran",
     "help.documentation": "Dokumentasi",
+    "help.tutorialIndex": "Tutorial (daring)",
+    "vfs.workbookImportTutorial": "Tutorial impor buku kerja (daring)",
     "help.supportOnKoFi": "Dukung saya di Ko-fi",
     "help.fullDocumentationGithubReadme": "Dokumentasi lengkap: <a href=\"https://github.com/s243a/SciREPL#readme\" target=\"_blank\">README di GitHub</a>",
     "help.version": "Versi",
