@@ -1,0 +1,15 @@
+/* Shared, public-help-only locale navigation. No executable translation data. */
+.tutorial-locale-tools { margin-block: 0 1.5rem; padding: .75rem; border: 1px solid var(--border, #344257); border-radius: .75rem; }
+.tutorial-language-menu summary { cursor: pointer; min-block-size: 44px; display: list-item; padding: .5rem; overflow-wrap: anywhere; }
+.tutorial-language-menu nav { display: flex; flex-wrap: wrap; gap: .5rem; margin-block-start: .5rem; }
+.tutorial-language-menu a { display: inline-flex; align-items: center; min-block-size: 44px; padding: .5rem .75rem; border: 1px solid var(--border, #344257); border-radius: .5rem; }
+.tutorial-language-menu a[aria-current] { font-weight: bold; outline: 2px solid currentColor; }
+.tutorial-translation-notice { font-size: .9rem; margin-block-end: 0; }
+.english-reference { font-size: .85em; }
+/* The Free app requests this fixed index view; the shared index stays full. */
+html[data-tutorial-edition="free"] [data-tutorial-editions="pro"] { display: none; }
+html[dir="rtl"] .lesson-steps, html[dir="rtl"] .lesson-nav ol { padding-inline-start: 1.6rem; padding-inline-end: 0; }
+html[dir="rtl"] pre, html[dir="rtl"] code, html[dir="rtl"] kbd, html[dir="rtl"] .path-tree { direction: ltr; unicode-bidi: isolate; text-align: left; }
+html[dir="rtl"] .shot-window, html[dir="rtl"] .shot-stage { direction: ltr; }
+/* These are explicitly marked natural-language prompts, not source code. */
+html[dir="rtl"] pre[data-translatable-prompt], html[dir="rtl"] pre[data-translatable-prompt] code { direction: rtl; unicode-bidi: plaintext; text-align: right; }

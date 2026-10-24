@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "locale": "bn",
+  "chunk": "08",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "originalReviewHash": "0e9f23ab244c0cbd69da199f249797d21af1b4e96bd5c13d5570e878387c52a8",
+  "reviewer": "Codex controller with independent Codex fidelity audit",
+  "reviewScope": "All 30 complete Bengali review fields were independently compared with the frozen source. The sole correction restores the literal Samsung Galaxy S24 identifier; reset scope, platform distinctions, direct-import caveats, surrounding prose, and protected tokens remain unchanged.",
+  "nativeLanguageReview": "pending",
+  "corrections": [
+    {
+      "fieldId": "files-export.tutorial.0015",
+      "before": "স্যামসাং গ্যালাক্সি এস চব্বিশ",
+      "after": "Samsung Galaxy S24",
+      "reason": "Restore the exact source phone model identifier and its digits while preserving the already-correct device meaning, every protected token, and all surrounding Bengali prose."
+    }
+  ]
+}

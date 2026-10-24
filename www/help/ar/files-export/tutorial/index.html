@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ثبّت مصنف CSV، وشغّل بياناته وعدّلها في الملفات والتخزين، ثم صدّر حزمة مصنف مع CSV وأعد فتحها. يتضمن ميزة تمييز الملفات الاختيارية في Pro.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ar/files-export/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../files-export/tutorial/tutorial.css">
+  <title>شرح توجيهي لمصنف CSV · مساعدة SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/files-export/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/files-export/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/files-export/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/files-export/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/files-export/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/files-export/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/files-export/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/files-export/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/files-export/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/files-export/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/files-export/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/files-export/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/files-export/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/files-export/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">الانتقال إلى المحتوى</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+    <nav aria-label="التنقل الأساسي">
+      <a href="../../../files-export/">الملفات والتصدير<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+      <a href="../../tutorials/">جميع الشروحات التوجيهية</a>
+      <a href="../../../">كل المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+      <a href="../../../../">افتح Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="لغة البرنامج التعليمي"><details class="tutorial-language-menu"><summary>لغة البرنامج التعليمي: <bdi>العربية</bdi></summary><nav aria-label="لغة البرنامج التعليمي"><a href="../../../en/files-export/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="./" lang="ar" hreflang="ar" aria-current="page">العربية</a>
+      <a href="../../../bn/files-export/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/files-export/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/files-export/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/files-export/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/files-export/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/files-export/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/files-export/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/files-export/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/files-export/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/files-export/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/files-export/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">برنامج تعليمي مترجم آليًا؛ والمراجعة بواسطة متحدث أصلي باللغة قيد الانتظار. لم تتغير التعليمات البرمجية والقيم التقنية. تُظهر لقطات الشاشة الواجهة الأصلية باللغة الإنجليزية؛ يرجى مطابقة أسماء عناصر التحكم المترجمة في هذا النص مع ما يظهر في تطبيقك.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> / <a href="../../../files-export/">الملفات والتصدير<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> / شرح توجيهي لـ CSV</p>
+    <article>
+      <p class="eyebrow">تعلم بالممارسة</p>
+      <h1>استكشف CSV في مصنف</h1>
+      <p class="lede">ابدأ في <strong>تصفح الحزم والمجموعات والمصنفات</strong>. ثبّت مثالاً صغيراً، وشغّل خلاياه، وعدّل CSV الخاص به، ثم صدّر المصنف مع بياناته وأعد فتحه. البيانات خيالية ولا تحتاج تعليمات Python البرمجية إلى حزم إضافية أو حساب ذكاء اصطناعي.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">خطوات أندرويد</li>
+        <li class="chip">حوالي 15 دقيقة</li>
+      </ul>
+      <p class="screen-note">التُقطت لقطات الشاشة على هاتف من سلسلة Samsung Galaxy S24. تظهر صور التصفح والمخرجات الأولية Free؛ وتظهر صور محرر الملفات واختيار الحزمة الجديدة Pro 1.4.0 وهي موضحة أدناه. في Pro، يمكنك استخدام التنزيل المباشر للمصنف ومسار استيراد ملف؛ قد تختلف عناصر التحكم المحيطة، وقد لا يكون إدخال التصفح الجديد هذا موجوداً هناك.</p>
+      <p class="callout"><strong>ألا ترى دفتر العمل هذا في التصفح بعد؟</strong> المثال مدمج في Free 1.4.0 والإصدارات الأحدث؛ قد لا يدرجه تطبيق مثبت قديم أو تطبيق ويب تقدمي محفوظ في ذاكرة التخزين المؤقت. <a download="csv-basics-seedlings.srwb" href="../../../files-export/tutorial/assets/csv-basics-seedlings.srwb">نزّل دفتر العمل مباشرةً</a>، ثم استخدم <strong>القائمة ← استيراد ملف</strong> لفتحه. يمكنك متابعة بقية هذا الدرس الآن.</p>
+      <nav class="lesson-nav" aria-label="خطوات الشرح الإرشادي لـ CSV">
+        <strong>في هذا الدرس</strong>
+        <ol>
+          <li><a href="#install">تثبيت المثال من التصفح</a></li>
+          <li><a href="#run">تشغيل خلايا Python الخاصة به</a></li>
+          <li><a href="#change">تغيير قياس في الملفات والتخزين</a></li>
+          <li><a href="#import">استيراد ملف CSV</a></li>
+          <li><a href="#export">تصدير دفتر العمل والبيانات</a></li>
+          <li><a href="#reopen">إعادة فتح الحزمة والتحقق من بياناتها</a></li>
+        </ol>
+        <p><a href="../../tutorials/">جميع الدروس التعليمية</a></p>
+      </nav>
+
+      <section id="install">
+        <p class="step-label">الخطوة 1</p>
+        <h2>العثور على دفتر العمل في التصفح</h2>
+        <ol class="lesson-steps">
+          <li>افتح <strong>القائمة ← تصفح الحزم والمجموعات والمصنفات</strong>. يفتح اختصار رأس الصفحة الاختياري 📦 الشاشة نفسها إذا كان مرئيًا.</li>
+          <li>ابحث عن <strong><bdi lang="en" dir="ltr">CSV Basics</bdi></strong>. وتحت <strong>كتب العمل</strong>، ابحث عن <strong><bdi lang="en" dir="ltr">CSV Basics: Seedling Heights</bdi></strong>. إنه مثال إنجليزي مدمج، وليس حزمة يلزم تثبيتها في Python.</li>
+          <li>انقر على <strong>تثبيت</strong>. يصبح دفتر العمل عادةً هو علامة التبويب المحددة. إذا قمت بإيقاف تشغيل التبديل التلقائي، فاستخدم أداة تحديد دفاتر العمل لاختياره.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse-menu" role="img" aria-label="قائمة SciREPL مع تحديد تصفح الحزم والحزم المجمعة ودفاتر العمل بإطار أصفر.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>يميز الإطار الأصفر <strong>تصفح الحزم والمجموعات والمصنفات</strong> في القائمة.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">عرض لقطة الشاشة الكاملة للقائمة</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--catalog" role="img" aria-label="شاشة التصفح مصفاة حسب CSV Basics، مع تحديد حقل البحث وزر التثبيت بإطار أصفر.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-catalog.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/catalog-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>ابحث عن <strong><bdi lang="en" dir="ltr">CSV Basics</bdi></strong>، ثم استخدم <strong>تثبيت</strong> على بطاقة دفتر العمل. لم يكن الكتالوج البعيد متاحًا في لقطة الشاشة هذه؛ ومع ذلك استمر ظهور العناصر المدمجة.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-catalog.png">عرض لقطة الشاشة الكاملة للتصفح</a>
+        </figure>
+        <p class="callout"><strong>إذا ظهرت سياسة الخصوصية:</strong> قد يتحقق التصفح من الكتالوج المعتمد عبر الإنترنت. اقرأ الإفصاح، ومرر <em>داخل مربع الحوار</em> إلى الأسفل، وانقر على <strong>أفهم ذلك</strong> فقط إذا كنت موافقًا. يمكنك بدلًا من ذلك إغلاق الإشعار والاستمرار في استخدام الإدخالات المدمجة؛ وسيكون الكتالوج البعيد غير متاح. هذا المثال نفسه لا يحتاج إلى مجموعة بيانات خارجية أو حزمة Python.</p>
+        <p>يؤدي تثبيت دفتر العمل إلى إضافة خلاياه؛ لكنه <em>لا</em> يشغّلها. يتيح لك ذلك فحص التعليمات البرمجية قبل تنفيذها.</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">الخطوة 2</p>
+        <h2>تشغيل الخلايا بالترتيب</h2>
+        <p>يشرح النص الافتتاحي العينة. خلايا Python الثلاث لكل منها اسم: <code>create_csv</code>، و<code>read_csv</code>، و<code>compare_groups</code>. بالنسبة للخلية المحفوظة، انقر على رمز <strong>✎ القلم</strong> لفتح المحرر، ثم انقر على <strong>تشغيل</strong> الخاص بتلك الخلية. في Pro يمكنك أيضًا النقر المزدوج على التعليمات البرمجية للخلية لتعديلها.</p>
+        <ol class="lesson-steps">
+          <li>شغّل <code>create_csv</code>. يكتب ستة صفوف افتراضية إلى <code>/shared/data/seedling-heights.csv</code>. ينبغي أن ترى <code>Saved 6 fictional rows</code>.</li>
+          <li>شغّل <code>read_csv</code>. يفتح الملف الذي تم إنشاؤه للتو ويطبع جميع الصفوف الستة.</li>
+          <li>شغّل <code>compare_groups</code>. يطبع متوسط الضوء وقدره <strong>13.0 سم</strong>، ومتوسط الظل وقدره <strong>8.0 سم</strong>، وفارقًا قدره <strong>5.0 سم</strong>.</li>
+        </ol>
+        <p>الملف مرئي أيضًا في <strong>القائمة → الملفات والتخزين</strong>. يمكنك قراءته هناك، أو استخدام <strong>تعديل</strong> و<strong>حفظ</strong> لتعديله مباشرةً. <a href="#edit-file">توضح الخطوة التالية كيفية القيام بذلك.</a></p>
+        <p>ينبغي أن يبدو المخرج النهائي هكذا:</p>
+        <pre><code>Light mean: 13.0 cm
+Shade mean: 8.0 cm
+Difference: 5.0 cm</code></pre>
+        <p class="callout"><strong>التشغيل الأول أبطأ؟</strong> قد يستغرق Python لحظة للتهيئة. انتظر حتى تظهر شارة الحالة <strong>جاهز</strong> قبل الحكم على ما إذا كانت الخلية قد انتهت. تعيد الخلايا اللاحقة عادةً استخدام بيئة التشغيل المحملة. إذا كان تنزيل بيئة التشغيل يتطلب موافقة، فاقرأ إشعار الخصوصية قبل القبول؛ لا يستدعي دفتر العمل هذا <code>%pip install</code>.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--csv-output" role="img" aria-label="مخرجات SciREPL توضح متوسط الضوء 13.0 سنتيمترًا، ومتوسط الظل 8.0 سنتيمترًا، والفرق 5.0 سنتيمترًا.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-output.png" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>مخرجات الخلية الثالثة على الهاتف بعد تشغيل دفتر العمل النموذجي.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-output.png">عرض لقطة الشاشة الكاملة للمخرجات</a>
+        </figure>
+        <p>توضح هذه القيم الافتراضية القراءة والحساب، وليست استنتاجًا علميًا حول الضوء ونمو النبات.</p>
+      </section>
+
+      <section id="change">
+        <p class="step-label">الخطوة 3</p>
+        <h2>تغيير قيمة واحدة وإعادة التشغيل</h2>
+        <div id="edit-file">
+          <p>ليس عليك تعديل خلية Python لتغيير بياناتها. افتح CSV نفسه:</p>
+          <ol class="lesson-steps">
+            <li>اختر <strong>القائمة → الملفات والتخزين</strong> (قد تضيف القائمة <strong>VFS / Paths</strong> إلى الاسم).</li>
+            <li>اختر <strong>/ (التخزين الدائم)</strong> أو <strong>جميع أنظمة الملفات</strong>. مرر إلى <code>/shared/data/seedling-heights.csv</code> واضغط على اسم الملف، وليس على أيقونة التنزيل أو الإزالة الخاصة به.</li>
+            <li>اضغط على <strong>تعديل</strong>. غيّر الصف <code>light,14</code> إلى <code>light,15</code>. احتفظ بالترويسة <code>group,height_cm</code> والفواصل والصفوف الأخرى دون تغيير.</li>
+            <li>اضغط على <strong>حفظ</strong>، ثم أغلق ملفات وسعة التخزين. لا يؤدي حفظ الملف إلى تشغيل أي تعليمات برمجية.</li>
+          </ol>
+          <figure class="phone-figure">
+            <div class="shot-window shot-window--file-edit" role="img" aria-label="يتم تعديل ملف CSV في ملفات وسعة التخزين، مع تحديد زر حفظ باللون الأصفر. يعرض Pro أيضًا ملء الشاشة.">
+              <div class="shot-stage">
+                <img src="../../../files-export/tutorial/assets/phone-file-edit.png" alt="" loading="lazy" decoding="async">
+                <img src="../../../files-export/tutorial/assets/file-edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              </div>
+            </div>
+            <figcaption><strong>Pro 1.4.0:</strong> ملف CSV مفتوح في محرر معاينة الملف. يحدد الإطار الأصفر <strong>حفظ</strong>. يحتوي Free أيضًا على عناصر تحكم التعديل/الحفظ الخاصة بالمعاينة؛ بينما يقتصر <strong>ملء الشاشة</strong> على Pro فقط.</figcaption>
+            <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-file-edit.png">عرض لقطة الشاشة الكاملة لتعديل ملفات وسعة التخزين</a>
+          </figure>
+        </div>
+        <p>أعد تشغيل <code>read_csv</code> و<code>compare_groups</code> فقط. يبلغ متوسط الضوء الآن حوالي <strong>13.3 سم</strong> والفرق حوالي <strong>5.3 سم</strong>. <strong>لا</strong> تعد تشغيل <code>create_csv</code>: سيؤدي ذلك إلى الكتابة فوق تعديل ملفك بالقيم التي لا تزال موجودة في تلك الخلية.</p>
+        <p>بدلًا من ذلك، عدّل <code>create_csv</code> باستخدام <strong>✎ القلم</strong> الخاص بها، وغيّر قياسها <code>14</code> إلى <code>15</code>، وشغّل خلايا Python الثلاث كلها بالترتيب. يغير هذا التعليمات البرمجية التي تُنشئ الملف، بدلًا من مجرد تغيير الملف.</p>
+        <p>لماذا نعيد تشغيل الخلايا اللاحقة؟ مخرجاتها المحفوظة هي سجل للتنفيذ السابق؛ ولا يؤدي تغيير ملف إلى إعادة حساب النتائج السابقة تلقائيًا. تقرأ كل خلية الملف عند تشغيلها.</p>
+        <aside class="callout" id="pro-syntax-highlighting" data-editions="pro">
+          <h3>Pro: تعديل الملفات في وضع ملء الشاشة والتمييز الاختياري</h3>
+          <p>في معاينة الملف، اضغط على <strong>ملء الشاشة</strong> للحصول على محرر أكبر. يظل CSV بصيغة <strong>نص عادي</strong>، لذلك يتم تعطيل مربع الاختيار <strong>تمييز بناء الجملة</strong> الخاص به.</p>
+          <p>بالنسبة لملفات التعليمات البرمجية المدعومة، يكون تمييز بناء الجملة اختياريًا و<strong>معطلًا بشكل افتراضي</strong>. قم بتشغيله باستخدام مربع الاختيار في محرر الملفات هذا، وليس من إعدادات مظهر دفتر الملاحظات. يحدد الامتداد اللغة: على سبيل المثال <code>.py</code> هو Python، و<code>.js</code> هو JavaScript، و<code>.R</code> هو R، و<code>.pl</code> هو <strong>Prolog</strong>، وليس Perl. تظل الامتدادات غير المعروفة كنص عادي.</p>
+          <figure class="phone-figure">
+            <div class="shot-window shot-window--file-highlight" role="img" aria-label="في Pro، محرر ملفات Python بملء الشاشة مع تحديد تمييز بناء الجملة وتعليمات Python البرمجية الملونة. يقع خيارا الحفظ والإغلاق في شريط الأدوات.">
+              <div class="shot-stage">
+                <img src="../../../files-export/tutorial/assets/phone-python-highlight.png" alt="" loading="lazy" decoding="async">
+                <img src="../../../files-export/tutorial/assets/file-highlight-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              </div>
+            </div>
+            <figcaption><strong>Pro 1.4.0:</strong> ملف توضيحي منفصل لـ <code>seedling-summary.py</code> يحتوي على كود المقارنة، مع تمكين التمييز. هذا الملف الاختياري غير مطلوب لدرس CSV. يمكن التمرير أفقياً للسطور الطويلة.</figcaption>
+            <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-python-highlight.png">عرض لقطة الشاشة الكاملة لمحرر الملفات مع التمييز</a>
+          </figure>
+          <p><strong>حفظ</strong> يكتب الملف ويُبقي المحرر مفتوحاً. استخدم <strong>× إغلاق</strong> للعودة إلى الملفات والتخزين؛ حيث يطلب التأكيد قبل تجاهل التغييرات غير المحفوظة. تحرير الملف أو حفظه لا يؤدي إطلاقاً إلى تنفيذه.</p>
+          <p><a href="../../../files-export/tutorial/assets/phone-csv-fullscreen.png">شاهد المحرر نفسه بملء الشاشة مع فتح ملف CSV كنص عادي.</a></p>
+        </aside>
+      </section>
+
+      <section id="import">
+        <p class="step-label">الخطوة 4</p>
+        <h2>استيراد ملف CSV الأصلي</h2>
+        <ol class="lesson-steps">
+          <li><a download="seedling-heights.csv" href="../../../files-export/tutorial/assets/seedling-heights.csv">قم بتنزيل نموذج CSV<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> الأصلي إلى مجلد يمكن لمنتقي الملفات في جهازك فتحه.</li>
+          <li>في SciREPL، اختر <strong>القائمة ← استيراد ملف</strong> وحدد <code>seedling-heights.csv</code>. يجب أن تنص رسالة التأكيد على أنه تم رفعه إلى <code>/shared/data/seedling-heights.csv</code>.</li>
+          <li>يستبدل هذا الملف المحلي المعدل بالصفوف الستة الأصلية. أعد تشغيل <code>read_csv</code> و<code>compare_groups</code>؛ وينبغي أن يعود المتوسطان إلى <strong>13.0</strong> و<strong>8.0 سم</strong>.</li>
+        </ol>
+        <p class="callout"><strong>هام:</strong> لا تُعد تشغيل <code>create_csv</code> بعد استيراد ملف مختلف بالاسم نفسه ما لم تكن تنوي استبداله. بالنسبة لملف CSV الخاص بك، لاحظ مسار التأكيد بدقة وغيّر <code>path</code> في خلايا القراءة إلى اسم ذلك الملف. قد يعرض منتقي الملفات مجلد التنزيلات في أندرويد، أو موفر سحابة، أو كليهما.</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">الخطوة 5</p>
+        <h2>حفظ نسخة محمولة</h2>
+        <p>افتح <strong>القائمة ← تصدير المصنفات والحزم</strong>. إذا كنت تريد الخلايا فقط، فاختر <strong>مصنف (.srwb)</strong> و<strong>علامة التبويب الحالية فقط</strong>. إن <code>.srwb</code> <strong>لا</strong> يتضمن ملف CSV المنفصل في SharedVFS.</p>
+        <p>لنقل دفتر العمل <em>مع بياناته</em>، اختر <strong>حزمة (أرشيف)</strong> واحتفظ بـ <strong>.zip</strong>. في شجرة <strong>المحتويات</strong>، حدد:</p>
+        <ul>
+          <li>دفتر العمل <code>CSV_Basics__Seedling_Heights.ipynb</code> ضمن <strong>notebooks/</strong>. يخزن تصدير الحزمة الخلايا بتنسيق دفاتر عمل Jupyter.</li>
+          <li>الملف <code>seedling-heights.csv</code> ضمن <strong>shared/data/</strong>.</li>
+        </ul>
+        <p>قم بإلغاء تحديد دفاتر العمل والملفات غير ذات الصلة. قم بتوسيع المجلدات باستخدام أسهمها إذا لزم الأمر؛ ولا تفترض أن <strong>علامة التبويب الحالية فقط</strong> يحد من محتويات الحزمة. لا تحتاج إلى نسخ <strong>shared/notebooks/</strong> الإضافية لهذا الدرس. في Pro، اترك <strong>تضمين محادثة الذكاء الاصطناعي</strong> غير محدد ما لم ترغب عن قصد في مشاركته.</p>
+        <p>اضغط على <strong>تصدير</strong>. يفتح هذا في أندرويد ورقة المشاركة: احفظ الأرشيف في مكان يمكنك العثور عليه لاحقاً، مثل محرك الأقراص الخاص بك أو وجهة الحفظ في مدير الملفات. وفي المتصفح يتم تنزيل ملف. اسم الملف المقترح هو <code>scirepl_package.zip</code>؛ وإعادة تسميته إلى <code>seedling-project.zip</code> تجعل التعرف عليه أسهل.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--package-selection" role="img" aria-label="تصدير حزمة Pro مع تحديد أرشيف الحزمة وتحديد دفتر عمل أساسيات CSV وCSV seedling-heights فقط. تحدد الخطوط العريضة الصفراء هذين الملفين.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-package-selection.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/package-selection-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pro 1.4.0:</strong> تم تحديد الحزمة، وتحديد المدخلين المحاطين بإطار أصفر. لا يتم تضمين دفاتر العمل الأخرى، وملف العرض التوضيحي الاختياري لـ Python، ونسخ دفاتر العمل المحفوظة. يستخدم Free تحديد دفتر العمل والبيانات نفسه، دون خيار محادثة الذكاء الاصطناعي.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-package-selection.png">عرض لقطة الشاشة الكاملة لاختيار الحزمة</a>
+        </figure>
+        <p class="callout"><strong>الاسترداد المحلي ليس نسخة احتياطية.</strong> لا تشارك مساحة تخزين تطبيقات أندرويد وتطبيق الويب التقدمي في كروم ومتصفح آخر هذه الملفات تلقائياً. احتفظ بالنسخة المصدرة في مكان تتحكم فيه. راجع <a href="../../../files-export/">الملفات والاستيراد والتصدير<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> للاطلاع على تنسيقات أخرى.</p>
+      </section>
+
+      <section id="reopen">
+        <p class="step-label">الخطوة 6</p>
+        <h2>أعد فتح الحزمة وتحقق من كلا الجزأين</h2>
+        <p>قبل الوثوق بنسخة احتياطية، تحقق من إمكانية فتحها. يمكنك القيام بذلك في تثبيت آخر لـ SciREPL أو في ملف تعريف متصفح آخر. يضيف الاستيراد هنا دفتر عمل آخر؛ كما أنه يستبدل الملفات في مسارات الوجهة الخاصة بالحزمة، لذا احتفظ بنسخة منفصلة من أي ملف أحدث قبل استيراد حزمة أقدم.</p>
+        <ol class="lesson-steps">
+          <li>اختر <strong>القائمة → استيراد حزمة (.zip / .tar.gz)</strong> وحدد الأرشيف الذي حفظته. في هذا الدرس، هو <code>.zip</code>، وليس تنزيل CSV أو <code>.srwb</code> المنفصل.</li>
+          <li>اختر دفتر العمل المستورد حديثًا <strong><bdi lang="en" dir="ltr">CSV Basics: Seedling Heights</bdi></strong> إذا لم يتم تحديده تلقائيًا. إذا قمت بالاستيراد في التطبيق نفسه، فقد يكون لعلامتي التبويب القديمة والجديدة الاسم نفسه.</li>
+          <li>افتح <strong>القائمة → الملفات والتخزين</strong> وتحقق من <code>/shared/data/seedling-heights.csv</code>. يجب أن تتطابق صفوفه الستة مع الملف الذي قمت بتصديره. أغلق المعاينة بعد التحقق.</li>
+          <li>شغّل <strong>خلية Python الثانية</strong> (كود <code>read_csv</code>)، ثم <strong>خلية Python الثالثة</strong> (كود <code>compare_groups</code>). يستخدم تصدير الحزمة تنسيق Jupyter وقد لا يحتفظ بأسماء الخلايا؛ يمكنك التعرف عليها من خلال ترتيبها والشفرة البرمجية الخاصة بها. بعد الخطوة 4 وملف CSV الأصلي، توقع <strong>13.0 سم</strong>، و<strong>8.0 سم</strong>، و<strong>5.0 سم</strong>. إذا قمت بتصدير ملف <code>light,15</code> المعدل بدلاً من ذلك، فتوقع <strong>13.3 سم</strong>، و<strong>8.0 سم</strong>، و<strong>5.3 سم</strong>.</li>
+        </ol>
+        <p class="callout"><strong>لا تُعد تشغيل <code>create_csv</code> لفحص الاستعادة هذا.</strong> فهو يستبدل البيانات المستوردة بالقيم الموجودة في الشفرة البرمجية الخاصة به. إن قراءة ملف CSV المستعاد أولاً تثبت أن البيانات قد انتقلت مع دفتر العمل؛ والمخرجات المحفوظة القديمة وحدها لا تثبت ذلك.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--restored-output" role="img" aria-label="مخرجات جديدة بعد استعادة الحزمة وتشغيل خلية المقارنة الخاصة بها: متوسط الضوء 13.0 سنتيمتر، ومتوسط الظل 8.0، والفرق 5.0.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-restored-output.png" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pro 1.4.0:</strong> مخرجات جديدة على الهاتف بعد استيراد الأرشيف المصدر وتشغيل خلايا القراءة والمقارنة فقط. لقد استعاد CSV الصفوف الستة الأصلية.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-restored-output.png">عرض لقطة الشاشة الكاملة للمخرجات المستعادة</a>
+        </figure>
+        <p>إذا كان الملف مفقودًا، أو كان دفتر العمل غائبًا، فارجع إلى الخطوة 5 وتحقق من تحديد <em>كلا</em> الإدخالين. لا يمكن لتصدير دفتر العمل العادي أن ينقل ملف CSV نيابة عنك.</p>
+      </section>
+
+      <section id="what-next">
+        <h2>ما الخطوة التالية؟</h2>
+        <p>جرب ملف CSV من صنعك. احتفظ بالعمودين <code>group</code> و<code>height_cm</code>، واستخدم ارتفاعات رقمية، وضمّن صف <code>light</code> واحدًا وصف <code>shade</code> واحدًا على الأقل — أو قم بتكييف عاملي تصفية المجموعتين في <code>compare_groups</code>. يمكنك فحص الملف المحلي ضمن <strong>القائمة → الملفات والتخزين</strong>. للتعرف على عناصر التحكم في الهاتف المستخدمة هنا، راجع <a href="../../interface/tutorial/">الدليل التفصيلي لواجهة دفتر العمل الأول</a>.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>مساعدة SciREPL</span><nav aria-label="التنقل في التذييل"><a href="../../../files-export/">الملفات والتصدير<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a><a href="../../../">كل المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a></nav></footer>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="ru" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Создавайте статические диаграммы Markdown, генерируйте изображения с помощью холста JavaScript и пишите уравнения KaTeX в блокноте SciREPL без установки пакетов.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ru/workbooks/graphics/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/graphics/tutorial.css">
+  <title>Изображения, диаграммы и уравнения · Справка SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/graphics/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/graphics/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/graphics/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/graphics/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/graphics/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/graphics/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/graphics/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/graphics/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/graphics/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/graphics/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/graphics/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/graphics/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/graphics/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/graphics/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+    <nav aria-label="Основная навигация">
+      <a href="../../../workbooks/">Справочник по блокнотам<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+      <a href="../../tutorials/">Все руководства</a>
+      <a href="../../../">Вся справка<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+      <a href="../../../../">Открыть PWA Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Язык руководства"><details class="tutorial-language-menu"><summary>Язык руководства: <bdi>Русский</bdi></summary><nav aria-label="Язык руководства"><a href="../../../en/workbooks/graphics/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/graphics/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/graphics/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/graphics/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/graphics/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/graphics/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/graphics/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/graphics/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/graphics/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/graphics/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/graphics/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="./" lang="ru" hreflang="ru" aria-current="page">Русский</a>
+      <a href="../../../zh/workbooks/graphics/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Машинный перевод руководства; ожидает проверки носителем языка. Код и технические значения оставлены без изменений. На снимках экрана показан оригинальный интерфейс на английском языке; сопоставляйте переведенные названия элементов управления в этом тексте с вашим приложением.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Справка<span class="english-reference"> (Справочная страница на английском языке)</span></a> / <a href="../../../workbooks/">Блокноты<span class="english-reference"> (Справочная страница на английском языке)</span></a> / Изображения, диаграммы и уравнения</p>
+    <article>
+      <p class="eyebrow">Обучение на практике</p>
+      <h1>Добавление изображений, диаграмм и уравнений</h1>
+      <p class="lede">Блокнот может объяснить идею не только кодом, но и изображением. Попробуйте три способа показать одну и ту же простую систему координат: статическое изображение в Markdown, картинку, нарисованную с помощью JavaScript, и уравнение, сверстанное в KaTeX. Вам не понадобятся Python, R, установка пакетов или аккаунт ИИ.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Рабочий процесс Free + Pro</li>
+        <li class="chip">Примеры, проверенные в браузере</li>
+        <li class="chip">Около 10 минут</li>
+      </ul>
+      <p class="screen-note">Примеры и снимки экрана были проверены в <strong>браузерной сборке SciREPL Free</strong> <time datetime="2026-10-06">6 октября 2026</time> года. В снимках экрана используется узкая область просмотра браузера; это <strong>не снимки с Android</strong>. На Android используются те же элементы управления, но их расположение может отличаться. Версия Pro и все выпущенные версии приложения для этого руководства не тестировались.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Выберите способ, подходящий для вашего объяснения</caption>
+          <thead><tr><th scope="col">Что требуется</th><th scope="col">Тип ячейки</th><th scope="col">Что создает результат</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Фиксированная диаграмма или изображение</th><td>Markdown (<strong>Md</strong>)</td><td>Встроенный SVG или внедренный PNG, сохраненный в тексте ячейки</td></tr>
+            <tr><th scope="row">Изображение, вычисленное или нарисованное кодом</th><td>Код → JavaScript (<strong>JS</strong>)</td><td>Холст, отображаемый с помощью <code>window.renderImage(...)</code></td></tr>
+            <tr><th scope="row">Формула или матрица</th><td>Markdown (<strong>Md</strong>)</td><td>Математические выражения в стиле TeX между разделителями <code>$$</code>, отображаемые с помощью KaTeX</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <nav class="lesson-nav" aria-label="Шаги руководства по графике">
+        <strong>В этом уроке</strong>
+        <ol>
+          <li><a href="#open">Откройте небольшой пример блокнота</a></li>
+          <li><a href="#static">Храните статическое изображение в Markdown</a></li>
+          <li><a href="#canvas">Нарисуйте изображение с помощью JavaScript</a></li>
+          <li><a href="#math">Пишите уравнения с помощью KaTeX</a></li>
+          <li><a href="#save">Сохраните и снова откройте свою работу</a></li>
+        </ol>
+        <p><a href="#troubleshooting">Если результат не отображается</a></p>
+        <p><a href="../../tutorials/">Все руководства</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">Шаг 1</p>
+        <h2>Откройте пример блокнота</h2>
+        <p>Сопутствующий файл содержит полные примеры, включая внедренный PNG. В нем все собрано в одном небольшом блокноте, поэтому вам не придется вручную вводить длинную строку изображения в формате Base64.</p>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/graphics/assets/workbook-graphics.srwb" download="workbook-graphics.srwb">Скачайте пример блокнота с графикой (.srwb)</a>. Сохраните сам файл, сохранив его расширение <code>.srwb</code>. Если браузер отображает текст, используйте действие сохранения/скачивания. Запомните папку, в которую вы его сохранили.</li>
+          <li>Откройте SciREPL. В <strong>заголовке в верхней части приложения</strong> найдите <strong>☰ Меню</strong> — кнопку с <strong>тремя горизонтальными линиями</strong>. Нажмите на нее.</li>
+          <li>Выберите <strong>📂 Импортировать файл (например, .srwb, .ipynb, .csv, .py, .zip)</strong>. При необходимости прокрутите <em>внутри меню</em>. В диалоговом окне выбора файлов вашего устройства выберите <code>workbook-graphics.srwb</code> из папки «Загрузки» или выбранной вами папки.</li>
+          <li>Закройте меню, если оно осталось открытым, и выберите новую вкладку <strong>Workbook Graphics</strong> в селекторе блокнотов. Ваши существующие вкладки сохранятся.</li>
+          <li>Найдите четыре ячейки с именами <code>static_axes</code>, <code>embedded_png</code>, <code>canvas_axes</code> и <code>math_axes</code>. Ознакомьтесь с ними перед запуском кода. Статические диаграммы и уравнения появляются из исходного текста Markdown; изображение JavaScript появляется только после запуска ячейки.</li>
+        </ol>
+        <p class="callout"><strong>Импорт — это не запуск.</strong> Импорт <code>.srwb</code> не выполняет его код, даже если включена настройка автоматического выполнения. В этом уроке только ячейка <code>canvas_axes</code> требует выполнения JavaScript. Шага <strong>Выполнить все ячейки</strong> здесь нет.</p>
+        <p>Нужны подробности о скачивании или выборе файла? Ознакомьтесь с <a href="../import/">руководством по ручному импорту блокнота</a>. Приведенные выше имена отображаются на сохраненных ячейках; в <a href="../named-cells/">руководстве по путям именованных ячеек</a> объясняется, как их назначать и использовать. Вы также можете создать эти примеры в уже открытом блокноте, следуя приведенным ниже шагам.</p>
+      </section>
+
+      <section id="static">
+        <p class="step-label">Шаг 2 · Способ 1</p>
+        <h2>Хранение статической диаграммы в Markdown</h2>
+        <p>Представьте лист бумаги перед собой. <strong>r</strong> направлен вправо вдоль листа, <strong>u</strong> — вверх вдоль него, а <strong>n</strong> направлен от листа к вам. Круг с точкой обозначает это направление наружу, словно наконечник летящей на вас стрелы.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-static.png" alt="Снимок экрана из узкого окна браузера: ячейка SciREPL Markdown отображает диаграмму листа со стрелками вправо и вверх и точкой в круге для нормали, направленной к наблюдателю." loading="lazy" decoding="async">
+          <figcaption>Статический SVG отрисовывается <em>внутри ячейки Markdown</em>. Это снимок экрана браузера с SciREPL Free, а не рисунок, созданный запуском языкового ядра.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-static.png">Посмотреть полный снимок экрана браузера</a>
+        </figure>
+        <h3>Редактирование импортированной диаграммы</h3>
+        <ol class="lesson-steps">
+          <li>Найдите <code>static_axes</code>. Нажмите значок <strong>✎ карандаша</strong> в собственном заголовке этой сохраненной ячейки, рядом с <strong>✕</strong>. Это откроет исходный код существующей ячейки; панель новой ячейки создала бы еще одну ячейку.</li>
+          <li>Оставьте кнопку типа ячейки установленной на <strong>Md</strong>. В тексте SVG измените <code>r: right</code> на <code>r: across</code>.</li>
+          <li>Нажмите кнопку <strong>▶ Выполнить</strong> этой ячейки, чтобы сохранить и снова отобразить Markdown. Для ячейки <strong>Md</strong> эта кнопка выполняет рендеринг текста; она не выполняет JavaScript и не запускает среду выполнения языка.</li>
+        </ol>
+        <h3>Или создайте собственную ячейку Markdown</h3>
+        <ol class="lesson-steps">
+          <li>Найдите <strong>панель новой ячейки</strong>, где вводится следующая ячейка. Если она свернута, используйте кнопку <strong>⌃ Показать панель новой ячейки</strong> рядом с названием приложения.</li>
+          <li>Нажмите кнопку типа ячейки с отметкой <strong>код</strong>, чтобы она изменилась на <strong>Md</strong>. Markdown — это <em>тип ячейки</em>, а не пункт в раскрывающемся списке языков.</li>
+          <li>Скопируйте приведенный ниже полный код SVG в текстовое поле, <strong>не добавляя блоки кода Markdown</strong> (<code>```</code>). Оставьте пустую строку между окружающим текстом и SVG.</li>
+          <li>Нажмите <strong>▶ Выполнить</strong>, чтобы добавить отображаемую ячейку Markdown. Вы должны увидеть лист бумаги и все три метки направлений.</li>
+        </ol>
+        <pre><code data-graphic-example="svg">&lt;svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 360 220" width="100%" height="220"
+     role="img" aria-label="Right, up and outward normal on paper"&gt;
+  &lt;title&gt;A paper coordinate frame&lt;/title&gt;
+  &lt;rect x="20" y="18" width="320" height="184"
+        rx="6" fill="#ffffff" stroke="#526170" stroke-width="2" /&gt;
+  &lt;path d="M110 145 H280" fill="none" stroke="#075d69" stroke-width="3" /&gt;
+  &lt;polygon points="280,145 267,138 267,152" fill="#075d69" /&gt;
+  &lt;path d="M110 145 V48" fill="none" stroke="#064d91" stroke-width="3" /&gt;
+  &lt;polygon points="110,48 103,61 117,61" fill="#064d91" /&gt;
+  &lt;circle cx="110" cy="145" r="10" fill="#ffffff" stroke="#14191f" stroke-width="2" /&gt;
+  &lt;circle cx="110" cy="145" r="3" fill="#14191f" /&gt;
+  &lt;text x="204" y="168" fill="#14191f" font-size="16"&gt;r: right&lt;/text&gt;
+  &lt;text x="124" y="62" fill="#14191f" font-size="16"&gt;u: up&lt;/text&gt;
+  &lt;text x="42" y="190" fill="#14191f" font-size="16"&gt;n: toward you&lt;/text&gt;
+&lt;/svg&gt;</code></pre>
+        <p>SciREPL выполняет санитизацию Markdown. В этом примере используются обычные фигуры SVG, текст и явные атрибуты <code>fill</code>/<code>stroke</code>. Наконечники стрелок представляют собой многоугольники: не рассчитывайте на сохранение <code>marker-end="url(...)"</code>, блока <code>&lt;style&gt;</code>, скриптов или анимации после санитизации.</p>
+
+        <h3>Использование внедренного PNG вместо этого</h3>
+        <p>Другой статический вариант — это PNG с данными Base64, сохраненными непосредственно в исходном тексте Markdown. Стандартный синтаксис изображений Markdown выглядит следующим образом:</p>
+        <pre><code>![Paper axes](data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE)</code></pre>
+        <p>В этой строке показан <em>формат</em>, а не работающее изображение: замените заполнитель полным закодированным PNG или используйте уже готовую ячейку <code>embedded_png</code>. Часть после <code>base64,</code> — это данные изображения, а не имя файла. Сохраняйте ее в одну строку.</p>
+        <p>Чтобы изображение помещалось в ячейку на маленьком экране, в сопутствующей ячейке <code>embedded_png</code> используется эквивалентный встроенный HTML ниже с атрибутом <code>width="100%"</code>. Оно по-прежнему хранится внутри Markdown, а не как результат выполнения кода:</p>
+        <pre><code>&lt;img alt="Paper axes" width="100%"
+     src="data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE"&gt;</code></pre>
+        <p class="callout"><strong>Выберите один статический путь:</strong> используйте <em>встроенный элемент SVG</em> для небольшой редактируемой диаграммы или изображение <code>data:image/png;base64,...</code> для растрового рисунка. SVG data URL, такой как <code>data:image/svg+xml,...</code>, не эквивалентен встроенному SVG и блокируется в проверенной сборке. Удаленные URL-адреса изображений там также блокируются. Эти два автономных примера не требуют загрузки изображений при отображении.</p>
+        <p>Оба статических примера находятся в исходном тексте Markdown. Их можно отобразить после импорта блокнота без запуска кода.</p>
+      </section>
+
+      <section id="canvas">
+        <p class="step-label">Шаг 3 · Способ 2</p>
+        <h2>Рисование изображения с помощью JavaScript</h2>
+        <p>Статическое изображение остается неизменным, пока вы не отредактируете его исходный текст. Для изображения, вычисляемого или рисуемого программой, используйте ячейку <strong>код</strong> и выберите <strong>JS - JavaScript</strong>. В этом примере рисунок создается на холсте, преобразуется в PNG и отправляется в вывод ячейки.</p>
+        <ol class="lesson-steps">
+          <li>В импортированном блокноте нажмите значок <strong>✎ карандаша</strong> на <code>canvas_axes</code>. Убедитесь, что тип ячейки — <strong>код</strong>, а ее язык — <strong>JS - JavaScript</strong> (компактный переключатель может показывать просто <strong>JS</strong>).</li>
+          <li>Ознакомьтесь с приведенным ниже кодом, который представляет собой полную программу в этой ячейке. Для нее не требуется никаких других ячеек, файлов, пакетов или сетевых запросов.</li>
+          <li>Нажмите <em>в этой ячейке кнопку</em> <strong>▶ Выполнить</strong>. Под исходным кодом JavaScript должно появиться изображение.</li>
+        </ol>
+        <p>Чтобы вместо этого создать новую ячейку, перейдите на панель новой ячейки, при необходимости измените <strong>Md</strong> обратно на <strong>код</strong> и выберите <strong>JS - JavaScript</strong> в раскрывающемся списке языков. Вставьте код, затем нажмите <strong>▶ Выполнить</strong>. Если JavaScript скрыт, перейдите в <strong>☰ Меню → Языки</strong> и включите его.</p>
+        <pre><code data-graphic-example="javascript">(() =&gt; {
+  const canvas = document.createElement('canvas');
+  canvas.width = 360;
+  canvas.height = 220;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 360, 220);
+  ctx.strokeStyle = '#526170';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(20, 18, 320, 184);
+
+  function arrow(x1, y1, x2, y2, color) {
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 14 * Math.cos(angle - 0.5),
+               y2 - 14 * Math.sin(angle - 0.5));
+    ctx.lineTo(x2 - 14 * Math.cos(angle + 0.5),
+               y2 - 14 * Math.sin(angle + 0.5));
+    ctx.closePath();
+    ctx.fill();
+  }
+  arrow(110, 145, 280, 145, '#075d69'); // right
+  arrow(110, 145, 110, 48, '#064d91');  // up
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#14191f';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(110, 145, 10, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#14191f';
+  ctx.beginPath();
+  ctx.arc(110, 145, 3, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.font = '16px sans-serif';
+  ctx.fillText('r: right', 204, 168);
+  ctx.fillText('u: up', 124, 62);
+  ctx.fillText('n: toward you', 42, 190);
+  window.renderImage(canvas.toDataURL('image/png'));
+})();</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-canvas.png" alt="Снимок экрана из узкого окна браузера: SciREPL отображает систему координат на листе бумаги как вывод PNG под ячейкой холста JavaScript." loading="lazy" decoding="async">
+          <figcaption>Эта похожая диаграмма представляет собой <strong>сгенерированный вывод PNG</strong>, а не Markdown. Ячейка JavaScript создает его при выборе <strong>▶ Выполнить</strong>. Снимок экрана браузера с SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-canvas.png">Посмотреть полный снимок экрана браузера</a>
+        </figure>
+        <p>Попробуйте изменить <code>r: right</code> в <code>ctx.fillText(...)</code>, затем запустите ячейку снова. Обертка функции <code>(() =&gt; { ... })();</code> сохраняет переменные этого примера локальными, поэтому вы можете перезапускать ее без повторного объявления переменных верхнего уровня <code>const</code>.</p>
+        <p class="callout"><strong>Вызов отображения имеет значение.</strong> Оставьте <code>window.renderImage(canvas.toDataURL('image/png'))</code> в конце. Возврат обычной строки, такой как <code>'&lt;svg&gt;...&lt;/svg&gt;'</code>, из JavaScript отображает текст; это не превратит такую строку во встроенную диаграмму. Вам не нужно вставлять холст на страницу приложения.</p>
+      </section>
+
+      <section id="math">
+        <p class="step-label">Шаг 4 · Способ 3</p>
+        <h2>Объяснение изображения с помощью уравнений</h2>
+        <p>Используйте ячейку <strong>Markdown (Md)</strong> для математики в стиле TeX. Направления диаграмм образуют правую систему координат: <strong>вправо × вверх = внешняя нормаль</strong>. В матрице ниже первая строка — это <strong>r</strong>, вторая — <strong>u</strong>, а третья — <strong>n</strong>; нижние индексы представляют их компоненты в выбранной системе координат x, y, z.</p>
+        <ol class="lesson-steps">
+          <li>Нажмите значок <strong>✎ карандаша</strong> на <code>math_axes</code> или создайте новую ячейку с помощью <strong>код → Md</strong> на панели новой ячейки.</li>
+          <li>Используйте приведенный ниже полный текст. Разделители <code>$$</code> должны находиться в исходном тексте Markdown; не оборачивайте его в блок кода.</li>
+          <li>Нажмите <strong>▶ Выполнить</strong>, чтобы сохранить и отобразить Markdown. Вы должны увидеть уравнение векторного произведения и матрицу из трех строк, а не необработанные команды с обратным слэшем. Для этой ячейки языковое ядро не запускается.</li>
+        </ol>
+        <pre><code data-graphic-example="math">Right, up and outward normal form a right-handed frame.
+
+$$\mathbf{r} \times \mathbf{u} = \mathbf{n}$$
+
+Rows of the frame matrix: right, up, then outward normal.
+
+$$
+M = \begin{pmatrix}
+r_x &amp; r_y &amp; r_z \\
+u_x &amp; u_y &amp; u_z \\
+n_x &amp; n_y &amp; n_z
+\end{pmatrix}
+$$</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-equations.png" alt="Снимок экрана из узкого окна браузера: SciREPL отображает векторное произведение «вправо × вверх = нормаль» и матрицу системы координат из трех строк с помощью KaTeX в ячейке Markdown." loading="lazy" decoding="async">
+          <figcaption>KaTeX выполняет верстку математических выражений непосредственно из исходного текста <strong>Markdown</strong>. Это уравнения, а не рисунок, сгенерированный TeX. Снимок экрана браузера с SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-equations.png">Посмотреть полный снимок экрана браузера</a>
+        </figure>
+        <p class="callout"><strong>KaTeX не является полноценным компилятором TeX.</strong> Он выполняет рендеринг поддерживаемых математических обозначений, но не компилирует диаграммы TikZ или документ LaTeX целиком. Хотя в KaTeX указан <code>\includegraphics</code>, для него требуется параметр доверия, который SciREPL не включает в проверенном модуле рендеринга; здесь это не способ вставки изображений. Для картинок используйте Markdown SVG/PNG или холст JavaScript.</p>
+        <p>Для других символов и математических команд обратитесь к <a href="https://katex.org/docs/support_table.html">таблице поддержки KaTeX</a>; документация может описывать возможности, появившиеся позже встроенной версии SciREPL. Пример блокнота, использующего эти направления для объяснения перемещений кубика, см. в <a href="../tutorial/#open">руководстве по группам Маркова</a>.</p>
+      </section>
+
+      <section id="save">
+        <p class="step-label">Шаг 5</p>
+        <h2>Сохранение копии и определение того, что нужно перезапустить</h2>
+        <ol class="lesson-steps">
+          <li>Откройте <strong>☰ Меню → Экспорт книг и пакетов</strong>.</li>
+          <li>Выберите <strong>Книга (.srwb)</strong> и <strong>Только текущая вкладка</strong> для этого блокнота, затем нажмите <strong>Экспорт</strong>. Сохраните файл в месте, которое вы контролируете.</li>
+          <li>Чтобы снова открыть эту копию, используйте <strong>Меню → Импорт файла</strong>. При этом будет добавлена еще одна вкладка блокнота; она не заменит существующую.</li>
+          <li>Проверьте статический SVG, внедренный PNG и уравнения. Они берутся из сохраненного исходного текста Markdown и не требуют выполнения кода. Проверьте <code>canvas_axes</code> и запустите эту ячейку JavaScript снова, чтобы повторно сгенерировать ее изображение.</li>
+        </ol>
+        <p class="callout"><strong>Сгенерированный вывод не тождествен исходному коду.</strong> В проверенной браузерной сборке Free экспорт <code>.srwb</code> может сохранять вывод изображения JavaScript, однако ручной выбор <strong>Меню → Импорт файла</strong> не восстанавливает этот вывод кода. Исходный код JavaScript сохраняется, поэтому запустите его снова. Встроенный SVG, внедренный PNG и уравнения представляют собой исходный текст Markdown и отображаются при импорте. Не используйте отображавшийся ранее вывод в качестве доказательства того, что код только что был выполнен.</p>
+        <p>Эти проверки относятся к приведенным выше примерам блокнотов, а не к точности передачи изображений во всех форматах экспорта. Не предполагайте, что экспорт в PDF, DOCX, Markdown и другие форматы документов сохраняет каждое изображение одинаково; проверяйте экспортированный документ. Доступные форматы см. в разделе <a href="../../../files-export/">файлы и экспорт<span class="english-reference"> (Справочная страница на английском языке)</span></a>.</p>
+        <p>Экспорт отредактированного блокнота создает резервную копию ваших изменений; исходный скачанный пример не обновляется при редактировании ячейки. Локальное хранилище приложения не является резервной копией, а сеансы в Android и браузере не синхронизируют работу автоматически.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">Если что-то выглядит неправильно</p>
+        <h2>Проверьте тип ячейки и исходный код</h2>
+        <ul>
+          <li><strong>Отображается код SVG вместо диаграммы:</strong> убедитесь, что тип ячейки — <strong>Md</strong>, удалите обрамляющие блоки кода и выполните рендеринг ячейки снова. Используйте полный встроенный пример <code>&lt;svg&gt;...&lt;/svg&gt;</code>, а не SVG data URL.</li>
+          <li><strong>Отсутствует PNG:</strong> используйте ячейку <code>embedded_png</code> из сопутствующего файла или проверьте, что вы вставили строку <code>data:image/png;base64,...</code> целиком, без пробелов и переносов строк. Имя локального файла не является внедренными данными изображения.</li>
+          <li><strong>Код холста не выполняется:</strong> установите тип ячейки на <strong>код</strong>, а язык — на <strong>JS - JavaScript</strong>, а не Python. Сохраните обертку функции целиком и завершающий вызов <code>window.renderImage(...)</code>.</li>
+          <li><strong>В импортированной ячейке JavaScript нет изображения:</strong> импорт этого блокнота не запускает его и не восстанавливает вывод кода. Проверьте и снова запустите <code>canvas_axes</code>.</li>
+          <li><strong>Отображается необработанный TeX или математическая ошибка:</strong> используйте <strong>Md</strong>, укажите как открывающий, так и закрывающий <code>$$</code> и сверьте каждый обратный слэш и фигурную скобку с примером. Каждая строка матрицы, кроме последней, заканчивается двумя обратными слэшами, <code>\\</code>.</li>
+          <li><strong>При редактировании создалась лишняя ячейка:</strong> панель новой ячейки добавляет ячейки. Используйте значок <strong>✎ карандаша</strong> сохраненной ячейки, чтобы изменить существующую ячейку, а затем ее собственную кнопку <strong>▶ Выполнить</strong>. Используйте <strong>Отмена</strong>, если вы открыли ее редактор по ошибке.</li>
+        </ul>
+        <p>Иллюстрированный обзор сохраненных ячеек, значка карандаша и панели новой ячейки см. в <a href="../../interface/tutorial/">руководстве по интерфейсу первого блокнота</a>. Вернитесь к <a href="../../../workbooks/">справочнику по блокнотам<span class="english-reference"> (Справочная страница на английском языке)</span></a> для краткого напоминания о типах ячеек.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Справка SciREPL</span><nav aria-label="Навигация в подвале"><a href="../../../workbooks/">Справочник по блокнотам<span class="english-reference"> (Справочная страница на английском языке)</span></a><a href="../../../">Вся справка<span class="english-reference"> (Справочная страница на английском языке)</span></a></nav></footer>
+</body>
+</html>

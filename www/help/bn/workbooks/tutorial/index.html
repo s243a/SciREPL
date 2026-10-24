@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="bn" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SciREPL-এর ক্যাটালগে Markov Groups ওয়ার্কবুকটি খুঁজুন, এর Python সেলগুলো চালান, একটি র্যান্ডম ওয়াক সম্পাদনা করুন এবং আপনার নিজের ওয়ার্কবুকের অনুলিপি এক্সপোর্ট করুন।">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/bn/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/tutorial/tutorial.css">
+  <script src="../../../workbooks/tutorial/catalogue-link.js" defer></script>
+  <title>Markov Groups ওয়ার্কবুক ওয়াকথ্রু · SciREPL সহায়তা</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">সরাসরি মূল বিষয়বস্তুতে যান</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+    <nav aria-label="প্রধান নেভিগেশন">
+      <a href="../../../workbooks/">ওয়ার্কবুক রেফারেন্স<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+      <a href="../../tutorials/">সকল টিউটোরিয়াল</a>
+      <a href="../../../">সকল সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+      <a href="../../../../">Free PWA খুলুন</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="টিউটোরিয়ালের ভাষা"><details class="tutorial-language-menu"><summary>টিউটোরিয়ালের ভাষা: <bdi>বাংলা</bdi></summary><nav aria-label="টিউটোরিয়ালের ভাষা"><a href="../../../en/workbooks/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="./" lang="bn" hreflang="bn" aria-current="page">বাংলা</a>
+      <a href="../../../de/workbooks/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">মেশিন-অনূদিত টিউটোরিয়াল; স্থানীয় ভাষায় পর্যালোচনা প্রক্রিয়াধীন। কোড এবং প্রযুক্তিগত মানসমূহ অপরিবর্তিত। স্ক্রিনশটগুলোতে মূল ইংরেজি ইন্টারফেস দেখানো হয়েছে; আপনার অ্যাপের সাথে এই টেক্সটের অনূদিত কন্ট্রোল নামগুলো মিলিয়ে নিন।</p></aside>
+    <p class="breadcrumbs"><a href="../../../">সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / <a href="../../../workbooks/">ওয়ার্কবুক<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / Markov Groups ওয়াকথ্রু</p>
+    <article>
+      <p class="eyebrow">কাজের মাধ্যমে শিখুন</p>
+      <h1>ক্যাটালগ থেকে একটি ওয়ার্কবুক এক্সপ্লোর করুন</h1>
+      <p class="lede">বিদ্যমান <strong>Markov Groups: A Random Walk on Cube Moves</strong> ওয়ার্কবুকটি খুঁজুন, এর চারটি Python সেল চালান, এর র্যান্ডম ওয়াক সংক্ষিপ্ত করুন এবং আপনার নিজের একটি অনুলিপি সংরক্ষণ করুন। মূল উদ্দেশ্য হলো SciREPL ব্যবহার করা; আপনার ম্যাট্রিক্স অ্যালজেব্রা জানার বা রুবিকস কিউব মেলাতে পারার প্রয়োজন নেই।</p>
+      <p class="callout"><strong>অ্যাপটি ব্যবহার করা শিখতে চান?</strong> ধাপ 1–5 অনুসরণ করুন: একটি ওয়ার্কবুক খুঁজুন, খুলুন, চালান, সম্পাদনা করুন এবং এক্সপোর্ট করুন। আপনি ধাপ 5-এর পর থামতে পারেন। <a href="#optional-maths">ঐচ্ছিক গণিত</a> এর পরে রয়েছে; এই ওয়াকথ্রু সম্পন্ন করার জন্য এটির প্রয়োজন নেই।</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Android ধাপসমূহ</li>
+        <li class="chip">প্রায় 15 মিনিট</li>
+      </ul>
+      <p class="screen-note">আসল ফোনের স্ক্রিনশটগুলোতে SciREPL Pro <strong>1.4.0-debug</strong> প্রদর্শিত হয়েছে একটি <strong>Samsung Galaxy S24+</strong>-এ, যা <time datetime="2026-10-06">6 অক্টোবর 2026</time>-এ ক্যাপচার করা হয়েছে। এগুলো শেয়ার করা ওয়ার্কবুকের কার্যপ্রবাহ ব্যাখ্যা করে, কোনো প্রকাশিত Pro বিল্ড নয়। Free এবং অন্যান্য সংস্করণে কিছু কন্ট্রোল ভিন্নভাবে সাজানো থাকতে পারে। উদাহরণটি হলো SciREPL ক্যাটালগ <strong>v0.4.0</strong> থেকে নেওয়া ইংরেজি ওয়ার্কবুক।</p>
+      <nav class="lesson-nav" aria-label="ওয়ার্কবুক ওয়াকথ্রু-এর ধাপসমূহ">
+        <strong>এই পাঠে</strong>
+        <p><a href="#find-menu">প্রথমে মেনুটি খুঁজুন</a></p>
+        <ol>
+          <li><a href="#browse">ব্রাউজ, ফিল্টার এবং সার্চ করুন</a></li>
+          <li><a href="#open">ওয়ার্কবুকটি খুলুন</a></li>
+          <li><a href="#run">এর সেলগুলো ক্রমানুসারে চালান</a></li>
+          <li><a href="#edit">একটি মান পরিবর্তন করুন এবং পুনরায় চালান</a></li>
+          <li><a href="#export">আপনার ওয়ার্কবুকের অনুলিপি এক্সপোর্ট করুন</a></li>
+        </ol>
+        <p><a href="#optional-maths">ঐচ্ছিক: কিউব উদাহরণের পেছনের গণিত</a></p>
+        <p><a href="../../tutorials/">সকল টিউটোরিয়াল</a></p>
+      </nav>
+
+      <section id="find-menu">
+        <p class="step-label">শুরু করার আগে</p>
+        <h2>মেনুটি খুঁজুন</h2>
+        <p>SciREPL-এর <strong>অ্যাপের শীর্ষে থাকা হেডার সারিতে</strong> <strong>☰ Menu</strong> বোতামটি দেখুন। এর আইকনটি হলো <strong>তিনটি অনুভূমিক রেখা</strong>, যা নিচে হলুদ রঙে হাইলাইট করা হয়েছে। অ্যাপের মেনু খুলতে এতে ট্যাপ করুন; ধাপ 1 দেখায় কোন মেনু আইটেমটি বেছে নিতে হবে।</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--find-menu" role="img" aria-label="SciREPL-এর শীর্ষ হেডার সারি, যেখানে প্রশ্নবোধক চিহ্নযুক্ত Help বোতামের পাশে তিনটি অনুভূমিক রেখাবিশিষ্ট Menu বোতামটি হলুদ রঙে হাইলাইট করা রয়েছে।">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>এই স্ক্রিনশটে <strong>☰ Menu</strong> বোতামটি <strong>? Help</strong> বোতামটির পাশে রয়েছে। আপনার হেডারে ভিন্ন বিন্যাস থাকলেও তিন লাইনের আইকনটি ব্যবহার করুন।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-workbook.png">সম্পূর্ণ স্ক্রিনশটটি দেখুন</a>
+        </figure>
+      </section>
+
+      <section id="browse">
+        <p class="step-label">ধাপ 1</p>
+        <h2>ব্রাউজ, ফিল্টার এবং সার্চ করুন</h2>
+        <ol class="lesson-steps">
+          <li><strong>মেনু → প্যাকেজ, বান্ডিল ও ওয়ার্কবুক ব্রাউজ করুন</strong> খুলুন। Free-এ, ঐচ্ছিক <strong>📦</strong> হেডার শর্টকাটটি দৃশ্যমান থাকলে একই স্ক্রিন খোলে। <a href="../../interface/appearance/#browse-shortcut">Appearance ওয়াকথ্রু</a>-তে এটি কীভাবে সক্রিয় করতে হয় তা দেখানো হয়েছে।</li>
+          <li>তালিকাটি ব্রাউজ করুন অথবা এর ফিল্টারগুলো ব্যবহার করুন। এই ইংরেজি উদাহরণের জন্য, <strong>English</strong> বেছে নিন <strong>কথ্য ভাষা</strong>-এর অধীনে এবং <strong>Python</strong> বেছে নিন <strong>কার্নেল</strong>-এর অধীনে। <strong>সব কথ্য ভাষা</strong> এবং কার্নেলের <strong>সব</strong> বিকল্পটিও কাজ করে, তবে আরও এন্ট্রি দেখায়।</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse" role="img" aria-label="হলুদ রঙে হাইলাইট করা ক্যাটালগ কন্ট্রোলসহ SciREPL ব্রাউজ স্ক্রিন।">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-browse.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>ব্রাউজ প্যাকেজ, বান্ডেল এবং ওয়ার্কবুক টেমপ্লেটগুলোকে একত্রিত করে। এর সার্চ এবং ফিল্টারগুলো আপনাকে তালিকাটি সংকুচিত করতে সাহায্য করে।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-browse.png">সম্পূর্ণ ব্রাউজ স্ক্রিনশটটি দেখুন</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>সার্চ ফিল্ডে <strong>Markov Groups</strong> লিখুন। <strong>ওয়ার্কবুকসমূহ</strong>-এর অধীনে, <strong>Markov Groups: A Random Walk on Cube Moves</strong> খুঁজুন। ইনস্টল করার আগে পুরো শিরোনামটি পরীক্ষা করুন: এটি একটি ওয়ার্কবুক টেমপ্লেট, Python-এ যুক্ত করার মতো কোনো প্যাকেজ নয়।</li>
+          <li>কিবোর্ডটি ফলাফল ঢেকে ফেললে, এর হাইড-কিবোর্ড বোতাম ব্যবহার করুন অথবা এটি সরাতে একবার Android <strong>পূর্ববর্তী</strong> চাপুন। ব্রাউজ খোলা রাখুন এবং সংশ্লিষ্ট ওয়ার্কবুকটিতে স্ক্রোল করুন।</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--search" role="img" aria-label="সংশ্লিষ্ট ওয়ার্কবুক এবং এর Install কন্ট্রোল হলুদ রঙে হাইলাইট করা অবস্থায় Markov Groups-এর ব্রাউজ সার্চ।">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-search.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/search-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Markov Groups</strong> লিখে সার্চ করুন, তারপর সংশ্লিষ্ট ওয়ার্কবুকের শিরোনাম এবং <strong>ইনস্টল করুন</strong> বোতামটি পরীক্ষা করুন।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-search.png">সম্পূর্ণ সার্চ স্ক্রিনশটটি দেখুন</a>
+        </figure>
+        <p><strong>আর কী কী পাওয়া যায়?</strong> <a id="catalogue-workbooks-link" href="https://github.com/s243a/SciREPL-Catalog/tree/main/workbooks/en">GitHub-এ ওয়ার্কবুকের তালিকা ব্রাউজ করুন (<bdi id="catalogue-workbooks-language">English</bdi>)</a>। একটি পাঠের বিভিন্ন ভাষার সংস্করণগুলো পৃথক এন্ট্রি, ভিন্ন পাঠ নয়।</p>
+        <div class="catalogue-language-choice" id="catalogue-language-choice" hidden>
+          <label for="catalogue-workbooks-locale">ওয়ার্কবুকের ভাষা:</label>
+          <select id="catalogue-workbooks-locale">
+            <option value="ar" lang="ar">العربية</option>
+            <option value="bn" lang="bn">বাংলা</option>
+            <option value="de" lang="de">Deutsch</option>
+            <option value="en" lang="en" selected>English</option>
+            <option value="es" lang="es">Español</option>
+            <option value="fr" lang="fr">Français</option>
+            <option value="hi" lang="hi">हिन्दी</option>
+            <option value="id" lang="id">Bahasa Indonesia</option>
+            <option value="ja" lang="ja">日本語</option>
+            <option value="ko" lang="ko">한국어</option>
+            <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+            <option value="ru" lang="ru">Русский</option>
+            <option value="zh" lang="zh">中文</option>
+          </select>
+        </div>
+        <p>GitHub লিঙ্কটি সর্বশেষ ডেভেলপমেন্ট বিষয়বস্তু দেখায়। SciREPL সাধারণত সর্বশেষ স্থিতিশীল ক্যাটালগ রিলিজ ব্যবহার করে, তাই GitHub-এ প্রদর্শিত কিছু ওয়ার্কবুক এখনও ব্রাউজে নাও দেখা যেতে পারে। SciREPL-এ, সার্চ ক্লিয়ার করুন এবং <strong>CSV</strong>, <strong>Prolog</strong>, <strong>Lua</strong>, বা <strong>statistics</strong> চেষ্টা করে দেখুন; অন্যান্য ভাষাগুলো ঘুরে দেখার সময় Kernel-এর অধীনে <strong>সব</strong> বেছে নিন।</p>
+        <p class="callout"><strong>যদি গোপনীয়তা সংক্রান্ত নোটিশ দেখা যায়:</strong> দূরবর্তী ক্যাটালগ আনা বা রিফ্রেশ করার জন্য নেটওয়ার্ক সংযোগ প্রয়োজন। ডিসক্লোজারটি পড়ুন, <em>ডায়ালগের ভেতরে</em> একদম নিচে স্ক্রোল করুন, এবং কেবল সম্মত হলেই <strong>I Understand</strong>-এ ট্যাপ করুন। নোটিশটি বন্ধ করলে সেই নেটওয়ার্ক রিফ্রেশটি বন্ধ থাকবে; তবে বিল্ট-ইন এন্ট্রি এবং পূর্বে ক্যাশ করা ক্যাটালগ এন্ট্রিগুলো তখনও প্রদর্শিত হতে পারে। <a href="../../../privacy/">গোপনীয়তা এবং স্থানীয় ডেটা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> দেখুন।</p>
+        <p class="callout"><strong>কোনো মিল থাকা ওয়ার্কবুক খুঁজে পাচ্ছেন না?</strong> ভাষা এবং কার্নেল ফিল্টারগুলো পরীক্ষা করুন, তারপর ক্যাটালগের <strong>রিফ্রেশ</strong> কন্ট্রোলটি ব্যবহার করুন। কোনো পুরানো অ্যাপে একই ক্যাটালগ কন্ট্রোল নাও থাকতে পারে। বিকল্পভাবে, আপনার ডিভাইসে <a download="markov-groups.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/v0.4.0/workbooks/en/markov-groups.srwb">পিন করা v0.4.0 ওয়ার্কবুক ফাইলটি সংরক্ষণ করুন</a>, তারপর <strong>মেনু → Import File</strong> বেছে নিয়ে <code>markov-groups.srwb</code> নির্বাচন করুন। আপনার ব্রাউজার যদি ফাইলটিকে টেক্সট হিসেবে প্রদর্শন করে, তবে এর সংরক্ষণ/ডাউনলোড অপশন ব্যবহার করুন এবং <code>.srwb</code> এক্সটেনশনটি বজায় রাখুন। <a href="../import/">ম্যানুয়াল ওয়ার্কবুক ইমপোর্ট ওয়াকথ্রু</a>-তে GitHub-এর <code>main</code> শাখা থেকে Simpson's Paradox ব্যবহার করে ধাপগুলো দেখানো হয়েছে; এই পাঠটি চালিয়ে যেতে উপরের Markov ফাইলটি বেছে নিন।</p>
+      </section>
+
+      <section id="open">
+        <p class="step-label">ধাপ 2</p>
+        <h2>ওয়ার্কবুকটি খুলুন এবং এর সেলগুলো পরিদর্শন করুন</h2>
+        <ol class="lesson-steps">
+          <li>ওয়ার্কবুক কার্ডে <strong>ইনস্টল করুন</strong>-এ ট্যাপ করুন। বোতামটিতে ইতিমধ্যে <strong>ইনস্টল করা হয়েছে</strong> লেখা থাকলে, ব্রাউজ মেনু থেকে প্রস্থান করুন এবং এর পরিবর্তে ওয়ার্কবুক সিলেক্টর থেকে বিদ্যমান ওয়ার্কবুকটি বেছে নিন।</li>
+          <li>সাধারণত ওয়ার্কবুকটি নির্বাচিত ট্যাব হিসেবে চলে আসে। ব্রাউজ মেনুটি খোলা থাকলে, তা থেকে বের হয়ে আসুন। স্বয়ংক্রিয় পরিবর্তন বন্ধ থাকলে, <strong><bdi lang="en" dir="ltr">Markov Groups: A Random Walk on Cube Moves</bdi></strong> বেছে নিন <strong><svg role="img" aria-label="ডাউন-শেভরন" width="16" height="16" viewBox="0 0 16 16" style="vertical-align: -.125em;"><path d="M3 5.5 8 10.5 13 5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> ওয়ার্কবুক সিলেক্টর</strong> থেকে, যা রয়েছে <strong>SciREPL</strong> হেডারে।</li>
+          <li>শুরুর টেক্সটটি পড়ুন, তারপর সেলগুলো স্ক্রোল করে দেখুন। Markdown সেলগুলো পাঠটি ব্যাখ্যা করে; Python সেলগুলোতে এমন কোড রয়েছে যা আপনি চালাবেন। আপনাকে খুঁজে পেতে সাহায্য করার জন্য প্রতিটি Python সেলের একটি নাম রয়েছে।</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--workbook" role="img" aria-label="খোলা অবস্থায় Markov Groups ওয়ার্কবুক, যেখানে এর শিরোনাম এবং ওয়ার্কবুক কন্ট্রোলগুলো হলুদ রঙে হাইলাইট করা হয়েছে।">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/workbook-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>ক্যাটালগ ওয়ার্কবুকটি সম্পাদনাযোগ্য সেল হিসেবে খোলে। এর ভূমিকাতে Python চালানোর ক্রম দেওয়া রয়েছে।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-workbook.png">সম্পূর্ণ ওয়ার্কবুক স্ক্রিনশটটি দেখুন</a>
+        </figure>
+        <p class="callout"><strong>ইনস্টল মানেই চালানো নয়।</strong> এই দূরবর্তী ক্যাটালগ ওয়ার্কবুকটি ইনস্টল করলে এর Python কোড কার্যকর না করেই এর সেলগুলো যুক্ত হয়। v0.4.0 টেমপ্লেটে কোনো সংরক্ষিত Python আউটপুট নেই, তাই কোডটি পরীক্ষা করুন এবং নিজেই এটি চালান। কোনো এআই অ্যাকাউন্ট, API কি, বাহ্যিক ডেটাসেট বা অতিরিক্ত প্যাকেজ ইনস্টলেশনের প্রয়োজন নেই; কোডটিতে NumPy ব্যবহার করা হয়েছে SciREPL-এর Python রানটাইমের সাথে।</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">ধাপ 3</p>
+        <h2>চারটি Python সেল ক্রমানুসারে চালান</h2>
+        <p>কোনো সংরক্ষিত সেলের জন্য, সেই সেলের হেডারে থাকা <strong>✎ পেন্সিল</strong>-এ ট্যাপ করুন, তারপর সেই সেলের নিজস্ব <strong>রান করুন</strong>-এ ট্যাপ করুন। এটি বিদ্যমান সেলটিকে কার্যকর করে; নিচের নতুন-সেল প্যানেলটি একটি ভিন্ন সেল তৈরি করে।</p>
+        <aside class="callout" data-editions="pro"><strong>Pro শর্টকাট:</strong> সংরক্ষিত কোডের এডিটর খুলতে তাতে ডাবল-ট্যাপ করুন, তারপর সেই সেলের নিজস্ব <strong>Run</strong>-এ ট্যাপ করুন। এই ওয়াকথ্রুতে Free-এ ব্যবহার করা হয়েছে <strong>✎ পেন্সিল</strong> ।</aside>
+        <p class="callout"><strong>এই নামগুলোর অর্থ কী?</strong> <code>cube_moves</code> এবং <code>check_moves</code> হলো সেলে প্রদর্শিত নাম, টাইপ করার কোনো কমান্ড নয়। মিল থাকা নামটি খুঁজুন, তারপর সেই সেলের পেন্সিল এবং Run ব্যবহার করুন। <a href="../named-cells/">নেমড সেলস অ্যান্ড ক্রস-ল্যাঙ্গুয়েজ পাথস টিউটোরিয়াল</a>-এ দেখানো হয়েছে কীভাবে নাম নির্ধারণ করতে হয় এবং সেগুলোকে <code>/nb/cube_moves/.code</code>-এর মতো রেফারেন্স হিসেবে ব্যবহার করতে হয়।</p>
+        <ol class="lesson-steps">
+          <li><code>cube_moves</code> চালান। এটি মুভ এবং হেল্পারগুলোকে সংজ্ঞায়িত করে। প্রত্যাশিত ফলাফল: <code>Built six clockwise quarter-turn matrices with fixed face centres.</code></li>
+          <li><code>check_moves</code> চালান। এটি যাচাই করে যে কোনো স্টিকার হারিয়ে যায়নি, কেন্দ্রগুলো অপরিবর্তিত রয়েছে এবং প্রতিটি কোয়ার্টার টার্ন চারবার পুনরাবৃত্তি করলে শুরুতে ফিরে আসে। ছয়টি উত্তীর্ণ লাইনের পর, প্রত্যাশিত ফলাফল: <code>All six moves passed. U and R do not commute.</code></li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--checks" role="img" aria-label="ফোনে check_moves-এর নতুন আউটপুট, যেখানে উত্তীর্ণ যাচাইগুলো হলুদ রঙে হাইলাইট করা হয়েছে।">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-checks.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/checks-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>প্রিন্ট করা যাচাইগুলো <code>check_moves</code> চালানোর ফলে পাওয়া নতুন ফলাফল, ক্যাটালগের সরবরাহ করা কোনো সংরক্ষিত ফলাফল নয়।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-checks.png">যাচাইয়ের সম্পূর্ণ স্ক্রিনশটটি দেখুন</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li><code>show_turn</code> চালান। এটি একটি টার্নের আগে এবং পরে U-টার্ন সাইকেল এবং স্টিকার লেবেলগুলো প্রিন্ট করে। সামনের উপরের সারিটি <code>[19, 20, 21]</code> থেকে <code>[46, 47, 48]</code>-এ পরিবর্তিত হয়। <code>U then R equals R then U: False</code> তুলনাটি দেখায় যে মুভের ক্রম গুরুত্বপূর্ণ।</li>
+        </ol>
+        <p><strong>মুদ্রিত আউটপুটের অংশবিশেষ:</strong></p>
+        <pre id="show-turn-output" style="white-space: pre-wrap; overflow-wrap: anywhere;"><code>U cycles, shown as one-based sticker positions:
+1 -&gt; 3 -&gt; 9 -&gt; 7 -&gt; 1
+2 -&gt; 6 -&gt; 8 -&gt; 4 -&gt; 2
+19 -&gt; 37 -&gt; 28 -&gt; 46 -&gt; 19
+20 -&gt; 38 -&gt; 29 -&gt; 47 -&gt; 20
+21 -&gt; 39 -&gt; 30 -&gt; 48 -&gt; 21
+
+F top row labels before U: [19, 20, 21]
+F top row labels after U:  [46, 47, 48]
+
+U then R equals R then U: False</code></pre>
+        <p>ফেজ-লেটারের দীর্ঘ তালিকাটি এখানে বাদ দেওয়া হয়েছে। সাইকেল লাইনগুলোতে <strong>এক-ভিত্তিক অবস্থান</strong> ব্যবহৃত হয়; সারির তুলনাটি <strong>স্টিকার লেবেল</strong> প্রদর্শন করে। এগুলোর অর্থ ভিন্ন, যদিও মেলানো কিউব প্রাথমিকভাবে সেগুলোকে একই সংখ্যা প্রদান করে।</p>
+        <ol class="lesson-steps" start="4">
+          <li><code>random_walk</code> চালান। এটি একটি স্টিকারের মোট সম্ভাবনা <code>1.0</code>, একটি 12-ধাপের নমুনা পথ, চূড়ান্ত ফেজ-লেটার লেবেল এবং প্রতিটি স্টিকার লেবেল ও ছয়টি কেন্দ্রই সংরক্ষিত রয়েছে নিশ্চিত করে এমন একটি বার্তা প্রিন্ট করে।</li>
+        </ol>
+        <p>Python সেলগুলো ইতিমধ্যে প্রয়োজনীয় ক্রমানুসারে রয়েছে। সেগুলোর ক্রম পরিবর্তন করবেন না: পরবর্তী সেলগুলো <code>cube_moves</code>-এর সংজ্ঞাগুলো পুনরায় ব্যবহার করে। একসাথে কয়েকটি সেল চালানোর জন্য, <a href="#batch-run-note">Run All Below and Run All Cells</a> দেখুন।</p>
+        <p class="callout"><strong>প্রথমবার চালানো কি ধীরগতির?</strong> Python ইনিশিয়ালাইজ হতে সময় লাগতে পারে এবং কোনো রানটাইম ডাউনলোড বা নেটওয়ার্ক ফলব্যাকের জন্য আপনার সম্মতির প্রয়োজন হতে পারে। স্ট্যাটাস ব্যাজটি <strong>প্রস্তুত</strong>-এ ফিরে আসা পর্যন্ত অপেক্ষা করুন এবং কোনো ত্রুটির জন্য সেলের আউটপুট পরীক্ষা করুন। রিস্টার্ট করার পর যদি পরবর্তী কোনো সেল কোনো অনির্ধারিত নামের কথা জানায়, তবে শুরু থেকেই Python সেলগুলো চালান; সংরক্ষিত আউটপুট এবং লাইভ Python সংজ্ঞা এক নয়।</p>
+        <p>এই ওয়ার্কবুকটি টেক্সট এবং ফেজ-লেটারের তালিকা প্রিন্ট করে। এটি কোনো কিউব আঁকে না বা অ্যানিমেট করে না এবং এর সিডেড সংক্ষিপ্ত পথটি সুষমভাবে মিশ্রিত স্ক্র্যাম্বলের প্রমাণ নয়।</p>
+      </section>
+
+      <section id="edit">
+        <p class="step-label">ধাপ 4</p>
+        <h2>ওয়াকটি সংক্ষিপ্ত করুন এবং সংরক্ষিত সেলটি পুনরায় চালান</h2>
+        <ol class="lesson-steps">
+          <li><code>random_walk</code> খুঁজুন এবং <em>এর</em> <strong>✎ পেন্সিল</strong>-এ ট্যাপ করুন।</li>
+          <li>এই লাইনটি খুঁজুন এবং কেবল <code>size=12</code> এটিতে পরিবর্তন করুন <code>size=6</code>:
+            <pre><code>moves = rng.choice(MOVE_OPTIONS, size=12).tolist()</code></pre>
+            <p><code>np.random.default_rng(7)</code> অপরিবর্তিত রাখুন। সিড এই উদাহরণটিকে পুনরাবৃত্তিযোগ্য করে তোলে।</p>
+          </li>
+          <li>সেই সংরক্ষিত সেলের এডিটরে থাকা <strong>রান করুন</strong> বোতামে ট্যাপ করুন। আউটপুটটি রিফ্রেশ হয়; <code>Sampled moves:</code> লাইনটিতে এখন বারোটির পরিবর্তে ছয়টি বিকল্প থাকে। <code>I</code> একটি বিকল্প হিসেবে গণ্য হয় যদিও এটি কিউবটিকে স্থির রাখে।</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--edit" role="img" aria-label="সংরক্ষিত random_walk সেলটি সম্পাদনা করা হচ্ছে, যেখানে size equals six এবং সেলের Run কন্ট্রোল হলুদ রঙে হাইলাইট করা রয়েছে।">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-edit.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>সংরক্ষিত সেলে একটি মান পরিবর্তন করুন, তারপর <em>সেই সেলের</em> Run ব্যবহার করুন। শুধুমাত্র সম্পাদনা করলেই এর পূর্ববর্তী আউটপুট রিফ্রেশ হয় না।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-edit.png">সম্পাদনার সম্পূর্ণ স্ক্রিনশটটি দেখুন</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--six-moves" role="img" aria-label="পুনরায় চালানোর পর ছয়টি নমুনা বিকল্প প্রদর্শনকারী random_walk-এর নতুন আউটপুট, যা হলুদ রঙে হাইলাইট করা রয়েছে।">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-six-moves.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/six-moves-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>সংক্ষিপ্ত নমুনা পথটি হলো আপনার সম্পাদনার দৃশ্যমান ফলাফল। চূড়ান্ত বার্তাটি তখনও নিশ্চিত করে যে গতিপথটি স্টিকার লেবেল এবং কেন্দ্রগুলোকে সুরক্ষিত রাখে।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-six-moves.png">ছয়টি বিকল্পের ফলাফলের সম্পূর্ণ স্ক্রিনশটটি দেখুন</a>
+        </figure>
+        <p>এই পরিবর্তনের জন্য, পূর্ববর্তী সংজ্ঞাগুলো লোড থাকা অবস্থায় কেবল <code>random_walk</code> পুনরায় চালান। এর পরিবর্তে আপনি যদি <code>cube_moves</code> সম্পাদনা করেন, তবে পরবর্তী Python সেলগুলোও পুনরায় চালান। আউটপুটগুলো তাদের সর্বশেষ কার্যকরের হিসাব রাখে; অন্য কোনো সেল পরিবর্তিত হলে এগুলো স্বয়ংক্রিয়ভাবে পুনরায় গণনা করে না।</p>
+        <p>ভুলবশত এডিটর খুলে ফেললে, <strong>বাতিল</strong> বেছে নিন। মূল উদাহরণে ফিরে যেতে, <code>size=6</code>-কে পুনরায় পরিবর্তন করে <code>size=12</code> করুন এবং সেলটি আবার চালান।</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">ধাপ 5</p>
+        <h2>আপনার নিজের ওয়ার্কবুকের অনুলিপি এক্সপোর্ট করুন</h2>
+        <ol class="lesson-steps">
+          <li>Markov Groups ওয়ার্কবুকটি নির্বাচিত রাখুন, তারপর Export Document নয়, বরং <strong>মেনু → ওয়ার্কবুক ও প্যাকেজ এক্সপোর্ট করুন</strong> খুলুন।</li>
+          <li><strong>ওয়ার্কবুক (.srwb)</strong> এবং <strong>কেবল বর্তমান ট্যাব</strong> বেছে নিন।</li>
+          <li><strong>এক্সপোর্ট</strong>-এ ট্যাপ করুন এবং আপনার নিয়ন্ত্রণে থাকা কোনো স্থানে অনুলিপিটি সংরক্ষণ করুন। Android একটি শেয়ার/সংরক্ষণ প্রবাহ খোলে; ব্রাউজার একটি ফাইল ডাউনলোড করে। <code>.srwb</code> এক্সটেনশনটি বজায় রাখুন।</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="Workbook srwb, Current tab only এবং Export হলুদ রঙে হাইলাইট করা এক্সপোর্ট ডায়ালগ।">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Workbook ফরম্যাট এবং Current tab only সম্পর্কহীন ট্যাব অন্তর্ভুক্ত না করেই এই সম্পাদিত ওয়ার্কবুকটি সংরক্ষণ করে। শুধুমাত্র-Pro <strong>এআই কথোপকথন অন্তর্ভুক্ত করুন</strong> বিকল্পটি এই পাঠের জন্য প্রয়োজনীয় নয়; এটি আনচেক করা অবস্থাতেই রাখুন।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-export.png">এক্সপোর্টের সম্পূর্ণ স্ক্রিনশটটি দেখুন</a>
+        </figure>
+        <p>ওয়ার্কবুকটির জন্য কোনো পৃথক ডেটা ফাইলের প্রয়োজন নেই, তাই এই পাঠের জন্য একটি <code>.srwb</code> অনুলিপিই যথেষ্ট। আপনি <strong>মেনু → Import File</strong> দিয়ে এটি পুনরায় খুলতে পারেন; নতুন রানটাইম শুরু করার সময় এর Python সেলগুলো শুরু থেকে চালান।</p>
+        <p class="callout"><strong>স্থানীয় পুনরুদ্ধার কোনো ব্যাকআপ নয়।</strong> অ্যাপ/সাইট স্টোরেজ মুছে ফেলা বা আনইনস্টল করা স্থানীয় কাজ সরিয়ে দিতে পারে। Android এবং ব্রাউজার সেশনগুলো আপনার সম্পাদনা স্বয়ংক্রিয়ভাবে শেয়ার করে না। এক্সপোর্ট আপনার পরিবর্তনগুলো ক্যাটালগে প্রকাশ করে না; এটি আপনাকে একটি পৃথক অনুলিপি দেয়।</p>
+        <p>সংরক্ষিত-সেল সম্পাদনার প্রাথমিক বিষয়গুলোর জন্য, <a href="../../interface/tutorial/">প্রথম-ওয়ার্কবুক ইন্টারফেস ওয়াকথ্রু</a> দেখুন। একটি পৃথক ডেটা ফাইল পড়ে এবং বহন করে এমন একটি উদাহরণের জন্য, <a href="../../files-export/tutorial/">CSV ওয়ার্কবুক ওয়াকথ্রু</a> চেষ্টা করে দেখুন। <a href="../../../workbooks/">ওয়ার্কবুক রেফারেন্স<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>-এ সেলের ধরন এবং স্থায়ী সেলের নামগুলো অন্তর্ভুক্ত রয়েছে।</p>
+      </section>
+
+      <aside class="callout" id="batch-run-note" aria-labelledby="batch-run-heading">
+        <h3 id="batch-run-heading">Run All Below এবং Run All Cells</h3>
+        <ul>
+          <li><strong>Run All Below:</strong> কোনো সংরক্ষিত সেল এর <strong>✎ পেন্সিল</strong> দিয়ে খুলুন, তারপর <strong>নিচের সব সেল রান করুন</strong> বেছে নিন (কম্প্যাক্ট আইকনটি হলো <strong>▶↓</strong>)। এটি সেই সেলটি <em>এবং</em> এর নিচের প্রতিটি সেল ক্রমানুসারে চালায়।</li>
+          <li><strong>মেনু → Run All Cells:</strong> নির্বাচিত ওয়ার্কবুকটিকে এর প্রথম সেল থেকে শেষ সেল পর্যন্ত চালায়। এটি প্রতিটি ওয়ার্কবুক ট্যাব চালানোর কোনো কমান্ড নয়।</li>
+        </ul>
+        <p>প্রথমে কোডটি পরীক্ষা করুন এবং ব্যাচ চলার সময় এই ওয়ার্কবুকটি নির্বাচিত রাখুন। একটি নতুন Python সেশনের পর, <code>cube_moves</code> থেকে শুরু করুন যাতে পরবর্তী সেলগুলোতে তাদের সংজ্ঞা থাকে। এই অ্যাকশনগুলো কোড কার্যকর করে; কোনো ব্যাখ্যাকে “ঐচ্ছিক” বললে অ্যাপটি এর কোড সেলগুলো এড়িয়ে যায় না।</p>
+      </aside>
+
+      <p class="callout" id="walkthrough-complete"><strong>আপনি SciREPL ওয়াকথ্রুটি সম্পন্ন করেছেন।</strong> আপনি একটি ওয়ার্কবুক খুঁজে পেয়েছেন, খুলেছেন, চালিয়েছেন, সম্পাদনা করেছেন এবং এক্সপোর্ট করেছেন। আপনি যদি কেবল অ্যাপটি শিখতে চান, তবে এখানেই থামতে পারেন। আপনি যদি কিউব গণিত এবং ডেভেলপমেন্ট ওয়ার্কবুকটি এক্সপ্লোর করতে চান তবে নিচে চালিয়ে যান।</p>
+
+      <section id="optional-maths">
+        <p class="step-label">ঐচ্ছিক পঠন</p>
+        <h2>কিউব উদাহরণের পেছনের গণিত</h2>
+        <h3>আউটপুটের পেছনের কিছু তাৎপর্য</h3>
+        <p>ওয়ার্কবুকটি কেবল ছয়টি রঙ নয়, বরং <strong>54টি পৃথকভাবে লেবেলযুক্ত স্টিকার</strong> ট্র্যাক করে। একটি বৈধ মুভ সেই লেবেলগুলোকে পুনর্বিন্যস্ত করে। একটি কোয়ার্টার টার্নের চারবার পুনরাবৃত্তি শুরুর বিন্যাসে ফিরিয়ে নিয়ে যায়, তবে ভিন্ন ভিন্ন ফেজের টার্নগুলোর ক্রম পরিবর্তন করা হলে তা ভিন্ন ফলাফল দিতে পারে।</p>
+        <p>র্যান্ডম ওয়াকটি 13টি বিকল্পের মধ্য থেকে বেছে নেয়: স্থির থাকা (<code>I</code>), ছয়টি কোয়ার্টার টার্ন এবং সেগুলোর ছয়টি ইনভার্স। এর <strong>54×54 সম্ভাবনা ম্যাট্রিক্স একটি স্টিকারের অবস্থান বর্ণনা করে</strong>, পুরো কিউবের প্রতিটি কনফিগারেশন নয়। <code>1.0</code>-এর মোট সম্ভাবনা নির্দেশ করে যে এই স্টিকারের অবস্থানের সম্ভাবনাগুলোর যোগফল এক; এটি প্রমাণ করে না যে কিউবটি সুষমভাবে স্ক্র্যাম্বল হয়েছে।</p>
+        <p class="callout"><strong>ফেজের দিকগুলো সম্পর্কে জানতে আগ্রহী?</strong> ওয়ার্কবুকের <code>coordinates</code> সেলটি গ্লোবাল অক্ষ এবং প্রতিটি ফেজের ডান, উপর ও বহির্মুখী সাধারণ রেখা (নরম্যাল) প্রদান করে। <a href="../graphics/">ছবি, ডায়াগ্রাম এবং সমীকরণ টিউটোরিয়াল</a>-এ দেখানো হয়েছে কীভাবে এই ধরনের ব্যাখ্যা একটি ওয়ার্কবুকে অন্তর্ভুক্ত করতে হয়। ক্যাটালগের ডেভেলপমেন্ট কপিতে স্থানাঙ্ক ডায়াগ্রাম যুক্ত করা হচ্ছে; উপরের পিন করা v0.4.0 কপিতে এগুলো অন্তর্ভুক্ত নেই।</p>
+        <div id="stage4-preview">
+          <h3>ঐচ্ছিক: সংশোধিত পর্যায় 4-এর প্রিভিউ দেখুন</h3>
+          <p>উপরের ধাপগুলো এবং ফোনের স্ক্রিনশটগুলোতে স্থিতিশীল <strong>v0.4.0</strong> ওয়ার্কবুকটি ব্যবহার করা হয়েছে। <a download="markov-groups-stage4-preview.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/f88d9b9e26364eeb5e7ff1ee9bcce5f27d47c66e/workbooks/en/markov-groups.srwb">সংশোধিত ওয়ার্কবুক ডাউনলোডটি</a> একটি <strong>ডেভেলপমেন্ট প্রিভিউ</strong>, এখনও স্থিতিশীল ক্যাটালগ নয়। আপনি যদি এর সংক্ষিপ্ত, ইন্টারলিভড ব্যাখ্যা এবং কোড সেলগুলো চেষ্টা করতে চান তবে <strong>মেনু → Import File</strong> দিয়ে এটি ইমপোর্ট করুন।</p>
+          <p>সেই প্রিভিউতে, উপরের মতোই প্রথমে <code>cube_moves</code>, <code>check_moves</code> এবং <code>show_turn</code> চালান। তারপর:</p>
+          <ol class="lesson-steps">
+            <li><code>transition_matrix</code> চালান। এটি <code>T</code> তৈরি করে, যা সুষমভাবে নির্বাচিত একটি বিকল্পের পর একটি স্টিকারের অবস্থানের সম্ভাবনা ম্যাট্রিক্স: <code>I</code>, একটি ফেজ কোয়ার্টার টার্ন, বা এর ইনভার্স।</li>
+            <li><code>sticker_step</code> চালান। এটি <strong>স্টিকার লেবেল 1</strong>-কে অনুসরণ করে, যা প্রাথমিকভাবে <strong>শূন্য-ভিত্তিক অবস্থান 0</strong>-এ থাকে। এর অবস্থানের সম্ভাবনাগুলোর সমষ্টি হলো <code>1.0</code>। নিচের চার্টটি সেই সেলের গণনা করা গন্তব্যের সম্ভাবনাগুলো প্রদর্শন করে।</li>
+          </ol>
+          <figure id="sticker-probability-figure" aria-describedby="sticker-probability-caption" style="margin: 24px 0;">
+            <img src="../../../workbooks/tutorial/assets/sticker-one-step.svg" width="400" height="380" style="display: block; width: min(100%, 560px); height: auto;" alt="একটি র্যান্ডম মুভের পর, স্টিকার লেবেল 1-এর অবস্থান 0-এ থাকার সম্ভাবনা তেরো ভাগের সাত ভাগ, এবং অবস্থান 2, 6, 18, 35, 42 বা 47-এ পৌঁছানোর সম্ভাবনা প্রতিটির ক্ষেত্রে তেরো ভাগের এক ভাগ।">
+            <figcaption id="sticker-probability-caption"><strong>একটি সম্ভাবনা বার চার্ট, কোনো বিনযুক্ত হিস্টোগ্রাম নয়।</strong> এই চিত্রটি <code>after_one_step = T @ location_probability</code> থেকে গণনা করা হয়েছে; এটি কোনো ফোনের স্ক্রিনশট বা ওয়ার্কবুকের তৈরি নতুন আউটপুট নয়। অবস্থানগুলো শূন্য-ভিত্তিক। অন্য 47টি অবস্থানের সম্ভাবনা শূন্য এবং সেগুলো বাদ দেওয়া হয়েছে। স্টিকারের লেবেল 1 হিসেবেই থাকে।</figcaption>
+          </figure>
+          <div class="table-wrap">
+            <table aria-label="স্টিকার লেবেল 1-এর জন্য নিখুঁত এক-ধাপের সম্ভাবনা">
+              <thead><tr><th>গন্তব্য অবস্থান</th><th>সম্ভাবনা</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>7/13 ≈ 53.85%</td></tr>
+                <tr><td>2, 6, 18, 35, 42, 47 (প্রতিটি)</td><td>1/13 ≈ 7.69%</td></tr>
+                <tr><td>অন্যান্য সকল 47টি অবস্থান</td><td>0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <ol class="lesson-steps" start="3">
+            <li><code>random_walk</code> চালান। এটি একটি 12-বিকল্পের পথ নমুনা হিসেবে নেয় <strong>পুরো কিউবের</strong> জন্য, <code>transition_matrix</code>-এর সংজ্ঞাগুলো ব্যবহার করে। এটি উপরের এক-স্টিকারের সম্ভাবনাগুলো থেকে ভিন্ন। ধাপ 4-এর <code>size=12</code> সম্পাদনাটি উভয় সংস্করণেই এই সেলে কাজ করে।</li>
+          </ol>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL সহায়তা</span><nav aria-label="ফুটার নেভিগেশন"><a href="../../../workbooks/">ওয়ার্কবুক রেফারেন্স<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a><a href="../../../">সকল সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a></nav></footer>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="zh" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="通过“菜单”→“外观”显示 SciREPL 的“浏览”快捷方式，并调整顶栏按钮、“运行”标签、主题以及 Android 状态栏空间。">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/zh/interface/appearance/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../interface/appearance/tutorial.css">
+  <title>外观演练 · SciREPL 帮助</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/appearance/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/appearance/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/appearance/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/appearance/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/appearance/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/appearance/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/appearance/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/appearance/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/appearance/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/appearance/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/appearance/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/appearance/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/appearance/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/appearance/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">跳转到主要内容</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (英文参考页面)</span></a>
+    <nav aria-label="主导航">
+      <a href="../../../interface/">界面参考<span class="english-reference"> (英文参考页面)</span></a>
+      <a href="../../tutorials/">所有教程</a>
+      <a href="../../../">所有帮助<span class="english-reference"> (英文参考页面)</span></a>
+      <a href="../../../../">打开 Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="教程语言"><details class="tutorial-language-menu"><summary>教程语言: <bdi>简体中文</bdi></summary><nav aria-label="教程语言"><a href="../../../en/interface/appearance/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/appearance/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/appearance/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/appearance/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/appearance/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/appearance/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/appearance/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/appearance/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/appearance/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/interface/appearance/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/appearance/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/appearance/" lang="ru" hreflang="ru">Русский</a>
+      <a href="./" lang="zh" hreflang="zh" aria-current="page">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">本教程为机器翻译，母语审校待完成。代码和技术参数保持不变。屏幕截图显示原始英文界面；请将本文中翻译的控件名称与您的应用相对应。</p></aside>
+    <p class="breadcrumbs"><a href="../../../">帮助<span class="english-reference"> (英文参考页面)</span></a> / <a href="../../../interface/">界面<span class="english-reference"> (英文参考页面)</span></a> / 外观演练</p>
+    <article>
+      <p class="eyebrow">定制属于您的专属界面</p>
+      <h1>显示“浏览”并调整“外观”</h1>
+      <p class="lede">将 <strong>📦 浏览</strong> 快捷方式放置在 <strong>SciREPL Free</strong> 的顶栏中，然后选择舒适的按钮以及浅色或深色主题。通用的外观控件在 Pro 中也很有用；另外专门针对 Pro 的独立章节介绍了全屏编辑、额外按键和实时语法颜色。您无需更改或运行任何工作簿单元格即可完成此操作。</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro（见标签）</li>
+        <li class="chip">Android 屏幕截图</li>
+        <li class="chip">约 3 分钟</li>
+      </ul>
+      <p class="screen-note">这五张屏幕截图是 <strong>SciREPL Free 1.4.0-debug</strong> 在 <strong>Samsung Galaxy S24+</strong> 上的真实截图，拍摄于 <time datetime="2026-10-06">6 日，十月 2026 年</time>。它们展示的是 debug 签名的应用，而非来自 Play 商店的安装版本。图中所示步骤使用的是 Free 1.4.0 控件。“浏览”的顶栏快捷方式仅限 Free；Pro 用户可从“菜单”中打开同一目录。下文仅限 Pro 的文本已针对 Pro 1.4.0 代码库进行了验证；这些 Free 图片并未展示那些控件，且较早版本的菜单可能有所不同。</p>
+      <nav class="lesson-nav" aria-label="外观演练步骤">
+        <strong>本课内容</strong>
+        <ol>
+          <li><a href="#open-appearance">打开“外观”</a></li>
+          <li><a href="#browse-shortcut">显示“浏览”快捷方式</a></li>
+          <li><a href="#buttons">调整按钮和“运行”</a></li>
+          <li><a href="#pro-editor">仅限 Pro：全屏编辑、额外按键和实时颜色</a></li>
+          <li><a href="#theme">选择主题</a></li>
+          <li><a href="#android-space">可选的 Android 空间与恢复</a></li>
+        </ol>
+        <p><a href="../../tutorials/">所有教程</a></p>
+      </nav>
+
+      <section id="open-appearance">
+        <p class="step-label">步骤 1</p>
+        <h2>打开“菜单”→“外观”</h2>
+        <ol class="lesson-steps">
+          <li>找到应用顶部顶栏中的三条横线按钮 <strong>☰ 菜单</strong>。</li>
+          <li>点按它，然后选择 <strong>🎨 外观</strong>。如果菜单高度超过屏幕，可在其内部滚动以找到该条目。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-menu" role="img" aria-label="用黄色高亮标出“外观”条目的 SciREPL 菜单。">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>从应用菜单中选择 <strong>🎨 外观</strong>。</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-menu.png">查看完整的“菜单”屏幕截图</a>
+        </figure>
+        <p class="callout"><strong>更改会在您选择时立即生效。</strong> 下方的常规控件无需“保存”或“应用”按钮。通过 <strong>×</strong> 关闭“外观”不会取消您的更改，并且您的选择会在下次访问应用时保留。</p>
+      </section>
+
+      <section id="browse-shortcut">
+        <p class="step-label">步骤 2</p>
+        <h2>Free 1.4.0：显示 📦“浏览”快捷方式</h2>
+        <p><strong>使用的是 Pro？</strong> 请跳过此快捷方式设置，改用 <strong>菜单 → 浏览软件包、合辑与工作簿</strong>。接下来的几节将介绍通用的外观控件。</p>
+        <ol class="lesson-steps">
+          <li>打开 <strong>菜单 → 外观</strong>，然后滚动至 <strong>页眉快捷方式</strong>。</li>
+          <li>找到 <strong>显示浏览快捷方式</strong> 并选择 <strong>始终显示</strong>。</li>
+          <li>使用 <strong>×</strong> 关闭“外观”。此时顶栏中会出现 <strong>📦</strong> 按钮；点按它即可打开 <strong>浏览软件包、合辑与工作簿</strong>。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-shortcuts" role="img" aria-label="SciREPL Free 的“顶栏快捷方式”部分，其中“显示‘浏览’快捷方式”及其优先级箭头以黄色高亮显示。">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-shortcuts.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/shortcuts-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>在 <strong>Free 1.4.0</strong> 中，使用 <strong>显示浏览快捷方式</strong> 旁的下拉菜单来决定 📦 按钮是否保持可见。</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-shortcuts.png">查看完整的快捷方式屏幕截图</a>
+        </figure>
+        <p>这些选项各有不同用途：</p>
+        <ul>
+          <li><strong>始终：</strong>保持快捷方式可见，即使顶栏需要增加一行。</li>
+          <li><strong>有空间时：</strong>“浏览”的默认设置。仅在空间合适时显示；屏幕较窄、按钮较大或状态消息较长都可能导致其消失。</li>
+          <li><strong>从不：</strong>隐藏顶栏快捷方式。</li>
+        </ul>
+        <p><strong>↑</strong> 和 <strong>↓</strong> 按钮用于更改当空间紧张时哪个可选快捷方式优先让出位置。将快捷方式上移可使其保持显示更久，下移则让其更早消失。它们改变的是优先级，而非图标在顶栏中的显示位置。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-header" role="img" aria-label="用黄色高亮标出包裹箱“浏览”快捷方式的 SciREPL Free 顶栏。">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-header.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/header-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Free 的 <strong>📦</strong> 顶栏快捷方式打开的目录与 <strong>菜单 → 浏览软件包、合辑与工作簿</strong> 相同。</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-header.png">查看完整的顶栏屏幕截图</a>
+        </figure>
+        <p class="callout"><strong>没有 📦 按钮？</strong> 当快捷方式被隐藏或您的版本未提供该功能时，“菜单”途径仍然有效。若想保持顶栏紧凑，请将“浏览”恢复为 <strong>空间足够时</strong>，而不要强行让每个可选快捷方式都保持可见。</p>
+        <p>如果您来到这里是为了查找工作簿，现在可以<a href="../../workbooks/tutorial/#browse">返回马尔可夫群演练</a>并搜索该目录。</p>
+      </section>
+
+      <section id="buttons">
+        <p class="step-label">步骤 3</p>
+        <h2>选择舒适的按钮与“运行”标签</h2>
+        <p>重新打开 <strong>菜单 → 外观</strong> 并找到 <strong>按钮</strong>。移动 <strong>按钮大小</strong> 滑块；其百分比和旁边的 <strong>预览</strong> 会立即变化。默认值为 <strong>100%</strong>。较大的顶栏按钮可能更容易点按，但会给可选快捷方式留下更少的空间。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-options" role="img" aria-label="用黄色高亮标出“外观”的布局和按钮控件，包括“隐藏 Android 状态栏”和“按钮大小”。">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-options.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/options-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>按钮大小</strong> 用于调整顶栏控件。仅限 Android 的状态栏设置将在下文说明。</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-options.png">查看完整的布局和按钮屏幕截图</a>
+        </figure>
+        <p><strong>运行按钮</strong> 下拉菜单控制的是<em>新建单元格面板</em>中的“运行”，而不是已保存单元格编辑器内部的“运行”按钮：</p>
+        <ul>
+          <li><strong>自动（空间紧张时仅显示图标）：</strong>默认设置。空间合适时保留标签，或者仅使用 ▶ 图标以为键入腾出空间。</li>
+          <li><strong>仅图标：</strong>始终使用紧凑的 ▶ 按钮。</li>
+          <li><strong>始终显示标签：</strong>即使在窄屏上也保留文字。</li>
+        </ul>
+        <p>“外观”中没有文本缩放滑块。<strong>按钮大小</strong> 不是通用的字号设置。Free 1.4.0 和 Pro 1.3.0 会自动放大紧凑的顶栏控件，以适应 Android 的系统文本缩放。</p>
+      </section>
+
+      <section id="pro-editor">
+        <p class="step-label">可选 · 仅限 Pro</p>
+        <h2>仅限 Pro：全屏编辑、额外按键和语法颜色</h2>
+        <p>这些是 <strong>SciREPL Pro 1.4.0</strong> 编辑器控件，而非上方 Free 屏幕截图中展示的控件。额外按键和实时颜色是独立的设置。</p>
+        <h3>进入全屏编辑</h3>
+        <ol class="lesson-steps">
+          <li><strong>新建单元格：</strong>点按新建单元格代码字段中的 <strong>⤢ 全屏</strong> 按钮。其向外的对角箭头表示展开编辑器。</li>
+          <li><strong>已保存单元格：</strong>点按该单元格的 <strong>✎ 铅笔</strong> 进行编辑，然后点按该单元格代码字段角落的 <strong>⤢</strong>。</li>
+        </ol>
+        <p>编辑器将占据整个屏幕，以便容纳更多代码。已启用的额外按键和建议条在键盘上方仍然可用；语法颜色使用下文所述的相同设置。进入全屏<strong>不会</strong>运行代码。</p>
+        <p>点按<strong>顶部的编辑器标签</strong>即可返回工作簿并保留草稿打开状态；<strong>上一步</strong> 或 <kbd>Esc</kbd> 也能退出全屏模式。对于已保存的单元格，<strong>完成</strong> 会应用草稿而不运行它，而 <strong>取消</strong> 则会放弃本次编辑。对于新建单元格，“完成”和“取消”都会退出全屏，既不清除草稿也不创建单元格；“运行”是一项独立操作。</p>
+        <p><strong>与“面板使用全屏”不同。</strong>“外观”中的该独立选项控制的是面板和对话框的上边距；它不会打开全屏代码编辑器。</p>
+        <h3>显示额外按键行</h3>
+        <p>打开 <strong>菜单 → 补全 → 分区： → 通用</strong>。设置 <strong>键盘上方的附加按键： → 开启</strong>；默认值为 <strong>关闭</strong>。该行提供 Esc、Tab、取消缩进、箭头、Home、End、运行以及标点符号。向侧方滑动可访问未完全显示出来的按键。选择“开启”并不会运行代码，但该行中的 <strong>▶ 运行</strong> 键会运行——在点按它之前请检查源代码。</p>
+        <p>在同一部分中，<strong>竖屏中的候选项：</strong> 和 <strong>横屏中的候选项：</strong> 可选择 <strong>独立一行</strong> 或 <strong>替换附加按键</strong>。默认设置为竖屏时“独立行”，横屏时“替换额外按键”：当候选词出现时，它们可以暂时取代按键的位置。关闭额外按键后，建议条将使用独立行。<strong>横屏附加工具行：</strong> 提供 <strong>关闭</strong>、<strong>空间足够时</strong>（默认）或 <strong>始终显示</strong>。“有空间时”会使用 <strong>最少可见代码行数：</strong>（初始为 <strong>8</strong>），因此较矮的横屏视图可以隐藏可选行。</p>
+        <h3>开启或关闭实时语法颜色</h3>
+        <p>打开 <strong>菜单 → 外观 → 输入时语法着色</strong>。选择 <strong>开启</strong> 可在编辑时为支持的代码着色，选择 <strong>关闭</strong> 则显示为纯文本。默认设置 <strong>自动（桌面端开启，触控端关闭）</strong> 会在桌面浏览器中启用颜色，而在手机上保持关闭。如果键入时感觉不够流畅，请选择“关闭”；在性能较低的设备上着色会影响键入速度。超过 <strong>6000 个字符</strong>的代码即使在“开启”状态下也不会着色。</p>
+        <p>着色不会验证或执行代码，不会发送 API 请求，也不会开启补全功能。更改此设置会立即生效，并且不会更改您的源代码。</p>
+        <h3>“文件与存储”包含单独的开关</h3>
+        <p>对于文本文件，请使用 <strong>菜单 → 文件与存储 (VFS / Paths)</strong>，选择该文件，然后选择 <strong>全屏</strong>。该编辑器的 <strong>语法高亮</strong> 复选框独立于“外观”的实时颜色设置，且默认处于关闭状态。它不适用于无法识别的文件类型或超过 100,000 个字符的文件。其额外按键共用“补全”偏好设置，但在文件编辑器空间不足时可能会隐藏。文件 <strong>保存</strong> 会写入您的编辑；仅切换颜色则不会。</p>
+      </section>
+
+      <section id="theme">
+        <p class="step-label">步骤 4</p>
+        <h2>选择浅色、深色或系统主题</h2>
+        <p>滚动到 <strong>主题</strong> 并选择 <strong>深色</strong>、<strong>浅色</strong> 或 <strong>跟随系统</strong>。深色为默认选项。“跟随系统”会遵循您设备上的浅色/深色偏好；这是由您做出的选择，并非默认项。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-theme" role="img" aria-label="用黄色高亮标出“外观”的“主题”下拉菜单。">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-theme.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/theme-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>选择内置主题，然后关闭“外观”以继续在该选择下使用应用。</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-theme.png">查看完整的主题屏幕截图</a>
+        </figure>
+        <p>在本课中，您不需要 <strong>自定义</strong>、<strong>自定义…</strong>、主题 JSON 编辑器或 <strong>高级：自定义 CSS</strong>。这些高级选项不属于本新手演练的范围。</p>
+      </section>
+
+      <section id="android-space">
+        <p class="step-label">可选的收尾调整</p>
+        <h2>Android 空间与恢复默认设置</h2>
+        <p>在 <strong>布局</strong> 下，保持选中 <strong>顶部边距 → 自动</strong>。它会遵循设备报告的安全区域，使顶栏上方留有适当的空间；您无需猜测像素值。</p>
+        <p>在 Android 应用中，<strong>隐藏 Android 状态栏</strong> 提供：</p>
+        <ul>
+          <li><strong>从不：</strong>默认设置；保持时钟和通知状态栏可见。</li>
+          <li><strong>横屏时：</strong>手机处于横屏状态时隐藏该栏；竖屏时恢复显示。</li>
+          <li><strong>始终：</strong>在两种屏幕方向下均予以隐藏。</li>
+        </ul>
+        <p>此设置仅影响 Android <em>状态</em>栏，不影响导航栏或手势栏。该设置在浏览器/PWA 以及 Windows 界面中不存在。Pro 1.3.0 则代之以一个名为 <strong>横屏时隐藏 Android 状态栏</strong> 的复选框。</p>
+        <p class="callout"><strong>想要撤销外观更改？</strong> <strong>恢复默认设置</strong> 可恢复默认主题、顶栏按钮大小、上边距、快捷方式以及状态栏偏好设置，并移除自定义主题/CSS 选项。它不会清除您的工作簿单元格。它<em>不会</em>重置独立的“运行”按钮或界面语言偏好设置；如有需要，请自行选择“运行”的 <strong>自动</strong> 选项。</p>
+        <p>完成后使用 <strong>×</strong> 关闭“外观”。接下来可继续阅读<a href="../../workbooks/tutorial/">马尔可夫群工作簿演练</a>，或返回<a href="../../../interface/">简明界面参考<span class="english-reference"> (英文参考页面)</span></a>。</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL 帮助</span><nav aria-label="页脚导航"><a href="../../../interface/">界面参考<span class="english-reference"> (英文参考页面)</span></a><a href="../../../">所有帮助<span class="english-reference"> (英文参考页面)</span></a></nav></footer>
+</body>
+</html>

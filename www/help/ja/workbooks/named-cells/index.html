@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ja" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SciREPLセルに名前を付け、/nb仮想ファイルシステム経由でそのソースと出力を読み取り、JavaScript、Bash、Pythonの間でデータまたは生成されたコードを受け渡します。">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ja/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/named-cells/tutorial.css">
+  <title>名前付きセルと言語間のパス · SciREPL ヘルプ</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/named-cells/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/named-cells/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/named-cells/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/named-cells/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/named-cells/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/named-cells/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/named-cells/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/named-cells/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/named-cells/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">コンテンツへスキップ</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (英語のリファレンスページ)</span></a>
+    <nav aria-label="プライマリナビゲーション"><a href="../../../workbooks/">ワークブックリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a><a href="../../tutorials/">すべてのチュートリアル</a><a href="../../../">すべてのヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a><a href="../../../../">Free PWAを開く</a></nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="チュートリアルの言語"><details class="tutorial-language-menu"><summary>チュートリアルの言語: <bdi>日本語</bdi></summary><nav aria-label="チュートリアルの言語"><a href="../../../en/workbooks/named-cells/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/named-cells/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/named-cells/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/named-cells/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/named-cells/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/named-cells/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/named-cells/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/named-cells/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="./" lang="ja" hreflang="ja" aria-current="page">日本語</a>
+      <a href="../../../ko/workbooks/named-cells/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/named-cells/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/named-cells/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/named-cells/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">機械翻訳されたチュートリアルです。ネイティブによるレビューは保留中です。コードおよび技術的な値は変更されていません。スクリーンショットにはオリジナルの英語インターフェースが表示されています。本文中の翻訳されたコントロール名をアプリと照合してください。</p></aside>
+    <p class="breadcrumbs"><a href="../../../">ヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a> / <a href="../../../workbooks/">ワークブック<span class="english-reference"> (英語のリファレンスページ)</span></a> / 名前付きセルとパス</p>
+    <article>
+      <p class="eyebrow">実践しながら学ぶ</p>
+      <h1>セルに名前を付けてプログラムを連携する</h1>
+      <p class="lede">セルには位置だけで識別される代わりに、<code>numbers</code>のような便利な名前を付けることができます。他のセルは<code>/nb/numbers/.output</code>を通じてその最新のテキスト出力を読み取ったり、<code>/shared/</code>内の通常のファイルを介してデータを交換したりできます。JavaScriptとBashで両方のルートを試してから、別のセルで小さなBashプログラムを生成してください—生成されたコードを自動実行することはありません。</p>
+      <ul class="meta"><li class="chip chip-free">Free + Proのワークフロー</li><li class="chip">ブラウザで検証済みの例</li><li class="chip">約15分</li></ul>
+      <p class="screen-note">ウォークスルーとスクリーンショットは、<strong>SciREPL Freeブラウザビルド</strong>において<time datetime="2026-10-06">6日 十月 2026年</time>に確認されました。これらは幅の狭いブラウザの完全なキャプチャであり、<strong>Androidのスクリーンショットではありません</strong>。Proおよびすべてのリリース済みバージョンについて、このガイドでの確認は行われていません。メインの演習では同梱のJavaScriptおよびBashを使用します。パッケージ、モデルの呼び出し、ランタイムのダウンロードは不要です。Pythonは任意の最終ステップです。</p>
+      <p class="callout"><strong>ここでの「パス」の意味:</strong><code>/nb/</code>はプログラムから利用可能な、<em>現在選択されているワークブックのセル</em>の仮想ビューです。これはAndroidの「ダウンロード」内のフォルダではなく、独立した「パスビュー」画面でもありません。確認済みのFreeバージョンの<strong>ファイルとストレージ</strong>画面では<code>/nb/</code>を閲覧できません。後ほど、その画面で表示できる共有ファイルに意図的に一部のデータをコピーします。</p>
+      <nav class="lesson-nav" aria-label="名前付きセルのウォークスルーの手順">
+        <strong>このレッスンで学ぶこと</strong>
+        <ol>
+          <li><a href="#open">小さなサンプルワークブックをインポートする</a></li>
+          <li><a href="#name">セルの名前を見つけて変更する</a></li>
+          <li><a href="#produce">データ生成セルを実行する</a></li>
+          <li><a href="#paths">パスを通じてセルを読み取る</a></li>
+          <li><a href="#shared-file">共有JSONファイルを介してデータをやり取りする</a></li>
+          <li><a href="#generate">別のセルのソースを生成し、自身で実行する</a></li>
+          <li><a href="#update">データを変更して結果を更新する</a></li>
+        </ol>
+        <p><a href="#python">任意のPythonリーダー</a> · <a href="#more">その他のワークブックの例</a> · <a href="#troubleshooting">問題が発生した場合</a></p>
+        <p><a href="../../tutorials/">すべてのチュートリアル</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">ステップ1</p>
+        <h2>実行せずに例をインポートする</h2>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/named-cells/assets/named-cell-interop.srwb" download="named-cell-interop.srwb">名前付きセルのサンプルワークブック（.srwb）をダウンロードします</a>。ファイル自体を保存し、その<code>.srwb</code>拡張子を保持してください。ブラウザにテキストが表示される場合は、保存またはダウンロード機能を使用してください。</li>
+          <li>SciREPLの上部ヘッダーで、<strong>☰ Menu</strong>（<strong>三本の水平線</strong>があるボタン）を見つけます。これを開いて<strong>📂 ファイルをインポート (例: .srwb, .ipynb, .csv, .py, .zip)</strong>を選択してください。必要に応じてメニュー内をスクロールします。</li>
+          <li>デバイスのファイルピッカーで<code>named-cell-interop.srwb</code>を選択します。メニューが開いたままの場合は閉じ、ワークブックセレクターで新しい<strong>Named Cell Interop</strong>タブを選択してください。セレクターの<strong>▾</strong>矢印はアプリタイトルの近くにあります。既存のワークブックは保持されます。</li>
+          <li>はじめにを読み、<code>numbers</code>、<code>inspect_cells</code>、<code>write_shared</code>、<code>read_shared</code>、<code>generate_report</code>、<code>bash_report</code>、<code>python_total</code>という名前の七つのコードセルを見つけます。演習を進められるよう、これらにはあらかじめ名前が付けられています。</li>
+        </ol>
+        <p class="callout"><strong>インポートは実行ではありません。</strong>通常の<code>.srwb</code>インポートでは、自動実行が有効になっている場合でもコードは実行されません。このレッスンではRun All Cellsを選択しないでください。順序が重要であり、最後のPythonセルは任意です。見慣れないコードは実行前に確認してください。</p>
+        <p>ダウンロードとピッカーの手順についての詳細が必要ですか？<a href="../import/">手動ワークブックインポートのウォークスルー</a>をご利用ください。このレッスンを進めるには、<strong>Named Cell Interop</strong>を選択したままにしてください。<code>/nb/</code>は開いているすべてのタブではなく、アクティブなワークブックを指します。</p>
+      </section>
+
+      <section id="name">
+        <p class="step-label">ステップ2</p>
+        <h2>セルの名前を見つけて変更する</h2>
+        <p>保存されたコードセルのヘッダーには<strong>In[…]プロンプトラベル</strong>があり、名前付きセルにはその名前も表示されます。名前付けに使用するのはこのラベルであり、セルのソースを編集する<strong>✎ 鉛筆</strong>ではありません。表示される番号は保存されたカードを識別するものであり、並べ替え後に<code>/nb/In[N]/...</code>パス内のセルの現在位置と一致する必要はありません。参照には名前を使用することをお勧めします。</p>
+        <figure class="phone-figure">
+          <div class="annotated-shot" role="img" aria-label="numbersセルのInラベルと鉛筆コントロールが黄色で囲まれたブラウザのスクリーンショット。そのソースとJSON出力が下に表示されています。">
+            <img src="../../../workbooks/named-cells/assets/browser-named-cell.png" alt="" loading="lazy" decoding="async">
+            <img class="shot-annotation" src="../../../workbooks/named-cells/assets/browser-named-cell-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          </div>
+          <figcaption>二つの黄色い枠線は、ダブルクリックまたは長押しで名前変更ダイアログを開く保存済みセルの<strong>In[…]ラベル</strong>と、ソースエディターを開く<strong>✎ 鉛筆</strong>を示しています。右側には<code>numbers</code>という名前が表示されます。このブラウザキャプチャはステップ3の後の出力を示しています。デスクトップでは、カードの上にカーソルを置くとコントロールが表示されます。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-named-cell.png">ブラウザの完全なスクリーンショットを表示</a>
+        </figure>
+        <ol class="lesson-steps">
+          <li><code>numbers</code>を見つけます。デスクトップでは、<strong>そのIn[…]ラベルをダブルクリック</strong>します。タッチデバイスでは、<strong>そのラベルを長押し</strong>します。確認済みのビルドでは、シングルクリックは名前付け操作ではありません。</li>
+          <li>ダイアログで<code>numbers</code>を<code>measurements</code>に置き換え、<strong>OK</strong>で確定します。セルヘッダー内の名前が変更されます。ソースと言語は変更されません。</li>
+          <li>もう一度同じダイアログを開いて、名前を<strong>再び<code>numbers</code></strong>に戻し、<strong>OK</strong>を選択してください。後続のセル群がその名前を使用するため、続ける前に元に戻しておきます。</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-name-dialog.png" alt="寸法が入力され、確認およびキャンセル操作部を備えたSciREPL Freeのセル名ダイアログの狭いブラウザスクリーンショット。" loading="lazy" decoding="async">
+          <figcaption>名前は専用のダイアログで編集します。セルの名前を変更しても他のセル内の参照は書き換えられません。新しい名前を維持する場合、<code>/nb/numbers/.output</code>も変更する必要があります。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-name-dialog.png">ブラウザの名前指定ダイアログの完全なスクリーンショットを表示</a>
+        </figure>
+        <p><code>cube_moves</code>や<code>check_moves</code>のような、わかりやすくシンプルな名前を選びます。名前はワークブック内で一意である必要があり、<code>/</code>を含めたり、<code>.</code>で始めたり、<code>In[2]</code>のような予約済みの位置ラベルにすることはできません。名前を空にすると削除されます。</p>
+        <p>チュートリアルで<strong>「<code>cube_moves</code>を実行し、次に<code>check_moves</code>を実行する」</strong>と指示できるのはこのためです。これらはワークブック内で探すべきセル名であり、別途ダウンロードが必要なファイルではありません。セルを挿入または移動する際、位置よりも名前の方が優れた参照手段になります。</p>
+      </section>
+
+      <section id="produce">
+        <p class="step-label">ステップ3</p>
+        <h2>データを生成するセルを実行する</h2>
+        <p><code>numbers</code>を探します。そのセル自体の<strong>✎ 鉛筆</strong>をタップしてソースを確認し、セルが<strong>コード → JS - JavaScript</strong>であることを確認してください。それから、別のセルを追加してしまう新規セルパネルではなく、<em>その保存済みセルの</em> <strong>▶ 実行</strong>ボタンを使用します。</p>
+        <p class="callout"><strong>Proのショートカット：</strong>保存済みセルのエディタは、<strong>セルのソーステキストをダブルタップすること</strong>によってもProで開けます。<strong>✎ 鉛筆</strong>は両方のエディションで動作します。この編集ショートカットは、名前を変更するために<strong>In[…]ラベル</strong>をダブルクリックまたは長押しする操作とは異なります。</p>
+        <pre><code data-cell-example="numbers">console.log(JSON.stringify({values: [3, 5, 8]}));</code></pre>
+        <p>次のような単一行の出力を想定してください：</p>
+        <pre><code>{"values":[3,5,8]}</code></pre>
+        <p>結果は<strong>JSONテキスト</strong>です。その構造により、散文のメッセージよりも他の言語から読み取りやすくなっています。生きたJavaScriptオブジェクトを渡したり、JavaScript変数をBashやPythonと共有したりしているわけではありません。</p>
+      </section>
+
+      <section id="paths">
+        <p class="step-label">ステップ4</p>
+        <h2>仮想ファイルシステム経由でセルを読み取る</h2>
+        <p><code>numbers</code>の仮想ディレクトリにはドット接頭辞付きのプロパティがあります。パスは、ワークブックのマウント、セル識別子、および必要なプロパティを組み合わせたものです：</p>
+        <pre class="path-tree" aria-label="numbersセルの仮想パス"><code>/nb/                         current workbook's cells
+└── numbers/                 this named cell
+    ├── .code                source text
+    ├── .output              latest text output
+    ├── .language            javascript
+    ├── .type                code
+    └── .name                numbers</code></pre>
+        <div class="table-wrap">
+          <table>
+            <caption>ワークブックパスインターフェースで使用されるセルプロパティ</caption>
+            <thead><tr><th scope="col">プロパティ</th><th scope="col">読み取りによって取得できる内容</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>.code</code></th><td>そのソースが実行されたかどうかに関わらず、現在のソース。</td></tr>
+              <tr><th scope="row"><code>.output</code></th><td>最新のテキスト出力。これは読み取り専用であり、実行によって提供されます。空であったり古くなっていたりする場合があります。</td></tr>
+              <tr><th scope="row"><code>.language</code></th><td><code>javascript</code>や<code>bash</code>などの保存された言語識別子。</td></tr>
+              <tr><th scope="row"><code>.type</code></th><td><code>code</code>や<code>markdown</code>などのセルタイプ。</td></tr>
+              <tr><th scope="row"><code>.name</code></th><td>割り当てられた名前。セルに名前がない場合は空のテキスト。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>今度は<strong>✎ 鉛筆</strong>を<code>inspect_cells</code>で開き、<strong>コード → Bash</strong>を確認して実行します。これはプロデューサーのソース、そのJSON出力、およびその言語を読み取った後、現在のワークブックのセル識別子を一覧表示します。セルやファイルを書き込んだり変更したりすることはありません。</p>
+        <pre><code data-cell-example="inspect_cells">printf 'Source:\n'
+cat /nb/numbers/.code
+printf '\nOutput:\n'
+cat /nb/numbers/.output
+printf '\nLanguage:\n'
+cat /nb/numbers/.language
+printf '\nCell names and positions:\n'
+ls /nb/</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-cell-paths.png" alt="inspect_cells Bashセルがnumbersセルのソース、JSON出力、言語、および仮想セル一覧を表示している狭いブラウザスクリーンショット。" loading="lazy" decoding="async">
+          <figcaption>Bashは一見普通に見える<code>cat</code>パスでセルのプロパティを読み取ります。これらのパスはワークブックのデータを指定しており、Androidシェルやスマートフォンの物理フォルダは関係していません。SciREPL Freeのブラウザキャプチャ。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-cell-paths.png">ブラウザのセルパスの完全なスクリーンショットを表示</a>
+        </figure>
+        <h3>名前、位置、および相対参照</h3>
+        <p>同じセルは<strong>現在の1始まりの位置</strong>で指定することもでき、たとえば<code>/nb/In[2]/.output</code>は現在の順序で二番目のセルを意味します。Markdownセルも数えます。これは恒久的なカード識別子ではありません。順序を並べ替えた後、表示されるIn[…]の番号はこのパスで使用される位置と異なる場合があります。位置参照はセルの並べ替えや挿入を行うと意味が変わりますが、名前参照は指定された名前のセルを特定し続けます。</p>
+        <p>BashとJavaScriptは実行中セルからの相対参照もサポートしています。<code>/nb/-1/.output</code>は前のセルを意味し、<code>/nb/./.code</code>は現在のセルを意味します。これらには実行コンテキストが必要であり、セルの順序に依存します。本チュートリアルでは代わりに明示的な名前を使用しており、相対参照があらゆる言語で同一に動作することに依存していません。</p>
+      </section>
+
+      <section id="shared-file">
+        <p class="step-label">ステップ 5</p>
+        <h2>共有ファイルを介してデータを交換する</h2>
+        <p><strong>共有仮想ファイルシステム</strong>には、異なる言語カーネルが使用できる通常のファイルが保持されます。ここでの<code>/shared/</code>は、お使いのSciREPLブラウザ／アプリセッションの内部で管理されるストレージを意味し、Androidのダウンロードやパソコン上のフォルダ、クラウド同期ではありません。共有ファイルはテキストまたはバイトを保持しますが、ある言語の実行中変数を別の言語で利用できるようにするものではありません。</p>
+        <div class="table-wrap">
+          <table>
+            <caption>プログラムがデータを参照する二つの方法</caption>
+            <thead><tr><th scope="col">パス</th><th scope="col">指定する対象</th><th scope="col">更新するもの</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>/nb/numbers/.output</code></th><td>選択したワークブック内のセルの最新のテキスト出力。</td><td>そのセルを再実行すること。</td></tr>
+              <tr><th scope="row"><code>/shared/data/named-cell-tutorial/values.json</code></th><td>カーネルやワークブックのタブをまたいで利用可能な通常のJSONファイル。</td><td>そのファイルに明示的に書き込むプログラムまたはファイルエディタ。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>通常のJSONファイルを書き込む</h3>
+        <p><strong>✎ 鉛筆</strong>を<code>write_shared</code>で開き、<strong>コード → JS - JavaScript</strong>を確認して実行します。これにより作成元の最新のテキスト出力が読み取られ、共有JSONテキストファイルとして保存されます。共有ファイルシステムは必要に応じて親フォルダを作成します。</p>
+        <pre><code data-cell-example="write_shared">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+window.sharedVFS.writeFile('/shared/data/named-cell-tutorial/values.json', text, 'javascript');
+console.log('Saved JSON to /shared/data/named-cell-tutorial/values.json');</code></pre>
+        <p>その結果は<strong>コピーを含む別のファイル</strong>（JSON出力）であり、<code>/nb/numbers/.output</code>の別名ではありません。専用フォルダによって、この例の小さな一時ファイルが他のデータと分けて保持されます。<code>write_shared</code>を再実行すると、まさにこのレッスンファイルが上書きされます。</p>
+        <h3>別のプログラムからファイルを読み取る</h3>
+        <p><strong>✎ 鉛筆</strong>を<code>read_shared</code>で開き、<strong>コード → JS - JavaScript</strong>を確認して実行します。この独立したプログラムは、<code>numbers</code>セルではなく保存されたファイルを読み取ります:</p>
+        <pre><code data-cell-example="read_shared">const text = window.sharedVFS.readFile('/shared/data/named-cell-tutorial/values.json', 'utf8');
+if (!text) throw new Error('Run write_shared first.');
+const record = JSON.parse(text);
+console.log(record.values.reduce((sum, value) =&gt; sum + value, 0));</code></pre>
+        <p><code>16</code>が出力されることを想定します。明示的な<code>'utf8'</code>は、JSONによる解析のためにファイルのバイト列をテキストとして読み取ります。各カーネルには独自のファイルAPIがあります。ここではJavaScriptが共有ファイルシステムのヘルパーを使用し、下のオプションのステップに示すように、Pythonは<code>open(...)</code>を使用できます。これは完全なオペレーティングシステムのファイルシステムではありません。</p>
+        <p>言語間の別の確認として、新しい<strong>コード → Bash</strong>セルを追加してこのコマンドを実行できます。同じ通常のファイルを読み取り、<code>{"values":[3,5,8]}</code>を出力します:</p>
+        <pre><code>cat /shared/data/named-cell-tutorial/values.json</code></pre>
+        <h3>ファイルGUIで同じファイルを表示する</h3>
+        <ol class="lesson-steps">
+          <li><strong>☰ メニュー → ファイルとストレージ</strong>を開きます。</li>
+          <li>共有 <code>data</code> フォルダを見つけ、次に <code>named-cell-tutorial</code> と <code>values.json</code> を見つけます。ファイルを選択してその JSON テキストを表示します。</li>
+          <li><code>{"values":[3,5,8]}</code> が含まれていることを確認し、Files &amp; Storage を閉じてワークブックの作業を続行します。</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-shared-values.png" alt="SciREPL Free の Files &amp; Storage 画面で、コピーされた values.json ファイルとその JSON コンテンツを表示しているナローブラウザスクリーンショット。" loading="lazy" decoding="async">
+          <figcaption>共有ファイルシステムへの明示的なコピーにより、ファイル GUI で JSON が利用可能になります。確認された Free 画面には <code>/nb/</code> 自体は一覧表示されません。SciREPL Free のブラウザキャプチャ。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-shared-values.png">ブラウザの共有ファイルの完全なスクリーンショットを表示</a>
+        </figure>
+        <p class="callout"><strong>コピーは自動的には更新されません。</strong><code>numbers</code> を変更または再実行すると、その最新のセル出力は変更されますが、既存の <code>values.json</code> は変更されません。コピーを更新するには <code>write_shared</code> を再実行し、その後そこから再計算するために <code>read_shared</code> を実行します。ファイルはローカルのアプリ/ブラウザストレージに保持されますが、そのストレージを消去したりアプリをアンインストールしたりすると削除される可能性があります。ローカルでの永続化はバックアップではありません。保持する必要があるファイルはエクスポートしてください。</p>
+        <p>共有ファイルの表示、編集、エクスポートについては、<a href="../../files-export/tutorial/#edit-file">CSV および Files &amp; Storage のウォークスルー </a> を参照してください。ワークブックのみの <code>.srwb</code> エクスポートには、この JSON コピーのような個別のファイルは含まれません。ワークブックと選択したデータファイルを一緒に含めるには、<a href="../../files-export/tutorial/#export">Package archive エクスポート</a> を使用してください。</p>
+      </section>
+
+      <section id="generate">
+        <p class="step-label">ステップ 6</p>
+        <h2>別のセルのコードを生成し、自分で実行する</h2>
+        <p>これまで Bash は JavaScript の出力を読み取ってきました。今度は JavaScript がその同じ JSON テキストを使用して合計を計算し、短い Bash プログラムを <em>既存の</em> <code>bash_report</code> セルに書き込みます。コードの記述とコードの実行は二つの別々のアクションです。</p>
+        <ol class="program-flow" aria-label="データと生成されたコードのフロー">
+          <li><code>numbers</code><span>実行 → JSON テキスト</span></li>
+          <li><code>generate_report</code><span>JSON を読み取り → Bash ソースを書き込み</span></li>
+          <li><code>bash_report</code><span>確認 → 手動で実行</span></li>
+        </ol>
+        <p class="callout"><strong>この書き込みはソースを置き換えます。</strong>保持する必要がある作業を含むセルではなく、コンパニオンのスクラッチ <code>bash_report</code> セルを使用してください。独自のワークブックでソースの書き込みを試す前にバックアップを作成してください。この演習では、ジェネレータ自体を上書きしたり、<code>.language</code> をプログラムで変更したりしないでください。</p>
+        <ol class="lesson-steps">
+          <li><code>bash_report</code> が存在し、その言語が <strong>Bash</strong> であることを確認します。その初期ソースは以下に示されています。まだ実行しないでください。</li>
+          <li><strong>☰ Menu → 設定 → ノートブック VFS</strong> を開きます。ジェネレータの書き込みには <strong>セルが他のセルを変更することを許可</strong> がオンになっている必要があります。チェック済みのビルドではデフォルトでオンになっていますが、設定を確認してください。ノートブック間の読み取り、ノートブック間の書き込み、またはプログラムによる実行を有効にする必要は<em>ありません</em>。Settings を閉じます。</li>
+          <li><strong>✎ 鉛筆</strong>を <code>generate_report</code> 上で開き、<strong>コード → JS - JavaScript</strong> を確認して実行します。</li>
+        </ol>
+        <pre><code data-cell-example="generate_report">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+const data = JSON.parse(text);
+const total = data.values.reduce((sum, value) =&gt; sum + value, 0);
+const updated = window.notebookVFS.writeFile(
+  '/nb/bash_report/.code', `echo "Total: ${total}"`
+);
+if (!updated) throw new Error('Check bash_report exists and cell writes are allowed.');
+console.log('Updated bash_report source; inspect it, then run it yourself.');</code></pre>
+        <p>ターゲットはこのプレースホルダーで始まります:</p>
+        <pre><code data-cell-example="bash_report">echo "Run generate_report first"</code></pre>
+        <p>ジェネレータが成功すると、<code>bash_report</code> のソースは <code>echo "Total: 16"</code> になります。この書き込みによって <strong>Bash が実行されたわけではありません</strong>。そのセルの <strong>✎ 鉛筆</strong> を開いて新しいソースを確認し、<em>それ自体の</em> <strong>▶ 実行</strong> をタップします。<code>Total: 16</code> となるはずです。</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-generated-report.png" alt="SciREPL Free のナローブラウザスクリーンショット。bash_report 内の生成された Bash ソース echo Total: 16 と、手動実行後の Total: 16 を表示しています。" loading="lazy" decoding="async">
+          <figcaption>ターゲットは依然として Bash セルです。JavaScript がそのソースを提供し、あなたが行った個別の <strong>▶ 実行</strong> アクションがその下の出力を生成しました。SciREPL Free のブラウザキャプチャ。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-generated-report.png">ブラウザの生成されたレポートの完全なスクリーンショットを表示</a>
+        </figure>
+        <p><code>readFile(...)</code> はテキストを返します。未知のセルまたはプロパティは <code>null</code> を返します。<code>writeFile(...)</code> は書き込みが成功したかどうかを報告します。ジェネレーター内のチェックにより、プロデューサーに出力がない場合や宛先に書き込めない場合は停止します。名前は大文字と小文字が区別されます。正確な綴りを維持してください。</p>
+      </section>
+
+      <section id="update">
+        <p class="step-label">ステップ 7</p>
+        <h2>データを変更し、依存する各ステップを更新する</h2>
+        <ol class="lesson-steps">
+          <li><code>numbers</code> をその <strong>✎ 鉛筆</strong> で編集します。<code>[3, 5, 8]</code> を <code>[4, 5, 8]</code> に変更し、そのセルを実行します。その JSON には <code>4</code> が含まれるようになります。</li>
+          <li>他のものを実行する前に <code>bash_report</code> を確認してください。以前のソースと出力は変更されないままです。依存関係の自動更新はありません。</li>
+          <li><code>generate_report</code> を再実行します。これによりレポートのソースが <code>echo "Total: 17"</code> に変更されますが、古い <code>Total: 16</code> の出力が表示されたままになることがあります。</li>
+          <li><code>bash_report</code> を検査して再実行します。出力が <code>Total: 17</code> になります。</li>
+          <li>ファイルを更新する前に <code>read_shared</code> を再実行します。以前のまま <code>16</code> が表示されますが、これは古い JSON コピーによるものです。次に <code>write_shared</code> を再実行し、続いて <code>read_shared</code> を再実行します。ファイルルートにも <code>17</code> が表示されます。Files &amp; Storage で <code>values.json</code> を再度開いて、変更されたファイルを確認します。</li>
+        </ol>
+        <p class="callout"><strong>ソース、出力、コピーされたファイルは異なるものです。</strong> コンシューマーの前に、そのセルの <strong>▶ 実行</strong> で開いているソースの編集を完了してください。保存されていないエディターの下書きは、保存されている <code>.code</code> ではありません。ソースの書き込みによって宛先が実行されることはなく、コピーされたファイルがその後の変更に追従することもありません。プロデューサー → ジェネレーター → レポートという明示的な順序に従ってください。古い出力が見えていることは、現在のソースが実行されたことの証明にはなりません。</p>
+        <p>ソースの編集内容と名前を保持するには、ワークブックをエクスポートします。通常の <code>.srwb</code> インポートでは現在、保存されたコード出力が破棄されるため、再度開いた後は、リーダーの前に <code>numbers</code> を再実行し、次にジェネレーターとレポートを再実行してください。個別の共有データファイルには、ファイルまたはパッケージのエクスポートが必要です。<a href="../../../files-export/">ファイルとエクスポートのリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a> を参照してください。</p>
+      </section>
+
+      <section id="python">
+        <p class="step-label">オプション</p>
+        <h2>Python から両方のルートを読み取る</h2>
+        <p>Python を開始せずにここで終了することもできます。三番目の言語を試すには、まず <code>numbers</code> と <code>write_shared</code> を実行し、次に <code>python_total</code> を <strong>コード → Python</strong> として検査して実行します:</p>
+        <pre><code data-cell-example="python_total">import json
+record = json.loads(nb_read('numbers', '.output'))
+print('Cell output:', sum(record['values']))
+with open('/shared/data/named-cell-tutorial/values.json') as source:
+    saved = json.load(source)
+print('Shared file:', sum(saved['values']))</code></pre>
+        <p>元のデータには <code>Cell output: 16</code> と <code>Shared file: 16</code>、あるいは両方の行に <code>17</code> が表示されるのは、ステップ 7 で両方のルートを更新した後です。Python の <code>nb_read('numbers', '.output')</code> は、名前付きセルの最後のテキスト出力を読み取ります。独立した <code>open(...)</code> は、通常の Python ファイル構文を使用して共有ファイルを読み取ります。標準の <code>json</code> モジュールが両方を解析するため、<code>%pip install</code> は不要です。プロデューサーのみが更新された場合、二つの合計は異なる場合があります。</p>
+        <p>初回使用時、Python はランタイムの初期化またはダウンロードが必要になる場合があります。ビルドや既存の同意状況に応じてプライバシー／ネットワークに関する通知が表示されることがあります。同意する前にお読みください。このオプションのステップは JavaScript／Bash の演習には必須ではなく、コンパニオンをインポートしただけでは Python は起動しません。</p>
+      </section>
+
+      <section id="more">
+        <p class="step-label">探索を続ける</p>
+        <h2>他のワークブックでパターンを認識する</h2>
+        <p>名前付きセルはシンプルな相互運用の境界を提供します。一つのプログラムがテキストを生成し、別のプログラムがそれを読み取るか、ソースの生成に使用します。カタログには、確認できるより大きな例がすでに用意されています:</p>
+        <ul>
+          <li><strong>平均余命の分析</strong> は通常の CSV ファイルを <code>/shared/data/</code> から、Python および R で読み取ります。これは名前付きセルの読み取りではなく、共有ファイルルートです。データセットをダウンロードし、パッケージを使用します。実行する前にセットアップと同意の要件をお読みください。</li>
+          <li><strong>Prolog が R を生成</strong> は名前付き Prolog ソースを <code>nb_read(..., '.code', ...)</code> で読み取り、生成された R ソースを <code>nb_write('r_factorial', '.code', ...)</code> で書き込みます。R セルは個別に実行されます。</li>
+          <li><strong>Prolog が TypR を生成</strong> は生成された定義を名前付きのソース専用クエリセルと結合し、<code>typr_output</code> を書き込みます。<code>#!source</code> セルは実行しなくてもソースとして読み取り可能です。</li>
+        </ul>
+        <p>これらのタイトルは<strong>☰ Menu → Browse Packages…</strong>で検索してください。これらは発展的な読書資料であり、<strong>本ガイド向けに認定された実行ウォークスルーではありません</strong>。利用可能なエディションや必要な設定が異なります。Prologが生成するワークブックには、Browse経由でインストールされる<strong>unifyweaver-scirepl</strong>の依存関係が必要です。生のワークブックを単にインポートするだけでは、この依存関係はインストールされません。手動でインポートした<code>.ipynb</code>については、その設定下でJupyterのインポートがコードを実行する可能性があるため、まず<strong>メニュー → 設定 → インポートと編集 → ワークブックのインポート時にセルを自動実行</strong>がオフになっていることを確認してください。<a href="../tutorial/">Browseのウォークスルー</a>および<a href="../import/">手動インポートガイド</a>を参照してください。</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">何か問題が発生した場合は</p>
+        <h2>名前、ワークブック、および実行順序を確認する</h2>
+        <ul>
+          <li><strong>命名ダイアログが開かない場合：</strong>保存済みセルのソース、出力、鉛筆アイコンではなく、<strong>In[…]ラベル</strong>をダブルクリックまたは長押ししてください。シングルクリックは命名の操作ではありません。</li>
+          <li><strong>プロデューサーが見つからない場合：</strong><strong>Named Cell Interop</strong>を選択したままにし、正確な名前<code>numbers</code>を復元して、スペルと大文字・小文字を確認してください。名前を変更しても、他のセル内のパスは書き直されません。</li>
+          <li><strong>ジェネレーターに「Run numbers first」と表示される場合：</strong><code>numbers</code>を確認して実行してください。ソースをインポートしたり単に編集したりするだけでは、<code>.output</code>には値が設定されません。</li>
+          <li><strong>JSONの解析に失敗する場合：</strong>プロデューサーを完全な例と比較してください。その出力は見出しや余分な出力メッセージではなく、JSONのみである必要があります。</li>
+          <li><strong>レポートを書き込めなかった場合：</strong>既存の<code>bash_report</code>セルがこのワークブック内に存在し、<strong>セルが他のセルを変更することを許可</strong>がオンになっていることを確認してください。ソース書き込みの問題を解決するためにプログラムによる実行を有効にしないでください。</li>
+          <li><strong>レポートが依然として16のままである場合：</strong>データを編集した後、<code>numbers</code>を実行し、次に<code>generate_report</code>、続いて<code>bash_report</code>を実行してください。コピーされたファイルは<code>write_shared</code>で個別に更新し、その後<code>read_shared</code>を再実行してください。</li>
+          <li><strong>Files &amp; Storageに /nb が見つからない場合：</strong>その画面には共有ファイルが表示され、チェック対象ビルドにおけるこの仮想セルマウントは表示されません。代わりに<code>write_shared</code>を実行し、意図的に作成されたその<code>values.json</code>コピーを探してください。</li>
+        </ul>
+        <p><a href="../../interface/tutorial/">最初のワークブックのインターフェースチュートリアル</a>ではヘッダーと保存済みセルの鉛筆アイコンについて説明しており、<a href="../graphics/">グラフィックチュートリアル</a>ではセルが結果を生成するその他の方法を示しています。</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL ヘルプ</span><nav aria-label="フッターナビゲーション"><a href="../../../workbooks/">ワークブックリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a><a href="../../../">すべてのヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a></nav></footer>
+</body>
+</html>

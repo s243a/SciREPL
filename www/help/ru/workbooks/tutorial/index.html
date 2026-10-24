@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="ru" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Найдите рабочую книгу «Группы Маркова» в каталоге SciREPL, выполните её ячейки Python, отредактируйте случайное блуждание и экспортируйте собственную копию рабочей книги.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ru/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/tutorial/tutorial.css">
+  <script src="../../../workbooks/tutorial/catalogue-link.js" defer></script>
+  <title>Руководство по рабочей книге «Группы Маркова» · Справка SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+    <nav aria-label="Основная навигация">
+      <a href="../../../workbooks/">Справочник по рабочим книгам<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+      <a href="../../tutorials/">Все руководства</a>
+      <a href="../../../">Вся справка<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+      <a href="../../../../">Открыть PWA Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Язык руководства"><details class="tutorial-language-menu"><summary>Язык руководства: <bdi>Русский</bdi></summary><nav aria-label="Язык руководства"><a href="../../../en/workbooks/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="./" lang="ru" hreflang="ru" aria-current="page">Русский</a>
+      <a href="../../../zh/workbooks/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Машинный перевод руководства; ожидает проверки носителем языка. Код и технические значения оставлены без изменений. На снимках экрана показан оригинальный интерфейс на английском языке; сопоставляйте переведенные названия элементов управления в этом тексте с вашим приложением.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Справка<span class="english-reference"> (Справочная страница на английском языке)</span></a> / <a href="../../../workbooks/">Рабочие книги<span class="english-reference"> (Справочная страница на английском языке)</span></a> / Руководство по «Группам Маркова»</p>
+    <article>
+      <p class="eyebrow">Обучение на практике</p>
+      <h1>Изучение рабочей книги из каталога</h1>
+      <p class="lede">Найдите существующую рабочую книгу <strong>Markov Groups: A Random Walk on Cube Moves</strong>, выполните четыре её ячейки Python, сократите её случайное блуждание и сохраните собственную копию. Основное внимание уделяется использованию SciREPL; вам не нужно знать матричную алгебру или уметь собирать кубик Рубика.</p>
+      <p class="callout"><strong>Хотите изучить приложение?</strong> Выполните шаги 1–5: найдите, откройте, запустите, отредактируйте и экспортируйте рабочую книгу. Вы можете остановиться после шага 5. <a href="#optional-maths">Необязательная математическая часть</a> приведена далее; она не требуется для прохождения этого руководства.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Инструкции для Android</li>
+        <li class="chip">Примерно 15 минут</li>
+      </ul>
+      <p class="screen-note">Реальные скриншоты с телефона показывают SciREPL Pro <strong>1.4.0-debug</strong> на <strong>Samsung Galaxy S24+</strong>, сделанные <time datetime="2026-10-06">6 октября 2026</time> г. Они иллюстрируют рабочий процесс с общей рабочей книгой, а не выпущенную сборку Pro. В Free и других версиях некоторые элементы управления могут располагаться иначе. В качестве примера используется англоязычная рабочая книга из каталога SciREPL <strong>v0.4.0</strong>.</p>
+      <nav class="lesson-nav" aria-label="Шаги руководства по рабочей книге">
+        <strong>В этом уроке</strong>
+        <p><a href="#find-menu">Сначала найдите меню</a></p>
+        <ol>
+          <li><a href="#browse">Просмотр, фильтрация и поиск</a></li>
+          <li><a href="#open">Откройте рабочую книгу</a></li>
+          <li><a href="#run">Последовательно выполните её ячейки</a></li>
+          <li><a href="#edit">Измените одно значение и запустите снова</a></li>
+          <li><a href="#export">Экспортируйте собственную копию рабочей книги</a></li>
+        </ol>
+        <p><a href="#optional-maths">Необязательно: математика в основе примера с кубиком</a></p>
+        <p><a href="../../tutorials/">Все руководства</a></p>
+      </nav>
+
+      <section id="find-menu">
+        <p class="step-label">Перед началом работы</p>
+        <h2>Поиск меню</h2>
+        <p>Найдите в SciREPL в <strong>строке заголовка в верхней части приложения</strong> кнопку <strong>☰ Меню</strong>. Её значок — <strong>три горизонтальные линии</strong>, выделенные жёлтым ниже. Нажмите её, чтобы открыть меню приложения; на шаге 1 показано, какой пункт меню выбрать.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--find-menu" role="img" aria-label="Верхняя строка заголовка SciREPL с выделенной жёлтым кнопкой «Меню» с тремя горизонтальными линиями рядом с кнопкой «Справка» со знаком вопроса.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Кнопка <strong>☰ Меню</strong> находится рядом с кнопкой <strong>? Справка</strong> на этом скриншоте. Используйте значок с тремя линиями, даже если в вашем заголовке элементы расположены иначе.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-workbook.png">Посмотреть скриншот полностью</a>
+        </figure>
+      </section>
+
+      <section id="browse">
+        <p class="step-label">Шаг 1</p>
+        <h2>Просмотр, фильтрация и поиск</h2>
+        <ol class="lesson-steps">
+          <li>Откройте <strong>Меню → Обзор пакетов, коллекций и книг</strong>. В Free дополнительный ярлык <strong>📦</strong> в заголовке открывает тот же экран, когда он отображается. В <a href="../../interface/appearance/#browse-shortcut">руководстве по внешнему виду</a> показано, как его включить.</li>
+          <li>Просмотрите список или воспользуйтесь фильтрами. Для этого англоязычного примера выберите <strong>English</strong> в <strong>Разговорный язык</strong> и <strong>Python</strong> в <strong>Ядро</strong>. Вариант <strong>Все разговорные языки</strong> и вариант <strong>Все</strong> для ядра также работают, но отображают больше записей.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse" role="img" aria-label="Экран «Обзор» SciREPL с элементами управления каталогом, выделенными жёлтым цветом.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-browse.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Раздел «Обзор» объединяет пакеты, наборы и шаблоны рабочих книг. Поиск и фильтры помогают сузить список.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-browse.png">Посмотреть полный скриншот раздела «Обзор»</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>Введите <strong>Markov Groups</strong> в поле поиска. В разделе <strong>Рабочие книги</strong> найдите <strong>Markov Groups: A Random Walk on Cube Moves</strong>. Перед установкой проверьте полное название: это шаблон рабочей книги, а не пакет для добавления в Python.</li>
+          <li>Если клавиатура закрывает результат, используйте кнопку скрытия клавиатуры или нажмите кнопку Android <strong>Назад</strong> один раз, чтобы убрать её. Не закрывайте «Обзор» и прокрутите список до нужной рабочей книги.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--search" role="img" aria-label="Поиск по запросу «Markov Groups» в разделе «Обзор» с выделенными жёлтым цветом подходящей рабочей книгой и её элементом управления «Установить».">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-search.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/search-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Выполните поиск <strong>Markov Groups</strong>, затем проверьте название подходящей рабочей книги и кнопку <strong>Установить</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-search.png">Посмотреть полный скриншот поиска</a>
+        </figure>
+        <p><strong>Что ещё доступно?</strong> <a id="catalogue-workbooks-link" href="https://github.com/s243a/SciREPL-Catalog/tree/main/workbooks/en">Просмотрите список рабочих книг на GitHub (<bdi id="catalogue-workbooks-language">English</bdi>)</a>. Языковые версии урока представляют собой отдельные записи, а не разные уроки.</p>
+        <div class="catalogue-language-choice" id="catalogue-language-choice" hidden>
+          <label for="catalogue-workbooks-locale">Язык рабочей книги:</label>
+          <select id="catalogue-workbooks-locale">
+            <option value="ar" lang="ar">العربية</option>
+            <option value="bn" lang="bn">বাংলা</option>
+            <option value="de" lang="de">Deutsch</option>
+            <option value="en" lang="en" selected>English</option>
+            <option value="es" lang="es">Español</option>
+            <option value="fr" lang="fr">Français</option>
+            <option value="hi" lang="hi">हिन्दी</option>
+            <option value="id" lang="id">Bahasa Indonesia</option>
+            <option value="ja" lang="ja">日本語</option>
+            <option value="ko" lang="ko">한국어</option>
+            <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+            <option value="ru" lang="ru">Русский</option>
+            <option value="zh" lang="zh">中文</option>
+          </select>
+        </div>
+        <p>Ссылка на GitHub показывает последние материалы для разработки. SciREPL обычно использует последний стабильный выпуск каталога, поэтому некоторые рабочие книги, представленные на GitHub, могут пока не отображаться в «Обзоре». В SciREPL очистите строку поиска и попробуйте <strong>CSV</strong>, <strong>Prolog</strong>, <strong>Lua</strong> или <strong>statistics</strong>; при изучении других языков выберите <strong>Все</strong> в поле «Ядро».</p>
+        <p class="callout"><strong>Если появится уведомление о конфиденциальности:</strong> для получения или обновления удалённого каталога требуется сетевое подключение. Прочтите уведомление, прокрутите <em>внутри диалогового окна</em> до конца и нажмите <strong>Я понимаю</strong>, только если вы согласны. Закрытие уведомления предотвращает обновление по сети; встроенные записи и ранее кэшированные записи каталога по-прежнему могут отображаться. См. раздел <a href="../../../privacy/">конфиденциальность и локальные данные<span class="english-reference"> (Справочная страница на английском языке)</span></a>.</p>
+        <p class="callout"><strong>Нет подходящей рабочей книги?</strong> Проверьте фильтры языка и ядра, затем воспользуйтесь элементом управления <strong>Обновить</strong> каталога. В более старой версии приложения таких элементов управления каталогом может не быть. Либо <a download="markov-groups.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/v0.4.0/workbooks/en/markov-groups.srwb">сохраните закреплённый файл рабочей книги v0.4.0</a> на своё устройство, затем выберите <strong>Меню → Import File</strong> и укажите <code>markov-groups.srwb</code>. Если браузер отображает файл как текст, используйте действие сохранения/скачивания и сохраните расширение <code>.srwb</code>. В <a href="../import/">руководстве по ручному импорту рабочей книги</a> показаны действия на примере «Парадокса Симпсона» из GitHub (ветка <code>main</code>); выберите файл Маркова выше, чтобы продолжить этот урок.</p>
+      </section>
+
+      <section id="open">
+        <p class="step-label">Шаг 2</p>
+        <h2>Открытие рабочей книги и просмотр её ячеек</h2>
+        <ol class="lesson-steps">
+          <li>Нажмите <strong>Установить</strong> на карточке рабочей книги. Если на кнопке уже написано <strong>Установлено</strong>, выйдите из меню «Обзор» и выберите существующую рабочую книгу в селекторе рабочих книг.</li>
+          <li>Обычно рабочая книга становится выбранной вкладкой. Если меню «Обзор» остаётся открытым, закройте его. Если автоматическое переключение отключено, выберите <strong><bdi lang="en" dir="ltr">Markov Groups: A Random Walk on Cube Moves</bdi></strong> в <strong><svg role="img" aria-label="значке стрелки вниз" width="16" height="16" viewBox="0 0 16 16" style="vertical-align: -.125em;"><path d="M3 5.5 8 10.5 13 5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> селектора рабочих книг</strong> рядом с <strong>SciREPL</strong> в заголовке.</li>
+          <li>Прочитайте вступительный текст, затем просмотрите ячейки. Ячейки Markdown объясняют урок; ячейки Python содержат код, который вы будете выполнять. У каждой ячейки Python есть имя, помогающее её найти.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--workbook" role="img" aria-label="Открытая рабочая книга «Markov Groups» с выделенными жёлтым цветом названием и элементами управления рабочей книги.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/workbook-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Рабочая книга из каталога открывается в виде редактируемых ячеек. Во введении к ней указан порядок запуска Python.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-workbook.png">Посмотреть полный скриншот рабочей книги</a>
+        </figure>
+        <p class="callout"><strong>«Установить» не означает «Выполнить».</strong> Установка этой рабочей книги из удалённого каталога добавляет её ячейки без выполнения кода Python. В шаблоне v0.4.0 нет сохранённых результатов Python, поэтому просмотрите код и выполните его самостоятельно. Аккаунт ИИ, ключ API, внешний набор данных или установка дополнительных пакетов не требуются; код использует NumPy со средой выполнения SciREPL для Python.</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">Шаг 3</p>
+        <h2>Последовательно выполните четыре ячейки Python</h2>
+        <p>Для сохранённой ячейки нажмите <strong>✎ карандаш</strong> в заголовке этой ячейки, затем нажмите кнопку <strong>Выполнить</strong> самой этой ячейки. Это приведёт к выполнению существующей ячейки; нижняя панель новой ячейки создаёт другую ячейку.</p>
+        <aside class="callout" data-editions="pro"><strong>Быстрое действие в Pro:</strong> дважды коснитесь сохранённого кода, чтобы открыть его редактор, затем нажмите кнопку <strong>Запуск</strong> самой этой ячейки. В Free используется <strong>✎ карандаш</strong> в этом руководстве.</aside>
+        <p class="callout"><strong>Что означают эти имена?</strong> <code>cube_moves</code> и <code>check_moves</code> — это имена, отображаемые на ячейках, а не команды для ввода. Найдите соответствующее имя, затем используйте значок карандаша этой ячейки и нажмите «Запуск». В <a href="../named-cells/">руководстве по именованным ячейкам и межъязыковым путям</a> показано, как назначать имена и использовать их в качестве ссылок, таких как <code>/nb/cube_moves/.code</code>.</p>
+        <ol class="lesson-steps">
+          <li>Выполните <code>cube_moves</code>. Она определяет ходы и вспомогательные функции. Ожидаемый результат: <code>Built six clockwise quarter-turn matrices with fixed face centres.</code></li>
+          <li>Выполните <code>check_moves</code>. Она проверяет, что ни одна наклейка не потеряна, центры остаются неподвижными, а четыре повторения каждого четверть-оборота возвращают кубик в исходное состояние. После шести пройденных строк ожидается: <code>All six moves passed. U and R do not commute.</code></li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--checks" role="img" aria-label="Свежий вывод check_moves на телефоне с успешно пройденными проверками, выделенными жёлтым цветом.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-checks.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/checks-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Выведенные проверки — это свежие результаты выполнения <code>check_moves</code>, а не сохранённые результаты, предоставленные каталогом.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-checks.png">Посмотреть полный скриншот проверок</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>Выполните <code>show_turn</code>. Она выводит циклы поворота грани U и обозначения наклеек до и после поворота. Верхний ряд передней грани меняется с <code>[19, 20, 21]</code> на <code>[46, 47, 48]</code>. Сравнение <code>U then R equals R then U: False</code> показывает, что порядок ходов имеет значение.</li>
+        </ol>
+        <p><strong>Часть выведенного результата:</strong></p>
+        <pre id="show-turn-output" style="white-space: pre-wrap; overflow-wrap: anywhere;"><code>U cycles, shown as one-based sticker positions:
+1 -&gt; 3 -&gt; 9 -&gt; 7 -&gt; 1
+2 -&gt; 6 -&gt; 8 -&gt; 4 -&gt; 2
+19 -&gt; 37 -&gt; 28 -&gt; 46 -&gt; 19
+20 -&gt; 38 -&gt; 29 -&gt; 47 -&gt; 20
+21 -&gt; 39 -&gt; 30 -&gt; 48 -&gt; 21
+
+F top row labels before U: [19, 20, 21]
+F top row labels after U:  [46, 47, 48]
+
+U then R equals R then U: False</code></pre>
+        <p>Длинный список букв граней здесь опущен. В строках циклов используются <strong>позиции с отсчётом от единицы</strong>; сравнение рядов показывает <strong>обозначения наклеек</strong>. Это разные сущности, хотя на собранном кубике им изначально соответствуют одинаковые числа.</p>
+        <ol class="lesson-steps" start="4">
+          <li>Выполните <code>random_walk</code>. Она выводит суммарную вероятность для одной наклейки, равную <code>1.0</code>, выборку пути из 12 шагов, итоговые обозначения букв граней и сообщение, подтверждающее, что каждое обозначение наклейки и все шесть центров сохранились.</li>
+        </ol>
+        <p>Ячейки Python уже расположены в требуемом порядке. Не меняйте их порядок: последующие ячейки повторно используют определения из <code>cube_moves</code>. Информацию о запуске нескольких ячеек одновременно см. в разделе <a href="#batch-run-note">Выполнить все ниже и Выполнить все ячейки</a>.</p>
+        <p class="callout"><strong>Первый запуск выполняется медленнее?</strong> Для инициализации Python может потребоваться время, а загрузка среды выполнения или резервное переключение на сеть могут потребовать вашего согласия. Подождите, пока индикатор состояния вернётся к <strong>готово</strong>, и проверьте вывод ячейки на наличие ошибок. Если после перезапуска последующая ячейка сообщает о неопределённом имени, выполните ячейки Python с самого начала: сохранённый вывод — это не то же самое, что активные определения Python.</p>
+        <p>Эта рабочая книга выводит текст и списки букв граней. Она не отрисовывает и не анимирует кубик, а её короткий путь с фиксированным сидом не является доказательством равномерно перемешанного состояния.</p>
+      </section>
+
+      <section id="edit">
+        <p class="step-label">Шаг 4</p>
+        <h2>Сокращение блуждания и повторный запуск сохранённой ячейки</h2>
+        <ol class="lesson-steps">
+          <li>Найдите <code>random_walk</code> и нажмите <em>её</em> значок <strong>✎ карандаш</strong>.</li>
+          <li>Найдите эту строку и измените только <code>size=12</code> на <code>size=6</code>:
+            <pre><code>moves = rng.choice(MOVE_OPTIONS, size=12).tolist()</code></pre>
+            <p>Оставьте <code>np.random.default_rng(7)</code> без изменений. Сид делает этот пример воспроизводимым.</p>
+          </li>
+          <li>Нажмите кнопку <strong>Выполнить</strong> в редакторе этой сохранённой ячейки. Вывод обновится; строка <code>Sampled moves:</code> теперь содержит шесть вариантов вместо двенадцати. <code>I</code> считается вариантом, даже если оставляет кубик неподвижным.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--edit" role="img" aria-label="Редактирование сохранённой ячейки random_walk со значением size равным шести и элементом управления «Запуск» ячейки, выделенным жёлтым цветом.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-edit.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Измените одно значение в сохранённой ячейке, затем нажмите кнопку «Запуск» <em>этой ячейки</em>. Одно лишь редактирование не обновляет её предыдущий вывод.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-edit.png">Посмотреть полный скриншот редактирования</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--six-moves" role="img" aria-label="Свежий вывод random_walk, показывающий шесть выбранных вариантов после повторного запуска, выделенный жёлтым цветом.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-six-moves.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/six-moves-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Более короткий путь выборки — это видимый результат вашего редактирования. Итоговое сообщение по-прежнему подтверждает, что траектория сохраняет обозначения наклеек и центры.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-six-moves.png">Посмотреть полный скриншот результата с шестью вариантами</a>
+        </figure>
+        <p>Для этого изменения перезапустите только <code>random_walk</code>, пока загружены более ранние определения. Если же вы отредактируете <code>cube_moves</code>, перезапустите и последующие ячейки Python. Выводы фиксируют своё последнее выполнение; они не пересчитываются автоматически при изменении другой ячейки.</p>
+        <p>Если вы открыли редактор по ошибке, выберите <strong>Отмена</strong>. Чтобы вернуться к исходному примеру, измените <code>size=6</code> обратно на <code>size=12</code> и снова выполните ячейку.</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">Шаг 5</p>
+        <h2>Экспорт собственной копии рабочей книги</h2>
+        <ol class="lesson-steps">
+          <li>Оставьте выбранной рабочую книгу «Markov Groups», затем откройте <strong>Меню → Экспорт книг и пакетов</strong>, а не «Export Document».</li>
+          <li>Выберите <strong>Книга (.srwb)</strong> и <strong>Только текущая вкладка</strong>.</li>
+          <li>Нажмите <strong>Экспорт</strong> и сохраните копию в надёжном месте. Android откроет сценарий отправки/сохранения; браузер скачает файл. Сохраните расширение <code>.srwb</code>.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="Диалоговое окно экспорта с параметрами «Workbook srwb», «Current tab only» и кнопкой «Export», выделенными жёлтым цветом.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Формат «Workbook» и параметр «Current tab only» сохраняют эту отредактированную рабочую книгу, не включая несвязанные вкладки. Доступная только в Pro опция <strong>Включить диалог с ИИ</strong> для этого урока не требуется; оставьте её неотмеченной.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-export.png">Посмотреть полный скриншот экспорта</a>
+        </figure>
+        <p>Для рабочей книги не требуется отдельный файл данных, поэтому для этого урока достаточно копии <code>.srwb</code>. Вы можете снова открыть её через <strong>Меню → Import File</strong>; при запуске новой среды выполнения выполните её ячейки Python с самого начала.</p>
+        <p class="callout"><strong>Локальное восстановление — это не резервная копия.</strong> Очистка хранилища приложения/сайта или удаление приложения могут привести к удалению локальных данных. Сеансы Android и браузера не синхронизируют ваши изменения автоматически. Экспорт не публикует ваши изменения в каталоге; он предоставляет вам отдельную копию.</p>
+        <p>Основные сведения о редактировании сохранённых ячеек см. в <a href="../../interface/tutorial/">руководстве по интерфейсу первой рабочей книги</a>. Пример, который считывает и переносит отдельный файл данных, представлен в <a href="../../files-export/tutorial/">руководстве по рабочей книге CSV</a>. В <a href="../../../workbooks/">справочнике по рабочим книгам<span class="english-reference"> (Справочная страница на английском языке)</span></a> описаны типы ячеек и постоянные имена ячеек.</p>
+      </section>
+
+      <aside class="callout" id="batch-run-note" aria-labelledby="batch-run-heading">
+        <h3 id="batch-run-heading">Выполнить все ниже и Выполнить все ячейки</h3>
+        <ul>
+          <li><strong>Выполнить все ниже:</strong> откройте сохранённую ячейку с помощью её значка <strong>✎ карандаш</strong>, затем выберите <strong>Выполнить все ниже</strong> (компактный значок — <strong>▶↓</strong>). Это приведёт к последовательному выполнению этой ячейки <em>и</em> каждой ячейки под ней.</li>
+          <li><strong>Меню → Выполнить все ячейки:</strong> выполняет выбранную рабочую книгу от первой ячейки до последней. Это не команда для запуска каждой вкладки рабочей книги.</li>
+        </ul>
+        <p>Сначала проверьте код и не снимайте выбор с этой рабочей книги во время пакетного выполнения. После запуска нового сеанса Python начните с <code>cube_moves</code>, чтобы последующие ячейки содержали необходимые определения. Эти действия выполняют код; пометка пояснения как «необязательное» не приводит к пропуску ячеек с кодом приложением.</p>
+      </aside>
+
+      <p class="callout" id="walkthrough-complete"><strong>Вы завершили руководство по SciREPL.</strong> Вы нашли, открыли, выполнили, отредактировали и экспортировали рабочую книгу. Если вы просто хотели познакомиться с приложением, на этом можно остановиться. Продолжайте чтение ниже, если хотите изучить математику кубика и рабочую книгу для разработки.</p>
+
+      <section id="optional-maths">
+        <p class="step-label">Дополнительное чтение</p>
+        <h2>Математика в основе примера с кубиком</h2>
+        <h3>Немного о смысле выводимых данных</h3>
+        <p>Рабочая книга отслеживает <strong>54 индивидуально помеченные наклейки</strong>, а не просто шесть цветов. Допустимый ход переставляет эти обозначения. Четыре повторения одного поворота на четверть возвращают кубик к начальному расположению, однако повороты разных граней могут приводить к разным результатам при изменении их порядка.</p>
+        <p>Случайное блуждание выбирает из 13 вариантов: остаться на месте (<code>I</code>), шесть поворотов на четверть и шесть обратных им ходов. Его матрица вероятностей <strong>54×54 описывает положение одной наклейки</strong>, а не каждую конфигурацию кубика целиком. Суммарная вероятность <code>1.0</code> означает, что вероятности положения этой наклейки в сумме дают единицу; это не доказывает, что кубик равномерно перемешан.</p>
+        <p class="callout"><strong>Интересуют направления граней?</strong> Ячейка <code>coordinates</code> рабочей книги задаёт глобальные оси, а также направления вправо, вверх и внешнюю нормаль для каждой грани. В <a href="../graphics/">руководстве по изображениям, диаграммам и уравнениям</a> показано, как добавлять подобные объяснения в рабочую книгу. Координатные диаграммы сейчас добавляются в версию каталога для разработки; закреплённая копия v0.4.0 выше их не содержит.</p>
+        <div id="stage4-preview">
+          <h3>Необязательно: предварительный просмотр обновлённого этапа 4</h3>
+          <p>Описанные выше шаги и скриншоты с телефона относятся к стабильной рабочей книге <strong>v0.4.0</strong>. <a download="markov-groups-stage4-preview.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/f88d9b9e26364eeb5e7ff1ee9bcce5f27d47c66e/workbooks/en/markov-groups.srwb">Загрузка обновлённой рабочей книги</a> представляет собой <strong>предварительную версию для разработки</strong>, которая ещё не вошла в стабильный каталог. Импортируйте её через <strong>Меню → Import File</strong>, если хотите попробовать её более краткие чередующиеся ячейки с пояснениями и кодом.</p>
+          <p>В этой предварительной версии сначала выполните <code>cube_moves</code>, <code>check_moves</code> и <code>show_turn</code>, как описано выше. Затем:</p>
+          <ol class="lesson-steps">
+            <li>Выполните <code>transition_matrix</code>. Она формирует <code>T</code> — матрицу вероятностей положения одной наклейки после одного равномерно выбранного варианта: <code>I</code>, поворота грани на четверть или обратного ему хода.</li>
+            <li>Выполните <code>sticker_step</code>. Она отслеживает <strong>наклейку с обозначением 1</strong>, изначально находящуюся в <strong>позиции 0 при отсчёте от нуля</strong>. Сумма вероятностей её положения равна <code>1.0</code>. На диаграмме ниже показаны вероятности позиций назначения, вычисленные этой ячейкой.</li>
+          </ol>
+          <figure id="sticker-probability-figure" aria-describedby="sticker-probability-caption" style="margin: 24px 0;">
+            <img src="../../../workbooks/tutorial/assets/sticker-one-step.svg" width="400" height="380" style="display: block; width: min(100%, 560px); height: auto;" alt="После одного случайного хода наклейка с обозначением 1 с вероятностью семь тринадцатых остаётся в позиции 0 и с вероятностью одна тринадцатая для каждой попадает в позиции 2, 6, 18, 35, 42 или 47.">
+            <figcaption id="sticker-probability-caption"><strong>Столбчатая диаграмма вероятностей, а не группированная гистограмма.</strong> Эта иллюстрация рассчитана на основе <code>after_one_step = T @ location_probability</code>; это не скриншот с телефона и не новый вывод, полученный рабочей книгой. Позиции отсчитываются от нуля. Остальные 47 позиций имеют нулевую вероятность и опущены. Обозначение наклейки остаётся равным 1.</figcaption>
+          </figure>
+          <div class="table-wrap">
+            <table aria-label="Точные одношаговые вероятности для наклейки с обозначением 1">
+              <thead><tr><th>Позиция назначения</th><th>Вероятность</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>7/13 ≈ 53.85%</td></tr>
+                <tr><td>2, 6, 18, 35, 42, 47 (каждая)</td><td>1/13 ≈ 7.69%</td></tr>
+                <tr><td>Все остальные 47 позиций</td><td>0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <ol class="lesson-steps" start="3">
+            <li>Выполните <code>random_walk</code>. Она формирует выборку пути из 12 вариантов для <strong>всего кубика</strong>, используя определения из <code>transition_matrix</code>. Это отличается от приведённых выше вероятностей для одной наклейки. Описанное на шаге 4 изменение <code>size=12</code> работает в этой ячейке в любой редакции.</li>
+          </ol>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Справка SciREPL</span><nav aria-label="Навигация в нижнем колонтитуле"><a href="../../../workbooks/">Справочник по рабочим книгам<span class="english-reference"> (Справочная страница на английском языке)</span></a><a href="../../../">Вся справка<span class="english-reference"> (Справочная страница на английском языке)</span></a></nav></footer>
+</body>
+</html>

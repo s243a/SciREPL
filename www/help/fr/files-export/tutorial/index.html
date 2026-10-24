@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Installez un classeur CSV, exécutez et modifiez ses données dans Fichiers et stockage, puis exportez et rouvrez un paquet classeur-plus-CSV. Comprend la mise en surbrillance de fichier facultative de Pro.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/fr/files-export/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../files-export/tutorial/tutorial.css">
+  <title>Guide du classeur CSV · Aide SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/files-export/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/files-export/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/files-export/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/files-export/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/files-export/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/files-export/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/files-export/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/files-export/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/files-export/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/files-export/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/files-export/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/files-export/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/files-export/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/files-export/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Passer au contenu</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Page de référence en anglais)</span></a>
+    <nav aria-label="Navigation principale">
+      <a href="../../../files-export/">Fichiers et exportation<span class="english-reference"> (Page de référence en anglais)</span></a>
+      <a href="../../tutorials/">Tous les tutoriels</a>
+      <a href="../../../">Toute l'aide<span class="english-reference"> (Page de référence en anglais)</span></a>
+      <a href="../../../../">Ouvrir la PWA Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Langue du tutoriel"><details class="tutorial-language-menu"><summary>Langue du tutoriel: <bdi>Français</bdi></summary><nav aria-label="Langue du tutoriel"><a href="../../../en/files-export/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/files-export/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/files-export/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/files-export/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/files-export/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="./" lang="fr" hreflang="fr" aria-current="page">Français</a>
+      <a href="../../../hi/files-export/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/files-export/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/files-export/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/files-export/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/files-export/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/files-export/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/files-export/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutoriel traduit automatiquement ; révision par un locuteur natif en attente. Le code et les valeurs techniques sont inchangés. Les captures d'écran montrent l'interface d'origine en anglais ; faites correspondre les noms de commandes traduits dans ce texte à votre application.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Aide<span class="english-reference"> (Page de référence en anglais)</span></a> / <a href="../../../files-export/">Fichiers et exportation<span class="english-reference"> (Page de référence en anglais)</span></a> / Guide CSV</p>
+    <article>
+      <p class="eyebrow">Apprendre par la pratique</p>
+      <h1>Explorer un CSV dans un classeur</h1>
+      <p class="lede">Commencez dans <strong>Parcourir paquets, collections et classeurs</strong>. Installez un petit exemple, exécutez ses cellules, modifiez son CSV, puis exportez et rouvrez le classeur avec ses données. Les données sont fictives et le code Python ne nécessite aucun paquet supplémentaire ni compte d'IA.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Étapes Android</li>
+        <li class="chip">Environ 15 minutes</li>
+      </ul>
+      <p class="screen-note">Les captures d'écran ont été prises sur un téléphone de la série Samsung Galaxy S24. Les images de Parcourir et de sortie initiale montrent Free ; les nouvelles images de l'éditeur de fichiers et de sélection de paquets montrent Pro 1.4.0 et sont identifiées ci-dessous. Dans Pro, vous pouvez utiliser le téléchargement direct du classeur et le chemin Importer un fichier ; les commandes environnantes peuvent différer, et cette nouvelle entrée Parcourir peut ne pas y être présente.</p>
+      <p class="callout"><strong>Vous ne voyez pas encore ce classeur dans Parcourir ?</strong> L'exemple est intégré à Free 1.4.0 et versions ultérieures ; une application installée plus ancienne ou une PWA en cache peut ne pas le répertorier. <a download="csv-basics-seedlings.srwb" href="../../../files-export/tutorial/assets/csv-basics-seedlings.srwb">Téléchargez directement le classeur</a>, puis utilisez <strong>Menu → Importer un fichier</strong> pour l'ouvrir. Vous pouvez maintenant suivre le reste de cette leçon.</p>
+      <nav class="lesson-nav" aria-label="Étapes du guide pratique CSV">
+        <strong>Dans cette leçon</strong>
+        <ol>
+          <li><a href="#install">Installer l'exemple depuis Parcourir</a></li>
+          <li><a href="#run">Exécuter ses cellules Python</a></li>
+          <li><a href="#change">Modifier une mesure dans Fichiers et stockage</a></li>
+          <li><a href="#import">Importer un fichier CSV</a></li>
+          <li><a href="#export">Exporter le classeur et les données</a></li>
+          <li><a href="#reopen">Rouvrir le paquet et vérifier ses données</a></li>
+        </ol>
+        <p><a href="../../tutorials/">Tous les tutoriels</a></p>
+      </nav>
+
+      <section id="install">
+        <p class="step-label">Étape 1</p>
+        <h2>Trouver le classeur dans Parcourir</h2>
+        <ol class="lesson-steps">
+          <li>Ouvrez <strong>Menu → Parcourir paquets, collections et classeurs</strong>. Le raccourci d'en-tête facultatif 📦 ouvre le même écran s'il est visible.</li>
+          <li>Recherchez <strong>CSV Basics</strong>. Sous <strong>Classeurs</strong>, trouvez <strong>CSV Basics: Seedling Heights</strong>. Il s'agit d'un exemple intégré en anglais, et non d'un paquet à installer dans Python.</li>
+          <li>Appuyez sur <strong>Installer</strong>. Le classeur devient normalement l'onglet sélectionné. Si vous avez désactivé le basculement automatique, utilisez le sélecteur de classeur pour le choisir.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse-menu" role="img" aria-label="Menu SciREPL avec Parcourir les paquets, lots et classeurs entouré de jaune.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Le contour jaune indique <strong>Parcourir paquets, collections et classeurs</strong> dans Menu.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">Afficher la capture d'écran complète du Menu</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--catalog" role="img" aria-label="Écran Parcourir filtré sur CSV Basics, avec le champ de recherche et le bouton Installer entourés de jaune.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-catalog.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/catalog-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Recherchez <strong>CSV Basics</strong>, puis utilisez <strong>Installer</strong> sur la fiche du classeur. Le catalogue distant n'était pas disponible dans cette capture ; les éléments intégrés apparaissaient tout de même.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-catalog.png">Afficher la capture d'écran complète de Parcourir</a>
+        </figure>
+        <p class="callout"><strong>Si une politique de confidentialité apparaît :</strong> Parcourir peut vérifier le catalogue vérifié en ligne. Lisez l'avis, faites défiler <em>à l'intérieur de la boîte de dialogue</em> jusqu'en bas, puis appuyez sur <strong>Je comprends</strong> uniquement si vous acceptez. Vous pouvez plutôt fermer la notification et continuer à utiliser les entrées intégrées ; le catalogue distant sera indisponible. Cet exemple lui-même ne nécessite aucun jeu de données externe ni paquet Python.</p>
+        <p>L'installation d'un classeur ajoute ses cellules ; elle ne les exécute <em>pas</em>. Cela vous permet d'inspecter le code avant de l'exécuter.</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">Étape 2</p>
+        <h2>Exécuter les cellules dans l'ordre</h2>
+        <p>Le texte d'introduction explique l'exemple. Les trois cellules Python ont chacune un nom : <code>create_csv</code>, <code>read_csv</code> et <code>compare_groups</code>. Pour une cellule enregistrée, appuyez sur son <strong>✎ crayon</strong> pour ouvrir l'éditeur, puis appuyez sur le <strong>Exécuter</strong> de cette cellule. Dans Pro, vous pouvez aussi appuyer deux fois sur le code de la cellule pour le modifier.</p>
+        <ol class="lesson-steps">
+          <li>Exécutez <code>create_csv</code>. Cela écrit six lignes fictives dans <code>/shared/data/seedling-heights.csv</code>. Vous devriez voir <code>Saved 6 fictional rows</code>.</li>
+          <li>Exécutez <code>read_csv</code>. Cela ouvre le fichier qui vient d'être créé et affiche les six lignes.</li>
+          <li>Exécutez <code>compare_groups</code>. Cela affiche une moyenne à la lumière de <strong>13.0 cm</strong>, une moyenne à l'ombre de <strong>8.0 cm</strong> et une différence de <strong>5.0 cm</strong>.</li>
+        </ol>
+        <p>Le fichier est également visible dans <strong>Menu → Fichiers et stockage</strong>. Vous pouvez le lire à cet endroit, ou utiliser <strong>Modifier</strong> et <strong>Enregistrer</strong> pour le modifier directement. <a href="#edit-file">L'étape suivante montre comment procéder.</a></p>
+        <p>Le résultat final devrait ressembler à ceci :</p>
+        <pre><code>Light mean: 13.0 cm
+Shade mean: 8.0 cm
+Difference: 5.0 cm</code></pre>
+        <p class="callout"><strong>Premier lancement plus lent ?</strong> Python peut prendre un instant pour s'initialiser. Attendez que le badge d'état indique <strong>prêt</strong> avant d'évaluer si une cellule a terminé. Les cellules suivantes réutilisent normalement l'environnement d'exécution chargé. Si le téléchargement d'un environnement d'exécution nécessite un consentement, lisez l'avis de confidentialité avant d'accepter ; ce classeur n'appelle pas <code>%pip install</code>.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--csv-output" role="img" aria-label="Sortie de SciREPL indiquant une moyenne à la lumière de 13.0 centimètres, une moyenne à l&#39;ombre de 8.0 centimètres et une différence de 5.0 centimètres.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-output.png" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>La sortie de la troisième cellule sur le téléphone après l'exécution du classeur d'exemple.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-output.png">Afficher la capture d'écran complète de la sortie</a>
+        </figure>
+        <p>Ces valeurs fictives illustrent la lecture et le calcul, et non une conclusion scientifique sur la lumière et la croissance des plantes.</p>
+      </section>
+
+      <section id="change">
+        <p class="step-label">Étape 3</p>
+        <h2>Modifier une valeur et réexécuter</h2>
+        <div id="edit-file">
+          <p>Vous n'avez pas besoin de modifier la cellule Python pour changer ses données. Ouvrez le CSV lui-même :</p>
+          <ol class="lesson-steps">
+            <li>Choisissez <strong>Menu → Fichiers et stockage</strong> (le menu peut ajouter <strong>VFS / Paths</strong> au nom).</li>
+            <li>Choisissez <strong>/ (Stockage persistant)</strong> ou <strong>Tous les systèmes de fichiers</strong>. Faites défiler jusqu'à <code>/shared/data/seedling-heights.csv</code> et appuyez sur le nom du fichier, pas sur son icône de téléchargement ou de suppression.</li>
+            <li>Appuyez sur <strong>Modifier</strong>. Modifiez la ligne <code>light,14</code> en <code>light,15</code>. Conservez l'en-tête <code>group,height_cm</code>, les virgules et les autres lignes sans modification.</li>
+            <li>Appuyez sur <strong>Enregistrer</strong>, puis fermez Files &amp; Storage. L'enregistrement d'un fichier n'exécute aucun code.</li>
+          </ol>
+          <figure class="phone-figure">
+            <div class="shot-window shot-window--file-edit" role="img" aria-label="Fichier CSV en cours de modification dans Files and Storage, avec Save entouré de jaune. Pro affiche également Full screen.">
+              <div class="shot-stage">
+                <img src="../../../files-export/tutorial/assets/phone-file-edit.png" alt="" loading="lazy" decoding="async">
+                <img src="../../../files-export/tutorial/assets/file-edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              </div>
+            </div>
+            <figcaption><strong>Pro 1.4.0:</strong> le CSV est ouvert dans l'éditeur de l'aperçu du fichier. Le contour jaune indique <strong>Enregistrer</strong>. Free dispose également des commandes Edit/Save de l'aperçu ; <strong>Plein écran</strong> est réservé à Pro.</figcaption>
+            <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-file-edit.png">Afficher la capture d'écran complète de l'édition dans Files &amp; Storage</a>
+          </figure>
+        </div>
+        <p>Réexécutez uniquement <code>read_csv</code> et <code>compare_groups</code>. La moyenne à la lumière est désormais d'environ <strong>13.3 cm</strong> et la différence d'environ <strong>5.3 cm</strong>. Ne réexécutez <strong>pas</strong> <code>create_csv</code> : cela écraserait la modification de votre fichier avec les valeurs toujours présentes dans cette cellule.</p>
+        <p>Sinon, modifiez <code>create_csv</code> avec son <strong>✎ crayon</strong>, changez sa mesure de <code>14</code> en <code>15</code> et exécutez les trois cellules Python dans l'ordre. Cela modifie le code qui génère le fichier, plutôt que seulement le fichier.</p>
+        <p>Pourquoi réexécuter les cellules suivantes ? Leur sortie enregistrée constitue un historique de l'exécution précédente ; la modification d'un fichier ne recalcule pas automatiquement les résultats antérieurs. Chaque cellule lit le fichier lorsque vous l'exécutez.</p>
+        <aside class="callout" id="pro-syntax-highlighting" data-editions="pro">
+          <h3>Pro : édition de fichiers en plein écran et coloration facultative</h3>
+          <p>Dans l'aperçu du fichier, appuyez sur <strong>Plein écran</strong> pour obtenir un éditeur plus grand. Le CSV reste <strong>Texte brut</strong>, donc sa case à cocher <strong>Coloration syntaxique</strong> est désactivée.</p>
+          <p>Pour les fichiers de code pris en charge, la coloration syntaxique est facultative et <strong>désactivée par défaut</strong>. Activez-la à l'aide de la case à cocher dans cet éditeur de fichier, et non dans les paramètres d'apparence du carnet de notes. L'extension choisit le langage : par exemple <code>.py</code> correspond à Python, <code>.js</code> correspond à JavaScript, <code>.R</code> correspond à R et <code>.pl</code> correspond à <strong>Prolog</strong>, et non à Perl. Les extensions inconnues restent en texte brut.</p>
+          <figure class="phone-figure">
+            <div class="shot-window shot-window--file-highlight" role="img" aria-label="Éditeur Pro en plein écran de fichier Python avec Syntax highlighting sélectionné et code Python en couleur. Save et Close se trouvent dans la barre d&#39;outils.">
+              <div class="shot-stage">
+                <img src="../../../files-export/tutorial/assets/phone-python-highlight.png" alt="" loading="lazy" decoding="async">
+                <img src="../../../files-export/tutorial/assets/file-highlight-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              </div>
+            </div>
+            <figcaption><strong>Pro 1.4.0 :</strong> un fichier de démonstration <code>seedling-summary.py</code> distinct contenant le code de comparaison, avec coloration syntaxique activée. Ce fichier facultatif n'est pas nécessaire pour la leçon CSV. Les longues lignes peuvent défiler horizontalement.</figcaption>
+            <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-python-highlight.png">Afficher la capture d'écran complète de l'éditeur de fichiers avec coloration syntaxique</a>
+          </figure>
+          <p><strong>Enregistrer</strong> enregistre le fichier et maintient l'éditeur ouvert. Utilisez <strong>× Fermer</strong> pour revenir à Fichiers et stockage ; une confirmation est demandée avant d'abandonner les modifications non enregistrées. La modification ou l'enregistrement du fichier ne l'exécute jamais.</p>
+          <p><a href="../../../files-export/tutorial/assets/phone-csv-fullscreen.png">Voir le même éditeur en plein écran avec le CSV ouvert sous forme de texte brut.</a></p>
+        </aside>
+      </section>
+
+      <section id="import">
+        <p class="step-label">Étape 4</p>
+        <h2>Importer le CSV d'origine</h2>
+        <ol class="lesson-steps">
+          <li><a download="seedling-heights.csv" href="../../../files-export/tutorial/assets/seedling-heights.csv">Téléchargez l'échantillon CSV d'origine<span class="english-reference"> (Page de référence en anglais)</span></a> dans un dossier que le sélecteur de fichiers de votre appareil peut ouvrir.</li>
+          <li>Dans SciREPL, choisissez <strong>Menu → Importer un fichier</strong> et sélectionnez <code>seedling-heights.csv</code>. La confirmation doit indiquer qu'il a été téléversé dans <code>/shared/data/seedling-heights.csv</code>.</li>
+          <li>Cela remplace le fichier local modifié par les six lignes d'origine. Réexécutez <code>read_csv</code> et <code>compare_groups</code> ; les deux moyennes devraient revenir à <strong>13.0</strong> et <strong>8.0 cm</strong>.</li>
+        </ol>
+        <p class="callout"><strong>Important :</strong> Ne réexécutez pas <code>create_csv</code> après avoir importé un fichier différent portant le même nom, sauf si vous avez l'intention de l'écraser. Pour votre propre CSV, notez le chemin de confirmation exact et remplacez <code>path</code> dans les cellules de lecture par ce nom de fichier. Le sélecteur de fichiers peut afficher les téléchargements Android, un fournisseur cloud ou les deux.</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">Étape 5</p>
+        <h2>Enregistrer une copie portable</h2>
+        <p>Ouvrez <strong>Menu → Exporter classeurs et paquets</strong>. Si vous ne souhaitez conserver que les cellules, choisissez <strong>Classeur (.srwb)</strong> et <strong>Onglet actif uniquement</strong>. Un <code>.srwb</code> n'inclut <strong>pas</strong> le CSV distinct dans SharedVFS.</p>
+        <p>Pour déplacer le classeur <em>avec ses données</em>, choisissez <strong>Paquet (archive)</strong> et conservez <strong>.zip</strong>. Dans l'arborescence <strong>Contenu</strong>, sélectionnez :</p>
+        <ul>
+          <li>Le classeur <code>CSV_Basics__Seedling_Heights.ipynb</code> sous <strong>notebooks/</strong>. L'exportation de package enregistre les cellules au format de carnet Jupyter.</li>
+          <li>Le fichier <code>seedling-heights.csv</code> sous <strong>shared/data/</strong>.</li>
+        </ul>
+        <p>Décochez les classeurs et les fichiers non pertinents. Développez les dossiers à l'aide de leur flèche si nécessaire ; ne partez pas du principe que <strong>Onglet actif uniquement</strong> limite le contenu d'un package. Vous n'avez pas besoin des copies supplémentaires dans <strong>shared/notebooks/</strong> pour cette leçon. Dans Pro, laissez <strong>Inclure la conversation IA</strong> décoché, sauf si vous souhaitez délibérément le partager.</p>
+        <p>Appuyez sur <strong>Exporter</strong>. Sur Android, cela ouvre la feuille de partage : enregistrez l'archive dans un emplacement facile à retrouver, par exemple votre propre disque ou la destination d'enregistrement d'un gestionnaire de fichiers. Dans un navigateur, cela télécharge un fichier. Le nom de fichier suggéré est <code>scirepl_package.zip</code> ; le renommer en <code>seedling-project.zip</code> facilite sa reconnaissance.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--package-selection" role="img" aria-label="Exportation de package Pro avec l&#39;archive de package sélectionnée et seuls le classeur CSV Basics et le fichier CSV seedling-heights cochés. Des contours jaunes marquent ces deux fichiers.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-package-selection.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/package-selection-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pro 1.4.0 :</strong> Package est sélectionné, et les deux entrées entourées de jaune sont cochées. Les autres classeurs, le fichier de démonstration Python facultatif et les copies de classeur enregistrées ne sont pas inclus. Free utilise la même sélection de classeur et de données, sans l'option de conversation IA.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-package-selection.png">Afficher la capture d'écran complète de la sélection du package</a>
+        </figure>
+        <p class="callout"><strong>La récupération locale n'est pas une sauvegarde.</strong> Le stockage d'applications Android, la PWA dans Chrome et un autre navigateur ne partagent pas automatiquement ces fichiers. Conservez la copie exportée dans un emplacement que vous contrôlez. Consultez <a href="../../../files-export/">Fichiers, importation et exportation<span class="english-reference"> (Page de référence en anglais)</span></a> pour d'autres formats.</p>
+      </section>
+
+      <section id="reopen">
+        <p class="step-label">Étape 6</p>
+        <h2>Rouvrez le paquet et vérifiez les deux parties</h2>
+        <p>Avant de faire confiance à une sauvegarde, vérifiez que vous pouvez l'ouvrir. Vous pouvez effectuer cette vérification dans une autre installation de SciREPL ou dans un autre profil de navigateur. L'importation ajoute ici un autre classeur ; elle remplace également les fichiers aux chemins de destination du paquet, conservez donc une copie distincte de tout fichier plus récent avant d'importer un paquet plus ancien.</p>
+        <ol class="lesson-steps">
+          <li>Choisissez <strong>Menu → Importer un paquet (.zip / .tar.gz)</strong> et sélectionnez l'archive que vous avez enregistrée. Pour cette leçon, il s'agit d'un <code>.zip</code>, et non du téléchargement séparé CSV ou <code>.srwb</code>.</li>
+          <li>Choisissez le classeur nouvellement importé <strong>CSV Basics: Seedling Heights</strong> s'il n'est pas sélectionné automatiquement. Si vous avez effectué l'importation dans la même application, l'ancien et le nouvel onglet peuvent porter le même nom.</li>
+          <li>Ouvrez <strong>Menu → Fichiers et stockage</strong> et vérifiez <code>/shared/data/seedling-heights.csv</code>. Ses six lignes doivent correspondre au fichier que vous avez exporté. Fermez l'aperçu après vérification.</li>
+          <li>Exécutez la <strong>deuxième cellule Python</strong> (le code <code>read_csv</code>), puis la <strong>troisième cellule Python</strong> (le code <code>compare_groups</code>). L'exportation de paquets utilise le format Jupyter et peut ne pas conserver les noms des cellules ; identifiez-les d'après leur ordre et leur code. Après l'étape 4 et son CSV d'origine, attendez-vous à <strong>13.0 cm</strong>, <strong>8.0 cm</strong> et <strong>5.0 cm</strong>. Si vous avez plutôt exporté le fichier <code>light,15</code> modifié, attendez-vous à <strong>13.3 cm</strong>, <strong>8.0 cm</strong> et <strong>5.3 cm</strong>.</li>
+        </ol>
+        <p class="callout"><strong>Ne réexécutez pas <code>create_csv</code> pour cette vérification de restauration.</strong> Cela écrase les données importées avec les valeurs de son code. Lire d'abord le CSV restauré prouve que les données ont voyagé avec le classeur ; une ancienne sortie enregistrée seule ne le prouve pas.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--restored-output" role="img" aria-label="Nouvelle sortie après avoir restauré le paquet et exécuté sa cellule de comparaison : moyenne en pleine lumière 13.0 centimètres, moyenne à l&#39;ombre 8.0, différence 5.0.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-restored-output.png" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pro 1.4.0 :</strong> nouvelle sortie sur le téléphone après avoir importé l'archive exportée et exécuté uniquement ses cellules de lecture et de comparaison. Le CSV a restauré les six lignes d'origine.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-restored-output.png">Afficher la capture d'écran complète de la sortie restaurée</a>
+        </figure>
+        <p>Si le fichier est manquant ou si le classeur est absent, revenez à l'étape 5 et vérifiez que <em>les deux</em> entrées étaient bien sélectionnées. Une simple exportation de classeur ne peut pas transporter le CSV pour vous.</p>
+      </section>
+
+      <section id="what-next">
+        <h2>Et maintenant ?</h2>
+        <p>Essayez avec votre propre CSV. Conservez les colonnes <code>group</code> et <code>height_cm</code>, utilisez des hauteurs numériques et incluez au moins une ligne <code>light</code> et une ligne <code>shade</code>—ou adaptez les deux filtres de groupe dans <code>compare_groups</code>. Vous pouvez inspecter le fichier local sous <strong>Menu → Fichiers et stockage</strong>. Pour les commandes sur téléphone utilisées ici, consultez le <a href="../../interface/tutorial/">guide de l'interface du premier classeur</a>.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Aide SciREPL</span><nav aria-label="Navigation de pied de page"><a href="../../../files-export/">Fichiers et exportation<span class="english-reference"> (Page de référence en anglais)</span></a><a href="../../../">Toute l'aide<span class="english-reference"> (Page de référence en anglais)</span></a></nav></footer>
+</body>
+</html>

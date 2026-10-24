@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="bn" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="এক জায়গায় সমস্ত SciREPL টিউটোরিয়াল: ইন্টারফেস, Appearance, ওয়ার্কবুক, CSV ফাইল, গ্রাফিক্স, শেয়ার করা ফাইল এবং Pro এআই ও সমাপ্তিকরণ।">
+  <meta name="theme-color" content="#06101d">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/bn/tutorials/">
+  <link rel="stylesheet" href="../../styles.css">
+  <title>সমস্ত টিউটোরিয়াল · SciREPL সহায়তা</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/tutorials/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/tutorials/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/tutorials/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/tutorials/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/tutorials/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/tutorials/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/tutorials/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/tutorials/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/tutorials/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/tutorials/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/tutorials/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/tutorials/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/tutorials/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/tutorials/">
+  <link rel="stylesheet" href="../../tutorial-locales.css">
+  <script src="../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">মূল বিষয়বস্তুতে যান</a>
+  <header class="site-header">
+    <a class="brand" href="../../">sci<span>REPL</span> Help<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+    <nav aria-label="প্রধান নেভিগেশন">
+      <a href="./" aria-current="page">সমস্ত টিউটোরিয়াল</a>
+      <a href="../../">সমস্ত সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+      <a href="../../../">Free PWA খুলুন</a>
+    </nav>
+  </header>
+
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="টিউটোরিয়ালের ভাষা"><details class="tutorial-language-menu"><summary>টিউটোরিয়ালের ভাষা: <bdi>বাংলা</bdi></summary><nav aria-label="টিউটোরিয়ালের ভাষা"><a href="../../en/tutorials/" lang="en" hreflang="en">English</a>
+      <a href="../../ar/tutorials/" lang="ar" hreflang="ar">العربية</a>
+      <a href="./" lang="bn" hreflang="bn" aria-current="page">বাংলা</a>
+      <a href="../../de/tutorials/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../es/tutorials/" lang="es" hreflang="es">Español</a>
+      <a href="../../fr/tutorials/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../hi/tutorials/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../id/tutorials/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../ja/tutorials/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../ko/tutorials/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../pt-BR/tutorials/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../ru/tutorials/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../zh/tutorials/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">মেশিন-অনূদিত টিউটোরিয়াল; স্থানীয় ভাষায় পর্যালোচনা প্রক্রিয়াধীন। কোড এবং প্রযুক্তিগত মানসমূহ অপরিবর্তিত। স্ক্রিনশটগুলোতে মূল ইংরেজি ইন্টারফেস দেখানো হয়েছে; আপনার অ্যাপের সাথে এই টেক্সটের অনূদিত কন্ট্রোল নামগুলো মিলিয়ে নিন।</p></aside>
+    <p class="breadcrumbs"><a href="../../">সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / সমস্ত টিউটোরিয়াল</p>
+    <section class="hero" aria-labelledby="tutorials-title">
+      <p class="eyebrow">কাজের মাধ্যমে শিখুন</p>
+      <h1 id="tutorials-title">সমস্ত SciREPL টিউটোরিয়াল</h1>
+      <p class="lede">একটি ধাপে ধাপে নির্দেশিকা বেছে নিন। নিয়ন্ত্রণগুলো জানুন, একটি ওয়ার্কবুক খুঁজুন, ফাইল ও ছবি ব্যবহার করে দেখুন, অথবা Pro-এর এআই এবং সমাপ্তিকরণ অন্বেষণ করুন। প্রতিটি টিউটোরিয়ালে উল্লেখ রয়েছে যে এটি কোন অ্যাপ সংস্করণ ও প্ল্যাটফর্মে পরীক্ষা করা হয়েছে এবং কেবল Pro-এর বৈশিষ্ট্যগুলো চিহ্নিত করে।</p>
+      <ul class="meta" aria-label="টিউটোরিয়ালের বিষয়বস্তু">
+        <li class="chip chip-free">Free কর্মপ্রবাহ</li>
+        <li class="chip chip-pro" data-tutorial-editions="pro">Pro পার্থক্যগুলো চিহ্নিত</li>
+        <li class="chip">ফোন এবং ব্রাউজারের উদাহরণ</li>
+      </ul>
+      <p class="note"><strong>SciREPL-এ নতুন?</strong> <a href="../interface/tutorial/">ইন্টারফেস নির্দেশিকা</a> দিয়ে শুরু করুন, তারপর <a href="../workbooks/tutorial/">ক্যাটালগের একটি ওয়ার্কবুক খুঁজুন এবং চালান</a>। সেই দ্বিতীয় পাঠের কিউব গণিতটি ঐচ্ছিক; অ্যাপ কর্মপ্রবাহ শেখার পর আপনি থামতে পারেন।</p>
+    </section>
+
+    <section aria-labelledby="interface-tutorials">
+      <h2 id="interface-tutorials">ইন্টারফেস এবং Appearance</h2>
+      <div class="card-grid">
+        <a class="card" href="../interface/tutorial/">
+          <p class="card-scope">এখানে শুরু করুন</p>
+          <h3>আপনার প্রথম ওয়ার্কবুক</h3>
+          <p>মেনু খুঁজুন, কোড লিখুন ও চালান, সংরক্ষিত সেল সম্পাদনা করুন এবং আপনার কাজ রপ্তানি করুন।</p>
+        </a>
+        <a class="card" href="../interface/appearance/">
+          <p class="card-scope">আপনার স্ক্রিনে জায়গা তৈরি করুন</p>
+          <h3>Appearance সেটিংস</h3>
+          <p>একটি থিম বেছে নিন, আকার এবং হেডার শর্টকাট সমন্বয় করুন, Browse প্রদর্শন করুন এবং অ্যান্ড্রয়েড স্ক্রিনের জায়গা পরিচালনা করুন।</p>
+        </a>
+      </div>
+    </section>
+
+    <section aria-labelledby="workbook-tutorials">
+      <h2 id="workbook-tutorials">ওয়ার্কবুক এবং ফাইল</h2>
+      <div class="card-grid">
+        <a class="card" href="../workbooks/tutorial/">
+          <p class="card-scope">ব্রাউজ করুন এবং একটি উদাহরণ চালান</p>
+          <h3>ক্যাটালগে Markov Groups খুঁজুন</h3>
+          <p>একটি ওয়ার্কবুক অনুসন্ধান করুন, এটি ইনস্টল করুন, এর সেলগুলো চালান, একটি উদাহরণ পরিবর্তন করুন এবং একটি অনুলিপি রপ্তানি করুন। গণিতটি ঐচ্ছিক।</p>
+        </a>
+        <a class="card" href="../workbooks/import/">
+          <p class="card-scope">নিজে একটি ওয়ার্কবুক ডাউনলোড করুন</p>
+          <h3>ম্যানুয়াল ওয়ার্কবুক আমদানি</h3>
+          <p>GitHub থেকে Simpson’s Paradox ডাউনলোড করে আমদানি করুন। .srwb এবং .ipynb ফাইলের মধ্যে এবং আমদানি ও চালানোর মধ্যকার পার্থক্য জানুন।</p>
+        </a>
+        <a class="card" href="../files-export/tutorial/">
+          <p class="card-scope">উপাত্ত তৈরি, পরিদর্শন এবং ব্যাকআপ করুন</p>
+          <h3>CSV ফাইল এবং প্যাকেজ রপ্তানি</h3>
+          <p>একটি CSV ফাইল তৈরি ও পড়ুন, Files &amp; Storage-এ এটি দেখুন ও সম্পাদনা করুন, তারপর ওয়ার্কবুক এবং উপাত্ত উভয় ধারণকারী একটি প্যাকেজ রপ্তানি করুন এবং পুনরায় খুলুন।</p>
+        </a>
+      </div>
+    </section>
+
+    <section aria-labelledby="graphics-interop-tutorials">
+      <h2 id="graphics-interop-tutorials">ছবি এবং একাধিক ভাষার কাজ</h2>
+      <div class="card-grid">
+        <a class="card" href="../workbooks/graphics/">
+          <p class="card-scope">আপনার ওয়ার্কবুক চিত্রিত করুন</p>
+          <h3>ছবি, ডায়াগ্রাম এবং সমীকরণ</h3>
+          <p>Markdown-এ স্থির ছবি এম্বেড করুন, একটি JavaScript ক্যানভাস চিত্র আঁকুন এবং KaTeX সমীকরণ লিখুন। একটি ছোট উদাহরণ ওয়ার্কবুক অন্তর্ভুক্ত রয়েছে।</p>
+        </a>
+        <a class="card" href="../workbooks/named-cells/">
+          <p class="card-scope">সেল এবং ভাষাগুলো সংযুক্ত করুন</p>
+          <h3>নামযুক্ত সেল এবং শেয়ার করা ফাইল</h3>
+          <p>সেলগুলোর নাম দিন, ভার্চুয়াল পাথের মাধ্যমে সেগুলোর উৎস এবং আউটপুট পড়ুন, শেয়ার করা ফাইলের মাধ্যমে JSON বিনিময় করুন এবং অন্য সেলের কোড তৈরি করুন।</p>
+        </a>
+      </div>
+    </section>
+
+    <section aria-labelledby="ai-tutorials" data-tutorial-editions="pro">
+      <h2 id="ai-tutorials">এআই এবং সমাপ্তিকরণ (Pro)</h2>
+      <div class="card-grid">
+        <a class="card" href="../pro/ai/tutorial/">
+          <p class="card-scope">শুধুমাত্র Pro · স্থানীয় মডেলের জন্য অ্যান্ড্রয়েড প্রয়োজন</p>
+          <h3>অফলাইন পরামর্শ থেকে এআই-সহায়তাপ্রাপ্ত কোডিং</h3>
+          <p>API-খরচবিহীন সারণী দিয়ে শুরু করুন, একটি কি এবং উন্মুক্ত এজেন্ট প্রিসেট সেট আপ করুন, একটি অনলাইন সমাপ্তিকরণ মডেল বেছে নিন, স্থানীয় পরামর্শগুলি চেষ্টা করুন, এবং কোড বোঝার জন্য এআই প্রম্পট সেল ব্যবহার করুন।</p>
+        </a>
+      </div>
+    </section>
+
+    <p class="note"><strong>হাতে-কলমে নির্দেশিকার বদলে একটি রেফারেন্স খুঁজছেন?</strong> <a href="../../">সহায়তা হোম পৃষ্ঠা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> ভাষা, প্যাকেজ, সমস্যা সমাধান, গোপনীয়তা এবং Pro-নির্দিষ্ট বৈশিষ্ট্যগুলিও অন্তর্ভুক্ত করে।</p>
+  </main>
+
+  <footer class="site-footer">
+    <span>SciREPL ডকুমেন্টেশন</span>
+    <nav aria-label="ফুটার নেভিগেশন">
+      <a href="../../">সহায়তা হোম<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+      <a href="../../../privacy.html">Free গোপনীয়তা</a>
+      <a href="../../../pro/privacy.html">Pro গোপনীয়তা</a>
+      <a href="https://github.com/s243a/SciREPL/issues">ডকুমেন্টেশন সংক্রান্ত কোনো সমস্যার কথা জানান</a>
+    </nav>
+  </footer>
+</body>
+</html>

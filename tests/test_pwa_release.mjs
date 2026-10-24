@@ -379,6 +379,30 @@ try {
     );
     assert(prologCdnAttempts === 0, 'Prolog does not attempt its CDN fallback', String(prologCdnAttempts));
 
+    const bindingCases = await page.evaluate(async () => {
+        const queries = {
+            unbound: 'X = _.',
+            opaque: 'open_string("x", S), close(S).',
+            number: 'X = 42.',
+            compound: 'X = foo(bar).',
+            dict: 'X = person{name:alice}.',
+        };
+        const output = {};
+        for (const [name, query] of Object.entries(queries)) {
+            const result = await window.kernelManager.execute(query, 'prolog');
+            output[name] = result.stdout || '';
+        }
+        return output;
+    });
+    assert(!/\bX\s*=|\[object Object\]/.test(bindingCases.unbound),
+        'unbound Prolog variables are omitted from displayed bindings', bindingCases.unbound);
+    assert(!/\bS\s*=|\[object Object\]/.test(bindingCases.opaque),
+        'opaque Prolog handles are omitted from displayed bindings', bindingCases.opaque);
+    assert(/\bX\s*=\s*42\b/.test(bindingCases.number),
+        'bound numeric Prolog values remain visible', bindingCases.number);
+    assert(/\bX\s*=/.test(bindingCases.compound) && /\bX\s*=/.test(bindingCases.dict),
+        'compound and dictionary Prolog bindings remain visible', JSON.stringify(bindingCases));
+
     console.log('4. Going offline before installing the dependency-aware bundle...');
     await context.setOffline(true);
     const offlineInstall = await page.evaluate(async () => {
@@ -489,6 +513,17 @@ try {
     assert(offlineReload.controlled, 'offline reload remains service-worker controlled');
     assert(!offlineReload.online, 'browser remained offline during reload');
     assert(offlineReload.title === 'Sci REPL', 'offline app shell rendered', offlineReload.title);
+    const offlineTutorialLinks = await page.evaluate(async () => {
+        await window.i18n.activate('ar');
+        return {
+            index: document.getElementById('help-tutorial-index').href,
+            import: document.getElementById('workbook-import-tutorial').href,
+        };
+    });
+    assert(offlineTutorialLinks.index === 'https://s243a.github.io/SciREPL/help/ar/tutorials/?edition=free'
+        && offlineTutorialLinks.import === 'https://s243a.github.io/SciREPL/help/ar/workbooks/import/?edition=free',
+        'cached tutorial helper updates both Free guide links after an offline locale switch');
+    await page.evaluate(() => window.i18n.activate('en'));
     assert(pageErrors.length === 0, 'offline app reload raises no uncaught page errors', pageErrors.join(' | '));
 
     console.log('7. Restarting the bundled Prolog kernel while still offline...');

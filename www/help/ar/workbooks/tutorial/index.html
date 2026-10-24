@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="اعثر على دفتر عمل Markov Groups في كتالوج SciREPL، وشغّل خلايا Python الخاصة به، وعدّل مسارًا عشوائيًا، وصدّر نسختك الخاصة من دفتر العمل.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ar/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/tutorial/tutorial.css">
+  <script src="../../../workbooks/tutorial/catalogue-link.js" defer></script>
+  <title>دليل تفصيلي لدفتر عمل Markov Groups · مساعدة SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">الانتقال إلى المحتوى</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+    <nav aria-label="التنقل الرئيسي">
+      <a href="../../../workbooks/">مرجع دفاتر العمل<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+      <a href="../../tutorials/">جميع الدروس التعليمية</a>
+      <a href="../../../">كل المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+      <a href="../../../../">فتح تطبيق Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="لغة البرنامج التعليمي"><details class="tutorial-language-menu"><summary>لغة البرنامج التعليمي: <bdi>العربية</bdi></summary><nav aria-label="لغة البرنامج التعليمي"><a href="../../../en/workbooks/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="./" lang="ar" hreflang="ar" aria-current="page">العربية</a>
+      <a href="../../../bn/workbooks/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">برنامج تعليمي مترجم آليًا؛ والمراجعة بواسطة متحدث أصلي باللغة قيد الانتظار. لم تتغير التعليمات البرمجية والقيم التقنية. تُظهر لقطات الشاشة الواجهة الأصلية باللغة الإنجليزية؛ يرجى مطابقة أسماء عناصر التحكم المترجمة في هذا النص مع ما يظهر في تطبيقك.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> / <a href="../../../workbooks/">دفاتر العمل<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> / الدليل التفصيلي لـ Markov Groups</p>
+    <article>
+      <p class="eyebrow">التعلم بالممارسة</p>
+      <h1>استكشف دفتر عمل من الدليل</h1>
+      <p class="lede">اعثر على دفتر العمل الحالي <strong><bdi lang="en" dir="ltr">Markov Groups: A Random Walk on Cube Moves</bdi></strong>، وشغّل خلايا Python الأربع الخاصة به، وقصّر مساره العشوائي، واحفظ نسختك الخاصة. ينصب التركيز على استخدام SciREPL؛ لست بحاجة إلى معرفة جبر المصفوفات أو حل مكعب روبيك.</p>
+      <p class="callout"><strong>هل أنت هنا لتتعلم التطبيق؟</strong> اتبع الخطوات من 1 إلى 5: اعثر على دفتر عمل، وافتحه، وشغّله، وعدّله، وصدّره. يمكنك التوقف بعد الخطوة 5. تأتي <a href="#optional-maths">الرياضيات الاختيارية</a> بعد ذلك؛ وهي ليست لازمة لإكمال هذا الدليل التوجيهي.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">خطوات أندرويد</li>
+        <li class="chip">حوالي 15 دقيقة</li>
+      </ul>
+      <p class="screen-note">تُظهر لقطات الشاشة المأخوذة من هاتف حقيقي SciREPL Pro <strong>1.4.0-debug</strong> على <strong>Samsung Galaxy S24+</strong>، والتي التُقطت في <time datetime="2026-10-06">6 أكتوبر 2026</time>. وهي توضح سير عمل دفتر العمل المشترك، وليست بنية Pro تم إصدارها. قد ترتب نسخة Free والإصدارات الأخرى بعض عناصر التحكم بشكل مختلف. والمثال المأخوذ هو دفتر العمل الإنجليزي من كتالوج SciREPL <strong>v0.4.0</strong>.</p>
+      <nav class="lesson-nav" aria-label="خطوات الدليل التوجيهي لدفتر العمل">
+        <strong>في هذا الدرس</strong>
+        <p><a href="#find-menu">أولاً، اعثر على القائمة</a></p>
+        <ol>
+          <li><a href="#browse">تصفح وصفّ وابحث</a></li>
+          <li><a href="#open">افتح دفتر العمل</a></li>
+          <li><a href="#run">شغّل خلاياه بالترتيب</a></li>
+          <li><a href="#edit">غيّر قيمة واحدة وأعد التشغيل</a></li>
+          <li><a href="#export">صدّر نسختك من دفتر العمل</a></li>
+        </ol>
+        <p><a href="#optional-maths">اختياري: الرياضيات الكامنة وراء مثال المكعب</a></p>
+        <p><a href="../../tutorials/">جميع الدروس التعليمية</a></p>
+      </nav>
+
+      <section id="find-menu">
+        <p class="step-label">قبل أن تبدأ</p>
+        <h2>اعثر على القائمة</h2>
+        <p>ابحث في SciREPL في <strong>صف العنوان أعلى التطبيق</strong> عن زر <strong>☰ Menu</strong>. أيقونته عبارة عن <strong>ثلاثة خطوط أفقية</strong>، مظللة باللون الأصفر أدناه. اضغط عليه لفتح قائمة التطبيق؛ توضح الخطوة 1 عنصر القائمة الذي يجب اختياره.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--find-menu" role="img" aria-label="صف العنوان العلوي لـ SciREPL، مع تمييز زر القائمة ذي الخطوط الأفقية الثلاثة باللون الأصفر بجوار زر المساعدة الذي يحمل علامة استفهام.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>يقع زر <strong>☰ Menu</strong> بجوار زر <strong>? Help</strong> في لقطة الشاشة هذه. استخدم الأيقونة ذات الخطوط الثلاثة حتى لو كان ترتيب صف العنوان لديك مختلفًا.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-workbook.png">عرض لقطة الشاشة الكاملة</a>
+        </figure>
+      </section>
+
+      <section id="browse">
+        <p class="step-label">الخطوة 1</p>
+        <h2>تصفح وصفّ وابحث</h2>
+        <ol class="lesson-steps">
+          <li>افتح <strong>القائمة → تصفح الحزم والمجموعات والمصنفات</strong>. في Free، يفتح اختصار العنوان الاختياري <strong>📦</strong> الشاشة ذاتها عندما يكون مرئيًا. يوضح <a href="../../interface/appearance/#browse-shortcut">دليل المظهر التوجيهي</a> كيفية تفعيله.</li>
+          <li>تصفح القائمة أو استخدم عوامل التصفية الخاصة بها. بالنسبة لهذا المثال الإنجليزي، اختر <strong><bdi lang="en" dir="ltr">English</bdi></strong> أسفل <strong>اللغة المنطوقة</strong> و<strong>Python</strong> أسفل <strong>النواة</strong>. يعمل أيضًا خيار <strong>جميع اللغات المنطوقة</strong> وخيار <strong>الكل</strong> الخاص بالنواة، ولكنهما يعرضان المزيد من الإدخالات.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse" role="img" aria-label="شاشة التصفح في SciREPL مع تمييز عناصر التحكم في الدليل باللون الأصفر.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-browse.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>يجمع التصفح بين الحزم والحزم المجمعة وقوالب دفاتر العمل. ويساعدك البحث وعوامل التصفية على تضييق نطاق القائمة.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-browse.png">عرض لقطة شاشة التصفح الكاملة</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>اكتب <strong><bdi lang="en" dir="ltr">Markov Groups</bdi></strong> في حقل البحث. وتحت <strong>كتب العمل</strong>، ابحث عن <strong><bdi lang="en" dir="ltr">Markov Groups: A Random Walk on Cube Moves</bdi></strong>. تحقق من العنوان الكامل قبل التثبيت: هذا قالب دفتر عمل، وليس حزمة للإضافة إلى Python.</li>
+          <li>إذا كانت لوحة المفاتيح تغطي النتيجة، فاستخدم زر إخفاء لوحة المفاتيح الخاص بها أو اضغط على <strong>السابق</strong> في أندرويد مرة واحدة لإغلاقها. اترك التصفح مفتوحًا ومرر إلى دفتر العمل المطابق.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--search" role="img" aria-label="بحث التصفح عن Markov Groups مع تمييز دفتر العمل المطابق وعنصر التحكم في التثبيت باللون الأصفر.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-search.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/search-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>ابحث عن <strong><bdi lang="en" dir="ltr">Markov Groups</bdi></strong>، ثم تحقق من عنوان دفتر العمل المطابق وزر <strong>تثبيت</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-search.png">عرض لقطة الشاشة الكاملة للبحث</a>
+        </figure>
+        <p><strong>ما المتاح أيضًا؟</strong> <a id="catalogue-workbooks-link" href="https://github.com/s243a/SciREPL-Catalog/tree/main/workbooks/en">تصفح قائمة دفاتر العمل على GitHub (<bdi id="catalogue-workbooks-language">الإنجليزية</bdi>)</a>. إن إصدارات اللغات المختلفة للدرس هي مدخلات منفصلة وليست دروسًا مختلفة.</p>
+        <div class="catalogue-language-choice" id="catalogue-language-choice" hidden>
+          <label for="catalogue-workbooks-locale">لغة دفتر العمل:</label>
+          <select id="catalogue-workbooks-locale">
+            <option value="ar" lang="ar">العربية</option>
+            <option value="bn" lang="bn">বাংলা</option>
+            <option value="de" lang="de">Deutsch</option>
+            <option value="en" lang="en" selected>English</option>
+            <option value="es" lang="es">Español</option>
+            <option value="fr" lang="fr">Français</option>
+            <option value="hi" lang="hi">हिन्दी</option>
+            <option value="id" lang="id">Bahasa Indonesia</option>
+            <option value="ja" lang="ja">日本語</option>
+            <option value="ko" lang="ko">한국어</option>
+            <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+            <option value="ru" lang="ru">Русский</option>
+            <option value="zh" lang="zh">中文</option>
+          </select>
+        </div>
+        <p>يعرض رابط GitHub أحدث محتويات التطوير. يستخدم SciREPL عادةً أحدث إصدار مستقر من الفهرس، لذا قد لا تظهر بعض دفاتر العمل المعروضة على GitHub بعد في التصفح. في SciREPL، امسح البحث وجرّب <strong>CSV</strong>، أو <strong>Prolog</strong>، أو <strong>Lua</strong>، أو <strong>statistics</strong>؛ واختر <strong>الكل</strong> ضمن النواة عند استكشاف لغات أخرى.</p>
+        <p class="callout"><strong>إذا ظهر إشعار الخصوصية:</strong> يتطلب جلب الفهرس البعيد أو تحديثه اتصالاً بالشبكة. اقرأ الإفصاح، ومرر <em>داخل مربع الحوار</em> إلى الأسفل، واضغط على <strong>أفهم ذلك</strong> فقط إذا كنت موافقًا. يؤدي إغلاق الإشعار إلى منع تحديث الشبكة هذا؛ مع ذلك، قد تظل الإدخالات المضمنة وإدخالات الفهرس المخزنة مؤقتًا سابقًا معروضة. راجع <a href="../../../privacy/">الخصوصية والبيانات المحلية<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>.</p>
+        <p class="callout"><strong>ألا يوجد دفتر عمل مطابق؟</strong> تحقق من عوامل تصفية اللغة والنواة، ثم استخدم عنصر التحكم <strong>تحديث</strong> الخاص بالفهرس. قد لا يحتوي التطبيق الأقدم على عناصر التحكم نفسها في الفهرس. بدلاً من ذلك، <a download="markov-groups.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/v0.4.0/workbooks/en/markov-groups.srwb">احفظ ملف دفتر العمل المثبت v0.4.0</a> على جهازك، ثم اختر <strong>القائمة → استيراد ملف</strong> وحدد <code>markov-groups.srwb</code>. إذا كان متصفحك يعرض الملف كنص، فاستخدم إجراء الحفظ/التنزيل الخاص به واحتفظ بالامتداد <code>.srwb</code>. يعرض <a href="../import/">الدليل الإرشادي للاستيراد اليدوي لدفتر العمل</a> الخطوات باستخدام مفارقة سيمبسون من GitHub في فرع <code>main</code>؛ اختر ملف ماركوف أعلاه لمتابعة هذا الدرس.</p>
+      </section>
+
+      <section id="open">
+        <p class="step-label">الخطوة 2</p>
+        <h2>افتح دفتر العمل وافحص خلاياه</h2>
+        <ol class="lesson-steps">
+          <li>اضغط على <strong>تثبيت</strong> في بطاقة دفتر العمل. وإذا كان الزر يعرض بالفعل <strong>مثبت</strong>، فاخرج من قائمة التصفح واختر دفتر العمل الحالي من محدد دفاتر العمل بدلاً من ذلك.</li>
+          <li>يصبح دفتر العمل عادةً علامة التبويب المحددة. وإذا بقيت قائمة التصفح مفتوحة، فاخرج منها. وإذا كان التبديل التلقائي متوقفًا، فاختر <strong><bdi lang="en" dir="ltr">Markov Groups: A Random Walk on Cube Moves</bdi></strong> من <strong><svg role="img" aria-label="السهم المتجه لأسفل" width="16" height="16" viewBox="0 0 16 16" style="vertical-align: -.125em;"><path d="M3 5.5 8 10.5 13 5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> محدد دفاتر العمل</strong> بجانب <strong>SciREPL</strong> في الترويسة.</li>
+          <li>اقرأ النص الافتتاحي، ثم مرر عبر الخلايا. تشرح خلايا Markdown الدرس؛ بينما تحتوي خلايا Python على الشيفرة البرمجية التي ستقوم بتشغيلها. ولكل خلية Python اسم لمساعدتك في العثور عليها.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--workbook" role="img" aria-label="دفتر عمل مجموعات ماركوف المفتوح، مع تمييز عنوانه وعناصر التحكم في دفتر العمل باللون الأصفر.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/workbook-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>يفتح دفتر عمل الدليل كخلايا قابلة للتعديل. وتوضح مقدمته ترتيب تشغيل Python.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-workbook.png">عرض لقطة الشاشة الكاملة لدفتر العمل</a>
+        </figure>
+        <p class="callout"><strong>التثبيت لا يعني التشغيل.</strong> يؤدي تثبيت دفتر عمل الدليل البعيد هذا إلى إضافة خلاياه دون تنفيذ شيفرة Python البرمجية الخاصة به. لا يحتوي قالب v0.4.0 على مخرجات Python محفوظة، لذا تفحص الشيفرة وشغلها بنفسك. لا يلزم وجود حساب ذكاء اصطناعي، أو مفتاح API، أو مجموعة بيانات خارجية، أو تثبيت حزم إضافية؛ إذ تستخدم الشيفرة البرمجية NumPy مع بيئة SciREPL لتشغيل Python.</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">الخطوة 3</p>
+        <h2>شغّل خلايا Python الأربع بالترتيب</h2>
+        <p>بالنسبة لأي خلية محفوظة، اضغط على <strong>✎ القلم</strong> في ترويسة تلك الخلية، ثم اضغط على زر <strong>تشغيل</strong> الخاص بتلك الخلية. يؤدي هذا إلى تنفيذ الخلية الحالية؛ بينما تنشئ لوحة الخلية الجديدة السفلية خلية مختلفة.</p>
+        <aside class="callout" data-editions="pro"><strong>اختصار Pro:</strong> انقر نقرًا مزدوجًا على الشيفرة المحفوظة لفتح محررها، ثم اضغط في تلك الخلية على <strong>تشغيل</strong>. يستخدم Free <strong>✎ القلم</strong> في هذا الدليل التوضيحي.</aside>
+        <p class="callout"><strong>ماذا تعني هذه الأسماء؟</strong> إن <code>cube_moves</code> و<code>check_moves</code> هما اسمان يظهران على الخلايا، وليسا أمرين يجب كتابتهما. ابحث عن الاسم المطابق، ثم استخدم قلم تلك الخلية وزر التشغيل. يوضح <a href="../named-cells/">البرنامج التعليمي للخلايا المسماة والمسارات متعددة اللغات</a> كيفية تعيين الأسماء واستخدامها كمراجع مثل <code>/nb/cube_moves/.code</code>.</p>
+        <ol class="lesson-steps">
+          <li>شغّل <code>cube_moves</code>. وهو يحدد الحركات والدوال المساعدة. يُتوقع <code>Built six clockwise quarter-turn matrices with fixed face centres.</code></li>
+          <li>شغّل <code>check_moves</code>. يتحقق هذا من عدم فقدان أي ملصق، وثبات المراكز في مكانها، وأن أربعة تكرارات لكل ربع دورة تعود إلى نقطة البداية. وبعد ستة أسطر ناجحة، يُتوقع <code>All six moves passed. U and R do not commute.</code></li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--checks" role="img" aria-label="مخرجات check_moves حديثة على الهاتف، مع تمييز الفحوصات الناجحة باللون الأصفر.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-checks.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/checks-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>الفحوصات المطبوعة هي نتائج حديثة ناتجة عن تشغيل <code>check_moves</code>، وليست نتائج محفوظة يوفرها الدليل.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-checks.png">عرض لقطة الشاشة الكاملة لنتائج الفحص</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>شغّل <code>show_turn</code>. يطبع هذا دورات دوران U وتسميات الملصقات قبل الدوران وبعده. يتغير الصف العلوي الأمامي من <code>[19, 20, 21]</code> إلى <code>[46, 47, 48]</code>. توضح المقارنة <code>U then R equals R then U: False</code> أن ترتيب الحركات مهم.</li>
+        </ol>
+        <p><strong>جزء من المخرجات المطبوعة:</strong></p>
+        <pre id="show-turn-output" style="white-space: pre-wrap; overflow-wrap: anywhere;"><code>U cycles, shown as one-based sticker positions:
+1 -&gt; 3 -&gt; 9 -&gt; 7 -&gt; 1
+2 -&gt; 6 -&gt; 8 -&gt; 4 -&gt; 2
+19 -&gt; 37 -&gt; 28 -&gt; 46 -&gt; 19
+20 -&gt; 38 -&gt; 29 -&gt; 47 -&gt; 20
+21 -&gt; 39 -&gt; 30 -&gt; 48 -&gt; 21
+
+F top row labels before U: [19, 20, 21]
+F top row labels after U:  [46, 47, 48]
+
+U then R equals R then U: False</code></pre>
+        <p>حُذفت القائمة الطويلة لأحرف الأوجه هنا. تستخدم أسطر الدورات <strong>مواضع تبدأ من واحد</strong>؛ بينما تُظهر مقارنة الصفوف <strong>تسميات الملصقات</strong>. هذه معانٍ مختلفة، على الرغم من أن المكعب المحلول يمنحها في البداية أرقامًا متطابقة.</p>
+        <ol class="lesson-steps" start="4">
+          <li>شغّل <code>random_walk</code>. يطبع هذا إجمالي احتمال لملصق واحد قدره <code>1.0</code>، ومسارًا مُعاينًا من 12 خطوة، والتسميات النهائية لأحرف الأوجه، ورسالة تؤكد الحفاظ على كل تسمية ملصق وجميع المراكز الستة.</li>
+        </ol>
+        <p>خلايا Python مرتبة بالفعل بالترتيب المطلوب. لا تُعد ترتيبها: فالخلايا اللاحقة تعيد استخدام تعريفات من <code>cube_moves</code>. لتشغيل عدة خلايا دفعة واحدة، راجع <a href="#batch-run-note">تشغيل الكل أدناه وتشغيل كل الخلايا</a>.</p>
+        <p class="callout"><strong>هل التشغيل الأول أبطأ؟</strong> قد يحتاج Python إلى وقت للتهيئة، وقد يتطلب تنزيل بيئة التشغيل أو الرجوع إلى الشبكة موافقتك. انتظر حتى تعود شارة الحالة إلى <strong>جاهز</strong> وتحقق من مخرجات الخلية بحثًا عن أخطاء. إذا أبلغت خلية لاحقة عن اسم غير محدد بعد إعادة التشغيل، فشغّل خلايا Python من البداية؛ فالمخرجات المحفوظة ليست هي نفسها تعريفات Python المباشرة.</p>
+        <p>يطبع دفتر العمل هذا نصوصًا وقوائم بأحرف الأوجه. وهو لا يرسم مكعبًا ولا يحركه، ومساره القصير ذو البذرة المحددة ليس دليلاً على خلط عشوائي متجانس.</p>
+      </section>
+
+      <section id="edit">
+        <p class="step-label">الخطوة 4</p>
+        <h2>تقصير المسار وإعادة تشغيل الخلية المحفوظة</h2>
+        <ol class="lesson-steps">
+          <li>ابحث عن <code>random_walk</code> واضغط على <em>رمز</em> <strong>✎ القلم</strong> الخاص بها.</li>
+          <li>ابحث عن هذا السطر وغيّر فقط <code>size=12</code> إلى <code>size=6</code>:
+            <pre><code>moves = rng.choice(MOVE_OPTIONS, size=12).tolist()</code></pre>
+            <p>اترك <code>np.random.default_rng(7)</code> دون تغيير. تجعل البذرة هذا المثال قابلاً للتكرار.</p>
+          </li>
+          <li>اضغط على زر <strong>تشغيل</strong> في محرر تلك الخلية المحفوظة. تم تحديث المخرجات؛ يحتوي سطر <code>Sampled moves:</code> الآن على ستة خيارات بدلاً من اثني عشر. يُعد <code>I</code> خيارًا على الرغم من أنه يترك المكعب ثابتًا.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--edit" role="img" aria-label="خلية random_walk المحفوظة قيد التعديل، مع تعيين الحجم إلى ستة وتمييز عنصر تحكم التشغيل الخاص بالخلية باللون الأصفر.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-edit.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>غيّر قيمة واحدة في الخلية المحفوظة، ثم استخدم زر التشغيل الخاص بـ <em>تلك الخلية</em>. التعديل بمفرده لا يحدّث مخرجاتها السابقة.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-edit.png">عرض لقطة الشاشة الكاملة للتعديل</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--six-moves" role="img" aria-label="مخرجات random_walk جديدة تعرض ستة خيارات تم أخذ عينات منها بعد إعادة التشغيل، ومميزة باللون الأصفر.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-six-moves.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/six-moves-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>المسار الأقصر الذي تم أخذ عينات منه هو النتيجة المرئية لتعديلك. وتظل الرسالة النهائية تؤكد أن المسار يحفظ تسميات الملصقات والمراكز.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-six-moves.png">عرض لقطة الشاشة الكاملة لنتيجة الخيارات الستة</a>
+        </figure>
+        <p>لهذا التغيير، أعد تشغيل <code>random_walk</code> فقط أثناء تحميل التعريفات السابقة. وإذا عدّلت <code>cube_moves</code> بدلاً من ذلك، فأعد تشغيل خلايا Python اللاحقة أيضًا. تسجل المخرجات آخر عملية تنفيذ لها؛ ولا يُعاد حسابها تلقائيًا عند تغيير خلية أخرى.</p>
+        <p>إذا فتحت المحرر عن طريق الخطأ، فاختر <strong>إلغاء</strong>. للعودة إلى المثال الأصلي، أعد تغيير <code>size=6</code> إلى <code>size=12</code> وشغّل الخلية مرة أخرى.</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">الخطوة 5</p>
+        <h2>تصدير نسختك الخاصة من دفتر العمل</h2>
+        <ol class="lesson-steps">
+          <li>أبقِ دفتر عمل مجموعات ماركوف محددًا، ثم افتح <strong>القائمة → تصدير المصنفات والحزم</strong>، وليس تصدير المستند.</li>
+          <li>اختر <strong>مصنف (.srwb)</strong> و<strong>علامة التبويب الحالية فقط</strong>.</li>
+          <li>اضغط على <strong>تصدير</strong> واحفظ النسخة في مكان تتحكم فيه. يفتح نظام Android مسار مشاركة/حفظ؛ ويقوم المتصفح بتنزيل ملف. احتفظ بالامتداد <code>.srwb</code>.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="مربع حوار التصدير مع تمييز Workbook srwb وCurrent tab only وExport باللون الأصفر.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>يحفظ تنسيق Workbook وCurrent tab only دفتر العمل المعدل هذا دون تضمين علامات تبويب غير مرتبطة. إن خيار Pro فقط <strong>تضمين محادثة الذكاء الاصطناعي</strong> غير مطلوب لهذا الدرس؛ اتركه دون تحديد.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-export.png">عرض لقطة الشاشة الكاملة للتصدير</a>
+        </figure>
+        <p>لا يحتاج دفتر العمل إلى ملف بيانات منفصل، لذا فإن نسخة <code>.srwb</code> كافية لهذا الدرس. يمكنك إعادة فتحه عبر <strong>القائمة → استيراد ملف</strong>؛ وشغّل خلايا Python الخاصة به من البداية عند بدء تشغيل بيئة تشغيل جديدة.</p>
+        <p class="callout"><strong>الاسترداد المحلي ليس نسخة احتياطية.</strong> يمكن أن يؤدي مسح مساحة تخزين التطبيق أو الموقع أو إلغاء التثبيت إلى إزالة العمل المحلي. لا تشارك جلسات أندرويد والمتصفح تعديلاتك تلقائيًا. لا يؤدي التصدير إلى نشر تغييراتك في الدليل؛ بل يمنحك نسخة منفصلة.</p>
+        <p>للتعرف على أساسيات تعديل الخلايا المحفوظة، راجع <a href="../../interface/tutorial/">الجولة الإرشادية لواجهة دفتر العمل الأول</a>. للحصول على مثال يقرأ ملف بيانات منفصل وينقله، جرب <a href="../../files-export/tutorial/">CSV جولة دفتر العمل الإرشادية</a>. يغطي <a href="../../../workbooks/">مرجع دفاتر العمل<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> أنواع الخلايا وأسماء الخلايا الثابتة.</p>
+      </section>
+
+      <aside class="callout" id="batch-run-note" aria-labelledby="batch-run-heading">
+        <h3 id="batch-run-heading">تشغيل الكل أدناه وتشغيل جميع الخلايا</h3>
+        <ul>
+          <li><strong>تشغيل الكل أدناه:</strong> افتح خلية محفوظة باستخدام <strong>✎ قلم الرصاص</strong> الخاص بها، ثم اختر <strong>تشغيل الباقي</strong> (الرمز المصغر هو <strong>▶↓</strong>). يؤدي ذلك إلى تشغيل تلك الخلية <em>و</em>كل خلية أسفلها، بالترتيب.</li>
+          <li><strong>القائمة → تشغيل جميع الخلايا:</strong> يشغل دفتر العمل المحدد من خليته الأولى إلى الأخيرة. إنه ليس أمرًا لتشغيل كل علامة تبويب لدفتر عمل.</li>
+        </ul>
+        <p>عاين التعليمة البرمجية أولًا وأبقِ دفتر العمل هذا محددًا أثناء تشغيل الدفعة. بعد جلسة Python جديدة، ابدأ من <code>cube_moves</code> حتى تحتوي الخلايا اللاحقة على تعريفاتها. تنفذ هذه الإجراءات تعليمات برمجية؛ فوصف الشرح بأنه «اختياري» لا يجعل التطبيق يتخطى خلايا التعليمات البرمجية الخاصة به.</p>
+      </aside>
+
+      <p class="callout" id="walkthrough-complete"><strong>لقد أكملت جولة SciREPL الإرشادية.</strong> لقد عثرت على دفتر عمل وفتحته وشغلته وعدلته وصدرته. إذا كنت ترغب فقط في تعلم التطبيق، فيمكنك التوقف هنا. تابع أدناه إذا كنت ترغب في استكشاف رياضيات المكعب ودفتر عمل التطوير.</p>
+
+      <section id="optional-maths">
+        <p class="step-label">قراءة اختيارية</p>
+        <h2>الرياضيات الكامنة وراء مثال المكعب</h2>
+        <h3>بعض المعاني الكامنة وراء المخرجات</h3>
+        <p>يتتبع دفتر العمل <strong>54 ملصقًا مسمى بشكل فردي</strong>، وليس ستة ألوان فقط. تؤدي النقلة القانونية إلى إعادة ترتيب تلك الملصقات. تعيد أربعة تكرارات لربع دورة واحدة الترتيب إلى نقطة البداية، لكن دورات الأوجه المختلفة يمكن أن تعطي نتائج مختلفة عندما يتغير ترتيبها.</p>
+        <p>يختار المسار العشوائي من بين 13 خيارًا: البقاء ثابتًا (<code>I</code>)، وست دورات ربعية، ومعكوساتها الستة. وتصف مصفوفة الاحتمالات <strong>54×54 الخاصة به موقع ملصق واحد</strong>، وليس كل تشكيلة للمكعب الكامل. ويعني إجمالي الاحتمال البالغ <code>1.0</code> أن احتمالات موقع هذا الملصق مجموعها واحد؛ ولا يثبت ذلك أن المكعب مبعثر بشكل منتظم.</p>
+        <p class="callout"><strong>هل أنت فضولي بشأن اتجاهات الأوجه؟</strong> توفر خلية <code>coordinates</code> في دفتر العمل المحاور العامة والاتجاه الأيمن والعلوي والعمودي الخارجي لكل وجه. يوضح <a href="../graphics/">برنامج تعليم الصور والرسوم البيانية والمعادلات</a> كيفية وضع هذا النوع من الشرح في دفتر العمل. تجري إضافة مخططات الإحداثيات إلى نسخة التطوير في الدليل؛ ولا تتضمنها نسخة v0.4.0 المثبتة أعلاه.</p>
+        <div id="stage4-preview">
+          <h3>اختياري: معاينة المرحلة 4 المُعدّلة</h3>
+          <p>تستخدم الخطوات ولقطات شاشة الهاتف أعلاه دفتر العمل المستقر <strong>v0.4.0</strong>. يُعد <a download="markov-groups-stage4-preview.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/f88d9b9e26364eeb5e7ff1ee9bcce5f27d47c66e/workbooks/en/markov-groups.srwb">تنزيل دفتر العمل المُعدَّل</a> بمثابة <strong>معاينة تطوير</strong>، وليس الدليل المستقر بعد. يمكنك استيراده عبر <strong>القائمة → استيراد ملف</strong> إذا كنت ترغب في تجربة خلايا التعليمات البرمجية والشرح الأقصر والمتداخلة الخاصة به.</p>
+          <p>في تلك المعاينة، شغّل <code>cube_moves</code> و<code>check_moves</code> و<code>show_turn</code> أولًا، كما هو موضح أعلاه. ثم:</p>
+          <ol class="lesson-steps">
+            <li>شغّل <code>transition_matrix</code>. ينشئ ذلك <code>T</code>، وهي مصفوفة الاحتمالات لموقع ملصق واحد بعد خيار واحد مختار بانتظام: <code>I</code>، أو ربع دورة للوجه، أو معكوسها.</li>
+            <li>شغّل <code>sticker_step</code>. إنه يتبع <strong>تسمية الملصق 1</strong>، الموجود في البداية عند <strong>الموضع ذي الأساس الصفري 0</strong>. ويبلغ مجموع احتمالات موقعه <code>1.0</code>. يعرض الرسم البياني أدناه احتمالات الوجهة المحسوبة بواسطة تلك الخلية.</li>
+          </ol>
+          <figure id="sticker-probability-figure" aria-describedby="sticker-probability-caption" style="margin: 24px 0;">
+            <img src="../../../workbooks/tutorial/assets/sticker-one-step.svg" width="400" height="380" style="display: block; width: min(100%, 560px); height: auto;" alt="بعد نقلة عشوائية واحدة، يمتلك ملصق العلامة 1 احتمال سبعة على ثلاثة عشر للبقاء في الموضع 0، واحتمال واحد على ثلاثة عشر للوصول إلى كل من المواضع 2 أو 6 أو 18 أو 35 أو 42 أو 47.">
+            <figcaption id="sticker-probability-caption"><strong>مخطط شريطي للاحتمالات، وليس مدرجًا تكراريًا ذا فئات.</strong> يُحسب هذا الرسم التوضيحي من <code>after_one_step = T @ location_probability</code>؛ وهو ليس لقطة شاشة لهاتف أو مخرجًا جديدًا أنتجه دفتر العمل. المواضع مبنية على الصفر. المواضع الـ 47 الأخرى احتمالها صفر وجرى استبعادها. تبقى علامة الملصق 1.</figcaption>
+          </figure>
+          <div class="table-wrap">
+            <table aria-label="احتمالات الخطوة الواحدة الدقيقة لملصق العلامة 1">
+              <thead><tr><th>موضع الوجهة</th><th>الاحتمال</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>7/13 ≈ 53.85%</td></tr>
+                <tr><td>2، 6، 18، 35، 42، 47 (لكل منها)</td><td>1/13 ≈ 7.69%</td></tr>
+                <tr><td>كافة المواضع الـ 47 الأخرى</td><td>0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <ol class="lesson-steps" start="3">
+            <li>شغّل <code>random_walk</code>. فهو يأخذ عينة لمسار ذي 12 خيارًا لـ <strong>كامل المكعب</strong>، باستخدام التعريفات من <code>transition_matrix</code>. ويختلف هذا عن احتمالات الملصق الواحد أعلاه. يعمل تعديل الخطوة 4 <code>size=12</code> في هذه الخلية في أي من الإصدارين.</li>
+          </ol>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>مساعدة SciREPL</span><nav aria-label="التنقل في التذييل"><a href="../../../workbooks/">مرجع دفاتر العمل<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a><a href="../../../">كل المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a></nav></footer>
+</body>
+</html>

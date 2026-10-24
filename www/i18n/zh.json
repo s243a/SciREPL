@@ -25,6 +25,7 @@
     "Session-AppState": "会话"
   },
   "strings": {
+    "help.keyboardTrustNotice": "SciREPL 与这些项目没有关联。键盘应用可以读取您输入的所有内容，包括密码和 API 密钥。请仅安装您信任的键盘，检查其权限，并保持更新。",
     "__literal": [
       "app.search.position",
       "export.docx",
@@ -253,7 +254,7 @@
     "help.cellLanguage": "单元格语言",
     "help.eachCellRemembersItsLanguage": "每个单元格都会记住自身的编程语言。若要更改单元格语言，请点击 ✎ 进行编辑，然后使用语言下拉列表。点击 <strong>All→</strong> 可将该语言应用到笔记本中的所有代码单元格。",
     "help.sourceOnlyCellsTyprDirectives": "仅源文件单元格与 TypR 指令",
-    "help.putSourceOnFirstLine": "在已命名的 TypR 或 Lua 单元格的第一行添加 <code>#!source</code>，可保留高亮代码供 Notebook VFS 读取而不执行。其余指令为 TypR 专属：",
+    "help.putSourceOnFirstLine": "在任意受支持语言的已命名代码单元格的第一行添加 <code>#!source</code>，可保留高亮代码供 Notebook VFS 读取而不执行。其余指令为 TypR 专属：",
     "help.sourceCellShowsSourceOnly": "<code>#!source</code> — 单元格显示<strong>仅源码</strong>，特意不显示 <code>Out [n]</code>，且仍可通过 Notebook VFS 读取。",
     "help.typecheckTypeCheckFollowingCode": "<code>#!typecheck</code> — 对后续代码进行类型检查而不执行。",
     "help.transpileShowTranspiledRCode": "<code>#!transpile</code> — 显示转译后的 R 代码。",

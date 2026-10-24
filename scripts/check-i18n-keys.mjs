@@ -31,6 +31,44 @@ const require = createRequire(import.meta.url);
 const base = JSON.parse(readFileSync(path.join(WWW, 'i18n', 'en.json'), 'utf8'));
 const known = new Set(Object.keys(base.strings || {}));
 
+// A percentage can round to 100% while this credential-access warning silently
+// falls back to English. Require the specific safety copy in every UI locale;
+// do not turn this into a blanket ban on intentional fallback/literal strings.
+const REQUIRED_TRANSLATED_SAFETY_KEYS = ['help.keyboardTrustNotice'];
+function missingSafetyTranslations(strings, baseStrings) {
+    return REQUIRED_TRANSLATED_SAFETY_KEYS.filter((key) => {
+        const value = strings?.[key];
+        return typeof value !== 'string' || !value.trim()
+            || value.trim() === baseStrings[key]?.trim() || value.trim() === key;
+    });
+}
+
+function assertSafetyTranslationCoverage() {
+    const key = REQUIRED_TRANSLATED_SAFETY_KEYS[0];
+    const english = { [key]: 'Keyboard apps can read passwords and API keys.' };
+    for (const value of [undefined, '', '  ', english[key], ` ${english[key]} `, key, 7]) {
+        if (!missingSafetyTranslations({ [key]: value, __literal: [key] }, english).includes(key)) {
+            throw new Error('i18n safety-copy regression: untranslated warning was accepted');
+        }
+    }
+    // Unrelated keys may still fall back; neither coverage nor draft status is
+    // an assertion that a native-language reviewer approved the wording.
+    if (missingSafetyTranslations({ [key]: 'A translated warning.' }, english).length) {
+        throw new Error('i18n safety-copy regression: translated warning was rejected');
+    }
+}
+assertSafetyTranslationCoverage();
+
+for (const file of readdirSync(path.join(WWW, 'i18n'))) {
+    if (!/^[^.]+\.json$/.test(file) || file === 'en.json' || file === 'manifest.json') continue;
+    const cat = JSON.parse(readFileSync(path.join(WWW, 'i18n', file), 'utf8'));
+    const missing = missingSafetyTranslations(cat.strings, base.strings || {});
+    if (missing.length) {
+        console.error(`[i18n] ${file}: required translated safety copy is missing: ${missing.join(', ')}`);
+        process.exit(1);
+    }
+}
+
 // Domain catalogues (privacy.en.json) hold their own keys — the policy strings
 // live there now, not in the general catalogue — so include them or every
 // privacy.* reference reads as missing.

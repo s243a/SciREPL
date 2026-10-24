@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Téléchargez un fichier de classeur SciREPL, trouvez Menu → Importer un fichier, sélectionnez-le sur Android ou sur ordinateur, et vérifiez ses cellules avant de les exécuter.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/fr/workbooks/import/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/import/tutorial.css">
+  <title>Importer un fichier de classeur · Aide SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/import/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/import/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/import/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/import/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/import/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/import/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/import/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/import/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/import/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/import/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/import/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/import/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/import/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/import/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Aller au contenu</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Page de référence en anglais)</span></a>
+    <nav aria-label="Navigation principale">
+      <a href="../../../workbooks/">Référence des classeurs<span class="english-reference"> (Page de référence en anglais)</span></a>
+      <a href="../../tutorials/">Tous les tutoriels</a>
+      <a href="../../../">Toute l'aide<span class="english-reference"> (Page de référence en anglais)</span></a>
+      <a href="../../../../">Ouvrir la PWA Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Langue du tutoriel"><details class="tutorial-language-menu"><summary>Langue du tutoriel: <bdi>Français</bdi></summary><nav aria-label="Langue du tutoriel"><a href="../../../en/workbooks/import/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/import/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/import/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/import/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/import/" lang="es" hreflang="es">Español</a>
+      <a href="./" lang="fr" hreflang="fr" aria-current="page">Français</a>
+      <a href="../../../hi/workbooks/import/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/import/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/import/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/import/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/import/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/import/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/import/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutoriel traduit automatiquement ; révision par un locuteur natif en attente. Le code et les valeurs techniques sont inchangés. Les captures d'écran montrent l'interface d'origine en anglais ; faites correspondre les noms de commandes traduits dans ce texte à votre application.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Aide<span class="english-reference"> (Page de référence en anglais)</span></a> / <a href="../../../workbooks/">Classeurs<span class="english-reference"> (Page de référence en anglais)</span></a> / Importer un fichier de classeur</p>
+    <article>
+      <p class="eyebrow">Apprendre par la pratique</p>
+      <h1>Importez vous-même un fichier de classeur</h1>
+      <p class="lede">Vous avez déjà un fichier de classeur, ou vous ne trouvez pas de leçon dans Parcourir ? Enregistrez le fichier sur votre appareil, puis utilisez <strong>Menu → Importer un fichier</strong> pour l'ajouter à SciREPL. Ce court guide utilise <strong>Simpson's Paradox</strong> de la branche GitHub <code>main</code> du catalogue ; vous n'avez pas besoin d'installer de paquet ni d'écrire de code pour l'importer.</p>
+      <p>SciREPL importe deux formats de bloc-notes : <strong><code>.srwb</code></strong>, son propre format de classeur, et <strong><code>.ipynb</code></strong>, le format de bloc-notes Jupyter. Cet exemple utilise <code>.srwb</code> ; les <a href="#other-formats">remarques sur les formats ci-dessous</a> expliquent le comportement d'exécution différent des importations Jupyter.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Étapes pour Android + navigateur</li>
+        <li class="chip">Environ 3 minutes</li>
+      </ul>
+      <p class="screen-note">La capture d'écran de Menu est une véritable capture Android sur un <strong>Samsung Galaxy S24+</strong>, montrant <strong>SciREPL Free 1.4.0-debug</strong>, et non une installation du Play Store. La capture d'écran du classeur importé est une capture distincte dans le navigateur <strong>Chromium de Free 1.4.0 avec une fenêtre d'affichage au format mobile</strong> ; ce n'est pas la preuve d'une importation via le sélecteur de fichiers Android. Les deux ont été prises le <time datetime="2026-10-06">6 octobre 2026</time>. D'autres éditions, versions et sélecteurs de fichiers peuvent organiser les commandes différemment. L'exemple est le fichier <code>simpsons-paradox.srwb</code> en anglais du catalogue SciREPL, sur la branche <code>main</code>, tel qu'examiné pour ce guide ; cette branche peut changer. <a href="../../../workbooks/import/assets/capture-receipt.json">Les détails de capture et de source<span class="english-reference"> (Page de référence en anglais)</span></a> enregistrent les dimensions exactes de l'image et le hachage du fichier examiné.</p>
+      <nav class="lesson-nav" aria-label="Étapes d&#39;importation manuelle d&#39;un classeur">
+        <strong>Dans cette leçon</strong>
+        <ol>
+          <li><a href="#download">Enregistrer le fichier de classeur</a></li>
+          <li><a href="#import">Trouver Menu et importer le fichier</a></li>
+          <li><a href="#check">Vérifier le nouvel onglet du classeur</a></li>
+          <li><a href="#next">Poursuivre la leçon</a></li>
+        </ol>
+        <p><a href="#other-formats">Autres formats et sécurité</a> · <a href="#troubleshooting">Si un élément semble incorrect</a></p>
+        <p><a href="../../tutorials/">Tous les tutoriels</a></p>
+      </nav>
+
+      <section id="download">
+        <p class="step-label">Étape 1</p>
+        <h2>Enregistrer le fichier de classeur sur votre appareil</h2>
+        <p>Sur GitHub, la branche <code>main</code> peut contenir des classeurs ou des mises à jour qui ne figurent pas encore dans la dernière version stable du catalogue présentée par Parcourir. Les versions du catalogue évoluent indépendamment de la version de l'application. Une importation directe de fichier vous permet d'essayer un classeur de confiance sans attendre qu'il apparaisse dans Parcourir.</p>
+        <ol class="lesson-steps">
+          <li><a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">Afficher le paradoxe de Simpson sur GitHub</a>, puis <a download="simpsons-paradox.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/main/workbooks/en/simpsons-paradox.srwb">télécharger le fichier de classeur effectif (.srwb)</a>. Le second lien ouvre le fichier brut, et non la page web de GitHub.</li>
+          <li>Si votre navigateur affiche le fichier sous forme de texte au lieu de le télécharger, utilisez l'action <strong>enregistrer/télécharger</strong> du navigateur. Enregistrez le fichier de classeur lui-même, et non une capture d'écran ou une page HTML.</li>
+          <li>Conservez le nom de fichier <code>simpsons-paradox.srwb</code> et son extension <code>.srwb</code>. Notez l'emplacement où il a été enregistré : Android utilise couramment <strong>Téléchargements</strong> ; sur ordinateur, il peut s'agir de Téléchargements ou d'un dossier que vous avez choisi.</li>
+        </ol>
+        <p><strong>Il ne s'agit pas du téléchargement d'une version figée.</strong> <code>main</code> est une branche de développement : le contenu du fichier et les cellules peuvent changer après la prise de ces captures d'écran. Le fichier que vous enregistrez est une copie locale ; une modification ultérieure sur GitHub ne met pas à jour automatiquement votre onglet importé.</p>
+        <p class="callout"><strong>Télécharger n'est pas importer.</strong> L'enregistrement du fichier le place sur votre appareil ; il n'ouvre pas encore de classeur dans SciREPL. Vous n'avez pas besoin de l'ouvrir dans un éditeur de texte ni de le placer dans la vue Fichiers de SciREPL. L'étape suivante sélectionne ce fichier téléchargé.</p>
+        <p>Si vous possédez déjà un fichier <code>.srwb</code> de confiance provenant de quelqu'un d'autre, utilisez ce fichier à la place et sautez l'exemple de téléchargement. Le titre de son classeur et son nombre de cellules différeront des vérifications de l'étape 3.</p>
+      </section>
+
+      <section id="import">
+        <p class="step-label">Étape 2</p>
+        <h2>Trouver Menu et choisir Importer un fichier</h2>
+        <ol class="lesson-steps">
+          <li>Revenez à SciREPL. Dans la <strong>ligne d'en-tête en haut de l'application</strong>, trouvez <strong>☰ Menu</strong>, le bouton avec <strong>trois lignes horizontales</strong>, puis touchez-le ou cliquez dessus.</li>
+          <li>Choisissez <strong>📂 Importer un fichier (par exemple .srwb, .ipynb, .csv, .py, .zip)</strong>. Si le menu est plus grand que l'écran, faites défiler <em>à l'intérieur du menu</em> pour le trouver.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-menu" role="img" aria-label="Capture d&#39;écran sur Samsung Galaxy S24+ du menu ouvert de SciREPL Free, avec l&#39;entrée Importer un fichier surlignée en jaune.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Choisissez <strong>📂 Importer un fichier</strong> dans le menu de l'application. L'annotation jaune indique l'entrée d'importation dans <strong>Free 1.4.0-debug sur Android</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/phone-menu.png">Afficher la capture d'écran complète du menu Android</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li><strong>Sur Android :</strong> le sélecteur de fichiers du système s'ouvre. Regardez dans <strong>Téléchargements</strong>, ou parcourez jusqu'à l'emplacement où vous avez enregistré le fichier. Sélectionnez <code>simpsons-paradox.srwb</code>. Le sélecteur appartient à Android, sa disposition et toute commande finale <strong>Ouvrir</strong> ou de sélection dépendent donc de votre appareil.</li>
+          <li><strong>Sur ordinateur :</strong> utilisez le sélecteur de fichiers pour trouver le dossier que vous avez choisi lors du téléchargement. Sélectionnez <code>simpsons-paradox.srwb</code> et confirmez la sélection. Utilisez cette méthode au lieu de chercher l'écran Téléchargements d'Android.</li>
+          <li>De retour dans SciREPL, attendez que l'importation se termine. Si le menu est toujours ouvert, fermez-le pour voir le classeur.</li>
+        </ol>
+        <p class="callout"><strong>Un classeur n'est pas un téléversement de fichier de données.</strong> L'importation d'un fichier <code>.srwb</code> ajoute son classeur sous la forme d'un onglet distinct, ou d'onglets distincts si le fichier contient plusieurs classeurs. Vos onglets existants sont conservés. Cela ne place pas le classeur dans la vue Fichiers et ne remplace pas votre classeur actuel.</p>
+      </section>
+
+      <section id="check">
+        <p class="step-label">Étape 3</p>
+        <h2>Vérifier le nouveau classeur avant d'exécuter quoi que ce soit</h2>
+        <ol class="lesson-steps">
+          <li>Recherchez <strong>Simpson's Paradox</strong> dans le sélecteur de classeur. Sélectionnez ce nouvel onglet s'il n'est pas déjà sélectionné. Son introduction s'intitule <strong>Simpson's Paradox: When Every Group Disagrees with the Total</strong>.</li>
+          <li>Lisez l'introduction et faites défiler les cellules. La version examinée pour ces captures d'écran comporte <strong>sept cellules</strong> : trois cellules de texte, trois cellules <strong>R</strong> et une cellule <strong>JavaScript</strong>. Une version ultérieure sur <code>main</code> peut différer.</li>
+          <li>Trouvez les cellules R nommées <code>data</code>, <code>compute</code> et <code>viz</code>, dans cet ordre. La cellule JavaScript est nommée <code>js_check</code> et constitue une vérification distincte et facultative. Lisez le texte explicatif ainsi que le code.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-result" role="img" aria-label="Capture d&#39;écran du navigateur Chromium de SciREPL Free 1.4.0 dans une fenêtre d&#39;affichage de taille mobile, montrant le classeur Simpson&#39;s Paradox importé et son titre surligné en jaune.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/browser-imported.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/imported-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Résultat de l'importation dans le navigateur :</strong> le classeur importé <strong>Simpson's Paradox</strong> s'ouvre sous la forme de cellules modifiables dans <strong>Free 1.4.0 dans Chromium</strong>, ici dans une fenêtre d'affichage de 390 × 844. Ceci n'est pas une capture d'écran Android. L'importation n'a pas exécuté ses cellules R ou JavaScript.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/browser-imported.png">Afficher la capture d'écran complète du classeur importé dans le navigateur</a>
+        </figure>
+        <p class="callout"><strong>Importer ne signifie pas Exécuter pour les fichiers .srwb.</strong> SciREPL n'exécute pas le code lorsque vous importez un fichier <code>.srwb</code>, même si l'exécution automatique est activée pour d'autres importations. Inspectez le code provenant d'une source inconnue ou non fiable avant de choisir <strong>Exécuter</strong> ou <strong>Exécuter toutes les cellules</strong>.</p>
+        <p><strong>L'importation ordinaire de fichiers .srwb supprime actuellement les sorties enregistrées des cellules de code</strong>, même lorsque le fichier les contient. Le texte Markdown est conservé et restitué, c'est pourquoi l'introduction s'affiche immédiatement. Pour régénérer des graphiques ou d'autres images générées par du code, réexécutez leurs cellules de code, avec les cellules dépendantes dans l'ordre. L'importation ne restaure pas les variables d'exécution actives de R ou d'autres environnements.</p>
+      </section>
+
+      <section id="next">
+        <p class="step-label">Étape 4</p>
+        <h2>Facultatif : exécuter la leçon importée</h2>
+        <p>Votre importation manuelle est terminée ; l'exécution du code est une étape distincte. Simpson's Paradox utilise des <strong>données pédagogiques synthétiques</strong> pour montrer comment les comparaisons au sein des groupes peuvent être en désaccord avec la comparaison globale. Pour l'explorer, appuyez sur le <strong>✎ crayon</strong> d'une cellule de code enregistrée, inspectez le code, puis utilisez pour <em>cette cellule</em> le bouton <strong>Exécuter</strong>.</p>
+        <ol class="lesson-steps">
+          <li>Exécutez la cellule R <code>data</code>, puis lisez la cellule de texte <code>pause</code> et formulez sa prédiction avant d'exécuter <code>compute</code>. Poursuivez avec <code>viz</code> pour générer le graphique. Les cellules R ultérieures dépendent des précédentes. Elles utilisent le R de base ; vous n'avez pas besoin d'installer de packages R supplémentaires.</li>
+          <li>Si vous souhaitez une vérification JavaScript distincte, exécutez <code>js_check</code>. Elle est autonome : elle ne dépend pas des cellules R et ne nécessite pas de démarrer R.</li>
+        </ol>
+        <p class="callout"><strong>Première exécution de R :</strong> dans SciREPL, l'environnement d'exécution webR peut avoir besoin d'être téléchargé et initialisé. Un avis relatif au réseau ou à la confidentialité peut apparaître ; lisez-le et n'acceptez que si vous souhaitez continuer. Attendez que l'environnement d'exécution soit prêt et vérifiez si la cellule contient des erreurs. La seule importation du classeur n'a pas chargé ses définitions R.</p>
+        <p>Pour un autre exemple avec une présentation plus complète de l'exécution et de la modification, consultez <a href="../tutorial/#run">la leçon sur les groupes de Markov</a>. Il s'agit d'un classeur différent, comportant quatre cellules Python ; son <a href="../tutorial/#export">étape d'exportation</a> illustre également comment enregistrer une copie modifiée du classeur.</p>
+        <p class="callout"><strong>Conservez une copie que vous contrôlez.</strong> Le fichier téléchargé est la copie originale du classeur, et non une sauvegarde des modifications ultérieures. Exportez une copie du classeur pour enregistrer vos modifications. Effacer le stockage de l'application ou du navigateur peut supprimer le travail local, et les sessions Android et du navigateur ne partagent pas automatiquement vos modifications.</p>
+      </section>
+
+      <section id="other-formats">
+        <p class="step-label">Autres formats et sécurité</p>
+        <h2>Sachez ce que contient votre fichier</h2>
+        <p><strong>Les carnets Jupyter (.ipynb)</strong> utilisent également <strong>Menu → Importer un fichier</strong>, mais leur comportement d'exécution diffère de <code>.srwb</code>. Si <strong>Exécuter automatiquement les cellules à l'import du classeur</strong> est activé, une importation <code>.ipynb</code> peut exécuter automatiquement des cellules de code qui n'ont pas de sorties enregistrées.</p>
+        <p class="callout"><strong>N'importez des fichiers de carnet que depuis des sources fiables.</strong> Avant d'importer un <code>.ipynb</code>, ouvrez <strong>Menu → Paramètres → Importation et édition</strong> et assurez-vous que <strong>Exécuter automatiquement les cellules à l'import du classeur</strong> est <strong>désactivé</strong> (non coché). Il est désactivé par défaut, mais vérifiez votre paramètre actuel. Le désactiver ne garantit pas qu'un carnet arbitraire soit sûr ; inspectez le code d'un carnet fiable avant de décider explicitement de l'exécuter.</p>
+        <p><strong>Fichiers de données séparés :</strong> une exportation normale de <code>.srwb</code> n'emporte pas les fichiers CSV séparés ni les autres données stockées dans le système de fichiers virtuel de SciREPL (la vue <strong>Fichiers</strong>). Cette version du paradoxe de Simpson crée ses données synthétiques dans le code, elle n'a donc pas besoin de fichier de données séparé. Pour un classeur qui lit un CSV, suivez, dans le guide <a href="../../files-export/tutorial/#export">CSV, l'exportation d'archive de paquet</a> et <a href="../../files-export/tutorial/#reopen">les étapes de réouverture</a> pour transférer et restaurer à la fois le classeur et ses données. Les archives de paquet et les importations <code>.zip</code> ne font pas partie de cette courte leçon sur les fichiers de classeur.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">Si quelque chose semble incorrect</p>
+        <h2>Vérifiez le fichier et l'onglet sélectionné</h2>
+        <ul>
+          <li><strong>Le sélecteur ne trouve pas le fichier :</strong> consultez la liste des téléchargements de votre navigateur pour voir où il a été enregistré, puis accédez à ce dossier. Télécharger sur un ordinateur de bureau ne place pas le fichier dans le dossier Téléchargements de votre téléphone.</li>
+          <li><strong>Le nom de fichier se termine par .txt ou .html :</strong> revenez au lien de téléchargement du classeur et enregistrez le véritable fichier avec son extension <code>.srwb</code>. Renommer une page HTML en <code>.srwb</code> n'en fait pas un classeur.</li>
+          <li><strong>Vous voyez toujours votre ancien classeur :</strong> fermez le menu et vérifiez le sélecteur de classeur pour trouver le nouveau titre. Les onglets existants sont conservés.</li>
+          <li><strong>Vous l'avez importé deux fois :</strong> une autre importation ajoute une autre copie ; elle ne met pas à jour et ne remplace pas l'onglet précédent. Vérifiez quelle copie vous modifiez avant d'apporter des changements.</li>
+          <li><strong>Le titre ou les cellules ne correspondent pas :</strong> vérifiez que vous avez sélectionné <code>simpsons-paradox.srwb</code>, et non un autre téléchargement ou un fichier provenant d'une autre leçon. Le fichier sur <code>main</code> peut changer ; comparez votre copie avec <a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">le fichier GitHub actuel</a> et inspectez tout code inconnu avant de l'exécuter.</li>
+        </ul>
+        <p>Pour découvrir les bases des onglets de classeur et de la modification de cellules enregistrées, consultez le <a href="../../interface/tutorial/">guide de l'interface du premier classeur</a>. La <a href="../../../workbooks/">référence des classeurs<span class="english-reference"> (Page de référence en anglais)</span></a> explique la structure des classeurs et les types de cellules.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Aide SciREPL</span><nav aria-label="Navigation de pied de page"><a href="../../../workbooks/">Référence des classeurs<span class="english-reference"> (Page de référence en anglais)</span></a><a href="../../../">Toute l'aide<span class="english-reference"> (Page de référence en anglais)</span></a></nav></footer>
+</body>
+</html>

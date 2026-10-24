@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="pt-BR" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Baixe um arquivo de pasta de trabalho do SciREPL, localize Menu → Import File, selecione-o no Android ou no computador e verifique suas células antes de executá-las.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/import/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/import/tutorial.css">
+  <title>Importar um arquivo de pasta de trabalho · Ajuda do SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/import/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/import/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/import/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/import/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/import/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/import/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/import/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/import/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/import/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/import/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/import/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/import/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/import/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/import/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Pular para o conteúdo</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Página de referência em inglês)</span></a>
+    <nav aria-label="Navegação principal">
+      <a href="../../../workbooks/">Referência das pastas de trabalho<span class="english-reference"> (Página de referência em inglês)</span></a>
+      <a href="../../tutorials/">Todos os tutoriais</a>
+      <a href="../../../">Toda a ajuda<span class="english-reference"> (Página de referência em inglês)</span></a>
+      <a href="../../../../">Abrir o PWA Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Idioma do tutorial"><details class="tutorial-language-menu"><summary>Idioma do tutorial: <bdi>Português (Brasil)</bdi></summary><nav aria-label="Idioma do tutorial"><a href="../../../en/workbooks/import/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/import/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/import/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/import/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/import/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/import/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/import/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/import/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/import/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/import/" lang="ko" hreflang="ko">한국어</a>
+      <a href="./" lang="pt-BR" hreflang="pt-BR" aria-current="page">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/import/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/import/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutorial traduzido por máquina; a revisão no idioma nativo está pendente. O código e os valores técnicos não foram alterados. As capturas de tela mostram a interface original em inglês; faça a correspondência dos nomes de controles traduzidos neste texto com o seu aplicativo.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Ajuda<span class="english-reference"> (Página de referência em inglês)</span></a> / <a href="../../../workbooks/">Pastas de trabalho<span class="english-reference"> (Página de referência em inglês)</span></a> / Importar um arquivo de pasta de trabalho</p>
+    <article>
+      <p class="eyebrow">Aprenda na prática</p>
+      <h1>Importe você mesmo um arquivo de pasta de trabalho</h1>
+      <p class="lede">Já tem um arquivo de pasta de trabalho ou não consegue encontrar uma lição em Browse? Salve o arquivo no seu dispositivo e, em seguida, use <strong>Menu → Import File</strong> para adicioná-lo ao SciREPL. Este breve passo a passo usa <strong>Simpson's Paradox</strong> do branch GitHub <code>main</code> do catálogo; você não precisa instalar um pacote nem escrever código para importá-lo.</p>
+      <p>O SciREPL importa dois formatos de notebook: <strong><code>.srwb</code></strong>, seu próprio formato de pasta de trabalho, e <strong><code>.ipynb</code></strong>, o formato de notebook do Jupyter. Este exemplo usa <code>.srwb</code>; as <a href="#other-formats">notas de formato abaixo</a> explicam o comportamento de execução diferente das importações do Jupyter.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Etapas para Android + navegador</li>
+        <li class="chip">Cerca de 3 minutos</li>
+      </ul>
+      <p class="screen-note">A captura de tela do Menu é uma captura real do Android em um <strong>Samsung Galaxy S24+</strong>, mostrando <strong>SciREPL Free 1.4.0-debug</strong>, e não uma instalação da Play Store. A captura de tela da pasta de trabalho importada é uma captura separada <strong>no navegador Chromium de Free 1.4.0 em uma janela de visualização em tamanho móvel</strong>; não é uma comprovação de importação pelo seletor de arquivos do Android. Ambas foram tiradas em <time datetime="2026-10-06">6 de outubro de 2026</time>. Outras edições, versões e seletores de arquivos podem organizar os controles de maneira diferente. O exemplo é o arquivo em inglês <code>simpsons-paradox.srwb</code> do catálogo do SciREPL no branch <code>main</code> conforme revisado para este guia; esse branch pode mudar. <a href="../../../workbooks/import/assets/capture-receipt.json">Os detalhes de captura e origem<span class="english-reference"> (Página de referência em inglês)</span></a> registram as dimensões exatas da imagem e o hash do arquivo revisado.</p>
+      <nav class="lesson-nav" aria-label="Etapas manuais de importação de pasta de trabalho">
+        <strong>Nesta lição</strong>
+        <ol>
+          <li><a href="#download">Salve o arquivo da pasta de trabalho</a></li>
+          <li><a href="#import">Localize o Menu e importe o arquivo</a></li>
+          <li><a href="#check">Verifique a nova aba da pasta de trabalho</a></li>
+          <li><a href="#next">Continue com a lição</a></li>
+        </ol>
+        <p><a href="#other-formats">Outros formatos e segurança</a> · <a href="#troubleshooting">Se algo parecer errado</a></p>
+        <p><a href="../../tutorials/">Todos os tutoriais</a></p>
+      </nav>
+
+      <section id="download">
+        <p class="step-label">Passo 1</p>
+        <h2>Salve o arquivo da pasta de trabalho em seu dispositivo</h2>
+        <p>No GitHub, o branch <code>main</code> pode conter pastas de trabalho ou atualizações que ainda não estão na versão estável mais recente do catálogo exibida em Browse. Os lançamentos do catálogo mudam independentemente do lançamento do aplicativo. Uma importação direta de arquivo permite testar uma pasta de trabalho confiável sem esperar que ela apareça em Browse.</p>
+        <ol class="lesson-steps">
+          <li><a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">Veja o Paradoxo de Simpson no GitHub</a>, depois <a download="simpsons-paradox.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/main/workbooks/en/simpsons-paradox.srwb">baixe o arquivo real da pasta de trabalho (.srwb)</a>. O segundo link abre o arquivo bruto, não a página da web do GitHub.</li>
+          <li>Se o seu navegador exibir o arquivo como texto em vez de baixá-lo, use a ação de <strong>salvar/baixar</strong> do navegador. Salve o arquivo da pasta de trabalho em si, não uma captura de tela ou uma página HTML.</li>
+          <li>Mantenha o nome do arquivo <code>simpsons-paradox.srwb</code> e sua extensão <code>.srwb</code>. Observe onde ele foi salvo: o Android normalmente usa <strong>Downloads</strong>; no desktop, pode ser Downloads ou uma pasta que você escolheu.</li>
+        </ol>
+        <p><strong>Este não é um download de versão fixada.</strong> O branch <code>main</code> é uma ramificação de desenvolvimento: o conteúdo e as células do arquivo podem mudar depois que essas capturas de tela foram feitas. O arquivo que você salva é uma cópia local; uma alteração posterior no GitHub não atualiza sua aba importada automaticamente.</p>
+        <p class="callout"><strong>Baixar não é importar.</strong> Salvar o arquivo o coloca em seu dispositivo; isso ainda não abre uma pasta de trabalho no SciREPL. Você não precisa abri-lo em um editor de texto nem colocá-lo na visualização Arquivos do SciREPL. O próximo passo seleciona esse arquivo baixado.</p>
+        <p>Se você já tiver um arquivo <code>.srwb</code> confiável de outra pessoa, use esse arquivo e pule o download de exemplo. O título da pasta de trabalho e a contagem de células serão diferentes das verificações no Passo 3.</p>
+      </section>
+
+      <section id="import">
+        <p class="step-label">Passo 2</p>
+        <h2>Localize o Menu e escolha Importar Arquivo</h2>
+        <ol class="lesson-steps">
+          <li>Volte para o SciREPL. Na <strong>linha de cabeçalho na parte superior do aplicativo</strong>, localize o <strong>☰ Menu</strong>, o botão com <strong>três linhas horizontais</strong>, e toque ou clique nele.</li>
+          <li>Escolha <strong>📂 Importar arquivo (por exemplo, .srwb, .ipynb, .csv, .py, .zip)</strong>. Se o menu for mais alto do que a tela, role <em>dentro do menu</em> para encontrá-lo.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-menu" role="img" aria-label="Captura de tela do Samsung Galaxy S24+ do Menu aberto do SciREPL Free, com a entrada Import File destacada em amarelo.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Escolha <strong>📂 Import File</strong> no menu do aplicativo. A anotação amarela aponta para a entrada de importação no <strong>Free 1.4.0-debug no Android</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/phone-menu.png">Veja a captura de tela completa do Menu do Android</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li><strong>No Android:</strong> o seletor de arquivos do sistema é aberto. Procure em <strong>Downloads</strong> ou navegue até o local onde você salvou o arquivo. Selecione <code>simpsons-paradox.srwb</code>. O seletor pertence ao Android, portanto o layout dele e qualquer controle de seleção ou <strong>Abrir</strong> final dependem do seu dispositivo.</li>
+          <li><strong>No desktop:</strong> use o seletor de arquivos para encontrar a pasta que você escolheu ao baixar. Selecione <code>simpsons-paradox.srwb</code> e confirme a seleção. Use esse caminho em vez de procurar a tela Downloads do Android.</li>
+          <li>De volta ao SciREPL, aguarde a conclusão da importação. Se o menu ainda estiver aberto, feche-o para ver a pasta de trabalho.</li>
+        </ol>
+        <p class="callout"><strong>Um caderno não é um envio de arquivo de dados.</strong> Importar um arquivo <code>.srwb</code> adiciona seu caderno como uma aba separada, ou abas separadas se o arquivo contiver vários cadernos. Suas abas existentes são mantidas. Isso não coloca o caderno na visualização Arquivos e não substitui seu caderno atual.</p>
+      </section>
+
+      <section id="check">
+        <p class="step-label">Passo 3</p>
+        <h2>Verifique o novo caderno antes de executar qualquer coisa</h2>
+        <ol class="lesson-steps">
+          <li>Procure no seletor de cadernos por <strong>Simpson's Paradox</strong>. Selecione essa nova aba se ela ainda não estiver selecionada. Sua introdução tem o título <strong>Simpson's Paradox: When Every Group Disagrees with the Total</strong>.</li>
+          <li>Leia a introdução e percorra as células. A versão analisada para estas capturas de tela tem <strong>sete células</strong>: três células de texto, três células <strong>R</strong> e uma célula <strong>JavaScript</strong>. Uma versão posterior no <code>main</code> pode ser diferente.</li>
+          <li>Encontre as células R com os nomes <code>data</code>, <code>compute</code> e <code>viz</code>, nessa ordem. A célula JavaScript se chama <code>js_check</code> e é uma verificação separada e opcional. Leia o texto explicativo, bem como o código.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-result" role="img" aria-label="Captura de tela do navegador Chromium do SciREPL Free 1.4.0 em uma janela de visualização do tamanho de um dispositivo móvel, mostrando o caderno importado Simpson&#39;s Paradox e seu título destacado em amarelo.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/browser-imported.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/imported-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Resultado da importação no navegador:</strong> o caderno importado <strong>Simpson's Paradox</strong> abre como células editáveis no <strong>Free 1.4.0 no Chromium</strong>, aqui em uma janela de visualização de 390 × 844. Esta não é uma captura de tela do Android. A importação não executou suas células R ou JavaScript.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/browser-imported.png">Veja a captura de tela completa do caderno importado no navegador</a>
+        </figure>
+        <p class="callout"><strong>Importar não significa Executar para .srwb.</strong> O SciREPL não executa o código quando você importa um arquivo <code>.srwb</code>, mesmo que a execução automática esteja ativada para outras importações. Inspecione o código de uma fonte desconhecida ou não confiável antes de escolher <strong>Executar</strong> ou <strong>Executar todas as células</strong>.</p>
+        <p><strong>A importação comum de .srwb atualmente descarta as saídas salvas das células de código</strong>, mesmo quando o arquivo as contém. O texto em Markdown é mantido e renderizado, razão pela qual a introdução aparece imediatamente. Para gerar novamente gráficos ou outras imagens geradas por código, execute as células de código novamente, com as células dependentes em ordem. A importação não restaura variáveis ativas de R ou de outro ambiente de execução.</p>
+      </section>
+
+      <section id="next">
+        <p class="step-label">Passo 4</p>
+        <h2>Opcional: execute a lição importada</h2>
+        <p>Sua importação manual está concluída; executar o código é uma etapa separada. O Simpson's Paradox usa <strong>dados didáticos sintéticos</strong> para mostrar como as comparações dentro dos grupos podem discordar da comparação geral. Para explorá-lo, toque no <strong>✎ lápis</strong> de uma célula de código salva, inspecione o código e, <em>dessa célula</em>, use o botão <strong>Executar</strong>.</p>
+        <ol class="lesson-steps">
+          <li>Execute a célula R <code>data</code>, leia a célula de texto <code>pause</code> e faça sua previsão antes de executar <code>compute</code>. Continue com <code>viz</code> para gerar o gráfico. As células R posteriores dependem das anteriores. Elas usam o R básico; você não precisa instalar pacotes R adicionais.</li>
+          <li>Se você quiser uma verificação separada em JavaScript, execute <code>js_check</code>. Ela é independente: não depende das células R e não requer a inicialização do R.</li>
+        </ol>
+        <p class="callout"><strong>Primeira execução do R:</strong> no SciREPL, o ambiente de execução webR pode precisar ser baixado e inicializado. Um aviso de rede/privacidade pode aparecer; leia-o e concorde apenas se quiser prosseguir. Aguarde até que o ambiente de execução esteja pronto e verifique se há erros na célula. Apenas importar o caderno não carregou suas definições de R.</p>
+        <p>Para outro exemplo com um passo a passo mais completo de execução e edição, consulte <a href="../tutorial/#run">a lição Markov Groups</a>. Esse é um caderno diferente, com quatro células Python; sua <a href="../tutorial/#export">etapa de exportação</a> também ilustra como salvar uma cópia editada do caderno.</p>
+        <p class="callout"><strong>Mantenha uma cópia sob seu controle.</strong> O arquivo baixado é a cópia original da pasta de trabalho, não um backup de edições posteriores. Exporte uma cópia da pasta de trabalho para salvar suas alterações. Limpar o armazenamento do aplicativo ou do navegador pode remover o trabalho local, e as sessões do Android e do navegador não compartilham suas alterações automaticamente.</p>
+      </section>
+
+      <section id="other-formats">
+        <p class="step-label">Outros formatos e segurança</p>
+        <h2>Saiba o que seu arquivo contém</h2>
+        <p>Os <strong>cadernos do Jupyter (.ipynb)</strong> também usam <strong>Menu → Importar arquivo</strong>, mas seu comportamento de execução difere de <code>.srwb</code>. Se <strong>Executar células automaticamente ao importar pasta de trabalho</strong> estiver ativado, uma importação de <code>.ipynb</code> pode executar automaticamente células de código que não têm saídas salvas.</p>
+        <p class="callout"><strong>Importe arquivos de caderno apenas de fontes confiáveis.</strong> Antes de importar um <code>.ipynb</code>, abra <strong>Menu → Configurações → Importar e editar</strong> e certifique-se de que <strong>Executar células automaticamente ao importar pasta de trabalho</strong> esteja <strong>desativado</strong> (desmarcado). Ele fica desativado por padrão, mas verifique sua configuração atual. Desativá-lo não é garantia de que um caderno arbitrário seja seguro; inspecione o código de um caderno confiável antes de decidir explicitamente se deseja executá-lo.</p>
+        <p><strong>Arquivos de dados separados:</strong> uma exportação normal de <code>.srwb</code> não inclui arquivos CSV separados ou outros dados armazenados no sistema de arquivos virtual do SciREPL (a visualização <strong>Arquivos</strong>). Esta versão do Paradoxo de Simpson cria seus dados sintéticos em código, portanto não precisa de um arquivo de dados separado. Para uma pasta de trabalho que lê um CSV, siga a <a href="../../files-export/tutorial/#export">exportação de arquivo de pacote do roteiro de CSV</a> e as <a href="../../files-export/tutorial/#reopen">etapas de reabertura</a> para transportar e restaurar tanto a pasta de trabalho quanto seus dados. Arquivos de pacote e importações de <code>.zip</code> estão fora desta breve lição sobre arquivos de pastas de trabalho.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">Se algo parecer errado</p>
+        <h2>Verifique o arquivo e a guia selecionada</h2>
+        <ul>
+          <li><strong>O seletor não consegue encontrar o arquivo:</strong> verifique a lista de downloads do seu navegador para ver onde ele foi salvo e navegue até essa pasta. Fazer o download em um computador não coloca o arquivo na pasta Downloads do seu celular.</li>
+          <li><strong>O nome do arquivo termina em .txt ou .html:</strong> retorne ao link de download da pasta de trabalho e salve o arquivo real com sua extensão <code>.srwb</code>. Renomear uma página HTML para <code>.srwb</code> não a transforma em uma pasta de trabalho.</li>
+          <li><strong>Você ainda vê sua pasta de trabalho antiga:</strong> feche o menu e verifique o seletor de pastas de trabalho para encontrar o novo título. As guias existentes são preservadas.</li>
+          <li><strong>Você importou duas vezes:</strong> outra importação adiciona outra cópia; ela não atualiza nem substitui a guia anterior. Verifique qual cópia você está editando antes de fazer alterações.</li>
+          <li><strong>O título ou as células não coincidem:</strong> verifique se você selecionou <code>simpsons-paradox.srwb</code>, e não um download diferente ou um arquivo de outra lição. O arquivo no <code>main</code> pode mudar; compare sua cópia com o <a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">arquivo atual do GitHub</a> e inspecione códigos desconhecidos antes de executá-los.</li>
+        </ul>
+        <p>Para os conceitos básicos de guias de pastas de trabalho e edição de células salvas, consulte o <a href="../../interface/tutorial/">roteiro de interface da primeira pasta de trabalho</a>. A <a href="../../../workbooks/">referência de pastas de trabalho<span class="english-reference"> (Página de referência em inglês)</span></a> explica a estrutura da pasta de trabalho e os tipos de célula.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Ajuda do SciREPL</span><nav aria-label="Navegação do rodapé"><a href="../../../workbooks/">Referência de pastas de trabalho<span class="english-reference"> (Página de referência em inglês)</span></a><a href="../../../">Toda a ajuda<span class="english-reference"> (Página de referência em inglês)</span></a></nav></footer>
+</body>
+</html>

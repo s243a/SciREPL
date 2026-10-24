@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ja" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Menu → Appearanceから、SciREPLのBrowseショートカットの表示や、ヘッダーボタン、Runラベル、テーマ、Androidステータスバーの余白を調整できます。">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ja/interface/appearance/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../interface/appearance/tutorial.css">
+  <title>外観のウォークスルー · SciREPL ヘルプ</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/appearance/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/appearance/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/appearance/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/appearance/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/appearance/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/appearance/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/appearance/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/appearance/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/appearance/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/appearance/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/appearance/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/appearance/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/appearance/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/appearance/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">コンテンツへスキップ</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (英語のリファレンスページ)</span></a>
+    <nav aria-label="メインナビゲーション">
+      <a href="../../../interface/">インターフェースリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a>
+      <a href="../../tutorials/">すべてのチュートリアル</a>
+      <a href="../../../">すべてのヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a>
+      <a href="../../../../">Free PWAを開く</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="チュートリアルの言語"><details class="tutorial-language-menu"><summary>チュートリアルの言語: <bdi>日本語</bdi></summary><nav aria-label="チュートリアルの言語"><a href="../../../en/interface/appearance/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/appearance/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/appearance/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/appearance/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/appearance/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/appearance/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/appearance/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/appearance/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="./" lang="ja" hreflang="ja" aria-current="page">日本語</a>
+      <a href="../../../ko/interface/appearance/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/appearance/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/appearance/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/appearance/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">機械翻訳されたチュートリアルです。ネイティブによるレビューは保留中です。コードおよび技術的な値は変更されていません。スクリーンショットにはオリジナルの英語インターフェースが表示されています。本文中の翻訳されたコントロール名をアプリと照合してください。</p></aside>
+    <p class="breadcrumbs"><a href="../../../">ヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a> / <a href="../../../interface/">インターフェース<span class="english-reference"> (英語のリファレンスページ)</span></a> / 外観のウォークスルー</p>
+    <article>
+      <p class="eyebrow">インターフェースを自分好みにカスタマイズする</p>
+      <h1>「ブラウズ」を表示して「外観」を調整する</h1>
+      <p class="lede"><strong>📦 Browse</strong>ショートカットを<strong>SciREPL Freeの</strong>ヘッダーに配置し、使いやすいボタンやライトまたはダークテーマを選択します。共有の外観設定はProでも役立ちます。全画面編集、追加キー、ライブ構文カラーリングについては、別のPro専用セクションで説明しています。これはワークブックのセルを変更したり実行したりすることなく行えます。</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro（ラベルを参照）</li>
+        <li class="chip">Androidのスクリーンショット</li>
+        <li class="chip">約3分</li>
+      </ul>
+      <p class="screen-note">五枚のスクリーンショットは、<strong>SciREPL Free 1.4.0-debug</strong>を<strong>Samsung Galaxy S24+</strong>で実行し、<time datetime="2026-10-06">6日 十月 2026年</time>に実際に撮影したものです。これらはPlay Storeからのインストールではなく、デバッグ署名されたアプリを示しています。図示されている手順ではFree 1.4.0のコントロールを使用しています。「ブラウズ」のヘッダーショートカットはFree専用です。Proのユーザーはメニューから同じカタログを開くことができます。以下のPro専用テキストはPro 1.4.0のコードベースと照合して検証されています。それらのコントロールはこれらのFreeの画像には図示されておらず、古いメニューでは異なる場合があります。</p>
+      <nav class="lesson-nav" aria-label="外観ウォークスルーの手順">
+        <strong>このレッスンで学ぶこと</strong>
+        <ol>
+          <li><a href="#open-appearance">「外観」を開く</a></li>
+          <li><a href="#browse-shortcut">「ブラウズ」ショートカットを表示する</a></li>
+          <li><a href="#buttons">ボタンと「実行」を調整する</a></li>
+          <li><a href="#pro-editor">Pro専用：全画面編集、追加キー、ライブカラー</a></li>
+          <li><a href="#theme">テーマを選択する</a></li>
+          <li><a href="#android-space">任意のAndroid用スペースと復元</a></li>
+        </ol>
+        <p><a href="../../tutorials/">すべてのチュートリアル</a></p>
+      </nav>
+
+      <section id="open-appearance">
+        <p class="step-label">ステップ1</p>
+        <h2>メニュー → 外観 を開く</h2>
+        <ol class="lesson-steps">
+          <li>アプリ上部のヘッダーにある三本線のボタン、<strong>☰ Menu</strong>を見つけます。</li>
+          <li>それをタップし、<strong>🎨 外観</strong>を選択します。メニューが画面に収まらない場合は、メニュー内をスクロールして項目を探してください。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-menu" role="img" aria-label="外観の項目が黄色でハイライトされたSciREPLのメニュー。">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>アプリのメニューから<strong>🎨 外観</strong>を選択します。</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-menu.png">メニューのスクリーンショット全体を表示</a>
+        </figure>
+        <p class="callout"><strong>変更は選択するとすぐに適用されます。</strong>以下の通常のコントロールには「保存」や「適用」ボタンは必要ありません。<strong>×</strong>で「外観」を閉じても変更はキャンセルされず、選択した内容は次回のアプリ起動時にも保持されます。</p>
+      </section>
+
+      <section id="browse-shortcut">
+        <p class="step-label">ステップ2</p>
+        <h2>Free 1.4.0：📦「ブラウズ」ショートカットを表示</h2>
+        <p><strong>Proをご利用ですか？</strong>このショートカット設定はスキップして、<strong>メニュー → パッケージ、バンドル、ワークブックを参照</strong>を使用してください。以降のセクションでは共有の「外観」コントロールについて説明します。</p>
+        <ol class="lesson-steps">
+          <li><strong>メニュー → 外観</strong>を開き、<strong>ヘッダーのショートカット</strong>までスクロールします。</li>
+          <li><strong>参照のショートカットを表示</strong>を見つけて<strong>常に表示</strong>を選択します。</li>
+          <li><strong>×</strong>で「外観」を閉じます。ヘッダーに<strong>📦</strong>ボタンが表示されるので、タップして<strong>パッケージ、バンドル、ワークブックを参照</strong>を開きます。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-shortcuts" role="img" aria-label="SciREPL Freeのヘッダーショートカットセクション。「ブラウズショートカットを表示」とその優先度矢印が黄色で強調表示されています。">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-shortcuts.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/shortcuts-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Free 1.4.0</strong>では、<strong>参照のショートカットを表示</strong>の横にあるドロップダウンを使用して、📦ボタンを表示したままにするかどうかを決定します。</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-shortcuts.png">ショートカットの完全なスクリーンショットを表示</a>
+        </figure>
+        <p>それぞれの選択肢には異なる目的があります：</p>
+        <ul>
+          <li><strong>常に表示：</strong>ヘッダーが別の行を必要とする場合でも、ショートカットを表示したままにします。</li>
+          <li><strong>スペースがある場合：</strong>「ブラウズ」のデフォルト設定です。収まる場合にのみ表示されます。画面が狭い場合やボタンが大きい場合、またはステータスメッセージが長い場合は非表示になることがあります。</li>
+          <li><strong>表示しない：</strong>ヘッダーショートカットを非表示にします。</li>
+        </ul>
+        <p><strong>↑</strong>および<strong>↓</strong>ボタンは、スペースが狭いときにどのオプションのショートカットが最初に場所を譲るかを変更します。ショートカットを上に移動すると長く保持され、下に移動すると早く非表示になります。これらはヘッダー内のアイコンの位置ではなく、優先度を変更します。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-header" role="img" aria-label="SciREPL Freeヘッダー。パッケージボックスの「ブラウズ」ショートカットが黄色で強調表示されています。">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-header.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/header-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Freeの<strong>📦</strong>ヘッダーショートカットは、<strong>メニュー → パッケージ、バンドル、ワークブックを参照</strong>と同じカタログを開きます。</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-header.png">ヘッダーの完全なスクリーンショットを表示</a>
+        </figure>
+        <p class="callout"><strong>📦ボタンがありませんか？</strong>ショートカットが非表示になっている場合や、お使いのバージョンで提供されていない場合でも、メニューからの手順は機能します。コンパクトなヘッダーにするには、すべてのオプションのショートカットを強制的に表示し続けるのではなく、「ブラウズ」を<strong>余裕があるとき</strong>に戻します。</p>
+        <p>ワークブックを見つけるためにここに来た場合は、ここで<a href="../../workbooks/tutorial/#browse">マルコフグループのウォークスルーに戻り</a>、カタログを検索できます。</p>
+      </section>
+
+      <section id="buttons">
+        <p class="step-label">ステップ 3</p>
+        <h2>使いやすいボタンと「実行」ラベルを選択する</h2>
+        <p><strong>メニュー → 外観</strong>を再度開き、<strong>ボタン</strong>を見つけます。<strong>ボタンのサイズ</strong>スライダーを動かすと、そのパーセンテージと近くの<strong>プレビュー</strong>がすぐに変化します。デフォルトは<strong>100%</strong>です。ヘッダーボタンを大きくするとタップしやすくなりますが、オプションのショートカット用のスペースが狭くなります。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-options" role="img" aria-label="「Androidのステータスバーを非表示」や「ボタンサイズ」を含む、「外観」のレイアウトおよびボタンコントロールが黄色で強調表示されています。">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-options.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/options-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>ボタンのサイズ</strong>はヘッダーコントロールを調整します。Android専用のステータスバー設定については以下で説明します。</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-options.png">レイアウトとボタンの完全なスクリーンショットを表示</a>
+        </figure>
+        <p><strong>実行ボタン</strong>ドロップダウンは、保存済みセルエディタ内の「実行」ボタンではなく、<em>新規セルパネル</em>内の「実行」を制御します：</p>
+        <ul>
+          <li><strong>自動（スペースが狭い場合はアイコンのみ）：</strong>デフォルト設定です。収まる場合はラベルを保持し、入力スペースを確保するために▶アイコンのみを使用することもできます。</li>
+          <li><strong>アイコンのみ：</strong>常にコンパクトな▶ボタンを使用します。</li>
+          <li><strong>常にラベルを表示：</strong>狭い画面でもテキストを表示したままにします。</li>
+        </ul>
+        <p>「外観」にはテキスト拡大スライダーはありません。<strong>ボタンのサイズ</strong>は一般的なフォントサイズ設定ではありません。Free 1.4.0およびPro 1.3.0は、Androidのシステムテキスト拡大に合わせてコンパクトなヘッダーコントロールを自動的に拡大します。</p>
+      </section>
+
+      <section id="pro-editor">
+        <p class="step-label">オプション · Proのみ</p>
+        <h2>Proのみ：フルスクリーン編集、追加のキー、および構文の色</h2>
+        <p>これらは<strong>SciREPL Pro 1.4.0</strong>のエディタコントロールであり、上記のFreeのスクリーンショットに示されているコントロールではありません。追加のキーとライブカラーは別の設定です。</p>
+        <h3>全画面編集を開始する</h3>
+        <ol class="lesson-steps">
+          <li><strong>新しいセル：</strong>新しいセルのコードフィールドにある<strong>⤢ Full screen</strong>ボタンをタップします。外側を向いた斜めの矢印はエディタの拡大を意味します。</li>
+          <li><strong>保存済みセル：</strong>そのセルの<strong>✎ pencil</strong>をタップして編集し、次にそのセルのコードフィールドの隅にある<strong>⤢</strong>をタップします。</li>
+        </ol>
+        <p>より多くのコードを表示できるように、エディタが画面全体に広がります。有効化された追加キーやサジェスチョンチップはキーボード上部に引き続き表示され、シンタックスカラーには以下で説明する同じ設定が使用されます。全画面にしてもコードは実行され<strong>ません</strong>。</p>
+        <p><strong>上部のエディタラベル</strong>をタップすると、下書きを開いたままワークブックに戻ります。<strong>戻る</strong>または<kbd>Esc</kbd>でも全画面モードを終了できます。保存済みセルの場合、<strong>完了</strong>は実行せずに下書きを適用し、<strong>キャンセル</strong>は編集を破棄します。新しいセルの場合、DoneとCancelはいずれも下書きを消去したりセルを作成したりせずに全画面を終了します。Runは別の操作です。</p>
+        <p><strong>「Panels use the full screen」とは異なります。</strong>その独立したAppearanceオプションはパネルやダイアログの上部余白を制御するもので、全画面コードエディタを開くわけではありません。</p>
+        <h3>追加キー行を表示する</h3>
+        <p><strong>メニュー → 補完 → セクション → 全般</strong>を開きます。<strong>キーボード上の追加キー → オン</strong>を設定します。デフォルトは<strong>オフ</strong>です。この行にはEsc、Tab、インデント解除、矢印、Home、End、Run、句読点があります。収まりきらないキーには横にスワイプしてアクセスします。Onを選択してもコードは実行されませんが、この行の<strong>▶ 実行</strong>キーは実行されるため、タップする前にソースを確認してください。</p>
+        <p>同じセクションで、<strong>縦向きのチップ</strong>と<strong>横向きのチップ</strong>は<strong>専用の行</strong>または<strong>追加キーを置き換える</strong>を選択します。デフォルトは縦向きでOwn row、横向きでReplace extra keysです。候補が表示されている間、候補が一時的にキーの場所を占有することがあります。追加キーがオフの場合、チップは専用の行を使用します。<strong>横向きの追加行</strong>には<strong>オフ</strong>、<strong>余裕があるとき</strong>（デフォルト）、<strong>常に表示</strong>があります。When there is roomは<strong>表示するコード行数の下限</strong>（初期値は<strong>8</strong>）を使用するため、高さの低い横向き表示ではオプション行を非表示にできます。</p>
+        <h3>入力時のシンタックスカラーのオン／オフを切り替える</h3>
+        <p><strong>メニュー → 外観 → 入力中のシンタックスカラー</strong>を開きます。編集時に対象コードを色付けするには<strong>オン</strong>を選択し、プレーンテキストにするには<strong>オフ</strong>を選択します。デフォルトの<strong>自動（デスクトップではオン、タッチ操作ではオフ）</strong>は、デスクトップブラウザで色付けを有効にし、スマートフォンではオフのままにします。入力の反応が鈍く感じられる場合はOffを選択してください。処理速度の遅いデバイスでは色付けによって入力速度が低下することがあります。<strong>6000文字</strong>を超える長さのコードは、Onにしていても色付けされません。</p>
+        <p>色付けによってコードの検証や実行が行われたり、APIリクエストが送信されたり、補完が有効になったりすることはありません。この設定の変更は直ちに反映され、ソースが改変されることはありません。</p>
+        <h3>Files &amp; Storageには個別の切り替えがあります</h3>
+        <p>テキストファイルの場合は、<strong>メニュー → Files &amp; Storage (VFS / Paths)</strong>を使用してファイルを選択し、<strong>全画面表示</strong>を選択します。そのエディタの<strong>構文の強調表示</strong>チェックボックスはAppearanceの入力時色付け設定から独立しており、デフォルトでオフになっています。認識できないファイル形式や100,000文字を超えるファイルでは利用できません。その追加キーはCompletion設定を共有しますが、ファイルエディタの空きスペースが少なすぎると非表示になることがあります。ファイル<strong>保存</strong>によって編集内容が書き込まれます。色付けを切り替えるだけでは書き込まれません。</p>
+      </section>
+
+      <section id="theme">
+        <p class="step-label">ステップ4</p>
+        <h2>ライト、ダーク、またはシステムテーマを選択する</h2>
+        <p><strong>テーマ</strong>までスクロールして、<strong>ダーク</strong>、<strong>ライト</strong>、または<strong>システムに従う</strong>を選択します。Darkがデフォルトです。Match systemはお使いのデバイスのライト／ダーク設定に従います。これはご自身で選択するものであり、デフォルトではありません。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-theme" role="img" aria-label="黄色で強調表示されたAppearanceのThemeドロップダウン。">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-theme.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/theme-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>組み込みテーマを選択し、Appearanceを閉じてその選択のままアプリを引き続き使用します。</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-theme.png">テーマの完全なスクリーンショットを表示</a>
+        </figure>
+        <p>このレッスンでは<strong>カスタム</strong>、<strong>カスタマイズ…</strong>、テーマJSONエディター、<strong>高度な設定: カスタムCSS</strong>は不要です。これらの高度なオプションは、この初心者向けウォークスルーの対象外です。</p>
+      </section>
+
+      <section id="android-space">
+        <p class="step-label">任意の仕上げ</p>
+        <h2>Androidの余白とデフォルトへの復帰</h2>
+        <p><strong>レイアウト</strong>の下で、<strong>上部マージン → 自動</strong>を選択したままにします。端末から報告されたセーフエリアに従うため、ヘッダーの上部に適切な余白が確保されます。ピクセル値を推測する必要はありません。</p>
+        <p>Androidアプリでは、<strong>Android のステータスバーを隠す</strong>に以下の設定があります:</p>
+        <ul>
+          <li><strong>しない:</strong> デフォルトです。時計と通知ステータスバーを表示したままにします。</li>
+          <li><strong>横向き時:</strong> スマートフォンが横向きの間はそのバーを非表示にし、縦向きで元に戻します。</li>
+          <li><strong>常に:</strong> どちらの向きでも非表示にします。</li>
+        </ul>
+        <p>この設定はAndroidの<em>ステータス</em>バーにのみ影響し、ナビゲーションバーやジェスチャーバーには影響しません。ブラウザ/PWAおよびWindowsのインターフェースにはありません。Pro 1.3.0には代わりに<strong>横向き時にAndroidステータスバーを非表示</strong>という名前のチェックボックスがあります。</p>
+        <p class="callout"><strong>外観の変更を元に戻したいですか？</strong> <strong>デフォルトに戻す</strong>を使用すると、デフォルトのテーマ、ヘッダーボタンのサイズ、上部マージン、ショートカット、ステータスバーの設定が復元され、カスタムテーマやCSSの選択が削除されます。ワークブックのセルは消去されません。個別の実行ボタンやインターフェース言語の設定はリセット<em>されません</em>。必要に応じて、実行の<strong>自動</strong>オプションをご自身で選択してください。</p>
+        <p>完了したら<strong>×</strong>で外観を閉じます。続けて<a href="../../workbooks/tutorial/">Markov Groupsワークブックのウォークスルー</a>に進むか、<a href="../../../interface/">簡潔なインターフェースリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a>に戻ってください。</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL ヘルプ</span><nav aria-label="フッターナビゲーション"><a href="../../../interface/">インターフェースリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a><a href="../../../">すべてのヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a></nav></footer>
+</body>
+</html>

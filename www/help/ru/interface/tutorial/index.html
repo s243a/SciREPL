@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ru" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Изучите интерфейс SciREPL, создавая, запуская, редактируя и экспортируя небольшую рабочую книгу.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ru/interface/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <title>Знакомство с интерфейсом · Справка SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+    <nav aria-label="Основная навигация">
+      <a href="../../../interface/">Справочник по интерфейсу<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+      <a href="../../tutorials/">Все руководства</a>
+      <a href="../../../">Вся справка<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+      <a href="../../../../">Открыть Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Язык руководства"><details class="tutorial-language-menu"><summary>Язык руководства: <bdi>Русский</bdi></summary><nav aria-label="Язык руководства"><a href="../../../en/interface/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/interface/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="./" lang="ru" hreflang="ru" aria-current="page">Русский</a>
+      <a href="../../../zh/interface/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Машинный перевод руководства; ожидает проверки носителем языка. Код и технические значения оставлены без изменений. На снимках экрана показан оригинальный интерфейс на английском языке; сопоставляйте переведенные названия элементов управления в этом тексте с вашим приложением.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Справка<span class="english-reference"> (Справочная страница на английском языке)</span></a> / <a href="../../../interface/">Интерфейс<span class="english-reference"> (Справочная страница на английском языке)</span></a> / Руководство</p>
+    <article>
+      <p class="eyebrow">Обучение на практике</p>
+      <h1>Создайте свою первую рабочую книгу</h1>
+      <p class="lede">Это более подробное практическое дополнение к <a href="../../../interface/">справочнику по интерфейсу<span class="english-reference"> (Справочная страница на английском языке)</span></a>. Вы запустите одну ячейку Python, измените её и сохраните копию под своим управлением. Учётная запись ИИ или ключ API не требуются.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Шаги для Android</li>
+        <li class="chip">Около 5 минут</li>
+      </ul>
+      <p class="screen-note">На снимках экрана показана версия SciREPL Free v1.3.2 на телефоне серии Samsung Galaxy S24. Урок также применим к Pro, хотя некоторые элементы управления там могут выглядеть иначе.</p>
+      <nav class="lesson-nav" aria-label="Шаги руководства">
+        <strong>В этом уроке</strong>
+        <ol>
+          <li><a href="#find-your-place">Ориентация в приложении</a></li>
+          <li><a href="#write-a-cell">Написание и запуск ячейки</a></li>
+          <li><a href="#edit-a-cell">Редактирование сохранённой ячейки</a></li>
+          <li><a href="#save-a-copy">Экспорт копии рабочей книги</a></li>
+          <li><a href="#what-next">Что попробовать дальше</a></li>
+        </ol>
+        <p><a href="../../tutorials/">Все руководства</a></p>
+      </nav>
+
+      <section id="find-your-place">
+        <p class="step-label">Шаг 1</p>
+        <h2>Ориентация в приложении</h2>
+        <p>Верхняя строка — это <strong>заголовок</strong>. Он включает меню, справку и значок состояния. Селектор рабочих книг выбирает, какая рабочая книга открыта.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--header" role="img" aria-label="Верхняя панель телефона с селектором рабочих книг, кнопкой меню и кнопкой справки, выделенными жёлтым контуром.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Жёлтые контуры обозначают селектор рабочих книг, меню и справку.</figcaption>
+          <p>Ниже строки заголовка находится рабочая книга: сохранённые ячейки и их результаты.</p>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">Посмотреть полный снимок экрана телефона</a>
+        </figure>
+        <p>Панель <strong>новой ячейки</strong> — это место, где вы вводите следующую ячейку. Необязательные кнопки заголовка могут исчезать на узком экране; их действия остаются доступными через Меню или Справку, где применимо.</p>
+      </section>
+
+      <section id="write-a-cell">
+        <p class="step-label">Шаг 2</p>
+        <h2>Напишите и запустите ячейку Python</h2>
+        <p>Перед первым запуском дождитесь, пока значок статуса не покажет <strong>готово</strong>.</p>
+        <ol class="lesson-steps">
+          <li>На панели новой ячейки выберите <strong>Python</strong> в списке выбора языка. На узком телефоне закрытый селектор может показывать только <strong>Py</strong>.</li>
+          <li>Введите эту короткую программу:
+            <pre><code>print("Hello from SciREPL")</code></pre>
+          </li>
+          <li>Нажмите <strong>Выполнить</strong>. В рабочей книге появится сохраненная ячейка. Под ней вы должны увидеть <code>Hello from SciREPL</code>.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--composer" role="img" aria-label="Панель новой ячейки с выбранным Py, кодом print Hello from SciREPL в поле кода и кнопкой Run, выделенной желтым.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Нижняя панель создает <em>новую</em> ячейку: выберите <strong>Py</strong>, введите код, затем нажмите <strong>Выполнить</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">Посмотреть полный снимок экрана телефона</a>
+        </figure>
+        <p class="callout"><strong>Первый запуск может занять больше времени.</strong> Среда выполнения Python должна запуститься один раз. Дождитесь возвращения статуса к <strong>готово</strong>; последующие ячейки Python обычно повторно используют эту среду выполнения.</p>
+        <aside class="callout">
+          <p><strong>Если появится уведомление о конфиденциальности:</strong> Python обычно поставляется в комплекте, поэтому для этого примера загрузка среды выполнения не требуется. Сетевая среда выполнения, такая как R или Lua в Free, может сначала показать Политику конфиденциальности SciREPL; Python также может ее показать, если для встроенной копии требуется резервный вариант через сеть. Прочитайте ее, прокрутите <em>внутри диалогового окна</em> вниз и нажмите <strong>Я понимаю</strong>, если согласны. Отдельный запрос на загрузку среды выполнения может затем предложить нажать <strong>Скачать</strong>.</p>
+          <p><a href="../../../interface/tutorial/assets/privacy-policy-top.jpg">Посмотрите пример диалогового окна Политики конфиденциальности<span class="english-reference"> (Справочная страница на английском языке)</span></a> (на снимке экрана показана его верхняя часть; кнопка находится ниже). В Free 1.4.0 и Pro 1.4.0 допустимая команда <code>%pip install</code> также открывает это уведомление, если вы еще не приняли текущее соглашение о сети, перед попыткой установить пакет. См. <a href="../../../privacy/">конфиденциальность и локальные данные<span class="english-reference"> (Справочная страница на английском языке)</span></a> перед использованием сетевых функций.</p>
+        </aside>
+      </section>
+
+      <section id="edit-a-cell">
+        <p class="step-label">Шаг 3</p>
+        <h2>Отредактируйте сохраненную ячейку</h2>
+        <ol class="lesson-steps">
+          <li>Нажмите на карандаш <strong>✎</strong> в заголовке самой сохраненной ячейки, в правом верхнем углу сразу слева от <strong>✕</strong>. Это откроет ячейку для редактирования; ввод текста на панели новой ячейки создал бы другую ячейку.</li>
+          <li>Замените <code>Hello from SciREPL</code> на <code>Hello again</code>.</li>
+          <li>Выберите <strong>Выполнить</strong>, чтобы сохранить и применить изменение. Теперь под этой ячейкой должно отображаться <code>Hello again</code>.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--editing" role="img" aria-label="Редактор сохраненной ячейки, содержащий print Hello again. Желтые рамки отмечают карандаш сохраненной ячейки в правом верхнем углу, редактируемое поле кода и кнопку Run. Предыдущий вывод по-прежнему содержит Hello from SciREPL до нажатия Run.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-edit-draft.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/edit-draft-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Желтые рамки показывают, где находится <strong>✎ карандаш</strong> сохраненной ячейки, редактируемый код и кнопка <strong>Выполнить</strong> этой ячейки. На этом снимке экрана карандаш затенен, так как режим редактирования уже включен. Кнопка Run сохраняет и выполняет изменения; до этого виден старый результат вывода.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-edit-draft.png">Посмотреть полный снимок экрана телефона, включая клавиатуру</a>
+        </figure>
+        <aside class="callout">
+          <p><strong>Pro — быстрый способ:</strong> На сенсорном экране дважды коснитесь кода сохраненной ячейки, чтобы отредактировать его. В Free в настоящее время используется кнопка <strong>✎</strong>.</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--result" role="img" aria-label="Сохраненная ячейка Python, содержащая print Hello again, за которой следует выделенный вывод Hello again.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-rerun.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/rerun-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>После <strong>Выполнить</strong> вывод под сохраненной ячейкой отображает <code>Hello again</code>.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-rerun.png">Посмотреть полный снимок экрана телефона</a>
+        </figure>
+        <p>Если вы случайно открыли редактор, используйте <strong>Отмена</strong>, чтобы закрыть его без запуска. Селектор языка внутри сохраненной ячейки меняет эту ячейку; селектор новой ячейки — нет.</p>
+      </section>
+
+      <section id="save-a-copy">
+        <p class="step-label">Шаг 4</p>
+        <h2>Экспорт копии рабочей книги</h2>
+        <ol class="lesson-steps">
+          <li>Откройте <strong>Меню → Экспорт книг и пакетов</strong>.</li>
+          <li>Выберите <strong>Только текущая вкладка</strong> или <strong>Все вкладки</strong>, затем SciREPL формат <strong>Книга (.srwb)</strong>, если хотите сохранить состояние, специфичное для SciREPL.</li>
+          <li>Нажмите <strong>Экспорт</strong> и выберите место назначения, которое вы контролируете.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--menu" role="img" aria-label="Строка меню Export Workbooks and Packages обведена желтым контуром, между Export Document и Import File.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Выберите <strong>Экспорт книг и пакетов</strong>, а не Export Document.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">Посмотреть полный снимок экрана меню</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="Диалоговое окно экспорта с форматом Workbook srwb, областью Current tab only и кнопкой Export, обведенными желтым.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Для одной вкладки оставьте <strong>Книга (.srwb)</strong> и <strong>Только текущая вкладка</strong>, затем нажмите <strong>Экспорт</strong>. Выберите <strong>Все вкладки</strong>, чтобы включить всю рабочую книгу.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-export.png">Посмотреть полный снимок экрана диалогового окна экспорта</a>
+        </figure>
+        <p class="callout"><strong>Зачем выполнять экспорт?</strong> SciREPL восстанавливает локальные сеансы, но локальное хранилище не является резервной копией и не синхронизируется автоматически между приложением Android и браузером. См. раздел <a href="../../../files-export/">файлы и экспорт<span class="english-reference"> (Справочная страница на английском языке)</span></a> для других форматов, включая <code>.ipynb</code> и PDF.</p>
+      </section>
+
+      <section id="what-next">
+        <p class="step-label">Шаг 5</p>
+        <h2>Что попробовать дальше</h2>
+        <p>Попробуйте <code>2 + 2</code> в другой ячейке Python. Затем используйте селектор рабочей книги для переключения вкладок. <a href="../../files-export/tutorial/">Руководство по рабочей книге CSV</a> начинается с <strong>Меню → Обзор пакетов, коллекций и книг</strong>, устанавливает пример и показывает, как его ячейки работают с локальным файлом.</p>
+        <p><a href="../../workbooks/tutorial/">Руководство Markov Groups</a> показывает, как искать по расширенному каталогу, открыть существующую рабочую книгу о движениях кубика, последовательно запустить ее ячейки и изменить один параметр.</p>
+        <p>Для быстрого напоминания о расположении элементов управления вернитесь к <a href="../../../interface/">справочнику по интерфейсу<span class="english-reference"> (Справочная страница на английском языке)</span></a>. Чтобы изучить другой язык или добавить пакеты, перейдите к разделу <a href="../../../languages-packages/">Языки и пакеты<span class="english-reference"> (Справочная страница на английском языке)</span></a>.</p>
+        <aside class="callout"><strong>Используете Pro?</strong> Основной рабочий процесс аналогичен. В Pro также есть полноэкранный редактор и дополнительные функции ИИ; см. <a href="../../../pro/ai/#full-screen">Pro: рабочие процессы с ИИ и полноэкранным режимом<span class="english-reference"> (Справочная страница на английском языке)</span></a> после того, как освоитесь с обычными ячейками.</aside>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Справка SciREPL</span><nav aria-label="Навигация в нижнем колонтитуле"><a href="../../../interface/">Краткий справочник по интерфейсу<span class="english-reference"> (Справочная страница на английском языке)</span></a><a href="../../../">Вся справка<span class="english-reference"> (Справочная страница на английском языке)</span></a></nav></footer>
+</body>
+</html>

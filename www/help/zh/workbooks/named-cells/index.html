@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="zh" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="命名 SciREPL 单元格，通过 /nb 虚拟文件系统读取其源码和输出，并在 JavaScript、Bash 与 Python 之间传递数据或生成的代码。">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/zh/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/named-cells/tutorial.css">
+  <title>命名单元格与跨语言路径 · SciREPL 帮助</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/named-cells/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/named-cells/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/named-cells/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/named-cells/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/named-cells/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/named-cells/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/named-cells/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/named-cells/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/named-cells/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">跳转至主要内容</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (英文参考页面)</span></a>
+    <nav aria-label="主导航"><a href="../../../workbooks/">工作簿参考<span class="english-reference"> (英文参考页面)</span></a><a href="../../tutorials/">所有教程</a><a href="../../../">所有帮助<span class="english-reference"> (英文参考页面)</span></a><a href="../../../../">打开 Free PWA</a></nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="教程语言"><details class="tutorial-language-menu"><summary>教程语言: <bdi>简体中文</bdi></summary><nav aria-label="教程语言"><a href="../../../en/workbooks/named-cells/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/named-cells/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/named-cells/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/named-cells/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/named-cells/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/named-cells/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/named-cells/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/named-cells/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/named-cells/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/named-cells/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/named-cells/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/named-cells/" lang="ru" hreflang="ru">Русский</a>
+      <a href="./" lang="zh" hreflang="zh" aria-current="page">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">本教程为机器翻译，母语审校待完成。代码和技术参数保持不变。屏幕截图显示原始英文界面；请将本文中翻译的控件名称与您的应用相对应。</p></aside>
+    <p class="breadcrumbs"><a href="../../../">帮助<span class="english-reference"> (英文参考页面)</span></a> / <a href="../../../workbooks/">工作簿<span class="english-reference"> (英文参考页面)</span></a> / 命名单元格与路径</p>
+    <article>
+      <p class="eyebrow">边做边学</p>
+      <h1>命名单元格并连接程序</h1>
+      <p class="lede">单元格可以拥有一个有意义的名称（例如 <code>numbers</code>），而不仅仅通过其位置来识别。其他单元格可以通过 <code>/nb/numbers/.output</code> 读取其最新的文本输出，或者通过 <code>/shared/</code> 中的普通文件交换数据。使用 JavaScript 和 Bash 尝试这两种途径，然后在另一个单元格中生成一个简短的 Bash 程序——且不会自动运行生成的代码。</p>
+      <ul class="meta"><li class="chip chip-free">Free + Pro 工作流</li><li class="chip">经浏览器验证的示例</li><li class="chip">约 15 分钟</li></ul>
+      <p class="screen-note">本操作指南与屏幕截图已在 <strong>SciREPL Free 浏览器版本</strong>中于 <time datetime="2026-10-06">6 日（十月 2026 年）</time>经过核验。这些是完整的窄屏浏览器截图，<strong>并非 Android 屏幕截图</strong>。本指南尚未针对 Pro 及每个已发布版本进行检查。主要练习使用内置的 JavaScript 和 Bash：无需安装软件包、进行模型调用或下载运行环境。Python 是可选的最后一步。</p>
+      <p class="callout"><strong>此处“路径”的含义：</strong> <code>/nb/</code> 是<em>当前所选工作簿单元格</em>的虚拟视图，可供程序使用。它不是 Android“下载”中的文件夹，也不是单独的“路径视图”屏幕。所核验的 Free 版本的 <strong>文件与存储</strong> 屏幕无法浏览 <code>/nb/</code>；稍后我们将特意把一些数据复制到该屏幕可显示的共享文件中。</p>
+      <nav class="lesson-nav" aria-label="命名单元格操作分步指南">
+        <strong>本课内容</strong>
+        <ol>
+          <li><a href="#open">导入小型示例工作簿</a></li>
+          <li><a href="#name">查找并修改单元格名称</a></li>
+          <li><a href="#produce">运行生成数据的单元格</a></li>
+          <li><a href="#paths">通过路径读取单元格</a></li>
+          <li><a href="#shared-file">通过共享的 JSON 文件交换数据</a></li>
+          <li><a href="#generate">生成另一个单元格的源码，然后自行运行</a></li>
+          <li><a href="#update">修改数据并刷新结果</a></li>
+        </ol>
+        <p><a href="#python">可选的 Python 读取程序</a> · <a href="#more">其他工作簿示例</a> · <a href="#troubleshooting">若遇到问题</a></p>
+        <p><a href="../../tutorials/">所有教程</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">步骤 1</p>
+        <h2>导入示例且不运行它</h2>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/named-cells/assets/named-cell-interop.srwb" download="named-cell-interop.srwb">下载命名单元格示例工作簿 (.srwb)</a>。保存文件本身并保留其 <code>.srwb</code> 扩展名。如果浏览器显示文本，请使用其保存/下载操作。</li>
+          <li>在 SciREPL 的顶部页眉中，找到 <strong>☰ 菜单</strong>——即带有<strong>三条水平横线</strong>的按钮。打开它并选择 <strong>📂 导入文件（如 .srwb、.ipynb、.csv、.py、.zip）</strong>。如有需要，可在菜单内滚动。</li>
+          <li>在设备的文件选择器中选择 <code>named-cell-interop.srwb</code>。如果菜单仍处于打开状态，请退出菜单，然后在工作簿选择器中选择新的 <strong>Named Cell Interop</strong> 标签页。选择器的 <strong>▾</strong> 箭头位于应用标题附近。您现有的工作簿仍会保留。</li>
+          <li>阅读简介，然后找到名为 <code>numbers</code>、<code>inspect_cells</code>、<code>write_shared</code>、<code>read_shared</code>、<code>generate_report</code>、<code>bash_report</code> 和 <code>python_total</code> 的七个代码单元格。它们已经命名完毕，以便您跟进练习。</li>
+        </ol>
+        <p class="callout"><strong>导入不等于运行。</strong>即使启用了自动执行，普通的 <code>.srwb</code> 导入也不会执行代码。本课请勿选择“运行所有单元格”：执行顺序至关重要，且最后一个 Python 单元格是可选的。在运行不熟悉的代码前请先进行检查。</p>
+        <p>需要更详细的下载和选择器步骤？请参阅<a href="../import/">手动工作簿导入操作指南</a>。若要跟进本课，请保持选中 <strong>Named Cell Interop</strong>：<code>/nb/</code> 指的是当前活动的工作簿，而非每个已打开的标签页。</p>
+      </section>
+
+      <section id="name">
+        <p class="step-label">步骤 2</p>
+        <h2>查找并修改单元格名称</h2>
+        <p>已保存的代码单元格在其自身的页眉中带有 <strong>In[…] 提示标签</strong>，已命名的单元格还会显示其名称。这个标签才是用于命名的——而不是用于编辑单元格源码的 <strong>✎ 铅笔</strong>。显示的数字用于标识已保存的卡片；在重新排序后，它不一定与单元格在 <code>/nb/In[N]/...</code> 路径中的当前位置一致。引用时建议优先使用名称。</p>
+        <figure class="phone-figure">
+          <div class="annotated-shot" role="img" aria-label="浏览器截图，其中 numbers 单元格的 In 标签和铅笔控件以黄色线框标出；其源码和 JSON 输出显示在下方。">
+            <img src="../../../workbooks/named-cells/assets/browser-named-cell.png" alt="" loading="lazy" decoding="async">
+            <img class="shot-annotation" src="../../../workbooks/named-cells/assets/browser-named-cell-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          </div>
+          <figcaption>两个黄色线框标出了已保存单元格的 <strong>In[…] 标签</strong>（双击或长按可打开命名对话框）及其 <strong>✎ 铅笔</strong>（可打开源码编辑器）。名称 <code>numbers</code> 显示在右侧。此浏览器捕获画面展示了步骤 3 之后的输出；在桌面端，将鼠标悬停在卡片上即可显示其控件。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-named-cell.png">查看完整的浏览器屏幕截图</a>
+        </figure>
+        <ol class="lesson-steps">
+          <li>找到 <code>numbers</code>。在桌面端，<strong>双击其 In[…] 标签</strong>。在触屏设备上，<strong>按住该标签</strong>。在所核验的版本中，单击并非触发命名的手势。</li>
+          <li>在对话框中，将 <code>numbers</code> 替换为 <code>measurements</code>，然后使用 <strong>确定</strong> 确认。单元格页眉中的名称会更改；源码和语言则保持不变。</li>
+          <li>再次打开相同的对话框，将名称<strong>改回 <code>numbers</code></strong>，然后选择 <strong>确定</strong>。后续单元格会使用该名称，因此请在继续之前将其恢复。</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-name-dialog.png" alt="SciREPL Free 的单元格命名对话框的窄屏浏览器截图，其中输入了 measurements，并带有确认与取消控件。" loading="lazy" decoding="async">
+          <figcaption>名称在其专属对话框中编辑。重命名单元格不会重写其他单元格中的引用：如果保留新名称，<code>/nb/numbers/.output</code> 也需要相应更改。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-name-dialog.png">查看完整的浏览器命名对话框屏幕截图</a>
+        </figure>
+        <p>请选择独特且简洁的名称，例如 <code>cube_moves</code> 或 <code>check_moves</code>。名称在工作簿内必须唯一；不能包含 <code>/</code>、以 <code>.</code> 开头，或为保留的位置标签（例如 <code>In[2]</code>）。清空名称即可将其移除。</p>
+        <p>这就是为什么教程中会写道<strong>“先运行 <code>cube_moves</code>，再运行 <code>check_moves</code>”</strong>：这些是要在工作簿中查找的单元格名称，而不是必须单独下载的文件。当您插入或移动单元格时，名称是比位置更可靠的引用方式。</p>
+      </section>
+
+      <section id="produce">
+        <p class="step-label">步骤 3</p>
+        <h2>运行生成数据的单元格</h2>
+        <p>找到 <code>numbers</code>。点击其自身的 <strong>✎ 铅笔</strong>，检查源码，并确认该单元格为 <strong>代码 → JS - JavaScript</strong>。然后使用<em>该已保存单元格的</em> <strong>▶ 运行</strong> 按钮——而不是用于添加另一个单元格的新建单元格面板。</p>
+        <p class="callout"><strong>Pro 快捷方式：</strong>您还可以通过<strong>双击单元格的源码文本</strong>在 Pro 中打开已保存单元格的编辑器。<strong>✎ 铅笔</strong>在两个版本中均可使用。此编辑快捷方式不同于通过双击或长按 <strong>In[…] 标签</strong>来修改其名称。</p>
+        <pre><code data-cell-example="numbers">console.log(JSON.stringify({values: [3, 5, 8]}));</code></pre>
+        <p>预期会得到如下单行输出：</p>
+        <pre><code>{"values":[3,5,8]}</code></pre>
+        <p>结果是 <strong>JSON 文本</strong>。其结构使其比普通文字消息更容易被另一种语言读取。我们并非在传递活动的 JavaScript 对象，也未将 JavaScript 变量共享给 Bash 或 Python。</p>
+      </section>
+
+      <section id="paths">
+        <p class="step-label">步骤 4</p>
+        <h2>通过虚拟文件系统读取单元格</h2>
+        <p><code>numbers</code> 的虚拟目录包含带有点前缀的属性。路径由工作簿挂载点、单元格标识符和所需属性组合而成：</p>
+        <pre class="path-tree" aria-label="numbers 单元格的虚拟路径"><code>/nb/                         current workbook's cells
+└── numbers/                 this named cell
+    ├── .code                source text
+    ├── .output              latest text output
+    ├── .language            javascript
+    ├── .type                code
+    └── .name                numbers</code></pre>
+        <div class="table-wrap">
+          <table>
+            <caption>工作簿路径接口所使用的单元格属性</caption>
+            <thead><tr><th scope="col">属性</th><th scope="col">读取该属性所获得的内容</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>.code</code></th><td>当前的源码，无论该源码是否运行过。</td></tr>
+              <tr><th scope="row"><code>.output</code></th><td>最新的文本输出。它是只读的：由执行操作提供。它可能为空或已过期。</td></tr>
+              <tr><th scope="row"><code>.language</code></th><td>存储的语言标识符，例如 <code>javascript</code> 或 <code>bash</code>。</td></tr>
+              <tr><th scope="row"><code>.type</code></th><td>单元格类型，例如 <code>code</code> 或 <code>markdown</code>。</td></tr>
+              <tr><th scope="row"><code>.name</code></th><td>所分配的名称；若单元格未命名，则为空文本。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>现在打开 <strong>✎ 铅笔</strong>进入 <code>inspect_cells</code>，检查 <strong>代码 → Bash</strong>，然后运行它。这将读取生成单元格的源码、其 JSON 输出及其语言，然后列出当前工作簿的单元格标识符。它不会写入或更改任何单元格或文件。</p>
+        <pre><code data-cell-example="inspect_cells">printf 'Source:\n'
+cat /nb/numbers/.code
+printf '\nOutput:\n'
+cat /nb/numbers/.output
+printf '\nLanguage:\n'
+cat /nb/numbers/.language
+printf '\nCell names and positions:\n'
+ls /nb/</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-cell-paths.png" alt="inspect_cells Bash 单元格的窄屏浏览器截图，显示了 numbers 单元格的源码、JSON 输出、语言及虚拟单元格列表。" loading="lazy" decoding="async">
+          <figcaption>Bash 使用看似普通的 <code>cat</code> 路径读取单元格的属性。这些路径用于定位工作簿数据；不涉及 Android shell 或手机上的物理文件夹。SciREPL Free 的浏览器捕获画面。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-cell-paths.png">查看完整的浏览器单元格路径屏幕截图</a>
+        </figure>
+        <h3>名称、位置与相对引用</h3>
+        <p>同一个单元格也可以通过其<strong>当前基于 1 的位置</strong>来寻址，例如 <code>/nb/In[2]/.output</code> 表示当前顺序中的第二个单元格。Markdown 单元格也计入其中。这并非永久的卡片 ID：重新排序后，输出显示的 In[…] 数字可能与该路径所使用的位置不同。当您重排或插入单元格时，位置引用的含义会发生变化；而名称引用则始终能准确定位到该命名单元格。</p>
+        <p>Bash 和 JavaScript 还支持相对于正在执行的单元格的引用：<code>/nb/-1/.output</code> 表示前一个单元格，而 <code>/nb/./.code</code> 表示当前单元格。它们需要执行上下文并依赖于单元格顺序。本教程使用显式名称代替；不依赖于相对引用在各种语言中表现一致。</p>
+      </section>
+
+      <section id="shared-file">
+        <p class="step-label">步骤 5</p>
+        <h2>通过共享文件交换数据</h2>
+        <p><strong>共享虚拟文件系统</strong>存放不同语言内核均可使用的普通文件。在这里，<code>/shared/</code> 指的是在您的 SciREPL 浏览器/应用会话内部管理的文件存储——而不是 Android 的“下载”文件夹、计算机上的某个文件夹或云端同步。共享文件承载文本或字节；它们不会使某种语言的活动变量对另一种语言可用。</p>
+        <div class="table-wrap">
+          <table>
+            <caption>程序引用数据的两种方式</caption>
+            <thead><tr><th scope="col">路径</th><th scope="col">所指向的目标</th><th scope="col">触发更新的操作</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>/nb/numbers/.output</code></th><td>所选工作簿中单元格的最新文本输出。</td><td>再次运行该单元格。</td></tr>
+              <tr><th scope="row"><code>/shared/data/named-cell-tutorial/values.json</code></th><td>一个普通的 JSON 文件，可跨内核与工作簿标签页使用。</td><td>显式写入该文件的程序或文件编辑器。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>写入普通的 JSON 文件</h3>
+        <p>打开 <strong>✎ 铅笔</strong>进入 <code>write_shared</code>，检查 <strong>代码 → JS - JavaScript</strong>，然后运行它。这将读取生成单元格的最新文本输出，并将其保存为共享的 JSON 文本文件。共享文件系统会根据需要自动创建父文件夹。</p>
+        <pre><code data-cell-example="write_shared">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+window.sharedVFS.writeFile('/shared/data/named-cell-tutorial/values.json', text, 'javascript');
+console.log('Saved JSON to /shared/data/named-cell-tutorial/values.json');</code></pre>
+        <p>结果是一个<strong>包含副本的单独文件</strong>（包含 JSON 输出的副本），而不是 <code>/nb/numbers/.output</code> 的另一个别名。专用文件夹可将本示例的小型暂存文件与您的其他数据隔开；重新运行 <code>write_shared</code> 会覆盖这个具体的课时文件。</p>
+        <h3>从另一个程序读取该文件</h3>
+        <p>打开 <strong>✎ 铅笔</strong>进入 <code>read_shared</code>，检查 <strong>代码 → JS - JavaScript</strong>，然后运行它。这个独立的程序读取已保存的文件，而不是 <code>numbers</code> 单元格：</p>
+        <pre><code data-cell-example="read_shared">const text = window.sharedVFS.readFile('/shared/data/named-cell-tutorial/values.json', 'utf8');
+if (!text) throw new Error('Run write_shared first.');
+const record = JSON.parse(text);
+console.log(record.values.reduce((sum, value) =&gt; sum + value, 0));</code></pre>
+        <p>预期会得到 <code>16</code>。显式的 <code>'utf8'</code> 会将文件的字节作为文本读取，以便进行 JSON 解析。每个内核都有自己的文件 API：在此处 JavaScript 使用共享文件系统帮助工具；Python 则可以使用 <code>open(...)</code>，如下文的可选步骤所示。这并不是一个完整的操作系统文件系统。</p>
+        <p>若要进行单独的跨语言检查，您可以添加一个新的 <strong>代码 → Bash</strong> 单元格并运行此命令。它会读取同一个普通文件并输出 <code>{"values":[3,5,8]}</code>：</p>
+        <pre><code>cat /shared/data/named-cell-tutorial/values.json</code></pre>
+        <h3>在文件图形界面中查看同一文件</h3>
+        <ol class="lesson-steps">
+          <li>打开 <strong>☰ 菜单 → 文件与存储</strong>。</li>
+          <li>找到共享的 <code>data</code> 文件夹，然后找到 <code>named-cell-tutorial</code> 和 <code>values.json</code>。选择该文件以查看其 JSON 文本。</li>
+          <li>确认其包含 <code>{"values":[3,5,8]}</code>，然后关闭“文件与存储”以继续操作工作簿。</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-shared-values.png" alt="SciREPL Free 的“文件与存储”屏幕的窄屏浏览器截图，显示了复制的 values.json 文件及其 JSON 内容。" loading="lazy" decoding="async">
+          <figcaption>特意将其复制到共享文件系统中，使得 JSON 可以在文件图形界面中使用。所核验的 Free 屏幕本身不会列出 <code>/nb/</code>。SciREPL Free 的浏览器捕获画面。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-shared-values.png">查看完整的浏览器共享文件屏幕截图</a>
+        </figure>
+        <p class="callout"><strong>副本不会自动更新。</strong>修改或重新运行 <code>numbers</code> 只会更改其最新的单元格输出，而不会更改已存在的 <code>values.json</code>。重新运行 <code>write_shared</code> 可刷新副本，然后运行 <code>read_shared</code> 根据其重新计算。文件保存在本地应用/浏览器存储中，但清除该存储或卸载应用可能会将其移除。本地持久化存储并非备份；请导出您需要保留的文件。</p>
+        <p>有关查看、编辑和导出共享文件的信息，请参阅<a href="../../files-export/tutorial/#edit-file">CSV 与“文件和存储”操作指南</a>。仅限工作簿的 <code>.srwb</code> 导出不包含单独的文件（例如这个 JSON 副本）；请使用<a href="../../files-export/tutorial/#export">软件包归档导出</a>将工作簿与所选数据文件一并打包导出。</p>
+      </section>
+
+      <section id="generate">
+        <p class="step-label">步骤 6</p>
+        <h2>生成另一个单元格的代码，然后自行运行</h2>
+        <p>到目前为止，Bash 读取了 JavaScript 输出。现在，JavaScript 将使用相同的 JSON 文本来计算总计，并将一个简短的 Bash 程序写入<em>现有的</em> <code>bash_report</code> 单元格中。编写代码与运行代码是两个独立的操作。</p>
+        <ol class="program-flow" aria-label="数据与生成代码的流向">
+          <li><code>numbers</code><span>运行 → JSON 文本</span></li>
+          <li><code>generate_report</code><span>读取 JSON → 写入 Bash 源码</span></li>
+          <li><code>bash_report</code><span>检查 → 手动运行</span></li>
+        </ol>
+        <p class="callout"><strong>此写入操作会替换源码。</strong>请使用配套的临时 <code>bash_report</code> 单元格，而不要使用包含您需要保留的工作成果的单元格。在自己的工作簿中尝试源码写入之前，请先做好备份。在本次练习中，请勿覆盖生成器本身，也请勿以编程方式修改 <code>.language</code>。</p>
+        <ol class="lesson-steps">
+          <li>确认 <code>bash_report</code> 存在且其语言为 <strong>Bash</strong>。其初始源码如下所示；先不要运行它。</li>
+          <li>打开 <strong>☰ 菜单 → 设置 → 笔记本 VFS</strong>。生成器的写入操作必须勾选 <strong>允许单元格修改其他单元格</strong>。在所核验的版本中该选项默认开启，但请检查您的设置。您<em>无需</em>启用跨笔记本读取、跨笔记本写入或以编程方式执行。关闭“设置”。</li>
+          <li>打开 <strong>✎ 铅笔</strong>进入 <code>generate_report</code>，检查 <strong>代码 → JS - JavaScript</strong>，然后运行它。</li>
+        </ol>
+        <pre><code data-cell-example="generate_report">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+const data = JSON.parse(text);
+const total = data.values.reduce((sum, value) =&gt; sum + value, 0);
+const updated = window.notebookVFS.writeFile(
+  '/nb/bash_report/.code', `echo "Total: ${total}"`
+);
+if (!updated) throw new Error('Check bash_report exists and cell writes are allowed.');
+console.log('Updated bash_report source; inspect it, then run it yourself.');</code></pre>
+        <p>目标单元格初始包含以下占位内容：</p>
+        <pre><code data-cell-example="bash_report">echo "Run generate_report first"</code></pre>
+        <p>生成器执行成功后，<code>bash_report</code> 的源码变为 <code>echo "Total: 16"</code>。该写入操作<strong>并未运行 Bash</strong>。打开该单元格的 <strong>✎ 铅笔</strong>检查新源码，然后点击<em>其自身的</em> <strong>▶ 运行</strong>。预期会得到 <code>Total: 16</code>。</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-generated-report.png" alt="SciREPL Free 的窄屏浏览器截图，显示了在 bash_report 中生成的 Bash 源码 echo Total: 16，以及手动运行后的 Total: 16。" loading="lazy" decoding="async">
+          <figcaption>目标单元格仍然是 Bash 单元格。JavaScript 提供了其源码；而您单独执行的 <strong>▶ 运行</strong> 操作则在其下方生成了输出。SciREPL Free 的浏览器捕获画面。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-generated-report.png">查看完整的浏览器生成报告屏幕截图</a>
+        </figure>
+        <p><code>readFile(...)</code> 返回文本；未知的单元格或属性会返回 <code>null</code>。<code>writeFile(...)</code> 报告写入是否成功。若生产者没有输出或目标位置无法写入，生成器中的检查将阻止其继续执行。名称区分大小写：请保持拼写完全一致。</p>
+      </section>
+
+      <section id="update">
+        <p class="step-label">步骤 7</p>
+        <h2>修改数据并刷新各个依赖步骤</h2>
+        <ol class="lesson-steps">
+          <li>使用 <code>numbers</code> 的 <strong>✎ 铅笔</strong>进行编辑。将 <code>[3, 5, 8]</code> 改为 <code>[4, 5, 8]</code>，然后运行该单元格。其 JSON 现在包含 <code>4</code>。</li>
+          <li>在运行其他任何内容之前，先查看 <code>bash_report</code>。其之前的源码和输出保持不变：不存在自动依赖刷新。</li>
+          <li>重新运行 <code>generate_report</code>。这会将报告的源码更改为 <code>echo "Total: 17"</code>，但其原有的 <code>Total: 16</code> 输出可能仍然可见。</li>
+          <li>检查并重新运行 <code>bash_report</code>。现在其输出为 <code>Total: 17</code>。</li>
+          <li>在刷新文件之前，重新运行 <code>read_shared</code>：它仍然显示 <code>16</code>（来自旧 JSON 副本）。现在重新运行 <code>write_shared</code>，然后运行 <code>read_shared</code>；文件途径也会显示 <code>17</code>。在“文件与存储”中重新打开 <code>values.json</code> 以检查已更改的文件。</li>
+        </ol>
+        <p class="callout"><strong>源码、输出和复制的文件是不同的概念。</strong>在其消费者使用之前，请通过该单元格的 <strong>▶ 运行</strong> 完成打开的源码编辑；未保存的编辑器草稿不是存储的 <code>.code</code>。源码写入不会执行目标单元格，复制的文件也不会跟随后续的更改。请遵循明确的顺序：生产者 → 生成器 → 报告。可见的旧输出并不能证明当前源码已经运行。</p>
+        <p>导出工作簿以保留您的源码编辑和名称。普通的 <code>.srwb</code> 导入目前会丢弃已保存的代码输出，因此重新打开后，请在其读取程序之前重新运行 <code>numbers</code>，然后再运行生成器和报告。独立的共享数据文件需要进行文件或软件包导出。请参阅<a href="../../../files-export/">文件与导出参考<span class="english-reference"> (英文参考页面)</span></a>。</p>
+      </section>
+
+      <section id="python">
+        <p class="step-label">可选</p>
+        <h2>从 Python 读取两种途径</h2>
+        <p>您可以到此为止，而无需启动 Python。若要尝试第三种语言，请先运行 <code>numbers</code> 和 <code>write_shared</code>，然后检查并运行 <code>python_total</code>（作为 <strong>代码 → Python</strong>）：</p>
+        <pre><code data-cell-example="python_total">import json
+record = json.loads(nb_read('numbers', '.output'))
+print('Cell output:', sum(record['values']))
+with open('/shared/data/named-cell-tutorial/values.json') as source:
+    saved = json.load(source)
+print('Shared file:', sum(saved['values']))</code></pre>
+        <p>对于原始数据，预期会得到 <code>Cell output: 16</code> 和 <code>Shared file: 16</code>；或者两行都将为 <code>17</code>（在步骤 7 中刷新两条途径之后）。Python 的 <code>nb_read('numbers', '.output')</code> 用于读取命名单元格的最新文本输出。独立的 <code>open(...)</code> 使用标准 Python 文件语法读取共享文件。标准 <code>json</code> 模块负责解析两者；不需要 <code>%pip install</code>。如果仅刷新了生产者，两个总计可能会有所不同。</p>
+        <p>首次使用时，Python 可能需要初始化或下载其运行时环境。根据您的版本和现有的许可情况，可能会显示隐私/网络提示；请在同意前仔细阅读。此可选步骤并非 JavaScript/Bash 练习所必需，且仅导入配套工作簿并不会启动 Python。</p>
+      </section>
+
+      <section id="more">
+        <p class="step-label">继续探索</p>
+        <h2>识别其他工作簿中的模式</h2>
+        <p>命名单元格提供了一个简单的互操作边界：一个程序生成文本，另一个程序读取该文本或利用它来生成源码。目录中已有更大的示例可供查看：</p>
+        <ul>
+          <li><strong>预期寿命数据分析</strong> 读取普通的 CSV 文件（源自 <code>/shared/data/</code>），使用 Python 与 R：这是共享文件途径，而非命名单元格读取。它会下载数据集并使用软件包；在运行前请阅读其设置和许可要求。</li>
+          <li><strong>Prolog 生成 R 代码</strong> 读取已命名的 Prolog 源码（通过 <code>nb_read(..., '.code', ...)</code>），并使用 <code>nb_write('r_factorial', '.code', ...)</code> 写入生成的 R 源码。R 单元格单独运行。</li>
+          <li><strong>Prolog 生成 TypR 代码</strong> 将生成的定义与命名的纯源码查询单元格相结合，然后写入 <code>typr_output</code>。<code>#!source</code> 单元格无需执行即可作为源码读取。</li>
+        </ul>
+        <p>在 <strong>☰ 菜单 → 浏览软件包…</strong> 中搜索这些标题。它们属于补充阅读材料，<strong>并非本指南经过认证的执行操作指引</strong>；其适用的版本和设置要求各不相同。Prolog-generates 工作簿需要通过“浏览”安装 <strong>unifyweaver-scirepl</strong> 依赖项；单独导入原始工作簿不会安装该依赖项。对于手动导入的 <code>.ipynb</code>，请先确认 <strong>菜单 → 设置 → 导入与编辑 → 导入工作簿时自动执行单元格</strong> 处于关闭状态，因为在此设置下 Jupyter 导入可能会执行代码。请参阅<a href="../tutorial/">“浏览”操作指南</a>和<a href="../import/">手动导入指南</a>。</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">如果显示异常</p>
+        <h2>检查名称、工作簿及运行顺序</h2>
+        <ul>
+          <li><strong>命名对话框未打开：</strong>双击或长按已保存单元格的 <strong>In[…] 标签</strong>，而不是其源码、输出或铅笔图标。单击并非触发命名的手势。</li>
+          <li><strong>找不到生产者：</strong>请保持选中 <strong>Named Cell Interop</strong>，恢复完全一致的名称 <code>numbers</code>，并检查拼写及大小写。重命名不会重写其他单元格中的路径。</li>
+          <li><strong>生成器提示“先运行 numbers”：</strong>检查并运行 <code>numbers</code>。仅导入或编辑其源码并不会填充 <code>.output</code>。</li>
+          <li><strong>JSON 解析失败：</strong>请将生产者与完整示例进行比对。其输出必须仅包含 JSON，不能包含标题或额外打印的消息。</li>
+          <li><strong>无法写入报告：</strong>请确认现有的 <code>bash_report</code> 单元格存在于此工作簿中，并且已勾选 <strong>允许单元格修改其他单元格</strong>。请勿通过启用以编程方式执行来解决源码写入问题。</li>
+          <li><strong>报告仍显示 16：</strong>编辑数据后，请先运行 <code>numbers</code>，然后运行 <code>generate_report</code>，再运行 <code>bash_report</code>。使用 <code>write_shared</code> 单独刷新复制的文件，然后重新运行 <code>read_shared</code>。</li>
+          <li><strong>在“文件与存储”中找不到 /nb：</strong>在所核验的版本中，该屏幕显示的是共享文件，而非这个虚拟单元格挂载点。请改为运行 <code>write_shared</code> 并查找其特意复制的 <code>values.json</code> 副本。</li>
+        </ul>
+        <p><a href="../../interface/tutorial/">首个工作簿界面教程</a>讲解了页眉与已保存单元格的铅笔图标；<a href="../graphics/">图形教程</a>展示了单元格生成结果的其他方式。</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL 帮助</span><nav aria-label="页脚导航"><a href="../../../workbooks/">工作簿参考<span class="english-reference"> (英文参考页面)</span></a><a href="../../../">所有帮助<span class="english-reference"> (英文参考页面)</span></a></nav></footer>
+</body>
+</html>

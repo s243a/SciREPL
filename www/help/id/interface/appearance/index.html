@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="id" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tampilkan pintasan Jelajah SciREPL dan sesuaikan tombol header, label Run, tema, serta ruang bilah status Android melalui Menu → Appearance.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/id/interface/appearance/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../interface/appearance/tutorial.css">
+  <title>Panduan Tampilan · Bantuan SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/appearance/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/appearance/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/appearance/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/appearance/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/appearance/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/appearance/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/appearance/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/appearance/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/appearance/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/appearance/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/appearance/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/appearance/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/appearance/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/appearance/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Lompat ke konten</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+    <nav aria-label="Navigasi utama">
+      <a href="../../../interface/">Referensi antarmuka<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+      <a href="../../tutorials/">Semua tutorial</a>
+      <a href="../../../">Semua bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+      <a href="../../../../">Buka PWA Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Bahasa tutorial"><details class="tutorial-language-menu"><summary>Bahasa tutorial: <bdi>Bahasa Indonesia</bdi></summary><nav aria-label="Bahasa tutorial"><a href="../../../en/interface/appearance/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/appearance/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/appearance/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/appearance/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/appearance/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/appearance/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/appearance/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="./" lang="id" hreflang="id" aria-current="page">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/appearance/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/interface/appearance/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/appearance/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/appearance/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/appearance/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutorial hasil terjemahan mesin; peninjauan oleh penutur asli masih tertunda. Kode dan nilai teknis tidak diubah. Tangkapan layar menampilkan antarmuka asli bahasa Inggris; cocokkan nama kontrol yang diterjemahkan dalam teks ini dengan aplikasi Anda.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / <a href="../../../interface/">Antarmuka<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / Panduan Tampilan</p>
+    <article>
+      <p class="eyebrow">Sesuaikan antarmuka sesuai keinginan Anda</p>
+      <h1>Tampilkan Browse dan sesuaikan Tampilan</h1>
+      <p class="lede">Tempatkan pintasan <strong>📦 Browse</strong> di header <strong>SciREPL Free</strong>, lalu pilih tombol yang nyaman serta tema terang atau gelap. Kontrol Tampilan bersama juga berguna di Pro; bagian terpisah khusus Pro membahas pengeditan layar penuh, tombol tambahan, dan warna sintaks langsung. Anda dapat melakukan ini tanpa mengubah atau menjalankan sel buku kerja apa pun.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro (lihat label)</li>
+        <li class="chip">Tangkapan layar Android</li>
+        <li class="chip">Sekitar 3 menit</li>
+      </ul>
+      <p class="screen-note">Kelima tangkapan layar ini adalah tangkapan nyata dari <strong>SciREPL Free 1.4.0-debug</strong> pada <strong>Samsung Galaxy S24+</strong>, diambil pada <time datetime="2026-10-06">6 Oktober 2026</time>. Gambar-gambar tersebut menunjukkan aplikasi yang ditandatangani debug, bukan penginstalan dari Play Store. Langkah-langkah yang digambarkan menggunakan kontrol Free 1.4.0. Pintasan header Browse hanya untuk Free; pengguna Pro dapat membuka katalog yang sama dari Menu. Teks khusus Pro di bawah ini diverifikasi terhadap basis kode Pro 1.4.0; kontrol-kontrol tersebut tidak diilustrasikan oleh gambar Free ini, dan menu yang lebih lama dapat berbeda.</p>
+      <nav class="lesson-nav" aria-label="Langkah-langkah panduan Tampilan">
+        <strong>Dalam pelajaran ini</strong>
+        <ol>
+          <li><a href="#open-appearance">Buka Tampilan</a></li>
+          <li><a href="#browse-shortcut">Tampilkan pintasan Browse</a></li>
+          <li><a href="#buttons">Sesuaikan tombol dan Run</a></li>
+          <li><a href="#pro-editor">Khusus Pro: pengeditan layar penuh, tombol tambahan, dan warna langsung</a></li>
+          <li><a href="#theme">Pilih tema</a></li>
+          <li><a href="#android-space">Ruang Android dan pemulihan opsional</a></li>
+        </ol>
+        <p><a href="../../tutorials/">Semua tutorial</a></p>
+      </nav>
+
+      <section id="open-appearance">
+        <p class="step-label">Langkah 1</p>
+        <h2>Buka Menu → Tampilan</h2>
+        <ol class="lesson-steps">
+          <li>Temukan <strong>☰ Menu</strong>, tombol tiga garis horizontal di header pada bagian atas aplikasi.</li>
+          <li>Ketuk tombol tersebut, lalu pilih <strong>🎨 Tampilan</strong>. Jika menu lebih tinggi dari layar Anda, gulir di dalamnya untuk menemukan entri tersebut.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-menu" role="img" aria-label="Menu SciREPL dengan entri Tampilan yang disorot dengan warna kuning.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Pilih <strong>🎨 Tampilan</strong> dari menu aplikasi.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-menu.png">Lihat tangkapan layar Menu yang lengkap</a>
+        </figure>
+        <p class="callout"><strong>Perubahan langsung diterapkan saat Anda memilihnya.</strong> Kontrol biasa di bawah ini tidak memerlukan tombol Simpan atau Terapkan. Menutup Tampilan dengan <strong>×</strong> tidak membatalkan perubahan Anda, dan pilihan Anda tetap disimpan untuk kunjungan aplikasi berikutnya.</p>
+      </section>
+
+      <section id="browse-shortcut">
+        <p class="step-label">Langkah 2</p>
+        <h2>Free 1.4.0: tampilkan pintasan 📦 Browse</h2>
+        <p><strong>Menggunakan Pro?</strong> Lewati penyiapan pintasan ini dan gunakan <strong>Menu → Jelajahi paket, bundel &amp; buku kerja</strong>. Bagian berikutnya membahas kontrol Tampilan bersama.</p>
+        <ol class="lesson-steps">
+          <li>Buka <strong>Menu → Tampilan</strong>, lalu gulir ke <strong>Pintasan header</strong>.</li>
+          <li>Temukan <strong>Tampilkan pintasan Jelajahi</strong> dan pilih <strong>Selalu</strong>.</li>
+          <li>Tutup Tampilan dengan <strong>×</strong>. Tombol <strong>📦</strong> kini ada di header; ketuk untuk membuka <strong>Jelajahi paket, bundel &amp; buku kerja</strong>.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-shortcuts" role="img" aria-label="Bagian Pintasan header SciREPL Free, dengan pintasan Tampilkan Telusuri serta panah prioritasnya disorot warna kuning.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-shortcuts.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/shortcuts-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Pada <strong>Free 1.4.0</strong>, gunakan menu dropdown di samping <strong>Tampilkan pintasan Jelajahi</strong> untuk menentukan apakah tombol 📦 tetap terlihat.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-shortcuts.png">Lihat tangkapan layar pintasan selengkapnya</a>
+        </figure>
+        <p>Pilihan-pilihan ini memiliki tujuan yang berbeda:</p>
+        <ul>
+          <li><strong>Selalu:</strong> buat pintasan tetap terlihat, meskipun header memerlukan baris lain.</li>
+          <li><strong>Jika ada ruang:</strong> default untuk Telusuri. Tampilkan hanya jika muat; layar yang lebih sempit, tombol yang lebih besar, atau pesan status yang lebih panjang dapat membuatnya menghilang.</li>
+          <li><strong>Jangan pernah:</strong> sembunyikan pintasan header.</li>
+        </ul>
+        <p>Tombol <strong>↑</strong> dan <strong>↓</strong> mengubah pintasan opsional mana yang melepaskan tempatnya terlebih dahulu saat ruang terbatas. Pindahkan pintasan ke atas untuk mempertahankannya lebih lama, atau ke bawah untuk membiarkannya menghilang lebih cepat. Tombol-tombol ini mengubah prioritas, bukan posisi ikon di header.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-header" role="img" aria-label="Header SciREPL Free dengan pintasan Telusuri kotak paket yang disorot warna kuning.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-header.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/header-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Di Free, pintasan header <strong>📦</strong> membuka katalog yang sama dengan <strong>Menu → Jelajahi paket, bundel &amp; buku kerja</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-header.png">Lihat tangkapan layar header selengkapnya</a>
+        </figure>
+        <p class="callout"><strong>Tidak ada tombol 📦?</strong> Jalur Menu tetap berfungsi ketika pintasan disembunyikan atau versi Anda tidak menyediakannya. Untuk header yang ringkas, kembalikan Telusuri ke <strong>Bila ada ruang</strong> alih-alih memaksa setiap pintasan opsional agar tetap terlihat.</p>
+        <p>Jika Anda datang ke sini untuk mencari buku kerja, Anda sekarang dapat <a href="../../workbooks/tutorial/#browse">kembali ke panduan Grup Markov</a> dan mencari di katalog.</p>
+      </section>
+
+      <section id="buttons">
+        <p class="step-label">Langkah 3</p>
+        <h2>Pilih tombol yang nyaman dan label Jalankan</h2>
+        <p>Buka kembali <strong>Menu → Tampilan</strong> dan temukan <strong>Tombol</strong>. Geser penggeser <strong>Ukuran tombol</strong>; persentasenya dan <strong>Pratinjau</strong> di dekatnya akan langsung berubah. Defaultnya adalah <strong>100%</strong>. Tombol header yang lebih besar bisa lebih mudah diketuk, tetapi menyisakan lebih sedikit ruang untuk pintasan opsional.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-options" role="img" aria-label="Kontrol tata letak dan tombol Tampilan, termasuk Sembunyikan bilah status Android dan Ukuran tombol, disorot warna kuning.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-options.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/options-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Ukuran tombol</strong> menyesuaikan kontrol header. Pengaturan bilah status khusus Android dijelaskan di bawah.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-options.png">Lihat tangkapan layar tata letak dan tombol selengkapnya</a>
+        </figure>
+        <p>Menu dropdown <strong>Tombol Jalankan</strong> mengontrol Jalankan di <em>panel sel baru</em>, bukan tombol Jalankan di dalam editor sel tersimpan:</p>
+        <ul>
+          <li><strong>Otomatis (hanya ikon jika ruang terbatas):</strong> default. Pertahankan label jika muat, atau gunakan ikon ▶ saja untuk memberi ruang mengetik.</li>
+          <li><strong>Hanya ikon:</strong> selalu gunakan tombol ▶ yang ringkas.</li>
+          <li><strong>Selalu tampilkan label:</strong> pertahankan teks, bahkan di layar yang sempit.</li>
+        </ul>
+        <p>Tidak ada penggeser zoom teks di Tampilan. <strong>Ukuran tombol</strong> bukan pengaturan ukuran font umum. Free 1.4.0 dan Pro 1.3.0 secara otomatis memperbesar kontrol header ringkas untuk mengakomodasi pembesaran teks sistem Android.</p>
+      </section>
+
+      <section id="pro-editor">
+        <p class="step-label">Opsional · Hanya Pro</p>
+        <h2>Hanya Pro: pengeditan layar penuh, tombol ekstra, dan warna sintaksis</h2>
+        <p>Ini adalah kontrol editor <strong>SciREPL Pro 1.4.0</strong>, bukan kontrol yang ditampilkan pada tangkapan layar Free di atas. Tombol ekstra dan warna langsung adalah pengaturan terpisah.</p>
+        <h3>Masuk ke pengeditan layar penuh</h3>
+        <ol class="lesson-steps">
+          <li><strong>Sel baru:</strong> ketuk tombol <strong>⤢ Layar penuh</strong> pada kolom kode sel baru. Panah diagonalnya yang mengarah ke luar berarti memperluas editor.</li>
+          <li><strong>Sel tersimpan:</strong> ketuk <strong>✎ pensil</strong> sel tersebut untuk mengeditnya, lalu ketuk <strong>⤢</strong> di sudut kolom kode sel tersebut.</li>
+        </ol>
+        <p>Editor memenuhi layar sehingga lebih banyak kode yang muat. Tombol tambahan dan chip saran yang diaktifkan tetap tersedia di atas keyboard; warna sintaksis menggunakan pengaturan yang sama seperti yang dijelaskan di bawah ini. Masuk ke layar penuh <strong>tidak</strong> menjalankan kode.</p>
+        <p>Ketuk <strong>label editor di bagian atas</strong> untuk kembali ke buku kerja dengan draf Anda yang masih terbuka; <strong>Kembali</strong> atau <kbd>Esc</kbd> juga keluar dari mode layar penuh. Untuk sel yang tersimpan, <strong>Selesai</strong> menerapkan draf tanpa menjalankannya, sedangkan <strong>Batal</strong> membuang hasil edit. Untuk sel baru, Selesai dan Batal keduanya keluar dari layar penuh tanpa menghapus draf atau membuat sel; Jalankan adalah tindakan terpisah.</p>
+        <p><strong>Tidak sama dengan “Panel menggunakan layar penuh”.</strong> Opsi Tampilan terpisah tersebut mengontrol margin atas panel dan dialog; opsi ini tidak membuka editor kode layar penuh.</p>
+        <h3>Tampilkan baris tombol tambahan</h3>
+        <p>Buka <strong>Menu → Pelengkapan → Bagian → Umum</strong>. Atur <strong>Tombol tambahan di atas papan ketik → Aktif</strong>; bawaannya adalah <strong>Nonaktif</strong>. Baris ini menyediakan Esc, Tab, penghapusan indentasi, panah, Home, End, Run, dan tanda baca. Gesek ke samping untuk menjangkau tombol yang tidak muat. Memilih Aktif tidak menjalankan kode, tetapi tombol <strong>▶ Jalankan</strong> pada baris tersebut menjalankannya—periksa kode sumber sebelum mengetuknya.</p>
+        <p>Di bagian yang sama, <strong>Chip dalam mode potret</strong> dan <strong>Chip dalam mode lanskap</strong> memilih <strong>Baris sendiri</strong> atau <strong>Gantikan tombol tambahan</strong>. Bawaannya adalah Baris sendiri dalam orientasi potret dan Gantikan tombol tambahan dalam orientasi lanskap: saat kandidat muncul, kandidat tersebut dapat menggantikan posisi tombol untuk sementara. Jika tombol tambahan dinonaktifkan, chip menggunakan barisnya sendiri. <strong>Baris aksesori dalam mode lanskap</strong> menawarkan <strong>Nonaktif</strong>, <strong>Bila ada ruang</strong> (bawaan), atau <strong>Selalu</strong>. Saat ada ruang menggunakan <strong>Jumlah minimum baris kode yang terlihat</strong>, yang awalnya <strong>8</strong>, sehingga tampilan lanskap yang pendek dapat menyembunyikan baris opsional.</p>
+        <h3>Aktifkan atau nonaktifkan warna sintaksis langsung</h3>
+        <p>Buka <strong>Menu → Tampilan → Pewarnaan sintaks saat mengetik</strong>. Pilih <strong>Aktif</strong> untuk mewarnai kode yang didukung saat mengedit, atau <strong>Nonaktif</strong> untuk teks biasa. Bawaannya, <strong>Otomatis (aktif di desktop, nonaktif di layar sentuh)</strong>, mengaktifkan warna di browser desktop dan menonaktifkannya di ponsel. Jika pengetikan terasa kurang responsif, pilih Nonaktif; pewarnaan dapat mengurangi kecepatan pengetikan pada perangkat yang lebih lambat. Kode yang lebih panjang dari <strong>6000 karakter</strong> tetap tidak diwarnai bahkan saat Aktif.</p>
+        <p>Warna tidak memvalidasi atau mengeksekusi kode, mengirimkan permintaan API, atau mengaktifkan pelengkapan. Mengubah pengaturan ini akan langsung berlaku dan tidak mengubah kode sumber Anda.</p>
+        <h3>Files &amp; Storage memiliki sakelar terpisah</h3>
+        <p>Untuk file teks, gunakan <strong>Menu → Files &amp; Storage (VFS / Paths)</strong>, pilih file tersebut, lalu pilih <strong>Layar penuh</strong>. Kotak centang <strong>Penyorotan sintaks</strong> pada editor tersebut tidak bergantung pada pengaturan warna langsung di Tampilan dan dinonaktifkan secara bawaan. Kotak centang ini tidak tersedia untuk jenis file yang tidak dikenali atau file yang berukuran lebih dari 100,000 karakter. Tombol tambahannya berbagi preferensi Pelengkapan, tetapi dapat disembunyikan jika editor file memiliki terlalu sedikit ruang. File <strong>Simpan</strong> menulis hasil edit Anda; beralih warna saja tidak.</p>
+      </section>
+
+      <section id="theme">
+        <p class="step-label">Langkah 4</p>
+        <h2>Pilih tema terang, gelap, atau sistem Anda</h2>
+        <p>Gulir ke <strong>Tema</strong> dan pilih <strong>Gelap</strong>, <strong>Terang</strong>, atau <strong>Ikuti sistem</strong>. Gelap adalah bawaan. Sesuaikan sistem mengikuti preferensi terang/gelap perangkat Anda; ini adalah pilihan yang Anda tentukan, bukan bawaan.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-theme" role="img" aria-label="Menu drop-down Tema pada Tampilan disorot dengan warna kuning.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-theme.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/theme-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Pilih tema bawaan, lalu tutup Tampilan untuk terus menggunakan aplikasi dengan pilihan tersebut.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-theme.png">Lihat tangkapan layar tema yang lengkap</a>
+        </figure>
+        <p>Anda tidak memerlukan <strong>Kustom</strong>, <strong>Sesuaikan…</strong>, editor tema JSON, atau <strong>Lanjutan: CSS kustom</strong> untuk pelajaran ini. Opsi lanjutan tersebut berada di luar panduan langkah demi langkah tingkat pemula ini.</p>
+      </section>
+
+      <section id="android-space">
+        <p class="step-label">Sentuhan akhir opsional</p>
+        <h2>Ruang Android dan kembali ke default</h2>
+        <p>Di bawah <strong>Tata Letak</strong>, biarkan <strong>Margin atas → Otomatis</strong> dipilih. Ini mengikuti area aman yang dilaporkan perangkat sehingga header memiliki ruang yang sesuai di atasnya; Anda tidak perlu menebak nilai piksel.</p>
+        <p>Di aplikasi Android, <strong>Sembunyikan bilah status Android</strong> menawarkan:</p>
+        <ul>
+          <li><strong>Never:</strong> default; biarkan jam dan bilah status notifikasi tetap terlihat.</li>
+          <li><strong>In landscape:</strong> sembunyikan bilah tersebut saat ponsel dalam posisi menyamping; pulihkan dalam posisi potret.</li>
+          <li><strong>Always:</strong> sembunyikan dalam kedua orientasi.</li>
+        </ul>
+        <p>Pengaturan ini hanya memengaruhi bilah <em>status</em> Android, bukan bilah navigasi atau gestur. Pengaturan ini tidak ada di antarmuka browser/PWA dan Windows. Pro 1.3.0 justru memiliki kotak centang bernama <strong>Hide Android status bar in landscape</strong>.</p>
+        <p class="callout"><strong>Ingin membatalkan perubahan tampilan?</strong> <strong>Atur ulang ke default</strong> memulihkan tema default, ukuran tombol header, margin atas, pintasan, dan preferensi bilah status, serta menghapus pilihan tema/CSS kustom. Ini tidak menghapus sel buku kerja Anda. Ini <em>tidak</em> mereset tombol Run terpisah atau preferensi bahasa antarmuka; pilih sendiri opsi <strong>Otomatis</strong> milik Run jika diperlukan.</p>
+        <p>Tutup Appearance dengan <strong>×</strong> setelah Anda selesai. Lanjutkan dengan <a href="../../workbooks/tutorial/">panduan buku kerja Markov Groups</a>, atau kembali ke <a href="../../../interface/">referensi antarmuka ringkas<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Bantuan SciREPL</span><nav aria-label="Navigasi footer"><a href="../../../interface/">Referensi antarmuka<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a><a href="../../../">Semua bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a></nav></footer>
+</body>
+</html>

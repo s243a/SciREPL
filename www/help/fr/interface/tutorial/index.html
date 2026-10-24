@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Découvrez l&#39;interface de SciREPL en créant, exécutant, modifiant et exportant un petit classeur.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/fr/interface/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <title>Découverte de l'interface · Aide SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Passer au contenu</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Page de référence en anglais)</span></a>
+    <nav aria-label="Navigation principale">
+      <a href="../../../interface/">Référence de l'interface<span class="english-reference"> (Page de référence en anglais)</span></a>
+      <a href="../../tutorials/">Tous les didacticiels</a>
+      <a href="../../../">Toute l'aide<span class="english-reference"> (Page de référence en anglais)</span></a>
+      <a href="../../../../">Ouvrir la PWA Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Langue du tutoriel"><details class="tutorial-language-menu"><summary>Langue du tutoriel: <bdi>Français</bdi></summary><nav aria-label="Langue du tutoriel"><a href="../../../en/interface/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="./" lang="fr" hreflang="fr" aria-current="page">Français</a>
+      <a href="../../../hi/interface/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/interface/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutoriel traduit automatiquement ; révision par un locuteur natif en attente. Le code et les valeurs techniques sont inchangés. Les captures d'écran montrent l'interface d'origine en anglais ; faites correspondre les noms de commandes traduits dans ce texte à votre application.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Aide<span class="english-reference"> (Page de référence en anglais)</span></a> / <a href="../../../interface/">Interface<span class="english-reference"> (Page de référence en anglais)</span></a> / Découverte</p>
+    <article>
+      <p class="eyebrow">Apprendre par la pratique</p>
+      <h1>Créez votre premier classeur</h1>
+      <p class="lede">Voici le guide pratique et plus détaillé accompagnant la <a href="../../../interface/">référence de l'interface<span class="english-reference"> (Page de référence en anglais)</span></a>. Vous exécuterez une cellule Python, la modifierez et enregistrerez une copie que vous contrôlez. Aucun compte d'IA ni clé d'API n'est nécessaire.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Étapes pour Android</li>
+        <li class="chip">Environ 5 minutes</li>
+      </ul>
+      <p class="screen-note">Les captures d'écran montrent SciREPL Free v1.3.2 sur un téléphone de la gamme Samsung Galaxy S24. La leçon s'applique également à Pro, bien que certaines commandes puissent y être différentes.</p>
+      <nav class="lesson-nav" aria-label="Étapes du guide">
+        <strong>Dans cette leçon</strong>
+        <ol>
+          <li><a href="#find-your-place">Prendre vos repères</a></li>
+          <li><a href="#write-a-cell">Écrire et exécuter une cellule</a></li>
+          <li><a href="#edit-a-cell">Modifier la cellule enregistrée</a></li>
+          <li><a href="#save-a-copy">Exporter une copie du classeur</a></li>
+          <li><a href="#what-next">Que tester ensuite</a></li>
+        </ol>
+        <p><a href="../../tutorials/">Tous les didacticiels</a></p>
+      </nav>
+
+      <section id="find-your-place">
+        <p class="step-label">Étape 1</p>
+        <h2>Prenez vos repères dans l'application</h2>
+        <p>La rangée supérieure est l'<strong>en-tête</strong>. Elle comprend Menu, Aide et un badge d'état. Le sélecteur de classeur permet de choisir le classeur ouvert.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--header" role="img" aria-label="En-tête sur téléphone avec le sélecteur de classeur, le bouton Menu et le bouton Aide entourés de jaune.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Les tracés jaunes indiquent le sélecteur de classeur, Menu et Aide.</figcaption>
+          <p>Sous la rangée d'en-tête se trouve le classeur : les cellules enregistrées et leurs résultats.</p>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">Afficher la capture d'écran complète du téléphone</a>
+        </figure>
+        <p>Le <strong>panneau de nouvelle cellule</strong> est l'endroit où vous saisissez la cellule suivante. Les boutons d'en-tête facultatifs peuvent disparaître lorsque l'écran est étroit ; leurs actions restent accessibles depuis le Menu ou l'Aide le cas échéant.</p>
+      </section>
+
+      <section id="write-a-cell">
+        <p class="step-label">Étape 2</p>
+        <h2>Écrire et exécuter une cellule Python</h2>
+        <p>Attendez que le badge d'état indique <strong>prêt</strong> avant la première exécution.</p>
+        <ol class="lesson-steps">
+          <li>Dans le panneau de nouvelle cellule, choisissez <strong>Python</strong> dans le sélecteur de langue. Sur un téléphone étroit, le sélecteur fermé peut afficher uniquement <strong>Py</strong>.</li>
+          <li>Saisissez ce court programme :
+            <pre><code>print("Hello from SciREPL")</code></pre>
+          </li>
+          <li>Appuyez sur <strong>Exécuter</strong>. Une cellule enregistrée apparaît dans le classeur. En dessous, vous devriez voir <code>Hello from SciREPL</code>.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--composer" role="img" aria-label="Panneau de nouvelle cellule avec Py sélectionné, print Hello from SciREPL dans le champ de code et Run entouré de jaune.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Le panneau inférieur crée une <em>nouvelle</em> cellule : choisissez <strong>Py</strong>, saisissez le code, puis appuyez sur <strong>Exécuter</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">Afficher la capture d'écran complète du téléphone</a>
+        </figure>
+        <p class="callout"><strong>La première exécution peut prendre plus de temps.</strong> L'environnement d'exécution de Python doit démarrer une fois. Attendez que l'état revienne à <strong>prêt</strong> ; les cellules Python ultérieures réutilisent généralement cet environnement d'exécution.</p>
+        <aside class="callout">
+          <p><strong>Si un avis de confidentialité apparaît :</strong> Python est normalement intégré, cet exemple ne devrait donc pas nécessiter le téléchargement d'un environnement d'exécution. Un environnement d'exécution réseau, tel que R ou Lua dans Free, peut d'abord afficher la politique de confidentialité de SciREPL ; Python peut aussi le faire si sa copie intégrée nécessite une solution de secours sur le réseau. Lisez-la, faites défiler <em>dans la boîte de dialogue</em> jusqu'en bas, et appuyez sur <strong>Je comprends</strong> si vous acceptez. Une invite distincte de téléchargement de l'environnement d'exécution peut ensuite vous demander d'appuyer sur <strong>Télécharger</strong>.</p>
+          <p><a href="../../../interface/tutorial/assets/privacy-policy-top.jpg">Voir un exemple de la boîte de dialogue Politique de confidentialité<span class="english-reference"> (Page de référence en anglais)</span></a> (la capture d'écran montre son sommet ; le bouton se trouve plus bas). Dans Free 1.4.0 et Pro 1.4.0, une commande <code>%pip install</code> valide ouvre également cet avis si vous n'avez pas accepté la déclaration réseau actuelle, avant de tenter d'installer un paquet. Consultez <a href="../../../privacy/">confidentialité et données locales<span class="english-reference"> (Page de référence en anglais)</span></a> avant d'utiliser les fonctionnalités réseau.</p>
+        </aside>
+      </section>
+
+      <section id="edit-a-cell">
+        <p class="step-label">Étape 3</p>
+        <h2>Modifier la cellule enregistrée</h2>
+        <ol class="lesson-steps">
+          <li>Appuyez sur le crayon <strong>✎</strong> dans l'en-tête même de la cellule enregistrée, en haut à droite juste à gauche de <strong>✕</strong>. Cela ouvre cette cellule pour modification ; taper dans le panneau de nouvelle cellule créerait une autre cellule.</li>
+          <li>Remplacez <code>Hello from SciREPL</code> par <code>Hello again</code>.</li>
+          <li>Choisissez <strong>Exécuter</strong> pour enregistrer et exécuter la modification. Vous devriez maintenant voir <code>Hello again</code> sous cette cellule.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--editing" role="img" aria-label="Éditeur de cellule enregistrée contenant print Hello again. Des contours jaunes indiquent le crayon de la cellule enregistrée en haut à droite, le champ de code modifiable et son bouton Run. La sortie précédente indique toujours Hello from SciREPL jusqu&#39;à ce que vous appuyiez sur Run.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-edit-draft.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/edit-draft-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Les contours jaunes montrent l'emplacement du <strong>crayon ✎</strong> de la cellule enregistrée, le code que vous modifiez et le bouton <strong>Exécuter</strong> de cette cellule. Le crayon est estompé dans cette capture d'écran car le mode de modification est déjà ouvert. Run enregistre et exécute la révision ; l'ancienne sortie reste visible jusque-là.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-edit-draft.png">Afficher la capture d'écran complète du téléphone, avec le clavier</a>
+        </figure>
+        <aside class="callout">
+          <p><strong>Raccourci Pro :</strong> Sur un écran tactile, appuyez deux fois sur le code de la cellule enregistrée pour le modifier. Free utilise actuellement le bouton <strong>✎</strong>.</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--result" role="img" aria-label="Cellule Python enregistrée contenant print Hello again, suivie de la sortie mise en évidence Hello again.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-rerun.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/rerun-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Après <strong>Exécuter</strong>, la sortie sous la cellule enregistrée indique <code>Hello again</code>.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-rerun.png">Afficher la capture d'écran complète du téléphone</a>
+        </figure>
+        <p>Si vous ouvrez l'éditeur par erreur, utilisez <strong>Annuler</strong> pour le fermer sans exécuter. Le sélecteur de langue dans une cellule enregistrée modifie cette cellule ; celui pour une nouvelle cellule ne le fait pas.</p>
+      </section>
+
+      <section id="save-a-copy">
+        <p class="step-label">Étape 4</p>
+        <h2>Exporter une copie du classeur</h2>
+        <ol class="lesson-steps">
+          <li>Ouvrez <strong>Menu → Exporter classeurs et paquets</strong>.</li>
+          <li>Choisissez <strong>Onglet actif uniquement</strong> ou <strong>Tous les onglets</strong>, puis le format SciREPL <strong>Classeur (.srwb)</strong> lorsque vous souhaitez conserver l'état propre à SciREPL.</li>
+          <li>Appuyez sur <strong>Exporter</strong> et choisissez une destination que vous contrôlez.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--menu" role="img" aria-label="Ligne de menu Exporter les classeurs et paquets entourée de jaune, entre Exporter le document et Importer un fichier.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Choisissez <strong>Exporter classeurs et paquets</strong>, et non Exporter le document.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">Afficher la capture d'écran complète du Menu</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="Boîte de dialogue d&#39;exportation avec le format de classeur srwb, la portée Onglet actif uniquement et le bouton Exporter entourés de jaune.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Pour un seul onglet, conservez <strong>Classeur (.srwb)</strong> et <strong>Onglet actif uniquement</strong>, puis appuyez sur <strong>Exporter</strong>. Choisissez <strong>Tous les onglets</strong> pour inclure l'ensemble du classeur.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-export.png">Afficher la capture d'écran complète de la boîte de dialogue d'exportation</a>
+        </figure>
+        <p class="callout"><strong>Pourquoi exporter ?</strong> SciREPL restaure les sessions locales, mais le stockage local ne constitue pas une sauvegarde et n'est pas partagé automatiquement entre l'application Android et un navigateur. Consultez <a href="../../../files-export/">fichiers et exportation<span class="english-reference"> (Page de référence en anglais)</span></a> pour d'autres formats, notamment <code>.ipynb</code> et le format PDF.</p>
+      </section>
+
+      <section id="what-next">
+        <p class="step-label">Étape 5</p>
+        <h2>Que faire ensuite</h2>
+        <p>Essayez <code>2 + 2</code> dans une autre cellule Python. Utilisez ensuite le sélecteur de classeur pour changer d'onglet. Le <a href="../../files-export/tutorial/">tutoriel du classeur CSV</a> commence par <strong>Menu → Parcourir paquets, collections et classeurs</strong>, installe un exemple et montre comment ses cellules fonctionnent avec un fichier local.</p>
+        <p>Le <a href="../../workbooks/tutorial/">tutoriel sur les groupes de Markov</a> montre comment effectuer des recherches dans le catalogue élargi, ouvrir un classeur existant sur les mouvements de cube, exécuter ses cellules dans l'ordre et modifier un paramètre.</p>
+        <p>Pour vous rappeler rapidement où se trouvent les commandes, revenez à la <a href="../../../interface/">référence de l'interface<span class="english-reference"> (Page de référence en anglais)</span></a>. Pour apprendre un autre langage ou ajouter des paquets, poursuivez avec <a href="../../../languages-packages/">Langages et paquets<span class="english-reference"> (Page de référence en anglais)</span></a>.</p>
+        <aside class="callout"><strong>Vous utilisez Pro ?</strong> Le flux de travail de base est identique. Pro dispose également d'un éditeur plein écran et de fonctionnalités d'IA facultatives ; consultez <a href="../../../pro/ai/#full-screen">les flux de travail d'IA et plein écran de Pro<span class="english-reference"> (Page de référence en anglais)</span></a> après vous être familiarisé avec les cellules ordinaires.</aside>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Aide SciREPL</span><nav aria-label="Navigation de pied de page"><a href="../../../interface/">Référence concise de l'interface<span class="english-reference"> (Page de référence en anglais)</span></a><a href="../../../">Toute l'aide<span class="english-reference"> (Page de référence en anglais)</span></a></nav></footer>
+</body>
+</html>

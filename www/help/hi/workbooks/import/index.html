@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="hi" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="एक SciREPL वर्कबुक फ़ाइल डाउनलोड करें, Menu → Import File ढूंढें, इसे Android या डेस्कटॉप पर चुनें, और चलाने से पहले इसके सेल जांचें।">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/hi/workbooks/import/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/import/tutorial.css">
+  <title>एक वर्कबुक फ़ाइल आयात करें · SciREPL सहायता</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/import/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/import/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/import/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/import/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/import/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/import/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/import/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/import/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/import/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/import/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/import/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/import/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/import/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/import/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">सामग्री पर जाएं</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (अंग्रेज़ी संदर्भ पृष्ठ)</span></a>
+    <nav aria-label="प्राथमिक नेविगेशन">
+      <a href="../../../workbooks/">वर्कबुक संदर्भ<span class="english-reference"> (अंग्रेज़ी संदर्भ पृष्ठ)</span></a>
+      <a href="../../tutorials/">सभी ट्यूटोरियल</a>
+      <a href="../../../">सभी सहायता<span class="english-reference"> (अंग्रेज़ी संदर्भ पृष्ठ)</span></a>
+      <a href="../../../../">Free PWA खोलें</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="ट्यूटोरियल भाषा"><details class="tutorial-language-menu"><summary>ट्यूटोरियल भाषा: <bdi>हिन्दी</bdi></summary><nav aria-label="ट्यूटोरियल भाषा"><a href="../../../en/workbooks/import/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/import/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/import/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/import/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/import/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/import/" lang="fr" hreflang="fr">Français</a>
+      <a href="./" lang="hi" hreflang="hi" aria-current="page">हिन्दी</a>
+      <a href="../../../id/workbooks/import/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/import/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/import/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/import/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/import/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/import/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">मशीन द्वारा अनुवादित ट्यूटोरियल; मूल भाषा में समीक्षा लंबित है। कोड और तकनीकी मान अपरिवर्तित हैं। स्क्रीनशॉट मूल अंग्रेज़ी इंटरफ़ेस दिखाते हैं; इस पाठ में अनुवादित नियंत्रण नामों का अपने ऐप से मिलान करें।</p></aside>
+    <p class="breadcrumbs"><a href="../../../">सहायता<span class="english-reference"> (अंग्रेज़ी संदर्भ पृष्ठ)</span></a> / <a href="../../../workbooks/">वर्कबुक<span class="english-reference"> (अंग्रेज़ी संदर्भ पृष्ठ)</span></a> / वर्कबुक फ़ाइल आयात करें</p>
+    <article>
+      <p class="eyebrow">करके सीखें</p>
+      <h1>वर्कबुक फ़ाइल खुद आयात करें</h1>
+      <p class="lede">पहले से ही एक वर्कबुक फ़ाइल है, या Browse में कोई पाठ नहीं मिल रहा है? फ़ाइल को अपने डिवाइस पर सहेजें, फिर <strong>मेनू → Import File</strong> का उपयोग करके इसे SciREPL में जोड़ें। यह संक्षिप्त वॉकथ्रू <strong>Simpson's Paradox</strong> का उपयोग करता है, जो कैटलॉग की GitHub <code>main</code> शाखा से है; इसे आयात करने के लिए आपको कोई पैकेज इंस्टॉल करने या कोड लिखने की आवश्यकता नहीं है।</p>
+      <p>SciREPL दो नोटबुक फ़ॉर्मैट आयात करता है: <strong><code>.srwb</code></strong>, इसका अपना वर्कबुक फ़ॉर्मैट, और <strong><code>.ipynb</code></strong>, Jupyter नोटबुक फ़ॉर्मैट। यह उदाहरण <code>.srwb</code> का उपयोग करता है; <a href="#other-formats">नीचे दिए गए फ़ॉर्मैट संबंधी नोट</a> Jupyter आयात के अलग निष्पादन व्यवहार को समझाते हैं।</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Android + ब्राउज़र चरण</li>
+        <li class="chip">लगभग 3 मिनट</li>
+      </ul>
+      <p class="screen-note">Menu स्क्रीनशॉट <strong>Samsung Galaxy S24+</strong> पर एक वास्तविक Android कैप्चर है, जो <strong>SciREPL Free 1.4.0-debug</strong> दिखाता है, न कि Play Store इंस्टॉलेशन। आयातित-वर्कबुक स्क्रीनशॉट <strong>Chromium ब्राउज़र द्वारा Free 1.4.0 का मोबाइल-आकार के व्यूपोर्ट पर एक अलग कैप्चर है</strong>; यह किसी Android फ़ाइल-पिकर आयात का प्रमाण नहीं है। दोनों <time datetime="2026-10-06">6 अक्टूबर 2026</time> को लिए गए थे। अन्य संस्करण, वर्ज़न और फ़ाइल पिकर नियंत्रणों को अलग ढंग से व्यवस्थित कर सकते हैं। यह उदाहरण इस गाइड के लिए समीक्षित अंग्रेजी <code>simpsons-paradox.srwb</code> फ़ाइल है, जो SciREPL Catalog की <code>main</code> शाखा से है; वह शाखा बदल सकती है। <a href="../../../workbooks/import/assets/capture-receipt.json">कैप्चर और स्रोत विवरण<span class="english-reference"> (अंग्रेज़ी संदर्भ पृष्ठ)</span></a> छवि के सटीक आयाम और समीक्षित फ़ाइल हैश दर्ज करते हैं।</p>
+      <nav class="lesson-nav" aria-label="मैन्युअल वर्कबुक आयात चरण">
+        <strong>इस पाठ में</strong>
+        <ol>
+          <li><a href="#download">वर्कबुक फ़ाइल सहेजें</a></li>
+          <li><a href="#import">Menu ढूंढें और फ़ाइल आयात करें</a></li>
+          <li><a href="#check">नया वर्कबुक टैब जांचें</a></li>
+          <li><a href="#next">पाठ जारी रखें</a></li>
+        </ol>
+        <p><a href="#other-formats">अन्य फ़ॉर्मैट और सुरक्षा</a> · <a href="#troubleshooting">यदि कुछ गलत दिखे</a></p>
+        <p><a href="../../tutorials/">सभी ट्यूटोरियल</a></p>
+      </nav>
+
+      <section id="download">
+        <p class="step-label">चरण 1</p>
+        <h2>वर्कबुक फ़ाइल को अपने डिवाइस पर सहेजें</h2>
+        <p>GitHub की <code>main</code> शाखा में ऐसी वर्कबुक या अपडेट हो सकते हैं जो Browse द्वारा दिखाए गए नवीनतम स्थिर कैटलॉग रिलीज़ में अभी तक नहीं हैं। कैटलॉग रिलीज़ ऐप रिलीज़ से स्वतंत्र रूप से बदलते हैं। सीधा फ़ाइल आयात आपको Browse में दिखने की प्रतीक्षा किए बिना किसी विश्वसनीय वर्कबुक को आज़माने की सुविधा देता है।</p>
+        <ol class="lesson-steps">
+          <li><a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">GitHub पर Simpson's Paradox देखें</a>, फिर <a download="simpsons-paradox.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/main/workbooks/en/simpsons-paradox.srwb">वास्तविक वर्कबुक फ़ाइल (.srwb) डाउनलोड करें</a>। दूसरा लिंक रॉ फ़ाइल खोलता है, न कि GitHub वेब पेज।</li>
+          <li>यदि आपका ब्राउज़र फ़ाइल को डाउनलोड करने के बजाय टेक्स्ट के रूप में प्रदर्शित करता है, तो ब्राउज़र की <strong>सहेजें/डाउनलोड करें</strong> क्रिया का उपयोग करें। वर्कबुक फ़ाइल को ही सहेजें, न कि स्क्रीनशॉट या HTML पेज को।</li>
+          <li>फ़ाइल नाम <code>simpsons-paradox.srwb</code> और इसका <code>.srwb</code> एक्सटेंशन बनाए रखें। ध्यान दें कि इसे कहां सहेजा गया था: Android आमतौर पर <strong>Downloads</strong> का उपयोग करता है; डेस्कटॉप पर यह Downloads या आपके द्वारा चुना गया कोई फ़ोल्डर हो सकता है।</li>
+        </ol>
+        <p><strong>यह कोई पिन किया गया रिलीज़ डाउनलोड नहीं है।</strong> <code>main</code> एक डेवलपमेंट शाखा है: इन स्क्रीनशॉट को लिए जाने के बाद फ़ाइल की सामग्री और सेल बदल सकते हैं। आपके द्वारा सहेजी गई फ़ाइल एक स्थानीय प्रति है; बाद में GitHub पर किया गया कोई बदलाव आपके आयातित टैब को स्वचालित रूप से अपडेट नहीं करता है।</p>
+        <p class="callout"><strong>डाउनलोड करना आयात करना नहीं है।</strong> फ़ाइल को सहेजने से यह आपके डिवाइस पर आ जाती है; यह अभी तक SciREPL में वर्कबुक नहीं खोलती है। आपको इसे किसी टेक्स्ट एडिटर में खोलने या SciREPL के Files दृश्य में रखने की आवश्यकता नहीं है। अगला चरण उस डाउनलोड की गई फ़ाइल का चयन करता है।</p>
+        <p>यदि आपके पास पहले से ही किसी अन्य से प्राप्त विश्वसनीय <code>.srwb</code> फ़ाइल है, तो इसके बजाय उस फ़ाइल का उपयोग करें और उदाहरण डाउनलोड को छोड़ दें। इसका वर्कबुक शीर्षक और सेल गणना चरण 3 की जांच से भिन्न होगी।</p>
+      </section>
+
+      <section id="import">
+        <p class="step-label">चरण 2</p>
+        <h2>Menu ढूंढें और Import File चुनें</h2>
+        <ol class="lesson-steps">
+          <li>SciREPL पर वापस लौटें। <strong>ऐप के शीर्ष पर हेडर पंक्ति</strong> में, <strong>☰ Menu</strong> ढूंढें, जो <strong>तीन क्षैतिज रेखाओं</strong> वाला बटन है, और उस पर टैप या क्लिक करें।</li>
+          <li><strong>📂 फ़ाइल आयात करें (उदा. .srwb, .ipynb, .csv, .py, .zip)</strong> चुनें। यदि मेनू स्क्रीन से बड़ा है, तो इसे खोजने के लिए <em>मेनू के अंदर</em> स्क्रॉल करें।</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-menu" role="img" aria-label="SciREPL Free के खुले हुए Menu का Samsung Galaxy S24+ स्क्रीनशॉट, जिसमें Import File प्रविष्टि पीले रंग में हाइलाइट की गई है।">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>ऐप के मेनू में <strong>📂 Import File</strong> चुनें। पीला एनोटेशन <strong>Android पर Free 1.4.0-debug</strong> में आयात प्रविष्टि की ओर इशारा करता है।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/phone-menu.png">पूरा Android Menu स्क्रीनशॉट देखें</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li><strong>Android पर:</strong> सिस्टम फ़ाइल पिकर खुलता है। <strong>Downloads</strong> में देखें, या उस स्थान पर ब्राउज़ करें जहां आपने फ़ाइल सहेजी थी। <code>simpsons-paradox.srwb</code> का चयन करें। पिकर Android का हिस्सा है, इसलिए इसका लेआउट और कोई अंतिम <strong>Open</strong> या चयन नियंत्रण आपके डिवाइस पर निर्भर करता है।</li>
+          <li><strong>डेस्कटॉप पर:</strong> डाउनलोड करते समय आपके द्वारा चुने गए फ़ोल्डर को खोजने के लिए फ़ाइल चयनकर्ता का उपयोग करें। <code>simpsons-paradox.srwb</code> चुनें और चयन की पुष्टि करें। Android की Downloads स्क्रीन खोजने के बजाय इस तरीके का उपयोग करें।</li>
+          <li>SciREPL में वापस आकर, आयात समाप्त होने की प्रतीक्षा करें। यदि मेनू अभी भी खुला है, तो वर्कबुक देखने के लिए इसे बंद करें।</li>
+        </ol>
+        <p class="callout"><strong>वर्कबुक डेटा-फ़ाइल अपलोड नहीं है।</strong> <code>.srwb</code> फ़ाइल आयात करने पर इसकी वर्कबुक एक अलग टैब के रूप में जुड़ती है, या यदि फ़ाइल में कई वर्कबुक हैं तो अलग-अलग टैब के रूप में। आपके मौजूदा टैब सुरक्षित रहते हैं। यह वर्कबुक को Files दृश्य में नहीं डालता है, और यह आपकी वर्तमान वर्कबुक को प्रतिस्थापित नहीं करता है।</p>
+      </section>
+
+      <section id="check">
+        <p class="step-label">चरण 3</p>
+        <h2>कुछ भी चलाने से पहले नई वर्कबुक की जांच करें</h2>
+        <ol class="lesson-steps">
+          <li>वर्कबुक चयनकर्ता में <strong>Simpson's Paradox</strong> देखें। यदि वह नया टैब पहले से चयनित नहीं है, तो उसे चुनें। इसके परिचय का शीर्षक <strong>Simpson's Paradox: When Every Group Disagrees with the Total</strong> है।</li>
+          <li>परिचय पढ़ें और सेल में स्क्रॉल करें। इन स्क्रीनशॉट के लिए समीक्षित संस्करण में <strong>सात सेल</strong> हैं: तीन टेक्स्ट सेल, तीन <strong>R</strong> सेल, और एक <strong>JavaScript</strong> सेल। <code>main</code> पर बाद का संस्करण भिन्न हो सकता है।</li>
+          <li>उसी क्रम में <code>data</code>, <code>compute</code>, और <code>viz</code> नाम वाले R सेल ढूंढें। JavaScript सेल का नाम <code>js_check</code> है और यह एक अलग, वैकल्पिक जांच है। कोड के साथ-साथ व्याख्यात्मक टेक्स्ट भी पढ़ें।</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-result" role="img" aria-label="मोबाइल-आकार के व्यूपोर्ट पर SciREPL Free 1.4.0 का Chromium ब्राउज़र स्क्रीनशॉट, जिसमें आयातित Simpson&#39;s Paradox वर्कबुक और उसका शीर्षक पीले रंग में हाइलाइट किया गया दिखाया गया है।">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/browser-imported.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/imported-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>ब्राउज़र आयात परिणाम:</strong> आयातित <strong>Simpson's Paradox</strong> वर्कबुक <strong>Chromium में Free 1.4.0</strong> में संपादन योग्य सेल के रूप में खुलती है, यहाँ 390 × 844 व्यूपोर्ट पर। यह कोई Android स्क्रीनशॉट नहीं है। आयात करने से इसके R या JavaScript सेल नहीं चले हैं।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/browser-imported.png">ब्राउज़र में आयातित-वर्कबुक का पूरा स्क्रीनशॉट देखें</a>
+        </figure>
+        <p class="callout"><strong>.srwb के लिए आयात का अर्थ रन (चलाना) नहीं है।</strong> SciREPL, <code>.srwb</code> फ़ाइल आयात करने पर कोड निष्पादित नहीं करता है, भले ही अन्य आयातों के लिए ऑटो-एग्ज़ीक्यूट सक्षम हो। <strong>चलाएं</strong> या <strong>सभी सेल चलाएं</strong> चुनने से पहले किसी अपरिचित या अविश्वसनीय स्रोत से प्राप्त कोड का निरीक्षण करें।</p>
+        <p><strong>सामान्य .srwb आयात वर्तमान में सहेजे गए कोड-सेल आउटपुट को छोड़ देता है</strong>, भले ही फ़ाइल में वे मौजूद हों। Markdown टेक्स्ट को बनाए रखा और रेंडर किया जाता है, यही कारण है कि परिचय तुरंत दिखाई देता है। चार्ट या अन्य कोड-जनरेटेड छवियों को फिर से तैयार करने के लिए, उनके कोड सेल को निर्भर सेल के साथ क्रम में फिर से चलाएं। आयात लाइव R या अन्य रनटाइम वेरिएबल्स को पुनर्स्थापित नहीं करता है।</p>
+      </section>
+
+      <section id="next">
+        <p class="step-label">चरण 4</p>
+        <h2>वैकल्पिक: आयातित पाठ चलाएं</h2>
+        <p>आपका मैन्युअल आयात पूरा हो गया है; कोड चलाना एक अलग चरण है। यह दिखाने के लिए कि समूहों के भीतर तुलना समग्र तुलना से कैसे असहमत हो सकती है, Simpson's Paradox <strong>सिंथेटिक शिक्षण डेटा</strong> का उपयोग करता है। इसे एक्सप्लोर करने के लिए, सहेजे गए कोड सेल की <strong>✎ पेंसिल</strong> पर टैप करें, कोड का निरीक्षण करें, फिर <em>उस सेल के</em> <strong>चलाएं</strong> बटन का उपयोग करें।</p>
+        <ol class="lesson-steps">
+          <li>R सेल <code>data</code> चलाएं, फिर टेक्स्ट सेल <code>pause</code> पढ़ें और <code>compute</code> चलाने से पहले इसका अनुमान लगाएं। चार्ट जनरेट करने के लिए <code>viz</code> के साथ आगे बढ़ें। बाद के R सेल पहले वाले सेल पर निर्भर करते हैं। वे बेस R का उपयोग करते हैं; आपको अतिरिक्त R पैकेज इंस्टॉल करने की आवश्यकता नहीं है।</li>
+          <li>यदि आप एक अलग JavaScript जांच चाहते हैं, तो <code>js_check</code> चलाएं। यह स्टैंडअलोन है: यह R सेल पर निर्भर नहीं करता है और इसके लिए R शुरू करने की आवश्यकता नहीं होती है।</li>
+        </ol>
+        <p class="callout"><strong>पहला R रन:</strong> SciREPL के webR रनटाइम को डाउनलोड और इनिशियलाइज़ करने की आवश्यकता हो सकती है। एक नेटवर्क/गोपनीयता सूचना दिखाई दे सकती है; इसे पढ़ें और केवल तभी सहमत हों जब आप आगे बढ़ना चाहते हैं। रनटाइम तैयार होने की प्रतीक्षा करें और त्रुटियों के लिए सेल की जांच करें। केवल वर्कबुक आयात करने से इसकी R परिभाषाएं लोड नहीं हुई हैं।</p>
+        <p>अधिक संपूर्ण रन-एंड-एडिट वॉकथ्रू वाले किसी अन्य उदाहरण के लिए, <a href="../tutorial/#run">Markov Groups पाठ</a> देखें। वह एक अलग वर्कबुक है, जिसमें चार Python सेल हैं; इसका <a href="../tutorial/#export">निर्यात चरण</a> यह भी दर्शाता है कि संपादित वर्कबुक प्रति को कैसे सहेजा जाए।</p>
+        <p class="callout"><strong>ऐसी प्रति रखें जिसे आप नियंत्रित करते हों।</strong> डाउनलोड की गई फ़ाइल मूल वर्कबुक प्रति है, न कि बाद के संपादनों का बैकअप। अपने परिवर्तनों को सहेजने के लिए वर्कबुक की प्रति निर्यात करें। ऐप या ब्राउज़र स्टोरेज खाली करने से स्थानीय काम हट सकता है, और Android तथा ब्राउज़र सत्र स्वचालित रूप से आपके परिवर्तनों को साझा नहीं करते हैं।</p>
+      </section>
+
+      <section id="other-formats">
+        <p class="step-label">अन्य फ़ॉर्मैट और सुरक्षा</p>
+        <h2>जानें कि आपकी फ़ाइल में क्या है</h2>
+        <p><strong>Jupyter नोटबुक (.ipynb)</strong> भी <strong>मेनू → Import File</strong> का उपयोग करती हैं, लेकिन उनका निष्पादन व्यवहार <code>.srwb</code> से भिन्न होता है। यदि <strong>वर्कबुक आयात पर स्वचालित रूप से सेल निष्पादित करें</strong> सक्षम है, तो <code>.ipynb</code> आयात स्वचालित रूप से ऐसे कोड सेल चला सकता है जिनमें कोई सहेजा गया आउटपुट नहीं है।</p>
+        <p class="callout"><strong>नोटबुक फ़ाइलें केवल उन्हीं स्रोतों से आयात करें जिन पर आप भरोसा करते हैं।</strong> <code>.ipynb</code> आयात करने से पहले, <strong>मेनू → सेटिंग्स → आयात और संपादन</strong> खोलें और सुनिश्चित करें कि <strong>वर्कबुक आयात पर स्वचालित रूप से सेल निष्पादित करें</strong>, <strong>बंद</strong> (अनचेक) है। यह डिफ़ॉल्ट रूप से बंद होता है, लेकिन अपनी वर्तमान सेटिंग जांचें। इसे बंद करना इस बात की गारंटी नहीं है कि कोई मनमाना नोटबुक सुरक्षित है; स्पष्ट रूप से यह निर्णय लेने से पहले कि इसे चलाना है या नहीं, विश्वसनीय नोटबुक कोड का निरीक्षण करें।</p>
+        <p><strong>अलग डेटा फ़ाइलें:</strong> एक सामान्य <code>.srwb</code> निर्यात अलग CSV फ़ाइलों या SciREPL के वर्चुअल फ़ाइल सिस्टम (<strong>Files</strong> दृश्य) में संग्रहीत अन्य डेटा को साथ नहीं ले जाता है। Simpson's Paradox का यह संस्करण कोड में अपना सिंथेटिक डेटा बनाता है, इसलिए इसे किसी अलग डेटा फ़ाइल की आवश्यकता नहीं है। ऐसी वर्कबुक के लिए जो CSV पढ़ती है, वर्कबुक और उसके डेटा दोनों को ले जाने और पुनर्स्थापित करने के लिए <a href="../../files-export/tutorial/#export">CSV वॉकथ्रू के Package archive export</a> और <a href="../../files-export/tutorial/#reopen">फिर से खोलने के चरणों</a> का पालन करें। पैकेज संग्रह और <code>.zip</code> आयात इस संक्षिप्त वर्कबुक-फ़ाइल पाठ से बाहर हैं।</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">यदि कुछ गलत दिखे</p>
+        <h2>फ़ाइल और चयनित टैब की जांच करें</h2>
+        <ul>
+          <li><strong>पिकर को फ़ाइल नहीं मिल रही है:</strong> यह देखने के लिए कि इसे कहां सहेजा गया था, अपने ब्राउज़र की डाउनलोड सूची देखें, फिर उस फ़ोल्डर पर ब्राउज़ करें। डेस्कटॉप पर डाउनलोड करने से फ़ाइल आपके फ़ोन के Downloads फ़ोल्डर में नहीं आती है।</li>
+          <li><strong>फ़ाइल नाम .txt या .html पर समाप्त होता है:</strong> वर्कबुक डाउनलोड लिंक पर वापस लौटें और वास्तविक फ़ाइल को उसके <code>.srwb</code> एक्सटेंशन के साथ सहेजें। किसी HTML पेज का नाम बदलकर <code>.srwb</code> करने से वह वर्कबुक में परिवर्तित नहीं हो जाता है।</li>
+          <li><strong>आपको अभी भी अपनी पुरानी वर्कबुक दिखाई दे रही है:</strong> मेनू बंद करें और नए शीर्षक के लिए वर्कबुक चयनकर्ता की जांच करें। मौजूदा टैब सुरक्षित रहते हैं।</li>
+          <li><strong>आपने इसे दो बार आयात कर लिया है:</strong> दूसरा आयात एक और प्रति जोड़ता है; यह पुराने टैब को अपडेट या प्रतिस्थापित नहीं करता है। परिवर्तन करने से पहले जांच लें कि आप किस प्रति को संपादित कर रहे हैं।</li>
+          <li><strong>शीर्षक या सेल मेल नहीं खाते:</strong> जांचें कि आपने <code>simpsons-paradox.srwb</code> का चयन किया है, न कि किसी भिन्न डाउनलोड या किसी अन्य पाठ की फ़ाइल का। <code>main</code> पर फ़ाइल बदल सकती है; अपनी प्रति की तुलना <a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">वर्तमान GitHub फ़ाइल</a> से करें और अपरिचित कोड को चलाने से पहले उसका निरीक्षण करें।</li>
+        </ul>
+        <p>वर्कबुक टैब और सहेजे गए सेल संपादन की बुनियादी बातों के लिए, <a href="../../interface/tutorial/">पहला-वर्कबुक इंटरफ़ेस वॉकथ्रू</a> देखें। <a href="../../../workbooks/">वर्कबुक संदर्भ<span class="english-reference"> (अंग्रेज़ी संदर्भ पृष्ठ)</span></a> वर्कबुक संरचना और सेल प्रकारों की व्याख्या करता है।</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL सहायता</span><nav aria-label="फ़ूटर नेविगेशन"><a href="../../../workbooks/">वर्कबुक संदर्भ<span class="english-reference"> (अंग्रेज़ी संदर्भ पृष्ठ)</span></a><a href="../../../">सभी सहायता<span class="english-reference"> (अंग्रेज़ी संदर्भ पृष्ठ)</span></a></nav></footer>
+</body>
+</html>

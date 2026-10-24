@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "locale": "pt-BR",
+  "chunk": "08",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "originalReviewHash": "dccc8dc0d9a987839891fa6ac93949fedc358845e01cb37f42fdaf86de37bafe",
+  "reviewer": "Codex controller with independent Codex fidelity audit",
+  "reviewScope": "All 30 complete Brazilian Portuguese review fields were independently compared with the frozen English source. The sole correction restores the exact phone model identifier instead of spelling its digits as words; no surrounding prose, protected token, or other field changes.",
+  "nativeLanguageReview": "pending",
+  "corrections": [
+    {
+      "fieldId": "files-export.tutorial.0015",
+      "before": "Samsung Galaxy S vinte e quatro",
+      "after": "Samsung Galaxy S24",
+      "reason": "Restore the immutable source phone model identifier with its original digits, while preserving all surrounding Portuguese prose and every protected token."
+    }
+  ]
+}

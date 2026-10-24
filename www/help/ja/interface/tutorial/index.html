@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ja" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="小さなワークブックの作成、実行、編集、エクスポートを通じて、SciREPLのインターフェースを学びます。">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ja/interface/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <title>インターフェースのチュートリアル · SciREPLヘルプ</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">コンテンツへスキップ</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (英語のリファレンスページ)</span></a>
+    <nav aria-label="メインナビゲーション">
+      <a href="../../../interface/">インターフェースリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a>
+      <a href="../../tutorials/">すべてのチュートリアル</a>
+      <a href="../../../">すべてのヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a>
+      <a href="../../../../">Free PWAを開く</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="チュートリアルの言語"><details class="tutorial-language-menu"><summary>チュートリアルの言語: <bdi>日本語</bdi></summary><nav aria-label="チュートリアルの言語"><a href="../../../en/interface/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="./" lang="ja" hreflang="ja" aria-current="page">日本語</a>
+      <a href="../../../ko/interface/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">機械翻訳されたチュートリアルです。ネイティブによるレビューは保留中です。コードおよび技術的な値は変更されていません。スクリーンショットにはオリジナルの英語インターフェースが表示されています。本文中の翻訳されたコントロール名をアプリと照合してください。</p></aside>
+    <p class="breadcrumbs"><a href="../../../">ヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a> / <a href="../../../interface/">インターフェース<span class="english-reference"> (英語のリファレンスページ)</span></a> / チュートリアル</p>
+    <article>
+      <p class="eyebrow">実践しながら学ぶ</p>
+      <h1>最初のワークブックを作成する</h1>
+      <p class="lede">これは、<a href="../../../interface/">インターフェースリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a>の実践的な詳細ガイドです。ひとつのPythonセルを実行し、それを変更して、自身で管理できるコピーを保存します。AIアカウントやAPIキーは不要です。</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Androidの手順</li>
+        <li class="chip">約5分</li>
+      </ul>
+      <p class="screen-note">スクリーンショットは、SciREPL Free v1.3.2をSamsung Galaxy S24シリーズのスマートフォンで表示した画面です。一部の操作部が異なって見える場合がありますが、このレッスンはProにも適用されます。</p>
+      <nav class="lesson-nav" aria-label="チュートリアルの手順">
+        <strong>このレッスンで学ぶこと</strong>
+        <ol>
+          <li><a href="#find-your-place">配置を確認する</a></li>
+          <li><a href="#write-a-cell">セルを作成して実行する</a></li>
+          <li><a href="#edit-a-cell">保存したセルを編集する</a></li>
+          <li><a href="#save-a-copy">ワークブックのコピーをエクスポートする</a></li>
+          <li><a href="#what-next">次に試すこと</a></li>
+        </ol>
+        <p><a href="../../tutorials/">すべてのチュートリアル</a></p>
+      </nav>
+
+      <section id="find-your-place">
+        <p class="step-label">ステップ1</p>
+        <h2>アプリ内での配置を確認する</h2>
+        <p>最上部の行は<strong>ヘッダー</strong>です。メニュー、ヘルプ、ステータスバッジが含まれます。ワークブックセレクターで、開くワークブックを選択します。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--header" role="img" aria-label="ワークブックセレクター、メニューボタン、ヘルプボタンが黄色で囲まれたスマートフォンのヘッダー。">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>黄色い枠線は、ワークブックセレクター、メニュー、ヘルプを示しています。</figcaption>
+          <p>ヘッダー行の下にあるのがワークブックです。保存されたセルとその結果が表示されます。</p>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">スマートフォン全体のスクリーンショットを表示</a>
+        </figure>
+        <p><strong>新しいセル用パネル</strong>は、次のセルを入力する場所です。画面幅が狭い場合、任意のヘッダーボタンが非表示になることがありますが、該当する操作はメニューまたはヘルプから引き続き利用できます。</p>
+      </section>
+
+      <section id="write-a-cell">
+        <p class="step-label">ステップ 2</p>
+        <h2>Python セルの作成と実行</h2>
+        <p>初回実行の前に、ステータスバッジに <strong>準備完了</strong> と表示されるまでお待ちください。</p>
+        <ol class="lesson-steps">
+          <li>新しいセル用パネルで、言語セレクターから <strong>Python</strong> を選択します。幅の狭いスマートフォンでは、閉じた状態のセレクターに <strong>Py</strong> とのみ表示される場合があります。</li>
+          <li>次の短いプログラムを入力します:
+            <pre><code>print("Hello from SciREPL")</code></pre>
+          </li>
+          <li><strong>実行</strong> をタップします。ワークブックに保存されたセルが表示されます。その下に <code>Hello from SciREPL</code> が表示されるはずです。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--composer" role="img" aria-label="Py が選択され、コード欄に print Hello from SciREPL と入力されており、Run が黄色で囲まれている新しいセル用パネル。">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>下部パネルでは<em>新しい</em>セルを作成します。<strong>Py</strong> を選択し、コードを入力して、<strong>実行</strong> をタップします。</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">スマートフォン全体のスクリーンショットを表示</a>
+        </figure>
+        <p class="callout"><strong>初回実行には時間がかかる場合があります。</strong> Python のランタイムを一度起動する必要があります。ステータスが <strong>準備完了</strong> に戻るまでお待ちください。その後の Python セルは通常、そのランタイムを再利用します。</p>
+        <aside class="callout">
+          <p><strong>プライバシーに関する通知が表示された場合:</strong> 通常は Python が同梱されているため、この例ではランタイムのダウンロードは不要なはずです。R や Lua（Free 内）などのネットワークランタイムでは、最初に SciREPL のプライバシーポリシーが表示される場合があります。Python でも、同梱版でネットワークフォールバックが必要な場合に表示されることがあります。内容をお読みになり、<em>ダイアログの内側</em>を一番下までスクロールして、同意される場合は <strong>I Understand</strong> をタップしてください。その後、別の「ランタイムのダウンロード」プロンプトで <strong>ダウンロード</strong> のタップを求められることがあります。</p>
+          <p><a href="../../../interface/tutorial/assets/privacy-policy-top.jpg">プライバシーポリシーダイアログの例を見る<span class="english-reference"> (英語のリファレンスページ)</span></a>（スクリーンショットには上部のみが示されており、ボタンはさらに下にあります）。Free 1.4.0 および Pro 1.4.0 では、パッケージのインストールを試みる前に、現在のネットワーク開示に同意していない場合、有効な <code>%pip install</code> コマンドでもこの通知が開きます。ネットワーク機能を使用する前に、<a href="../../../privacy/">プライバシーとローカルデータ<span class="english-reference"> (英語のリファレンスページ)</span></a>をご確認ください。</p>
+        </aside>
+      </section>
+
+      <section id="edit-a-cell">
+        <p class="step-label">ステップ 3</p>
+        <h2>保存されたセルの編集</h2>
+        <ol class="lesson-steps">
+          <li>保存されたセル自体のヘッダーにある鉛筆 <strong>✎</strong>（右上の <strong>✕</strong> のすぐ左）をタップします。そのセルが編集用に開きます。新しいセル用パネルに入力すると別のセルが作成されてしまいます。</li>
+          <li><code>Hello from SciREPL</code> を <code>Hello again</code> に変更します。</li>
+          <li>変更を保存して実行するには <strong>実行</strong> を選択します。これで、そのセルの下に <code>Hello again</code> が表示されるはずです。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--editing" role="img" aria-label="print Hello again を含む保存済みセルエディター。右上の保存済みセルの鉛筆アイコン、編集可能なコード欄、Run ボタンが黄色の枠線で示されています。Run をタップするまでは、以前の出力である Hello from SciREPL が表示されたままになります。">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-edit-draft.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/edit-draft-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>黄色の枠線は、保存されたセルの <strong>✎ 鉛筆</strong>の位置、編集中のコード、そのセルの <strong>実行</strong> ボタンを示しています。このスクリーンショットでは既に編集モードが開いているため、鉛筆アイコンは薄く表示されています。Run は変更を保存して実行します。それまでは以前の出力が表示されたままになります。</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-edit-draft.png">キーボードを含むスマートフォン全体のスクリーンショットを表示</a>
+        </figure>
+        <aside class="callout">
+          <p><strong>Pro のショートカット:</strong> タッチ画面では、保存されたセルのコードをダブルタップして編集できます。Free では現在、<strong>✎</strong> ボタンを使用します。</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--result" role="img" aria-label="print Hello again を含む保存済みの Python セルと、それに続く強調表示された出力 Hello again。">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-rerun.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/rerun-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>実行</strong> の後、保存されたセルの下の出力には <code>Hello again</code> と表示されます。</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-rerun.png">スマートフォン全体のスクリーンショットを表示</a>
+        </figure>
+        <p>誤ってエディタを開いた場合は、<strong>キャンセル</strong>を使用して実行せずに閉じます。保存されたセル内の言語セレクターはそのセルを変更しますが、新規セル用のセレクターは変更しません。</p>
+      </section>
+
+      <section id="save-a-copy">
+        <p class="step-label">ステップ 4</p>
+        <h2>ワークブックのコピーをエクスポート</h2>
+        <ol class="lesson-steps">
+          <li><strong>メニュー → ワークブックとパッケージをエクスポート</strong>を開きます。</li>
+          <li><strong>現在のタブのみ</strong>または<strong>すべてのタブ</strong>を選択し、SciREPL形式の<strong>ワークブック (.srwb)</strong>は、SciREPL固有の状態を保持したい場合に選択します。</li>
+          <li><strong>エクスポート</strong>をタップし、自身が管理する保存先を選択します。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--menu" role="img" aria-label="Export DocumentとImport Fileの間にある、黄色枠で囲まれたメニュー行Export Workbooks and Packages。">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Export Documentではなく<strong>ワークブックとパッケージをエクスポート</strong>を選択します。</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">メニュー全体のスクリーンショットを表示</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="Workbook srwb形式、Current tab onlyのスコープ、および黄色枠で囲まれたExportボタンが表示されているエクスポートダイアログ。">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>単一のタブの場合は、<strong>ワークブック (.srwb)</strong>と<strong>現在のタブのみ</strong>のままにして<strong>エクスポート</strong>をタップします。ワークブック全体を含めるには<strong>すべてのタブ</strong>を選択します。</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-export.png">エクスポートダイアログ全体のスクリーンショットを表示</a>
+        </figure>
+        <p class="callout"><strong>エクスポートする理由</strong> SciREPLはローカルセッションを復元しますが、ローカルストレージはバックアップではなく、Androidアプリとブラウザ間で自動的には共有されません。<a href="../../../files-export/">ファイルとエクスポート<span class="english-reference"> (英語のリファレンスページ)</span></a>を参照して、<code>.ipynb</code>やPDFを含む他の形式を確認してください。</p>
+      </section>
+
+      <section id="what-next">
+        <p class="step-label">ステップ 5</p>
+        <h2>次に試すこと</h2>
+        <p><code>2 + 2</code>を別のPythonセルで試します。次に、ワークブックセレクターを使用してタブを切り替えます。<a href="../../files-export/tutorial/">CSVワークブックのウォークスルー</a>は、<strong>メニュー → パッケージ、バンドル、ワークブックを参照</strong>から開始し、サンプルをインストールして、そのセルがローカルファイルとどのように連携するかを示します。</p>
+        <p><a href="../../workbooks/tutorial/">Markov Groupsのウォークスルー</a>では、より広範なカタログを検索し、キューブの操作に関する既存のワークブックを開き、そのセルを順番に実行して、単一のパラメータを変更する方法を示します。</p>
+        <p>各操作の配置をすぐに確認したい場合は、<a href="../../../interface/">インターフェースリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a>に戻ってください。別の言語を学ぶかパッケージを追加するには、<a href="../../../languages-packages/">言語とパッケージ<span class="english-reference"> (英語のリファレンスページ)</span></a>に進んでください。</p>
+        <aside class="callout"><strong>Proをお使いですか？</strong> 基本的なワークフローは同じです。ProにはフルスクリーンエディタとオプションのAI機能も用意されています。詳細については、 <a href="../../../pro/ai/#full-screen">ProのAIおよびフルスクリーンワークフロー<span class="english-reference"> (英語のリファレンスページ)</span></a> 通常のセルに慣れた後に確認してください。</aside>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL ヘルプ</span><nav aria-label="フッターナビゲーション"><a href="../../../interface/">簡潔なインターフェースリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a><a href="../../../">すべてのヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a></nav></footer>
+</body>
+</html>

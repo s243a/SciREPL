@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ko" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CSV 통합 문서를 설치하고, 파일 및 저장공간에서 데이터를 실행 및 편집한 다음, 통합 문서 및 CSV 패키지를 내보내고 다시 엽니다. Pro의 선택적 파일 강조 표시 기능이 포함되어 있습니다.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ko/files-export/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../files-export/tutorial/tutorial.css">
+  <title>CSV 통합 문서 둘러보기 · SciREPL 도움말</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/files-export/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/files-export/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/files-export/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/files-export/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/files-export/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/files-export/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/files-export/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/files-export/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/files-export/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/files-export/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/files-export/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/files-export/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/files-export/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/files-export/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (영어 참조 페이지)</span></a>
+    <nav aria-label="기본 탐색">
+      <a href="../../../files-export/">파일 및 내보내기<span class="english-reference"> (영어 참조 페이지)</span></a>
+      <a href="../../tutorials/">모든 튜토리얼</a>
+      <a href="../../../">모든 도움말<span class="english-reference"> (영어 참조 페이지)</span></a>
+      <a href="../../../../">Free PWA 열기</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="튜토리얼 언어"><details class="tutorial-language-menu"><summary>튜토리얼 언어: <bdi>한국어</bdi></summary><nav aria-label="튜토리얼 언어"><a href="../../../en/files-export/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/files-export/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/files-export/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/files-export/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/files-export/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/files-export/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/files-export/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/files-export/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/files-export/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="./" lang="ko" hreflang="ko" aria-current="page">한국어</a>
+      <a href="../../../pt-BR/files-export/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/files-export/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/files-export/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">기계 번역된 튜토리얼이며 원어민 검토 대기 중입니다. 코드 및 기술적 값은 변경되지 않았습니다. 스크린샷에는 원본 영어 인터페이스가 표시되므로, 본문의 번역된 컨트롤 이름을 앱과 대조하여 확인하세요.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">도움말<span class="english-reference"> (영어 참조 페이지)</span></a> / <a href="../../../files-export/">파일 및 내보내기<span class="english-reference"> (영어 참조 페이지)</span></a> / CSV 둘러보기</p>
+    <article>
+      <p class="eyebrow">실습을 통한 학습</p>
+      <h1>통합 문서에서 CSV 살펴보기</h1>
+      <p class="lede"><strong>패키지, 번들 및 워크북 찾아보기</strong>에서 시작합니다. 작은 예제를 설치하고, 셀을 실행하고, CSV를 편집한 다음, 데이터와 함께 통합 문서를 내보내고 다시 엽니다. 데이터는 가상이며 Python 코드에는 추가 패키지나 AI 계정이 필요하지 않습니다.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Android 단계</li>
+        <li class="chip">약 15분</li>
+      </ul>
+      <p class="screen-note">스크린샷은 삼성 갤럭시 S24 시리즈 휴대전화에서 캡처되었습니다. 둘러보기 및 초기 출력 사진에는 Free가 표시되며, 새 파일 편집기 및 패키지 선택 사진에는 Pro 1.4.0가 표시되고 아래에 레이블이 지정되어 있습니다. Pro에서는 직접 통합 문서 다운로드 및 파일 가져오기 경로를 사용할 수 있습니다. 주변 컨트롤이 다를 수 있으며, 이 새로운 둘러보기 항목이 표시되지 않을 수도 있습니다.</p>
+      <p class="callout"><strong>찾아보기에서 이 통합 문서를 아직 찾을 수 없나요?</strong> 이 예제는 Free 1.4.0 이상 버전에 내장되어 있으며, 이전에 설치된 앱이나 캐시된 PWA에는 표시되지 않을 수 있습니다. <a download="csv-basics-seedlings.srwb" href="../../../files-export/tutorial/assets/csv-basics-seedlings.srwb">통합 문서를 직접 다운로드</a>한 다음 <strong>메뉴 → Import File</strong>을(를) 사용하여 여세요. 이제 이 단원의 나머지 부분을 진행할 수 있습니다.</p>
+      <nav class="lesson-nav" aria-label="CSV 단계별 안내">
+        <strong>이번 단원</strong>
+        <ol>
+          <li><a href="#install">찾아보기에서 예제 설치</a></li>
+          <li><a href="#run">해당 Python 셀 실행</a></li>
+          <li><a href="#change">파일 및 저장소에서 측정값 변경</a></li>
+          <li><a href="#import">CSV 파일 가져오기</a></li>
+          <li><a href="#export">통합 문서 및 데이터 내보내기</a></li>
+          <li><a href="#reopen">패키지를 다시 열고 데이터 확인</a></li>
+        </ol>
+        <p><a href="../../tutorials/">모든 튜토리얼</a></p>
+      </nav>
+
+      <section id="install">
+        <p class="step-label">1단계</p>
+        <h2>찾아보기에서 통합 문서 찾기</h2>
+        <ol class="lesson-steps">
+          <li><strong>메뉴 → 패키지, 번들 및 워크북 찾아보기</strong>을(를) 엽니다. 📦 머리글 바로가기가 표시되어 있다면 이를 통해서도 동일한 화면을 열 수 있습니다.</li>
+          <li><strong>CSV Basics</strong>을(를) 검색합니다. <strong>워크북</strong> 아래에서 <strong>CSV Basics: Seedling Heights</strong>을(를) 찾으세요. 이는 내장된 영어 예제이며, Python에 설치해야 하는 패키지가 아닙니다.</li>
+          <li><strong>설치</strong>을(를) 탭합니다. 일반적으로 해당 통합 문서가 선택된 탭이 됩니다. 자동 전환을 끈 경우 통합 문서 선택기를 사용하여 선택하세요.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse-menu" role="img" aria-label="Browse Packages, Bundles and Workbooks 항목이 노란색 윤곽선으로 표시된 SciREPL 메뉴입니다.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>노란색 윤곽선은 메뉴의 <strong>패키지, 번들 및 워크북 찾아보기</strong>을(를) 나타냅니다.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">전체 메뉴 스크린샷 보기</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--catalog" role="img" aria-label="검색 필드와 Install 단추가 노란색 윤곽선으로 표시된 CSV Basics 필터링 찾아보기 화면입니다.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-catalog.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/catalog-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>CSV Basics</strong>을(를) 검색한 다음 통합 문서 카드에서 <strong>설치</strong>을(를) 사용하세요. 이 캡처에서는 원격 카탈로그를 사용할 수 없었지만 내장 항목은 계속 표시되었습니다.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-catalog.png">전체 찾아보기 스크린샷 보기</a>
+        </figure>
+        <p class="callout"><strong>개인정보처리방침이 표시되는 경우:</strong> 찾아보기에서 온라인으로 확인된 카탈로그를 확인할 수 있습니다. 공개 고지 사항을 읽고 <em>대화상자 내부를</em> 맨 아래까지 스크롤한 후, 동의하는 경우에만 <strong>I Understand</strong>를 탭하세요. 대신 알림을 닫고 내장 항목을 계속 사용할 수도 있으며, 이 경우 원격 카탈로그는 사용할 수 없습니다. 이 예제 자체에는 외부 데이터 세트나 Python 패키지가 필요하지 않습니다.</p>
+        <p>통합 문서를 설치하면 셀이 추가되지만, 해당 셀이 실행되지는 <em>않습니다</em>. 따라서 코드를 실행하기 전에 검사할 수 있습니다.</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">2단계</p>
+        <h2>셀을 순서대로 실행</h2>
+        <p>시작 텍스트는 샘플을 설명합니다. 세 개의 Python 셀에는 각각 다음과 같은 이름이 있습니다: <code>create_csv</code>, <code>read_csv</code>, 그리고 <code>compare_groups</code>. 저장된 셀의 경우 편집기를 열려면 해당 셀의 <strong>✎ 연필</strong>을(를) 탭한 다음 해당 셀의 <strong>실행</strong>을(를) 탭하세요. Pro에서는 셀의 코드를 두 번 탭하여 편집할 수도 있습니다.</p>
+        <ol class="lesson-steps">
+          <li><code>create_csv</code>을(를) 실행합니다. <code>/shared/data/seedling-heights.csv</code>에 여섯 개의 가상 행을 작성합니다. <code>Saved 6 fictional rows</code>이(가) 표시되어야 합니다.</li>
+          <li><code>read_csv</code>을(를) 실행합니다. 방금 생성된 파일을 열고 여섯 개의 행을 모두 출력합니다.</li>
+          <li><code>compare_groups</code>을(를) 실행합니다. 이는 밝은 조건 평균 <strong>13.0 cm</strong>, 그늘 조건 평균 <strong>8.0 cm</strong>, 그리고 차이 <strong>5.0 cm</strong>을(를) 출력합니다.</li>
+        </ol>
+        <p><strong>메뉴 → 파일 및 스토리지</strong>에서도 해당 파일을 볼 수 있습니다. 거기서 파일을 읽거나, <strong>편집</strong> 및 <strong>저장</strong>을(를) 사용하여 직접 변경할 수 있습니다. <a href="#edit-file">다음 단계에서 방법을 안내합니다.</a></p>
+        <p>최종 출력은 다음과 같이 표시되어야 합니다:</p>
+        <pre><code>Light mean: 13.0 cm
+Shade mean: 8.0 cm
+Difference: 5.0 cm</code></pre>
+        <p class="callout"><strong>첫 실행이 더 느린가요?</strong> Python을(를) 초기화하는 데 잠시 시간이 걸릴 수 있습니다. 셀 실행이 완료되었는지 판단하기 전에 상태 배지에 <strong>준비 완료</strong>이(가) 표시될 때까지 기다리세요. 이후 셀은 일반적으로 로드된 런타임을 재사용합니다. 런타임 다운로드에 동의가 필요한 경우 수락하기 전에 개인정보 처리방침을 읽어보세요. 이 통합 문서는 <code>%pip install</code>을(를) 호출하지 않습니다.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--csv-output" role="img" aria-label="SciREPL 출력에는 양지 평균 13.0 센티미터, 음지 평균 8.0 센티미터, 그리고 차이 5.0 센티미터가 표시됩니다.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-output.png" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>샘플 통합 문서를 실행한 후 휴대전화에 표시된 세 번째 셀의 출력입니다.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-output.png">전체 출력 스크린샷 보기</a>
+        </figure>
+        <p>이 가상의 값들은 읽기와 계산을 보여주기 위한 것일 뿐, 빛과 식물 성장에 관한 과학적 결론은 아닙니다.</p>
+      </section>
+
+      <section id="change">
+        <p class="step-label">3단계</p>
+        <h2>값 하나를 변경하고 다시 실행</h2>
+        <div id="edit-file">
+          <p>데이터를 변경하기 위해 Python 셀을 편집할 필요는 없습니다. CSV 파일 자체를 여세요:</p>
+          <ol class="lesson-steps">
+            <li><strong>메뉴 → 파일 및 스토리지</strong>을(를) 선택합니다(메뉴 이름에 <strong>VFS / Paths</strong>가 추가되어 있을 수 있습니다).</li>
+            <li><strong>/ (영구 스토리지)</strong> 또는 <strong>모든 파일 시스템</strong>을(를) 선택합니다. <code>/shared/data/seedling-heights.csv</code> 위치로 스크롤한 다음 다운로드나 삭제 아이콘이 아닌 파일 이름을 탭합니다.</li>
+            <li><strong>편집</strong>을(를) 탭합니다. <code>light,14</code> 행을 <code>light,15</code>(으)로 변경합니다. 헤더 <code>group,height_cm</code>, 쉼표 및 다른 행은 변경하지 않고 그대로 유지합니다.</li>
+            <li><strong>저장</strong>을(를) 탭한 다음 Files &amp; Storage를 닫습니다. 파일을 저장해도 코드가 실행되지는 않습니다.</li>
+          </ol>
+          <figure class="phone-figure">
+            <div class="shot-window shot-window--file-edit" role="img" aria-label="Files and Storage에서 편집 중인 CSV 파일로, Save가 노란색 윤곽선으로 표시되어 있습니다. Pro에는 Full screen도 표시됩니다.">
+              <div class="shot-stage">
+                <img src="../../../files-export/tutorial/assets/phone-file-edit.png" alt="" loading="lazy" decoding="async">
+                <img src="../../../files-export/tutorial/assets/file-edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              </div>
+            </div>
+            <figcaption><strong>Pro 1.4.0:</strong> 파일 미리보기의 편집기에 CSV 파일이 열려 있습니다. 노란색 윤곽선은 <strong>저장</strong>을(를) 표시합니다. Free 버전에도 미리보기의 Edit/Save 컨트롤이 포함되어 있으며, <strong>전체 화면</strong> 기능은 Pro 전용입니다.</figcaption>
+            <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-file-edit.png">전체 Files &amp; Storage 편집 스크린샷 보기</a>
+          </figure>
+        </div>
+        <p><code>read_csv</code> 및 <code>compare_groups</code>만 다시 실행합니다. 이제 양지 평균은 약 <strong>13.3 cm</strong>이며 차이는 약 <strong>5.3 cm</strong>입니다. <strong>절대</strong> <code>create_csv</code>을(를) 다시 실행하지 마세요. 해당 셀에 여전히 남아 있는 값으로 파일 편집 내용이 덮어써집니다.</p>
+        <p>또는 <code>create_csv</code>을(를) <strong>✎ 연필</strong> 아이콘으로 편집하여 측정값 <code>14</code>을(를) <code>15</code>(으)로 변경한 다음 세 개의 Python 셀을 모두 순서대로 실행할 수도 있습니다. 이렇게 하면 파일만 변경하는 대신 파일을 생성하는 코드가 변경됩니다.</p>
+        <p>이후 셀들을 다시 실행하는 이유는 무엇인가요? 저장된 출력은 이전 실행 기록일 뿐이며, 파일을 변경하더라도 이전 결과가 자동으로 다시 계산되지는 않습니다. 각 셀은 실행할 때 파일을 읽습니다.</p>
+        <aside class="callout" id="pro-syntax-highlighting" data-editions="pro">
+          <h3>Pro: 전체 화면 파일 편집 및 선택적 강조 표시</h3>
+          <p>파일 미리보기에서 더 큰 편집기를 사용하려면 <strong>전체 화면</strong>을(를) 탭합니다. CSV 파일은 <strong>일반 텍스트</strong> 상태를 유지하므로 <strong>구문 강조 표시</strong> 확인란이 비활성화됩니다.</p>
+          <p>지원되는 코드 파일의 경우 구문 강조 표시는 선택 사항이며 <strong>기본적으로 꺼져 있습니다</strong>. 전자필기장의 모양 설정이 아닌 이 파일 편집기의 확인란을 사용하여 켜세요. 확장자에 따라 언어가 선택됩니다. 예를 들어 <code>.py</code>은(는) Python, <code>.js</code>은(는) JavaScript, <code>.R</code>은(는) R, 그리고 <code>.pl</code>은(는) Perl이 아닌 <strong>Prolog</strong>입니다. 알 수 없는 확장자는 일반 텍스트로 유지됩니다.</p>
+          <figure class="phone-figure">
+            <div class="shot-window shot-window--file-highlight" role="img" aria-label="Pro 전체 화면 Python 파일 편집기로, Syntax highlighting이 선택되어 색상이 지정된 Python 코드가 표시됩니다. Save 및 Close는 도구 모음에 있습니다.">
+              <div class="shot-stage">
+                <img src="../../../files-export/tutorial/assets/phone-python-highlight.png" alt="" loading="lazy" decoding="async">
+                <img src="../../../files-export/tutorial/assets/file-highlight-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              </div>
+            </div>
+            <figcaption><strong>Pro 1.4.0:</strong> 구문 강조가 활성화된 비교 코드를 포함하는 별도의 <code>seedling-summary.py</code> 시연 파일입니다. 이 선택적 파일은 CSV 단원에 필요하지 않습니다. 긴 줄은 가로로 스크롤할 수 있습니다.</figcaption>
+            <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-python-highlight.png">강조 표시된 파일 편집기 전체 스크린샷 보기</a>
+          </figure>
+          <p><strong>저장</strong>은(는) 파일을 저장하고 편집기를 열린 상태로 유지합니다. Files &amp; Storage로 돌아가려면 <strong>× Close</strong>를 사용하세요. 저장되지 않은 변경 사항을 삭제하기 전에 확인 메시지가 표시됩니다. 파일을 편집하거나 저장해도 실행되지는 않습니다.</p>
+          <p><a href="../../../files-export/tutorial/assets/phone-csv-fullscreen.png">CSV 파일이 일반 텍스트로 열려 있는 동일한 전체 화면 편집기를 확인하세요.</a></p>
+        </aside>
+      </section>
+
+      <section id="import">
+        <p class="step-label">4단계</p>
+        <h2>원본 CSV 가져오기</h2>
+        <ol class="lesson-steps">
+          <li>기기의 파일 선택기로 열 수 있는 폴더에 <a download="seedling-heights.csv" href="../../../files-export/tutorial/assets/seedling-heights.csv">원본 샘플 CSV<span class="english-reference"> (영어 참조 페이지)</span></a>을(를) 다운로드하세요.</li>
+          <li>SciREPL에서 <strong>메뉴 → Import File</strong>을(를) 선택하고 <code>seedling-heights.csv</code>을(를) 선택합니다. 확인 메시지에 <code>/shared/data/seedling-heights.csv</code>(으)로 업로드되었다고 표시되어야 합니다.</li>
+          <li>이렇게 하면 변경된 로컬 파일이 원래의 여섯 개 행으로 바뀝니다. <code>read_csv</code> 및 <code>compare_groups</code>을(를) 다시 실행하면 두 평균이 <strong>13.0</strong> 및 <strong>8.0 cm</strong>(으)로 돌아와야 합니다.</li>
+        </ol>
+        <p class="callout"><strong>중요:</strong> 덮어쓸 의도가 아니라면 동일한 이름의 다른 파일을 가져온 후 <code>create_csv</code>을(를) 다시 실행하지 마세요. 자체 CSV의 경우 정확한 확인 경로를 기록하고 읽기 셀의 <code>path</code>을(를) 해당 파일 이름으로 변경하세요. 파일 선택기에는 Android Downloads, 클라우드 제공업체 또는 둘 다 표시될 수 있습니다.</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">5단계</p>
+        <h2>이동 가능한 사본 저장</h2>
+        <p><strong>메뉴 → 워크북 및 패키지 내보내기</strong>을(를) 엽니다. 셀만 원하는 경우 <strong>워크북 (.srwb)</strong> 및 <strong>현재 탭만</strong>을(를) 선택하세요. <code>.srwb</code>은(는) <strong>결코</strong> SharedVFS의 별도 CSV을(를) 포함하지 않습니다.</p>
+        <p>워크북을 <em>데이터와 함께</em> 이동하려면 <strong>패키지 (아카이브)</strong>을(를) 선택하고 <strong>.zip</strong>을(를) 유지하세요. <strong>내용</strong> 트리에서 다음을 선택합니다:</p>
+        <ul>
+          <li>워크북 <code>CSV_Basics__Seedling_Heights.ipynb</code>(<strong>notebooks/</strong> 아래). 패키지 내보내기는 셀을 Jupyter 노트북 형식으로 저장합니다.</li>
+          <li>파일 <code>seedling-heights.csv</code>(<strong>shared/data/</strong> 아래).</li>
+        </ul>
+        <p>관련 없는 워크북과 파일의 선택을 취소하세요. 필요한 경우 화살표를 사용하여 폴더를 확장하세요. <strong>현재 탭만</strong>이(가) 패키지 콘텐츠를 제한한다고 가정하지 마세요. 이번 단원에서는 추가 <strong>shared/notebooks/</strong> 복사본이 필요하지 않습니다. Pro에서는 의도적으로 공유하려는 경우가 아니라면 <strong>AI 대화 포함</strong>을(를) 선택 해제된 상태로 두세요.</p>
+        <p><strong>내보내기</strong>을(를) 탭합니다. Android에서는 공유 시트가 열립니다. 개인 드라이브나 파일 관리자의 저장 위치 등 다시 찾을 수 있는 곳에 아카이브를 저장하세요. 브라우저에서는 파일이 다운로드됩니다. 제안된 파일 이름은 <code>scirepl_package.zip</code>이며, 이름을 <code>seedling-project.zip</code>(으)로 바꾸면 더 쉽게 알아볼 수 있습니다.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--package-selection" role="img" aria-label="Pro 패키지 내보내기에서 Package archive가 선택되고 CSV Basics 워크북 및 seedling-heights CSV만 선택된 상태입니다. 노란색 윤곽선은 해당 두 파일을 표시합니다.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-package-selection.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/package-selection-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pro 1.4.0:</strong> Package가 선택되어 있고 노란색 윤곽선으로 표시된 두 항목이 선택되어 있습니다. 다른 워크북, 선택 사항인 Python 시연 파일 및 저장된 워크북 사본은 포함되지 않습니다. Free에서는 AI 대화 옵션 없이 동일한 워크북 및 데이터 선택 항목을 사용합니다.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-package-selection.png">패키지 선택 전체 스크린샷 보기</a>
+        </figure>
+        <p class="callout"><strong>로컬 복구는 백업이 아닙니다.</strong> Android 앱 저장소, Chrome의 PWA 및 다른 브라우저는 이러한 파일을 자동으로 공유하지 않습니다. 내보낸 사본은 직접 관리할 수 있는 위치에 보관하세요. 다른 형식에 대해서는 <a href="../../../files-export/">Files, import, and export<span class="english-reference"> (영어 참조 페이지)</span></a>을(를) 참조하세요.</p>
+      </section>
+
+      <section id="reopen">
+        <p class="step-label">6단계</p>
+        <h2>패키지를 다시 열고 두 부분 모두 확인하기</h2>
+        <p>백업을 신뢰하기 전에 열 수 있는지 확인하십시오. 다른 SciREPL 설치 환경이나 브라우저 프로필에서 이 작업을 수행할 수 있습니다. 여기서 가져오면 다른 통합 문서가 추가되며, 패키지의 대상 경로에 있는 파일도 대체되므로 이전 패키지를 가져오기 전에 더 최신 파일의 사본을 별도로 보관해 두십시오.</p>
+        <ol class="lesson-steps">
+          <li><strong>메뉴 → Import Package (.zip / .tar.gz)</strong>을(를) 선택하고 저장한 아카이브를 선택하십시오. 이번 단원에서는 이것이 <code>.zip</code>에 해당하며, 별도의 CSV 또는 <code>.srwb</code> 다운로드가 아닙니다.</li>
+          <li>새로 가져온 <strong>CSV Basics: Seedling Heights</strong> 통합 문서가 자동으로 선택되지 않은 경우 이를 선택하십시오. 동일한 앱으로 가져온 경우 이전 탭과 새 탭의 이름이 같을 수 있습니다.</li>
+          <li><strong>메뉴 → 파일 및 스토리지</strong>을(를) 열고 <code>/shared/data/seedling-heights.csv</code>을(를) 확인하십시오. 해당 파일의 여섯 개 행이 내보낸 파일과 일치해야 합니다. 확인 후 미리보기를 닫으십시오.</li>
+          <li><strong>두 번째 Python 셀</strong>(<code>read_csv</code> 코드)을 실행한 다음, <strong>세 번째 Python 셀</strong>(<code>compare_groups</code> 코드)을 실행하십시오. 패키지 내보내기는 Jupyter 형식을 사용하므로 셀 이름이 유지되지 않을 수 있습니다. 순서와 코드로 셀을 식별하십시오. Step 4의 원본 CSV 이후에는 <strong>13.0 cm</strong>, <strong>8.0 cm</strong>, 그리고 <strong>5.0 cm</strong>이(가) 나와야 합니다. 대신 편집된 <code>light,15</code> 파일을 내보낸 경우에는 <strong>13.3 cm</strong>, <strong>8.0 cm</strong>, 그리고 <strong>5.3 cm</strong>이(가) 나와야 합니다.</li>
+        </ol>
+        <p class="callout"><strong>이번 복원 확인을 위해 <code>create_csv</code>을(를) 다시 실행하지 마십시오.</strong> 코드의 값으로 가져온 데이터를 덮어쓰게 됩니다. 복원된 CSV을(를) 먼저 읽어야 데이터가 통합 문서와 함께 이동했음이 입증되며, 이전에 저장된 출력만으로는 그것이 입증되지 않습니다.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--restored-output" role="img" aria-label="패키지를 복원하고 비교 셀을 실행한 후의 새로운 출력: 양지 평균 13.0센티미터, 음지 평균 8.0, 차이 5.0.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-restored-output.png" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pro 1.4.0:</strong> 내보낸 아카이브를 가져와서 읽기 및 비교 셀만 실행한 후의 스마트폰 새 출력 화면입니다. CSV에서 원래의 여섯 개 행이 복원되었습니다.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-restored-output.png">복원된 출력의 전체 스크린샷 보기</a>
+        </figure>
+        <p>파일이 누락되었거나 통합 문서가 없으면 Step 5로 돌아가 <em>두</em> 항목이 모두 선택되었는지 확인하십시오. 일반 통합 문서 내보내기로는 CSV을(를) 함께 가져올 수 없습니다.</p>
+      </section>
+
+      <section id="what-next">
+        <h2>다음 단계</h2>
+        <p>직접 CSV을(를) 만들어 보십시오. <code>group</code> 및 <code>height_cm</code> 열을 유지하고, 숫자 높이를 사용하며, 적어도 하나의 <code>light</code> 행과 하나의 <code>shade</code> 행을 포함하거나 <code>compare_groups</code>의 두 그룹 필터를 조정하십시오. <strong>메뉴 → 파일 및 스토리지</strong>에서 로컬 파일을 검사할 수 있습니다. 여기서 사용된 스마트폰 컨트롤에 대해서는 <a href="../../interface/tutorial/">첫 번째 통합 문서 인터페이스 안내</a>를 참조하십시오.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL 도움말</span><nav aria-label="바닥글 탐색"><a href="../../../files-export/">파일 및 내보내기<span class="english-reference"> (영어 참조 페이지)</span></a><a href="../../../">모든 도움말<span class="english-reference"> (영어 참조 페이지)</span></a></nav></footer>
+</body>
+</html>

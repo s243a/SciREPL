@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Affichez le raccourci Parcourir de SciREPL et ajustez les boutons d&#39;en-tête, le libellé Exécuter, le thème et l&#39;espace de la barre d&#39;état Android via Menu → Apparence.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/fr/interface/appearance/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../interface/appearance/tutorial.css">
+  <title>Tutoriel sur l'apparence · Aide SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/appearance/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/appearance/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/appearance/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/appearance/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/appearance/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/appearance/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/appearance/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/appearance/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/appearance/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/appearance/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/appearance/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/appearance/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/appearance/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/appearance/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Passer au contenu</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Page de référence en anglais)</span></a>
+    <nav aria-label="Navigation principale">
+      <a href="../../../interface/">Référence de l'interface<span class="english-reference"> (Page de référence en anglais)</span></a>
+      <a href="../../tutorials/">Tous les tutoriels</a>
+      <a href="../../../">Toute l'aide<span class="english-reference"> (Page de référence en anglais)</span></a>
+      <a href="../../../../">Ouvrir la PWA Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Langue du tutoriel"><details class="tutorial-language-menu"><summary>Langue du tutoriel: <bdi>Français</bdi></summary><nav aria-label="Langue du tutoriel"><a href="../../../en/interface/appearance/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/appearance/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/appearance/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/appearance/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/appearance/" lang="es" hreflang="es">Español</a>
+      <a href="./" lang="fr" hreflang="fr" aria-current="page">Français</a>
+      <a href="../../../hi/interface/appearance/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/appearance/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/appearance/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/interface/appearance/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/appearance/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/appearance/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/appearance/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutoriel traduit automatiquement ; révision par un locuteur natif en attente. Le code et les valeurs techniques sont inchangés. Les captures d'écran montrent l'interface d'origine en anglais ; faites correspondre les noms de commandes traduits dans ce texte à votre application.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Aide<span class="english-reference"> (Page de référence en anglais)</span></a> / <a href="../../../interface/">Interface<span class="english-reference"> (Page de référence en anglais)</span></a> / Présentation de l'apparence</p>
+    <article>
+      <p class="eyebrow">Personnalisez l'interface</p>
+      <h1>Afficher Parcourir et ajuster l'apparence</h1>
+      <p class="lede">Placez le raccourci <strong>📦 Parcourir</strong> dans l'en-tête de <strong>SciREPL Free</strong>, puis choisissez des boutons confortables et un thème clair ou sombre. Les contrôles partagés d'apparence sont également utiles dans Pro ; une section distincte réservée à Pro couvre l'édition en plein écran, les touches supplémentaires et les couleurs syntaxiques en direct. Vous pouvez effectuer cela sans modifier ni exécuter de cellules de classeur.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro (voir les étiquettes)</li>
+        <li class="chip">Captures d'écran Android</li>
+        <li class="chip">Environ 3 minutes</li>
+      </ul>
+      <p class="screen-note">Les cinq captures d'écran sont de véritables captures de <strong>SciREPL Free 1.4.0-debug</strong> sur un <strong>Samsung Galaxy S24+</strong>, prises le <time datetime="2026-10-06">6 octobre 2026</time>. Elles montrent l'application signée pour le débogage, et non une installation depuis le Play Store. Les étapes illustrées utilisent les contrôles de Free 1.4.0. Le raccourci d'en-tête de Parcourir est réservé à Free ; les utilisateurs de Pro peuvent ouvrir le même catalogue depuis Menu. Le texte réservé à Pro ci-dessous est vérifié par rapport au code source de Pro 1.4.0 ; ces contrôles ne sont pas illustrés par ces images de Free, et les menus plus anciens peuvent différer.</p>
+      <nav class="lesson-nav" aria-label="Étapes de la présentation de l&#39;apparence">
+        <strong>Dans cette leçon</strong>
+        <ol>
+          <li><a href="#open-appearance">Ouvrir Apparence</a></li>
+          <li><a href="#browse-shortcut">Afficher le raccourci Parcourir</a></li>
+          <li><a href="#buttons">Ajuster les boutons et Exécuter</a></li>
+          <li><a href="#pro-editor">Pro uniquement : édition en plein écran, touches supplémentaires et couleurs en direct</a></li>
+          <li><a href="#theme">Choisir un thème</a></li>
+          <li><a href="#android-space">Espace Android facultatif et récupération</a></li>
+        </ol>
+        <p><a href="../../tutorials/">Tous les tutoriels</a></p>
+      </nav>
+
+      <section id="open-appearance">
+        <p class="step-label">Étape 1</p>
+        <h2>Ouvrir Menu → Apparence</h2>
+        <ol class="lesson-steps">
+          <li>Trouvez <strong>☰ Menu</strong>, le bouton à trois lignes horizontales dans l'en-tête en haut de l'application.</li>
+          <li>Appuyez dessus, puis choisissez <strong>🎨 Apparence</strong>. Si le menu est plus grand que votre écran, faites-le défiler pour trouver l'entrée.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-menu" role="img" aria-label="Menu SciREPL avec l&#39;entrée Apparence mise en surbrillance en jaune.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Choisissez <strong>🎨 Apparence</strong> dans le menu de l'application.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-menu.png">Afficher la capture d'écran complète du Menu</a>
+        </figure>
+        <p class="callout"><strong>Les modifications prennent effet au fur et à mesure que vous les sélectionnez.</strong> Les contrôles ordinaires ci-dessous ne nécessitent aucun bouton Enregistrer ou Appliquer. Fermer Apparence avec <strong>×</strong> n'annule pas vos modifications, et vos choix sont conservés pour la prochaine visite de l'application.</p>
+      </section>
+
+      <section id="browse-shortcut">
+        <p class="step-label">Étape 2</p>
+        <h2>Free 1.4.0 : afficher le raccourci 📦 Parcourir</h2>
+        <p><strong>Vous utilisez Pro ?</strong> Ignorez cette configuration de raccourci et utilisez <strong>Menu → Parcourir paquets, collections et classeurs</strong>. Les sections suivantes couvrent les contrôles d'apparence partagés.</p>
+        <ol class="lesson-steps">
+          <li>Ouvrez <strong>Menu → Apparence</strong>, puis faites défiler jusqu'à <strong>Raccourcis de l’en-tête</strong>.</li>
+          <li>Trouvez <strong>Afficher le raccourci Parcourir</strong> et choisissez <strong>Toujours</strong>.</li>
+          <li>Fermez Apparence avec <strong>×</strong>. Le bouton <strong>📦</strong> se trouve désormais dans l'en-tête ; appuyez dessus pour ouvrir <strong>Parcourir paquets, collections et classeurs</strong>.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-shortcuts" role="img" aria-label="Section Raccourcis d&#39;en-tête de SciREPL Free, avec le raccourci Show Browse et ses flèches de priorité surlignés en jaune.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-shortcuts.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/shortcuts-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Dans <strong>Free 1.4.0</strong>, utilisez la liste déroulante à côté de <strong>Afficher le raccourci Parcourir</strong> pour décider si le bouton 📦 reste visible.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-shortcuts.png">Voir la capture d'écran complète des raccourcis</a>
+        </figure>
+        <p>Les choix ont des fonctions différentes :</p>
+        <ul>
+          <li><strong>Toujours :</strong> garder le raccourci visible, même si l'en-tête nécessite une autre ligne.</li>
+          <li><strong>Quand il y a de la place :</strong> l'option par défaut pour Parcourir. Ne l'afficher que lorsqu'il y a de la place ; un écran plus étroit, des boutons plus grands ou un message d'état plus long peuvent le faire disparaître.</li>
+          <li><strong>Jamais :</strong> masquer le raccourci d'en-tête.</li>
+        </ul>
+        <p>Les boutons <strong>↑</strong> et <strong>↓</strong> déterminent quel raccourci facultatif cède sa place en premier lorsque l'espace est restreint. Déplacez un raccourci vers le haut pour le conserver plus longtemps, ou vers le bas pour le laisser disparaître plus tôt. Ils modifient la priorité, pas la position des icônes dans l'en-tête.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-header" role="img" aria-label="En-tête de SciREPL Free avec le raccourci Parcourir en forme de colis surligné en jaune.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-header.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/header-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Dans Free, le raccourci d'en-tête <strong>📦</strong> ouvre le même catalogue que <strong>Menu → Parcourir paquets, collections et classeurs</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-header.png">Voir la capture d'écran complète de l'en-tête</a>
+        </figure>
+        <p class="callout"><strong>Pas de bouton 📦 ?</strong> Le chemin par le Menu fonctionne toujours lorsque le raccourci est masqué ou que votre version ne le propose pas. Pour un en-tête compact, rétablissez Parcourir sur <strong>Quand il y a de la place</strong> au lieu de forcer chaque raccourci facultatif à rester visible.</p>
+        <p>Si vous êtes venu ici pour trouver un classeur, vous pouvez maintenant <a href="../../workbooks/tutorial/#browse">revenir au guide des groupes de Markov</a> et faire une recherche dans le catalogue.</p>
+      </section>
+
+      <section id="buttons">
+        <p class="step-label">Étape 3</p>
+        <h2>Choisir des boutons confortables et un libellé Exécuter</h2>
+        <p>Rouvrez <strong>Menu → Apparence</strong> et trouvez <strong>Boutons</strong>. Déplacez le curseur <strong>Taille des boutons</strong> ; son pourcentage et le <strong>Aperçu</strong> à proximité changent immédiatement. La valeur par défaut est <strong>100%</strong>. Des boutons d'en-tête plus grands peuvent être plus faciles à toucher, mais laissent moins de place pour les raccourcis facultatifs.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-options" role="img" aria-label="Commandes de disposition et de boutons d&#39;Apparence, y compris Masquer la barre d&#39;état Android et Taille des boutons, surlignées en jaune.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-options.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/options-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Taille des boutons</strong> ajuste les commandes de l'en-tête. Le paramètre de barre d'état réservé à Android est expliqué ci-dessous.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-options.png">Voir la capture d'écran complète de la disposition et des boutons</a>
+        </figure>
+        <p>La liste déroulante <strong>Bouton Exécuter</strong> contrôle Exécuter dans le <em>panneau de nouvelle cellule</em>, et non les boutons Exécuter à l'intérieur des éditeurs de cellules enregistrées :</p>
+        <ul>
+          <li><strong>Auto (icône uniquement lorsque l'espace est restreint) :</strong> la valeur par défaut. Conserver le libellé lorsqu'il rentre, ou utiliser uniquement l'icône ▶ pour laisser de la place pour la saisie.</li>
+          <li><strong>Icône uniquement :</strong> toujours utiliser le bouton compact ▶.</li>
+          <li><strong>Toujours afficher le libellé :</strong> conserver le texte, même sur un écran étroit.</li>
+        </ul>
+        <p>Il n'y a pas de curseur de zoom de texte dans Apparence. <strong>Taille des boutons</strong> n'est pas un paramètre général de taille de police. Free 1.4.0 et Pro 1.3.0 agrandissent automatiquement les commandes compactes de l'en-tête pour s'adapter au zoom de texte du système Android.</p>
+      </section>
+
+      <section id="pro-editor">
+        <p class="step-label">Facultatif · Pro uniquement</p>
+        <h2>Pro uniquement : édition plein écran, touches supplémentaires et couleurs syntaxiques</h2>
+        <p>Ce sont des commandes d'éditeur de <strong>SciREPL Pro 1.4.0</strong>, et non des commandes présentées dans les captures d'écran de Free ci-dessus. Les touches supplémentaires et les couleurs en direct sont des paramètres distincts.</p>
+        <h3>Passer à la modification en plein écran</h3>
+        <ol class="lesson-steps">
+          <li><strong>Nouvelle cellule :</strong> appuyez sur le bouton <strong>⤢ Plein écran</strong> dans le champ de code de la nouvelle cellule. Ses flèches diagonales pointant vers l'extérieur indiquent d'agrandir l'éditeur.</li>
+          <li><strong>Cellule enregistrée :</strong> appuyez sur le <strong>✎ crayon</strong> de cette cellule pour la modifier, puis appuyez sur <strong>⤢</strong> dans le coin du champ de code de cette cellule.</li>
+        </ol>
+        <p>L'éditeur occupe l'écran pour afficher davantage de code. Les touches supplémentaires activées et les pastilles de suggestion restent disponibles au-dessus du clavier ; les couleurs de syntaxe utilisent le même paramètre décrit ci-dessous. Le passage en plein écran n'exécute <strong>pas</strong> le code.</p>
+        <p>Appuyez sur <strong>le libellé de l'éditeur en haut</strong> pour revenir au classeur avec votre brouillon toujours ouvert ; <strong>Précédent</strong> ou <kbd>Esc</kbd> permet également de quitter le mode plein écran. Pour une cellule enregistrée, <strong>Terminé</strong> applique le brouillon sans l'exécuter, tandis que <strong>Annuler</strong> annule la modification. Pour une nouvelle cellule, Terminé et Annuler permettent tous deux de quitter le plein écran sans effacer le brouillon ni créer de cellule ; Exécuter est une action distincte.</p>
+        <p><strong>À ne pas confondre avec « Les panneaux occupent tout l'écran ».</strong> Cette option distincte d'Apparence contrôle la marge supérieure des panneaux et des boîtes de dialogue ; elle n'ouvre pas l'éditeur de code en plein écran.</p>
+        <h3>Afficher la rangée de touches supplémentaires</h3>
+        <p>Ouvrez <strong>Menu → Complétion → Section  → Général</strong>. Définissez <strong>Touches supplémentaires au-dessus du clavier  → Activée</strong> ; la valeur par défaut est <strong>Désactivé</strong>. La rangée propose Échap, Tab, la suppression de l'indentation, les flèches, Début, Fin, Exécuter et la ponctuation. Balayez-la latéralement pour accéder aux touches qui ne s'affichent pas. Choisir Activé n'exécute pas de code, mais la touche <strong>▶ Exécuter</strong> de la rangée le fait — vérifiez le code source avant d'appuyer dessus.</p>
+        <p>Dans la même section, <strong>Puces en portrait </strong> et <strong>Puces en paysage </strong> permettent de choisir <strong>Ligne dédiée</strong> ou <strong>Remplacer les touches supplémentaires</strong>. Les valeurs par défaut sont Ligne dédiée en portrait et Remplacer les touches supplémentaires en paysage : lorsque des suggestions apparaissent, elles peuvent temporairement prendre la place des touches. Lorsque les touches supplémentaires sont désactivées, les pastilles utilisent leur propre rangée. <strong>Barres supplémentaires en mode paysage </strong> propose <strong>Désactivé</strong>, <strong>Quand il y a de la place</strong> (par défaut) ou <strong>Toujours</strong>. Lorsqu'il y a de la place utilise <strong>Nombre minimal de lignes de code visibles </strong>, initialement <strong>8</strong>, de sorte qu'un affichage paysage de faible hauteur puisse masquer les rangées facultatives.</p>
+        <h3>Activer ou désactiver les couleurs de syntaxe en direct</h3>
+        <p>Ouvrez <strong>Menu → Apparence → Coloration syntaxique lors de la saisie</strong>. Choisissez <strong>Activée</strong> pour colorer le code pris en charge pendant la saisie, ou <strong>Désactivé</strong> pour du texte brut. L'option par défaut, <strong>Automatique (activée sur ordinateur, désactivée en mode tactile)</strong>, active les couleurs dans les navigateurs pour ordinateur et les désactive sur les téléphones. Si la saisie semble moins fluide, choisissez Désactivé ; la coloration peut ralentir la saisie sur les appareils moins performants. Le code dépassant <strong>6000 caractères</strong> reste non coloré, même avec Activé.</p>
+        <p>Les couleurs ne valident ni n'exécutent le code, n'envoient aucune requête API et n'activent pas la saisie semi-automatique. La modification de ce paramètre prend effet immédiatement et n'altère pas votre code source.</p>
+        <h3>Fichiers et stockage dispose d'une option distincte</h3>
+        <p>Pour un fichier texte, utilisez <strong>Menu → Fichiers et stockage (VFS / Chemins)</strong>, sélectionnez le fichier, puis choisissez <strong>Plein écran</strong>. La case à cocher <strong>Coloration syntaxique</strong> de cet éditeur est indépendante du paramètre de couleurs en direct d'Apparence et est désactivée par défaut. Elle n'est pas disponible pour les types de fichiers non reconnus ou les fichiers de plus de 100,000 caractères. Ses touches supplémentaires partagent la préférence de Complétion, mais peuvent se masquer lorsque l'éditeur de fichiers manque d'espace. L'action Fichier <strong>Enregistrer</strong> enregistre vos modifications ; changer uniquement les couleurs ne le fait pas.</p>
+      </section>
+
+      <section id="theme">
+        <p class="step-label">Étape 4</p>
+        <h2>Choisir le thème clair, sombre ou celui du système</h2>
+        <p>Faites défiler jusqu'à <strong>Thème</strong> et choisissez <strong>Sombre</strong>, <strong>Clair</strong> ou <strong>Selon le système</strong>. Sombre est l'option par défaut. Selon le système respecte la préférence clair/sombre de votre appareil ; c'est un choix que vous définissez, pas la valeur par défaut.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-theme" role="img" aria-label="Le menu déroulant Thème d&#39;Apparence mis en surbrillance en jaune.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-theme.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/theme-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Choisissez un thème intégré, puis fermez Apparence pour continuer à utiliser l'application avec ce choix.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-theme.png">Afficher la capture d'écran complète du thème</a>
+        </figure>
+        <p>Vous n'avez pas besoin de <strong>Personnalisé</strong>, de <strong>Personnaliser…</strong>, d'un éditeur JSON de thèmes ou de <strong>Avancé : CSS personnalisé</strong> pour cette leçon. Ces options avancées ne font pas partie de ce guide pour débutants.</p>
+      </section>
+
+      <section id="android-space">
+        <p class="step-label">Touches finales facultatives</p>
+        <h2>Espace Android et retour aux valeurs par défaut</h2>
+        <p>Sous <strong>Disposition</strong>, laissez <strong>Marge supérieure → Automatique</strong> sélectionné. Cela suit la zone sécurisée signalée par l'appareil afin que l'en-tête dispose d'un espace approprié au-dessus de lui ; vous n'avez pas besoin de deviner une valeur en pixels.</p>
+        <p>Dans l'application Android, <strong>Masquer la barre d’état Android</strong> propose :</p>
+        <ul>
+          <li><strong>Jamais :</strong> l'option par défaut ; laissez l'horloge et la barre d'état des notifications visibles.</li>
+          <li><strong>En paysage :</strong> masquez cette barre lorsque le téléphone est à l'horizontale ; rétablissez-la en portrait.</li>
+          <li><strong>Toujours :</strong> masquez-la dans les deux orientations.</li>
+        </ul>
+        <p>Ce paramètre ne concerne que la barre d'<em>état</em> Android, et non la barre de navigation ou de gestes. Il est absent de l'interface du navigateur/de la PWA et de Windows. Pro 1.3.0 propose à la place une case à cocher nommée <strong>Masquer la barre d'état Android en paysage</strong>.</p>
+        <p class="callout"><strong>Vous souhaitez annuler les modifications d'apparence ?</strong> <strong>Rétablir les valeurs par défaut</strong> rétablit le thème par défaut, la taille des boutons d'en-tête, la marge supérieure, les raccourcis et la préférence de barre d'état, et supprime les choix de thème/CSS personnalisés. Cela n'efface pas les cellules de votre classeur. Cela ne réinitialise <em>pas</em> le bouton Exécuter distinct ni les préférences de langue de l'interface ; choisissez vous-même l'option <strong>Automatique</strong> d'Exécuter si nécessaire.</p>
+        <p>Fermez Apparence avec <strong>×</strong> lorsque vous avez terminé. Poursuivez avec le <a href="../../workbooks/tutorial/">guide du classeur Groupes de Markov</a>, ou revenez à la <a href="../../../interface/">référence concise de l'interface<span class="english-reference"> (Page de référence en anglais)</span></a>.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Aide SciREPL</span><nav aria-label="Navigation de bas de page"><a href="../../../interface/">Référence de l'interface<span class="english-reference"> (Page de référence en anglais)</span></a><a href="../../../">Toute l'aide<span class="english-reference"> (Page de référence en anglais)</span></a></nav></footer>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ja" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SciREPLワークブックファイルをダウンロードし、Menu → Import Fileを見つけて、Androidまたはデスクトップでそれを選択し、実行する前にそのセルを確認します。">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ja/workbooks/import/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/import/tutorial.css">
+  <title>ワークブックファイルのインポート · SciREPL ヘルプ</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/import/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/import/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/import/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/import/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/import/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/import/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/import/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/import/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/import/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/import/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/import/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/import/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/import/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/import/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">コンテンツへスキップ</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (英語のリファレンスページ)</span></a>
+    <nav aria-label="プライマリナビゲーション">
+      <a href="../../../workbooks/">ワークブックリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a>
+      <a href="../../tutorials/">すべてのチュートリアル</a>
+      <a href="../../../">すべてのヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a>
+      <a href="../../../../">Free PWAを開く</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="チュートリアルの言語"><details class="tutorial-language-menu"><summary>チュートリアルの言語: <bdi>日本語</bdi></summary><nav aria-label="チュートリアルの言語"><a href="../../../en/workbooks/import/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/import/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/import/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/import/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/import/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/import/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/import/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/import/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="./" lang="ja" hreflang="ja" aria-current="page">日本語</a>
+      <a href="../../../ko/workbooks/import/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/import/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/import/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/import/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">機械翻訳されたチュートリアルです。ネイティブによるレビューは保留中です。コードおよび技術的な値は変更されていません。スクリーンショットにはオリジナルの英語インターフェースが表示されています。本文中の翻訳されたコントロール名をアプリと照合してください。</p></aside>
+    <p class="breadcrumbs"><a href="../../../">ヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a> / <a href="../../../workbooks/">ワークブック<span class="english-reference"> (英語のリファレンスページ)</span></a> / ワークブックファイルのインポート</p>
+    <article>
+      <p class="eyebrow">実践して学ぶ</p>
+      <h1>ワークブックファイルをご自身でインポートする</h1>
+      <p class="lede">すでにワークブックファイルをお持ちの場合、またはBrowseでレッスンが見つからない場合は、端末にファイルを保存し、<strong>メニュー → Import File</strong>を使用してSciREPLに追加します。この短いチュートリアルでは、<strong>Simpson's Paradox</strong>をカタログのGitHub <code>main</code>ブランチから使用します。インポートするためにパッケージをインストールしたりコードを書いたりする必要はありません。</p>
+      <p>SciREPLは二つのノートブック形式をインポートします。独自のワークブック形式である<strong><code>.srwb</code></strong>と、Jupyterノートブック形式である<strong><code>.ipynb</code></strong>です。この例では<code>.srwb</code>を使用します。<a href="#other-formats">以下の形式に関する注意事項</a>で、Jupyterインポートの異なる実行動作について説明しています。</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Android + ブラウザの手順</li>
+        <li class="chip">約3分</li>
+      </ul>
+      <p class="screen-note">Menuのスクリーンショットは<strong>Samsung Galaxy S24+</strong>での実際のAndroidキャプチャであり、Playストアのインストールではなく<strong>SciREPL Free 1.4.0-debug</strong>を示しています。インポートされたワークブックのスクリーンショットは、別の<strong>ChromiumブラウザによるFree 1.4.0のモバイルサイズビューポートでのキャプチャ</strong>であり、Androidのファイルピッカーによるインポートの証明ではありません。どちらも<time datetime="2026-10-06">6日 十月 2026年</time>に撮影されました。他のエディション、バージョン、およびファイルピッカーでは、コントロールの配置が異なる場合があります。この例は、本ガイド向けに確認された英語の<code>simpsons-paradox.srwb</code>ファイルであり、SciREPLカタログの<code>main</code>ブランチからのものです。そのブランチは変更される可能性があります。<a href="../../../workbooks/import/assets/capture-receipt.json">キャプチャとソースの詳細<span class="english-reference"> (英語のリファレンスページ)</span></a>には、正確な画像サイズと確認されたファイルのハッシュが記録されています。</p>
+      <nav class="lesson-nav" aria-label="ワークブックの手動インポート手順">
+        <strong>このレッスンでの内容</strong>
+        <ol>
+          <li><a href="#download">ワークブックファイルを保存する</a></li>
+          <li><a href="#import">メニューを見つけてファイルをインポートする</a></li>
+          <li><a href="#check">新しいワークブックタブを確認する</a></li>
+          <li><a href="#next">レッスンを続ける</a></li>
+        </ol>
+        <p><a href="#other-formats">その他の形式と安全性</a> · <a href="#troubleshooting">問題が発生した場合</a></p>
+        <p><a href="../../tutorials/">すべてのチュートリアル</a></p>
+      </nav>
+
+      <section id="download">
+        <p class="step-label">ステップ 1</p>
+        <h2>ワークブックファイルをお使いの端末に保存する</h2>
+        <p>GitHub の <code>main</code> ブランチには、Browse で表示される最新の安定版カタログリリースにはまだ含まれていないワークブックや更新が含まれている場合があります。カタログリリースはアプリのリリースとは無関係に変更されます。ファイルを直接インポートすることで、Browse に表示されるのを待たずに信頼できるワークブックを試すことができます。</p>
+        <ol class="lesson-steps">
+          <li><a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">GitHub で Simpson's Paradox を表示し</a>、次に<a download="simpsons-paradox.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/main/workbooks/en/simpsons-paradox.srwb">実際のワークブックファイル（.srwb）をダウンロードします</a>。二つ目のリンクは GitHub のウェブページではなく、RAW ファイルを開きます。</li>
+          <li>ブラウザがファイルをダウンロードせずにテキストとして表示する場合は、ブラウザの<strong>保存/ダウンロード</strong>操作を使用してください。スクリーンショットや HTML ページではなく、ワークブックファイルそのものを保存してください。</li>
+          <li>ファイル名 <code>simpsons-paradox.srwb</code> とその拡張子 <code>.srwb</code> はそのまま保持してください。保存先を確認してください。Android では通常 <strong>Downloads</strong> が使用され、デスクトップでは Downloads または選択したフォルダになります。</li>
+        </ol>
+        <p><strong>これは固定されたリリースのダウンロードではありません。</strong> <code>main</code> は開発ブランチです。これらのスクリーンショットが撮影された後に、ファイルの内容やセルが変更されている可能性があります。保存したファイルはローカルコピーであり、その後に GitHub で行われた変更がインポート済みのタブに自動的に反映されることはありません。</p>
+        <p class="callout"><strong>ダウンロードはインポートではありません。</strong> ファイルを保存すると端末に配置されますが、SciREPL でワークブックがまだ開かれるわけではありません。テキストエディタで開いたり、SciREPL の Files ビューに配置したりする必要はありません。次のステップで、ダウンロードしたそのファイルを選択します。</p>
+        <p>他の人から提供された信頼できる <code>.srwb</code> ファイルがすでにある場合は、サンプルのダウンロードをスキップしてそのファイルを使用してください。ワークブックのタイトルとセル数は、ステップ 3 の確認内容とは異なります。</p>
+      </section>
+
+      <section id="import">
+        <p class="step-label">ステップ 2</p>
+        <h2>Menu を見つけて Import File を選択する</h2>
+        <ol class="lesson-steps">
+          <li>SciREPL に戻ります。<strong>アプリ上部のヘッダー行</strong>で、<strong>☰ Menu</strong>（<strong>三本の水平線</strong>のボタン）を見つけてタップまたはクリックします。</li>
+          <li><strong>📂 ファイルをインポート (例: .srwb, .ipynb, .csv, .py, .zip)</strong> を選択します。メニューが画面の高さを超えている場合は、<em>メニュー内</em>をスクロールして見つけてください。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-menu" role="img" aria-label="SciREPL Free の開いた Menu の Samsung Galaxy S24+ スクリーンショット。Import File 項目が黄色で強調表示されています。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>アプリのメニューで <strong>📂 Import File</strong> を選択します。黄色の注記は、Android 上の <strong>Free 1.4.0-debug</strong> のインポート項目を指しています。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/phone-menu.png">Android の Menu 全体のスクリーンショットを表示</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li><strong>Android の場合：</strong>システムファイルピッカーが開きます。<strong>Downloads</strong> を確認するか、ファイルを保存した場所まで移動します。<code>simpsons-paradox.srwb</code> を選択します。ピッカーは Android の機能であるため、そのレイアウトや最終的な <strong>Open</strong> または選択操作は端末によって異なります。</li>
+          <li><strong>デスクトップの場合：</strong>ファイル選択ダイアログを使用して、ダウンロード時に選択したフォルダを見つけます。<code>simpsons-paradox.srwb</code> を選択し、選択を確定します。Android の Downloads 画面を探す代わりに、この手順を使用してください。</li>
+          <li>SciREPL に戻り、インポートが完了するまで待ちます。メニューがまだ開いている場合は、閉じてワークブックを表示します。</li>
+        </ol>
+        <p class="callout"><strong>ワークブックはデータファイルのアップロードではありません。</strong> <code>.srwb</code>ファイルをインポートすると、そのワークブックが別のタブとして追加されます。ファイルに複数のワークブックが含まれている場合は複数のタブとして追加されます。既存のタブは保持されます。ワークブックがファイルビューに配置されることはなく、現在のワークブックが置き換えられることもありません。</p>
+      </section>
+
+      <section id="check">
+        <p class="step-label">ステップ 3</p>
+        <h2>何も実行する前に新しいワークブックを確認する</h2>
+        <ol class="lesson-steps">
+          <li>ワークブックセレクターで<strong>Simpson's Paradox</strong>を探します。その新しいタブがまだ選択されていない場合は選択してください。その導入部には<strong>Simpson's Paradox: When Every Group Disagrees with the Total</strong>という見出しが付いています。</li>
+          <li>導入部を読み、セルをスクロールして確認します。これらのスクリーンショットで確認されたバージョンには<strong>七つのセル</strong>があります。三つのテキストセル、三つの<strong>R</strong>セル、そして一つの<strong>JavaScript</strong>セルです。<code>main</code>上の新しいバージョンでは異なる場合があります。</li>
+          <li>その順序で<code>data</code>、<code>compute</code>、<code>viz</code>と名付けられたRセルを見つけます。JavaScriptセルは<code>js_check</code>と名付けられており、別のオプションの確認です。コードだけでなく説明文も読んでください。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-result" role="img" aria-label="モバイルサイズのビューポートにおけるSciREPL Free 1.4.0のChromiumブラウザのスクリーンショット。インポートされたシンプソンのパラドックスのワークブックとその黄色で強調表示されたタイトルが示されています。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/browser-imported.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/imported-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>ブラウザのインポート結果：</strong>インポートされた<strong>Simpson's Paradox</strong>ワークブックは、<strong>Free 1.4.0（Chromium版）</strong>で編集可能なセルとして開きます。ここでは390 × 844のビューポートです。これはAndroidのスクリーンショットではありません。インポートによってRセルやJavaScriptセルは実行されていません。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/browser-imported.png">ブラウザでインポートされたワークブックの完全なスクリーンショットを表示</a>
+        </figure>
+        <p class="callout"><strong>.srwbにおいてインポートは実行を意味しません。</strong> 他のインポートで自動実行が有効になっている場合でも、SciREPLは<code>.srwb</code>ファイルをインポートしたときにコードを実行しません。見慣れない、または信頼できないソースからのコードは、<strong>実行</strong>または<strong>すべてのセルを実行</strong>を選択する前に検査してください。</p>
+        <p><strong>通常の.srwbインポートでは、ファイルに出力が含まれている場合でも、現在保存されているコードセルの出力は破棄されます</strong>。Markdownテキストは保持されてレンダリングされるため、導入部はすぐに表示されます。グラフやその他のコード生成画像を再生成するには、依存するセルを順番に再度実行してください。インポートによってアクティブなRやその他のランタイム変数が復元されることはありません。</p>
+      </section>
+
+      <section id="next">
+        <p class="step-label">ステップ 4</p>
+        <h2>任意：インポートしたレッスンを実行する</h2>
+        <p>手動インポートは完了しました。コードの実行は別のステップです。シンプソンのパラドックスでは、グループ内の比較が全体の比較とどのように一致しないかを示すために<strong>教育用の合成データ</strong>を使用しています。確認するには、保存されたコードセルの<strong>✎ 鉛筆</strong>をタップしてコードを検査し、<em>そのセルの</em> <strong>実行</strong>ボタンを使用します。</p>
+        <ol class="lesson-steps">
+          <li>Rセル<code>data</code>を実行し、テキストセル<code>pause</code>を読んで予測を立ててから<code>compute</code>を実行します。続けて<code>viz</code>を実行してグラフを生成します。後続のRセルは先行するセルに依存しています。これらはベースRを使用しているため、追加のRパッケージをインストールする必要はありません。</li>
+          <li>別のJavaScriptチェックを行いたい場合は、<code>js_check</code>を実行します。これはスタンドアロンであり、Rセルに依存せず、Rを起動する必要もありません。</li>
+        </ol>
+        <p class="callout"><strong>初回のR実行：</strong> SciREPLのwebRランタイムをダウンロードして初期化する必要がある場合があります。ネットワークおよびプライバシーに関する通知が表示されることがあります。内容を確認し、続行する場合にのみ同意してください。ランタイムの準備が完了するまで待ち、セルにエラーがないか確認します。ワークブックをインポートしただけでは、そのR定義はロードされていません。</p>
+        <p>実行と編集のより詳細なチュートリアルを含む別の例については、<a href="../tutorial/#run">マルコフグループのレッスン</a>を参照してください。これは四つのPythonセルを持つ別のワークブックであり、その<a href="../tutorial/#export">エクスポート手順</a>では、編集したワークブックのコピーを保存する方法も説明されています。</p>
+        <p class="callout"><strong>ご自身で管理できるコピーを保持してください。</strong> ダウンロードしたファイルは元のワークブックのコピーであり、それ以降の編集内容のバックアップではありません。変更を保存するにはワークブックのコピーをエクスポートしてください。アプリやブラウザのストレージを消去するとローカルの作業が削除される可能性があり、Androidとブラウザのセッション間で変更内容は自動的には共有されません。</p>
+      </section>
+
+      <section id="other-formats">
+        <p class="step-label">その他の形式と安全性</p>
+        <h2>ファイルに含まれる内容を把握する</h2>
+        <p><strong>Jupyterノートブック (.ipynb)</strong>も<strong>メニュー → ファイルをインポート</strong>を使用しますが、その実行挙動は<code>.srwb</code>とは異なります。<strong>ワークブックのインポート時にセルを自動実行</strong>が有効になっている場合、<code>.ipynb</code>のインポートによって、保存された出力のないコードセルが自動的に実行されることがあります。</p>
+        <p class="callout"><strong>信頼できるソースからのみノートブックファイルをインポートしてください。</strong> <code>.ipynb</code>をインポートする前に、<strong>メニュー → 設定 → インポートと編集</strong>を開き、<strong>ワークブックのインポート時にセルを自動実行</strong>が<strong>オフ</strong>（チェックが外れた状態）になっていることを確認してください。デフォルトではオフになっていますが、現在の設定を確認してください。オフにしても任意のノートブックが安全であると保証されるわけではありません。実行するかどうかを明示的に判断する前に、信頼できるノートブックのコードを点検してください。</p>
+        <p><strong>個別のデータファイル：</strong>通常の<code>.srwb</code>エクスポートでは、個別のCSVファイルや、SciREPLの仮想ファイルシステム（<strong>ファイル</strong>ビュー）に保存されている他のデータは保持されません。このバージョンのシンプソンのパラドックスはコード内で合成データを作成するため、個別のデータファイルを必要としません。CSVを読み込むワークブックの場合は、<a href="../../files-export/tutorial/#export">CSVウォークスルーのパッケージアーカイブのエクスポート</a>と<a href="../../files-export/tutorial/#reopen">再オープン手順</a>に従って、ワークブックとそのデータの両方を保持して復元してください。パッケージアーカイブと<code>.zip</code>のインポートは、この短いワークブックファイルのレッスン対象外です。</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">表示に問題がある場合</p>
+        <h2>ファイルと選択したタブを確認する</h2>
+        <ul>
+          <li><strong>ピッカーでファイルが見つからない場合：</strong>ブラウザのダウンロードリストを確認して保存先を確認し、そのフォルダに移動してください。パソコンでダウンロードしても、スマートフォンのダウンロードフォルダにはファイルが配置されません。</li>
+          <li><strong>ファイル名の末尾が .txt または .html になっている場合：</strong>ワークブックのダウンロードリンクに戻り、<code>.srwb</code>拡張子を持つ実際のファイルを保存してください。HTMLページの名前を<code>.srwb</code>に変更しても、ワークブックには変換されません。</li>
+          <li><strong>古いワークブックがまだ表示されている場合：</strong>メニューを閉じて、ワークブックセレクターで新しいタイトルを確認してください。既存のタブは保持されます。</li>
+          <li><strong>二回インポートした場合：</strong>再度インポートすると別のコピーが追加され、以前のタブが更新または置換されることはありません。変更を加える前に、どちらのコピーを編集しているか確認してください。</li>
+          <li><strong>タイトルまたはセルが一致しない場合：</strong>別のダウンロードや他のレッスンのファイルではなく、<code>simpsons-paradox.srwb</code>を選択したことを確認してください。<code>main</code>上のファイルは変更される可能性があります。お持ちのコピーを<a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">現在のGitHubファイル</a>と比較し、見慣れないコードを実行する前に点検してください。</li>
+        </ul>
+        <p>ワークブックのタブと保存されたセルの編集の基本については、<a href="../../interface/tutorial/">最初のワークブックインターフェースのウォークスルー</a>を参照してください。<a href="../../../workbooks/">ワークブックリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a>では、ワークブックの構造とセルの種類について説明しています。</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL ヘルプ</span><nav aria-label="フッターナビゲーション"><a href="../../../workbooks/">ワークブックリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a><a href="../../../">すべてのヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a></nav></footer>
+</body>
+</html>

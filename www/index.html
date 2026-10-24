@@ -452,7 +452,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             </div>
 
             <h3 data-i18n="help.sourceOnlyCellsTyprDirectives">Source-only Cells and TypR Directives</h3>
-            <p data-i18n-html="help.putSourceOnFirstLine">Put <code>#!source</code> on the first line of a named TypR or Lua cell to keep highlighted code available through the Notebook VFS without executing it. The remaining directives are TypR-specific:</p>
+            <p data-i18n-html="help.putSourceOnFirstLine">Put <code>#!source</code> on the first line of a named code cell in any supported language to keep highlighted code available through the Notebook VFS without executing it. The remaining directives are TypR-specific:</p>
             <ul>
                 <li data-i18n-html="help.sourceCellShowsSourceOnly"><code>#!source</code> — the cell shows <strong>Source only</strong>, intentionally has no <code>Out [n]</code>, and remains readable through the Notebook VFS.</li>
                 <li data-i18n-html="help.typecheckTypeCheckFollowingCode"><code>#!typecheck</code> — type-check the following code without executing it.</li>
@@ -476,7 +476,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             <p data-i18n-html="help.fullDocumentationGithubReadme">Full documentation: <a href="https://github.com/s243a/SciREPL#readme" target="_blank">GitHub README</a>
             </p>
             <p><a id="help-tutorial-index" class="vfs-btn tutorial-link"
-                  href="https://s243a.github.io/SciREPL/help/tutorials/"
+                  href="https://s243a.github.io/SciREPL/help/en/tutorials/?edition=free" data-tutorial-guide="index"
                   target="_blank" rel="noopener noreferrer"
                   data-i18n="help.tutorialIndex">Tutorials (online)</a></p>
 
@@ -1124,7 +1124,7 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                 <button data-i18n="prologSettings.uploadFile" id="vfs-upload-shared" class="vfs-btn">Upload File</button>
             </div>
             <p><a id="workbook-import-tutorial" class="vfs-btn tutorial-link"
-                  href="https://s243a.github.io/SciREPL/help/workbooks/import/"
+                  href="https://s243a.github.io/SciREPL/help/en/workbooks/import/?edition=free" data-tutorial-guide="import"
                   target="_blank" rel="noopener noreferrer"
                   data-i18n="vfs.workbookImportTutorial">Workbook import tutorial (online)</a></p>
             <div class="shared-upload-dest">
@@ -1380,6 +1380,7 @@ load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
     <script src="js/appearance_ui.js"></script>
     <script src="js/release_highlights.js"></script>
     <script src="js/whats_new.js"></script>
+    <script src="js/tutorial_links.js"></script>
     <script src="js/onboarding.js"></script>
     <script src="js/android_back.js"></script>
     <script src="js/kernel_manager.js"></script>

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="تعرف على واجهة SciREPL من خلال إنشاء دفتر عمل صغير وتشغيله وتعديله وتصديره.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ar/interface/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <title>دليل الواجهة الإرشادي · مساعدة SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">التخطي إلى المحتوى</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+    <nav aria-label="التنقل الرئيسي">
+      <a href="../../../interface/">مرجع الواجهة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+      <a href="../../tutorials/">جميع الدروس التعليمية</a>
+      <a href="../../../">كل المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+      <a href="../../../../">فتح تطبيق الويب التقدمي لـ Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="لغة البرنامج التعليمي"><details class="tutorial-language-menu"><summary>لغة البرنامج التعليمي: <bdi>العربية</bdi></summary><nav aria-label="لغة البرنامج التعليمي"><a href="../../../en/interface/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="./" lang="ar" hreflang="ar" aria-current="page">العربية</a>
+      <a href="../../../bn/interface/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/interface/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">برنامج تعليمي مترجم آليًا؛ والمراجعة بواسطة متحدث أصلي باللغة قيد الانتظار. لم تتغير التعليمات البرمجية والقيم التقنية. تُظهر لقطات الشاشة الواجهة الأصلية باللغة الإنجليزية؛ يرجى مطابقة أسماء عناصر التحكم المترجمة في هذا النص مع ما يظهر في تطبيقك.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> / <a href="../../../interface/">الواجهة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> / الدليل الإرشادي</p>
+    <article>
+      <p class="eyebrow">التعلم بالممارسة</p>
+      <h1>أنشئ دفتر عملك الأول</h1>
+      <p class="lede">هذا هو الدليل العملي المطول المصاحب لـ <a href="../../../interface/">مرجع الواجهة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>. ستقوم بتشغيل خلية Python واحدة، وتعديلها، وحفظ نسخة تتحكم بها. لا يلزم وجود حساب ذكاء اصطناعي أو مفتاح API.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">خطوات أندرويد</li>
+        <li class="chip">نحو 5 دقائق</li>
+      </ul>
+      <p class="screen-note">تُظهر لقطات الشاشة SciREPL Free v1.3.2 على هاتف من سلسلة Samsung Galaxy S24. ينطبق الدرس أيضاً على Pro، مع أن بعض عناصر التحكم هناك قد تبدو مختلفة.</p>
+      <nav class="lesson-nav" aria-label="خطوات الدليل الإرشادي">
+        <strong>في هذا الدرس</strong>
+        <ol>
+          <li><a href="#find-your-place">حدد موقعك</a></li>
+          <li><a href="#write-a-cell">اكتب خلية وشغلها</a></li>
+          <li><a href="#edit-a-cell">عدل الخلية المحفوظة</a></li>
+          <li><a href="#save-a-copy">صدر نسخة من دفتر العمل</a></li>
+          <li><a href="#what-next">ما يمكنك تجربته بعد ذلك</a></li>
+        </ol>
+        <p><a href="../../tutorials/">جميع الدروس التعليمية</a></p>
+      </nav>
+
+      <section id="find-your-place">
+        <p class="step-label">الخطوة 1</p>
+        <h2>حدد موقعك في التطبيق</h2>
+        <p>الصف العلوي هو <strong>الترويسة</strong>. وهو يتضمن القائمة، والمساعدة، وشارة الحالة. وتحدد أداة اختيار دفتر العمل الدفتر المفتوح.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--header" role="img" aria-label="ترويسة الهاتف مع تحديد أداة اختيار دفتر العمل وزر القائمة وزر المساعدة بإطار أصفر.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>تميز الخطوط الصفراء أداة اختيار دفتر العمل والقائمة والمساعدة.</figcaption>
+          <p>يوجد أسفل صف الترويسة دفتر العمل: الخلايا المحفوظة ونتائجها.</p>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">عرض لقطة شاشة الهاتف الكاملة</a>
+        </figure>
+        <p><strong>لوحة الخلية الجديدة</strong> هي المكان الذي تكتب فيه الخلية التالية. قد تختفي أزرار الترويسة الاختيارية عندما تكون الشاشة ضيقة؛ وتظل إجراءاتها متاحة من القائمة أو المساعدة عند الاقتضاء.</p>
+      </section>
+
+      <section id="write-a-cell">
+        <p class="step-label">الخطوة 2</p>
+        <h2>كتابة خلية Python وتشغيلها</h2>
+        <p>انتظر حتى تُظهر شارة الحالة <strong>جاهز</strong> قبل التشغيل الأول.</p>
+        <ol class="lesson-steps">
+          <li>في لوحة الخلية الجديدة، اختر <strong>Python</strong> من محدد اللغة. على الهاتف الضيق، قد يُظهر المحدد المغلق <strong>Py</strong> فقط.</li>
+          <li>اكتب هذا البرنامج القصير:
+            <pre><code>print("Hello from SciREPL")</code></pre>
+          </li>
+          <li>المس <strong>تشغيل</strong>. تظهر خلية محفوظة في مصنف العمل. وأسفلها، ينبغي أن ترى <code>Hello from SciREPL</code>.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--composer" role="img" aria-label="لوحة الخلية الجديدة مع تحديد Py، وعبارة print Hello from SciREPL في حقل الشيفرة، وإحاطة زر Run بإطار أصفر.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>تُنشئ اللوحة السفلية خلية <em>جديدة</em>: اختر <strong>Py</strong>، وأدخل الشيفرة البرمجية، ثم المس <strong>تشغيل</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">عرض لقطة شاشة الهاتف الكاملة</a>
+        </figure>
+        <p class="callout"><strong>قد يستغرق التشغيل الأول وقتاً أطول.</strong> يجب أن تبدأ بيئة تشغيل Python مرة واحدة. انتظر حتى تعود الحالة إلى <strong>جاهز</strong>؛ وعادة ما تعيد خلايا Python اللاحقة استخدام بيئة التشغيل تلك.</p>
+        <aside class="callout">
+          <p><strong>في حال ظهور إشعار الخصوصية:</strong> تكون حزمة Python مدمجة عادةً، لذا ينبغي ألا يحتاج هذا المثال إلى تنزيل بيئة تشغيل. قد تُظهر بيئة تشغيل عبر الشبكة، مثل R أو Lua في Free، سياسة خصوصية SciREPL أولاً؛ ويمكن لـ Python ذلك أيضاً إذا احتاجت نسخته المدمجة إلى بديل عبر الشبكة. اقرأها، ومرر <em>داخل مربع الحوار</em> إلى الأسفل، ثم المس <strong>أفهم ذلك</strong> إذا كنت موافقاً. بعد ذلك قد تطالبك مطالبة منفصلة لتنزيل بيئة التشغيل بلمس <strong>تنزيل</strong>.</p>
+          <p><a href="../../../interface/tutorial/assets/privacy-policy-top.jpg">شاهد مثالاً على مربع حوار سياسة الخصوصية<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> (تُظهر لقطة الشاشة الجزء العلوي منه؛ والزر موجود في موضع أدنى). في Free 1.4.0 وPro 1.4.0، يؤدي أمر <code>%pip install</code> صالح أيضاً إلى فتح هذا الإشعار إذا لم تكن قد قبلت الإفصاح الحالي عن الشبكة، وذلك قبل محاولة تثبيت أي حزمة. راجع <a href="../../../privacy/">الخصوصية والبيانات المحلية<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> قبل استخدام ميزات الشبكة.</p>
+        </aside>
+      </section>
+
+      <section id="edit-a-cell">
+        <p class="step-label">الخطوة 3</p>
+        <h2>تعديل الخلية المحفوظة</h2>
+        <ol class="lesson-steps">
+          <li>المس القلم <strong>✎</strong> في ترويسة الخلية المحفوظة نفسها، في أعلى اليمين إلى يسار <strong>✕</strong> مباشرة. سيؤدي ذلك إلى فتح تلك الخلية للتعديل؛ بينما تؤدي الكتابة في لوحة الخلية الجديدة إلى إنشاء خلية أخرى.</li>
+          <li>غيّر <code>Hello from SciREPL</code> إلى <code>Hello again</code>.</li>
+          <li>اختر <strong>تشغيل</strong> لحفظ التغيير وتشغيله. ينبغي أن ترى الآن <code>Hello again</code> أسفل تلك الخلية.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--editing" role="img" aria-label="محرر الخلية المحفوظة يحتوي على print Hello again. تحدد الإطارات الصفراء قلم الخلية المحفوظة في أعلى اليمين، وحقل الشيفرة البرمجية القابل للتعديل، وزر Run الخاص بها. ولا يزال المخرج السابق يعرض Hello from SciREPL حتى يتم لمس Run.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-edit-draft.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/edit-draft-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>تُظهر الإطارات الصفراء موضع <strong>قلم ✎</strong> للخلية المحفوظة، والشيفرة البرمجية التي تقوم بتعديلها، وزر <strong>تشغيل</strong> لتلك الخلية. يظهر القلم باهتاً في لقطة الشاشة هذه لأن وضع التعديل مفتوح بالفعل. يؤدي Run إلى حفظ المراجعة وتنفيذها؛ ويبقى المخرج القديم مرئياً حتى ذلك الحين.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-edit-draft.png">عرض لقطة شاشة الهاتف الكاملة، بما في ذلك لوحة المفاتيح</a>
+        </figure>
+        <aside class="callout">
+          <p><strong>اختصار Pro:</strong> على شاشة اللمس، انقر نقراً مزدوجاً على شيفرة الخلية المحفوظة لتعديلها. يستخدم Free حالياً الزر <strong>✎</strong>.</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--result" role="img" aria-label="خلية Python محفوظة تحتوي على print Hello again، متبوعة بالمخرج المميّز Hello again.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-rerun.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/rerun-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>بعد <strong>تشغيل</strong>، يُظهر المخرج أسفل الخلية المحفوظة <code>Hello again</code>.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-rerun.png">عرض لقطة شاشة الهاتف الكاملة</a>
+        </figure>
+        <p>إذا فتحت المحرر عن طريق الخطأ، فاستخدم <strong>إلغاء</strong> لإغلاقه دون تشغيل. يغير محدد اللغة داخل الخلية المحفوظة تلك الخلية، بينما لا يفعل ذلك محدد الخلايا الجديدة.</p>
+      </section>
+
+      <section id="save-a-copy">
+        <p class="step-label">الخطوة 4</p>
+        <h2>تصدير نسخة من مصنف العمل</h2>
+        <ol class="lesson-steps">
+          <li>افتح <strong>القائمة → تصدير المصنفات والحزم</strong>.</li>
+          <li>اختر <strong>علامة التبويب الحالية فقط</strong> أو <strong>جميع علامات التبويب</strong>، ثم تنسيق SciREPL <strong>مصنف (.srwb)</strong> عندما تريد الاحتفاظ بالحالة الخاصة بـ SciREPL.</li>
+          <li>اضغط على <strong>تصدير</strong> واختر وجهة تتحكم فيها.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--menu" role="img" aria-label="صف القائمة تصدير مصنفات العمل والحزم محاط بإطار أصفر، بين تصدير المستند واستيراد ملف.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>اختر <strong>تصدير المصنفات والحزم</strong>، وليس تصدير المستند.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">عرض لقطة شاشة القائمة الكاملة</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="مربع حوار التصدير مع تنسيق مصنف العمل srwb، ونطاق علامة التبويب الحالية فقط، وزر التصدير محاط بإطار أصفر.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>بالنسبة لعلامة تبويب واحدة، احتفظ بـ <strong>مصنف (.srwb)</strong> و <strong>علامة التبويب الحالية فقط</strong>، ثم اضغط على <strong>تصدير</strong>. اختر <strong>جميع علامات التبويب</strong> لتضمين مصنف العمل بأكمله.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-export.png">عرض لقطة شاشة مربع حوار التصدير الكاملة</a>
+        </figure>
+        <p class="callout"><strong>لماذا التصدير؟</strong> يستعيد SciREPL الجلسات المحلية، لكن التخزين المحلي ليس نسخة احتياطية ولا تتم مشاركته تلقائيًا بين تطبيق أندرويد والمتصفح. راجع <a href="../../../files-export/">الملفات والتصدير<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> لمعرفة التنسيقات الأخرى، بما في ذلك <code>.ipynb</code> و PDF.</p>
+      </section>
+
+      <section id="what-next">
+        <p class="step-label">الخطوة 5</p>
+        <h2>ما يمكنك تجربته بعد ذلك</h2>
+        <p>جرب <code>2 + 2</code> في خلية Python أخرى. ثم استخدم محدد مصنفات العمل للتبديل بين علامات التبويب. يبدأ <a href="../../files-export/tutorial/">الدليل الإرشادي لمصنف عمل CSV</a> من <strong>القائمة → تصفح الحزم والمجموعات والمصنفات</strong>، ويثبت مثالاً، ويوضح كيفية عمل خلاياه مع ملف محلي.</p>
+        <p>يوضح <a href="../../workbooks/tutorial/">الدليل الإرشادي لمجموعات ماركوف</a> كيفية البحث في الكتالوج الأوسع، وفتح مصنف عمل موجود حول حركات المكعب، وتشغيل خلاياه بالترتيب، وتغيير معلمة واحدة.</p>
+        <p>للحصول على تذكير سريع بمكان وجود عناصر التحكم، ارجع إلى <a href="../../../interface/">مرجع الواجهة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>. لتعلم لغة أخرى أو إضافة حزم، تابع مع <a href="../../../languages-packages/">اللغات والحزم<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>.</p>
+        <aside class="callout"><strong>هل تستخدم Pro؟</strong> سير العمل الأساسي هو نفسه. يحتوي Pro أيضًا على محرر ملء الشاشة وميزات ذكاء اصطناعي اختيارية؛ راجع <a href="../../../pro/ai/#full-screen">مسارات عمل الذكاء الاصطناعي وملء الشاشة في Pro<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> بعد أن تعتاد على الخلايا العادية.</aside>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>مساعدة SciREPL</span><nav aria-label="تذييل التنقل"><a href="../../../interface/">مرجع موجز للواجهة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a><a href="../../../">كل المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a></nav></footer>
+</body>
+</html>

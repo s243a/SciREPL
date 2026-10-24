@@ -16,6 +16,30 @@
  * Loaded before app.js via index.html. Registered as window.notebookVFS.
  */
 
+/**
+ * Source-only cells are stored notebook data, so any output left over from a
+ * previously executable version of the cell is stale. This helper deliberately
+ * only removes output when the cell is source-only; changing it back never
+ * creates or restores an output card.
+ * @param {object} cell
+ * @returns {boolean} whether stale output was cleared
+ */
+function clearSourceOnlyCellOutput(cell) {
+    const isSourceOnly = window._appInternals?.isSourceOnlyCell;
+    if (typeof isSourceOnly !== 'function' ||
+        !isSourceOnly(cell.code, cell.type, cell.language || 'python')) {
+        return false;
+    }
+
+    if (cell.outputCard && typeof cell.outputCard.remove === 'function') {
+        cell.outputCard.remove();
+    }
+    cell.outputCard = null;
+    cell.lastOutput = '';
+    cell.lastOutputHtml = '';
+    return true;
+}
+
 class NotebookVFS {
     constructor() {
         /** @type {string} Security settings keys in localStorage */
@@ -175,13 +199,17 @@ class NotebookVFS {
             case '.code':
                 cell.code = typeof value === 'string' ? value : new TextDecoder().decode(value);
                 this._updateCellUI(index, 'code');
+                clearSourceOnlyCellOutput(cell);
                 return true;
             case '.language':
                 cell.language = typeof value === 'string' ? value.trim() : new TextDecoder().decode(value).trim();
                 this._updateCellUI(index, 'language');
+                clearSourceOnlyCellOutput(cell);
                 return true;
             case '.type':
                 cell.type = typeof value === 'string' ? value.trim() : new TextDecoder().decode(value).trim();
+                this._updateCellUI(index, 'type');
+                clearSourceOnlyCellOutput(cell);
                 return true;
             case '.name':
                 return this._setCellName(index, typeof value === 'string' ? value.trim() : new TextDecoder().decode(value).trim());
@@ -280,7 +308,7 @@ class NotebookVFS {
             cell.inputCard.dataset.language = cell.language;
         }
 
-        if (['code', 'language'].includes(changedProp) &&
+        if (['code', 'language', 'type'].includes(changedProp) &&
             cell.inputCard && window._appInternals?.updateSourceOnlyIndicator) {
             window._appInternals.updateSourceOnlyIndicator(
                 cell.inputCard, cell.code, cell.type, cell.language || 'python'
@@ -831,9 +859,18 @@ class WorkbookVFS {
         const cell = cells[index];
         const value = typeof content === 'string' ? content : new TextDecoder().decode(content);
         switch (parsed.property) {
-            case '.code': cell.code = value; return true;
-            case '.language': cell.language = value.trim(); return true;
-            case '.type': cell.type = value.trim(); return true;
+            case '.code':
+                cell.code = value;
+                clearSourceOnlyCellOutput(cell);
+                return true;
+            case '.language':
+                cell.language = value.trim();
+                clearSourceOnlyCellOutput(cell);
+                return true;
+            case '.type':
+                cell.type = value.trim();
+                clearSourceOnlyCellOutput(cell);
+                return true;
             case '.name': cell.name = value.trim(); return true;
             default: return false;
         }

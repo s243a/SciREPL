@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "locale": "de",
+  "chunk": "22",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "originalReviewHash": "28489c1a6768380aa5aaad0826854847df9f30aa3b812d1fc7b250da27560515",
+  "reviewer": "Codex controller with independent Codex fidelity audit",
+  "reviewScope": "All 36 complete German review fields were independently compared with the frozen source. The sole correction restores the standard Base64 identifier; the technical meaning, three independently reviewed short-label keeps, source/output distinctions, and all other prose remain unchanged.",
+  "nativeLanguageReview": "pending",
+  "corrections": [
+    {
+      "fieldId": "workbooks.graphics.0041",
+      "before": "Base-vierundsechzig-Bildzeichenfolge",
+      "after": "Base64-Bildzeichenfolge",
+      "reason": "Use the standard literal Base64 technical identifier rather than spelling sixty-four as words, preserving the image-string meaning and all surrounding German prose."
+    }
+  ]
+}

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="zh" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="安装 CSV 工作簿，在“文件与存储”中运行并编辑其数据，然后导出并重新打开工作簿加 CSV 数据包。包含 Pro 的可选文件高亮功能。">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/zh/files-export/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../files-export/tutorial/tutorial.css">
+  <title>CSV 工作簿演练 · SciREPL 帮助</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/files-export/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/files-export/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/files-export/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/files-export/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/files-export/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/files-export/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/files-export/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/files-export/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/files-export/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/files-export/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/files-export/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/files-export/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/files-export/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/files-export/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">跳转至正文</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (英文参考页面)</span></a>
+    <nav aria-label="主导航">
+      <a href="../../../files-export/">文件与导出<span class="english-reference"> (英文参考页面)</span></a>
+      <a href="../../tutorials/">所有教程</a>
+      <a href="../../../">所有帮助<span class="english-reference"> (英文参考页面)</span></a>
+      <a href="../../../../">打开 Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="教程语言"><details class="tutorial-language-menu"><summary>教程语言: <bdi>简体中文</bdi></summary><nav aria-label="教程语言"><a href="../../../en/files-export/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/files-export/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/files-export/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/files-export/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/files-export/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/files-export/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/files-export/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/files-export/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/files-export/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/files-export/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/files-export/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/files-export/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="./" lang="zh" hreflang="zh" aria-current="page">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">本教程为机器翻译，母语审校待完成。代码和技术参数保持不变。屏幕截图显示原始英文界面；请将本文中翻译的控件名称与您的应用相对应。</p></aside>
+    <p class="breadcrumbs"><a href="../../../">帮助<span class="english-reference"> (英文参考页面)</span></a> / <a href="../../../files-export/">文件与导出<span class="english-reference"> (英文参考页面)</span></a> / CSV 演练</p>
+    <article>
+      <p class="eyebrow">边做边学</p>
+      <h1>在工作簿中探索 CSV</h1>
+      <p class="lede">从 <strong>浏览软件包、合辑与工作簿</strong> 开始。安装一个小型示例，运行其单元格，编辑其 CSV，然后导出并重新打开带有其数据的工作簿。数据纯属虚构，Python 代码不需要额外的包或 AI 账户。</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Android 操作步骤</li>
+        <li class="chip">约 15 分钟</li>
+      </ul>
+      <p class="screen-note">屏幕截图截取自三星 Galaxy S24 系列手机。“浏览”和初始输出的图片展示的是 Free；新的文件编辑器和数据包选择图片展示的是 Pro 1.4.0，并在下方标注。在 Pro 中，您可以使用直接下载工作簿和“导入文件”路径；周围的控件可能会有所不同，并且此新的“浏览”条目可能不会出现在那里。</p>
+      <p class="callout"><strong>还没有在“浏览”中看到此工作簿？</strong> 该示例内置于 Free 1.4.0 及更高版本中；较旧的已安装应用或缓存的 PWA 可能不会列出它。<a download="csv-basics-seedlings.srwb" href="../../../files-export/tutorial/assets/csv-basics-seedlings.srwb">直接下载工作簿</a>，然后使用 <strong>菜单 → 导入文件</strong> 打开它。您现在即可继续阅读本课的后续内容。</p>
+      <nav class="lesson-nav" aria-label="CSV 演练步骤">
+        <strong>本课内容</strong>
+        <ol>
+          <li><a href="#install">从“浏览”安装示例</a></li>
+          <li><a href="#run">运行其 Python 单元格</a></li>
+          <li><a href="#change">在“文件与存储”中更改测量值</a></li>
+          <li><a href="#import">导入 CSV 文件</a></li>
+          <li><a href="#export">导出工作簿和数据</a></li>
+          <li><a href="#reopen">重新打开数据包并检查其数据</a></li>
+        </ol>
+        <p><a href="../../tutorials/">所有教程</a></p>
+      </nav>
+
+      <section id="install">
+        <p class="step-label">步骤 1</p>
+        <h2>在“浏览”中找到工作簿</h2>
+        <ol class="lesson-steps">
+          <li>打开 <strong>菜单 → 浏览软件包、合辑与工作簿</strong>。如果可见，可选的 📦 顶部快捷方式也会打开相同的屏幕。</li>
+          <li>搜索 <strong>CSV Basics</strong>。在 <strong>工作簿</strong> 下，找到 <strong>CSV Basics: Seedling Heights</strong>。这是一个内置的英文示例，而不是需要安装到 Python 中的包。</li>
+          <li>点按 <strong>安装</strong>。工作簿通常会成为当前选中的标签页。如果您关闭了自动切换功能，请使用工作簿选择器来选择它。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse-menu" role="img" aria-label="SciREPL 菜单，“浏览包、捆绑包与工作簿”用黄色轮廓标出。">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>黄色轮廓标记了菜单中的 <strong>浏览软件包、合辑与工作簿</strong>。</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">查看完整的菜单屏幕截图</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--catalog" role="img" aria-label="筛选为 CSV Basics 的“浏览”屏幕，搜索字段和“安装”按钮用黄色轮廓标出。">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-catalog.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/catalog-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>搜索 <strong>CSV Basics</strong>，然后在工作簿卡片上使用 <strong>安装</strong>。在本次截图中远程目录不可用；内置项目仍然会显示。</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-catalog.png">查看完整的“浏览”屏幕截图</a>
+        </figure>
+        <p class="callout"><strong>如果出现隐私权政策：</strong>“浏览”可能会在线检查已验证的目录。阅读披露信息，在<em>对话框内部</em>滚动到底部，仅在您同意时点按<strong>我已了解</strong>。您也可以关闭该通知并继续使用内置条目；此时远程目录将不可用。此示例本身不需要外部数据集或 Python 包。</p>
+        <p>安装工作簿会添加其单元格；它<em>不会</em>运行这些单元格。这样可以让您在执行代码之前对其进行检查。</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">步骤 2</p>
+        <h2>按顺序运行单元格</h2>
+        <p>开头的文本对示例进行了说明。这三个 Python 单元格分别有一个名称：<code>create_csv</code>、<code>read_csv</code> 和 <code>compare_groups</code>。对于已保存的单元格，点按其 <strong>✎ 铅笔</strong>打开编辑器，然后点按该单元格的 <strong>运行</strong>。在 Pro 中，您也可以双击单元格的代码来编辑它。</p>
+        <ol class="lesson-steps">
+          <li>运行 <code>create_csv</code>。它会将六行虚构数据写入 <code>/shared/data/seedling-heights.csv</code>。您应该会看到 <code>Saved 6 fictional rows</code>。</li>
+          <li>运行 <code>read_csv</code>。它会打开刚创建的文件并输出所有六行内容。</li>
+          <li>运行 <code>compare_groups</code>。它会输出光照平均值 <strong>13.0 cm</strong>、遮阴平均值 <strong>8.0 cm</strong> 以及差值 <strong>5.0 cm</strong>。</li>
+        </ol>
+        <p>该文件也可以在 <strong>菜单 → 文件与存储</strong> 中看到。您可以在那里读取它，或者使用 <strong>编辑</strong> 和 <strong>保存</strong> 直接修改它。<a href="#edit-file">下一步将展示具体操作方法。</a></p>
+        <p>最终输出应该如下所示：</p>
+        <pre><code>Light mean: 13.0 cm
+Shade mean: 8.0 cm
+Difference: 5.0 cm</code></pre>
+        <p class="callout"><strong>首次运行较慢？</strong> Python 初始化可能需要稍等片刻。在判断单元格是否执行完毕之前，请等待状态徽标显示为 <strong>就绪</strong>。后续单元格通常会复用已加载的运行时。如果运行时下载需要许可，请在接受之前阅读隐私声明；此工作簿不会调用 <code>%pip install</code>。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--csv-output" role="img" aria-label="SciREPL 输出显示光照平均值 13.0 厘米、遮阴平均值 8.0 厘米和差值 5.0 厘米。">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-output.png" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>运行示例工作簿后手机上第三个单元格的输出。</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-output.png">查看完整的输出屏幕截图</a>
+        </figure>
+        <p>这些编造的数值仅用于演示数据读取和计算，并不代表关于光照与植物生长的科学结论。</p>
+      </section>
+
+      <section id="change">
+        <p class="step-label">步骤 3</p>
+        <h2>更改一个数值并重新运行</h2>
+        <div id="edit-file">
+          <p>您无需编辑 Python 单元格来更改其数据。直接打开 CSV 本身：</p>
+          <ol class="lesson-steps">
+            <li>选择 <strong>菜单 → 文件与存储</strong>（菜单可能会在该名称中附加 <strong>VFS / Paths</strong>）。</li>
+            <li>选择 <strong>/ (持久存储)</strong> 或 <strong>所有文件系统</strong>。滚动至 <code>/shared/data/seedling-heights.csv</code> 并点按文件名，而不是其下载或移除图标。</li>
+            <li>点按 <strong>编辑</strong>。将数据行 <code>light,14</code> 改为 <code>light,15</code>。保持表头 <code>group,height_cm</code>、逗号和其他数据行不变。</li>
+            <li>点按 <strong>保存</strong>，然后关闭“文件与存储”。保存文件不会运行任何代码。</li>
+          </ol>
+          <figure class="phone-figure">
+            <div class="shot-window shot-window--file-edit" role="img" aria-label="正在“文件与存储”中编辑 CSV 文件，“保存”用黄色轮廓标出。Pro 还显示了“全屏”。">
+              <div class="shot-stage">
+                <img src="../../../files-export/tutorial/assets/phone-file-edit.png" alt="" loading="lazy" decoding="async">
+                <img src="../../../files-export/tutorial/assets/file-edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              </div>
+            </div>
+            <figcaption><strong>Pro 1.4.0：</strong>CSV 已在文件预览的编辑器中打开。黄色轮廓标出了 <strong>保存</strong>。Free 也具有预览的“编辑/保存”控件；<strong>全屏</strong> 仅限 Pro。</figcaption>
+            <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-file-edit.png">查看完整的“文件与存储”编辑屏幕截图</a>
+          </figure>
+        </div>
+        <p>仅重新运行 <code>read_csv</code> 和 <code>compare_groups</code>。光照平均值现在约为 <strong>13.3 cm</strong>，差值约为 <strong>5.3 cm</strong>。<strong>切勿</strong>重新运行 <code>create_csv</code>：它会用该单元格中仍保留的数值覆盖您对文件的编辑。</p>
+        <p>或者，使用 <code>create_csv</code> 的 <strong>✎ 铅笔</strong>对其进行编辑，将其测量值从 <code>14</code> 改为 <code>15</code>，然后按顺序运行全部三个 Python 单元格。这将更改生成文件的代码，而不仅仅是更改文件本身。</p>
+        <p>为什么要重新运行后面的单元格？它们保存的输出是先前执行的记录；更改文件不会自动重新计算早先的结果。每个单元格仅在您运行它时才会读取该文件。</p>
+        <aside class="callout" id="pro-syntax-highlighting" data-editions="pro">
+          <h3>Pro：全屏文件编辑与可选语法高亮</h3>
+          <p>在文件预览中，点按 <strong>全屏</strong> 可打开更大的编辑器。CSV 仍保持为 <strong>纯文本</strong>，因此其 <strong>语法高亮</strong> 复选框处于停用状态。</p>
+          <p>对于受支持的代码文件，语法高亮是可选的，并且<strong>默认处于关闭状态</strong>。请使用此文件编辑器中的复选框将其开启，而不是通过笔记本的外观设置。扩展名决定了语言类型：例如 <code>.py</code> 对应 Python，<code>.js</code> 对应 JavaScript，<code>.R</code> 对应 R，而 <code>.pl</code> 对应 <strong>Prolog</strong> 而不是 Perl。未知扩展名仍将保持为纯文本。</p>
+          <figure class="phone-figure">
+            <div class="shot-window shot-window--file-highlight" role="img" aria-label="Pro 全屏 Python 文件编辑器，已勾选“语法高亮”并显示彩色 Python 代码。“保存”和“关闭”位于工具栏中。">
+              <div class="shot-stage">
+                <img src="../../../files-export/tutorial/assets/phone-python-highlight.png" alt="" loading="lazy" decoding="async">
+                <img src="../../../files-export/tutorial/assets/file-highlight-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              </div>
+            </div>
+            <figcaption><strong>Pro 1.4.0：</strong>一个单独的 <code>seedling-summary.py</code> 演示文件，包含比较代码，并已启用高亮。本 CSV 课程不需要此可选文件。长行可以水平滚动。</figcaption>
+            <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-python-highlight.png">查看完整的带高亮文件编辑器屏幕截图</a>
+          </figure>
+          <p><strong>保存</strong> 会写入文件并保持编辑器打开。使用 <strong>× 关闭</strong> 可返回“文件与存储”；在放弃未保存的更改之前系统会进行提示。编辑或保存文件绝不会执行该文件。</p>
+          <p><a href="../../../files-export/tutorial/assets/phone-csv-fullscreen.png">查看以纯文本形式打开 CSV 的同一全屏编辑器。</a></p>
+        </aside>
+      </section>
+
+      <section id="import">
+        <p class="step-label">步骤 4</p>
+        <h2>导入原始 CSV</h2>
+        <ol class="lesson-steps">
+          <li><a download="seedling-heights.csv" href="../../../files-export/tutorial/assets/seedling-heights.csv">将原始示例 CSV 下载<span class="english-reference"> (英文参考页面)</span></a>到您设备的文件选取器可以打开的文件夹中。</li>
+          <li>在 SciREPL 中，选择 <strong>菜单 → 导入文件</strong> 并选择 <code>seedling-heights.csv</code>。确认信息应显示已上传至 <code>/shared/data/seedling-heights.csv</code>。</li>
+          <li>这会用原始的六行内容替换已更改的本地文件。重新运行 <code>read_csv</code> 和 <code>compare_groups</code>；这两个平均值应恢复为 <strong>13.0</strong> 和 <strong>8.0 cm</strong>。</li>
+        </ol>
+        <p class="callout"><strong>重要提示：</strong>在导入同名的不同文件后，除非您打算覆盖它，否则请勿重新运行 <code>create_csv</code>。对于您自己的 CSV，请注意确切的确认路径，并将读取单元格中的 <code>path</code> 更改为该文件名。文件选取器可能会显示 Android 下载内容、云存储服务提供商或两者兼有。</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">步骤 5</p>
+        <h2>保存便携式副本</h2>
+        <p>打开 <strong>菜单 → 导出工作簿与软件包</strong>。如果您只需要单元格，请选择 <strong>工作簿 (.srwb)</strong> 和 <strong>仅当前标签页</strong>。<code>.srwb</code><strong>不</strong>包含 SharedVFS 中的独立 CSV。</p>
+        <p>要将工作簿<em>连同其数据</em>一起移动，请选择 <strong>软件包（归档）</strong> 并保留 <strong>.zip</strong>。在 <strong>内容</strong> 树中，选择：</p>
+        <ul>
+          <li>工作簿 <code>CSV_Basics__Seedling_Heights.ipynb</code>，位于 <strong>notebooks/</strong> 下。数据包导出以 Jupyter notebook 格式存储单元格。</li>
+          <li>文件 <code>seedling-heights.csv</code>，位于 <strong>shared/data/</strong> 下。</li>
+        </ul>
+        <p>取消勾选无关的工作簿和文件。如有需要，使用箭头展开文件夹；不要假定 <strong>仅当前标签页</strong> 会限制数据包的内容。本课不需要额外的 <strong>shared/notebooks/</strong> 副本。在 Pro 中，除非您特意想要共享，否则请取消勾选 <strong>包含 AI 对话</strong>。</p>
+        <p>点按 <strong>导出</strong>。在 Android 上这会打开分享面板：请将归档保存到您可以再次找到的地方，例如您自己的云端硬盘或文件管理器的保存目标位置。在浏览器中它会下载一个文件。建议的文件名是 <code>scirepl_package.zip</code>；将其重命名为 <code>seedling-project.zip</code> 会更容易识别。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--package-selection" role="img" aria-label="Pro 数据包导出，已选择“数据包归档”，且仅勾选了 CSV Basics 工作簿和 seedling-heights CSV。黄色轮廓标出了这两个文件。">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-package-selection.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/package-selection-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pro 1.4.0：</strong>已选择“数据包”，并且勾选了两个黄色轮廓标出的条目。其他工作簿、可选的 Python 演示文件以及已保存的工作簿副本未包含在内。Free 使用相同的工作簿与数据选择，但没有 AI 对话选项。</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-package-selection.png">查看完整的数据包选择屏幕截图</a>
+        </figure>
+        <p class="callout"><strong>本地恢复不是备份。</strong> Android 应用存储、Chrome 中的 PWA 以及其他浏览器不会自动共享这些文件。请将导出的副本保存在您自己控制的地方。有关其他格式，请参见<a href="../../../files-export/">文件、导入与导出<span class="english-reference"> (英文参考页面)</span></a>。</p>
+      </section>
+
+      <section id="reopen">
+        <p class="step-label">步骤 6</p>
+        <h2>重新打开数据包并检查这两个部分</h2>
+        <p>在信任备份之前，请先检查您是否能打开它。您可以在另一个 SciREPL 安装或浏览器个人资料中执行此操作。在此处导入会添加另一个工作簿；它还会替换数据包目标路径下的文件，因此在导入旧数据包之前，请为任何较新的文件单独保留一份副本。</p>
+        <ol class="lesson-steps">
+          <li>选择 <strong>菜单 → 导入数据包 (.zip / .tar.gz)</strong> 并选择您保存的归档。在本课中，它是一个 <code>.zip</code>，而不是单独下载的 CSV 或 <code>.srwb</code>。</li>
+          <li>如果未自动选中，请选择新导入的 <strong>CSV Basics: Seedling Heights</strong> 工作簿。如果您导入到同一个应用中，旧标签页和新标签页的名称可能会相同。</li>
+          <li>打开 <strong>菜单 → 文件与存储</strong> 并检查 <code>/shared/data/seedling-heights.csv</code>。它的六行内容应与您导出的文件相匹配。检查完毕后关闭预览。</li>
+          <li>运行<strong>第二个 Python 单元格</strong>（<code>read_csv</code> 代码），然后运行<strong>第三个 Python 单元格</strong>（<code>compare_groups</code> 代码）。数据包导出使用 Jupyter 格式，可能不会保留单元格名称；请通过它们的顺序和代码来进行识别。在执行步骤 4 的原始 CSV 后，结果预计为 <strong>13.0 cm</strong>、<strong>8.0 cm</strong> 和 <strong>5.0 cm</strong>。如果您导出的是编辑后的 <code>light,15</code> 文件，结果预计为 <strong>13.3 cm</strong>、<strong>8.0 cm</strong> 和 <strong>5.3 cm</strong>。</li>
+        </ol>
+        <p class="callout"><strong>进行此项恢复检查时切勿重新运行 <code>create_csv</code>。</strong>它会用其代码中的数值覆盖导入的数据。先读取恢复后的 CSV 可以证明数据随工作簿一同迁移；单凭旧的已保存输出无法证明这一点。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--restored-output" role="img" aria-label="恢复数据包并运行其比较单元格后的全新输出：光照平均值 13.0 厘米，遮阴平均值 8.0，差值 5.0。">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-restored-output.png" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pro 1.4.0：</strong>导入导出的归档并仅运行其读取和比较单元格后，手机上的全新输出。CSV 恢复了原始的六行数据。</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-restored-output.png">查看完整的已恢复输出屏幕截图</a>
+        </figure>
+        <p>如果文件丢失或工作簿不存在，请返回步骤 5 并检查是否<em>同时</em>选中了两个条目。普通工作簿导出无法为您携带 CSV。</p>
+      </section>
+
+      <section id="what-next">
+        <h2>后续步骤</h2>
+        <p>尝试创建您自己的 CSV。保留列 <code>group</code> 和 <code>height_cm</code>，使用数值型高度，并至少包含一行 <code>light</code> 和一行 <code>shade</code>——或者调整 <code>compare_groups</code> 中的两个分组筛选条件。您可以在 <strong>菜单 → 文件与存储</strong> 下检查本地文件。有关此处使用的手机端控件，请参见<a href="../../interface/tutorial/">首个工作簿界面演练</a>。</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL 帮助</span><nav aria-label="页脚导航"><a href="../../../files-export/">文件与导出<span class="english-reference"> (英文参考页面)</span></a><a href="../../../">所有帮助<span class="english-reference"> (英文参考页面)</span></a></nav></footer>
+</body>
+</html>

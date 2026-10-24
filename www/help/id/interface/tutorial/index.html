@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="id" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Pelajari antarmuka SciREPL dengan membuat, menjalankan, mengedit, dan mengekspor buku kerja kecil.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/id/interface/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <title>Panduan antarmuka · Bantuan SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Lewati ke konten</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+    <nav aria-label="Navigasi utama">
+      <a href="../../../interface/">Referensi antarmuka<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+      <a href="../../tutorials/">Semua tutorial</a>
+      <a href="../../../">Semua bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+      <a href="../../../../">Buka PWA Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Bahasa tutorial"><details class="tutorial-language-menu"><summary>Bahasa tutorial: <bdi>Bahasa Indonesia</bdi></summary><nav aria-label="Bahasa tutorial"><a href="../../../en/interface/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="./" lang="id" hreflang="id" aria-current="page">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/interface/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutorial hasil terjemahan mesin; peninjauan oleh penutur asli masih tertunda. Kode dan nilai teknis tidak diubah. Tangkapan layar menampilkan antarmuka asli bahasa Inggris; cocokkan nama kontrol yang diterjemahkan dalam teks ini dengan aplikasi Anda.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / <a href="../../../interface/">Antarmuka<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / Panduan</p>
+    <article>
+      <p class="eyebrow">Belajar sambil praktik</p>
+      <h1>Buat buku kerja pertama Anda</h1>
+      <p class="lede">Ini adalah pendamping praktis yang lebih panjang untuk <a href="../../../interface/">referensi antarmuka<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>. Anda akan menjalankan satu sel Python, mengubahnya, dan menyimpan salinan yang Anda kendalikan. Tidak diperlukan akun AI atau kunci API.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Langkah-langkah Android</li>
+        <li class="chip">Sekitar 5 menit</li>
+      </ul>
+      <p class="screen-note">Tangkapan layar menampilkan SciREPL Free v1.3.2 pada ponsel Samsung Galaxy seri S24. Pelajaran ini juga berlaku untuk Pro, meskipun beberapa kontrol di sana mungkin terlihat berbeda.</p>
+      <nav class="lesson-nav" aria-label="Langkah-langkah panduan">
+        <strong>Dalam pelajaran ini</strong>
+        <ol>
+          <li><a href="#find-your-place">Temukan tempat Anda</a></li>
+          <li><a href="#write-a-cell">Tulis dan jalankan sel</a></li>
+          <li><a href="#edit-a-cell">Edit sel yang tersimpan</a></li>
+          <li><a href="#save-a-copy">Ekspor salinan buku kerja</a></li>
+          <li><a href="#what-next">Hal berikutnya untuk dicoba</a></li>
+        </ol>
+        <p><a href="../../tutorials/">Semua tutorial</a></p>
+      </nav>
+
+      <section id="find-your-place">
+        <p class="step-label">Langkah 1</p>
+        <h2>Temukan tempat Anda di aplikasi</h2>
+        <p>Baris teratas adalah <strong>header</strong>. Ini mencakup Menu, Bantuan, dan lencana status. Pemilih buku kerja menentukan buku kerja mana yang terbuka.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--header" role="img" aria-label="Header ponsel dengan pemilih buku kerja, tombol Menu, dan tombol Bantuan yang diberi garis batas kuning.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Garis batas kuning menandai pemilih buku kerja, Menu, dan Bantuan.</figcaption>
+          <p>Di bawah baris header adalah buku kerja: sel yang tersimpan beserta hasilnya.</p>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">Lihat tangkapan layar ponsel selengkapnya</a>
+        </figure>
+        <p><strong>Panel sel baru</strong> adalah tempat Anda mengetik sel berikutnya. Tombol tajuk opsional dapat menghilang saat layar sempit; tindakannya tetap tersedia dari Menu atau Bantuan jika berlaku.</p>
+      </section>
+
+      <section id="write-a-cell">
+        <p class="step-label">Langkah 2</p>
+        <h2>Tulis dan jalankan sel Python</h2>
+        <p>Tunggu hingga lencana status bertuliskan <strong>siap</strong> sebelum penjalanan pertama.</p>
+        <ol class="lesson-steps">
+          <li>Di panel sel baru, pilih <strong>Python</strong> dari pemilih bahasa. Pada ponsel yang sempit, pemilih yang tertutup mungkin hanya menampilkan <strong>Py</strong>.</li>
+          <li>Ketik program pendek ini:
+            <pre><code>print("Hello from SciREPL")</code></pre>
+          </li>
+          <li>Ketuk <strong>Jalankan</strong>. Sel yang tersimpan akan muncul di buku kerja. Di bawahnya, Anda akan melihat <code>Hello from SciREPL</code>.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--composer" role="img" aria-label="Panel sel baru dengan Py dipilih, print Hello from SciREPL di kolom kode, dan Run bergaris luar kuning.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Panel bagian bawah membuat sel <em>baru</em>: pilih <strong>Py</strong>, masukkan kode, lalu ketuk <strong>Jalankan</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">Lihat tangkapan layar ponsel selengkapnya</a>
+        </figure>
+        <p class="callout"><strong>Penjalanan pertama mungkin memerlukan waktu lebih lama.</strong> Runtime Python harus dimulai satu kali. Tunggu hingga status kembali ke <strong>siap</strong>; sel Python berikutnya biasanya menggunakan kembali runtime tersebut.</p>
+        <aside class="callout">
+          <p><strong>Jika pemberitahuan privasi muncul:</strong> Python biasanya dibundel, jadi contoh ini seharusnya tidak memerlukan pengunduhan runtime. Runtime jaringan, seperti R atau Lua di Free, mungkin akan menampilkan Kebijakan Privasi SciREPL terlebih dahulu; Python juga dapat menampilkannya jika salinan yang dibundel memerlukan cadangan jaringan. Baca kebijakan tersebut, gulir <em>di dalam dialog</em> ke bagian bawah, dan ketuk <strong>Saya Mengerti</strong> jika Anda setuju. Perintah Pengunduhan Runtime terpisah kemudian mungkin meminta Anda untuk mengetuk <strong>Unduh</strong>.</p>
+          <p><a href="../../../interface/tutorial/assets/privacy-policy-top.jpg">Lihat contoh dialog Kebijakan Privasi<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> (tangkapan layar menunjukkan bagian atasnya; tombol berada lebih jauh di bawah). Di Free 1.4.0 dan Pro 1.4.0, perintah <code>%pip install</code> yang valid juga membuka pemberitahuan ini jika Anda belum menerima pengungkapan jaringan saat ini, sebelum mencoba menginstal paket. Lihat <a href="../../../privacy/">privasi dan data lokal<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> sebelum menggunakan fitur jaringan.</p>
+        </aside>
+      </section>
+
+      <section id="edit-a-cell">
+        <p class="step-label">Langkah 3</p>
+        <h2>Edit sel yang tersimpan</h2>
+        <ol class="lesson-steps">
+          <li>Ketuk pensil <strong>✎</strong> di tajuk sel yang tersimpan itu sendiri, di kanan atas tepat di sebelah kiri <strong>✕</strong>. Ini akan membuka sel tersebut untuk diedit; mengetik di panel sel baru akan membuat sel lain.</li>
+          <li>Ubah <code>Hello from SciREPL</code> menjadi <code>Hello again</code>.</li>
+          <li>Pilih <strong>Jalankan</strong> untuk menyimpan dan menjalankan perubahan. Anda sekarang akan melihat <code>Hello again</code> di bawah sel tersebut.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--editing" role="img" aria-label="Editor sel tersimpan yang berisi print Hello again. Garis luar kuning menandai pensil sel tersimpan di kanan atas, kolom kode yang dapat diedit, dan tombol Run miliknya. Output sebelumnya masih bertuliskan Hello from SciREPL hingga Run diketuk.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-edit-draft.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/edit-draft-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Garis luar kuning menunjukkan letak <strong>✎ pensil</strong> milik sel tersimpan, kode yang sedang Anda edit, dan tombol <strong>Jalankan</strong> sel tersebut. Pensil tampak redup di tangkapan layar ini karena mode edit sudah terbuka. Run menyimpan dan menjalankan revisi; output lama tetap terlihat hingga saat itu.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-edit-draft.png">Lihat tangkapan layar ponsel selengkapnya, termasuk papan ketik</a>
+        </figure>
+        <aside class="callout">
+          <p><strong>Pintasan Pro:</strong> Pada layar sentuh, ketuk dua kali kode sel yang tersimpan untuk mengeditnya. Free saat ini menggunakan tombol <strong>✎</strong>.</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--result" role="img" aria-label="Sel Python tersimpan yang berisi print Hello again, diikuti oleh output yang disorot Hello again.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-rerun.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/rerun-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Setelah <strong>Jalankan</strong>, output di bawah sel yang tersimpan akan bertuliskan <code>Hello again</code>.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-rerun.png">Lihat tangkapan layar ponsel lengkap</a>
+        </figure>
+        <p>Jika Anda tidak sengaja membuka editor, gunakan <strong>Batal</strong> untuk menutupnya tanpa menjalankan. Pemilih bahasa di dalam sel tersimpan akan mengubah sel tersebut; pemilih sel baru tidak.</p>
+      </section>
+
+      <section id="save-a-copy">
+        <p class="step-label">Langkah 4</p>
+        <h2>Ekspor salinan buku kerja</h2>
+        <ol class="lesson-steps">
+          <li>Buka <strong>Menu → Ekspor buku kerja &amp; paket</strong>.</li>
+          <li>Pilih <strong>Hanya tab saat ini</strong> atau <strong>Semua tab</strong>, lalu format SciREPL <strong>Buku kerja (.srwb)</strong> saat Anda ingin mempertahankan status khusus SciREPL.</li>
+          <li>Ketuk <strong>Ekspor</strong> dan pilih tujuan yang Anda kendalikan.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--menu" role="img" aria-label="Baris menu Export Workbooks and Packages bergaris tepi kuning, di antara Export Document dan Import File.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Pilih <strong>Ekspor buku kerja &amp; paket</strong>, bukan Export Document.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">Lihat tangkapan layar Menu lengkap</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="Dialog ekspor dengan format Workbook srwb, cakupan Current tab only, dan tombol Export bergaris tepi kuning.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Untuk satu tab, pertahankan <strong>Buku kerja (.srwb)</strong> dan <strong>Hanya tab saat ini</strong>, lalu ketuk <strong>Ekspor</strong>. Pilih <strong>Semua tab</strong> untuk menyertakan seluruh buku kerja.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-export.png">Lihat tangkapan layar dialog ekspor lengkap</a>
+        </figure>
+        <p class="callout"><strong>Mengapa mengekspor?</strong> SciREPL memulihkan sesi lokal, tetapi penyimpanan lokal bukan cadangan dan tidak dibagikan secara otomatis antara aplikasi Android dan browser. Lihat <a href="../../../files-export/">berkas dan ekspor<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> untuk format lain, termasuk <code>.ipynb</code> dan PDF.</p>
+      </section>
+
+      <section id="what-next">
+        <p class="step-label">Langkah 5</p>
+        <h2>Hal yang dapat dicoba berikutnya</h2>
+        <p>Coba <code>2 + 2</code> di sel Python lain. Lalu gunakan pemilih buku kerja untuk beralih tab. <a href="../../files-export/tutorial/">Panduan buku kerja CSV</a> dimulai dari <strong>Menu → Jelajahi paket, bundel &amp; buku kerja</strong>, memasang contoh, dan menunjukkan cara sel-selnya bekerja dengan berkas lokal.</p>
+        <p><a href="../../workbooks/tutorial/">Panduan Markov Groups</a> menunjukkan cara mencari katalog yang lebih luas, membuka buku kerja yang ada tentang gerakan kubus, menjalankan sel-selnya secara berurutan, dan mengubah satu parameter.</p>
+        <p>Untuk pengingat cepat tentang letak kontrol, kembali ke <a href="../../../interface/">referensi antarmuka<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>. Untuk mempelajari bahasa lain atau menambahkan paket, lanjutkan dengan <a href="../../../languages-packages/">Bahasa &amp; paket<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>.</p>
+        <aside class="callout"><strong>Menggunakan Pro?</strong> Alur kerja dasarnya sama. Pro juga memiliki editor layar penuh dan fitur AI opsional; lihat <a href="../../../pro/ai/#full-screen">Alur kerja AI dan layar penuh Pro<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> setelah Anda terbiasa dengan sel biasa.</aside>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Bantuan SciREPL</span><nav aria-label="Navigasi footer"><a href="../../../interface/">Referensi antarmuka ringkas<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a><a href="../../../">Semua bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a></nav></footer>
+</body>
+</html>

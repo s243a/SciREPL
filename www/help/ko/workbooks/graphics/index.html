@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="ko" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="패키지를 설치하지 않고도 정적 Markdown 다이어그램을 만들고, JavaScript 캔버스로 그림을 생성하며, KaTeX 수식을 SciREPL 워크북에 작성하세요.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ko/workbooks/graphics/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/graphics/tutorial.css">
+  <title>그림, 다이어그램 및 수식 · SciREPL 도움말</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/graphics/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/graphics/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/graphics/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/graphics/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/graphics/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/graphics/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/graphics/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/graphics/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/graphics/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/graphics/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/graphics/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/graphics/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/graphics/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/graphics/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (영어 참조 페이지)</span></a>
+    <nav aria-label="기본 탐색">
+      <a href="../../../workbooks/">워크북 참조 자료<span class="english-reference"> (영어 참조 페이지)</span></a>
+      <a href="../../tutorials/">모든 튜토리얼</a>
+      <a href="../../../">모든 도움말<span class="english-reference"> (영어 참조 페이지)</span></a>
+      <a href="../../../../">Free PWA 열기</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="튜토리얼 언어"><details class="tutorial-language-menu"><summary>튜토리얼 언어: <bdi>한국어</bdi></summary><nav aria-label="튜토리얼 언어"><a href="../../../en/workbooks/graphics/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/graphics/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/graphics/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/graphics/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/graphics/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/graphics/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/graphics/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/graphics/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/graphics/" lang="ja" hreflang="ja">日本語</a>
+      <a href="./" lang="ko" hreflang="ko" aria-current="page">한국어</a>
+      <a href="../../../pt-BR/workbooks/graphics/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/graphics/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/graphics/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">기계 번역된 튜토리얼이며 원어민 검토 대기 중입니다. 코드 및 기술적 값은 변경되지 않았습니다. 스크린샷에는 원본 영어 인터페이스가 표시되므로, 본문의 번역된 컨트롤 이름을 앱과 대조하여 확인하세요.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">도움말<span class="english-reference"> (영어 참조 페이지)</span></a> / <a href="../../../workbooks/">워크북<span class="english-reference"> (영어 참조 페이지)</span></a> / 그림, 다이어그램 및 수식</p>
+    <article>
+      <p class="eyebrow">직접 해보며 배우기</p>
+      <h1>그림, 다이어그램 및 수식 추가하기</h1>
+      <p class="lede">워크북은 코드뿐만 아니라 그림으로도 개념을 설명할 수 있습니다. 동일한 간단한 좌표계를 표시하는 세 가지 방법을 시도해 보세요: Markdown의 정적 이미지, JavaScript로 그린 그림, 그리고 KaTeX로 조판된 수식입니다. Python, R, 패키지 설치 또는 AI 계정은 필요하지 않습니다.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro 워크플로</li>
+        <li class="chip">브라우저에서 검증된 예제</li>
+        <li class="chip">약 10분</li>
+      </ul>
+      <p class="screen-note">예제와 스크린샷은 <strong>SciREPL Free 브라우저 빌드</strong>에서 <time datetime="2026-10-06">6 시월 2026</time>에 확인되었습니다. 스크린샷은 좁은 브라우저 뷰포트를 사용하며, <strong>Android 캡처가 아닙니다</strong>. Android에서도 동일한 제어 항목이 사용되지만 위치는 다를 수 있습니다. Pro 및 모든 출시된 앱 버전이 이 가이드를 위해 테스트된 것은 아닙니다.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>설명에 적합한 방법 선택하기</caption>
+          <thead><tr><th scope="col">원하는 작업</th><th scope="col">셀 유형</th><th scope="col">결과를 생성하는 요소</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">고정된 다이어그램 또는 그림</th><td>Markdown (<strong>Md</strong>)</td><td>셀 텍스트에 저장된 인라인 SVG 또는 포함된 PNG</td></tr>
+            <tr><th scope="row">코드로 계산되거나 그려진 그림</th><td>코드 → JavaScript (<strong>JS</strong>)</td><td><code>window.renderImage(...)</code>로 표시되는 캔버스</td></tr>
+            <tr><th scope="row">수식 또는 행렬</th><td>Markdown (<strong>Md</strong>)</td><td><code>$$</code> 구분 기호 사이의 TeX 스타일 수식(KaTeX로 렌더링됨)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <nav class="lesson-nav" aria-label="그래픽 단계별 가이드">
+        <strong>학습 내용</strong>
+        <ol>
+          <li><a href="#open">작은 예제 워크북 열기</a></li>
+          <li><a href="#static">Markdown에 정적 그림 유지하기</a></li>
+          <li><a href="#canvas">JavaScript로 그림 그리기</a></li>
+          <li><a href="#math">KaTeX로 수식 작성하기</a></li>
+          <li><a href="#save">작업 저장 및 다시 열기</a></li>
+        </ol>
+        <p><a href="#troubleshooting">결과가 표시되지 않는 경우</a></p>
+        <p><a href="../../tutorials/">모든 튜토리얼</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">1단계</p>
+        <h2>예제 워크북 열기</h2>
+        <p>동반 파일에는 포함된 PNG를 비롯한 전체 예제가 들어 있습니다. 모든 내용이 하나의 작은 워크북에 담겨 있으므로 긴 Base64 이미지 문자열을 직접 입력할 필요가 없습니다.</p>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/graphics/assets/workbook-graphics.srwb" download="workbook-graphics.srwb">그래픽 예제 워크북(.srwb)을 다운로드하세요</a>. <code>.srwb</code> 확장자를 유지하면서 실제 파일을 저장하세요. 브라우저에 텍스트가 표시되면 저장/다운로드 기능을 사용하세요. 저장한 폴더를 기억해 두세요.</li>
+          <li>SciREPL을(를) 엽니다. 앱 상단의 <strong>헤더</strong>에서 <strong>☰ 메뉴</strong>를 찾으세요. 이는 <strong>세 개의 가로선</strong>이 있는 버튼입니다. 탭하거나 클릭하세요.</li>
+          <li><strong>📂 파일 가져오기 (예: .srwb, .ipynb, .csv, .py, .zip)</strong>을(를) 선택하세요. 필요한 경우 <em>메뉴 안을 스크롤</em>하세요. 기기의 파일 선택 창에서 다운로드 또는 선택한 폴더에서 <code>workbook-graphics.srwb</code>을(를) 선택하세요.</li>
+          <li>메뉴가 열려 있다면 닫고, 통합 문서 선택기에서 새 <strong>Workbook Graphics</strong> 탭을 선택하세요. 기존 탭은 유지됩니다.</li>
+          <li>이름이 <code>static_axes</code>, <code>embedded_png</code>, <code>canvas_axes</code>, <code>math_axes</code>인 네 개의 셀을 찾으세요. 코드를 실행하기 전에 읽어보세요. 정적 다이어그램과 수식은 해당 Markdown 소스에서 나타나며, JavaScript 그림은 해당 셀을 실행한 후에만 나타납니다.</li>
+        </ol>
+        <p class="callout"><strong>가져오기는 실행하는 것이 아닙니다.</strong> <code>.srwb</code> 가져오기는 자동 실행 설정이 활성화되어 있어도 코드를 실행하지 않습니다. 이번 단원에서는 <code>canvas_axes</code>만 JavaScript 실행이 필요합니다. <strong>모든 셀 실행</strong> 단계는 없습니다.</p>
+        <p>다운로드나 파일 선택 창에 대해 더 자세한 정보가 필요한가요? <a href="../import/">수동 통합 문서 가져오기 안내</a>를 따르세요. 위 이름들은 저장된 셀에 표시됩니다. <a href="../named-cells/">이름이 지정된 셀 경로 튜토리얼</a>에서 이를 지정하고 사용하는 방법을 설명합니다. 아래 단계를 사용하여 이미 열려 있는 통합 문서에서 이러한 예제를 만들 수도 있습니다.</p>
+      </section>
+
+      <section id="static">
+        <p class="step-label">단계 2 · 방법 1</p>
+        <h2>Markdown에 정적 다이어그램 유지하기</h2>
+        <p>자신을 향하고 있는 종이 한 장을 떠올려 보세요. <strong>r</strong>은 종이를 따라 오른쪽을 가리키고, <strong>u</strong>는 종이를 따라 위쪽을 가리키며, <strong>n</strong>은 종이 밖으로 자신을 향합니다. 점이 찍힌 원은 자신을 향해 다가오는 화살표 끝을 보는 것처럼 바깥쪽 방향을 나타냅니다.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-static.png" alt="오른쪽 및 위쪽 화살표와 관찰자를 향하는 법선을 나타내는 원 안의 점이 포함된 종이 다이어그램을 표시하는 SciREPL Markdown 셀의 좁은 브라우저 스크린샷." loading="lazy" decoding="async">
+          <figcaption>정적 SVG는 <em>Markdown 셀 내부</em>에 렌더링됩니다. 이것은 언어 커널을 실행하여 생성된 그림이 아니라 SciREPL Free의 브라우저 캡처 화면입니다.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-static.png">전체 브라우저 스크린샷 보기</a>
+        </figure>
+        <h3>가져온 다이어그램 편집하기</h3>
+        <ol class="lesson-steps">
+          <li><code>static_axes</code>을(를) 찾으세요. 저장된 해당 셀의 자체 헤더에서 <strong>✎ 연필</strong>을 <strong>✕</strong> 근처에서 탭하세요. 이렇게 하면 기존 셀의 소스가 열립니다. 새 셀 패널은 다른 셀을 만듭니다.</li>
+          <li>셀 유형 버튼을 <strong>Md</strong> 상태로 유지하세요. SVG 텍스트에서 <code>r: right</code>을(를) <code>r: across</code>(으)로 변경하세요.</li>
+          <li>해당 셀의 <strong>▶ 실행</strong> 버튼을 탭하여 저장하고 Markdown을(를) 다시 렌더링하세요. <strong>Md</strong> 셀의 경우 이 버튼은 텍스트를 렌더링하며, JavaScript을(를) 실행하거나 언어 런타임을 시작하지 않습니다.</li>
+        </ol>
+        <h3>또는 자신만의 Markdown 셀 만들기</h3>
+        <ol class="lesson-steps">
+          <li>다음 셀을 입력하는 <strong>새 셀 패널</strong>을 찾으세요. 접혀 있다면 앱 제목 근처의 <strong>⌃ Show new-cell panel</strong> 버튼을 사용하세요.</li>
+          <li><strong>코드</strong> 표시가 된 셀 유형 버튼을 탭하여 <strong>Md</strong>로 변경하세요. Markdown은(는) 언어 드롭다운의 항목이 아니라 <em>셀 유형</em>입니다.</li>
+          <li>아래의 전체 SVG를 텍스트 필드에 <strong>Markdown 코드 펜스를 추가하지 않고</strong> (<code>```</code>) 복사하세요. 주변 산문과 SVG 사이에 빈 줄을 하나 남겨두세요.</li>
+          <li><strong>▶ 실행</strong>을(를) 탭하여 렌더링된 Markdown 셀을 추가하세요. 종이와 세 방향 레이블이 모두 표시되어야 합니다.</li>
+        </ol>
+        <pre><code data-graphic-example="svg">&lt;svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 360 220" width="100%" height="220"
+     role="img" aria-label="Right, up and outward normal on paper"&gt;
+  &lt;title&gt;A paper coordinate frame&lt;/title&gt;
+  &lt;rect x="20" y="18" width="320" height="184"
+        rx="6" fill="#ffffff" stroke="#526170" stroke-width="2" /&gt;
+  &lt;path d="M110 145 H280" fill="none" stroke="#075d69" stroke-width="3" /&gt;
+  &lt;polygon points="280,145 267,138 267,152" fill="#075d69" /&gt;
+  &lt;path d="M110 145 V48" fill="none" stroke="#064d91" stroke-width="3" /&gt;
+  &lt;polygon points="110,48 103,61 117,61" fill="#064d91" /&gt;
+  &lt;circle cx="110" cy="145" r="10" fill="#ffffff" stroke="#14191f" stroke-width="2" /&gt;
+  &lt;circle cx="110" cy="145" r="3" fill="#14191f" /&gt;
+  &lt;text x="204" y="168" fill="#14191f" font-size="16"&gt;r: right&lt;/text&gt;
+  &lt;text x="124" y="62" fill="#14191f" font-size="16"&gt;u: up&lt;/text&gt;
+  &lt;text x="42" y="190" fill="#14191f" font-size="16"&gt;n: toward you&lt;/text&gt;
+&lt;/svg&gt;</code></pre>
+        <p>SciREPL은(는) Markdown을(를) 새니타이징합니다. 이 예제에서는 일반적인 SVG 도형, 텍스트 및 명시적 <code>fill</code>/<code>stroke</code> 속성을 사용합니다. 화살표 머리는 다각형이므로 <code>marker-end="url(...)"</code>, <code>&lt;style&gt;</code> 블록, 스크립트 또는 애니메이션이 새니타이저를 거친 후에도 유지될 것이라 기대하지 마세요.</p>
+
+        <h3>대신 포함된 PNG 사용하기</h3>
+        <p>또 다른 정적 옵션은 Base64 데이터가 Markdown 소스에 직접 저장된 PNG입니다. 표준 Markdown 이미지 구문은 다음과 같습니다:</p>
+        <pre><code>![Paper axes](data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE)</code></pre>
+        <p>이 줄은 작동하는 그림이 아니라 <em>형식</em>을 보여줍니다. 자리표시자를 인코딩된 완전한 PNG로 바꾸거나 이미 작동하는 <code>embedded_png</code> 셀을 사용하세요. <code>base64,</code> 뒤의 부분은 파일 이름이 아니라 이미지 데이터입니다. 한 줄로 유지하세요.</p>
+        <p>작은 화면에서 셀에 맞는 그림을 위해, 동반 파일의 <code>embedded_png</code> 셀은 <code>width="100%"</code>이(가) 포함된 아래의 동일한 인라인 HTML을 사용합니다. 이는 코드 출력이 아니라 여전히 Markdown 내부에 저장됩니다:</p>
+        <pre><code>&lt;img alt="Paper axes" width="100%"
+     src="data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE"&gt;</code></pre>
+        <p class="callout"><strong>정적 경로 중 하나를 선택하세요:</strong> 편집 가능한 작은 다이어그램에는 <em>인라인 SVG 요소</em>를 사용하고, 래스터 그림에는 <code>data:image/png;base64,...</code> 이미지를 사용하세요. <code>data:image/svg+xml,...</code>과(와) 같은 SVG 데이터 URL은 인라인 SVG와 동일하지 않으며 검증된 빌드에서 차단됩니다. 원격 이미지 URL 역시 그곳에서 차단됩니다. 이 두 가지 자체 포함 예제는 표시될 때 이미지를 다운로드할 필요가 없습니다.</p>
+        <p>두 정적 예제는 모두 Markdown 소스에 있습니다. 워크북을 가져온 후 코드를 실행하지 않고도 표시할 수 있습니다.</p>
+      </section>
+
+      <section id="canvas">
+        <p class="step-label">단계 3 · 방법 2</p>
+        <h2>JavaScript로 그림 그리기</h2>
+        <p>정적 그림은 소스를 편집할 때까지 그대로 유지됩니다. 프로그램으로 계산되거나 그려진 그림의 경우 <strong>코드</strong> 셀을 사용하고 <strong>JS - JavaScript</strong>을(를) 선택하세요. 이 예제는 캔버스에 그림을 그리고 이를 PNG로 변환한 후 해당 이미지를 셀의 출력으로 보냅니다.</p>
+        <ol class="lesson-steps">
+          <li>가져온 워크북에서 <strong>✎ 연필</strong>을 <code>canvas_axes</code>에서 탭하세요. 셀 유형이 <strong>코드</strong>이고 해당 언어가 <strong>JS - JavaScript</strong>인지 확인하세요(간단한 선택기에는 <strong>JS</strong>만 표시될 수 있습니다).</li>
+          <li>해당 셀의 완전한 프로그램인 아래 코드를 읽어보세요. 다른 셀, 파일, 패키지 또는 네트워크 요청이 필요하지 않습니다.</li>
+          <li><em>해당 셀의</em> <strong>▶ 실행</strong>을(를) 탭하세요. JavaScript 소스 아래에 그림이 나타납니다.</li>
+        </ol>
+        <p>대신 새 셀을 만들려면 새 셀 패널로 이동하여 필요한 경우 <strong>Md</strong>를 다시 <strong>코드</strong>(으)로 변경하고 언어 드롭다운에서 <strong>JS - JavaScript</strong>을(를) 선택하세요. 코드를 붙여넣은 다음 <strong>▶ 실행</strong>을(를) 탭하세요. JavaScript이(가) 숨겨져 있다면 <strong>☰ 메뉴 → 언어</strong>을(를) 찾아 활성화하세요.</p>
+        <pre><code data-graphic-example="javascript">(() =&gt; {
+  const canvas = document.createElement('canvas');
+  canvas.width = 360;
+  canvas.height = 220;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 360, 220);
+  ctx.strokeStyle = '#526170';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(20, 18, 320, 184);
+
+  function arrow(x1, y1, x2, y2, color) {
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 14 * Math.cos(angle - 0.5),
+               y2 - 14 * Math.sin(angle - 0.5));
+    ctx.lineTo(x2 - 14 * Math.cos(angle + 0.5),
+               y2 - 14 * Math.sin(angle + 0.5));
+    ctx.closePath();
+    ctx.fill();
+  }
+  arrow(110, 145, 280, 145, '#075d69'); // right
+  arrow(110, 145, 110, 48, '#064d91');  // up
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#14191f';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(110, 145, 10, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#14191f';
+  ctx.beginPath();
+  ctx.arc(110, 145, 3, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.font = '16px sans-serif';
+  ctx.fillText('r: right', 204, 168);
+  ctx.fillText('u: up', 124, 62);
+  ctx.fillText('n: toward you', 42, 190);
+  window.renderImage(canvas.toDataURL('image/png'));
+})();</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-canvas.png" alt="SciREPL의 좁은 브라우저 스크린샷: JavaScript 캔버스 셀 아래에 종이 좌표계를 PNG 출력으로 표시합니다." loading="lazy" decoding="async">
+          <figcaption>비슷해 보이는 이 다이어그램은 <strong>생성된 PNG 출력</strong>이며, Markdown이(가) 아닙니다. JavaScript 셀은 <strong>▶ 실행</strong>을(를) 선택할 때 이를 생성합니다. SciREPL Free의 브라우저 캡처 화면.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-canvas.png">전체 브라우저 스크린샷 보기</a>
+        </figure>
+        <p><code>r: right</code>을(를) <code>ctx.fillText(...)</code>에서 변경해 본 다음, 셀을 다시 실행하세요. 함수 래퍼 <code>(() =&gt; { ... })();</code>은(는) 이 예제의 변수를 로컬로 유지하므로, 최상위 <code>const</code> 변수를 다시 선언하지 않고도 다시 실행할 수 있습니다.</p>
+        <p class="callout"><strong>표시 호출이 중요합니다.</strong> 마지막에 <code>window.renderImage(canvas.toDataURL('image/png'))</code>을(를) 유지하세요. <code>'&lt;svg&gt;...&lt;/svg&gt;'</code>과(와) 같은 일반 문자열을 JavaScript에서 반환하는 것은 텍스트를 표시할 뿐이며, 해당 문자열을 인라인 다이어그램으로 변환하지 않습니다. 캔버스를 앱 페이지에 삽입할 필요는 없습니다.</p>
+      </section>
+
+      <section id="math">
+        <p class="step-label">단계 4 · 방법 3</p>
+        <h2>수식으로 그림 설명하기</h2>
+        <p>TeX 스타일 수식에는 <strong>Markdown (Md)</strong> 셀을 사용하세요. 다이어그램의 방향은 오른손 좌표계를 형성합니다: <strong>right × up = outward normal</strong>. 아래 행렬에서 첫 번째 행은 <strong>r</strong>, 두 번째 행은 <strong>u</strong>, 세 번째 행은 <strong>n</strong>입니다. 아래 첨자는 선택한 x, y, z 좌표계에서의 성분입니다.</p>
+        <ol class="lesson-steps">
+          <li><strong>✎ 연필</strong>을 <code>math_axes</code>에서 탭하거나, 새 셀 패널에서 <strong>코드 → Md</strong>를 사용하여 새 셀을 만드세요.</li>
+          <li>아래의 전체 텍스트를 사용하세요. <code>$$</code> 구분 기호는 Markdown 소스에 속하며, 코드 펜스로 감싸지 마세요.</li>
+          <li><strong>▶ 실행</strong>을 탭하여 Markdown을 저장하고 렌더링하세요. 원시 역슬래시 명령어가 아니라 외적 방정식과 세 행으로 된 행렬이 표시되어야 합니다. 이 셀에 대해서는 어떤 언어 커널도 실행되지 않습니다.</li>
+        </ol>
+        <pre><code data-graphic-example="math">Right, up and outward normal form a right-handed frame.
+
+$$\mathbf{r} \times \mathbf{u} = \mathbf{n}$$
+
+Rows of the frame matrix: right, up, then outward normal.
+
+$$
+M = \begin{pmatrix}
+r_x &amp; r_y &amp; r_z \\
+u_x &amp; u_y &amp; u_z \\
+n_x &amp; n_y &amp; n_z
+\end{pmatrix}
+$$</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-equations.png" alt="SciREPL이 오른쪽 외적 위쪽은 법선과 같음 및 세 행 좌표계 행렬을 KaTeX을 사용하여 Markdown 셀에서 렌더링하는 좁은 브라우저 스크린샷." loading="lazy" decoding="async">
+          <figcaption>KaTeX은 수식을 <strong>Markdown 소스</strong>로부터 직접 조판합니다. 이것은 TeX으로 생성된 그림이 아니라 방정식입니다. SciREPL Free의 브라우저 캡처 화면.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-equations.png">전체 브라우저 스크린샷 보기</a>
+        </figure>
+        <p class="callout"><strong>KaTeX은 완전한 TeX 컴파일러가 아닙니다.</strong> 지원되는 수학 표기법을 렌더링하지만, TikZ 다이어그램이나 전체 LaTeX 문서를 컴파일하지는 않습니다. KaTeX에 <code>\includegraphics</code>이 나열되어 있기는 하지만, 확인된 렌더러에서 SciREPL이 활성화하지 않은 신뢰 옵션이 필요하므로 여기서는 이미지 삽입 경로가 아닙니다. 그림에는 Markdown SVG/PNG 또는 JavaScript 캔버스를 사용하세요.</p>
+        <p>다른 기호 및 수학 명령어를 보려면 <a href="https://katex.org/docs/support_table.html">KaTeX 지원 표</a>를 참조하세요. 설명서에는 SciREPL의 번들 버전보다 최신인 기능이 설명되어 있을 수 있습니다. 이러한 방향을 사용하여 큐브 동작을 설명하는 워크북은 <a href="../tutorial/#open">마르코프 그룹 둘러보기</a>를 참조하세요.</p>
+      </section>
+
+      <section id="save">
+        <p class="step-label">단계 5</p>
+        <h2>사본을 저장한 다음, 다시 실행할 항목 알아보기</h2>
+        <ol class="lesson-steps">
+          <li><strong>☰ 메뉴 → 워크북 및 패키지 내보내기</strong>을 여세요.</li>
+          <li>이 워크북에 대해 <strong>워크북 (.srwb)</strong> 및 <strong>현재 탭만</strong>을 선택한 다음, <strong>내보내기</strong>을 탭하세요. 직접 관리할 수 있는 위치에 파일을 저장하세요.</li>
+          <li>해당 사본을 다시 열려면 <strong>메뉴 → 파일 가져오기</strong>를 사용하세요. 이렇게 하면 다른 워크북 탭이 추가되며 기존 탭을 대체하지 않습니다.</li>
+          <li>정적 SVG, 포함된 PNG 및 방정식을 확인하세요. 이 항목들은 저장된 Markdown 소스에서 제공되며 코드를 실행할 필요가 없습니다. <code>canvas_axes</code>을 검사하고 해당 JavaScript 셀을 다시 실행하여 그림을 다시 생성하세요.</li>
+        </ol>
+        <p class="callout"><strong>생성된 출력은 소스와 동일하지 않습니다.</strong> 확인된 Free 브라우저 빌드에서는 <code>.srwb</code> 내보내기가 JavaScript 이미지 출력을 저장할 수 있지만, 수동 <strong>메뉴 → 파일 가져오기</strong>는 해당 코드 출력을 복원하지 않습니다. JavaScript 소스는 그대로 유지되므로 다시 실행하세요. 인라인 SVG, 포함된 PNG 및 방정식은 Markdown 소스이며 가져올 때 표시됩니다. 이전에 표시된 출력을 코드가 방금 실행되었다는 증거로 사용하지 마세요.</p>
+        <p>이러한 점검은 위의 워크북 예제를 다루며 모든 내보내기 형식에서의 이미지 충실도를 다루지는 않습니다. PDF, DOCX, Markdown 및 기타 문서 내보내기가 모든 이미지를 동일한 방식으로 유지한다고 가정하지 마세요. 내보낸 문서를 직접 확인하세요. 사용 가능한 형식은 <a href="../../../files-export/">파일 및 내보내기<span class="english-reference"> (영어 참조 페이지)</span></a>를 참조하세요.</p>
+        <p>편집된 워크북을 내보내면 변경 사항의 백업이 생성됩니다. 셀을 편집해도 다운로드한 원본 예제는 업데이트되지 않습니다. 로컬 앱 저장소는 백업이 아니며, Android와 브라우저 세션은 작업을 자동으로 공유하지 않습니다.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">문제가 있어 보이는 경우</p>
+        <h2>셀 유형 및 소스 확인</h2>
+        <ul>
+          <li><strong>다이어그램 대신 SVG 코드가 표시되는 경우:</strong> 셀 유형이 <strong>Md</strong>인지 확인하고, 감싸고 있는 코드 펜스를 모두 제거한 다음 셀을 다시 렌더링하세요. SVG 데이터 URL이 아닌 완전한 인라인 <code>&lt;svg&gt;...&lt;/svg&gt;</code> 예제를 사용하세요.</li>
+          <li><strong>PNG가 누락된 경우:</strong> 함께 제공되는 <code>embedded_png</code> 셀을 사용하거나 공백이나 줄 바꿈 없이 전체 <code>data:image/png;base64,...</code> 문자열을 붙여넣었는지 확인하세요. 로컬 파일 이름은 포함된 이미지 데이터가 아닙니다.</li>
+          <li><strong>캔버스 코드가 실행되지 않는 경우:</strong> 셀 유형을 <strong>코드</strong>으로, 언어를 <strong>JS - JavaScript</strong>로 설정하고 Python은 사용하지 마세요. 전체 함수 래퍼와 마지막 <code>window.renderImage(...)</code> 호출을 유지하세요.</li>
+          <li><strong>가져온 JavaScript 셀에 그림이 없음:</strong> 이 워크북을 가져와도 코드가 실행되거나 코드 출력이 복원되지 않습니다. <code>canvas_axes</code>을(를) 검사하고 다시 실행하세요.</li>
+          <li><strong>원시 TeX 또는 수학 오류가 표시됨:</strong> <strong>Md</strong>를 사용하고 시작 및 끝 <code>$$</code>을(를) 모두 포함하며 각 백슬래시와 중괄호를 예제와 대조하여 확인하세요. 마지막 행을 제외한 각 행렬 행은 두 개의 백슬래시인 <code>\\</code>(으)로 끝납니다.</li>
+          <li><strong>편집으로 인해 추가 셀이 생성됨:</strong> 새 셀 패널은 셀을 추가합니다. 저장된 셀의 <strong>✎ 연필</strong>을 사용하여 해당 기존 셀을 변경한 후 자체 <strong>▶ 실행</strong> 버튼을 사용하세요. 실수로 편집기를 열었다면 <strong>취소</strong>을(를) 사용하세요.</li>
+        </ul>
+        <p>저장된 셀, 연필 및 새 셀 패널에 대한 그림 안내는 <a href="../../interface/tutorial/">첫 번째 워크북 인터페이스 둘러보기</a>를 참조하세요. 셀 유형을 간략히 다시 확인하려면 <a href="../../../workbooks/">워크북 참조 자료<span class="english-reference"> (영어 참조 페이지)</span></a>로 돌아가세요.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL 도움말</span><nav aria-label="바닥글 탐색"><a href="../../../workbooks/">워크북 참조 자료<span class="english-reference"> (영어 참조 페이지)</span></a><a href="../../../">모든 도움말<span class="english-reference"> (영어 참조 페이지)</span></a></nav></footer>
+</body>
+</html>

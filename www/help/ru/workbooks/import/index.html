@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Скачайте файл рабочей книги SciREPL, найдите «Меню» → «Импортировать файл», выберите его на Android или компьютере и проверьте его ячейки перед запуском.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ru/workbooks/import/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/import/tutorial.css">
+  <title>Импорт файла рабочей книги · Справка SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/import/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/import/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/import/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/import/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/import/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/import/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/import/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/import/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/import/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/import/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/import/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/import/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/import/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/import/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+    <nav aria-label="Основная навигация">
+      <a href="../../../workbooks/">Справочник по рабочим книгам<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+      <a href="../../tutorials/">Все руководства</a>
+      <a href="../../../">Вся справка<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+      <a href="../../../../">Открыть Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Язык руководства"><details class="tutorial-language-menu"><summary>Язык руководства: <bdi>Русский</bdi></summary><nav aria-label="Язык руководства"><a href="../../../en/workbooks/import/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/import/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/import/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/import/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/import/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/import/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/import/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/import/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/import/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/import/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/import/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="./" lang="ru" hreflang="ru" aria-current="page">Русский</a>
+      <a href="../../../zh/workbooks/import/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Машинный перевод руководства; ожидает проверки носителем языка. Код и технические значения оставлены без изменений. На снимках экрана показан оригинальный интерфейс на английском языке; сопоставляйте переведенные названия элементов управления в этом тексте с вашим приложением.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Справка<span class="english-reference"> (Справочная страница на английском языке)</span></a> / <a href="../../../workbooks/">Рабочие книги<span class="english-reference"> (Справочная страница на английском языке)</span></a> / Импорт файла рабочей книги</p>
+    <article>
+      <p class="eyebrow">Обучение на практике</p>
+      <h1>Импортируйте файл рабочей книги самостоятельно</h1>
+      <p class="lede">Уже есть файл рабочей книги или не можете найти урок в разделе «Обзор»? Сохраните файл на свое устройство, затем используйте <strong>Меню → Импортировать файл</strong>, чтобы добавить его в SciREPL. В этом кратком руководстве используется <strong>Simpson's Paradox</strong> из ветки GitHub <code>main</code> каталога; для его импорта не требуется устанавливать пакеты или писать код.</p>
+      <p>SciREPL импортирует два формата блокнотов: <strong><code>.srwb</code></strong>, собственный формат рабочих книг, и <strong><code>.ipynb</code></strong>, формат блокнотов Jupyter. В этом примере используется <code>.srwb</code>; в <a href="#other-formats">примечаниях к форматам ниже</a> объясняются различия в поведении при выполнении импортированных блокнотов Jupyter.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Шаги для Android и браузера</li>
+        <li class="chip">Около 3 минут</li>
+      </ul>
+      <p class="screen-note">Снимок экрана меню — это реальный снимок на Android с устройства <strong>Samsung Galaxy S24+</strong>, демонстрирующий <strong>SciREPL Free 1.4.0-debug</strong>, а не установку из Play Store. Снимок экрана импортированной рабочей книги — это отдельный <strong>снимок в браузере Chromium версии Free 1.4.0 с размером области просмотра для мобильных устройств</strong>; он не служит подтверждением импорта через средство выбора файлов Android. Оба снимка были сделаны <time datetime="2026-10-06">6 октября 2026</time> года. В других редакциях, версиях и средствах выбора файлов элементы управления могут располагаться иначе. В качестве примера используется англоязычный файл <code>simpsons-paradox.srwb</code> из каталога SciREPL (ветка <code>main</code>), актуальный на момент составления этого руководства; эта ветка может измениться. В разделе <a href="../../../workbooks/import/assets/capture-receipt.json">Подробные сведения о снимках и источниках<span class="english-reference"> (Справочная страница на английском языке)</span></a> указаны точные размеры изображений и проверенный хеш файла.</p>
+      <nav class="lesson-nav" aria-label="Шаги ручного импорта рабочей книги">
+        <strong>В этом уроке</strong>
+        <ol>
+          <li><a href="#download">Сохраните файл рабочей книги</a></li>
+          <li><a href="#import">Найдите Меню и импортируйте файл</a></li>
+          <li><a href="#check">Проверьте новую вкладку рабочей книги</a></li>
+          <li><a href="#next">Продолжите работу с уроком</a></li>
+        </ol>
+        <p><a href="#other-formats">Другие форматы и безопасность</a> · <a href="#troubleshooting">Если что-то выглядит неправильно</a></p>
+        <p><a href="../../tutorials/">Все руководства</a></p>
+      </nav>
+
+      <section id="download">
+        <p class="step-label">Шаг 1</p>
+        <h2>Сохраните файл рабочей книги на свое устройство</h2>
+        <p>В репозитории GitHub ветка <code>main</code> может содержать рабочие книги или обновления, которых еще нет в последнем стабильном выпуске каталога, отображаемом в разделе «Обзор». Выпуски каталога обновляются независимо от релизов приложения. Прямой импорт файла позволяет опробовать проверенную рабочую книгу, не дожидаясь ее появления в разделе «Обзор».</p>
+        <ol class="lesson-steps">
+          <li><a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">Откройте «Парадокс Симпсона» на GitHub</a>, затем <a download="simpsons-paradox.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/main/workbooks/en/simpsons-paradox.srwb">скачайте сам файл рабочей книги (.srwb)</a>. Вторая ссылка открывает исходный файл, а не веб-страницу GitHub.</li>
+          <li>Если ваш браузер отображает файл как текст вместо его скачивания, используйте функцию браузера <strong>сохранить/скачать</strong>. Сохраните сам файл рабочей книги, а не снимок экрана или HTML-страницу.</li>
+          <li>Не изменяйте имя файла <code>simpsons-paradox.srwb</code> и его расширение <code>.srwb</code>. Обратите внимание, куда он был сохранен: на Android обычно используется папка <strong>Загрузки</strong>; на компьютере это может быть папка «Загрузки» или выбранная вами папка.</li>
+        </ol>
+        <p><strong>Это не загрузка закрепленного стабильного выпуска.</strong> Ветка <code>main</code> является веткой разработки: содержимое файла и ячейки могут измениться после того, как были сделаны эти снимки экрана. Сохраняемый вами файл является локальной копией; последующие изменения на GitHub не обновят автоматически вашу импортированную вкладку.</p>
+        <p class="callout"><strong>Скачивание — это еще не импорт.</strong> Сохранение файла помещает его на ваше устройство; это еще не открывает рабочую книгу в SciREPL. Вам не нужно открывать его в текстовом редакторе или помещать в раздел «Файлы» в SciREPL. На следующем шаге выбирается этот скачанный файл.</p>
+        <p>Если у вас уже есть надежный файл <code>.srwb</code> от другого источника, используйте его и пропустите скачивание примера. Название рабочей книги и количество ячеек в нем будут отличаться от проверок на шаге 3.</p>
+      </section>
+
+      <section id="import">
+        <p class="step-label">Шаг 2</p>
+        <h2>Найдите Меню и выберите «Импортировать файл»</h2>
+        <ol class="lesson-steps">
+          <li>Вернитесь в SciREPL. В <strong>строке заголовка в верхней части приложения</strong> найдите кнопку <strong>☰ Меню</strong> с <strong>тремя горизонтальными линиями</strong> и нажмите на нее.</li>
+          <li>Выберите <strong>📂 Импортировать файл (например, .srwb, .ipynb, .csv, .py, .zip)</strong>. Если меню не помещается на экране по высоте, прокрутите <em>внутри меню</em>, чтобы найти этот пункт.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-menu" role="img" aria-label="Снимок экрана Samsung Galaxy S24+ с открытым меню SciREPL Free, где пункт «Импортировать файл» выделен желтым цветом.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Выберите <strong>📂 Импортировать файл</strong> в меню приложения. Желтая отметка указывает на пункт импорта в <strong>Free 1.4.0-debug на Android</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/phone-menu.png">Посмотреть полный снимок экрана с меню Android</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li><strong>На Android:</strong> откроется системное средство выбора файлов. Загляните в папку <strong>Загрузки</strong> или перейдите в каталог, где был сохранен файл. Выберите <code>simpsons-paradox.srwb</code>. Средство выбора принадлежит Android, поэтому его внешний вид и итоговая кнопка <strong>Открыть</strong> или элемент подтверждения выбора зависят от вашего устройства.</li>
+          <li><strong>На компьютере:</strong> используйте диалог выбора файлов, чтобы найти папку, выбранную при скачивании. Выберите <code>simpsons-paradox.srwb</code> и подтвердите выбор. Используйте этот способ вместо поиска экрана «Загрузки» Android.</li>
+          <li>Вернувшись в SciREPL, дождитесь завершения импорта. Если меню все еще открыто, закройте его, чтобы увидеть рабочую книгу.</li>
+        </ol>
+        <p class="callout"><strong>Рабочая книга — это не загрузка файла данных.</strong> Импорт файла <code>.srwb</code> добавляет соответствующую рабочую книгу в виде отдельной вкладки (или нескольких вкладок, если файл содержит несколько рабочих книг). Ваши существующие вкладки сохраняются. При этом рабочая книга не помещается в раздел «Файлы» и не заменяет текущую рабочую книгу.</p>
+      </section>
+
+      <section id="check">
+        <p class="step-label">Шаг 3</p>
+        <h2>Проверьте новую рабочую книгу перед запуском чего-либо</h2>
+        <ol class="lesson-steps">
+          <li>Найдите в селекторе рабочих книг <strong>Simpson's Paradox</strong>. Выберите эту новую вкладку, если она еще не выбрана. Ее введение озаглавлено <strong>Simpson's Paradox: When Every Group Disagrees with the Total</strong>.</li>
+          <li>Прочитайте введение и просмотрите ячейки. В версии, использованной для этих снимков экрана, содержится <strong>семь ячеек</strong>: три текстовые ячейки, три ячейки <strong>R</strong> и одна ячейка <strong>JavaScript</strong>. Более поздняя версия на <code>main</code> может отличаться.</li>
+          <li>Найдите ячейки R с именами <code>data</code>, <code>compute</code> и <code>viz</code> именно в таком порядке. Ячейка JavaScript называется <code>js_check</code> и представляет собой отдельную необязательную проверку. Прочитайте как пояснительный текст, так и код.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-result" role="img" aria-label="Снимок экрана в браузере Chromium для SciREPL Free 1.4.0 с размером области просмотра мобильного устройства, на котором показана импортированная рабочая книга «Парадокс Симпсона» и ее заголовок, выделенный желтым цветом.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/browser-imported.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/imported-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Результат импорта в браузере:</strong> импортированная рабочая книга <strong>Simpson's Paradox</strong> открывается в виде редактируемых ячеек в <strong>Free 1.4.0 в Chromium</strong>, здесь с областью просмотра 390 × 844. Это не снимок экрана Android. Импорт не запускает выполнение ячеек R или JavaScript.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/browser-imported.png">Посмотреть полный снимок экрана импортированной рабочей книги в браузере</a>
+        </figure>
+        <p class="callout"><strong>Импорт для .srwb не означает запуск.</strong> SciREPL не выполняет код при импорте файла <code>.srwb</code>, даже если автоматическое выполнение включено для других импортов. Проверяйте код из незнакомого или ненадежного источника перед выбором <strong>Выполнить</strong> или <strong>Выполнить все ячейки</strong>.</p>
+        <p><strong>Обычный импорт файлов .srwb в настоящее время отбрасывает сохраненные результаты выполнения ячеек с кодом</strong>, даже если файл их содержит. Текст Markdown сохраняется и отображается, именно поэтому введение появляется сразу. Чтобы заново сгенерировать графики или другие созданные кодом изображения, запустите соответствующие ячейки с кодом повторно, соблюдая порядок зависимостей между ними. Импорт не восстанавливает активные переменные среды выполнения R или других языков.</p>
+      </section>
+
+      <section id="next">
+        <p class="step-label">Шаг 4</p>
+        <h2>Необязательно: запуск импортированного урока</h2>
+        <p>Ручной импорт завершен; запуск кода выполняется отдельно. В «Парадоксе Симпсона» используются <strong>синтетические учебные данные</strong>, чтобы продемонстрировать, как сравнения внутри групп могут противоречить общему сравнению. Чтобы изучить его, нажмите значок <strong>✎ карандаша</strong> у сохраненной ячейки с кодом, изучите код, а затем используйте кнопку <em>этой ячейки</em> <strong>Выполнить</strong>.</p>
+        <ol class="lesson-steps">
+          <li>Запустите ячейку R <code>data</code>, затем прочитайте текстовую ячейку <code>pause</code> и сделайте предсказание перед запуском <code>compute</code>. Продолжите выполнение ячейки <code>viz</code>, чтобы построить график. Последующие ячейки R зависят от предыдущих. Они используют базовый R; вам не нужно устанавливать дополнительные пакеты R.</li>
+          <li>Если вам нужна отдельная проверка на JavaScript, запустите <code>js_check</code>. Она автономна: не зависит от ячеек R и не требует запуска среды R.</li>
+        </ol>
+        <p class="callout"><strong>Первый запуск R:</strong> среде выполнения SciREPL webR может потребоваться скачивание и инициализация. Может появиться уведомление о сети и конфиденциальности; прочитайте его и согласитесь только в том случае, если хотите продолжить. Дождитесь готовности среды выполнения и проверьте ячейку на отсутствие ошибок. Один лишь импорт рабочей книги еще не загрузил ее определения R.</p>
+        <p>Другой пример с более подробным разбором запуска и редактирования приведен в <a href="../tutorial/#run">уроке «Группы Маркова»</a>. Это другая рабочая книга с четырьмя ячейками Python; ее <a href="../tutorial/#export">шаг экспорта</a> также иллюстрирует, как сохранить отредактированную копию рабочей книги.</p>
+        <p class="callout"><strong>Сохраняйте копию, которую вы контролируете.</strong> Скачанный файл представляет собой исходную копию рабочей книги, а не резервную копию последующих правок. Экспортируйте копию рабочей книги, чтобы сохранить внесенные изменения. Очистка хранилища приложения или браузера может привести к удалению локальной работы, а сеансы Android и браузера не синхронизируют ваши изменения автоматически.</p>
+      </section>
+
+      <section id="other-formats">
+        <p class="step-label">Другие форматы и безопасность</p>
+        <h2>Знайте, что содержит ваш файл</h2>
+        <p><strong>Блокноты Jupyter (.ipynb)</strong> также используют <strong>Меню → Импортировать файл</strong>, но поведение их выполнения отличается от <code>.srwb</code>. Если параметр <strong>Автоматически выполнять ячейки при импорте книги</strong> включен, импорт <code>.ipynb</code> может автоматически запускать ячейки с кодом, не имеющие сохраненных результатов вывода.</p>
+        <p class="callout"><strong>Импортируйте файлы блокнотов только из надежных источников.</strong> Перед импортом <code>.ipynb</code> откройте <strong>Меню → Настройки → Импорт и редактирование</strong> и убедитесь, что параметр <strong>Автоматически выполнять ячейки при импорте книги</strong> <strong>отключен</strong> (флажок снят). Он отключен по умолчанию, но проверьте текущую настройку. Отключение параметра не гарантирует безопасность произвольного блокнота; внимательно изучите код надежного блокнота, прежде чем принимать явное решение о его запуске.</p>
+        <p><strong>Отдельные файлы данных:</strong> обычный экспорт <code>.srwb</code> не переносит отдельные файлы CSV или другие данные, хранящиеся в виртуальной файловой системе SciREPL (раздел <strong>Файлы</strong>). Эта версия «Парадокса Симпсона» создает синтетические данные непосредственно в коде, поэтому отдельный файл данных ей не требуется. Для рабочей книги, которая считывает CSV, выполните <a href="../../files-export/tutorial/#export">экспорт архива пакета из руководства по CSV</a> и <a href="../../files-export/tutorial/#reopen">шаги повторного открытия</a>, чтобы сохранить и восстановить как рабочую книгу, так и ее данные. Архивы пакетов и импорт <code>.zip</code> выходят за рамки этого короткого урока по файлам рабочих книг.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">Если что-то выглядит неправильно</p>
+        <h2>Проверьте файл и выбранную вкладку</h2>
+        <ul>
+          <li><strong>Средство выбора не может найти файл:</strong> проверьте список загрузок в браузере, чтобы узнать, куда он был сохранен, а затем перейдите в эту папку. Скачивание на компьютере не помещает файл в папку «Загрузки» на телефоне.</li>
+          <li><strong>Имя файла заканчивается на .txt или .html:</strong> вернитесь к ссылке скачивания рабочей книги и сохраните сам файл с его расширением <code>.srwb</code>. Переименование HTML-страницы в <code>.srwb</code> не превращает ее в рабочую книгу.</li>
+          <li><strong>Вы по-прежнему видите старую рабочую книгу:</strong> закройте меню и проверьте селектор рабочих книг на наличие нового заголовка. Существующие вкладки сохраняются.</li>
+          <li><strong>Вы импортировали ее дважды:</strong> повторный импорт добавляет еще одну копию; он не обновляет и не заменяет предыдущую вкладку. Прежде чем вносить изменения, проверьте, какую именно копию вы редактируете.</li>
+          <li><strong>Название или ячейки не совпадают:</strong> убедитесь, что вы выбрали <code>simpsons-paradox.srwb</code>, а не другую загрузку или файл из другого урока. Файл на <code>main</code> может изменяться; сравните свою копию с <a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">текущим файлом на GitHub</a> и проверьте незнакомый код перед его запуском.</li>
+        </ul>
+        <p>Основные сведения о вкладках рабочих книг и редактировании сохраненных ячеек приведены в <a href="../../interface/tutorial/">обзоре интерфейса первой рабочей книги</a>. В <a href="../../../workbooks/">справочнике по рабочим книгам<span class="english-reference"> (Справочная страница на английском языке)</span></a> описаны структура рабочей книги и типы ячеек.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Справка SciREPL</span><nav aria-label="Навигация в подвале"><a href="../../../workbooks/">Справочник по рабочим книгам<span class="english-reference"> (Справочная страница на английском языке)</span></a><a href="../../../">Вся справка<span class="english-reference"> (Справочная страница на английском языке)</span></a></nav></footer>
+</body>
+</html>

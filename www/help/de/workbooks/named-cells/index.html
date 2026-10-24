@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="de" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Benennen Sie SciREPL-Zellen, lesen Sie deren Quellcode und Ausgabe über das virtuelle Dateisystem /nb und übergeben Sie Daten oder generierten Code zwischen JavaScript, Bash und Python.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/de/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/named-cells/tutorial.css">
+  <title>Benannte Zellen und sprachübergreifende Pfade · SciREPL-Hilfe</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/named-cells/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/named-cells/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/named-cells/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/named-cells/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/named-cells/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/named-cells/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/named-cells/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/named-cells/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/named-cells/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Zum Inhalt springen</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Englische Referenzseite)</span></a>
+    <nav aria-label="Hauptnavigation"><a href="../../../workbooks/">Arbeitsmappen-Referenz<span class="english-reference"> (Englische Referenzseite)</span></a><a href="../../tutorials/">Alle Tutorials</a><a href="../../../">Alle Hilfethemen<span class="english-reference"> (Englische Referenzseite)</span></a><a href="../../../../">Free-PWA öffnen</a></nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Tutorial-Sprache"><details class="tutorial-language-menu"><summary>Tutorial-Sprache: <bdi>Deutsch</bdi></summary><nav aria-label="Tutorial-Sprache"><a href="../../../en/workbooks/named-cells/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/named-cells/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/named-cells/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="./" lang="de" hreflang="de" aria-current="page">Deutsch</a>
+      <a href="../../../es/workbooks/named-cells/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/named-cells/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/named-cells/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/named-cells/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/named-cells/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/named-cells/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/named-cells/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/named-cells/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/named-cells/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Maschinell übersetztes Tutorial; die Überprüfung durch Muttersprachler steht noch aus. Code und technische Werte sind unverändert. Screenshots zeigen die englische Originaloberfläche; gleichen Sie die übersetzten Bezeichnungen der Steuerelemente in diesem Text mit Ihrer App ab.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Hilfe<span class="english-reference"> (Englische Referenzseite)</span></a> / <a href="../../../workbooks/">Arbeitsmappen<span class="english-reference"> (Englische Referenzseite)</span></a> / Benannte Zellen und Pfade</p>
+    <article>
+      <p class="eyebrow">Lernen durch Praxis</p>
+      <h1>Zellen benennen und Programme verbinden</h1>
+      <p class="lede">Eine Zelle kann einen aussagekräftigen Namen wie <code>numbers</code> haben, anstatt nur über ihre Position bekannt zu sein. Andere Zellen können ihre neueste Textausgabe über <code>/nb/numbers/.output</code> auslesen oder Daten über eine gewöhnliche Datei in <code>/shared/</code> austauschen. Probieren Sie beide Wege mit JavaScript und Bash aus und generieren Sie dann ein kleines Bash-Programm in einer anderen Zelle – ohne den generierten Code automatisch auszuführen.</p>
+      <ul class="meta"><li class="chip chip-free">Free + Pro-Workflow</li><li class="chip">Im Browser geprüfte Beispiele</li><li class="chip">Etwa 15 Minuten</li></ul>
+      <p class="screen-note">Die Anleitung und die Screenshots wurden im <strong>SciREPL-Free-Browser-Build</strong> am <time datetime="2026-10-06">6. Oktober 2026</time> überprüft. Dies sind vollständige Aufnahmen in schmaler Browseransicht, <strong>keine Android-Screenshots</strong>. Pro und jede veröffentlichte Version wurden für diesen Leitfaden nicht überprüft. Die Hauptübung verwendet das mitgelieferte JavaScript und Bash: Es sind keine Pakete, Modellaufrufe oder Laufzeit-Downloads erforderlich. Python ist ein optionaler letzter Schritt.</p>
+      <p class="callout"><strong>Was „Pfade“ hier bedeutet:</strong> <code>/nb/</code> ist eine virtuelle Ansicht der <em>Zellen der aktuell ausgewählten Arbeitsmappe</em>, die für Programme verfügbar ist. Es ist kein Ordner in Androids Downloads und kein separater Bildschirm namens „Path View“. In der geprüften Version von Free durchsucht der Bildschirm <strong>Dateien &amp; Speicher</strong> nicht <code>/nb/</code>; später kopieren wir gezielt einige Daten in eine geteilte Datei, die der Bildschirm anzeigen kann.</p>
+      <nav class="lesson-nav" aria-label="Schritte der Anleitung zu benannten Zellen">
+        <strong>In dieser Lektion</strong>
+        <ol>
+          <li><a href="#open">Die kleine Beispiel-Arbeitsmappe importieren</a></li>
+          <li><a href="#name">Den Namen einer Zelle finden und ändern</a></li>
+          <li><a href="#produce">Die datenerzeugende Zelle ausführen</a></li>
+          <li><a href="#paths">Zellen über ihre Pfade auslesen</a></li>
+          <li><a href="#shared-file">Daten über eine geteilte JSON-Datei austauschen</a></li>
+          <li><a href="#generate">Quellcode für eine andere Zelle generieren und selbst ausführen</a></li>
+          <li><a href="#update">Die Daten ändern und die Ergebnisse aktualisieren</a></li>
+        </ol>
+        <p><a href="#python">Optionaler Python-Reader</a> · <a href="#more">Weitere Arbeitsmappen-Beispiele</a> · <a href="#troubleshooting">Wenn etwas schiefgeht</a></p>
+        <p><a href="../../tutorials/">Alle Tutorials</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">Schritt 1</p>
+        <h2>Das Beispiel importieren, ohne es auszuführen</h2>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/named-cells/assets/named-cell-interop.srwb" download="named-cell-interop.srwb">Laden Sie die Beispiel-Arbeitsmappe für benannte Zellen herunter (.srwb)</a>. Speichern Sie die Datei selbst und behalten Sie ihre Dateiendung <code>.srwb</code> bei. Wenn der Browser Text anzeigt, verwenden Sie dessen Speichern-/Herunterladen-Funktion.</li>
+          <li>Suchen Sie in der oberen Kopfzeile von SciREPL nach <strong>☰ Menü</strong> – der Schaltfläche mit <strong>drei horizontalen Linien</strong>. Öffnen Sie es und wählen Sie <strong>📂 Datei importieren (z. B. .srwb, .ipynb, .csv, .py, .zip)</strong>. Scrollen Sie bei Bedarf im Menü.</li>
+          <li>Wählen Sie <code>named-cell-interop.srwb</code> in der Dateiauswahl Ihres Geräts aus. Schließen Sie das Menü, falls es geöffnet bleibt, und wählen Sie dann den neuen Tab <strong>Named Cell Interop</strong> in der Arbeitsmappenauswahl. Der Pfeil <strong>▾</strong> der Auswahl befindet sich in der Nähe des App-Titels. Ihre vorhandenen Arbeitsmappen bleiben erhalten.</li>
+          <li>Lesen Sie die Einleitung und suchen Sie dann die sieben Code-Zellen mit den Namen <code>numbers</code>, <code>inspect_cells</code>, <code>write_shared</code>, <code>read_shared</code>, <code>generate_report</code>, <code>bash_report</code> und <code>python_total</code>. Diese sind bereits benannt, damit Sie der Übung folgen können.</li>
+        </ol>
+        <p class="callout"><strong>Importieren ist nicht Ausführen.</strong> Ein gewöhnlicher Import von <code>.srwb</code> führt keinen Code aus, selbst wenn die automatische Ausführung aktiviert ist. Wählen Sie für diese Lektion nicht „Alle Zellen ausführen“: Die Reihenfolge ist wichtig, und die letzte Python-Zelle ist optional. Prüfen Sie unbekannten Code, bevor Sie ihn ausführen.</p>
+        <p>Benötigen Sie die Schritte zum Herunterladen und Auswählen ausführlicher? Nutzen Sie die <a href="../import/">Anleitung zum manuellen Import von Arbeitsmappen</a>. Um dieser Lektion zu folgen, lassen Sie <strong>Named Cell Interop</strong> ausgewählt: <code>/nb/</code> bezieht sich auf die aktive Arbeitsmappe, nicht auf jeden geöffneten Tab.</p>
+      </section>
+
+      <section id="name">
+        <p class="step-label">Schritt 2</p>
+        <h2>Den Namen einer Zelle finden und ändern</h2>
+        <p>Eine gespeicherte Code-Zelle hat eine <strong>In[…]-Prompt-Bezeichnung</strong> in ihrer eigenen Kopfzeile, und eine benannte Zelle zeigt dort auch ihren Namen an. Dies ist die Bezeichnung, die zum Benennen verwendet wird – nicht der <strong>✎ Stift</strong>, der den Quellcode der Zelle bearbeitet. Die angezeigte Nummer identifiziert die gespeicherte Karte; nach einer Neuordnung muss sie nicht mit der aktuellen Position der Zelle in einem <code>/nb/In[N]/...</code>-Pfad übereinstimmen. Bevorzugen Sie Namen für Verweise.</p>
+        <figure class="phone-figure">
+          <div class="annotated-shot" role="img" aria-label="Browser-Screenshot, auf dem das In-Label und das Stift-Bedienelement der numbers-Zelle gelb umrandet sind; ihr Quellcode und die JSON-Ausgabe sind darunter zu sehen.">
+            <img src="../../../workbooks/named-cells/assets/browser-named-cell.png" alt="" loading="lazy" decoding="async">
+            <img class="shot-annotation" src="../../../workbooks/named-cells/assets/browser-named-cell-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          </div>
+          <figcaption>Die zwei gelben Umrandungen kennzeichnen die <strong>In[…]-Bezeichnung</strong> der gespeicherten Zelle, die den Benennungsdialog per Doppelklick oder langem Drücken öffnet, sowie ihren <strong>✎ Stift</strong>, der den Quellcode-Editor öffnet. Der Name <code>numbers</code> erscheint rechts. Diese Browseraufnahme zeigt die Ausgabe nach Schritt 3; bewegen Sie auf dem Desktop den Mauszeiger über die Karte, um ihre Bedienelemente einzublenden.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-named-cell.png">Vollständigen Browser-Screenshot anzeigen</a>
+        </figure>
+        <ol class="lesson-steps">
+          <li>Suchen Sie <code>numbers</code>. Führen Sie auf dem Desktop einen <strong>Doppelklick auf ihre In[…]-Bezeichnung</strong> aus. Halten Sie auf einem Touch-Gerät <strong>diese Bezeichnung gedrückt</strong>. Ein einfacher Klick ist im geprüften Build nicht die Geste zum Benennen.</li>
+          <li>Ersetzen Sie im Dialog <code>numbers</code> durch <code>measurements</code> und bestätigen Sie anschließend mit <strong>OK</strong>. Der Name in der Kopfzeile der Zelle ändert sich; Quellcode und Sprache bleiben unverändert.</li>
+          <li>Öffnen Sie denselben Dialog erneut und ändern Sie den Namen <strong>zurück zu <code>numbers</code></strong>, und wählen Sie dann <strong>OK</strong>. Die nächsten Zellen verwenden diesen Namen; stellen Sie ihn daher wieder her, bevor Sie fortfahren.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-name-dialog.png" alt="Screenshot in schmaler Browseransicht des Zellennamen-Dialogs von SciREPL Free mit eingegebenen Messwerten sowie Bestätigungs- und Abbrechen-Bedienelementen." loading="lazy" decoding="async">
+          <figcaption>Der Name wird in einem eigenen Dialog bearbeitet. Das Umbenennen einer Zelle passt Referenzen in anderen Zellen nicht automatisch an: <code>/nb/numbers/.output</code> müsste ebenfalls geändert werden, wenn Sie den neuen Namen beibehalten würden.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-name-dialog.png">Vollständigen Browser-Screenshot des Benennungsdialogs anzeigen</a>
+        </figure>
+        <p>Wählen Sie eindeutige, einfache Namen wie <code>cube_moves</code> oder <code>check_moves</code>. Namen müssen innerhalb der Arbeitsmappe eindeutig sein; sie dürfen kein <code>/</code> enthalten, nicht mit <code>.</code> beginnen und keine reservierte Positionsbezeichnung wie <code>In[2]</code> sein. Das Leeren des Namens entfernt ihn.</p>
+        <p>Aus diesem Grund kann in einem Tutorial stehen: <strong>„Führen Sie <code>cube_moves</code> aus, dann <code>check_moves</code>“</strong>: Das sind Zellennamen, die in der Arbeitsmappe zu finden sind, keine separat herunterzuladenden Dateien. Namen eignen sich besser als Referenzen als Positionen, wenn Sie Zellen einfügen oder verschieben.</p>
+      </section>
+
+      <section id="produce">
+        <p class="step-label">Schritt 3</p>
+        <h2>Die datenerzeugende Zelle ausführen</h2>
+        <p>Suchen Sie <code>numbers</code>. Tippen Sie auf ihren <strong>✎ Stift</strong>, prüfen Sie den Quellcode und stellen Sie sicher, dass die Zelle auf <strong>Code → JS - JavaScript</strong> eingestellt ist. Verwenden Sie dann für <em>diese gespeicherte Zelle deren</em> Schaltfläche <strong>▶ Ausführen</strong> – nicht das Panel für neue Zellen, das eine weitere Zelle hinzufügt.</p>
+        <p class="callout"><strong>Pro-Kürzel:</strong> Sie können den Editor einer gespeicherten Zelle auch durch <strong>doppeltes Antippen des Quelltexts der Zelle</strong> in Pro öffnen. Der <strong>✎ Stift</strong> funktioniert in beiden Editionen. Dieses Bearbeitungskürzel unterscheidet sich vom Doppelklicken oder langen Drücken der <strong>In[…]-Bezeichnung</strong> zum Ändern ihres Namens.</p>
+        <pre><code data-cell-example="numbers">console.log(JSON.stringify({values: [3, 5, 8]}));</code></pre>
+        <p>Erwarten Sie diese einzeilige Ausgabe:</p>
+        <pre><code>{"values":[3,5,8]}</code></pre>
+        <p>Das Ergebnis ist <strong>JSON-Text</strong>. Durch seine Struktur lässt es sich von einer anderen Sprache leichter lesen als eine Fließtext-Meldung. Wir übergeben kein aktives JavaScript-Objekt und teilen keine JavaScript-Variablen mit Bash oder Python.</p>
+      </section>
+
+      <section id="paths">
+        <p class="step-label">Schritt 4</p>
+        <h2>Eine Zelle über das virtuelle Dateisystem auslesen</h2>
+        <p>Das virtuelle Verzeichnis für <code>numbers</code> enthält Eigenschaften mit vorangestelltem Punkt. Ein Pfad kombiniert den Einhängepunkt der Arbeitsmappe, die Zellenkennung und die gewünschte Eigenschaft:</p>
+        <pre class="path-tree" aria-label="Virtuelle Pfade für die numbers-Zelle"><code>/nb/                         current workbook's cells
+└── numbers/                 this named cell
+    ├── .code                source text
+    ├── .output              latest text output
+    ├── .language            javascript
+    ├── .type                code
+    └── .name                numbers</code></pre>
+        <div class="table-wrap">
+          <table>
+            <caption>Zelleneigenschaften, die von der Pfadschnittstelle der Arbeitsmappe verwendet werden</caption>
+            <thead><tr><th scope="col">Eigenschaft</th><th scope="col">Was das Auslesen liefert</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>.code</code></th><td>Der aktuelle Quellcode, unabhängig davon, ob dieser Quellcode ausgeführt wurde.</td></tr>
+              <tr><th scope="row"><code>.output</code></th><td>Die letzte Textausgabe. Sie ist schreibgeschützt: Die Ausführung liefert sie. Sie kann leer oder veraltet sein.</td></tr>
+              <tr><th scope="row"><code>.language</code></th><td>Die gespeicherte Sprachkennung, wie etwa <code>javascript</code> oder <code>bash</code>.</td></tr>
+              <tr><th scope="row"><code>.type</code></th><td>Der Zelltyp, wie etwa <code>code</code> oder <code>markdown</code>.</td></tr>
+              <tr><th scope="row"><code>.name</code></th><td>Der zugewiesene Name oder leerer Text, wenn die Zelle unbenannt ist.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Öffnen Sie nun den <strong>✎ Stift</strong> bei <code>inspect_cells</code>, prüfen Sie <strong>Code → Bash</strong> und führen Sie die Zelle aus. Dies liest den Quellcode der Erzeugerzelle, deren JSON-Ausgabe und deren Sprache aus und listet anschließend die Zellenkennungen der aktuellen Arbeitsmappe auf. Es schreibt oder ändert weder Zellen noch Dateien.</p>
+        <pre><code data-cell-example="inspect_cells">printf 'Source:\n'
+cat /nb/numbers/.code
+printf '\nOutput:\n'
+cat /nb/numbers/.output
+printf '\nLanguage:\n'
+cat /nb/numbers/.language
+printf '\nCell names and positions:\n'
+ls /nb/</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-cell-paths.png" alt="Screenshot in schmaler Browseransicht der Bash-Zelle inspect_cells, der den Quellcode der numbers-Zelle, die JSON-Ausgabe, die Sprache und die virtuelle Zellenauflistung zeigt." loading="lazy" decoding="async">
+          <figcaption>Bash liest die Eigenschaften der Zelle mit gewöhnlich aussehenden <code>cat</code>-Pfaden aus. Diese Pfade adressieren Arbeitsmappendaten; es ist keine Android-Shell und kein physischer Smartphone-Ordner beteiligt. Browseraufnahme von SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-cell-paths.png">Vollständigen Browser-Screenshot der Zellenpfade anzeigen</a>
+        </figure>
+        <h3>Namen, Positionen und relative Referenzen</h3>
+        <p>Dieselbe Zelle kann auch über ihre <strong>aktuelle 1-basierte Position</strong> adressiert werden; beispielsweise bedeutet <code>/nb/In[2]/.output</code> die zweite Zelle in der aktuellen Reihenfolge. Zählen Sie auch Markdown-Zellen mit. Dies ist keine dauerhafte Karten-ID: Nach einer Neuordnung kann sich die ausgegebene In[…]-Nummer von der durch diesen Pfad verwendeten Position unterscheiden. Positionsreferenzen ändern ihre Bedeutung, wenn Sie Zellen umordnen oder einfügen; Namensreferenzen identifizieren weiterhin die benannte Zelle.</p>
+        <p>Bash und JavaScript unterstützen auch Referenzen relativ zur ausführenden Zelle: <code>/nb/-1/.output</code> bedeutet die vorherige Zelle und <code>/nb/./.code</code> bedeutet die aktuelle Zelle. Sie erfordern einen Ausführungskontext und hängen von der Zellenreihenfolge ab. Dieses Tutorial verwendet stattdessen explizite Namen; es verlässt sich nicht darauf, dass sich relative Referenzen in jeder Sprache identisch verhalten.</p>
+      </section>
+
+      <section id="shared-file">
+        <p class="step-label">Schritt 5</p>
+        <h2>Daten über eine geteilte Datei austauschen</h2>
+        <p><strong>Das geteilte virtuelle Dateisystem</strong> enthält gewöhnliche Dateien, die verschiedene Sprach-Kernel nutzen können. Hier bezeichnet <code>/shared/</code> Speicherplatz, der innerhalb Ihrer SciREPL-Browser-/App-Sitzung verwaltet wird – nicht Androids Downloads, einen Ordner auf Ihrem Computer oder eine Cloud-Synchronisierung. Geteilte Dateien enthalten Text oder Bytes; sie machen nicht die aktiven Variablen einer Sprache für eine andere verfügbar.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Zwei Möglichkeiten, wie Programme auf Daten verweisen können</caption>
+            <thead><tr><th scope="col">Pfad</th><th scope="col">Was er adressiert</th><th scope="col">Was ihn aktualisiert</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>/nb/numbers/.output</code></th><td>Letzte Textausgabe einer Zelle in der ausgewählten Arbeitsmappe.</td><td>Erneutes Ausführen dieser Zelle.</td></tr>
+              <tr><th scope="row"><code>/shared/data/named-cell-tutorial/values.json</code></th><td>Eine gewöhnliche JSON-Datei, die über Kernel und Arbeitsmappen-Tabs hinweg verfügbar ist.</td><td>Ein Programm oder Datei-Editor, der diese Datei explizit schreibt.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Eine gewöhnliche JSON-Datei schreiben</h3>
+        <p>Öffnen Sie den <strong>✎ Stift</strong> bei <code>write_shared</code>, prüfen Sie <strong>Code → JS - JavaScript</strong> und führen Sie die Zelle aus. Dies liest die letzte Textausgabe der Erzeugerzelle und speichert sie als geteilte JSON-Textdatei. Das geteilte Dateisystem erstellt übergeordnete Ordner bei Bedarf automatisch.</p>
+        <pre><code data-cell-example="write_shared">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+window.sharedVFS.writeFile('/shared/data/named-cell-tutorial/values.json', text, 'javascript');
+console.log('Saved JSON to /shared/data/named-cell-tutorial/values.json');</code></pre>
+        <p>Das Ergebnis ist eine <strong>separate Datei, die eine Kopie</strong> der JSON-Ausgabe enthält, kein weiterer Name für <code>/nb/numbers/.output</code>. Der eigene Ordner hält die kleine Arbeitsdatei des Beispiels getrennt von Ihren anderen Daten; eine erneute Ausführung von <code>write_shared</code> überschreibt genau diese Lektionsdatei.</p>
+        <h3>Die Datei aus einem anderen Programm einlesen</h3>
+        <p>Öffnen Sie den <strong>✎ Stift</strong> bei <code>read_shared</code>, prüfen Sie <strong>Code → JS - JavaScript</strong> und führen Sie die Zelle aus. Dieses unabhängige Programm liest die gespeicherte Datei aus, nicht die Zelle <code>numbers</code>:</p>
+        <pre><code data-cell-example="read_shared">const text = window.sharedVFS.readFile('/shared/data/named-cell-tutorial/values.json', 'utf8');
+if (!text) throw new Error('Run write_shared first.');
+const record = JSON.parse(text);
+console.log(record.values.reduce((sum, value) =&gt; sum + value, 0));</code></pre>
+        <p>Erwarten Sie <code>16</code>. Das explizite <code>'utf8'</code> liest die Bytes der Datei als Text für das JSON-Parsing. Jeder Kernel besitzt seine eigene Datei-API: JavaScript verwendet hier den Helper des geteilten Dateisystems; Python kann <code>open(...)</code> verwenden, wie im optionalen Schritt unten gezeigt. Dies ist kein vollständiges Betriebssystem-Dateisystem.</p>
+        <p>Für eine separate sprachübergreifende Überprüfung können Sie eine neue Zelle <strong>Code → Bash</strong> hinzufügen und diesen Befehl ausführen. Er liest dieselbe gewöhnliche Datei und gibt <code>{"values":[3,5,8]}</code> aus:</p>
+        <pre><code>cat /shared/data/named-cell-tutorial/values.json</code></pre>
+        <h3>Dieselbe Datei in der Datei-Benutzeroberfläche anzeigen</h3>
+        <ol class="lesson-steps">
+          <li>Öffnen Sie <strong>☰ Menü → Dateien &amp; Speicher</strong>.</li>
+          <li>Suchen Sie den geteilten Ordner <code>data</code>, dann <code>named-cell-tutorial</code> und <code>values.json</code>. Wählen Sie die Datei aus, um ihren JSON-Text anzuzeigen.</li>
+          <li>Prüfen Sie, ob sie <code>{"values":[3,5,8]}</code> enthält, und schließen Sie dann Files &amp; Storage, um mit der Arbeitsmappe fortzufahren.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-shared-values.png" alt="Screenshot in schmaler Browseransicht des Bildschirms Files &amp; Storage von SciREPL Free, der die kopierte Datei values.json und ihren JSON-Inhalt zeigt." loading="lazy" decoding="async">
+          <figcaption>Eine gezielte Kopie in das geteilte Dateisystem macht das JSON in der Datei-Benutzeroberfläche verfügbar. Der geprüfte Bildschirm von Free listet <code>/nb/</code> selbst nicht auf. Browseraufnahme von SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-shared-values.png">Vollständigen Browser-Screenshot der geteilten Datei anzeigen</a>
+        </figure>
+        <p class="callout"><strong>Eine Kopie wird nicht automatisch aktualisiert.</strong> Das Ändern oder erneute Ausführen von <code>numbers</code> ändert dessen neueste Zellenausgabe, nicht das vorhandene <code>values.json</code>. Führen Sie <code>write_shared</code> erneut aus, um die Kopie zu aktualisieren, und dann <code>read_shared</code>, um auf deren Grundlage neu zu berechnen. Dateien werden im lokalen App-/Browser-Speicher aufbewahrt, aber das Löschen dieses Speichers oder die Deinstallation der App kann sie entfernen. Lokale Persistenz ist kein Backup; exportieren Sie Dateien, die Sie behalten müssen.</p>
+        <p>Informationen zum Anzeigen, Bearbeiten und Exportieren geteilter Dateien finden Sie in der Anleitung zu <a href="../../files-export/tutorial/#edit-file">CSV und Files &amp; Storage</a>. Ein reiner Arbeitsmappen-Export von <code>.srwb</code> enthält keine separaten Dateien wie diese JSON-Kopie; verwenden Sie den <a href="../../files-export/tutorial/#export">Paketarchiv-Export</a>, um die Arbeitsmappe und ausgewählte Datendateien gemeinsam einzuschließen.</p>
+      </section>
+
+      <section id="generate">
+        <p class="step-label">Schritt 6</p>
+        <h2>Code für eine andere Zelle generieren und selbst ausführen</h2>
+        <p>Bislang hat Bash die Ausgabe von JavaScript ausgelesen. Nun verwendet JavaScript denselben JSON-Text, um eine Gesamtsumme zu berechnen, und schreibt ein kurzes Bash-Programm in die <em>bereits vorhandene</em> Zelle <code>bash_report</code>. Code zu schreiben und Code auszuführen sind zwei getrennte Aktionen.</p>
+        <ol class="program-flow" aria-label="Ablauf von Daten und generiertem Code">
+          <li><code>numbers</code><span>Ausführen → JSON-Text</span></li>
+          <li><code>generate_report</code><span>JSON lesen → Bash-Quellcode schreiben</span></li>
+          <li><code>bash_report</code><span>Prüfen → manuell ausführen</span></li>
+        </ol>
+        <p class="callout"><strong>Dieser Schreibvorgang ersetzt Quellcode.</strong> Verwenden Sie die temporäre Zelle <code>bash_report</code> des Begleitmaterials, keine Zelle mit Inhalten, die Sie behalten müssen. Erstellen Sie ein Backup, bevor Sie Quellcode-Schreibvorgänge in Ihrer eigenen Arbeitsmappe ausprobieren. Überschreiben Sie in dieser Übung weder den Generator selbst noch ändern Sie <code>.language</code> programmatisch.</p>
+        <ol class="lesson-steps">
+          <li>Prüfen Sie, ob <code>bash_report</code> existiert und als Sprache <strong>Bash</strong> eingestellt ist. Der anfängliche Quellcode wird unten gezeigt; führen Sie ihn noch nicht aus.</li>
+          <li>Öffnen Sie <strong>☰ Menü → Einstellungen → Notebook-VFS</strong>. <strong>Zellen dürfen andere Zellen ändern</strong> muss für den Schreibvorgang des Generators aktiviert sein. Im geprüften Build ist dies standardmäßig aktiviert, überprüfen Sie jedoch Ihre Einstellung. Sie müssen arbeitsmappenübergreifende Lesevorgänge, arbeitsmappenübergreifende Schreibvorgänge oder programmatische Ausführung <em>nicht</em> aktivieren. Schließen Sie Settings.</li>
+          <li>Öffnen Sie den <strong>✎ Stift</strong> bei <code>generate_report</code>, prüfen Sie <strong>Code → JS - JavaScript</strong> und führen Sie die Zelle aus.</li>
+        </ol>
+        <pre><code data-cell-example="generate_report">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+const data = JSON.parse(text);
+const total = data.values.reduce((sum, value) =&gt; sum + value, 0);
+const updated = window.notebookVFS.writeFile(
+  '/nb/bash_report/.code', `echo "Total: ${total}"`
+);
+if (!updated) throw new Error('Check bash_report exists and cell writes are allowed.');
+console.log('Updated bash_report source; inspect it, then run it yourself.');</code></pre>
+        <p>Das Ziel beginnt mit diesem Platzhalter:</p>
+        <pre><code data-cell-example="bash_report">echo "Run generate_report first"</code></pre>
+        <p>Nachdem der Generator erfolgreich war, wird der Quellcode von <code>bash_report</code> zu <code>echo "Total: 16"</code>. Der Schreibvorgang hat <strong>Bash nicht ausgeführt</strong>. Öffnen Sie den <strong>✎ Stift</strong> dieser Zelle, um den neuen Quellcode zu prüfen, und tippen Sie dann auf <em>deren eigene Schaltfläche</em> <strong>▶ Ausführen</strong>. Erwarten Sie <code>Total: 16</code>.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-generated-report.png" alt="Screenshot in schmaler Browseransicht von SciREPL Free, der generierten Bash-Quellcode echo Total: 16 in bash_report und Total: 16 nach einem manuellen Ausführen zeigt." loading="lazy" decoding="async">
+          <figcaption>Das Ziel ist weiterhin eine Bash-Zelle. JavaScript lieferte ihren Quellcode; Ihre separate <strong>▶ Ausführen</strong>-Aktion erzeugte die Ausgabe darunter. Browseraufnahme von SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-generated-report.png">Vollständigen Browser-Screenshot des generierten Berichts anzeigen</a>
+        </figure>
+        <p><code>readFile(...)</code> gibt Text zurück; eine unbekannte Zelle oder Eigenschaft gibt <code>null</code> zurück. <code>writeFile(...)</code> meldet, ob der Schreibvorgang erfolgreich war. Die Prüfungen im Generator stoppen ihn, wenn die Erzeugerzelle keine Ausgabe hat oder das Ziel nicht beschrieben werden kann. Namen unterscheiden zwischen Groß- und Kleinschreibung: Behalten Sie die exakte Schreibweise bei.</p>
+      </section>
+
+      <section id="update">
+        <p class="step-label">Schritt 7</p>
+        <h2>Die Daten ändern und jeden abhängigen Schritt aktualisieren</h2>
+        <ol class="lesson-steps">
+          <li>Bearbeiten Sie <code>numbers</code> mit ihrem <strong>✎ Stift</strong>. Ändern Sie <code>[3, 5, 8]</code> zu <code>[4, 5, 8]</code> und führen Sie diese Zelle dann aus. Ihr JSON enthält nun <code>4</code>.</li>
+          <li>Betrachten Sie <code>bash_report</code>, bevor Sie etwas anderes ausführen. Der frühere Quellcode und die Ausgabe bleiben unverändert: Es gibt keine automatische Aktualisierung von Abhängigkeiten.</li>
+          <li>Führen Sie <code>generate_report</code> erneut aus. Dies ändert den Quellcode des Berichts zu <code>echo "Total: 17"</code>, aber seine alte Ausgabe <code>Total: 16</code> kann sichtbar bleiben.</li>
+          <li>Prüfen Sie <code>bash_report</code> und führen Sie die Zelle erneut aus. Nun lautet ihre Ausgabe <code>Total: 17</code>.</li>
+          <li>Führen Sie <code>read_shared</code> erneut aus, bevor Sie die Datei aktualisieren: Es zeigt noch <code>16</code> aus der älteren JSON-Kopie an. Führen Sie nun <code>write_shared</code> und anschließend <code>read_shared</code> erneut aus; auch der Dateiweg zeigt nun <code>17</code>. Öffnen Sie <code>values.json</code> in Files &amp; Storage erneut, um die geänderte Datei zu überprüfen.</li>
+        </ol>
+        <p class="callout"><strong>Quellcode, Ausgabe und kopierte Dateien sind unterschiedliche Dinge.</strong> Schließen Sie eine offene Quellcode-Bearbeitung mit dem <strong>▶ Ausführen</strong> dieser Zelle vor ihren Konsumenten ab; ein ungespeicherter Editor-Entwurf ist nicht das gespeicherte <code>.code</code>. Ein Quellcode-Schreibvorgang führt das Ziel nicht aus, und eine kopierte Datei folgt späteren Änderungen nicht automatisch. Halten Sie die explizite Reihenfolge ein: Erzeuger → Generator → Bericht. Eine sichtbare alte Ausgabe ist kein Beweis dafür, dass der aktuelle Quellcode ausgeführt wurde.</p>
+        <p>Exportieren Sie die Arbeitsmappe, um Ihre Quellcode-Änderungen und Namen zu behalten. Ein gewöhnlicher Import von <code>.srwb</code> verwirft derzeit gespeicherte Code-Ausgaben; führen Sie daher nach dem erneuten Öffnen <code>numbers</code> vor seinen Lesern aus, danach den Generator und den Bericht. Separate geteilte Datendateien erfordern einen Datei- oder Paketexport. Siehe die <a href="../../../files-export/">Dateien- und Export-Referenz<span class="english-reference"> (Englische Referenzseite)</span></a>.</p>
+      </section>
+
+      <section id="python">
+        <p class="step-label">Optional</p>
+        <h2>Beide Wege aus Python auslesen</h2>
+        <p>Sie können hier anhalten, ohne Python zu starten. Um eine dritte Sprache auszuprobieren, führen Sie zuerst <code>numbers</code> und <code>write_shared</code> aus, prüfen Sie dann <code>python_total</code> und führen Sie es als <strong>Code → Python</strong> aus:</p>
+        <pre><code data-cell-example="python_total">import json
+record = json.loads(nb_read('numbers', '.output'))
+print('Cell output:', sum(record['values']))
+with open('/shared/data/named-cell-tutorial/values.json') as source:
+    saved = json.load(source)
+print('Shared file:', sum(saved['values']))</code></pre>
+        <p>Erwarten Sie <code>Cell output: 16</code> und <code>Shared file: 16</code> für die ursprünglichen Daten oder <code>17</code> in beiden Zeilen nach dem Aktualisieren beider Wege in Schritt 7. In Python liest <code>nb_read('numbers', '.output')</code> die letzte Textausgabe der benannten Zelle. Das separate <code>open(...)</code> liest die geteilte Datei mit gewöhnlicher Python-Dateisyntax. Das Standardmodul <code>json</code> parst beides; es ist kein <code>%pip install</code> erforderlich. Wenn nur die Erzeugerzelle aktualisiert wurde, können sich die beiden Gesamtsummen unterscheiden.</p>
+        <p>Bei der ersten Verwendung muss Python möglicherweise initialisiert werden oder seine Laufzeitumgebung herunterladen. Abhängig von Ihrem Build und einer bereits erteilten Einwilligung kann ein Datenschutz-/Netzwerkhinweis erscheinen; lesen Sie diesen, bevor Sie zustimmen. Dieser optionale Schritt ist für die Übung mit JavaScript/Bash nicht erforderlich, und das Importieren des Begleitmaterials allein startet Python nicht.</p>
+      </section>
+
+      <section id="more">
+        <p class="step-label">Weiter erkunden</p>
+        <h2>Das Muster in anderen Arbeitsmappen wiedererkennen</h2>
+        <p>Benannte Zellen bieten eine einfache Schnittstelle für die Interoperabilität: Ein Programm erzeugt Text, ein anderes liest ihn oder nutzt ihn, um Quellcode zu generieren. Der Katalog enthält bereits größere Beispiele zur Ansicht:</p>
+        <ul>
+          <li><strong>Lebenserwartungsanalyse</strong> liest gewöhnliche CSV-Dateien aus <code>/shared/data/</code> in Python und R: der Weg über geteilte Dateien, kein Auslesen benannter Zellen. Es lädt Datensätze herunter und verwendet Pakete; lesen Sie die Einrichtungs- und Einwilligungsvoraussetzungen, bevor Sie es ausführen.</li>
+          <li><strong>Prolog generiert R</strong> liest benannten Prolog-Quellcode mit <code>nb_read(..., '.code', ...)</code> und schreibt generierten R-Quellcode mit <code>nb_write('r_factorial', '.code', ...)</code>. Die R-Zelle wird separat ausgeführt.</li>
+          <li><strong>Prolog generiert TypR</strong> kombiniert generierte Definitionen mit einer benannten Abfragezelle, die nur Quellcode enthält, und schreibt dann <code>typr_output</code>. Eine <code>#!source</code>-Zelle ist als Quellcode lesbar, ohne sie auszuführen.</li>
+        </ul>
+        <p>Suchen Sie nach diesen Titeln in <strong>☰ Menü → Browse Packages…</strong>. Sie dienen als weiterführende Lektüre, <strong>nicht als zertifizierte Ausführungsanleitungen für diesen Leitfaden</strong>; die verfügbare Edition und die Einrichtungsanforderungen unterscheiden sich. Die Prolog-generates-Arbeitsmappen erfordern die über Browse installierte Abhängigkeit <strong>unifyweaver-scirepl</strong>; das Importieren einer reinen Arbeitsmappe allein installiert diese Abhängigkeit nicht. Prüfen Sie bei einer manuell importierten <code>.ipynb</code> zuerst, ob <strong>Menü → Einstellungen → Import und Bearbeitung → Zellen beim Import der Arbeitsmappe automatisch ausführen</strong> deaktiviert ist, da Jupyter-Importe unter dieser Einstellung Code ausführen können. Siehe <a href="../tutorial/">die Browse-Anleitung</a> und <a href="../import/">den Leitfaden zum manuellen Import</a>.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">Wenn etwas fehlerhaft aussieht</p>
+        <h2>Namen, Arbeitsmappe und Ausführungsreihenfolge überprüfen</h2>
+        <ul>
+          <li><strong>Der Benennungsdialog öffnet sich nicht:</strong> Führen Sie einen Doppelklick oder ein langes Drücken auf die <strong>In[…]-Bezeichnung</strong> der gespeicherten Zelle aus, nicht auf ihren Quellcode, ihre Ausgabe oder den Stift. Ein einfacher Klick ist nicht die Geste zum Benennen.</li>
+          <li><strong>Die Erzeugerzelle kann nicht gefunden werden:</strong> Lassen Sie <strong>Named Cell Interop</strong> ausgewählt, stellen Sie den exakten Namen <code>numbers</code> wieder her und prüfen Sie Rechtschreibung sowie Groß- und Kleinschreibung. Das Umbenennen passt Pfade in anderen Zellen nicht automatisch an.</li>
+          <li><strong>Der Generator meldet „Run numbers first“:</strong> Prüfen Sie <code>numbers</code> und führen Sie die Zelle aus. Das Importieren oder bloße Bearbeiten ihres Quellcodes befüllt <code>.output</code> nicht.</li>
+          <li><strong>JSON-Parsing schlägt fehl:</strong> Vergleichen Sie die Erzeugerzelle mit dem vollständigen Beispiel. Ihre Ausgabe darf ausschließlich JSON sein, keine Überschrift oder zusätzliche ausgegebene Meldung.</li>
+          <li><strong>Der Bericht konnte nicht geschrieben werden:</strong> Prüfen Sie, ob sich die vorhandene Zelle <code>bash_report</code> in dieser Arbeitsmappe befindet und dass <strong>Zellen dürfen andere Zellen ändern</strong> aktiviert ist. Aktivieren Sie keine programmatische Ausführung, um ein Problem beim Schreiben von Quellcode zu beheben.</li>
+          <li><strong>Der Bericht ist weiterhin 16:</strong> Führen Sie nach dem Bearbeiten der Daten <code>numbers</code>, dann <code>generate_report</code> und anschließend <code>bash_report</code> aus. Aktualisieren Sie die kopierte Datei separat mit <code>write_shared</code> und führen Sie danach <code>read_shared</code> erneut aus.</li>
+          <li><strong>Sie können /nb in Files &amp; Storage nicht finden:</strong> Dieser Bildschirm zeigt geteilte Dateien, nicht diesen virtuellen Zellen-Einhängepunkt im geprüften Build. Führen Sie stattdessen <code>write_shared</code> aus und suchen Sie nach der gezielten <code>values.json</code>-Kopie.</li>
+        </ul>
+        <p>Das <a href="../../interface/tutorial/">Oberflächen-Tutorial für die erste Arbeitsmappe</a> erklärt die Kopfzeile und den Stift der gespeicherten Zelle; das <a href="../graphics/">Grafik-Tutorial</a> zeigt andere Möglichkeiten, wie eine Zelle ein Ergebnis liefern kann.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL-Hilfe</span><nav aria-label="Fußzeilennavigation"><a href="../../../workbooks/">Arbeitsmappen-Referenz<span class="english-reference"> (Englische Referenzseite)</span></a><a href="../../../">Alle Hilfethemen<span class="english-reference"> (Englische Referenzseite)</span></a></nav></footer>
+</body>
+</html>

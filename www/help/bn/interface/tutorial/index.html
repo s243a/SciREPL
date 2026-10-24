@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="bn" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="একটি ছোট ওয়ার্কবুক তৈরি, চালানো, সম্পাদনা এবং রপ্তানি করার মাধ্যমে SciREPL ইন্টারফেস শিখুন।">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/bn/interface/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <title>ইন্টারফেস নির্দেশিকা · SciREPL সহায়তা</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">সরাসরি বিষয়বস্তুতে যান</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+    <nav aria-label="প্রধান নেভিগেশন">
+      <a href="../../../interface/">ইন্টারফেস রেফারেন্স<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+      <a href="../../tutorials/">সকল টিউটোরিয়াল</a>
+      <a href="../../../">সকল সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+      <a href="../../../../">Free পিডব্লিউএ খুলুন</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="টিউটোরিয়ালের ভাষা"><details class="tutorial-language-menu"><summary>টিউটোরিয়ালের ভাষা: <bdi>বাংলা</bdi></summary><nav aria-label="টিউটোরিয়ালের ভাষা"><a href="../../../en/interface/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="./" lang="bn" hreflang="bn" aria-current="page">বাংলা</a>
+      <a href="../../../de/interface/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/interface/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">মেশিন-অনূদিত টিউটোরিয়াল; স্থানীয় ভাষায় পর্যালোচনা প্রক্রিয়াধীন। কোড এবং প্রযুক্তিগত মানসমূহ অপরিবর্তিত। স্ক্রিনশটগুলোতে মূল ইংরেজি ইন্টারফেস দেখানো হয়েছে; আপনার অ্যাপের সাথে এই টেক্সটের অনূদিত কন্ট্রোল নামগুলো মিলিয়ে নিন।</p></aside>
+    <p class="breadcrumbs"><a href="../../../">সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / <a href="../../../interface/">ইন্টারফেস<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / নির্দেশিকা</p>
+    <article>
+      <p class="eyebrow">কাজের মাধ্যমে শিখুন</p>
+      <h1>আপনার প্রথম ওয়ার্কবুক তৈরি করুন</h1>
+      <p class="lede">এটি <a href="../../../interface/">ইন্টারফেস রেফারেন্সের<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> দীর্ঘতর, ব্যবহারিক সহায়িকা। আপনি একটি Python সেল চালাবেন, এটি পরিবর্তন করবেন এবং আপনার নিয়ন্ত্রণে থাকা একটি অনুলিপি সংরক্ষণ করবেন। কোনো এআই অ্যাকাউন্ট বা API কি-র প্রয়োজন নেই।</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">অ্যান্ড্রয়েড পদক্ষেপ</li>
+        <li class="chip">প্রায় 5 মিনিট</li>
+      </ul>
+      <p class="screen-note">স্ক্রিনশটগুলিতে SciREPL Free v1.3.2 একটি Samsung Galaxy S24-সিরিজের ফোনে দেখানো হয়েছে। পাঠটি Pro-এর ক্ষেত্রেও প্রযোজ্য, যদিও এখানকার কিছু নিয়ন্ত্রণ ভিন্ন দেখতে হতে পারে।</p>
+      <nav class="lesson-nav" aria-label="নির্দেশিকার ধাপসমূহ">
+        <strong>এই পাঠে</strong>
+        <ol>
+          <li><a href="#find-your-place">আপনার অবস্থান খুঁজুন</a></li>
+          <li><a href="#write-a-cell">একটি সেল লিখুন এবং চালান</a></li>
+          <li><a href="#edit-a-cell">সংরক্ষিত সেলটি সম্পাদনা করুন</a></li>
+          <li><a href="#save-a-copy">ওয়ার্কবুকের একটি অনুলিপি রপ্তানি করুন</a></li>
+          <li><a href="#what-next">এরপর কী চেষ্টা করবেন</a></li>
+        </ol>
+        <p><a href="../../tutorials/">সকল টিউটোরিয়াল</a></p>
+      </nav>
+
+      <section id="find-your-place">
+        <p class="step-label">ধাপ 1</p>
+        <h2>অ্যাপে আপনার অবস্থান খুঁজুন</h2>
+        <p>শীর্ষ সারিটি হলো <strong>হেডার</strong>। এতে মেনু, সহায়তা এবং একটি স্ট্যাটাস ব্যাজ অন্তর্ভুক্ত রয়েছে। ওয়ার্কবুক নির্বাচক নির্ধারণ করে কোন ওয়ার্কবুকটি খোলা রয়েছে।</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--header" role="img" aria-label="হলুদ রঙে রূপরেখাযুক্ত ওয়ার্কবুক নির্বাচক, মেনু বোতাম এবং সহায়তা বোতামসহ ফোনের হেডার।">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>হলুদ রূপরেখাগুলি ওয়ার্কবুক নির্বাচক, মেনু এবং সহায়তা চিহ্নিত করে।</figcaption>
+          <p>হেডার সারির নিচে রয়েছে ওয়ার্কবুক: সংরক্ষিত সেল এবং সেগুলির ফলাফল।</p>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">সম্পূর্ণ ফোন স্ক্রিনশটটি দেখুন</a>
+        </figure>
+        <p><strong>নতুন-সেল প্যানেল</strong>-এ আপনি পরবর্তী সেলটি টাইপ করবেন। স্ক্রিন সরু হলে ঐচ্ছিক হেডার বোতামগুলো অদৃশ্য হয়ে যেতে পারে; প্রযোজ্য ক্ষেত্রে মেনু বা হেল্প থেকে সেগুলোর কাজ করা যাবে।</p>
+      </section>
+
+      <section id="write-a-cell">
+        <p class="step-label">ধাপ 2</p>
+        <h2>একটি Python সেল লিখুন এবং চালান</h2>
+        <p>প্রথমবার চালানোর আগে স্ট্যাটাস ব্যাজে <strong>প্রস্তুত</strong> না আসা পর্যন্ত অপেক্ষা করুন।</p>
+        <ol class="lesson-steps">
+          <li>নতুন-সেল প্যানেলে, ভাষা নির্বাচক থেকে <strong>Python</strong> নির্বাচন করুন। একটি সরু ফোনে, বন্ধ নির্বাচকে কেবল <strong>Py</strong> প্রদর্শিত হতে পারে।</li>
+          <li>এই সংক্ষিপ্ত প্রোগ্রামটি টাইপ করুন:
+            <pre><code>print("Hello from SciREPL")</code></pre>
+          </li>
+          <li><strong>রান করুন</strong>-এ ট্যাপ করুন। ওয়ার্কবুকে একটি সংরক্ষিত সেল প্রদর্শিত হবে। এর নিচে আপনি <code>Hello from SciREPL</code> দেখতে পাবেন।</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--composer" role="img" aria-label="Py নির্বাচিত অবস্থায় নতুন-সেল প্যানেল, কোড ক্ষেত্রে print Hello from SciREPL, এবং রান হলুদ রঙে চিহ্নিত।">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>নিচের প্যানেলটি একটি <em>নতুন</em> সেল তৈরি করে: <strong>Py</strong> বেছে নিন, কোড লিখুন, তারপর <strong>রান করুন</strong>-এ ট্যাপ করুন।</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">সম্পূর্ণ ফোন স্ক্রিনশটটি দেখুন</a>
+        </figure>
+        <p class="callout"><strong>প্রথমবার চালাতে বেশি সময় লাগতে পারে।</strong> Python-এর রানটাইম একবার শুরু হতে হয়। স্ট্যাটাস পুনরায় <strong>প্রস্তুত</strong>-এ ফিরে আসা পর্যন্ত অপেক্ষা করুন; পরবর্তী Python সেলগুলো সাধারণত সেই রানটাইম পুনরায় ব্যবহার করে।</p>
+        <aside class="callout">
+          <p><strong>যদি একটি গোপনীয়তা বিজ্ঞপ্তি প্রদর্শিত হয়:</strong> Python সাধারণত বান্ডিল হিসেবে থাকে, তাই এই উদাহরণের ক্ষেত্রে কোনো রানটাইম ডাউনলোডের প্রয়োজন হওয়া উচিত নয়। একটি নেটওয়ার্ক রানটাইম, যেমন R বা Lua (যা Free-এ রয়েছে), প্রথমে SciREPL-এর গোপনীয়তা নীতি দেখাতে পারে; Python-ও তা করতে পারে যদি এর বান্ডিল কপির জন্য একটি নেটওয়ার্ক ফলব্যাক প্রয়োজন হয়। এটি পড়ুন, <em>ডায়ালগের ভেতরের অংশে</em> একদম নিচে স্ক্রোল করুন, এবং আপনি একমত হলে <strong>I Understand</strong>-এ ট্যাপ করুন। এরপর একটি আলাদা রানটাইম ডাউনলোড প্রম্পট আপনাকে <strong>ডাউনলোড</strong>-এ ট্যাপ করতে বলতে পারে।</p>
+          <p><a href="../../../interface/tutorial/assets/privacy-policy-top.jpg">গোপনীয়তা নীতি ডায়ালগের একটি উদাহরণ দেখুন<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> (স্ক্রিনশটে এর ওপরের অংশ দেখানো হয়েছে; বোতামটি আরও নিচে রয়েছে)। Free 1.4.0 এবং Pro 1.4.0-এ, কোনো প্যাকেজ ইনস্টল করার চেষ্টার আগে আপনি বর্তমান নেটওয়ার্ক প্রকাশ মেনে না নিয়ে থাকলে একটি বৈধ <code>%pip install</code> কমান্ডও এই বিজ্ঞপ্তিটি খোলে। নেটওয়ার্ক সুবিধা ব্যবহারের পূর্বে <a href="../../../privacy/">গোপনীয়তা এবং স্থানীয় ডেটা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> দেখুন।</p>
+        </aside>
+      </section>
+
+      <section id="edit-a-cell">
+        <p class="step-label">ধাপ 3</p>
+        <h2>সংরক্ষিত সেলটি সম্পাদনা করুন</h2>
+        <ol class="lesson-steps">
+          <li>সংরক্ষিত সেলের নিজস্ব হেডারে থাকা পেন্সিল <strong>✎</strong>-এ ট্যাপ করুন, যা ওপরের ডানদিকে ঠিক <strong>✕</strong>-এর বাঁ পাশে রয়েছে। এটি সম্পাদনার জন্য সেই সেলটি খুলে দেয়; নতুন-সেল প্যানেলে টাইপ করলে আরেকটি সেল তৈরি হবে।</li>
+          <li><code>Hello from SciREPL</code>-কে <code>Hello again</code>-এ পরিবর্তন করুন।</li>
+          <li>পরিবর্তনটি সংরক্ষণ এবং চালানোর জন্য <strong>রান করুন</strong> বেছে নিন। আপনি এখন সেই সেলের নিচে <code>Hello again</code> দেখতে পাবেন।</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--editing" role="img" aria-label="print Hello again সংবলিত সংরক্ষিত-সেল সম্পাদক। হলুদ রূপরেখা সংরক্ষিত সেলের ওপরের ডানদিকের পেন্সিল, সম্পাদনাযোগ্য কোড ক্ষেত্র এবং এর রান বোতাম চিহ্নিত করে। রান ট্যাপ না করা পর্যন্ত পূর্ববর্তী আউটপুটে এখনও Hello from SciREPL দেখা যায়।">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-edit-draft.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/edit-draft-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>হলুদ রূপরেখাগুলো সংরক্ষিত সেলের <strong>✎ পেন্সিল</strong> যেখানে অবস্থিত, আপনি যে কোডটি সম্পাদনা করছেন এবং সেই সেলের <strong>রান করুন</strong> বোতামটি নির্দেশ করে। এই স্ক্রিনশটে পেন্সিলটি অস্পষ্ট কারণ সম্পাদনা মোড ইতিমধ্যে খোলা রয়েছে। রান এই সংশোধন সংরক্ষণ এবং কার্যকর করে; ততক্ষণ পর্যন্ত পুরনো আউটপুট দৃশ্যমান থাকে।</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-edit-draft.png">কীবোর্ডসহ সম্পূর্ণ ফোন স্ক্রিনশটটি দেখুন</a>
+        </figure>
+        <aside class="callout">
+          <p><strong>Pro শর্টকাট:</strong> টাচ স্ক্রিনে, সংরক্ষিত সেলের কোড সম্পাদনা করতে সেটিতে ডাবল-ট্যাপ করুন। Free বর্তমানে <strong>✎</strong> বোতামটি ব্যবহার করে।</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--result" role="img" aria-label="print Hello again সংবলিত সংরক্ষিত Python সেল, যার পরে হাইলাইট করা আউটপুট Hello again রয়েছে।">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-rerun.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/rerun-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>রান করুন</strong>-এর পরে, সংরক্ষিত সেলের নিচের আউটপুটে <code>Hello again</code> প্রদর্শিত হয়।</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-rerun.png">ফোনের সম্পূর্ণ স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p>ভুলবশত এডিটর খুলে ফেললে রান না করেই তা বন্ধ করতে <strong>বাতিল</strong> ব্যবহার করুন। সংরক্ষিত সেলের ভেতরের ভাষা নির্বাচক সেই সেলটিকে পরিবর্তন করে; নতুন-সেলের নির্বাচক তা করে না।</p>
+      </section>
+
+      <section id="save-a-copy">
+        <p class="step-label">ধাপ 4</p>
+        <h2>একটি ওয়ার্কবুকের অনুলিপি এক্সপোর্ট করুন</h2>
+        <ol class="lesson-steps">
+          <li><strong>মেনু → ওয়ার্কবুক ও প্যাকেজ এক্সপোর্ট করুন</strong> খুলুন।</li>
+          <li><strong>কেবল বর্তমান ট্যাব</strong> বা <strong>সমস্ত ট্যাব</strong> বেছে নিন, তারপর SciREPL ফরম্যাট <strong>ওয়ার্কবুক (.srwb)</strong> নির্বাচন করুন যখন আপনি SciREPL-নির্দিষ্ট অবস্থা বজায় রাখতে চান।</li>
+          <li><strong>এক্সপোর্ট</strong> চাপুন এবং আপনার নিয়ন্ত্রণের একটি গন্তব্য বেছে নিন।</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--menu" role="img" aria-label="Export Document এবং Import File-এর মাঝে, হলুদ রঙে চিহ্নিত মেনু সারি Export Workbooks and Packages।">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>ওয়ার্কবুক ও প্যাকেজ এক্সপোর্ট করুন</strong> বেছে নিন, Export Document নয়।</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">সম্পূর্ণ Menu স্ক্রিনশট দেখুন</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="হলুদ রঙে চিহ্নিত Workbook srwb ফরম্যাট, Current tab only পরিধি এবং Export বোতামসহ এক্সপোর্ট ডায়ালগ।">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>একটি ট্যাবের জন্য, <strong>ওয়ার্কবুক (.srwb)</strong> এবং <strong>কেবল বর্তমান ট্যাব</strong> রাখুন, তারপর <strong>এক্সপোর্ট</strong> চাপুন। সম্পূর্ণ ওয়ার্কবুক অন্তর্ভুক্ত করতে <strong>সমস্ত ট্যাব</strong> বেছে নিন।</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-export.png">সম্পূর্ণ এক্সপোর্ট ডায়ালগের স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p class="callout"><strong>কেন এক্সপোর্ট করবেন?</strong> SciREPL লোকাল সেশন পুনরুদ্ধার করে, তবে লোকাল স্টোরেজ কোনো ব্যাকআপ নয় এবং এটি অ্যান্ড্রয়েড অ্যাপ ও ব্রাউজারের মধ্যে স্বয়ংক্রিয়ভাবে শেয়ার হয় না। অন্যান্য ফরম্যাটের জন্য <a href="../../../files-export/">ফাইল এবং এক্সপোর্ট<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> দেখুন, যার অন্তর্ভুক্ত <code>.ipynb</code> এবং PDF।</p>
+      </section>
+
+      <section id="what-next">
+        <p class="step-label">ধাপ 5</p>
+        <h2>এরপর কী চেষ্টা করবেন</h2>
+        <p><code>2 + 2</code> চেষ্টা করুন অন্য একটি Python সেলে। তারপর ট্যাব পরিবর্তন করতে ওয়ার্কবুক নির্বাচক ব্যবহার করুন। <a href="../../files-export/tutorial/">CSV ওয়ার্কবুক নির্দেশিকা</a> শুরু হয় <strong>মেনু → প্যাকেজ, বান্ডিল ও ওয়ার্কবুক ব্রাউজ করুন</strong> থেকে, একটি উদাহরণ ইনস্টল করে এবং এর সেলগুলো কীভাবে একটি লোকাল ফাইলের সাথে কাজ করে তা দেখায়।</p>
+        <p><a href="../../workbooks/tutorial/">Markov Groups নির্দেশিকা</a> দেখায় কীভাবে আরও বিস্তৃত ক্যাটালগ অনুসন্ধান করবেন, কিউব চালনা সম্পর্কিত একটি বিদ্যমান ওয়ার্কবুক খুলবেন, এর সেলগুলো ক্রমানুসারে চালাবেন এবং একটি প্যারামিটার পরিবর্তন করবেন।</p>
+        <p>নিয়ন্ত্রণগুলো কোথায় রয়েছে তা দ্রুত মনে করার জন্য <a href="../../../interface/">ইন্টারফেস রেফারেন্স<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>-এ ফিরে যান। অন্য একটি ভাষা শিখতে বা প্যাকেজ যোগ করতে <a href="../../../languages-packages/">ভাষা ও প্যাকেজ<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> দিয়ে এগিয়ে যান।</p>
+        <aside class="callout"><strong>Pro ব্যবহার করছেন?</strong> মৌলিক কার্যপদ্ধতি একই রকম। Pro-এ একটি ফুল-স্ক্রিন এডিটর এবং ঐচ্ছিক এআই সুবিধাও রয়েছে; দেখুন <a href="../../../pro/ai/#full-screen">Pro এআই এবং ফুল-স্ক্রিন কার্যপদ্ধতি<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> সাধারণ সেলের সাথে স্বাচ্ছন্দ্য বোধ করার পর।</aside>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL সহায়তা</span><nav aria-label="ফুটার নেভিগেশন"><a href="../../../interface/">সংক্ষিপ্ত ইন্টারফেস রেফারেন্স<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a><a href="../../../">সকল সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a></nav></footer>
+</body>
+</html>

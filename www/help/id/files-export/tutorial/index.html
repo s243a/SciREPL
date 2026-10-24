@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="id" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Instal buku kerja CSV, jalankan dan edit datanya di Files &amp; Storage, lalu ekspor dan buka kembali paket buku-kerja-plus-CSV. Termasuk penyorotan file opsional milik Pro.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/id/files-export/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../files-export/tutorial/tutorial.css">
+  <title>Panduan buku kerja CSV · Bantuan SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/files-export/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/files-export/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/files-export/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/files-export/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/files-export/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/files-export/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/files-export/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/files-export/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/files-export/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/files-export/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/files-export/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/files-export/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/files-export/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/files-export/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Lompat ke konten</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+    <nav aria-label="Navigasi utama">
+      <a href="../../../files-export/">File &amp; ekspor<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+      <a href="../../tutorials/">Semua tutorial</a>
+      <a href="../../../">Semua bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+      <a href="../../../../">Buka PWA Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Bahasa tutorial"><details class="tutorial-language-menu"><summary>Bahasa tutorial: <bdi>Bahasa Indonesia</bdi></summary><nav aria-label="Bahasa tutorial"><a href="../../../en/files-export/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/files-export/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/files-export/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/files-export/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/files-export/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/files-export/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/files-export/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="./" lang="id" hreflang="id" aria-current="page">Bahasa Indonesia</a>
+      <a href="../../../ja/files-export/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/files-export/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/files-export/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/files-export/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/files-export/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutorial hasil terjemahan mesin; peninjauan oleh penutur asli masih tertunda. Kode dan nilai teknis tidak diubah. Tangkapan layar menampilkan antarmuka asli bahasa Inggris; cocokkan nama kontrol yang diterjemahkan dalam teks ini dengan aplikasi Anda.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / <a href="../../../files-export/">File &amp; ekspor<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / panduan CSV</p>
+    <article>
+      <p class="eyebrow">Belajar sambil praktik</p>
+      <h1>Jelajahi CSV dalam buku kerja</h1>
+      <p class="lede">Mulai di <strong>Jelajahi paket, bundel &amp; buku kerja</strong>. Instal contoh kecil, jalankan sel-selnya, edit CSV-nya, lalu ekspor dan buka kembali buku kerja beserta datanya. Data ini fiktif dan kode Python tidak memerlukan paket tambahan atau akun AI.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Langkah-langkah Android</li>
+        <li class="chip">Sekitar 15 menit</li>
+      </ul>
+      <p class="screen-note">Tangkapan layar diambil pada ponsel Samsung Galaxy seri S24. Gambar Browse dan output awal menampilkan Free; gambar editor file dan pemilihan paket yang baru menampilkan Pro 1.4.0 dan diberi label di bawah. Di Pro, Anda dapat menggunakan unduhan buku kerja langsung dan jalur Import File; kontrol di sekitarnya mungkin berbeda, dan entri Browse baru ini mungkin tidak ada di sana.</p>
+      <p class="callout"><strong>Belum melihat buku kerja ini di Browse?</strong> Contoh ini terpasang di Free 1.4.0 dan versi lebih baru; aplikasi lama yang terpasang atau PWA dalam cache mungkin tidak mencantumkannya. <a download="csv-basics-seedlings.srwb" href="../../../files-export/tutorial/assets/csv-basics-seedlings.srwb">Unduh buku kerja secara langsung</a>, lalu gunakan <strong>Menu → Import File</strong> untuk membukanya. Anda dapat mengikuti sisa pelajaran ini sekarang.</p>
+      <nav class="lesson-nav" aria-label="CSV langkah-langkah panduan">
+        <strong>Dalam pelajaran ini</strong>
+        <ol>
+          <li><a href="#install">Pasang contoh dari Browse</a></li>
+          <li><a href="#run">Jalankan sel Python miliknya</a></li>
+          <li><a href="#change">Ubah pengukuran di Files &amp; Storage</a></li>
+          <li><a href="#import">Impor berkas CSV</a></li>
+          <li><a href="#export">Ekspor buku kerja dan data</a></li>
+          <li><a href="#reopen">Buka kembali paket dan periksa datanya</a></li>
+        </ol>
+        <p><a href="../../tutorials/">Semua tutorial</a></p>
+      </nav>
+
+      <section id="install">
+        <p class="step-label">Langkah 1</p>
+        <h2>Temukan buku kerja di Browse</h2>
+        <ol class="lesson-steps">
+          <li>Buka <strong>Menu → Jelajahi paket, bundel &amp; buku kerja</strong>. Pintasan tajuk 📦 opsional membuka layar yang sama jika terlihat.</li>
+          <li>Cari <strong>CSV Basics</strong>. Di bawah <strong>Buku Kerja</strong>, temukan <strong>CSV Basics: Seedling Heights</strong>. Ini adalah contoh bawaan berbahasa Inggris, bukan paket yang perlu dipasang ke dalam Python.</li>
+          <li>Ketuk <strong>Instal</strong>. Buku kerja biasanya menjadi tab yang dipilih. Jika Anda menonaktifkan peralihan otomatis, gunakan pemilih buku kerja untuk memilihnya.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse-menu" role="img" aria-label="SciREPL Menu dengan Browse Packages, Bundles and Workbooks yang digariskan dengan warna kuning.">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Garis luar kuning menandai <strong>Jelajahi paket, bundel &amp; buku kerja</strong> di Menu.</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">Lihat tangkapan layar Menu yang lengkap</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--catalog" role="img" aria-label="Layar Browse difilter ke CSV Basics, dengan kolom pencarian dan tombol Install yang digariskan dengan warna kuning.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-catalog.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/catalog-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Cari <strong>CSV Basics</strong>, lalu gunakan <strong>Instal</strong> pada kartu buku kerja. Katalog jarak jauh tidak tersedia dalam tangkapan ini; item bawaan tetap muncul.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-catalog.png">Lihat tangkapan layar Browse yang lengkap</a>
+        </figure>
+        <p class="callout"><strong>Jika Kebijakan Privasi muncul:</strong> Browse dapat memeriksa katalog terverifikasi secara daring. Baca keterangannya, gulir <em>di dalam dialog</em> ke bagian bawah, dan ketuk <strong>I Understand</strong> hanya jika Anda setuju. Anda dapat menutup pemberitahuan tersebut dan tetap menggunakan entri bawaan; katalog jarak jauh tidak akan tersedia. Contoh ini sendiri tidak memerlukan kumpulan data eksternal atau paket Python.</p>
+        <p>Memasang buku kerja akan menambahkan sel-selnya; ini <em>tidak</em> menjalankannya. Hal itu memungkinkan Anda memeriksa kode sebelum mengeksekusinya.</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">Langkah 2</p>
+        <h2>Jalankan sel-sel secara berurutan</h2>
+        <p>Teks pembuka menjelaskan contoh ini. Ketiga sel Python masing-masing memiliki nama: <code>create_csv</code>, <code>read_csv</code>, dan <code>compare_groups</code>. Untuk sel yang disimpan, ketuk <strong>✎ pensil</strong> miliknya untuk membuka editor, lalu ketuk <strong>Jalankan</strong> sel tersebut. Di Pro Anda juga dapat mengetuk dua kali kode sel untuk mengeditnya.</p>
+        <ol class="lesson-steps">
+          <li>Jalankan <code>create_csv</code>. Ini menulis enam baris fiktif ke <code>/shared/data/seedling-heights.csv</code>. Anda akan melihat <code>Saved 6 fictional rows</code>.</li>
+          <li>Jalankan <code>read_csv</code>. Ini membuka berkas yang baru saja dibuat dan mencetak semua enam baris.</li>
+          <li>Jalankan <code>compare_groups</code>. Ini mencetak rata-rata terang sebesar <strong>13.0 cm</strong>, rata-rata teduh sebesar <strong>8.0 cm</strong>, dan selisih sebesar <strong>5.0 cm</strong>.</li>
+        </ol>
+        <p>Berkas ini juga terlihat di <strong>Menu → Berkas &amp; penyimpanan</strong>. Anda dapat membacanya di sana, atau menggunakan <strong>Sunting</strong> dan <strong>Simpan</strong> untuk mengubahnya secara langsung. <a href="#edit-file">Langkah berikutnya menunjukkan caranya.</a></p>
+        <p>Keluaran akhir akan terlihat seperti ini:</p>
+        <pre><code>Light mean: 13.0 cm
+Shade mean: 8.0 cm
+Difference: 5.0 cm</code></pre>
+        <p class="callout"><strong>Eksekusi pertama lebih lambat?</strong> Python mungkin memerlukan waktu sejenak untuk menginisialisasi. Tunggu lencana status menunjukkan <strong>siap</strong> sebelum menilai apakah suatu sel telah selesai. Sel-sel berikutnya biasanya menggunakan kembali runtime yang sudah dimuat. Jika pengunduhan runtime memerlukan persetujuan, baca pemberitahuan privasi sebelum menerima; buku kerja ini tidak memanggil <code>%pip install</code>.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--csv-output" role="img" aria-label="Keluaran SciREPL yang menunjukkan rata-rata terang 13.0 sentimeter, rata-rata teduh 8.0 sentimeter, dan selisih 5.0 sentimeter.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-output.png" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Keluaran sel ketiga di ponsel setelah menjalankan buku kerja contoh.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-output.png">Lihat tangkapan layar keluaran lengkap</a>
+        </figure>
+        <p>Nilai-nilai rekaan ini mengilustrasikan pembacaan dan perhitungan, bukan kesimpulan ilmiah mengenai cahaya dan pertumbuhan tanaman.</p>
+      </section>
+
+      <section id="change">
+        <p class="step-label">Langkah 3</p>
+        <h2>Ubah satu nilai dan jalankan ulang</h2>
+        <div id="edit-file">
+          <p>Anda tidak perlu mengedit sel Python untuk mengubah datanya. Buka CSV itu sendiri:</p>
+          <ol class="lesson-steps">
+            <li>Pilih <strong>Menu → Berkas &amp; penyimpanan</strong> (menu mungkin menambahkan <strong>VFS / Paths</strong> ke namanya).</li>
+            <li>Pilih <strong>/ (Penyimpanan persisten)</strong> atau <strong>Semua sistem berkas</strong>. Gulir ke <code>/shared/data/seedling-heights.csv</code> dan ketuk nama berkas, bukan ikon unduh atau hapusnya.</li>
+            <li>Ketuk <strong>Sunting</strong>. Ubah baris <code>light,14</code> menjadi <code>light,15</code>. Biarkan tajuk <code>group,height_cm</code>, koma, dan baris lainnya tidak berubah.</li>
+            <li>Ketuk <strong>Simpan</strong>, lalu tutup Files &amp; Storage. Menyimpan berkas tidak menjalankan kode apa pun.</li>
+          </ol>
+          <figure class="phone-figure">
+            <div class="shot-window shot-window--file-edit" role="img" aria-label="Berkas CSV sedang diedit di Files and Storage, dengan Save bergaris tepi kuning. Pro juga menampilkan Full screen.">
+              <div class="shot-stage">
+                <img src="../../../files-export/tutorial/assets/phone-file-edit.png" alt="" loading="lazy" decoding="async">
+                <img src="../../../files-export/tutorial/assets/file-edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              </div>
+            </div>
+            <figcaption><strong>Pro 1.4.0:</strong> CSV terbuka di editor pratinjau berkas. Garis tepi kuning menandai <strong>Simpan</strong>. Free juga memiliki kontrol Edit/Save pratinjau; <strong>Layar penuh</strong> hanya untuk Pro.</figcaption>
+            <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-file-edit.png">Lihat tangkapan layar pengeditan Files &amp; Storage lengkap</a>
+          </figure>
+        </div>
+        <p>Jalankan ulang hanya <code>read_csv</code> dan <code>compare_groups</code>. Rata-rata terang sekarang sekitar <strong>13.3 cm</strong> dan perbedaannya sekitar <strong>5.3 cm</strong>. <strong>Jangan</strong> jalankan ulang <code>create_csv</code>: tindakan ini akan menimpa editan berkas Anda dengan nilai yang masih ada di sel tersebut.</p>
+        <p>Sebagai alternatif, edit <code>create_csv</code> dengan <strong>✎ pensil</strong>-nya, ubah pengukurannya <code>14</code> menjadi <code>15</code>, dan jalankan ketiga sel Python secara berurutan. Ini mengubah kode yang menghasilkan berkas, bukan hanya berkasnya saja.</p>
+        <p>Mengapa menjalankan ulang sel-sel berikutnya? Keluaran tersimpannya merupakan catatan dari eksekusi sebelumnya; mengubah berkas tidak secara otomatis menghitung ulang hasil sebelumnya. Setiap sel membaca berkas saat Anda menjalankannya.</p>
+        <aside class="callout" id="pro-syntax-highlighting" data-editions="pro">
+          <h3>Pro: pengeditan berkas layar penuh dan penyorotan opsional</h3>
+          <p>Pada pratinjau berkas, ketuk <strong>Layar penuh</strong> untuk editor yang lebih besar. CSV tetap <strong>Teks biasa</strong>, sehingga kotak centang <strong>Penyorotan sintaks</strong> dinonaktifkan.</p>
+          <p>Untuk berkas kode yang didukung, penyorotan sintaks bersifat opsional dan <strong>nonaktif secara default</strong>. Aktifkan menggunakan kotak centang di editor berkas ini, bukan pengaturan tampilan buku catatan. Ekstensi memilih bahasanya: misalnya <code>.py</code> adalah Python, <code>.js</code> adalah JavaScript, <code>.R</code> adalah R, dan <code>.pl</code> adalah <strong>Prolog</strong>, bukan Perl. Ekstensi yang tidak dikenal tetap berupa teks biasa.</p>
+          <figure class="phone-figure">
+            <div class="shot-window shot-window--file-highlight" role="img" aria-label="Pro editor berkas Python layar penuh dengan Syntax highlighting dipilih dan kode Python berwarna. Save dan Close berada di toolbar.">
+              <div class="shot-stage">
+                <img src="../../../files-export/tutorial/assets/phone-python-highlight.png" alt="" loading="lazy" decoding="async">
+                <img src="../../../files-export/tutorial/assets/file-highlight-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+              </div>
+            </div>
+            <figcaption><strong>Pro 1.4.0:</strong> berkas peragaan <code>seedling-summary.py</code> terpisah yang berisi kode perbandingan, dengan penyorotan diaktifkan. Berkas opsional ini tidak diperlukan untuk pelajaran CSV. Baris yang panjang dapat digulir secara horizontal.</figcaption>
+            <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-python-highlight.png">Lihat tangkapan layar editor berkas dengan penyorotan yang lengkap</a>
+          </figure>
+          <p><strong>Simpan</strong> menulis berkas dan membiarkan editor tetap terbuka. Gunakan <strong>× Close</strong> untuk kembali ke Files &amp; Storage; ini meminta konfirmasi sebelum membuang perubahan yang belum disimpan. Mengedit atau menyimpan berkas tidak pernah mengeksekusinya.</p>
+          <p><a href="../../../files-export/tutorial/assets/phone-csv-fullscreen.png">Lihat editor layar penuh yang sama dengan CSV terbuka sebagai teks biasa.</a></p>
+        </aside>
+      </section>
+
+      <section id="import">
+        <p class="step-label">Langkah 4</p>
+        <h2>Impor CSV asli</h2>
+        <ol class="lesson-steps">
+          <li><a download="seedling-heights.csv" href="../../../files-export/tutorial/assets/seedling-heights.csv">Unduh contoh CSV asli<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> ke folder yang dapat dibuka oleh pemilih berkas perangkat Anda.</li>
+          <li>Di SciREPL, pilih <strong>Menu → Import File</strong> dan pilih <code>seedling-heights.csv</code>. Konfirmasi seharusnya menyatakan bahwa berkas telah diunggah ke <code>/shared/data/seedling-heights.csv</code>.</li>
+          <li>Tindakan ini mengganti berkas lokal yang diubah dengan enam baris asli. Jalankan ulang <code>read_csv</code> dan <code>compare_groups</code>; kedua nilai rata-rata seharusnya kembali ke <strong>13.0</strong> dan <strong>8.0 cm</strong>.</li>
+        </ol>
+        <p class="callout"><strong>Penting:</strong> Jangan jalankan ulang <code>create_csv</code> setelah mengimpor berkas lain dengan nama yang sama kecuali Anda berniat menimpanya. Untuk CSV Anda sendiri, perhatikan jalur konfirmasi yang tepat dan ubah <code>path</code> di sel pembacaan ke nama berkas tersebut. Pemilih berkas mungkin menampilkan Android Downloads, penyedia cloud, atau keduanya.</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">Langkah 5</p>
+        <h2>Simpan salinan portabel</h2>
+        <p>Buka <strong>Menu → Ekspor buku kerja &amp; paket</strong>. Jika Anda hanya menginginkan sel-selnya, pilih <strong>Buku kerja (.srwb)</strong> dan <strong>Hanya tab saat ini</strong>. Suatu <code>.srwb</code> <strong>tidak</strong> menyertakan CSV terpisah di SharedVFS.</p>
+        <p>Untuk memindahkan buku kerja <em>beserta datanya</em>, pilih <strong>Paket (arsip)</strong> dan pertahankan <strong>.zip</strong>. Pada hierarki <strong>Isi</strong>, pilih:</p>
+        <ul>
+          <li>Buku kerja <code>CSV_Basics__Seedling_Heights.ipynb</code> di bawah <strong>notebooks/</strong>. Ekspor paket menyimpan sel dalam format notebook Jupyter.</li>
+          <li>Berkas <code>seedling-heights.csv</code> di bawah <strong>shared/data/</strong>.</li>
+        </ul>
+        <p>Hapus centang pada buku kerja dan berkas yang tidak terkait. Perluas folder dengan tanda panahnya jika diperlukan; jangan berasumsi <strong>Hanya tab saat ini</strong> membatasi isi paket. Anda tidak memerlukan salinan ekstra <strong>shared/notebooks/</strong> untuk pelajaran ini. Di Pro, biarkan <strong>Sertakan percakapan AI</strong> tidak dicentang kecuali Anda sengaja ingin membagikannya.</p>
+        <p>Ketuk <strong>Ekspor</strong>. Di Android, ini akan membuka lembar berbagi: simpan arsip di tempat yang dapat Anda temukan lagi, seperti drive Anda sendiri atau tujuan penyimpanan pengelola berkas. Di peramban, tindakan ini mengunduh berkas. Nama berkas yang disarankan adalah <code>scirepl_package.zip</code>; mengganti namanya menjadi <code>seedling-project.zip</code> membuatnya lebih mudah dikenali.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--package-selection" role="img" aria-label="Ekspor paket Pro dengan Package archive dipilih dan hanya buku kerja CSV Basics serta CSV seedling-heights yang dicentang. Garis luar kuning menandai kedua berkas tersebut.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-package-selection.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../files-export/tutorial/assets/package-selection-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pro 1.4.0:</strong> Package dipilih, dan dua entri yang digariskan dengan warna kuning dicentang. Buku kerja lain, berkas peragaan Python opsional, dan salinan buku kerja tersimpan tidak disertakan. Free menggunakan pemilihan buku-kerja-dan-data yang sama, tanpa opsi percakapan AI.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-package-selection.png">Lihat tangkapan layar pemilihan paket yang lengkap</a>
+        </figure>
+        <p class="callout"><strong>Pemulihan lokal bukanlah cadangan.</strong> Penyimpanan aplikasi Android, PWA di Chrome, dan peramban lainnya tidak membagikan berkas-berkas ini secara otomatis. Simpan salinan yang diekspor di tempat yang Anda kontrol. Lihat <a href="../../../files-export/">Files, import, and export<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> untuk format lainnya.</p>
+      </section>
+
+      <section id="reopen">
+        <p class="step-label">Langkah 6</p>
+        <h2>Buka kembali paket dan periksa kedua bagian</h2>
+        <p>Sebelum memercayai cadangan, periksa apakah Anda dapat membukanya. Anda dapat melakukan ini di penginstalan atau profil peramban SciREPL lainnya. Mengimpor ke sini akan menambahkan buku kerja lain; tindakan ini juga menggantikan berkas pada jalur tujuan paket, jadi simpan salinan terpisah dari berkas yang lebih baru sebelum mengimpor paket yang lebih lama.</p>
+        <ol class="lesson-steps">
+          <li>Pilih <strong>Menu → Impor Paket (.zip / .tar.gz)</strong> dan pilih arsip yang Anda simpan. Untuk pelajaran ini, berkas tersebut berupa <code>.zip</code>, bukan unduhan CSV atau <code>.srwb</code> yang terpisah.</li>
+          <li>Pilih buku kerja <strong>CSV Basics: Seedling Heights</strong> yang baru diimpor jika tidak dipilih secara otomatis. Jika Anda mengimpor ke aplikasi yang sama, tab lama dan baru mungkin memiliki nama yang sama.</li>
+          <li>Buka <strong>Menu → Berkas &amp; penyimpanan</strong> dan periksa <code>/shared/data/seedling-heights.csv</code>. Enam barisnya harus cocok dengan berkas yang Anda ekspor. Tutup pratinjau setelah memeriksa.</li>
+          <li>Jalankan <strong>sel kedua Python</strong> (kode <code>read_csv</code>), lalu <strong>sel ketiga Python</strong> (kode <code>compare_groups</code>). Ekspor paket menggunakan format Jupyter dan mungkin tidak mempertahankan nama sel; kenali sel-sel ini berdasarkan urutan dan kodenya. Setelah Langkah 4 dengan CSV asli, harapkan <strong>13.0 cm</strong>, <strong>8.0 cm</strong>, dan <strong>5.0 cm</strong>. Jika Anda justru mengekspor berkas <code>light,15</code> yang diedit, harapkan <strong>13.3 cm</strong>, <strong>8.0 cm</strong>, dan <strong>5.3 cm</strong>.</li>
+        </ol>
+        <p class="callout"><strong>Jangan jalankan ulang <code>create_csv</code> untuk pemeriksaan pemulihan ini.</strong> Tindakan ini akan menimpa data yang diimpor dengan nilai dalam kodenya. Membaca CSV yang dipulihkan terlebih dahulu membuktikan bahwa data ikut terbawa bersama buku kerja; keluaran tersimpan yang lama saja tidak membuktikan hal itu.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--restored-output" role="img" aria-label="Keluaran baru setelah memulihkan paket dan menjalankan sel perbandingannya: rata-rata terang 13.0 sentimeter, rata-rata teduh 8.0, perbedaan 5.0.">
+            <div class="shot-stage">
+              <img src="../../../files-export/tutorial/assets/phone-restored-output.png" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pro 1.4.0:</strong> keluaran baru di ponsel setelah mengimpor arsip yang diekspor dan hanya menjalankan sel pembacaan serta perbandingannya. CSV memulihkan enam baris aslinya.</figcaption>
+          <a class="full-shot-link" href="../../../files-export/tutorial/assets/phone-restored-output.png">Lihat tangkapan layar keluaran yang dipulihkan secara lengkap</a>
+        </figure>
+        <p>Jika berkas hilang, atau buku kerja tidak ada, kembali ke Langkah 5 dan periksa apakah <em>kedua</em> entri telah dipilih. Ekspor buku kerja biasa tidak dapat membawa CSV untuk Anda.</p>
+      </section>
+
+      <section id="what-next">
+        <h2>Apa selanjutnya?</h2>
+        <p>Cobalah CSV milik Anda sendiri. Pertahankan kolom <code>group</code> dan <code>height_cm</code>, gunakan tinggi numerik, dan sertakan setidaknya satu baris <code>light</code> dan satu baris <code>shade</code>—atau sesuaikan dua filter grup di <code>compare_groups</code>. Anda dapat memeriksa berkas lokal di bawah <strong>Menu → Berkas &amp; penyimpanan</strong>. Untuk kontrol ponsel yang digunakan di sini, lihat <a href="../../interface/tutorial/">panduan antarmuka buku kerja pertama</a>.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Bantuan SciREPL</span><nav aria-label="Navigasi footer"><a href="../../../files-export/">Berkas &amp; ekspor<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a><a href="../../../">Semua bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a></nav></footer>
+</body>
+</html>

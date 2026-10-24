@@ -26,6 +26,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Pages workflow — stable runtime and matching PWA validation
+        run: node tests/test_pages_workflow.mjs
+
       - name: Install dependencies
         run: npm install
 

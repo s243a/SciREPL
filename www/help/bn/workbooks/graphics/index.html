@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="bn" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="স্ট্যাটিক Markdown ডায়াগ্রাম তৈরি করুন, JavaScript ক্যানভাস দিয়ে ছবি তৈরি করুন এবং প্যাকেজ ইনস্টল না করেই KaTeX সমীকরণ একটি SciREPL ওয়ার্কবুকে লিখুন।">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/bn/workbooks/graphics/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/graphics/tutorial.css">
+  <title>ছবি, ডায়াগ্রাম এবং সমীকরণ · SciREPL সহায়তা</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/graphics/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/graphics/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/graphics/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/graphics/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/graphics/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/graphics/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/graphics/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/graphics/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/graphics/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/graphics/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/graphics/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/graphics/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/graphics/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/graphics/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">মূল বিষয়বস্তুতে যান</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+    <nav aria-label="প্রাথমিক নেভিগেশন">
+      <a href="../../../workbooks/">ওয়ার্কবুক নির্দেশিকা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+      <a href="../../tutorials/">সব টিউটোরিয়াল</a>
+      <a href="../../../">সব সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+      <a href="../../../../">Free PWA খুলুন</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="টিউটোরিয়ালের ভাষা"><details class="tutorial-language-menu"><summary>টিউটোরিয়ালের ভাষা: <bdi>বাংলা</bdi></summary><nav aria-label="টিউটোরিয়ালের ভাষা"><a href="../../../en/workbooks/graphics/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/graphics/" lang="ar" hreflang="ar">العربية</a>
+      <a href="./" lang="bn" hreflang="bn" aria-current="page">বাংলা</a>
+      <a href="../../../de/workbooks/graphics/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/graphics/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/graphics/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/graphics/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/graphics/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/graphics/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/graphics/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/graphics/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/graphics/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/graphics/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">মেশিন-অনূদিত টিউটোরিয়াল; স্থানীয় ভাষায় পর্যালোচনা প্রক্রিয়াধীন। কোড এবং প্রযুক্তিগত মানসমূহ অপরিবর্তিত। স্ক্রিনশটগুলোতে মূল ইংরেজি ইন্টারফেস দেখানো হয়েছে; আপনার অ্যাপের সাথে এই টেক্সটের অনূদিত কন্ট্রোল নামগুলো মিলিয়ে নিন।</p></aside>
+    <p class="breadcrumbs"><a href="../../../">সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / <a href="../../../workbooks/">ওয়ার্কবুক<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / ছবি, ডায়াগ্রাম এবং সমীকরণ</p>
+    <article>
+      <p class="eyebrow">কাজের মাধ্যমে শিখুন</p>
+      <h1>ছবি, ডায়াগ্রাম এবং সমীকরণ যোগ করুন</h1>
+      <p class="lede">একটি ওয়ার্কবুকে কোডের পাশাপাশি ছবির মাধ্যমেও কোনো ধারণা ব্যাখ্যা করা যায়। একই সাধারণ স্থানাঙ্ক ফ্রেম প্রদর্শনের তিনটি উপায় চেষ্টা করুন: Markdown-এ একটি স্ট্যাটিক ছবি, JavaScript দিয়ে আঁকা একটি ছবি এবং KaTeX দিয়ে টাইপসেট করা একটি সমীকরণ। আপনার Python, R, প্যাকেজ ইনস্টলেশন বা কোনো AI অ্যাকাউন্টের প্রয়োজন নেই।</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro ওয়ার্কফ্লো</li>
+        <li class="chip">ব্রাউজারে যাচাইকৃত উদাহরণসমূহ</li>
+        <li class="chip">প্রায় 10 মিনিট</li>
+      </ul>
+      <p class="screen-note">উদাহরণ এবং স্ক্রিনশটগুলো <strong>SciREPL Free ব্রাউজার বিল্ডে</strong> <time datetime="2026-10-06">6 অক্টোবর 2026</time> তারিখে পরীক্ষা করা হয়েছিল। স্ক্রিনশটগুলোতে একটি সংকীর্ণ ব্রাউজার ভিউপোর্ট ব্যবহার করা হয়েছে; এগুলো <strong>অ্যান্ড্রয়েড ক্যাপচার নয়</strong>। অ্যান্ড্রয়েডে একই নিয়ন্ত্রণ ব্যবহার করা হয়, তবে সেগুলোর অবস্থান ভিন্ন হতে পারে। এই গাইডের জন্য Pro এবং প্রতিটি প্রকাশিত অ্যাপ সংস্করণ পরীক্ষা করা হয়নি।</p>
+      <div class="table-wrap">
+        <table>
+          <caption>আপনার ব্যাখ্যার সাথে মানানসই পদ্ধতিটি বেছে নিন</caption>
+          <thead><tr><th scope="col">আপনি যা চান</th><th scope="col">সেলের ধরন</th><th scope="col">যা ফলাফল তৈরি করে</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">একটি নির্দিষ্ট ডায়াগ্রাম বা ছবি</th><td>Markdown (<strong>Md</strong>)</td><td>ইনলাইন SVG বা একটি এমবেড করা PNG, যা সেলের টেক্সটে সংরক্ষিত থাকে</td></tr>
+            <tr><th scope="row">কোড দ্বারা গণনাকৃত বা আঁকা একটি ছবি</th><td>কোড → JavaScript (<strong>JS</strong>)</td><td>একটি ক্যানভাস, যা <code>window.renderImage(...)</code> দিয়ে প্রদর্শিত হয়</td></tr>
+            <tr><th scope="row">একটি সূত্র বা ম্যাট্রিক্স</th><td>Markdown (<strong>Md</strong>)</td><td><code>$$</code> ডিলিমিটারের মধ্যে TeX-শৈলীর গণিত, যা KaTeX দ্বারা রেন্ডার করা হয়</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <nav class="lesson-nav" aria-label="গ্রাফিক্স ওয়াকথ্রু ধাপসমূহ">
+        <strong>এই পাঠে</strong>
+        <ol>
+          <li><a href="#open">ছোট উদাহরণ ওয়ার্কবুকটি খুলুন</a></li>
+          <li><a href="#static">Markdown-এ একটি স্ট্যাটিক ছবি রাখুন</a></li>
+          <li><a href="#canvas">JavaScript দিয়ে একটি ছবি আঁকুন</a></li>
+          <li><a href="#math">KaTeX দিয়ে সমীকরণ লিখুন</a></li>
+          <li><a href="#save">আপনার কাজ সংরক্ষণ করুন এবং পুনরায় খুলুন</a></li>
+        </ol>
+        <p><a href="#troubleshooting">যদি ফলাফল দেখা না যায়</a></p>
+        <p><a href="../../tutorials/">সব টিউটোরিয়াল</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">ধাপ 1</p>
+        <h2>উদাহরণ ওয়ার্কবুকটি খুলুন</h2>
+        <p>সহযোগী ফাইলটিতে একটি এমবেড করা PNG সহ সম্পূর্ণ উদাহরণ রয়েছে। এটি সবকিছুকে একটি ছোট ওয়ার্কবুকে রাখে যাতে আপনাকে দীর্ঘ Base64 ইমেজ স্ট্রিং টাইপ করতে না হয়।</p>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/graphics/assets/workbook-graphics.srwb" download="workbook-graphics.srwb">গ্রাফিক্স উদাহরণের ওয়ার্কবুক (.srwb) ডাউনলোড করুন</a>। মূল ফাইলটি সংরক্ষণ করুন, এর <code>.srwb</code> এক্সটেনশনটি বজায় রাখুন। যদি আপনার ব্রাউজার টেক্সট প্রদর্শন করে, তবে এর সংরক্ষণ/ডাউনলোড অ্যাকশন ব্যবহার করুন। আপনি যে ফোল্ডারে এটি সংরক্ষণ করেছেন তা মনে রাখুন।</li>
+          <li>SciREPL খুলুন। <strong>অ্যাপের শীর্ষে থাকা হেডারে</strong>, <strong>☰ মেনু</strong> খুঁজুন, যা হলো <strong>তিনটি অনুভূমিক রেখা</strong> বিশিষ্ট বোতাম। এটিতে ট্যাপ বা ক্লিক করুন।</li>
+          <li><strong>📂 ফাইল ইমপোর্ট করুন (যেমন: .srwb, .ipynb, .csv, .py, .zip)</strong> বেছে নিন। প্রয়োজনে <em>মেনুর ভেতরে</em> স্ক্রোল করুন। আপনার ডিভাইসের ফাইল পিকার থেকে Downloads বা আপনার নির্বাচিত ফোল্ডার থেকে <code>workbook-graphics.srwb</code> নির্বাচন করুন।</li>
+          <li>মেনুটি খোলা থাকলে তা বন্ধ করুন এবং ওয়ার্কবুক নির্বাচকে নতুন <strong>Workbook Graphics</strong> ট্যাবটি নির্বাচন করুন। আপনার বিদ্যমান ট্যাবগুলো সংরক্ষিত থাকবে।</li>
+          <li><code>static_axes</code>, <code>embedded_png</code>, <code>canvas_axes</code> এবং <code>math_axes</code> নামের চারটি সেল খুঁজুন। কোড চালানোর আগে সেগুলো পড়ুন। স্ট্যাটিক ডায়াগ্রাম এবং সমীকরণগুলো তাদের Markdown উৎস থেকে দেখা যায়; JavaScript ছবিটি শুধুমাত্র এর সেল চালানোর পরেই প্রদর্শিত হয়।</li>
+        </ol>
+        <p class="callout"><strong>ইমপোর্ট করা মানে চালানো নয়।</strong> একটি <code>.srwb</code> ইমপোর্ট এর কোড এক্সিকিউট করে না, এমনকি অটো-এক্সিকিউট সেটিং সক্রিয় থাকলেও নয়। এই পাঠে শুধুমাত্র <code>canvas_axes</code>-এর JavaScript এক্সিকিউশন প্রয়োজন। কোনো <strong>সব সেল রান করুন</strong> ধাপ নেই।</p>
+        <p>ডাউনলোড বা পিকার সম্পর্কে আরো বিস্তারিত জানতে চান? <a href="../import/">ম্যানুয়াল ওয়ার্কবুক ইমপোর্ট ওয়াকথ্রু</a> অনুসরণ করুন। সংরক্ষিত সেলগুলোতে ওপরের নামগুলো দেখা যায়; <a href="../named-cells/">নামযুক্ত-সেল পাথ টিউটোরিয়াল</a> ব্যাখ্যা করে কীভাবে সেগুলো নির্ধারণ ও ব্যবহার করতে হয়। আপনি নিচের ধাপগুলো ব্যবহার করে ইতিমধ্যে খোলা থাকা একটি ওয়ার্কবুকেও এই উদাহরণগুলো তৈরি করতে পারেন।</p>
+      </section>
+
+      <section id="static">
+        <p class="step-label">ধাপ 2 · পদ্ধতি 1</p>
+        <h2>Markdown-এ একটি স্ট্যাটিক ডায়াগ্রাম রাখুন</h2>
+        <p>আপনার মুখোমুখি থাকা একটি কাগজের টুকরোর কথা ভাবুন। <strong>r</strong> কাগজের ডানদিকে নির্দেশ করে, <strong>u</strong> এর ওপরের দিকে নির্দেশ করে এবং <strong>n</strong> কাগজ থেকে বাইরের দিকে আপনার দিকে নির্দেশ করে। একটি বিন্দুর চারপাশের বৃত্ত সেই বহির্মুখী দিককে প্রকাশ করে, ঠিক যেমন আপনার দিকে আসা একটি তীরের অগ্রভাগ দেখার মতো।</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-static.png" alt="একটি সংকীর্ণ ব্রাউজারে SciREPL Markdown সেলের স্ক্রিনশট যাতে ডান এবং ওপরের তীর এবং দর্শকের দিকে থাকা অভিলম্বের জন্য বৃত্তের মধ্যে একটি বিন্দুসহ একটি কাগজের ডায়াগ্রাম প্রদর্শিত হচ্ছে।" loading="lazy" decoding="async">
+          <figcaption>স্ট্যাটিক SVG একটি <em>Markdown সেলের ভেতরে</em> রেন্ডার করা হয়। এটি SciREPL Free-এর ব্রাউজার ক্যাপচার, কোনো ভাষা কার্নেল চালিয়ে তৈরি করা অঙ্কন নয়।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-static.png">সম্পূর্ণ ব্রাউজার স্ক্রিনশট দেখুন</a>
+        </figure>
+        <h3>ইমপোর্ট করা ডায়াগ্রামটি সম্পাদনা করুন</h3>
+        <ol class="lesson-steps">
+          <li><code>static_axes</code> খুঁজুন। সেই সংরক্ষিত সেলের নিজস্ব হেডারে এর <strong>✎ পেন্সিলে</strong> ট্যাপ করুন, যা <strong>✕</strong>-এর কাছাকাছি অবস্থিত। এটি বিদ্যমান সেলের সোর্স খোলে; নতুন-সেল প্যানেল অন্য একটি সেল তৈরি করবে।</li>
+          <li>সেলের ধরনের বোতামটি <strong>Md</strong>-এ সেট করে রাখুন। SVG টেক্সটে, <code>r: right</code> পরিবর্তন করে <code>r: across</code> করুন।</li>
+          <li>সেই সেলের <strong>▶ রান</strong> বোতামে ট্যাপ করে Markdown আবার সংরক্ষণ ও রেন্ডার করুন। একটি <strong>Md</strong> সেলের জন্য, এই বোতামটি টেক্সট রেন্ডার করে; এটি JavaScript এক্সিকিউট করে না বা ল্যাঙ্গুয়েজ রানটাইম শুরু করে না।</li>
+        </ol>
+        <h3>অথবা আপনার নিজস্ব Markdown সেল তৈরি করুন</h3>
+        <ol class="lesson-steps">
+          <li><strong>নতুন-সেল প্যানেল</strong> খুঁজুন যেখানে আপনি পরবর্তী সেল টাইপ করবেন। এটি সঙ্কুচিত থাকলে, অ্যাপের শিরোনামের কাছে থাকা <strong>⌃ নতুন-সেল প্যানেল দেখান</strong> বোতামটি ব্যবহার করুন।</li>
+          <li><strong>কোড</strong> চিহ্নিত সেলের ধরনের বোতামে ট্যাপ করুন যাতে এটি পরিবর্তিত হয়ে <strong>Md</strong> হয়। Markdown হলো একটি <em>সেলের ধরন</em>, ভাষার ড্রপডাউনের কোনো এন্ট্রি নয়।</li>
+          <li>নিচের টেক্সট ফিল্ডে সম্পূর্ণ SVG কপি করুন, <strong>কোনো Markdown কোড ফেন্স যোগ না করে</strong> (<code>```</code>)। আশেপাশের লেখার সাথে SVG-এর মাঝে একটি ফাঁকা লাইন রাখুন।</li>
+          <li><strong>▶ রান</strong>-এ ট্যাপ করে রেন্ডার করা Markdown সেলটি যোগ করুন। আপনার কাগজ এবং তিনটি দিকের লেবেলই দেখতে পাওয়া উচিত।</li>
+        </ol>
+        <pre><code data-graphic-example="svg">&lt;svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 360 220" width="100%" height="220"
+     role="img" aria-label="Right, up and outward normal on paper"&gt;
+  &lt;title&gt;A paper coordinate frame&lt;/title&gt;
+  &lt;rect x="20" y="18" width="320" height="184"
+        rx="6" fill="#ffffff" stroke="#526170" stroke-width="2" /&gt;
+  &lt;path d="M110 145 H280" fill="none" stroke="#075d69" stroke-width="3" /&gt;
+  &lt;polygon points="280,145 267,138 267,152" fill="#075d69" /&gt;
+  &lt;path d="M110 145 V48" fill="none" stroke="#064d91" stroke-width="3" /&gt;
+  &lt;polygon points="110,48 103,61 117,61" fill="#064d91" /&gt;
+  &lt;circle cx="110" cy="145" r="10" fill="#ffffff" stroke="#14191f" stroke-width="2" /&gt;
+  &lt;circle cx="110" cy="145" r="3" fill="#14191f" /&gt;
+  &lt;text x="204" y="168" fill="#14191f" font-size="16"&gt;r: right&lt;/text&gt;
+  &lt;text x="124" y="62" fill="#14191f" font-size="16"&gt;u: up&lt;/text&gt;
+  &lt;text x="42" y="190" fill="#14191f" font-size="16"&gt;n: toward you&lt;/text&gt;
+&lt;/svg&gt;</code></pre>
+        <p>SciREPL Markdown স্যানিটাইজ করে। এই উদাহরণে সাধারণ SVG আকার, টেক্সট এবং স্পষ্ট <code>fill</code>/<code>stroke</code> অ্যাট্রিবিউট ব্যবহার করা হয়েছে। এর তীরের মাথাগুলো বহুভুজ: স্যানিটাইজার এড়িয়ে টিকে থাকার জন্য <code>marker-end="url(...)"</code>, একটি <code>&lt;style&gt;</code> ব্লক, স্ক্রিপ্ট বা অ্যানিমেশনের ওপর নির্ভর করবেন না।</p>
+
+        <h3>পরিবর্তে একটি এমবেড করা PNG ব্যবহার করুন</h3>
+        <p>অন্য স্ট্যাটিক বিকল্পটি হলো একটি PNG যার Base64 ডেটা সরাসরি Markdown সোর্সে সংরক্ষিত থাকে। মানক Markdown ছবির সিনট্যাক্স দেখতে এইরকম:</p>
+        <pre><code>![Paper axes](data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE)</code></pre>
+        <p>এই লাইনটি কেবল <em>ফরম্যাট</em> দেখায়, কোনো কার্যকরী ছবি নয়: প্লেসহোল্ডারটি সম্পূর্ণ এনকোড করা PNG দিয়ে প্রতিস্থাপন করুন, অথবা ইতিমধ্যে কাজ করা <code>embedded_png</code> সেলটি ব্যবহার করুন। <code>base64,</code>-এর পরের অংশটি ছবির ডেটা, ফাইলের নাম নয়। এটি এক লাইনে রাখুন।</p>
+        <p>ছোট স্ক্রিনে সেলের সাথে মানানসই ছবির জন্য, সহযোগী ফাইলের <code>embedded_png</code> সেলটিতে <code>width="100%"</code> সহ নিচের সমতুল্য ইনলাইন HTML ব্যবহার করা হয়েছে। এটি এখনও Markdown-এর ভেতরে সংরক্ষিত থাকে, কোড আউটপুট হিসেবে নয়:</p>
+        <pre><code>&lt;img alt="Paper axes" width="100%"
+     src="data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE"&gt;</code></pre>
+        <p class="callout"><strong>একটি স্ট্যাটিক পদ্ধতি বেছে নিন:</strong> একটি ছোট সম্পাদনাযোগ্য ডায়াগ্রামের জন্য একটি <em>ইনলাইন SVG উপাদান</em> ব্যবহার করুন, অথবা একটি রাস্টার ছবির জন্য একটি <code>data:image/png;base64,...</code> ছবি ব্যবহার করুন। একটি SVG ডেটা URL যেমন <code>data:image/svg+xml,...</code> ইনলাইন SVG-এর মতো নয় এবং পরীক্ষিত বিল্ডে তা ব্লক করা হয়েছে। দূরবর্তী ছবির URL-ও সেখানে ব্লক করা হয়েছে। প্রদর্শনের সময় এই দুটি স্বায়ত্তশাসিত উদাহরণের জন্য কোনো ছবি ডাউনলোডের প্রয়োজন হয় না।</p>
+        <p>উভয় স্ট্যাটিক উদাহরণই Markdown সোর্সে থাকে। ওয়ার্কবুক ইমপোর্টের পরে কোড না চালিয়েই এগুলো প্রদর্শন করা যায়।</p>
+      </section>
+
+      <section id="canvas">
+        <p class="step-label">ধাপ 3 · পদ্ধতি 2</p>
+        <h2>JavaScript দিয়ে একটি ছবি আঁকুন</h2>
+        <p>একটি স্ট্যাটিক ছবি একই রকম থাকে যতক্ষণ না আপনি এর সোর্স সম্পাদনা করেন। কোনো প্রোগ্রামের মাধ্যমে হিসাব করা বা আঁকা ছবির জন্য, একটি <strong>কোড</strong> সেল ব্যবহার করুন এবং <strong>JS - JavaScript</strong> নির্বাচন করুন। এই উদাহরণটি একটি ক্যানভাসে আঁকে, এটিকে PNG-তে রূপান্তর করে এবং সেই ছবিটি সেলের আউটপুটে পাঠায়।</p>
+        <ol class="lesson-steps">
+          <li>ইমপোর্ট করা ওয়ার্কবুকে, <strong>✎ পেন্সিলটিতে</strong> ট্যাপ করুন <code>canvas_axes</code>-এর মধ্যে। সেলের ধরন <strong>কোড</strong> এবং এর ভাষা <strong>JS - JavaScript</strong> কিনা তা দেখে নিন (কমপ্যাক্ট নির্বাচকে কেবল <strong>JS</strong> দেখা যেতে পারে)।</li>
+          <li>নিচের কোডটি পড়ুন, যা সেই সেলের সম্পূর্ণ প্রোগ্রাম। এর জন্য অন্য কোনো সেল, ফাইল, প্যাকেজ বা নেটওয়ার্ক অনুরোধের প্রয়োজন নেই।</li>
+          <li><em>সেই সেলের</em> <strong>▶ রান</strong>-এ ট্যাপ করুন। JavaScript সোর্সের নিচে একটি ছবি প্রদর্শিত হওয়া উচিত।</li>
+        </ol>
+        <p>এর পরিবর্তে একটি নতুন সেল তৈরি করতে, নতুন-সেল প্যানেলে যান, প্রয়োজনে <strong>Md</strong>-কে আবার <strong>কোড</strong>-এ পরিবর্তন করুন এবং ভাষা ড্রপডাউন থেকে <strong>JS - JavaScript</strong> বেছে নিন। কোডটি পেস্ট করুন, তারপর <strong>▶ রান</strong>-এ ট্যাপ করুন। যদি JavaScript লুকানো থাকে, তবে <strong>☰ মেনু → ভাষা</strong> খুঁজুন এবং এটি সক্ষম করুন।</p>
+        <pre><code data-graphic-example="javascript">(() =&gt; {
+  const canvas = document.createElement('canvas');
+  canvas.width = 360;
+  canvas.height = 220;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 360, 220);
+  ctx.strokeStyle = '#526170';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(20, 18, 320, 184);
+
+  function arrow(x1, y1, x2, y2, color) {
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 14 * Math.cos(angle - 0.5),
+               y2 - 14 * Math.sin(angle - 0.5));
+    ctx.lineTo(x2 - 14 * Math.cos(angle + 0.5),
+               y2 - 14 * Math.sin(angle + 0.5));
+    ctx.closePath();
+    ctx.fill();
+  }
+  arrow(110, 145, 280, 145, '#075d69'); // right
+  arrow(110, 145, 110, 48, '#064d91');  // up
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#14191f';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(110, 145, 10, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#14191f';
+  ctx.beginPath();
+  ctx.arc(110, 145, 3, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.font = '16px sans-serif';
+  ctx.fillText('r: right', 204, 168);
+  ctx.fillText('u: up', 124, 62);
+  ctx.fillText('n: toward you', 42, 190);
+  window.renderImage(canvas.toDataURL('image/png'));
+})();</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-canvas.png" alt="SciREPL-এর সংকীর্ণ ব্রাউজার স্ক্রিনশট, যেখানে একটি JavaScript ক্যানভাস সেলের নিচে PNG আউটপুট হিসেবে কাগজের স্থানাঙ্ক ফ্রেম প্রদর্শিত হচ্ছে।" loading="lazy" decoding="async">
+          <figcaption>এই একই রকম দেখতে ডায়াগ্রামটি একটি <strong>তৈরি করা PNG আউটপুট</strong>, Markdown নয়। JavaScript সেলটি এটি তৈরি করে যখন আপনি <strong>▶ রান</strong> বেছে নেন। SciREPL Free-এর ব্রাউজার ক্যাপচার।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-canvas.png">সম্পূর্ণ ব্রাউজার স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p><code>r: right</code> পরিবর্তন করে দেখুন <code>ctx.fillText(...)</code>-এ, তারপর সেলটি আবার চালান। ফাংশন র্যাপার <code>(() =&gt; { ... })();</code> এই উদাহরণের ভেরিয়েবলগুলোকে স্থানীয় রাখে, যাতে আপনি শীর্ষ-স্তরের <code>const</code> ভেরিয়েবল পুনরায় ঘোষণা না করেই এটি আবার চালাতে পারেন।</p>
+        <p class="callout"><strong>ডিসপ্লে কলটি গুরুত্বপূর্ণ।</strong> শেষে <code>window.renderImage(canvas.toDataURL('image/png'))</code> রাখুন। <code>'&lt;svg&gt;...&lt;/svg&gt;'</code>-এর মতো একটি সাধারণ স্ট্রিং JavaScript থেকে রিটার্ন করলে টেক্সট প্রদর্শিত হয়; এটি সেই স্ট্রিংকে ইনলাইন ডায়াগ্রামে পরিণত করে না। আপনার অ্যাপের পেজে ক্যানভাস ঢোকানোর প্রয়োজন নেই।</p>
+      </section>
+
+      <section id="math">
+        <p class="step-label">ধাপ 4 · পদ্ধতি 3</p>
+        <h2>সমীকরণ দিয়ে ছবিটি ব্যাখ্যা করুন</h2>
+        <p>TeX-শৈলীর গণিতের জন্য একটি <strong>Markdown (Md)</strong> সেল ব্যবহার করুন। ডায়াগ্রামের দিকগুলো একটি ডানহাতি ফ্রেম গঠন করে: <strong>ডান × ওপর = বহির্মুখী অভিলম্ব</strong>। নিচের ম্যাট্রিক্সে, প্রথম সারিটি <strong>r</strong>, দ্বিতীয়টি <strong>u</strong> এবং তৃতীয়টি <strong>n</strong>; সাবস্ক্রিপ্টগুলো হলো একটি নির্বাচিত x, y, z স্থানাঙ্ক ব্যবস্থায় তাদের উপাদান।</p>
+        <ol class="lesson-steps">
+          <li><strong>✎ পেন্সিলে</strong> ট্যাপ করুন <code>math_axes</code>-এ, অথবা নতুন-সেল প্যানেলে <strong>কোড → Md</strong> ব্যবহার করে একটি নতুন সেল তৈরি করুন।</li>
+          <li>নিচের সম্পূর্ণ টেক্সটটি ব্যবহার করুন। <code>$$</code> ডিলিমিটারগুলো Markdown সোর্সের অন্তর্ভুক্ত; এটিকে কোনো কোড ফেন্সের মধ্যে মুড়বেন না।</li>
+          <li><strong>▶ রান</strong>-এ ট্যাপ করে Markdown সংরক্ষণ ও রেন্ডার করুন। আপনার একটি ক্রস-প্রোডাক্ট সমীকরণ এবং একটি তিন-সারির ম্যাট্রিক্স দেখতে পাওয়া উচিত, কোনো অপরিবর্তিত ব্যাকস্ল্যাশ কমান্ড নয়। এই সেলের জন্য কোনো ভাষা কার্নেল চলে না।</li>
+        </ol>
+        <pre><code data-graphic-example="math">Right, up and outward normal form a right-handed frame.
+
+$$\mathbf{r} \times \mathbf{u} = \mathbf{n}$$
+
+Rows of the frame matrix: right, up, then outward normal.
+
+$$
+M = \begin{pmatrix}
+r_x &amp; r_y &amp; r_z \\
+u_x &amp; u_y &amp; u_z \\
+n_x &amp; n_y &amp; n_z
+\end{pmatrix}
+$$</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-equations.png" alt="SciREPL-এর সংকীর্ণ ব্রাউজার স্ক্রিনশট, যেখানে ডান ক্রস ওপর সমান অভিলম্ব এবং একটি তিন-সারির স্থানাঙ্ক-ফ্রেম ম্যাট্রিক্স KaTeX দিয়ে একটি Markdown সেলে রেন্ডার করা হয়েছে।" loading="lazy" decoding="async">
+          <figcaption>KaTeX সরাসরি <strong>Markdown সোর্স</strong> থেকে গণিত টাইপসেট করে। এগুলো সমীকরণ, কোনো TeX-দ্বারা তৈরি অঙ্কন নয়। SciREPL Free-এর ব্রাউজার ক্যাপচার।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-equations.png">সম্পূর্ণ ব্রাউজার স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p class="callout"><strong>KaTeX একটি পূর্ণাঙ্গ TeX কম্পাইলার নয়।</strong> এটি সমর্থিত গণিত নোটেশন রেন্ডার করে, তবে TikZ ডায়াগ্রাম বা একটি সম্পূর্ণ LaTeX নথি কম্পাইল করে না। যদিও KaTeX <code>\includegraphics</code> তালিকাভুক্ত করে, এর জন্য একটি ট্রাস্ট বিকল্প প্রয়োজন যা পরীক্ষিত রেন্ডারারে SciREPL সক্ষম করে না; এটি এখানে ছবি সন্নিবেশের কোনো পথ নয়। ছবির জন্য Markdown SVG/PNG বা JavaScript ক্যানভাস ব্যবহার করুন।</p>
+        <p>অন্যান্য প্রতীক এবং গণিত কমান্ডের জন্য, <a href="https://katex.org/docs/support_table.html">KaTeX সহায়তা সারণী</a> দেখুন; নথিপত্রটিতে SciREPL-এর অন্তর্ভুক্ত সংস্করণের চেয়ে নতুন বৈশিষ্ট্য বর্ণিত থাকতে পারে। কিউবের চালগুলো ব্যাখ্যা করতে এই দিকগুলো ব্যবহার করে এমন একটি ওয়ার্কবুকের জন্য, <a href="../tutorial/#open">মার্কভ গ্রুপস ওয়াকথ্রু</a> দেখুন।</p>
+      </section>
+
+      <section id="save">
+        <p class="step-label">ধাপ 5</p>
+        <h2>একটি অনুলিপি সংরক্ষণ করুন, তারপর জানুন কী পুনরায় চালাতে হবে</h2>
+        <ol class="lesson-steps">
+          <li><strong>☰ মেনু → ওয়ার্কবুক ও প্যাকেজ এক্সপোর্ট করুন</strong> খুলুন।</li>
+          <li>এই ওয়ার্কবুকের জন্য <strong>ওয়ার্কবুক (.srwb)</strong> এবং <strong>কেবল বর্তমান ট্যাব</strong> বেছে নিন, তারপর <strong>এক্সপোর্ট</strong>-এ ট্যাপ করুন। ফাইলটি আপনার নিয়ন্ত্রিত কোথাও সংরক্ষণ করুন।</li>
+          <li>সেই অনুলিপিটি পুনরায় খুলতে, <strong>মেনু → Import File</strong> ব্যবহার করুন। এটি আরেকটি ওয়ার্কবুক ট্যাব যোগ করে; এটি আপনার বিদ্যমান ট্যাবটিকে প্রতিস্থাপন করে না।</li>
+          <li>স্ট্যাটিক SVG, এমবেড করা PNG এবং সমীকরণগুলো পরীক্ষা করুন। সেগুলো সংরক্ষিত Markdown সোর্স থেকে আসে এবং কোনো কোড চালানোর প্রয়োজন হয় না। <code>canvas_axes</code> পরিদর্শন করুন এবং এর ছবি পুনরায় তৈরি করতে সেই JavaScript সেলটি আবার চালান।</li>
+        </ol>
+        <p class="callout"><strong>তৈরি করা আউটপুট আর সোর্স এক নয়।</strong> পরীক্ষিত Free ব্রাউজার বিল্ডে, <code>.srwb</code> এক্সপোর্ট একটি JavaScript ইমেজ আউটপুট সংরক্ষণ করতে পারে, কিন্তু ম্যানুয়াল <strong>মেনু → Import File</strong> সেই কোড আউটপুট পুনরুদ্ধার করে না। JavaScript সোর্সটি থেকে যায়, তাই এটি পুনরায় চালান। ইনলাইন SVG, এমবেড করা PNG এবং সমীকরণগুলো হলো Markdown সোর্স এবং এগুলো ইমপোর্টের সময় প্রদর্শিত হয়। কোড এইমাত্র চলেছে তার প্রমাণ হিসেবে পূর্বে দৃশ্যমান কোনো আউটপুট ব্যবহার করবেন না।</p>
+        <p>এই পরীক্ষাগুলো ওপরের ওয়ার্কবুক উদাহরণগুলোকে কভার করে, প্রতিটি এক্সপোর্ট ফরম্যাটে ছবির যথার্থতা নয়। PDF, DOCX, Markdown এবং অন্যান্য নথি এক্সপোর্ট প্রতিটি ছবি একইভাবে সংরক্ষণ করে এমনটি ধরে নেবেন না; আপনার এক্সপোর্ট করা নথিটি পরীক্ষা করুন। উপলব্ধ ফরম্যাটগুলোর জন্য <a href="../../../files-export/">ফাইল ও এক্সপোর্ট<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> দেখুন।</p>
+        <p>আপনার সম্পাদিত ওয়ার্কবুক এক্সপোর্ট করলে আপনার পরিবর্তনের একটি ব্যাকআপ তৈরি হয়; আপনি সেল সম্পাদনা করার সময় মূল ডাউনলোড করা উদাহরণটি আপডেট হয় না। স্থানীয় অ্যাপ স্টোরেজ কোনো ব্যাকআপ নয়, এবং অ্যান্ড্রয়েড ও ব্রাউজার সেশনগুলো স্বয়ংক্রিয়ভাবে কাজ শেয়ার করে না।</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">যদি কিছু ভুল মনে হয়</p>
+        <h2>সেলের ধরন এবং সোর্স পরীক্ষা করুন</h2>
+        <ul>
+          <li><strong>আপনি ডায়াগ্রামের পরিবর্তে SVG কোড দেখতে পাচ্ছেন:</strong> সেলের ধরন <strong>Md</strong> কিনা তা পরীক্ষা করুন, আশেপাশের যেকোনো কোড ফেন্স সরান এবং সেলটি আবার রেন্ডার করুন। সম্পূর্ণ ইনলাইন <code>&lt;svg&gt;...&lt;/svg&gt;</code> উদাহরণ ব্যবহার করুন, কোনো SVG ডেটা URL নয়।</li>
+          <li><strong>PNG অনুপস্থিত:</strong> সহযোগী ফাইলের <code>embedded_png</code> সেলটি ব্যবহার করুন, অথবা পরীক্ষা করুন যে আপনি স্পেস বা লাইন ব্রেক ছাড়া সম্পূর্ণ <code>data:image/png;base64,...</code> স্ট্রিংটি পেস্ট করেছেন কিনা। একটি স্থানীয় ফাইলের নাম এমবেড করা ছবির ডেটা নয়।</li>
+          <li><strong>ক্যানভাস কোড চলছে না:</strong> এর সেলের ধরন <strong>কোড</strong> এবং এর ভাষা <strong>JS - JavaScript</strong>-এ সেট করুন, Python নয়। সম্পূর্ণ ফাংশন র্যাপার এবং চূড়ান্ত <code>window.renderImage(...)</code> কল বজায় রাখুন।</li>
+          <li><strong>একটি ইমপোর্ট করা JavaScript সেলে কোনো ছবি নেই:</strong> এই ওয়ার্কবুকটি ইমপোর্ট করলে এটি চলে না বা এর কোড আউটপুট পুনরুদ্ধার হয় না। <code>canvas_axes</code> পরিদর্শন করুন এবং পুনরায় চালান।</li>
+          <li><strong>আপনি অপরিবর্তিত TeX বা গণিত ত্রুটি দেখছেন:</strong> <strong>Md</strong> ব্যবহার করুন, শুরু এবং শেষের উভয় <code>$$</code> অন্তর্ভুক্ত করুন এবং উদাহরণের সাথে প্রতিটি ব্যাকস্ল্যাশ ও ব্র্যাস মিলিয়ে দেখুন। শেষটি ছাড়া প্রতিটি ম্যাট্রিক্সের সারি দুটি ব্যাকস্ল্যাশ, <code>\\</code> দিয়ে শেষ হয়।</li>
+          <li><strong>সম্পাদনার ফলে একটি অতিরিক্ত সেল তৈরি হয়েছে:</strong> নতুন-সেল প্যানেল সেল যোগ করে। সেই বিদ্যমান সেলটি পরিবর্তন করতে সংরক্ষিত সেলের <strong>✎ পেন্সিল</strong> ব্যবহার করুন, তারপর এর নিজস্ব <strong>▶ রান</strong> বোতাম ব্যবহার করুন। আপনি ভুলবশত এর সম্পাদক খুলে থাকলে <strong>বাতিল</strong> ব্যবহার করুন।</li>
+        </ul>
+        <p>সংরক্ষিত সেল, পেন্সিল এবং নতুন-সেল প্যানেলের একটি সচিত্র নির্দেশিকার জন্য <a href="../../interface/tutorial/">প্রথম-ওয়ার্কবুক ইন্টারফেস ওয়াকথ্রু</a> দেখুন। সেলের ধরনের একটি সংক্ষিপ্ত স্মারকের জন্য <a href="../../../workbooks/">ওয়ার্কবুক নির্দেশিকা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>-এ ফিরে যান।</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL সহায়তা</span><nav aria-label="ফুটার নেভিগেশন"><a href="../../../workbooks/">ওয়ার্কবুক নির্দেশিকা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a><a href="../../../">সব সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a></nav></footer>
+</body>
+</html>

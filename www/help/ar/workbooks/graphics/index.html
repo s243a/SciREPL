@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="أنشئ مخططات بيانية ثابتة بتنسيق Markdown، وأنشئ صورة باستخدام لوحة رسم JavaScript، واكتب معادلات KaTeX في دفتر عمل SciREPL دون تثبيت حزم.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ar/workbooks/graphics/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/graphics/tutorial.css">
+  <title>الصور والمخططات البيانية والمعادلات · مساعدة SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/graphics/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/graphics/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/graphics/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/graphics/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/graphics/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/graphics/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/graphics/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/graphics/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/graphics/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/graphics/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/graphics/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/graphics/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/graphics/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/graphics/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">الانتقال إلى المحتوى</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+    <nav aria-label="التنقل الأساسي">
+      <a href="../../../workbooks/">مرجع دفاتر العمل<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+      <a href="../../tutorials/">جميع الدروس التعليمية</a>
+      <a href="../../../">كل المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a>
+      <a href="../../../../">افتح تطبيق الويب التقدمي لـ Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="لغة البرنامج التعليمي"><details class="tutorial-language-menu"><summary>لغة البرنامج التعليمي: <bdi>العربية</bdi></summary><nav aria-label="لغة البرنامج التعليمي"><a href="../../../en/workbooks/graphics/" lang="en" hreflang="en">English</a>
+      <a href="./" lang="ar" hreflang="ar" aria-current="page">العربية</a>
+      <a href="../../../bn/workbooks/graphics/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/graphics/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/graphics/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/graphics/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/graphics/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/graphics/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/graphics/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/graphics/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/graphics/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/graphics/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/graphics/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">برنامج تعليمي مترجم آليًا؛ والمراجعة بواسطة متحدث أصلي باللغة قيد الانتظار. لم تتغير التعليمات البرمجية والقيم التقنية. تُظهر لقطات الشاشة الواجهة الأصلية باللغة الإنجليزية؛ يرجى مطابقة أسماء عناصر التحكم المترجمة في هذا النص مع ما يظهر في تطبيقك.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> / <a href="../../../workbooks/">دفاتر العمل<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> / الصور والمخططات البيانية والمعادلات</p>
+    <article>
+      <p class="eyebrow">التعلم بالممارسة</p>
+      <h1>إضافة الصور والمخططات البيانية والمعادلات</h1>
+      <p class="lede">يمكن لدفتر العمل شرح فكرة باستخدام صورة بالإضافة إلى التعليمات البرمجية. جرب ثلاث طرق لعرض إطار الإحداثيات البسيط نفسه: صورة ثابتة في Markdown، وصورة مرسومة بواسطة JavaScript، ومعادلة منسقة باستخدام KaTeX. لا تحتاج إلى Python، أو R، أو تثبيت حزم، أو حساب ذكاء اصطناعي.</p>
+      <ul class="meta">
+        <li class="chip chip-free">سير عمل Free + Pro</li>
+        <li class="chip">أمثلة تم التحقق منها في المتصفح</li>
+        <li class="chip">حوالي 10 دقائق</li>
+      </ul>
+      <p class="screen-note">تم التحقق من الأمثلة ولقطات الشاشة في <strong>نسخة متصفح SciREPL Free</strong> في <time datetime="2026-10-06">6 أكتوبر 2026</time>. تستخدم لقطات الشاشة منفذ عرض متصفح ضيقاً؛ وهي <strong>ليست لقطات شاشة لنظام أندرويد</strong>. تُستخدم عناصر التحكم نفسها في أندرويد، ولكن قد يختلف موضعها. لم يتم اختبار Pro وكل إصدار تم إطلاقه من التطبيق لهذا الدليل.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>اختر الطريقة التي تناسب شرحك</caption>
+          <thead><tr><th scope="col">ما تريده</th><th scope="col">نوع الخلية</th><th scope="col">ما يُنشئ النتيجة</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">مخطط بياني أو صورة ثابتة</th><td>Markdown (<strong>Md</strong>)</td><td>ملف SVG مضمن أو صورة PNG مدرجة، مخزنة في نص الخلية</td></tr>
+            <tr><th scope="row">صورة محسوبة أو مرسومة بواسطة تعليمات برمجية</th><td>تعليمات برمجية → JavaScript (<strong>JS</strong>)</td><td>لوحة رسم، معروضة باستخدام <code>window.renderImage(...)</code></td></tr>
+            <tr><th scope="row">صيغة رياضية أو مصفوفة</th><td>Markdown (<strong>Md</strong>)</td><td>رياضيات بأسلوب TeX بين محددات <code>$$</code>، ويتم تصييرها بواسطة KaTeX</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <nav class="lesson-nav" aria-label="خطوات الدليل التوجيهي للرسومات">
+        <strong>في هذا الدرس</strong>
+        <ol>
+          <li><a href="#open">افتح دفتر عمل المثال الصغير</a></li>
+          <li><a href="#static">احتفظ بصورة ثابتة في Markdown</a></li>
+          <li><a href="#canvas">ارسم صورة باستخدام JavaScript</a></li>
+          <li><a href="#math">اكتب معادلات باستخدام KaTeX</a></li>
+          <li><a href="#save">احفظ عملك وأعد فتحه</a></li>
+        </ol>
+        <p><a href="#troubleshooting">إذا لم تظهر النتيجة</a></p>
+        <p><a href="../../tutorials/">جميع الدروس التعليمية</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">الخطوة 1</p>
+        <h2>افتح دفتر عمل المثال</h2>
+        <p>يحتوي الملف المصاحب على الأمثلة الكاملة، بما في ذلك صورة PNG مدرجة. وهو يجمع كل شيء في دفتر عمل صغير واحد حتى لا تضطر إلى كتابة سلسلة صورة Base64 طويلة.</p>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/graphics/assets/workbook-graphics.srwb" download="workbook-graphics.srwb">قم بتنزيل دفتر عمل مثال الرسومات (.srwb)</a>. احفظ الملف الفعلي مع الاحتفاظ بامتداده <code>.srwb</code>. إذا عرض متصفحك نصاً، فاستخدم إجراء الحفظ/التنزيل الخاص به. ولاحظ المجلد الذي حفظته فيه.</li>
+          <li>افتح SciREPL. في <strong>الترويسة في الجزء العلوي من التطبيق</strong>، ابحث عن <strong>☰ القائمة</strong>، وهو الزر الذي يحتوي على <strong>ثلاثة خطوط أفقية</strong>. انقر أو اضغط عليه.</li>
+          <li>اختر <strong>📂 استيراد ملف (مثل .srwb, .ipynb, .csv, .py, .zip)</strong>. مرّر <em>داخل القائمة</em> عند الحاجة. في أداة اختيار الملفات بجهازك، حدد <code>workbook-graphics.srwb</code> من التنزيلات أو المجلد الذي اخترته.</li>
+          <li>أغلق القائمة إذا بقيت مفتوحة، وحدد علامة التبويب الجديدة <strong><bdi lang="en" dir="ltr">Workbook Graphics</bdi></strong> في أداة اختيار دفاتر العمل. يتم الاحتفاظ بعلامات التبويب الحالية لديك.</li>
+          <li>ابحث عن الخلايا الأربع المسماة <code>static_axes</code> و<code>embedded_png</code> و<code>canvas_axes</code> و<code>math_axes</code>. اقرأها قبل تشغيل التعليمات البرمجية. تظهر المخططات والمعادلات الثابتة من مصدر Markdown الخاص بها؛ بينما لا تظهر صورة JavaScript إلا بعد تشغيل خليتها.</li>
+        </ol>
+        <p class="callout"><strong>الاستيراد ليس تشغيلًا.</strong> إن استيراد <code>.srwb</code> لا ينفذ تعليماته البرمجية، حتى عند تفعيل إعداد التنفيذ التلقائي. يحتاج <code>canvas_axes</code> فقط إلى تنفيذ JavaScript في هذا الدرس. لا توجد خطوة <strong>تشغيل جميع الخلايا</strong>.</p>
+        <p>هل تحتاج إلى مزيد من التفاصيل حول التنزيل أو أداة الاختيار؟ اتبع <a href="../import/">دليل استيراد دفتر العمل يدويًا</a>. تظهر الأسماء المذكورة أعلاه على الخلايا المحفوظة؛ ويوضح <a href="../named-cells/">الدرس التعليمي لمسارات الخلايا المسماة</a> كيفية تعيينها واستخدامها. يمكنك أيضًا إنشاء هذه الأمثلة في دفتر عمل مفتوح لديك بالفعل، باتباع الخطوات أدناه.</p>
+      </section>
+
+      <section id="static">
+        <p class="step-label">الخطوة 2 · الطريقة 1</p>
+        <h2>الاحتفاظ بمخطط ثابت في Markdown</h2>
+        <p>تخيل ورقة في مواجهتك. يشير <strong>r</strong> إلى اليمين على امتداد الورقة، ويشير <strong>u</strong> إلى الأعلى على امتدادها، بينما يشير <strong>n</strong> إلى خارج الورقة باتجاهك. وتمثل دائرة بداخلها نقطة ذلك الاتجاه نحو الخارج، تمامًا مثل رؤية رأس سهم يتجه نحوك.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-static.png" alt="لقطة شاشة لمتصفح ضيق لخلية SciREPL Markdown تعرض مخططًا لورقة مع سهمين لليمين وللأعلى ونقطة داخل دائرة تمثل العمودي باتجاه المشاهد." loading="lazy" decoding="async">
+          <figcaption>يتم تصيير ملف SVG الثابت <em>داخل خلية Markdown</em>. هذه لقطة من المتصفح لـ SciREPL Free، وليست رسمًا تم إنشاؤه عبر تشغيل نواة لغة.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-static.png">عرض لقطة الشاشة الكاملة للمتصفح</a>
+        </figure>
+        <h3>تعديل المخطط المستورد</h3>
+        <ol class="lesson-steps">
+          <li>ابحث عن <code>static_axes</code>. اضغط على <strong>✎ القلم</strong> في رأس تلك الخلية المحفوظة نفسها، بالقرب من <strong>✕</strong>. يؤدي هذا إلى فتح مصدر الخلية الحالية؛ بينما تنشئ لوحة الخلية الجديدة خلية أخرى.</li>
+          <li>أبقِ زر نوع الخلية مضبوطًا على <strong>Md</strong>. في نص SVG، غيّر <code>r: right</code> إلى <code>r: across</code>.</li>
+          <li>اضغط على زر <strong>▶ تشغيل</strong> لتلك الخلية لحفظ Markdown وتصييره مجددًا. بالنسبة لخلية <strong>Md</strong>، يصيّر هذا الزر النص؛ ولا ينفذ JavaScript أو يبدأ بيئة تشغيل لغة.</li>
+        </ol>
+        <h3>أو أنشئ خلية Markdown خاصة بك</h3>
+        <ol class="lesson-steps">
+          <li>ابحث عن <strong>لوحة الخلية الجديدة</strong> حيث تكتب الخلية التالية. وإذا كانت مطوية، فاستخدم زر <strong>⌃ إظهار لوحة الخلية الجديدة</strong> بالقرب من عنوان التطبيق.</li>
+          <li>اضغط على زر نوع الخلية المميز بعلامة <strong>كود</strong> ليتغير إلى <strong>Md</strong>. إن Markdown هو <em>نوع خلية</em>، وليس عنصرًا في القائمة المنسدلة للغات.</li>
+          <li>انسخ ملف SVG الكامل أدناه في حقل النص، <strong>دون إضافة أسوار تعليمات برمجية لـ Markdown</strong> (<code>```</code>). اترك سطرًا فارغًا بين النص المحيط وملف SVG.</li>
+          <li>اضغط على <strong>▶ تشغيل</strong> لإضافة خلية Markdown المصيرة. ينبغي أن ترى الورقة وتسميات الاتجاهات الثلاثة كلها.</li>
+        </ol>
+        <pre><code data-graphic-example="svg">&lt;svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 360 220" width="100%" height="220"
+     role="img" aria-label="Right, up and outward normal on paper"&gt;
+  &lt;title&gt;A paper coordinate frame&lt;/title&gt;
+  &lt;rect x="20" y="18" width="320" height="184"
+        rx="6" fill="#ffffff" stroke="#526170" stroke-width="2" /&gt;
+  &lt;path d="M110 145 H280" fill="none" stroke="#075d69" stroke-width="3" /&gt;
+  &lt;polygon points="280,145 267,138 267,152" fill="#075d69" /&gt;
+  &lt;path d="M110 145 V48" fill="none" stroke="#064d91" stroke-width="3" /&gt;
+  &lt;polygon points="110,48 103,61 117,61" fill="#064d91" /&gt;
+  &lt;circle cx="110" cy="145" r="10" fill="#ffffff" stroke="#14191f" stroke-width="2" /&gt;
+  &lt;circle cx="110" cy="145" r="3" fill="#14191f" /&gt;
+  &lt;text x="204" y="168" fill="#14191f" font-size="16"&gt;r: right&lt;/text&gt;
+  &lt;text x="124" y="62" fill="#14191f" font-size="16"&gt;u: up&lt;/text&gt;
+  &lt;text x="42" y="190" fill="#14191f" font-size="16"&gt;n: toward you&lt;/text&gt;
+&lt;/svg&gt;</code></pre>
+        <p>يعمل SciREPL على تنقية Markdown. يستخدم هذا المثال أشكال SVG عادية ونصوصًا وسمات <code>fill</code>/<code>stroke</code> صريحة. رؤوس الأسهم فيه عبارة عن مضلعات: لا تعتمد على بقاء <code>marker-end="url(...)"</code> أو كتلة <code>&lt;style&gt;</code> أو البرامج النصية أو الرسوم المتحركة بعد عملية التنقية.</p>
+
+        <h3>استخدام صورة PNG مضمنة بدلًا من ذلك</h3>
+        <p>الخيار الثابت الآخر هو صورة PNG مع تخزين بيانات Base64 الخاصة بها مباشرة في مصدر Markdown. يبدو بناء جملة صور Markdown القياسي على هذا النحو:</p>
+        <pre><code>![Paper axes](data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE)</code></pre>
+        <p>يوضح هذا السطر <em>التنسيق</em>، وليس صورة تعمل: استبدل العنصر النائب بصورة PNG المرمزة بالكامل، أو استخدم خلية <code>embedded_png</code> التي تعمل بالفعل. الجزء الذي يلي <code>base64,</code> هو بيانات صورة، وليس اسم ملف. احرص على إبقائه في سطر واحد.</p>
+        <p>للحصول على صورة تناسب الخلية على شاشة صغيرة، تستخدم خلية <code>embedded_png</code> المصاحبة لغة HTML المضمنة المكافئة أدناه، مع <code>width="100%"</code>. ولا تزال مخزنة داخل Markdown، وليس كمخرج برمجي:</p>
+        <pre><code>&lt;img alt="Paper axes" width="100%"
+     src="data:image/png;base64,PASTE_THE_COMPLETE_BASE64_PNG_HERE"&gt;</code></pre>
+        <p class="callout"><strong>اختر مساراً ثابتاً واحداً:</strong> استخدم <em>عنصر SVG مضمن</em> لمخطط صغير قابل للتعديل، أو صورة <code>data:image/png;base64,...</code> لصورة نقطية. إن عنوان URL لبيانات SVG مثل <code>data:image/svg+xml,...</code> ليس مماثلاً لـ SVG المضمن وهو محظور في الإصدار المفحوص. عناوين URL للصور البعيدة محظورة هناك أيضاً. لا يحتاج هذان المثالان المستقلان بذاتهما إلى تنزيل صور عند عرضهما.</p>
+        <p>يوجد كلا المثالين الثابتين في مصدر Markdown. ويمكن عرضهما بعد استيراد دفتر العمل دون تشغيل التعليمات البرمجية.</p>
+      </section>
+
+      <section id="canvas">
+        <p class="step-label">الخطوة 3 · الطريقة 2</p>
+        <h2>رسم صورة باستخدام JavaScript</h2>
+        <p>تبقى الصورة الثابتة كما هي حتى تقوم بتعديل مصدرها. للحصول على صورة يتم حسابها أو رسمها بواسطة برنامج، استخدم خلية <strong>كود</strong> وحدد <strong>JS - JavaScript</strong>. يرسم هذا المثال على لوحة رسم، ويحولها إلى PNG، ثم يرسل تلك الصورة إلى مخرجات الخلية.</p>
+        <ol class="lesson-steps">
+          <li>في دفتر العمل المستورد، اضغط على <strong>✎ القلم</strong> في <code>canvas_axes</code>. تأكد من أن نوع الخلية هو <strong>كود</strong> وأن لغتها هي <strong>JS - JavaScript</strong> (يمكن للمحدد المصغر أن يعرض فقط <strong>JS</strong>).</li>
+          <li>اقرأ التعليمات البرمجية أدناه، والتي تمثل البرنامج الكامل في تلك الخلية. ولا يحتاج إلى أي خلية أخرى أو ملف أو حزمة أو طلب شبكة.</li>
+          <li>اضغط في <em>تلك الخلية على</em> <strong>▶ تشغيل</strong>. يجب أن تظهر صورة أسفل مصدر JavaScript.</li>
+        </ol>
+        <p>لإنشاء خلية جديدة بدلاً من ذلك، انتقل إلى لوحة الخلية الجديدة، وقم بتغيير <strong>Md</strong> مرة أخرى إلى <strong>كود</strong> إذا لزم الأمر، واختر <strong>JS - JavaScript</strong> من القائمة المنسدلة للغات. الصق التعليمات البرمجية، ثم اضغط على <strong>▶ تشغيل</strong>. إذا كانت JavaScript مخفية، فابحث عن <strong>☰ القائمة ← اللغات</strong> وقم بتمكينها.</p>
+        <pre><code data-graphic-example="javascript">(() =&gt; {
+  const canvas = document.createElement('canvas');
+  canvas.width = 360;
+  canvas.height = 220;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 360, 220);
+  ctx.strokeStyle = '#526170';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(20, 18, 320, 184);
+
+  function arrow(x1, y1, x2, y2, color) {
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 14 * Math.cos(angle - 0.5),
+               y2 - 14 * Math.sin(angle - 0.5));
+    ctx.lineTo(x2 - 14 * Math.cos(angle + 0.5),
+               y2 - 14 * Math.sin(angle + 0.5));
+    ctx.closePath();
+    ctx.fill();
+  }
+  arrow(110, 145, 280, 145, '#075d69'); // right
+  arrow(110, 145, 110, 48, '#064d91');  // up
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#14191f';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(110, 145, 10, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#14191f';
+  ctx.beginPath();
+  ctx.arc(110, 145, 3, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.font = '16px sans-serif';
+  ctx.fillText('r: right', 204, 168);
+  ctx.fillText('u: up', 124, 62);
+  ctx.fillText('n: toward you', 42, 190);
+  window.renderImage(canvas.toDataURL('image/png'));
+})();</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-canvas.png" alt="لقطة شاشة لمتصفح ضيق لـ SciREPL تعرض إطار الإحداثيات الورقية كمخرج PNG أسفل خلية لوحة رسم JavaScript." loading="lazy" decoding="async">
+          <figcaption>هذا المخطط المشابه في المظهر هو <strong>مخرج PNG تم إنشاؤه</strong>، وليس Markdown. تنشئه خلية JavaScript عندما تختار <strong>▶ تشغيل</strong>. لقطة متصفح لـ SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-canvas.png">عرض لقطة الشاشة الكاملة للمتصفح</a>
+        </figure>
+        <p>جرب تغيير <code>r: right</code> في <code>ctx.fillText(...)</code>، ثم شغّل الخلية مرة أخرى. يحافظ غلاف الدالة <code>(() =&gt; { ... })();</code> على متغيرات هذا المثال محلية، بحيث يمكنك إعادة تشغيله دون إعادة الإعلان عن متغيرات <code>const</code> ذات المستوى الأعلى.</p>
+        <p class="callout"><strong>استدعاء العرض مهم.</strong> احتفظ بـ <code>window.renderImage(canvas.toDataURL('image/png'))</code> في النهاية. إن إرجاع سلسلة نصية عادية مثل <code>'&lt;svg&gt;...&lt;/svg&gt;'</code> من JavaScript يعرض نصاً؛ ولا يحول تلك السلسلة إلى مخطط مضمن. ولا تحتاج إلى إدراج لوحة الرسم في صفحة التطبيق.</p>
+      </section>
+
+      <section id="math">
+        <p class="step-label">الخطوة 4 · الطريقة 3</p>
+        <h2>شرح الصورة بالمعادلات</h2>
+        <p>استخدم خلية <strong>Markdown (Md)</strong> للرياضيات بنمط TeX. تشكل اتجاهات المخططات إطاراً أيمن: <strong>right × up = outward normal</strong>. في المصفوفة أدناه، الصف الأول هو <strong>r</strong>، والثاني هو <strong>u</strong>، والثالث هو <strong>n</strong>؛ الحروف السفلية هي مركباتها في نظام إحداثيات x، y، z محدد.</p>
+        <ol class="lesson-steps">
+          <li>اضغط على <strong>✎ القلم</strong> في <code>math_axes</code>، أو أنشئ خلية جديدة باستخدام <strong>كود → Md</strong> في لوحة الخلية الجديدة.</li>
+          <li>استخدم النص الكامل أدناه. تنتمي محددات <code>$$</code> إلى مصدر Markdown؛ ولا تضعها داخل سياج تعليمات برمجية.</li>
+          <li>اضغط على <strong>▶ تشغيل</strong> لحفظ Markdown وتصييره. من المفترض أن ترى معادلة الجداء الاتجاهي ومصفوفة من ثلاثة صفوف، لا أوامر الخط المائل العكسي النصية المجردة. لا تعمل أي نواة لغة لهذه الخلية.</li>
+        </ol>
+        <pre><code data-graphic-example="math">Right, up and outward normal form a right-handed frame.
+
+$$\mathbf{r} \times \mathbf{u} = \mathbf{n}$$
+
+Rows of the frame matrix: right, up, then outward normal.
+
+$$
+M = \begin{pmatrix}
+r_x &amp; r_y &amp; r_z \\
+u_x &amp; u_y &amp; u_z \\
+n_x &amp; n_y &amp; n_z
+\end{pmatrix}
+$$</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/graphics/assets/browser-graphics-equations.png" alt="لقطة شاشة لمتصفح ضيق لـ SciREPL أثناء تصيير اليمين جداء اتجاهي في الأعلى يساوي الناظم ومصفوفة إطار إحداثيات من ثلاثة صفوف باستخدام KaTeX في خلية Markdown." loading="lazy" decoding="async">
+          <figcaption>يقوم KaTeX بتنسيق المعادلات الرياضية مباشرة من مصدر <strong>Markdown</strong>. هذه معادلات، وليست رسماً تم إنشاؤه بواسطة TeX. لقطة متصفح لـ SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/graphics/assets/browser-graphics-equations.png">عرض لقطة الشاشة الكاملة للمتصفح</a>
+        </figure>
+        <p class="callout"><strong>KaTeX ليس مترجم TeX كاملاً.</strong> فهو يصيّر الرموز الرياضية المدعومة، لكنه لا يترجم مخططات TikZ أو مستند LaTeX بأكمله. ورغم أن KaTeX يسرد <code>\includegraphics</code>، فإنه يتطلب خيار موثوقية لا يفعّله SciREPL في أداة التصيير التي تم فحصها؛ وهو ليس مساراً لإدراج الصور هنا. استخدم SVG/PNG بتنسيق Markdown أو لوحة رسم JavaScript للصور.</p>
+        <p>للاطلاع على الرموز والأوامر الرياضية الأخرى، راجع جدول دعم <a href="https://katex.org/docs/support_table.html">KaTeX</a>؛ قد تصف الوثائق ميزات أحدث من الإصدار المضمّن في SciREPL. للحصول على دفتر عمل يستخدم هذه الإرشادات لشرح حركات المكعب، راجع <a href="../tutorial/#open">الدليل الإرشادي لمجموعات ماركوف</a>.</p>
+      </section>
+
+      <section id="save">
+        <p class="step-label">الخطوة 5</p>
+        <h2>احفظ نسخة، ثم تعرّف على ما يجب إعادة تشغيله</h2>
+        <ol class="lesson-steps">
+          <li>افتح <strong>☰ القائمة ← تصدير المصنفات والحزم</strong>.</li>
+          <li>اختر <strong>مصنف (.srwb)</strong> و<strong>علامة التبويب الحالية فقط</strong> لدفتر العمل هذا، ثم اضغط على <strong>تصدير</strong>. احفظ الملف في مكان يمكنك التحكم به.</li>
+          <li>لإعادة فتح تلك النسخة، استخدم <strong>القائمة ← استيراد ملف</strong>. يضيف هذا علامة تبويب دفتر عمل أخرى؛ ولا يستبدل علامة التبويب الحالية لديك.</li>
+          <li>تحقق من ملف SVG الثابت، وصورة PNG المدمجة، والمعادلات. إنها تأتي من مصدر Markdown المحفوظ ولا تحتاج إلى تنفيذ تعليمات برمجية. افحص <code>canvas_axes</code> وشغّل خلية JavaScript تلك مرة أخرى لإعادة إنشاء صورتها.</li>
+        </ol>
+        <p class="callout"><strong>المخرجات المُنشأة ليست هي نفسها النص المصدري.</strong> في إصدار متصفح Free الذي تم التحقق منه، يمكن لتصدير <code>.srwb</code> تخزين مخرجات صورة JavaScript، ولكن استخدام <strong>القائمة ← استيراد ملف</strong> يدوياً لا يستعيد مخرجات التعليمات البرمجية تلك. يظل مصدر JavaScript موجوداً، لذا أعد تشغيله. يُعد ملف SVG المضمن، وصورة PNG المدرجة، والمعادلات مصدراً لـ Markdown وتُعرض عند الاستيراد. لا تستخدم مخرجات كانت مرئية سابقاً كدليل على أن التعليمات البرمجية قد تم تشغيلها للتو.</p>
+        <p>تغطي عمليات التحقق هذه أمثلة دفتر العمل المذكورة أعلاه، وليس دقة الصور في كل تنسيق تصدير. لا تفترض أن عمليات تصدير المستندات إلى PDF وDOCX وMarkdown والتنسيقات الأخرى تحافظ على كل صورة بالطريقة نفسها؛ افحص مستندك المُصدَّر. راجع <a href="../../../files-export/">الملفات والتصدير<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> للاطلاع على التنسيقات المتاحة.</p>
+        <p>يؤدي تصدير دفتر العمل المعدل إلى إنشاء نسخة احتياطية من تغييراتك؛ لا يتم تحديث المثال الأصلي الذي تم تنزيله عند تعديل خلية. لا يُعد التخزين المحلي للتطبيق نسخة احتياطية، ولا تشارك جلسات أندرويد والمتصفح العمل تلقائياً.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">إذا بدا شيء ما غير صحيح</p>
+        <h2>تحقق من نوع الخلية والمصدر</h2>
+        <ul>
+          <li><strong>إذا رأيت تعليمات SVG البرمجية بدلاً من المخطط البياني:</strong> تحقق من أن نوع الخلية هو <strong>Md</strong>، وأزل أي أسوار تعليمات برمجية محيطة، وصيّر الخلية مرة أخرى. استخدم مثال <code>&lt;svg&gt;...&lt;/svg&gt;</code> المضمن الكامل، وليس عنوان URL لبيانات SVG.</li>
+          <li><strong>إذا كانت صورة PNG مفقودة:</strong> استخدم خلية <code>embedded_png</code> في الملف المصاحب، أو تحقق من أنك قمت بلصق سلسلة <code>data:image/png;base64,...</code> بالكامل دون مسافات أو فواصل أسطر. اسم الملف المحلي ليس بيانات صورة مضمنة.</li>
+          <li><strong>إذا لم يتم تشغيل تعليمات لوحة الرسم البرمجية:</strong> اضبط نوع خليتها على <strong>كود</strong> ولغتها على <strong>JS - JavaScript</strong>، وليس Python. احتفظ بغلاف الدالة بالكامل واستدعاء <code>window.renderImage(...)</code> النهائي.</li>
+          <li><strong>خلية JavaScript مستوردة لا تحتوي على صورة:</strong> استيراد دفتر العمل هذا لا يقوم بتشغيله أو استعادة مخرجات التعليمات البرمجية الخاصة به. افحص <code>canvas_axes</code> وأعد تشغيله.</li>
+          <li><strong>إذا رأيت نص TeX أولياً أو خطأ رياضياً:</strong> استخدم <strong>Md</strong>، مع تضمين كلٍّ من فتح وإغلاق <code>$$</code>، وتحقق من كل خط مائل عكسي وقوس مقارنة بالمثال. ينتهي كل صف مصفوفة باستثناء الأخير بخطين مائلين عكسيين، <code>\\</code>.</li>
+          <li><strong>أدى التعديل إلى إنشاء خلية إضافية:</strong> تضيف لوحة الخلية الجديدة خلايا. استخدم <strong>✎ القلم</strong> للخلية المحفوظة لتغيير تلك الخلية الحالية، ثم زر <strong>▶ تشغيل</strong> الخاص بها. استخدم <strong>إلغاء</strong> إذا فتحت محررها بالخطأ.</li>
+        </ul>
+        <p>للحصول على جولة مصورة حول الخلايا المحفوظة والقلم ولوحة الخلية الجديدة، راجع <a href="../../interface/tutorial/">الدليل الإرشادي لواجهة دفتر العمل الأول</a>. عد إلى <a href="../../../workbooks/">مرجع دفاتر العمل<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a> للتذكير الموجز بأنواع الخلايا.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>مساعدة SciREPL</span><nav aria-label="التنقل في تذييل الصفحة"><a href="../../../workbooks/">مرجع دفاتر العمل<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a><a href="../../../">كل المساعدة<span class="english-reference"> (صفحة المرجع الإنجليزية)</span></a></nav></footer>
+</body>
+</html>

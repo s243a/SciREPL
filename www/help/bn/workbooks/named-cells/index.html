@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="bn" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SciREPL সেলগুলোর নাম দিন, /nb ভার্চুয়াল ফাইলসিস্টেমের মাধ্যমে সেগুলির সোর্স ও আউটপুট পড়ুন, এবং JavaScript, Bash ও Python-এর মধ্যে ডেটা বা জেনারেট করা কোড পাস করুন।">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/bn/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/named-cells/tutorial.css">
+  <title>নামযুক্ত সেল এবং ক্রস-ল্যাঙ্গুয়েজ পাথ · SciREPL সহায়তা</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/named-cells/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/named-cells/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/named-cells/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/named-cells/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/named-cells/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/named-cells/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/named-cells/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/named-cells/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/named-cells/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">সরাসরি মূল বিষয়বস্তুতে যান</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+    <nav aria-label="প্রধান নেভিগেশন"><a href="../../../workbooks/">ওয়ার্কবুক রেফারেন্স<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a><a href="../../tutorials/">সমস্ত টিউটোরিয়াল</a><a href="../../../">সমস্ত সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a><a href="../../../../">Free PWA খুলুন</a></nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="টিউটোরিয়ালের ভাষা"><details class="tutorial-language-menu"><summary>টিউটোরিয়ালের ভাষা: <bdi>বাংলা</bdi></summary><nav aria-label="টিউটোরিয়ালের ভাষা"><a href="../../../en/workbooks/named-cells/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/named-cells/" lang="ar" hreflang="ar">العربية</a>
+      <a href="./" lang="bn" hreflang="bn" aria-current="page">বাংলা</a>
+      <a href="../../../de/workbooks/named-cells/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/named-cells/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/named-cells/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/named-cells/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/named-cells/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/named-cells/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/named-cells/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/named-cells/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/named-cells/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/named-cells/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">মেশিন-অনূদিত টিউটোরিয়াল; স্থানীয় ভাষায় পর্যালোচনা প্রক্রিয়াধীন। কোড এবং প্রযুক্তিগত মানসমূহ অপরিবর্তিত। স্ক্রিনশটগুলোতে মূল ইংরেজি ইন্টারফেস দেখানো হয়েছে; আপনার অ্যাপের সাথে এই টেক্সটের অনূদিত কন্ট্রোল নামগুলো মিলিয়ে নিন।</p></aside>
+    <p class="breadcrumbs"><a href="../../../">সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / <a href="../../../workbooks/">ওয়ার্কবুক<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / নামযুক্ত সেল এবং পাথ</p>
+    <article>
+      <p class="eyebrow">কাজ করতে করতে শিখুন</p>
+      <h1>সেলের নাম দিন এবং প্রোগ্রামগুলো সংযুক্ত করুন</h1>
+      <p class="lede">শুধুমাত্র অবস্থানের মাধ্যমে পরিচিত হওয়ার পরিবর্তে একটি সেলের <code>numbers</code>-এর মতো একটি কার্যকরী নাম থাকতে পারে। অন্য সেলগুলো <code>/nb/numbers/.output</code>-এর মাধ্যমে এর সর্বশেষ টেক্সট আউটপুট পড়তে পারে, অথবা <code>/shared/</code>-এ একটি সাধারণ ফাইলের মাধ্যমে ডেটা আদান-প্রদান করতে পারে। JavaScript এবং Bash দিয়ে উভয় পথই চেষ্টা করে দেখুন, তারপর অন্য একটি সেলে একটি ছোট Bash প্রোগ্রাম তৈরি করুন—জেনারেট করা কোডটি স্বয়ংক্রিয়ভাবে না চালিয়ে।</p>
+      <ul class="meta"><li class="chip chip-free">Free + Pro কর্মপ্রবাহ</li><li class="chip">ব্রাউজার-যাচাইকৃত উদাহরণ</li><li class="chip">প্রায় 15 মিনিট</li></ul>
+      <p class="screen-note">ওয়াকথ্রু এবং স্ক্রিনশটগুলো <strong>SciREPL Free ব্রাউজার বিল্ডে</strong> <time datetime="2026-10-06">6 অক্টোবর 2026</time>-এ পরীক্ষা করা হয়েছে। এগুলো সম্পূর্ণ সংকীর্ণ-ব্রাউজার ক্যাপচার, <strong>অ্যান্ড্রয়েড স্ক্রিনশট নয়</strong>। এই গাইডের জন্য Pro এবং প্রতিটি প্রকাশিত সংস্করণ যাচাই করা হয়নি। মূল অনুশীলনে বান্ডেল করা JavaScript এবং Bash ব্যবহার করা হয়েছে: কোনো প্যাকেজ, মডেল কল বা রানটাইম ডাউনলোডের প্রয়োজন নেই। Python একটি ঐচ্ছিক শেষ ধাপ।</p>
+      <p class="callout"><strong>এখানে “পাথ” বলতে যা বোঝায়:</strong> <code>/nb/</code> হলো <em>বর্তমানে নির্বাচিত ওয়ার্কবুকের সেলগুলোর</em> একটি ভার্চুয়াল ভিউ, যা প্রোগ্রামগুলোর কাছে উপলব্ধ। এটি অ্যান্ড্রয়েডের ডাউনলোড ফোল্ডারের কোনো ফোল্ডার নয়, এবং এটি কোনো পৃথক “পাথ ভিউ” স্ক্রিনও নয়। পরীক্ষিত Free সংস্করণের <strong>ফাইল ও স্টোরেজ</strong> স্ক্রিন <code>/nb/</code> ব্রাউজ করে না; পরবর্তীতে আমরা ইচ্ছে করেই কিছু ডেটা একটি শেয়ার করা ফাইলে কপি করব যা স্ক্রিনটি দেখাতে পারে।</p>
+      <nav class="lesson-nav" aria-label="নামযুক্ত সেলগুলোর ওয়াকথ্রু ধাপ">
+        <strong>এই পাঠে</strong>
+        <ol>
+          <li><a href="#open">ছোট উদাহরণ ওয়ার্কবুকটি ইমপোর্ট করুন</a></li>
+          <li><a href="#name">একটি সেলের নাম খুঁজুন এবং পরিবর্তন করুন</a></li>
+          <li><a href="#produce">ডেটা উৎপাদনকারী সেলটি চালান</a></li>
+          <li><a href="#paths">সেলগুলোর পাথের মাধ্যমে সেগুলি পড়ুন</a></li>
+          <li><a href="#shared-file">একটি শেয়ার করা JSON ফাইলের মাধ্যমে ডেটা আদান-প্রদান করুন</a></li>
+          <li><a href="#generate">অন্য একটি সেলের সোর্স জেনারেট করুন, তারপর নিজেই সেটি চালান</a></li>
+          <li><a href="#update">ডেটা পরিবর্তন করুন এবং ফলাফল রিফ্রেশ করুন</a></li>
+        </ol>
+        <p><a href="#python">ঐচ্ছিক Python রিডার</a> · <a href="#more">অন্যান্য ওয়ার্কবুকের উদাহরণ</a> · <a href="#troubleshooting">যদি কিছু ভুল হয়</a></p>
+        <p><a href="../../tutorials/">সমস্ত টিউটোরিয়াল</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">ধাপ 1</p>
+        <h2>উদাহরণটি না চালিয়ে ইমপোর্ট করুন</h2>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/named-cells/assets/named-cell-interop.srwb" download="named-cell-interop.srwb">নামযুক্ত-সেলের উদাহরণ ওয়ার্কবুক (.srwb) ডাউনলোড করুন</a>। ফাইলটি সংরক্ষণ করুন এবং এর <code>.srwb</code> এক্সটেনশন বজায় রাখুন। ব্রাউজার যদি টেক্সট দেখায়, তবে এর সেভ/ডাউনলোড অ্যাকশন ব্যবহার করুন।</li>
+          <li>SciREPL-এর উপরের হেডারে <strong>☰ Menu</strong> খুঁজুন—<strong>তিনটি অনুভূমিক রেখা</strong> বিশিষ্ট বোতামটি। এটি খুলুন এবং <strong>📂 ফাইল ইমপোর্ট করুন (যেমন: .srwb, .ipynb, .csv, .py, .zip)</strong> বেছে নিন। প্রয়োজনে মেনুর ভেতরে স্ক্রোল করুন।</li>
+          <li>আপনার ডিভাইসের ফাইল পিকার থেকে <code>named-cell-interop.srwb</code> নির্বাচন করুন। মেনুটি খোলা থাকলে তা থেকে বের হন, তারপর ওয়ার্কবুক সিলেক্টরে নতুন <strong>Named Cell Interop</strong> ট্যাবটি নির্বাচন করুন। সিলেক্টরের <strong>▾</strong> তীরটি অ্যাপের শিরোনামের কাছাকাছি রয়েছে। আপনার বিদ্যমান ওয়ার্কবুকগুলো বহাল থাকবে।</li>
+          <li>ভূমিকাটি পড়ুন, তারপর <code>numbers</code>, <code>inspect_cells</code>, <code>write_shared</code>, <code>read_shared</code>, <code>generate_report</code>, <code>bash_report</code>, এবং <code>python_total</code> নামের সাতটি কোড সেল খুঁজুন। এগুলোর নাম আগেই দেওয়া হয়েছে যাতে আপনি অনুশীলনটি অনুসরণ করতে পারেন।</li>
+        </ol>
+        <p class="callout"><strong>ইমপোর্ট করা মানে চালানো নয়।</strong> সাধারণ <code>.srwb</code> ইমপোর্ট কোড এক্সিকিউট করে না, এমনকি অটো-এক্সিকিউট চালু থাকলেও না। এই পাঠের জন্য Run All Cells বেছে নেবেন না: ক্রমটি গুরুত্বপূর্ণ, এবং শেষ Python সেলটি ঐচ্ছিক। অচেনা কোড চালানোর আগে তা পরীক্ষা করে নিন।</p>
+        <p>ডাউনলোড এবং পিকার ধাপগুলো আরো বিস্তারিতভাবে প্রয়োজন? <a href="../import/">ম্যানুয়াল ওয়ার্কবুক ইমপোর্ট ওয়াকথ্রু</a> ব্যবহার করুন। এই পাঠটি অনুসরণ করতে <strong>Named Cell Interop</strong> নির্বাচিত রাখুন: <code>/nb/</code> সক্রিয় ওয়ার্কবুককে নির্দেশ করে, প্রতিটি খোলা ট্যাবকে নয়।</p>
+      </section>
+
+      <section id="name">
+        <p class="step-label">ধাপ 2</p>
+        <h2>একটি সেলের নাম খুঁজুন এবং পরিবর্তন করুন</h2>
+        <p>সংরক্ষিত কোড সেলের নিজস্ব হেডারে একটি <strong>In[…] প্রম্পট লেবেল</strong> থাকে, এবং নামযুক্ত সেলে এর নামও দেখানো হয়। নামকরণের জন্য এটিই ব্যবহারযোগ্য লেবেল—<strong>✎ পেন্সিল</strong> নয়, যা সেলের সোর্স সম্পাদনা করে। প্রদর্শিত নম্বরটি সংরক্ষিত কার্ডটিকে শনাক্ত করে; পুনর্বিন্যাসের পর, এটি একটি <code>/nb/In[N]/...</code> পাথে সেলের বর্তমান অবস্থানের সাথে না-ও মিলতে পারে। রেফারেন্সের জন্য নাম ব্যবহারকে অগ্রাধিকার দিন।</p>
+        <figure class="phone-figure">
+          <div class="annotated-shot" role="img" aria-label="ব্রাউজার স্ক্রিনশট যাতে নম্বর সেলের In লেবেল এবং পেন্সিল কন্ট্রোল হলুদ রঙে চিহ্নিত রয়েছে; এর নিচে এর সোর্স এবং JSON আউটপুট দেখা যাচ্ছে।">
+            <img src="../../../workbooks/named-cells/assets/browser-named-cell.png" alt="" loading="lazy" decoding="async">
+            <img class="shot-annotation" src="../../../workbooks/named-cells/assets/browser-named-cell-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          </div>
+          <figcaption>হলুদ রঙের রূপরেখা দুটি সংরক্ষিত সেলের <strong>In[…] লেবেল</strong> (যা ডাবল-ক্লিক বা লং প্রেসে নামকরণের ডায়ালগ খোলে) এবং এর <strong>✎ পেন্সিল</strong> (যা সোর্স এডিটর খোলে) শনাক্ত করে। ডানদিকে <code>numbers</code> নামটি দেখা যাচ্ছে। এই ব্রাউজার ক্যাপচারে ধাপ 3-এর পরের আউটপুট দেখানো হয়েছে; ডেস্কটপে এর কন্ট্রোলগুলো দেখতে কার্ডের ওপর হভার করুন।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-named-cell.png">সম্পূর্ণ ব্রাউজার স্ক্রিনশট দেখুন</a>
+        </figure>
+        <ol class="lesson-steps">
+          <li><code>numbers</code> খুঁজুন। ডেস্কটপে <strong>এর In[…] লেবেলে ডাবল-ক্লিক করুন</strong>। স্পর্শ ডিভাইসে <strong>সেই লেবেলটি চেপে ধরে রাখুন</strong>। পরীক্ষিত বিল্ডে একক ক্লিক নামকরণের জেসচার নয়।</li>
+          <li>ডায়ালগে <code>numbers</code>-এর পরিবর্তে <code>measurements</code> লিখুন, তারপর <strong>ঠিক আছে</strong> দিয়ে নিশ্চিত করুন। সেল হেডারের নামটি পরিবর্তিত হবে; সোর্স এবং ভাষা অপরিবর্তিত থাকবে।</li>
+          <li>একই ডায়ালগ আবার খুলুন এবং নাম পরিবর্তন করে <strong>পুনরায় <code>numbers</code></strong> করুন, তারপর <strong>ঠিক আছে</strong> বেছে নিন। পরবর্তী সেলগুলোতে ওই নামটি ব্যবহৃত হয়েছে, তাই এগিয়ে যাওয়ার আগে এটি পুনরুদ্ধার করুন।</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-name-dialog.png" alt="SciREPL Free-এর সেল-নেম ডায়ালগের সংকীর্ণ-ব্রাউজার স্ক্রিনশট, যেখানে পরিমাপ প্রবেশ করানো হয়েছে এবং নিশ্চিতকরণ ও বাতিলের কন্ট্রোল রয়েছে।" loading="lazy" decoding="async">
+          <figcaption>নামটি তার নিজস্ব ডায়ালগে সম্পাদিত হয়। একটি সেলের নাম পরিবর্তন করলে অন্যান্য সেলের রেফারেন্সগুলো পুনরায় লেখা হয় না: আপনি যদি নতুন নামটি বহাল রাখতেন তবে <code>/nb/numbers/.output</code>-ও পরিবর্তন করতে হতো।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-name-dialog.png">সম্পূর্ণ ব্রাউজার নেমিং-ডায়ালগ স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p><code>cube_moves</code> বা <code>check_moves</code>-এর মতো স্বতন্ত্র ও সহজ নাম বেছে নিন। ওয়ার্কবুকের ভেতরে নামগুলো অনন্য হতে হবে; সেগুলোতে <code>/</code> থাকতে পারবে না, <code>.</code> দিয়ে শুরু হতে পারবে না, কিংবা <code>In[2]</code>-এর মতো সংরক্ষিত অবস্থানমূলক লেবেল হতে পারবে না। নাম খালি করলে তা মুছে যায়।</p>
+        <p>এই কারণেই একটি টিউটোরিয়ালে বলা হতে পারে <strong>“<code>cube_moves</code> চালান, তারপর <code>check_moves</code>”</strong>: এগুলো ওয়ার্কবুকে খুঁজে পাওয়ার জন্য সেলের নাম, আলাদাভাবে ডাউনলোড করার মতো কোনো ফাইল নয়। সেল প্রবেশ করানো বা সরানোর সময় অবস্থানের চেয়ে নাম অনেক উন্নত রেফারেন্স।</p>
+      </section>
+
+      <section id="produce">
+        <p class="step-label">ধাপ 3</p>
+        <h2>যে সেলটি ডেটা উৎপাদন করে সেটি চালান</h2>
+        <p><code>numbers</code> খুঁজুন। এর নিজস্ব <strong>✎ পেন্সিলে</strong> ট্যাপ করুন, সোর্স পরীক্ষা করুন এবং নিশ্চিত করুন যে সেলটি <strong>কোড → JS - JavaScript</strong>। তারপর <em>সংরক্ষিত সেলের</em> <strong>▶ রান</strong> বোতাম ব্যবহার করুন—নতুন-সেল প্যানেল নয়, যা অন্য একটি সেল যুক্ত করে।</p>
+        <p class="callout"><strong>Pro শর্টকাট:</strong> আপনি <strong>সেলের সোর্স টেক্সটে ডাবল-ট্যাপ করে</strong> Pro-এ একটি সংরক্ষিত সেলের এডিটর খুলতে পারেন। <strong>✎ পেন্সিল</strong> উভয় সংস্করণেই কাজ করে। এই সম্পাদনা শর্টকাটটি এর নাম পরিবর্তন করার জন্য <strong>In[…] লেবেলে</strong> ডাবল-ক্লিক বা লং-প্রেস করার থেকে আলাদা।</p>
+        <pre><code data-cell-example="numbers">console.log(JSON.stringify({values: [3, 5, 8]}));</code></pre>
+        <p>এই এক-লাইনের আউটপুট প্রত্যাশা করুন:</p>
+        <pre><code>{"values":[3,5,8]}</code></pre>
+        <p>ফলাফলটি হলো <strong>JSON টেক্সট</strong>। এর কাঠামোর কারণে কোনো সাধারণ গদ্য বার্তার চেয়ে অন্য ভাষার জন্য এটি পড়া সহজ হয়। আমরা কোনো লাইভ JavaScript অবজেক্ট পাস করছি না বা JavaScript ভেরিয়েবলগুলো Bash বা Python-এর সাথে শেয়ার করছি না।</p>
+      </section>
+
+      <section id="paths">
+        <p class="step-label">ধাপ 4</p>
+        <h2>ভার্চুয়াল ফাইলসিস্টেমের মাধ্যমে একটি সেল পড়ুন</h2>
+        <p><code>numbers</code>-এর ভার্চুয়াল ডিরেক্টরিতে ডট-উপসর্গযুক্ত প্রোপার্টি রয়েছে। একটি পাথ ওয়ার্কবুক মাউন্ট, সেল আইডেন্টিফায়ার এবং আপনি যে প্রোপার্টি চান তা একত্রিত করে:</p>
+        <pre class="path-tree" aria-label="নম্বর সেলের জন্য ভার্চুয়াল পাথ"><code>/nb/                         current workbook's cells
+└── numbers/                 this named cell
+    ├── .code                source text
+    ├── .output              latest text output
+    ├── .language            javascript
+    ├── .type                code
+    └── .name                numbers</code></pre>
+        <div class="table-wrap">
+          <table>
+            <caption>ওয়ার্কবুক পাথ ইন্টারফেস দ্বারা ব্যবহৃত সেল প্রোপার্টি</caption>
+            <thead><tr><th scope="col">প্রোপার্টি</th><th scope="col">এটি পড়লে আপনি যা পাবেন</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>.code</code></th><td>বর্তমান সোর্স, সেই সোর্সটি চালানো হয়েছে কি না তা নির্বিশেষে।</td></tr>
+              <tr><th scope="row"><code>.output</code></th><td>সর্বশেষ টেক্সট আউটপুট। এটি রিড-অনলি: এক্সিকিউশন এটি সরবরাহ করে। এটি খালি বা পুরোনো হতে পারে।</td></tr>
+              <tr><th scope="row"><code>.language</code></th><td>সংরক্ষিত ভাষা আইডেন্টিফায়ার, যেমন <code>javascript</code> বা <code>bash</code>।</td></tr>
+              <tr><th scope="row"><code>.type</code></th><td>সেলের ধরন, যেমন <code>code</code> বা <code>markdown</code>।</td></tr>
+              <tr><th scope="row"><code>.name</code></th><td>নির্ধারিত নাম, অথবা সেলটির নাম না থাকলে খালি টেক্সট।</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>এখন <strong>✎ পেন্সিলটি</strong> <code>inspect_cells</code>-এ খুলুন, <strong>কোড → Bash</strong> পরীক্ষা করুন, এবং এটি চালান। এটি উৎপাদক সেলের সোর্স, এর JSON আউটপুট এবং ভাষা পড়ে, তারপর বর্তমান ওয়ার্কবুকের সেল আইডেন্টিফায়ারগুলোর তালিকা তৈরি করে। এটি কোনো সেল বা ফাইল লেখে না বা পরিবর্তন করে না।</p>
+        <pre><code data-cell-example="inspect_cells">printf 'Source:\n'
+cat /nb/numbers/.code
+printf '\nOutput:\n'
+cat /nb/numbers/.output
+printf '\nLanguage:\n'
+cat /nb/numbers/.language
+printf '\nCell names and positions:\n'
+ls /nb/</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-cell-paths.png" alt="inspect_cells Bash সেলের সংকীর্ণ-ব্রাউজার স্ক্রিনশট যাতে নম্বর সেলের সোর্স, JSON আউটপুট, ভাষা এবং ভার্চুয়াল সেলের তালিকা দেখা যাচ্ছে।" loading="lazy" decoding="async">
+          <figcaption>Bash সাধারণ চেহারার <code>cat</code> পাথ দিয়ে সেলের প্রোপার্টিগুলো পড়ে। এই পাথগুলো ওয়ার্কবুক ডেটাকে সম্বোধন করে; এতে কোনো অ্যান্ড্রয়েড শেল বা ফোনের ফিজিক্যাল ফোল্ডার জড়িত নয়। SciREPL Free-এর ব্রাউজার ক্যাপচার।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-cell-paths.png">সম্পূর্ণ ব্রাউজার সেল-পাথ স্ক্রিনশট দেখুন</a>
+        </figure>
+        <h3>নাম, অবস্থান এবং আপেক্ষিক রেফারেন্স</h3>
+        <p>একই সেলকে তার <strong>বর্তমান 1-ভিত্তিক অবস্থানের</strong> মাধ্যমেও সম্বোধন করা যেতে পারে, উদাহরণস্বরূপ <code>/nb/In[2]/.output</code> বলতে বর্তমান ক্রমের দ্বিতীয় সেলটিকে বোঝায়। Markdown সেলগুলোও গণনা করুন। এটি কোনো স্থায়ী কার্ড আইডি নয়: পুনর্বিন্যাসের পর, মুদ্রিত In[…] নম্বরটি এই পাথের ব্যবহৃত অবস্থান থেকে ভিন্ন হতে পারে। আপনি যখন সেল পুনর্বিন্যাস বা সন্নিবেশ করেন তখন অবস্থানের রেফারেন্সের অর্থ বদলে যায়; কিন্তু নামের রেফারেন্সগুলো নামযুক্ত সেলটিকেই শনাক্ত করে রাখে।</p>
+        <p>Bash এবং JavaScript এক্সিকিউট হওয়া সেলের সাপেক্ষে আপেক্ষিক রেফারেন্সও সমর্থন করে: <code>/nb/-1/.output</code> পূর্ববর্তী সেল বোঝায়, এবং <code>/nb/./.code</code> বর্তমান সেল বোঝায়। এগুলোর জন্য একটি এক্সিকিউশন কনটেক্সটের প্রয়োজন এবং সেলের ক্রমের ওপর নির্ভর করে। এই টিউটোরিয়ালে পরিবর্তে স্পষ্ট নাম ব্যবহার করা হয়েছে; এটি প্রতিটি ভাষায় আপেক্ষিক রেফারেন্স একইভাবে আচরণ করার ওপর নির্ভর করে না।</p>
+      </section>
+
+      <section id="shared-file">
+        <p class="step-label">ধাপ 5</p>
+        <h2>একটি শেয়ার করা ফাইলের মাধ্যমে ডেটা আদান-প্রদান করুন</h2>
+        <p><strong>শেয়ার করা ভার্চুয়াল ফাইলসিস্টেমে</strong> সাধারণ ফাইল থাকে যা বিভিন্ন ভাষার কার্নেল ব্যবহার করতে পারে। এখানে <code>/shared/</code> বলতে আপনার SciREPL ব্রাউজার/অ্যাপ সেশনের ভেতরে পরিচালিত স্টোরেজকে বোঝায়—অ্যান্ড্রয়েডের ডাউনলোড, আপনার কম্পিউটারের কোনো ফোল্ডার বা ক্লাউড সিঙ্ক্রোনাইজেশন নয়। শেয়ার করা ফাইলগুলো টেক্সট বা বাইট বহন করে; এগুলো এক ভাষার লাইভ ভেরিয়েবল অন্য ভাষার কাছে উপলব্ধ করে না।</p>
+        <div class="table-wrap">
+          <table>
+            <caption>প্রোগ্রাম যেভাবে ডেটা রেফার করতে পারে তার দুটি উপায়</caption>
+            <thead><tr><th scope="col">পাথ</th><th scope="col">এটি যা সম্বোধন করে</th><th scope="col">যা এটি আপডেট করে</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>/nb/numbers/.output</code></th><td>নির্বাচিত ওয়ার্কবুকের একটি সেলের সর্বশেষ টেক্সট আউটপুট।</td><td>সেই সেলটি আবার চালানো।</td></tr>
+              <tr><th scope="row"><code>/shared/data/named-cell-tutorial/values.json</code></th><td>একটি সাধারণ JSON ফাইল, যা বিভিন্ন কার্নেল এবং ওয়ার্কবুক ট্যাবজুড়ে উপলব্ধ।</td><td>কোনো প্রোগ্রাম বা ফাইল এডিটর স্পষ্টভাবে সেই ফাইলটি লিখলে।</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>একটি সাধারণ JSON ফাইল লিখুন</h3>
+        <p><strong>✎ পেন্সিলটি</strong> <code>write_shared</code>-এ খুলুন, <strong>কোড → JS - JavaScript</strong> পরীক্ষা করুন, তারপর এটি চালান। এটি উৎপাদক সেলের সর্বশেষ টেক্সট আউটপুট পড়ে এবং একটি শেয়ার করা JSON টেক্সট ফাইল হিসেবে সংরক্ষণ করে। শেয়ার করা ফাইলসিস্টেম প্রয়োজন অনুযায়ী প্যারেন্ট ফোল্ডার তৈরি করে।</p>
+        <pre><code data-cell-example="write_shared">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+window.sharedVFS.writeFile('/shared/data/named-cell-tutorial/values.json', text, 'javascript');
+console.log('Saved JSON to /shared/data/named-cell-tutorial/values.json');</code></pre>
+        <p>ফলাফলটি হলো <strong>একটি অনুলিপি ধারণকারী পৃথক ফাইল</strong> JSON আউটপুটের, <code>/nb/numbers/.output</code>-এর কোনো বিকল্প নাম নয়। ডেডিকেটেড ফোল্ডারটি উদাহরণের ছোট স্ক্র্যাচ ফাইলটিকে আপনার অন্যান্য ডেটা থেকে আলাদা রাখে; <code>write_shared</code> পুনরায় চালালে এই পাঠের ফাইলটি ওভাররাইট হয়।</p>
+        <h3>ভিন্ন কোনো প্রোগ্রাম থেকে ফাইলটি পড়ুন</h3>
+        <p><strong>✎ পেন্সিলটি</strong> <code>read_shared</code>-এ খুলুন, <strong>কোড → JS - JavaScript</strong> পরীক্ষা করুন, তারপর এটি চালান। এই স্বাধীন প্রোগ্রামটি সংরক্ষিত ফাইলটি পড়ে, <code>numbers</code> সেলটি নয়:</p>
+        <pre><code data-cell-example="read_shared">const text = window.sharedVFS.readFile('/shared/data/named-cell-tutorial/values.json', 'utf8');
+if (!text) throw new Error('Run write_shared first.');
+const record = JSON.parse(text);
+console.log(record.values.reduce((sum, value) =&gt; sum + value, 0));</code></pre>
+        <p><code>16</code> প্রত্যাশা করুন। সুস্পষ্ট <code>'utf8'</code> ফাইলটির বাইটগুলোকে JSON পার্সিংয়ের জন্য টেক্সট হিসেবে পড়ে। প্রতিটি কার্নেলের নিজস্ব ফাইল API রয়েছে: JavaScript এখানে শেয়ার করা ফাইলসিস্টেম হেল্পার ব্যবহার করে; Python <code>open(...)</code> ব্যবহার করতে পারে, যেমনটি নিচের ঐচ্ছিক ধাপে দেখানো হয়েছে। এটি কোনো পূর্ণাঙ্গ অপারেটিং সিস্টেম ফাইলসিস্টেম নয়।</p>
+        <p>একটি পৃথক ক্রস-ল্যাঙ্গুয়েজ পরীক্ষার জন্য, আপনি একটি নতুন <strong>কোড → Bash</strong> সেল যোগ করতে পারেন এবং এই কমান্ডটি চালাতে পারেন। এটি একই সাধারণ ফাইল পড়ে এবং <code>{"values":[3,5,8]}</code> প্রিন্ট করে:</p>
+        <pre><code>cat /shared/data/named-cell-tutorial/values.json</code></pre>
+        <h3>ফাইল GUI-তে একই ফাইল দেখুন</h3>
+        <ol class="lesson-steps">
+          <li><strong>☰ Menu → ফাইল ও স্টোরেজ</strong> খুলুন।</li>
+          <li>শেয়ার করা <code>data</code> ফোল্ডারটি খুঁজুন, তারপর <code>named-cell-tutorial</code> এবং <code>values.json</code>। ফাইলটির JSON টেক্সট দেখতে এটি নির্বাচন করুন।</li>
+          <li>এতে <code>{"values":[3,5,8]}</code> আছে কি না তা পরীক্ষা করুন, তারপর ওয়ার্কবুকের কাজ চালিয়ে যেতে Files &amp; Storage বন্ধ করুন।</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-shared-values.png" alt="SciREPL Free-এর Files &amp; Storage স্ক্রিনের সংকীর্ণ-ব্রাউজার স্ক্রিনশট যাতে কপি করা values.json ফাইল এবং এর JSON বিষয়বস্তু দেখানো হয়েছে।" loading="lazy" decoding="async">
+          <figcaption>শেয়ার করা ফাইলসিস্টেমে একটি সুচিন্তিত কপি JSON-কে ফাইল GUI-তে উপলব্ধ করে। পরীক্ষিত Free স্ক্রিন স্বয়ং <code>/nb/</code>-কে তালিকাভুক্ত করে না। SciREPL Free-এর ব্রাউজার ক্যাপচার।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-shared-values.png">সম্পূর্ণ ব্রাউজার শেয়ার্ড-ফাইল স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p class="callout"><strong>একটি কপি স্বয়ংক্রিয়ভাবে আপডেট হয় না।</strong> <code>numbers</code> পরিবর্তন বা পুনরায় চালালে এর সর্বশেষ সেল আউটপুট পরিবর্তিত হয়, বিদ্যমান <code>values.json</code> নয়। কপিটি রিফ্রেশ করতে <code>write_shared</code> পুনরায় চালান, তারপর এটি থেকে পুনরায় গণনা করতে <code>read_shared</code> চালান। ফাইলগুলো স্থানীয় অ্যাপ/ব্রাউজার স্টোরেজে রাখা হয়, তবে সেই স্টোরেজ পরিষ্কার করলে বা অ্যাপটি আনইনস্টল করলে সেগুলো মুছে যেতে পারে। স্থানীয়ভাবে সংরক্ষিত থাকা কোনো ব্যাকআপ নয়; আপনার সংরক্ষণের প্রয়োজন এমন ফাইলগুলো এক্সপোর্ট করুন।</p>
+        <p>শেয়ার করা ফাইল দেখা, সম্পাদনা এবং এক্সপোর্ট করার জন্য <a href="../../files-export/tutorial/#edit-file">CSV এবং Files &amp; Storage ওয়াকথ্রু</a> দেখুন। শুধুমাত্র ওয়ার্কবুকের <code>.srwb</code> এক্সপোর্টে এই JSON কপির মতো পৃথক ফাইল অন্তর্ভুক্ত থাকে না; ওয়ার্কবুক এবং নির্বাচিত ডেটা ফাইলগুলো একসাথে অন্তর্ভুক্ত করতে <a href="../../files-export/tutorial/#export">Package archive export</a> ব্যবহার করুন।</p>
+      </section>
+
+      <section id="generate">
+        <p class="step-label">ধাপ 6</p>
+        <h2>অন্য একটি সেলের কোড জেনারেট করুন, তারপর নিজেই সেটি চালান</h2>
+        <p>এ পর্যন্ত Bash JavaScript আউটপুট পড়েছে। এখন JavaScript মোট গণনা করার জন্য সেই একই JSON টেক্সট ব্যবহার করবে, এবং একটি ছোট Bash প্রোগ্রাম <em>বিদ্যমান</em> <code>bash_report</code> সেলে লিখবে। কোড লেখা এবং কোড চালানো দুটি পৃথক ক্রিয়া।</p>
+        <ol class="program-flow" aria-label="ডেটা এবং জেনারেট করা কোডের প্রবাহ">
+          <li><code>numbers</code><span>চালান → JSON টেক্সট</span></li>
+          <li><code>generate_report</code><span>JSON পড়ুন → Bash সোর্স লিখুন</span></li>
+          <li><code>bash_report</code><span>পরীক্ষা করুন → ম্যানুয়ালি চালান</span></li>
+        </ol>
+        <p class="callout"><strong>এই রাইট সোর্সকে প্রতিস্থাপন করে।</strong> কম্প্যানিয়নের স্ক্র্যাচ <code>bash_report</code> সেলটি ব্যবহার করুন, আপনার সংরক্ষণের প্রয়োজন এমন কাজের সেল নয়। নিজের ওয়ার্কবুকে সোর্স লেখার চেষ্টা করার আগে একটি ব্যাকআপ তৈরি করুন। এই অনুশীলনে জেনারেটরটিকে ওভাররাইট করবেন না বা প্রোগ্রাম্যাটিকভাবে <code>.language</code> পরিবর্তন করবেন না।</p>
+        <ol class="lesson-steps">
+          <li><code>bash_report</code> বিদ্যমান রয়েছে এবং এর ভাষা <strong>Bash</strong> কি না তা যাচাই করুন। এর প্রাথমিক সোর্স নিচে দেখানো হয়েছে; এটি এখনই চালাবেন না।</li>
+          <li><strong>☰ Menu → সেটিংস → নোটবুক VFS</strong> খুলুন। জেনারেটরের রাইটের জন্য <strong>সেলগুলোকে অন্য সেল পরিবর্তন করার অনুমতি দিন</strong> চিহ্নিত করা থাকতে হবে। পরীক্ষিত বিল্ডে এটি ডিফল্টভাবেই চালু থাকে, তবে আপনার সেটিংস পরীক্ষা করে নিন। আপনার ক্রস-নোটবুক রিড, ক্রস-নোটবুক রাইট, বা প্রোগ্রাম্যাটিক এক্সিকিউশন সক্ষম করার প্রয়োজন <em>নেই</em>। Settings বন্ধ করুন।</li>
+          <li><strong>✎ পেন্সিলটি</strong> <code>generate_report</code>-এ খুলুন, <strong>কোড → JS - JavaScript</strong> পরীক্ষা করুন, এবং এটি চালান।</li>
+        </ol>
+        <pre><code data-cell-example="generate_report">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+const data = JSON.parse(text);
+const total = data.values.reduce((sum, value) =&gt; sum + value, 0);
+const updated = window.notebookVFS.writeFile(
+  '/nb/bash_report/.code', `echo "Total: ${total}"`
+);
+if (!updated) throw new Error('Check bash_report exists and cell writes are allowed.');
+console.log('Updated bash_report source; inspect it, then run it yourself.');</code></pre>
+        <p>টার্গেটটি এই প্লেসহোল্ডার দিয়ে শুরু হয়:</p>
+        <pre><code data-cell-example="bash_report">echo "Run generate_report first"</code></pre>
+        <p>জেনারেটর সফল হওয়ার পর, <code>bash_report</code>-এর সোর্স <code>echo "Total: 16"</code> হয়ে যায়। রাইট অপারেশনটি <strong>Bash চালায়নি</strong>। নতুন সোর্স পরীক্ষা করতে সেই সেলের <strong>✎ পেন্সিল</strong> খুলুন, তারপর <em>এর নিজস্ব</em> <strong>▶ রান</strong>-এ ট্যাপ করুন। <code>Total: 16</code> প্রত্যাশা করুন।</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-generated-report.png" alt="SciREPL Free-এর সংকীর্ণ-ব্রাউজার স্ক্রিনশট, যাতে bash_report-এ জেনারেট করা Bash সোর্স echo Total: 16 এবং ম্যানুয়ালি চালানোর পর Total: 16 দেখানো হয়েছে।" loading="lazy" decoding="async">
+          <figcaption>টার্গেটটি এখনও একটি Bash সেল। JavaScript এর সোর্স সরবরাহ করেছে; আপনার পৃথক <strong>▶ রান</strong> অ্যাকশন এর নিচে আউটপুট তৈরি করেছে। SciREPL Free-এর ব্রাউজার ক্যাপচার।</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-generated-report.png">সম্পূর্ণ ব্রাউজার জেনারেটেড-রিপোর্ট স্ক্রিনশট দেখুন</a>
+        </figure>
+        <p><code>readFile(...)</code> টেক্সট প্রদান করে; কোনো অজানা সেল বা প্রোপার্টি <code>null</code> প্রদান করে। রাইট সফল হয়েছে কি না তা <code>writeFile(...)</code> রিপোর্ট করে। যদি উৎপাদকের কোনো আউটপুট না থাকে বা গন্তব্যে লেখা না যায় তবে জেনারেটরের ভেতরের যাচাইকরণগুলো এটি থামিয়ে দেয়। নামগুলো কেস-সংবেদনশীল: হুবহু বানান বজায় রাখুন।</p>
+      </section>
+
+      <section id="update">
+        <p class="step-label">ধাপ 7</p>
+        <h2>ডেটা পরিবর্তন করুন এবং প্রতিটি নির্ভরশীল ধাপ রিফ্রেশ করুন</h2>
+        <ol class="lesson-steps">
+          <li><code>numbers</code>-কে এর <strong>✎ পেন্সিল</strong> দিয়ে সম্পাদনা করুন। <code>[3, 5, 8]</code>-কে <code>[4, 5, 8]</code>-এ পরিবর্তন করুন, তারপর সেই সেলটি চালান। এর JSON-এ এখন <code>4</code> রয়েছে।</li>
+          <li>অন্য কিছু চালানোর আগে <code>bash_report</code>-এর দিকে তাকান। এর আগের সোর্স এবং আউটপুট অপরিবর্তিত থাকে: কোনো স্বয়ংক্রিয় নির্ভরতা রিফ্রেশ নেই।</li>
+          <li><code>generate_report</code> পুনরায় চালান। এটি রিপোর্টের সোর্সকে <code>echo "Total: 17"</code>-এ পরিবর্তিত করে, তবে এর পুরোনো <code>Total: 16</code> আউটপুট দৃশ্যমান থাকতে পারে।</li>
+          <li><code>bash_report</code> পরীক্ষা করুন এবং পুনরায় চালান। এখন এর আউটপুট হলো <code>Total: 17</code>।</li>
+          <li>ফাইলটি রিফ্রেশ করার আগে <code>read_shared</code> পুনরায় চালান: এটি এখনও <code>16</code> দেখাচ্ছে পুরোনো JSON কপি থেকে। এখন <code>write_shared</code> পুনরায় চালান, তারপর <code>read_shared</code>; ফাইলের পথটিও <code>17</code> দেখায়। পরিবর্তিত ফাইলটি পরীক্ষা করতে Files &amp; Storage-এ <code>values.json</code> আবার খুলুন।</li>
+        </ol>
+        <p class="callout"><strong>সোর্স, আউটপুট এবং কপি করা ফাইল ভিন্ন জিনিস।</strong> এর গ্রাহক সেলগুলোর আগে সেই সেলের <strong>▶ রান</strong> দিয়ে একটি উন্মুক্ত সোর্স সম্পাদনা সম্পন্ন করুন; অসংরক্ষিত কোনো এডিটর ড্রাফট সংরক্ষিত <code>.code</code> নয়। একটি সোর্স রাইট গন্তব্যকে এক্সিকিউট করে না, এবং কপি করা ফাইল পরবর্তী পরিবর্তনগুলো অনুসরণ করে না। সুনির্দিষ্ট ক্রম অনুসরণ করুন: producer → generator → report। দৃশ্যমান পুরোনো আউটপুট বর্তমান সোর্স চলেছে তার প্রমাণ নয়।</p>
+        <p>আপনার সোর্স সম্পাদনা এবং নামগুলো ধরে রাখতে ওয়ার্কবুকটি এক্সপোর্ট করুন। সাধারণ <code>.srwb</code> ইমপোর্ট বর্তমানে সংরক্ষিত কোড আউটপুট বাতিল করে, তাই পুনরায় খোলার পর, এর রিডার সেলগুলোর আগে <code>numbers</code> পুনরায় চালান, তারপর জেনারেটর এবং রিপোর্ট। পৃথক শেয়ার করা ডেটা ফাইলের জন্য ফাইল বা প্যাকেজ এক্সপোর্টের প্রয়োজন হয়। <a href="../../../files-export/">ফাইল এবং এক্সপোর্ট রেফারেন্স<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> দেখুন।</p>
+      </section>
+
+      <section id="python">
+        <p class="step-label">ঐচ্ছিক</p>
+        <h2>Python থেকে উভয় পথই পড়ুন</h2>
+        <p>আপনি Python শুরু না করেই এখানে থামতে পারেন। তৃতীয় একটি ভাষা চেষ্টা করতে, প্রথমে <code>numbers</code> এবং <code>write_shared</code> চালান, তারপর <code>python_total</code> পরীক্ষা করুন এবং <strong>কোড → Python</strong> হিসেবে চালান:</p>
+        <pre><code data-cell-example="python_total">import json
+record = json.loads(nb_read('numbers', '.output'))
+print('Cell output:', sum(record['values']))
+with open('/shared/data/named-cell-tutorial/values.json') as source:
+    saved = json.load(source)
+print('Shared file:', sum(saved['values']))</code></pre>
+        <p>মূল ডেটার জন্য <code>Cell output: 16</code> এবং <code>Shared file: 16</code> প্রত্যাশা করুন, অথবা উভয় লাইনে <code>17</code> প্রত্যাশা করুন ধাপ 7-এ উভয় পথ রিফ্রেশ করার পরে। Python-এর <code>nb_read('numbers', '.output')</code> নামযুক্ত সেলের সর্বশেষ টেক্সট আউটপুট পড়ে। পৃথক <code>open(...)</code> স্বাভাবিক Python ফাইল সিনট্যাক্স ব্যবহার করে শেয়ার করা ফাইলটি পড়ে। স্ট্যান্ডার্ড <code>json</code> মডিউল উভয়ই পার্স করে; কোনো <code>%pip install</code>-এর প্রয়োজন নেই। যদি শুধুমাত্র উৎপাদক সেলটি রিফ্রেশ করা হয়, তবে দুটি মোট ফলাফল ভিন্ন হতে পারে।</p>
+        <p>প্রথমবার ব্যবহারের সময়, Python-এর রানটাইম শুরু বা ডাউনলোড করার প্রয়োজন হতে পারে। আপনার বিল্ড এবং বিদ্যমান সম্মতির ওপর ভিত্তি করে একটি গোপনীয়তা/নেটওয়ার্ক বিজ্ঞপ্তি প্রদর্শিত হতে পারে; সম্মত হওয়ার আগে এটি পড়ুন। এই ঐচ্ছিক ধাপটি JavaScript/Bash অনুশীলনের জন্য আবশ্যক নয়, এবং কেবল কম্প্যানিয়ন ইমপোর্ট করলেই Python শুরু হয় না।</p>
+      </section>
+
+      <section id="more">
+        <p class="step-label">অন্বেষণ চালিয়ে যান</p>
+        <h2>অন্যান্য ওয়ার্কবুকে প্যাটার্নটি চিনুন</h2>
+        <p>নামযুক্ত সেলগুলো একটি সহজ ইন্টারঅপারেশন সীমানা প্রদান করে: একটি প্রোগ্রাম টেক্সট তৈরি করে, অন্যটি তা পড়ে বা সোর্স জেনারেট করতে এটি ব্যবহার করে। ক্যাটালগে পরীক্ষা করার মতো ইতিমধ্যে আরও বড় উদাহরণ রয়েছে:</p>
+        <ul>
+          <li><strong>গড় আয়ু বিশ্লেষণ</strong> সাধারণ CSV ফাইল পড়ে <code>/shared/data/</code> থেকে Python এবং R-এ: এটি শেয়ার্ড-ফাইলের পথ, নামযুক্ত-সেল পড়া নয়। এটি ডেটাসেট ডাউনলোড করে এবং প্যাকেজ ব্যবহার করে; এটি চালানোর আগে এর সেটআপ এবং সম্মতির প্রয়োজনীয়তাগুলো পড়ুন।</li>
+          <li><strong>Prolog উৎপন্ন করে R</strong> নামযুক্ত Prolog সোর্স পড়ে <code>nb_read(..., '.code', ...)</code> দিয়ে এবং <code>nb_write('r_factorial', '.code', ...)</code> দিয়ে জেনারেট করা R সোর্স লেখে। R সেলটি আলাদাভাবে চালানো হয়।</li>
+          <li><strong>Prolog উৎপন্ন করে TypR</strong> একটি নামযুক্ত সোর্স-অনলি কোয়েরি সেলের সাথে জেনারেট করা সংজ্ঞাগুলোকে একত্রিত করে, তারপর <code>typr_output</code> লেখে। একটি <code>#!source</code> সেল এক্সিকিউট না করেই সোর্স হিসেবে পড়া যায়।</li>
+        </ul>
+        <p><strong>☰ Menu → Browse Packages…</strong>-এ এই শিরোনামগুলো অনুসন্ধান করুন। এগুলো অধিকতর পড়ার জন্য, <strong>এই গাইডের জন্য প্রত্যয়িত এক্সিকিউশন ওয়াকথ্রু নয়</strong>; উপলব্ধ সংস্করণ এবং সেটআপের প্রয়োজনীয়তা ভিন্ন। Prolog-generates ওয়ার্কবুকগুলোর জন্য Browse-এর মাধ্যমে ইনস্টল করা <strong>unifyweaver-scirepl</strong> ডিপেন্ডেন্সি প্রয়োজন; শুধু একটি অপরিশোধিত ওয়ার্কবুক ইমপোর্ট করলেই সেই ডিপেন্ডেন্সি ইনস্টল হয় না। ম্যানুয়ালি ইমপোর্ট করা <code>.ipynb</code>-এর জন্য, প্রথমে যাচাই করুন যে <strong>মেনু → সেটিংস → ইমপোর্ট ও সম্পাদনা → ওয়ার্কবুক ইমপোর্টের সময় স্বয়ংক্রিয়ভাবে সেল রান করুন</strong> বন্ধ রয়েছে, কারণ জুপিটার ইমপোর্ট ওই সেটিংসের অধীনে কোড এক্সিকিউট করতে পারে। <a href="../tutorial/">Browse ওয়াকথ্রু</a> এবং <a href="../import/">ম্যানুয়াল ইমপোর্ট গাইড</a> দেখুন।</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">যদি কিছু ভুল মনে হয়</p>
+        <h2>নাম, ওয়ার্কবুক এবং চালানোর ক্রম পরীক্ষা করুন</h2>
+        <ul>
+          <li><strong>নামকরণের ডায়ালগ খুলছে না:</strong> সংরক্ষিত সেলের <strong>In[…] লেবেলে</strong> ডাবল-ক্লিক বা লং-প্রেস করুন, এর সোর্স, আউটপুট বা পেন্সিলে নয়। একটি একক ক্লিক নামকরণের জেসচার নয়।</li>
+          <li><strong>উৎপাদক সেলটি পাওয়া যাচ্ছে না:</strong> <strong>Named Cell Interop</strong> নির্বাচিত রাখুন, হুবহু <code>numbers</code> নামটি পুনরুদ্ধার করুন, এবং বানান ও অক্ষরের কেস পরীক্ষা করুন। নাম পরিবর্তন করলে অন্য সেলের পাথগুলো পুনরায় লেখা হয় না।</li>
+          <li><strong>জেনারেটর বলছে “Run numbers first”:</strong> <code>numbers</code> পরীক্ষা করুন এবং চালান। সোর্স ইমপোর্ট বা কেবল সম্পাদনা করলেই <code>.output</code> পপুলেট হয় না।</li>
+          <li><strong>JSON পার্সিং ব্যর্থ হয়:</strong> উৎপাদক সেলটিকে সম্পূর্ণ উদাহরণের সাথে তুলনা করুন। এর আউটপুট শুধুমাত্র JSON হতে হবে, কোনো শিরোনাম বা অতিরিক্ত মুদ্রিত বার্তা নয়।</li>
+          <li><strong>রিপোর্টটি লেখা যায়নি:</strong> বিদ্যমান <code>bash_report</code> সেলটি এই ওয়ার্কবুকে আছে কি না এবং <strong>সেলগুলোকে অন্য সেল পরিবর্তন করার অনুমতি দিন</strong> চেক করা আছে কি না তা যাচাই করুন। সোর্স-রাইটের সমস্যা সমাধান করতে প্রোগ্রাম্যাটিক এক্সিকিউশন সক্ষম করবেন না।</li>
+          <li><strong>রিপোর্টটি এখনও 16:</strong> ডেটা সম্পাদনার পর, <code>numbers</code> চালান, তারপর <code>generate_report</code>, তারপর <code>bash_report</code>। কপি করা ফাইলটি <code>write_shared</code> দিয়ে আলাদাভাবে রিফ্রেশ করুন, তারপর <code>read_shared</code> পুনরায় চালান।</li>
+          <li><strong>আপনি Files &amp; Storage-এ /nb খুঁজে পাচ্ছেন না:</strong> পরীক্ষিত বিল্ডে ওই স্ক্রিনটি শেয়ার করা ফাইলগুলো দেখায়, এই ভার্চুয়াল সেল মাউন্ট নয়। পরিবর্তে <code>write_shared</code> চালান এবং এর সুচিন্তিত <code>values.json</code> কপিটি খুঁজুন।</li>
+        </ul>
+        <p><a href="../../interface/tutorial/">প্রথম-ওয়ার্কবুক ইন্টারফেস টিউটোরিয়াল</a> হেডার এবং সংরক্ষিত-সেলের পেন্সিল ব্যাখ্যা করে; <a href="../graphics/">গ্রাফিক্স টিউটোরিয়াল</a> অন্য যেসব উপায়ে একটি সেল ফলাফল তৈরি করতে পারে তা দেখায়।</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL সহায়তা</span><nav aria-label="ফুটার নেভিগেশন"><a href="../../../workbooks/">ওয়ার্কবুক রেফারেন্স<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a><a href="../../../">সমস্ত সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a></nav></footer>
+</body>
+</html>
