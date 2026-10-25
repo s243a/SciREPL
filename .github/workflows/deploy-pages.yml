@@ -27,7 +27,8 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Keep the runner compatible with the Chromium builds in locked Playwright.
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - name: Checkout code
