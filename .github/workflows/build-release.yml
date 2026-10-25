@@ -14,7 +14,8 @@ jobs:
   # the same gate as ci.yml; build depends on it, so a red suite blocks the
   # APK/PWA from being built or released.
   test:
-    runs-on: ubuntu-latest
+    # Keep the runner compatible with the Chromium builds in locked Playwright.
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -144,7 +145,8 @@ jobs:
     needs:
       - test
       - windows-portable
-    runs-on: ubuntu-latest
+    # Keep the runner compatible with the Chromium builds in locked Playwright.
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: write  # Required to create releases

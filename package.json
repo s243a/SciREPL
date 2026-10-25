@@ -12,7 +12,7 @@
     "configure": "node scripts/configure-build.mjs",
     "fetch:bundles": "node scripts/fetch-bundles.mjs",
     "test:header-scaling": "node tests/test_header_scaling.mjs",
-    "test:help": "node tests/test_help_site.mjs && node scripts/build-named-cell-example.mjs --check && node tests/test_workbook_graphics.mjs && node tests/test_named_cell_tutorial.mjs && npm run test:tutorial-locales",
+    "test:help": "node tests/test_help_site.mjs && node scripts/build-named-cell-example.mjs --check && node scripts/build-landing-pages.mjs --check && node tests/test_workbook_graphics.mjs && node tests/test_named_cell_tutorial.mjs && npm run test:tutorial-locales",
     "tutorials:extract": "node scripts/tutorial_locale_extract.mjs",
     "tutorials:render": "node scripts/tutorial_locale_render.mjs",
     "test:tutorial-locales": "node tests/test_tutorial_locale_editorial.mjs && node scripts/tutorial_locale_render.mjs --check && node tests/test_tutorial_locales.mjs --all && node tests/test_tutorial_locales_browser.mjs --all",
