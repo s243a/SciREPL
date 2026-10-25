@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 2340">
+  <title>Saved AI Prompt cell Configure control during editing</title>
+  <desc>A yellow outline locates Configure in the saved AI Prompt cell's header while its source is being edited. The underlying Android screenshot is unchanged.</desc>
+  <g fill="none" stroke="#ffd43b" stroke-width="6">
+    <rect id="saved-ai-configure-setting" x="767" y="999" width="186" height="86" rx="10"/>
+  </g>
+</svg>

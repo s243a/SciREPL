@@ -1,0 +1,213 @@
+{
+  "captureMethod": "Android screencap; unmodified full-screen PNG",
+  "device": {
+    "model": "SM-S926W",
+    "appPackage": "com.unifyweaver.scirepl.pro.debug",
+    "version": "1.4.0-debug",
+    "versionCode": 25,
+    "sourceCommit": null,
+    "activeCache": "scirepl-app-v461"
+  },
+  "exercise": {
+    "targetName": "variance_plot",
+    "contextScopeChosen": "none",
+    "requestGuard": "Exactly one requestCellOnce call with the toy prompt plus the complete harmless target source; targetLanguage javascript, OpenRouter GLM 5.3 Flash, no other cell source in the method argument.",
+    "singlePromptPathAudit": "requestCellOnce constructs a system framing/runtime guide and one user message, without Assistant history or tools. This is a source-path audit, not a saved HTTP-body capture.",
+    "before": "// Reviewed plot code will go here.",
+    "prompt": "Return only complete JavaScript source, without Markdown fences.\nCreate a reproducible histogram of estimated sample variances.\nSimulate 2,000 fresh samples, each containing 10 standard-normal N(0,1) values.\nDo not reuse the earlier integer array from summary_demo.\nInitialize state = 42 once for the whole run, not per sample. Before each uniform draw set state = (16807 * state) % 2147483647, then u = state / 2147483647.\nFor each normal draw use two successive uniforms: sqrt(-2 * log(u1)) * cos(2 * PI * u2). Do not reuse the spare sine result or use Math.random.\nFor each sample compute its mean, then unbiased variance sum((x - mean)^2) / 9.\nDraw a labelled canvas histogram with 40 equal-width bins from 0 to 4. The horizontal axis is estimated variance; the vertical axis is sample count.\nMark the true population variance 1 with a labelled vertical line. Use a light background, dark text and readable labels.\nPrint sample size, repetitions, seed, mean estimated variance, histogram total and any overflow count. Count overflow separately rather than hiding it.\nDisplay the canvas with window.renderImage(canvas.toDataURL(\"image/png\")).\nUse no packages, network, storage or workbook edits.",
+    "request": {
+      "backend": "openrouter",
+      "model": "z-ai/glm-5.3-flash",
+      "maxOutputTokens": 4096,
+      "requests": 1,
+      "text": "// Histogram of sample variances (n=10, N(0,1)), seeded Park-Miller + Box-Muller (cos only)\nlet state = 42;\nfunction nextUniform() {\n  state = (16807 * state) % 2147483647;\n  return state / 2147483647;\n}\nfunction nextNormal() {\n  const u1 = nextUniform();\n  const u2 = nextUniform();\n  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);\n}\n\nconst n = 10;\nconst reps = 2000;\nconst binCount = 40;\nconst binLo = 0;\nconst binHi = 4;\nconst binWidth = (binHi - binLo) / binCount;\n\nconst counts = new Array(binCount).fill(0);\nlet overflow = 0;\nlet inHist = 0;\nlet sumVar = 0;\n\nfor (let r = 0; r < reps; r++) {\n  let mean = 0;\n  const xs = new Array(n);\n  for (let i = 0; i < n; i++) {\n    const x = nextNormal();\n    xs[i] = x;\n    mean += x;\n  }\n  mean /= n;\n  let ss = 0;\n  for (let i = 0; i < n; i++) ss += (xs[i] - mean) * (xs[i] - mean);\n  const v = ss / (n - 1);\n  sumVar += v;\n  const b = Math.floor((v - binLo) / binWidth);\n  if (v >= binLo && v < binHi && b >= 0 && b < binCount) {\n    counts[b]++;\n    inHist++;\n  } else {\n    overflow++;\n  }\n}\n\nconst meanVar = sumVar / reps;\nconst histTotal = inHist;\n\n// Draw canvas\nconst W = 900, H = 560;\nconst canvas = document.createElement(\"canvas\");\ncanvas.width = W;\ncanvas.height = H;\nconst ctx = canvas.getContext(\"2d\");\n\n// Background\nctx.fillStyle = \"#f7f7fb\";\nctx.fillRect(0, 0, W, H);\n\n// Margins\nconst mLeft = 80, mRight = 30, mTop = 70, mBottom = 90;\nconst plotW = W - mLeft - mRight;\nconst plotH = H - mTop - mBottom;\n\nconst maxCount = Math.max(...counts, 1);\nconst yMax = Math.ceil(maxCount * 1.1);\n\nfunction xPix(v) { return mLeft + ((v - binLo) / (binHi - binLo)) * plotW; }\nfunction yPix(c) { return mTop + plotH - (c / yMax) * plotH; }\n\n// Dark text settings\nctx.textBaseline = \"middle\";\n\n// Gridlines + y ticks\nctx.strokeStyle = \"#dddddd\";\nctx.fillStyle = \"#222222\";\nctx.font = \"13px sans-serif\";\nctx.textAlign = \"right\";\nfor (let c = 0; c <= yMax; c += Math.max(1, Math.ceil(yMax / 10))) {\n  const y = yPix(c);\n  ctx.beginPath();\n  ctx.moveTo(mLeft, y);\n  ctx.lineTo(W - mRight, y);\n  ctx.stroke();\n  ctx.fillText(String(c), mLeft - 8, y);\n}\n\n// Bars\nconst barFill = \"#3b6ea5\";\nconst barEdge = \"#274d77\";\nfor (let b = 0; b < binCount; b++) {\n  const x0 = xPix(binLo + b * binWidth);\n  const x1 = xPix(binLo + (b + 1) * binWidth);\n  const y0 = yPix(counts[b]);\n  const y1 = yPix(0);\n  ctx.fillStyle = barFill;\n  ctx.fillRect(x0, y0, x1 - x0 - 1, y1 - y0);\n  ctx.strokeStyle = barEdge;\n  ctx.strokeRect(x0, y0, x1 - x0 - 1, y1 - y0);\n}\n\n// Axes\nctx.strokeStyle = \"#222222\";\nctx.beginPath();\nctx.moveTo(mLeft, mTop);\nctx.lineTo(mLeft, mTop + plotH);\nctx.lineTo(W - mRight, mTop + plotH);\nctx.stroke();\n\n// X ticks\nctx.fillStyle = \"#222222\";\nctx.textAlign = \"center\";\nctx.textBaseline = \"top\";\nfor (let v = 0; v <= 4; v += 0.5) {\n  const x = xPix(v);\n  ctx.beginPath();\n  ctx.moveTo(x, mTop + plotH);\n  ctx.lineTo(x, mTop + plotH + 5);\n  ctx.strokeStyle = \"#222222\";\n  ctx.stroke();\n  ctx.fillText(v.toFixed(1), x, mTop + plotH + 8);\n}\n\n// True variance vertical line at 1\nctx.strokeStyle = \"#c0392b\";\nctx.lineWidth = 2;\nctx.beginPath();\nctx.moveTo(xPix(1), mTop);\nctx.lineTo(xPix(1), mTop + plotH);\nctx.stroke();\nctx.lineWidth = 1;\nctx.fillStyle = \"#c0392b\";\nctx.textAlign = \"left\";\nctx.textBaseline = \"middle\";\nctx.font = \"13px sans-serif\";\nctx.fillText(\"true variance = 1\", xPix(1) + 6, mTop + 14);\n\n// Axis labels and title\nctx.fillStyle = \"#222222\";\nctx.font = \"15px sans-serif\";\nctx.textAlign = \"center\";\nctx.textBaseline = \"top\";\nctx.fillText(\"estimated variance\", mLeft + plotW / 2, H - mBottom + 34);\nctx.save();\nctx.translate(22, mTop + plotH / 2);\nctx.rotate(-Math.PI / 2);\nctx.textBaseline = \"middle\";\nctx.fillText(\"sample count\", 0, 0);\nctx.restore();\nctx.font = \"bold 18px sans-serif\";\nctx.fillText(\"Histogram of estimated sample variances (n = 10, N(0,1))\", W / 2, 25);\n\n// Render\nwindow.renderImage(canvas.toDataURL(\"image/png\"));\n\n// Report\n\"sample size=\" + n +\n\" | repetitions=\" + reps +\n\" | seed=42\" +\n\" | mean estimated variance=\" + meanVar.toFixed(5) +\n\" | histogram total=\" + histTotal +\n\" | overflow=\" + overflow;",
+      "usage": {
+        "inputTokens": 395,
+        "outputTokens": 1389,
+        "totalTokens": 1784
+      },
+      "finishReason": "stop"
+    },
+    "configuration": {
+      "schemaVersion": 1,
+      "result": {
+        "placement": "replace-target",
+        "target": {
+          "kind": "namedCell",
+          "name": "variance_plot"
+        },
+        "targetLanguage": null
+      }
+    },
+    "review": {
+      "text": "// Reviewed plot code will go here.",
+      "requestsBeforeApproval": 0
+    },
+    "targetUnchangedBeforeApply": true,
+    "manualCorrection": {
+      "reason": "The generated report was a bare expression, not printed by the JavaScript kernel because helper functions contain return. Wrapped only the final report in console.log before manual Run.",
+      "code": "// Histogram of sample variances (n=10, N(0,1)), seeded Park-Miller + Box-Muller (cos only)\nlet state = 42;\nfunction nextUniform() {\n  state = (16807 * state) % 2147483647;\n  return state / 2147483647;\n}\nfunction nextNormal() {\n  const u1 = nextUniform();\n  const u2 = nextUniform();\n  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);\n}\n\nconst n = 10;\nconst reps = 2000;\nconst binCount = 40;\nconst binLo = 0;\nconst binHi = 4;\nconst binWidth = (binHi - binLo) / binCount;\n\nconst counts = new Array(binCount).fill(0);\nlet overflow = 0;\nlet inHist = 0;\nlet sumVar = 0;\n\nfor (let r = 0; r < reps; r++) {\n  let mean = 0;\n  const xs = new Array(n);\n  for (let i = 0; i < n; i++) {\n    const x = nextNormal();\n    xs[i] = x;\n    mean += x;\n  }\n  mean /= n;\n  let ss = 0;\n  for (let i = 0; i < n; i++) ss += (xs[i] - mean) * (xs[i] - mean);\n  const v = ss / (n - 1);\n  sumVar += v;\n  const b = Math.floor((v - binLo) / binWidth);\n  if (v >= binLo && v < binHi && b >= 0 && b < binCount) {\n    counts[b]++;\n    inHist++;\n  } else {\n    overflow++;\n  }\n}\n\nconst meanVar = sumVar / reps;\nconst histTotal = inHist;\n\n// Draw canvas\nconst W = 900, H = 560;\nconst canvas = document.createElement(\"canvas\");\ncanvas.width = W;\ncanvas.height = H;\nconst ctx = canvas.getContext(\"2d\");\n\n// Background\nctx.fillStyle = \"#f7f7fb\";\nctx.fillRect(0, 0, W, H);\n\n// Margins\nconst mLeft = 80, mRight = 30, mTop = 70, mBottom = 90;\nconst plotW = W - mLeft - mRight;\nconst plotH = H - mTop - mBottom;\n\nconst maxCount = Math.max(...counts, 1);\nconst yMax = Math.ceil(maxCount * 1.1);\n\nfunction xPix(v) { return mLeft + ((v - binLo) / (binHi - binLo)) * plotW; }\nfunction yPix(c) { return mTop + plotH - (c / yMax) * plotH; }\n\n// Dark text settings\nctx.textBaseline = \"middle\";\n\n// Gridlines + y ticks\nctx.strokeStyle = \"#dddddd\";\nctx.fillStyle = \"#222222\";\nctx.font = \"13px sans-serif\";\nctx.textAlign = \"right\";\nfor (let c = 0; c <= yMax; c += Math.max(1, Math.ceil(yMax / 10))) {\n  const y = yPix(c);\n  ctx.beginPath();\n  ctx.moveTo(mLeft, y);\n  ctx.lineTo(W - mRight, y);\n  ctx.stroke();\n  ctx.fillText(String(c), mLeft - 8, y);\n}\n\n// Bars\nconst barFill = \"#3b6ea5\";\nconst barEdge = \"#274d77\";\nfor (let b = 0; b < binCount; b++) {\n  const x0 = xPix(binLo + b * binWidth);\n  const x1 = xPix(binLo + (b + 1) * binWidth);\n  const y0 = yPix(counts[b]);\n  const y1 = yPix(0);\n  ctx.fillStyle = barFill;\n  ctx.fillRect(x0, y0, x1 - x0 - 1, y1 - y0);\n  ctx.strokeStyle = barEdge;\n  ctx.strokeRect(x0, y0, x1 - x0 - 1, y1 - y0);\n}\n\n// Axes\nctx.strokeStyle = \"#222222\";\nctx.beginPath();\nctx.moveTo(mLeft, mTop);\nctx.lineTo(mLeft, mTop + plotH);\nctx.lineTo(W - mRight, mTop + plotH);\nctx.stroke();\n\n// X ticks\nctx.fillStyle = \"#222222\";\nctx.textAlign = \"center\";\nctx.textBaseline = \"top\";\nfor (let v = 0; v <= 4; v += 0.5) {\n  const x = xPix(v);\n  ctx.beginPath();\n  ctx.moveTo(x, mTop + plotH);\n  ctx.lineTo(x, mTop + plotH + 5);\n  ctx.strokeStyle = \"#222222\";\n  ctx.stroke();\n  ctx.fillText(v.toFixed(1), x, mTop + plotH + 8);\n}\n\n// True variance vertical line at 1\nctx.strokeStyle = \"#c0392b\";\nctx.lineWidth = 2;\nctx.beginPath();\nctx.moveTo(xPix(1), mTop);\nctx.lineTo(xPix(1), mTop + plotH);\nctx.stroke();\nctx.lineWidth = 1;\nctx.fillStyle = \"#c0392b\";\nctx.textAlign = \"left\";\nctx.textBaseline = \"middle\";\nctx.font = \"13px sans-serif\";\nctx.fillText(\"true variance = 1\", xPix(1) + 6, mTop + 14);\n\n// Axis labels and title\nctx.fillStyle = \"#222222\";\nctx.font = \"15px sans-serif\";\nctx.textAlign = \"center\";\nctx.textBaseline = \"top\";\nctx.fillText(\"estimated variance\", mLeft + plotW / 2, H - mBottom + 34);\nctx.save();\nctx.translate(22, mTop + plotH / 2);\nctx.rotate(-Math.PI / 2);\nctx.textBaseline = \"middle\";\nctx.fillText(\"sample count\", 0, 0);\nctx.restore();\nctx.font = \"bold 18px sans-serif\";\nctx.fillText(\"Histogram of estimated sample variances (n = 10, N(0,1))\", W / 2, 25);\n\n// Render\nwindow.renderImage(canvas.toDataURL(\"image/png\"));\n\n// Report\nconsole.log(\n\"sample size=\" + n +\n\" | repetitions=\" + reps +\n\" | seed=42\" +\n\" | mean estimated variance=\" + meanVar.toFixed(5) +\n\" | histogram total=\" + histTotal +\n\" | overflow=\" + overflow\n);"
+    },
+    "output": {
+      "text": "\n                \n                    Out [1]\n                \n                sample size=10 | repetitions=2000 | seed=42 | mean estimated variance=0.98521 | histogram total=2000 | overflow=0\n            ",
+      "plot": {
+        "naturalWidth": 900,
+        "naturalHeight": 560
+      },
+      "requests": 1,
+      "sourceMatchesReviewedCorrection": true,
+      "viewport": {
+        "width": 411,
+        "height": 891,
+        "dpr": 2.625
+      }
+    },
+    "afterApply": {
+      "targetMatchesGenerated": true,
+      "language": "javascript",
+      "outputCleared": true,
+      "requests": 1
+    },
+    "manualRun": {
+      "separateFromApply": true,
+      "reviewedSourceFile": "ai-variance-reviewed.js",
+      "expected": {
+        "meanEstimatedVariance": 0.9852140436801163,
+        "histogramTotal": 2000,
+        "overflow": 0
+      },
+      "independentReview": "Full generated source read and executed through JavaScriptKernel with stubbed canvas, without network. The only correction was printing the final report."
+    }
+  },
+  "screenshots": [
+    {
+      "file": "phone-ai-variance-config.png",
+      "width": 1080,
+      "height": 2340,
+      "sha256": "4c7dc027dd9d0b51d3a0e4fe6565c048bc92d3e3597c2146e92f93698be3c830",
+      "capturedAtUtc": "2026-10-13T04:51:10.231Z",
+      "rects": {
+        "placement": {
+          "x": 28.761905670166016,
+          "y": 174.70237731933594,
+          "width": 353.9047546386719,
+          "height": 42
+        },
+        "language": {
+          "x": 28.761905670166016,
+          "y": 251.9404754638672,
+          "width": 353.9047546386719,
+          "height": 42
+        },
+        "targetKind": {
+          "x": 28.761905670166016,
+          "y": 493.0952453613281,
+          "width": 353.9047546386719,
+          "height": 42
+        },
+        "targetName": {
+          "x": 28.761905670166016,
+          "y": 570.3333740234375,
+          "width": 353.9047546386719,
+          "height": 42
+        }
+      },
+      "viewport": {
+        "width": 411,
+        "height": 891,
+        "dpr": 2.625
+      },
+      "providerRequestsAtCapture": 0,
+      "displayView": {
+        "x": 0,
+        "width": 1080,
+        "y": 380,
+        "height": 1560
+      }
+    },
+    {
+      "file": "phone-ai-variance-preview-start.png",
+      "width": 1080,
+      "height": 2340,
+      "sha256": "779af076297fb59c0d65a1349d6fd0e8b703421dc7ef2cf72344c477f4dc3a28",
+      "capturedAtUtc": "2026-10-13T04:51:24.739Z",
+      "rects": {},
+      "viewport": {
+        "width": 411,
+        "height": 891,
+        "dpr": 2.625
+      },
+      "providerRequestsAtCapture": 1,
+      "displayView": {
+        "x": 0,
+        "width": 1080,
+        "y": 225,
+        "height": 1060
+      }
+    },
+    {
+      "file": "phone-ai-variance-preview-apply.png",
+      "width": 1080,
+      "height": 2340,
+      "sha256": "65116a829003d23dcb4b943f51c90562fedfb945cd129bda37e8ff6cf93cb808",
+      "capturedAtUtc": "2026-10-13T04:51:27.913Z",
+      "rects": {
+        "apply": {
+          "x": 24.761905670166016,
+          "y": 604.9940795898438,
+          "width": 145.80357360839844,
+          "height": 36
+        },
+        "cancel": {
+          "x": 178.5654754638672,
+          "y": 604.9940795898438,
+          "width": 67.16666412353516,
+          "height": 36
+        }
+      },
+      "viewport": {
+        "width": 411,
+        "height": 891,
+        "dpr": 2.625
+      },
+      "providerRequestsAtCapture": 1,
+      "displayView": {
+        "x": 0,
+        "width": 1080,
+        "y": 1100,
+        "height": 630
+      }
+    },
+    {
+      "file": "phone-ai-variance-plot.png",
+      "width": 1080,
+      "height": 2340,
+      "sha256": "461bf061a9cfc81098d16b96a96bc8dd98553848e50cd284eb22d9d18896ff6a",
+      "capturedAtUtc": "2026-10-13T04:53:38.045Z",
+      "rects": {},
+      "viewport": {
+        "width": 411,
+        "height": 891,
+        "dpr": 2.625
+      },
+      "providerRequestsAtCapture": 1,
+      "displayView": {
+        "x": 0,
+        "width": 1080,
+        "y": 225,
+        "height": 900
+      }
+    }
+  ],
+  "cleanup": {
+    "originalWorkbookRestored": true,
+    "originalDraftRestored": true,
+    "originalLanguageRestored": true,
+    "settingsRestored": true,
+    "requestFunctionRestored": true,
+    "temporaryWorkbookRemoved": true,
+    "unexpectedEditsPreserved": false,
+    "rotationRestored": true,
+    "temporaryAdbForwardRemoved": true
+  }
+}

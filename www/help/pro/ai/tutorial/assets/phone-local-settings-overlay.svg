@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 2340">
+  <title>Local model section, readiness and use mode</title>
+  <desc>Yellow outlines locate the Local model section, Ready status, and Use local model: When unsure. The underlying Android screenshot is unchanged.</desc>
+  <g fill="none" stroke="#ffd43b" stroke-width="6">
+    <rect id="local-section-setting" x="60" y="205" width="960" height="128" rx="10"/>
+    <rect id="local-ready-status" x="60" y="824" width="960" height="77" rx="10"/>
+    <rect id="local-use-setting" x="60" y="1036" width="960" height="96" rx="10"/>
+  </g>
+</svg>

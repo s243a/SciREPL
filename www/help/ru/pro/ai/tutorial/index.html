@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="ru" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Практическое руководство по SciREPL Pro: табличные подсказки без оплаты за API, настройка ключа API, предустановка агента Open, онлайн- и локальное автодополнение, а также специализированные ячейки AI Prompt.">
+  <meta name="theme-color" content="#06101d">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ru/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../styles.css">
+  <link rel="stylesheet" href="../../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../../pro/ai/tutorial/tutorial.css">
+  <title>ИИ и автодополнение шаг за шагом · Справка SciREPL Pro</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../tutorial-locales.css">
+</head>
+<body data-editions="pro" data-platforms="android windows-preview">
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+  <header class="site-header">
+    <a class="brand" href="../../../../">sci<span>REPL</span> Help<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+    <nav aria-label="Основная навигация">
+      <a href="../../../tutorials/">Все руководства</a>
+      <a href="../../../../pro/ai/">Справочник по ИИ<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+      <a href="../../../../pro/">Справка Pro<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Язык руководства"><details class="tutorial-language-menu"><summary>Язык руководства: <bdi>Русский</bdi></summary><nav aria-label="Язык руководства"><a href="../../../../en/pro/ai/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../../ar/pro/ai/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../../bn/pro/ai/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../../de/pro/ai/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../../es/pro/ai/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../../fr/pro/ai/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../../hi/pro/ai/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../../id/pro/ai/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../../ja/pro/ai/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../../ko/pro/ai/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../../pt-BR/pro/ai/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="./" lang="ru" hreflang="ru" aria-current="page">Русский</a>
+      <a href="../../../../zh/pro/ai/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Машинный перевод руководства; ожидает проверки носителем языка. Код и технические значения оставлены без изменений. На снимках экрана показан оригинальный интерфейс на английском языке; сопоставляйте переведенные названия элементов управления в этом тексте с вашим приложением.</p></aside>
+    <p class="breadcrumbs"><a href="../../../../">Справка<span class="english-reference"> (Справочная страница на английском языке)</span></a> / <a href="../../../../pro/">Pro<span class="english-reference"> (Справочная страница на английском языке)</span></a> / ИИ и автодополнение</p>
+    <article>
+      <p class="eyebrow">Обучение на практике · Pro</p>
+      <h1>От офлайн-подсказок к написанию кода с помощью ИИ</h1>
+      <p class="lede">Начните с быстрых табличных подсказок, которые не требуют оплаты за запросы. Затем настройте Ассистента, запросите онлайн-варианты, попробуйте модель на устройстве и завершите специализированными ячейками AI Prompt, объясняющими ваш код.</p>
+      <ul class="meta">
+        <li class="chip chip-pro">Только в Pro</li>
+        <li class="chip">Pro 1.4.0 + будущие элементы управления выполнением</li>
+        <li class="chip">Локальная модель: Android</li>
+      </ul>
+      <p class="screen-note">Большинство снимков экрана сделаны в приложении для Android, некоторые — в браузере. Интерфейс может отличаться в зависимости от версии приложения.</p>
+      <p class="callout"><strong>Проверьте версию.</strong> Изменения в механизме выполнения, описанные в <a href="#execution-permissions">приложении</a>, запланированы для <strong>предлагаемой Pro 1.5.0</strong>, которая <strong>еще не выпущена</strong>; окончательный номер версии может измениться.</p>
+      <p class="callout"><strong>«Free» здесь означает отсутствие оплаты за API.</strong> Табличные подсказки и модель на устройстве не тарифицируются провайдером. Это не делает их функциями редакции Free: это руководство предназначено для <strong>SciREPL Pro</strong>. Онлайн-запросы используют вашу собственную учетную запись у провайдера и могут стоить денег.</p>
+      <nav class="lesson-nav" aria-label="Шаги руководства по ИИ и автодополнению">
+        <strong>В этом уроке</strong>
+        <ol>
+          <li><a href="#tables">Начните с офлайн-подсказок по таблицам</a></li>
+          <li><a href="#key">Сохраните ключ API</a></li>
+          <li><a href="#agent">Создайте небольшой пример с предустановкой агента Open</a></li>
+          <li><a href="#online">Запросите автодополнения на основе API</a></li>
+          <li><a href="#local">Попробуйте модель на устройстве</a></li>
+          <li><a href="#prompt-cells">Используйте ячейку AI Prompt для понимания кода</a></li>
+        </ol>
+        <p><a href="../../../tutorials/">Выбрать другое руководство</a> · <a href="#troubleshooting">Если что-то пойдет не так</a></p>
+      </nav>
+
+      <section id="tables">
+        <p class="step-label">Шаг 1 · Ключ API не требуется</p>
+        <h2>Начните с офлайн-подсказок по таблицам</h2>
+        <p>Найдите <strong>☰ Меню</strong> в заголовке приложения: это кнопка с <strong>тремя горизонтальными линиями</strong>. Откройте <strong>Автодополнение</strong>. Его переключатель <strong>Раздел</strong> разделяет <strong>Общие</strong>, <strong>ИИ-подсказки (онлайн)</strong> и <strong>Локальная модель (на устройстве)</strong>. Начните с General.</p>
+        <ol class="lesson-steps">
+          <li>Установите <strong>Локальное автодополнение кода → Вкл.</strong>. Значение по умолчанию <strong>Авто (включено на компьютере, выключено для сенсорного ввода)</strong> иначе оставило бы функцию выключенной на телефоне.</li>
+          <li>Установите <strong>Чипы подсказок → Вкл.</strong> и сохраните <strong>Подсказки → У курсора</strong>. Чтобы изолировать таблицы, установите <strong>Подсказки ИИ → Отключено</strong> в онлайн-разделе и <strong>Использовать локальную модель → Отключено</strong> в локальном разделе, если какой-либо из этих параметров был включен ранее. Вернитесь в General.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-general" role="img" aria-label="Экран General Completion в браузере Pro. Желтыми рамками выделены заголовки Ghost text и Suggestion chips, Suggestions: At cursor и Suggestion chips: On.">
+            <div class="shot-stage shot-stage--completion-general">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general.png" width="414" height="820" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general-overlay.svg" width="414" height="820" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Фактические элементы управления раздела General в узком <strong>снимке браузера, а не скриншоте Android</strong>. Желтые рамки указывают на <strong>Подсказки → У курсора</strong>, <strong>Чипы подсказок → Вкл.</strong> и заголовки их разделов. Выпадающий список Section находится вверху; для доступа к нижним настройкам может потребоваться прокрутка.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-general.png">Просмотреть полный снимок настроек</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>Закройте Completion. В новой тренировочной рабочей тетради выберите ячейку <strong>код</strong> и язык <strong>JavaScript</strong>. Введите <code>cons</code>, расположив курсор в конце без выделения текста. Эти первые буквы <code>const</code> называются <strong>префиксом</strong>. Обратите внимание на появление <code>const</code>.</li>
+          <li>На снимке экрана ниже за <code>cons</code> следует полупрозрачный <code>t</code> — встроенный <strong>полупрозрачный текст</strong>. Коснитесь <strong>Принять</strong> или нажмите <kbd>Tab</kbd>, чтобы вставить предложение и получить <code>const</code>. Если вместо этого появится чип <code>const</code>, нажатие на него — еще один способ принять этот вариант. Завершите строку самостоятельно, например: <code>const values = [12, 15, 18];</code>.</li>
+        </ol>
+        <p class="callout"><strong>Accept — это не Run.</strong> Принятие подсказки изменяет исходный код; оно не выполняет ячейку. Примеры на JavaScript и Python в этом разделе демонстрируют автодополнение при редактировании. Выполнение этих практических ячеек не входит в задачи раздела. Когда включен только уровень офлайн-таблиц, ввод префикса не отправляет запрос к API и не запускает среду выполнения языка только ради генерации подсказок.</p>
+        <p class="note"><strong>Будущая онлайн-предвыборка:</strong> планируется подключаемый режим, который сможет отправлять запросы к модели по мере ввода. Он пока недоступен, и номер выпуска ему не присвоен. Утверждение об отсутствии запросов выше относится к текущему уровню офлайн-таблиц, а не к этому будущему режиму.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-javascript.png" width="1080" height="2340" alt="Фрагмент нижней части редактора с реального снимка экрана Android Galaxy S24+: код JavaScript cons, за которым следует полупрозрачная буква t и кнопка Accept, при этом чипы подсказок включены, а строка дополнительных клавиш скрыта." loading="lazy" decoding="async">
+          <figcaption><strong>Детальный вид реального снимка экрана Android Galaxy S24+.</strong> Табличное автодополнение JavaScript предлагает <code>const</code> для <code>cons</code>: полупрозрачный символ <code>t</code> представляет собой ghost text, кнопка <strong>Принять</strong> видна, а чипы включены. API и локальная модель отключены. Строка дополнительных клавиш здесь скрыта для контраста со следующим изображением; это отдельный дополнительный элемент управления, а не обязательное условие для автодополнения.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-javascript.png">Просмотреть исходный полный снимок экрана телефона с автодополнением JavaScript cons → const</a>
+        </figure>
+        <p><strong>Посмотрите два варианта офлайн-отображения на телефоне.</strong> Оставьте <strong>Чипы подсказок → Вкл.</strong>, выберите <strong>Python</strong> и введите <code>pri</code>. Полупрозрачный фрагмент <code>nt</code> после курсора предлагает <code>print</code>; он не станет частью исходного кода, пока вы его не примете. <strong>Вам не нужно отключать чипы, чтобы видеть полупрозрачный текст.</strong> Одиночный кандидат может отображаться полупрозрачным текстом, тогда как чипы предлагают выбор, если подходит несколько вариантов. Оставьте <strong>Подсказки ИИ</strong> и <strong>Использовать локальную модель</strong> выключенными для обоих примеров.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-ghost.png" width="1080" height="2340" alt="Фрагмент нижней части редактора со снимка экрана Android Galaxy S24+: исходный код Python pri, за которым следует полупрозрачный текст nt и кнопка Accept. Чипы подсказок включены." loading="lazy" decoding="async">
+          <figcaption><strong>Детальный вид реального снимка экрана Android Galaxy S24+.</strong> Офлайн-автодополнение по таблицам предлагает один полупрозрачный суффикс у курсора при <strong>Чипы подсказок → Вкл.</strong>. API и локальная модель отключены.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-ghost.png">Просмотреть исходный полный снимок экрана телефона с полупрозрачным текстом подсказки</a>
+        </figure>
+        <p>Пока чипы по-прежнему находятся в состоянии <strong>Вкл.</strong>, замените тренировочный ввод этими тремя строками, оставив курсор после незавершенного <code>sample_m</code>. Строка предложит <code>sample_mean</code> и <code>sample_median</code> из имен вашего собственного исходного кода. Коснитесь чипа, чтобы выбрать вариант; в отличие от полупрозрачного текста, эта строка показывает альтернативы.</p>
+        <pre><code>sample_mean = 0
+sample_median = 0
+sample_m</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-chips.png" width="1080" height="2340" alt="Фрагмент нижней части редактора со снимка экрана Android Galaxy S24+: в исходном коде Python определены sample_mean и sample_median, затем sample_m с чипами кандидатов sample_mean и sample_median." loading="lazy" decoding="async">
+          <figcaption><strong>Детальный вид реального снимка экрана Android Galaxy S24+.</strong> При включенных чипах полученные из исходного кода офлайн-кандидаты предлагают два указанных выше имени. API и локальная модель остаются выключенными.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-chips.png">Просмотреть исходный полный снимок экрана телефона с чипами вариантов</a>
+        </figure>
+        <p><strong>Строка дополнительных клавиш</strong>, видимая на изображениях телефона с Python, и <strong>цвета синтаксиса при вводе</strong> — это отдельные, необязательные элементы управления Pro. См. <a href="../../../interface/appearance/#pro-editor">Практическое руководство по внешнему виду: дополнительные клавиши и цвета синтаксиса</a>, чтобы включить или отключить их, а также найти отдельный флажок подсветки в редакторе файлов.</p>
+        <p>Опробовав эти варианты отображения автодополнения, переключитесь обратно на <strong>JavaScript</strong> и оставьте чипы включенными до конца урока.</p>
+        <p>Показанные здесь офлайн-чипы, включенные в <strong>Автодополнение → Общие → Чипы подсказок</strong>, объединяют подготовленные таблицы имен с локальной информацией о коде. В Python сюда входят переменные и функции, найденные в коде рабочей тетради, а также кэшированные имена ядра и атрибуты объектов, включая методы. Частота и история принятия помогают их ранжировать. В других языках охват отличается: статические списки, невыполненные определения или устаревшие снимки могут предложить имя, которое в данный момент недоступно в области видимости. <strong>Табличное дополнение не является языковой моделью</strong> и не анализирует вашу задачу.</p>
+        <p><strong>Только в конце ячейки</strong> — альтернатива, если подсказки в середине ячейки вас отвлекают. Выделение, строка, комментарий или разделенное имя могут намеренно не давать подсказок. В компактной альбомной ориентации необязательные строки могут исчезать, чтобы сохранить место для кода; см. <a href="../../../interface/appearance/">Настройки внешнего вида</a>.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-position">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-position.png" width="1080" height="2340" alt="Фрагмент реального экрана General Completion на Android Galaxy S24+: выпадающий список Suggestions открыт, выбран пункт At cursor, а под ним находится End of cell only." loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Реальный снимок экрана Android Galaxy S24+.</strong> В <strong>Автодополнение → Общие → Текст-призрак → Подсказки</strong> выберите <strong>У курсора</strong> или <strong>Только в конце ячейки</strong>. Последнее означает конец <em>всей ячейки</em>, а не каждой строки. Раскрытое меню Android перекрывает расположенные рядом настройки отступов; это отдельные элементы управления, не относящиеся к данному выбору.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-position.png">Просмотреть исходный полный снимок экрана телефона с раскрытым меню Suggestions</a>
+        </figure>
+      </section>
+
+      <section id="key">
+        <p class="step-label">Шаг 2 · Онлайн-настройка</p>
+        <h2>Сохраните ключ API</h2>
+        <p>Ключ API позволяет SciREPL использовать подконтрольную вам учетную запись у провайдера. Получите ключ у этого провайдера, ознакомьтесь с актуальными тарифами и лимитами учетной записи и используйте для этого урока только небольшую практическую рабочую тетрадь с неконфиденциальными данными.</p>
+        <ol class="lesson-steps">
+          <li>Откройте <strong>Меню → 🤖 AI Assistant (Pro)</strong>. Нажмите на панели значок <strong>⚙ шестеренки</strong> , чтобы открыть AI Settings.
+            <p class="callout"><strong>Не видите шестеренку?</strong> Клавиатура может сместить или прокрутить панель Ассистента. Потяните содержимое панели вниз, чтобы прокрутить ее к началу и увидеть шестеренку; закрытие клавиатуры также освободит место.</p>
+          </li>
+          <li>Установите <strong>Настроить модель для → ИИ-ассистент</strong>. Выберите <strong>Бэкенд</strong> (например, OpenRouter) и <strong>Модель</strong>, а также проверьте конечную точку (endpoint), если ваш бэкенд поддерживает ее настройку.</li>
+          <li>Введите соответствующий <strong>Ключ API</strong>. Используйте <strong>Сохранённые ключи</strong> для управления ключами других пар провайдера и эндпоинта. Ключ для одного назначения не подходит автоматически для другого.</li>
+          <li>Нажмите <strong>Сохранить</strong>. Само по себе сохранение настроек не отправляет запрос к модели. Оставьте панель открытой для следующего шага.</li>
+        </ol>
+        <p class="callout"><strong>Не храните ключ в рабочей тетради.</strong> Не вставляйте его в ячейку, запрос, снимок экрана или экспортированный файл. Сохраненные ключи остаются в локальном хранилище приложения/браузера без шифрования на уровне приложения; защищайте устройство и не выполняйте ненадежный код. В <a href="../../../../../pro/privacy.html">политике конфиденциальности Pro</a> объясняется, что именно сохраняется и передается.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--key-setup" role="img" aria-label="Окно AI Settings в браузере Pro без указанного ключа. Желтыми рамками выделены Configure model for: AI Assistant, Backend: OpenRouter, Model: GLM 5.3 Flash и пустое поле API Key.">
+            <div class="shot-stage shot-stage--key-setup">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup.png" width="390" height="538" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup-overlay.svg" width="390" height="538" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Свежий <strong>снимок AI Settings в браузере без введенного ключа</strong>, а не скриншот Android. Желтыми рамками отмечены поля для настройки: <strong>Настроить модель для</strong>, <strong>Бэкенд</strong>, <strong>Модель</strong> и <strong>Ключ API</strong>. Полупрозрачный текст <code>sk-…</code> — это плейсхолдер, а не сохраненный ключ. Прокрутите ниже, чтобы перейти к <strong>Сохранить</strong>; для этого изображения ключ не вводился и запрос не отправлялся.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-key-setup.png">Просмотреть исходный снимок экрана конфигурации ИИ</a>
+        </figure>
+        <p>Недорогая модель с поддержкой инструментов — разумная отправная точка для Ассистента. Примеры для сравнения включают <a href="https://openrouter.ai/z-ai/glm-5.3-flash">GLM 5.3 Flash</a>, <a href="https://developers.openai.com/api/docs/models/gpt-6-luna">GPT-6 Luna</a>, <a href="https://www.anthropic.com/claude/haiku">Claude Haiku 5.5</a> и <a href="https://api-docs.deepseek.com/quick_start/pricing">DeepSeek V4 Flash</a>. Точные идентификаторы моделей, доступные версии, поддержка инструментов и цены зависят от версии вашего приложения и провайдера; сверяйтесь с текущим списком выбора и документацией провайдера. Для появления недавно анонсированной модели может потребоваться обновление приложения. Позже вы сможете выбрать другую недорогую модель специально для автодополнений.</p>
+        <aside class="callout" id="custom-model">
+          <p><strong>Модели нет в списке?</strong> В <strong>Настройки ИИ → Настроить модель для → ИИ-ассистент</strong> сначала выберите правильный <strong>Бэкенд</strong>, затем укажите <strong>точный идентификатор модели API</strong> в <strong>Или введите пользовательский ID модели</strong> под списком выбора Model и нажмите <strong>Сохранить</strong>. Это поле уже доступно в Pro 1.4.0.</p>
+          <p>Сверяйте идентификатор с выбранным провайдером, а не просто с маркетинговым названием модели. Для OpenRouter укажите префикс организации — например, <code>anthropic/claude-haiku-5.5</code> на <a href="https://openrouter.ai/anthropic/claude-haiku-5.5">странице этой модели</a>. Вводите именно идентификатор, а не URL этой страницы. Пользовательский идентификатор имеет приоритет над выпадающим списком; повторный выбор модели из списка очищает пользовательское поле.</p>
+          <p><strong>Идентификатор не добавляет поддержку API.</strong> Модель должна поддерживать вызовы инструментов через API, который использует SciREPL. Проверяйте доступ у провайдера, совместимость и текущие цены; сохранение не проверяет их и не отправляет запрос к модели.</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--custom-model" role="img" aria-label="Окно AI Settings в браузере Pro без указанного ключа. Желтыми рамками выделены Backend: OpenRouter и поле пользовательского идентификатора модели, содержащее anthropic/claude-haiku-5.5, расположенное под списком выбора Model.">
+            <div class="shot-stage shot-stage--custom-model">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model.png" width="390" height="456" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model-overlay.svg" width="390" height="456" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Реальный <strong>снимок экрана браузера без ключа</strong>, а не скриншот Android. Желтая рамка под Model указывает на поле пользовательского идентификатора. В раскрывающемся списке по-прежнему отображается GLM 5.3 Flash, однако введенный идентификатор Haiku будет иметь приоритет при нажатии Save. Поле API Key и кнопка Save находятся ниже области кадрирования; ключ не вводился, кнопка Save не нажималась, и запрос к модели не отправлялся. Это пример настройки, а не проверка работоспособности модели.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-custom-model.png">Просмотреть исходный снимок экрана с пользовательской моделью</a>
+        </figure>
+      </section>
+
+      <section id="agent">
+        <p class="step-label">Шаг 3 · Осознанное использование инструментов</p>
+        <h2>Создайте небольшой пример с предустановкой агента Open</h2>
+        <p><strong>Открытый</strong> — это <strong>второй по уровню разрешений</strong> пресет безопасности после <strong>Полный контроль</strong>. По умолчанию он разрешает редактирование блокнота с меньшим количеством запросов подтверждения, чем Cautious. Запрашивается ли подтверждение выполнения, зависит от вашей версии и настроек разрешений; см. <a href="#execution-permissions">приложение о будущей системе подтверждения выполнения</a>. Используйте его осознанно в тренировочной рабочей тетради, а не как обязательное требование для автодополнения.</p>
+        <ol class="lesson-steps">
+          <li>В AI Settings выберите <strong>Security Level → Open</strong> и <strong>Запись агента → Активный лист</strong>. Оставьте просмотр исходного кода выключенным и отключите <strong>Автозапуск ячеек, созданных ИИ</strong>. В разделе <strong>Kernels…</strong>, установите <strong>JavaScript → Ask</strong>, затем сохраните. Это правило для ядра все равно будет запрашивать подтверждение, даже если ранее для инструмента выполнения было сохранено значение Allow.
+            <p class="callout" id="auto-run-warning"><strong>Отключение автозапуска — это не блокировка выполнения.</strong> Оно останавливает автоматический запуск вновь созданных ячеек, но не отключает отдельные запросы <code>execute_cell</code> или <code>run_cells</code>. В выпущенной версии Pro 1.4.0 значение Open по умолчанию может разрешать их без запроса подтверждения. В будущей версии значение Open по умолчанию будет запрашивать подтверждение, однако явное разрешение (Allow) для инструмента или ядра может изменить это поведение по умолчанию. Настройка <strong>Настройки ИИ → Ядра… → JavaScript → Спрашивать</strong> сохраняет выполнение JavaScript в этом упражнении под защитой подтверждения. Ваш собственный ручной запуск ячейки Run остается отдельным действием. <a href="#execution-permissions">Элементы управления выполнением в следующей версии подробно описаны в приложении.</a></p>
+            <aside class="callout" id="sandbox">
+              <p>Если вы предпочитаете больше подтверждений, используйте вместо этого <strong>Осторожный</strong>. Режим Open по-прежнему соблюдает отдельные параметры просмотра исходного кода и области записи; Full control обходит эти два общих ограничения. Индивидуальные разрешения и другие защитные барьеры по-прежнему действуют. <strong>Просмотр</strong> представляет собой дополнительное ограничение преимущественно для чтения, которое помешало бы этой демонстрации создания ячеек.</p>
+              <h3>Что изолированная среда браузера защищает — а что нет</h3>
+              <p>Обычное выполнение рабочей тетради происходит в браузере/WebView и его средах выполнения языков с виртуальной файловой системой, а не с неограниченным доступом к файлам вашего телефона. Это полезный рубеж, но <strong>не гарантия того, что код не может нанести вред</strong>. Разрешенный код JavaScript и мосты к нему могут получить доступ к данным приложения и сохраненным учетным данным; ограничения сети действуют по принципу наилучших усилий после запуска разрешенного кода, а не как изолирующий барьер, которому следует доверять секреты. Будущий запрос на выполнение добавляет шаг подтверждения, а не изоляцию от данных приложения. Используйте тренировочную рабочую тетрадь и не храните в ней конфиденциальные данные.</p>
+              <p><strong>Удаленный терминал / терминал MCP устроен иначе:</strong> он может предоставить доступ к реальной командной оболочке на хосте брокера за пределами локальной песочницы браузера. Оставьте Remote и Terminal выключенными здесь. Ознакомьтесь с разделом <a href="../../../../pro/remote/">Удаленный доступ и безопасность<span class="english-reference"> (Справочная страница на английском языке)</span></a> перед их включением. Вежливая просьба «не делай...» в запросе не является мерой безопасности.</p>
+            </aside>
+          </li>
+          <li>На панели Ассистента выберите <strong>This workbook</strong>. Оставьте параметры <strong>Review</strong>, <strong>Remote</strong> и <strong>Terminal</strong>  выключенными для этого примера с прямым подключением к провайдеру.
+            <figure class="phone-figure" id="assistant-context-controls">
+              <p class="screen-note">Заголовок панели</p>
+              <div class="shot-window shot-window--assistant-context-header" role="img" aria-label="Верхний фрагмент панели Ассистента на Android. Желтой рамкой выделен пункт This workbook, выбранный в раскрывающемся списке бесед.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <p class="screen-note">Нижние элементы управления</p>
+              <div class="shot-window shot-window--assistant-context-footer" role="img" aria-label="Нижний фрагмент той же панели Ассистента на Android. Желтыми рамками выделены неотмеченные флажки Review, Remote и Terminal. Видны пустое поле сообщения и кнопка Send.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption><strong>Два фрагмента одного и того же реального снимка экрана Android Galaxy S24+.</strong> Желтые рамки указывают на <strong>Эта книга</strong> и <strong>Просмотр</strong>, <strong>Удаленный</strong> и <strong>Терминал</strong> (все флажки сняты). Пустая средняя часть панели опущена. Никаких запросов не отправлялось.</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-assistant-context.png">Просмотреть исходный полный снимок экрана панели Ассистента</a>
+            </figure>
+          </li>
+          <li>Отправьте тренировочный промпт из врезки ниже. Кнопка панели <strong>Send</strong>  уже запускает агентный цикл инструментов: здесь нет дополнительного переключателя «Agent mode». Кнопка полноэкранного редактора <strong>Agent</strong>  представляет собой отдельный рабочий процесс.
+            <div class="callout" id="assistant-practice-prompt">
+              <p><strong>Скопируйте этот промпт.</strong> Вставьте его в <strong>поле сообщения Ассистента</strong>, а не в ячейку с кодом, затем нажмите <strong>Отправить</strong>.</p>
+              <pre data-translatable-prompt="assistant-practice"><code>В этой практической рабочей тетради добавьте пояснение на Markdown, за которым следует
+одна ячейка JavaScript с именем summary_demo. Сгенерируйте входной
+массив из 10 псевдослучайных целых чисел от 1 до 20 включительно.
+Используйте генератор Парка — Миллера с начальным state 42. Для каждого
+значения сначала обновите state = (16807 * state) % 2147483647;
+затем добавьте 1 + Math.floor(20 * state / 2147483647).
+Сгенерируйте массив по этому правилу; не прописывайте его значения жестко в коде
+и не используйте Math.random. Сбрасывайте state на 42 при каждом запуске ячейки (Run).
+Выведите сгенерированный входной массив, затем вычислите количество элементов (длину
+массива), среднее арифметическое, минимум и максимум. Выведите каждый
+результат на отдельной строке с меткой с помощью console.log.
+Используйте обычные массивы JavaScript, арифметику и Math.floor,
+без сторонних пакетов.
+Не запускайте ячейки и не изменяйте существующие. Не используйте файлы,
+хранилище, API DOM или сетевые запросы. Объясните ожидаемые
+результаты, чтобы я мог проверить код.</code></pre>
+            </div>
+          </li>
+          <li>Прочтите предложенное пояснение и новую ячейку <code>summary_demo</code>. Убедитесь, что она генерирует входные данные по указанному правилу и вычисляет сводные показатели на основе этого массива. Запустите эту ячейку самостоятельно, затем сравните с приведенной ниже проверкой. Ожидаемые результаты: количество элементов <strong>10</strong>, среднее <strong>9.3</strong>, минимум <strong>1</strong>, максимум <strong>20</strong>.</li>
+        </ol>
+        <aside class="callout" id="seeded-summary-check">
+          <h3>Проверьте входные данные и сводные показатели</h3>
+          <p>Семя (seed) фиксирует последовательность, поэтому эти кажущиеся случайными входные данные воспроизводимы. При соблюдении описанного выше правила «обновление перед выборкой» ожидаются следующие значения:</p>
+          <pre><code>Input: [1, 11, 15, 6, 8, 4, 20, 11, 11, 6]
+Count: 10
+Mean: 9.3
+Minimum: 1
+Maximum: 20</code></pre>
+          <p>Текстовые метки вывода могут отличаться, но числа должны совпадать. Повторный запуск ячейки должен давать те же входные данные и сводные показатели. Другое начальное значение seed изменит ход упражнения; этот небольшой генератор предназначен для воспроизводимой демонстрации, а не для криптографически безопасной случайности.</p>
+        </aside>
+        <figure class="phone-figure" id="assistant-seeded-result">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/phone-agent-result.png" width="1080" height="2340" alt="Реальный снимок экрана Android Galaxy S24+, показывающий часть проверенного исходного кода JavaScript summary_demo и вывод с фиксированным сидом: входные данные 1, 11, 15, 6, 8, 4, 20, 11, 11, 6; количество элементов 10, среднее 9.3, минимум 1, максимум 20." loading="lazy" decoding="async">
+          <figcaption><strong>Реальный снимок экрана Android Galaxy S24+ с описанным выше упражнением по генерации вектора с фиксированным сидом.</strong> GLM 5.3 Flash создал практические ячейки, приостановил работу на лимите в четыре шага и завершил выполнение после одного нажатия <strong>Продолжить</strong>. Код был проверен и запущен вручную — не автоматически агентом — и сгенерировал ожидаемые входные данные: количество элементов 10, среднее 9.3, минимум 1 и максимум 20. Второй ручной запуск Run воспроизвел те же результаты. На снимке экрана показан вывод и часть исходного кода; прокрутите ячейку вверх, чтобы проверить сид и первые строки.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-agent-result.png">Просмотреть полный снимок экрана телефона с проверенным кодом и результатом</a>
+        </figure>
+        <p><strong>Перед нажатием Send:</strong> Ассистент включает выбранную беседу и ограниченный предварительный просмотр ячеек текущей рабочей тетради (до первых 500 символов каждой ячейки плюс метаданные). Разрешенные инструменты могут передавать больше данных. Отключение просмотра исходного кода <em>не</em> останавливает отправку предварительного просмотра рабочей тетради. Это отличается от передачи меньшего объема данных текущей ячейки, используемой автодополнением ниже. <a href="#planned-workbook-context">Планируемые изменения контекста рабочей тетради описаны в приложении.</a></p>
+        <p><strong>Работа приостановлена с кнопкой Continue?</strong> Параметр <strong>Ограничения агента (за запуск) → Макс. шагов</strong>, выделенный ниже, управляет лимитом шагов для одного ограниченного запуска. Агент может достичь этого лимита до завершения задачи. Ознакомьтесь с тем, что он уже выполнил, затем нажмите <strong>Продолжить</strong>, если задача не завершена и вам требуется еще один ограниченный запуск. Продолжение может повлечь дополнительные расходы на API; оно не требуется после статуса <strong>Готово</strong>.</p>
+        <figure class="phone-figure" id="assistant-run-controls">
+          <div class="shot-window shot-window--assistant-open" role="img" aria-label="Прокрученное окно AI Settings в браузере Pro. Желтыми рамками отмечены пункты Auto-run cells created by AI (снят), Allow source browsing (снят), Agent writes: Active worksheet, Max steps с подсказкой значения по умолчанию 25 и Security Level: Open.">
+            <div class="shot-stage shot-stage--assistant-open">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open.png" width="390" height="1100" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open-overlay.svg" width="390" height="1100" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Окно AI Settings, прокрученное к разделам выполнения и разрешений. Желтые рамки указывают на <strong>Автоматически запускать созданные ИИ ячейки</strong> и <strong>Allow source browsing</strong> (оба флажка сняты), <strong>Область записи агента → Активный рабочий лист</strong>, <strong>Макс. шагов</strong> под <strong>Ограничения агента (за запуск)</strong> и <strong>Уровень безопасности → Открытый</strong>. Этот <strong>снимок браузера сделан до обновления с подтверждением выполнения</strong>; это не запрос к провайдеру и не тест безопасности. Метка Open описывает прежние настройки по умолчанию и длиннее, чем может отобразить узкий выпадающий список. Будущие диалоговые окна подтверждения и переопределения здесь не показаны.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-open.png">Просмотреть исходный полный снимок прокрученных настроек</a>
+        </figure>
+      </section>
+
+      <section id="online">
+        <p class="step-label">Шаг 4 · Запрашивайте альтернативы, когда они вам нужны</p>
+        <h2>Запросите автодополнения на основе API</h2>
+        <ol class="lesson-steps">
+          <li>Откройте <strong>Меню → Автодополнение</strong>, затем выберите <strong>Раздел → ИИ-подсказки (онлайн)</strong>. Установите <strong>Подсказки ИИ → По нажатию</strong>.</li>
+          <li>Оставьте <strong>Модель автодополнения → Использовать настройки ИИ-ассистента</strong>, чтобы унаследовать его провайдера, конечную точку и модель. Или выберите <strong>Выбрать провайдера и модель</strong>, укажите сохраненную пару провайдера и эндпоинта, а также недорогую модель, подходящую для коротких подсказок. На этом экране ключ не вводится; <strong>Открыть настройки ИИ</strong> позволяет предварительно добавить его.</li>
+          <li>Откройте <strong>Дополнительно</strong> этого раздела, чтобы проверить время ожидания ответа и лимиты расходов. Значения по умолчанию составляют <strong>6 с</strong>, <strong>$0.25/день</strong> и <strong>$5/месяц</strong>. Проверяйте цены перед их увеличением.</li>
+          <li>Вернитесь в редактор <strong>JavaScript</strong> и введите этот практический фрагмент:
+            <pre><code>const values = [12, 15, 18];
+const average = </code></pre>
+            Оставьте курсор после незавершенной строки <code>const average = </code>. Нажмите <strong>…</strong> в конце строки подсказок, используйте дополнительную клавишу <strong>…AI</strong> или нажмите <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd>.</li>
+          <li>Проверьте фактическую полезную нагрузку и назначение первого запроса перед его отправкой. Чипы ИИ отмечены значком <strong>✦</strong>. Коснитесь одного из них, чтобы принять его; сокращенный или многострочный чип сначала откроет предварительный просмотр. Проверьте полученный исходный код перед выполнением (Run).</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/completion-online.png" width="414" height="820" alt="Экран онлайн-автодополнения в браузере Pro с параметрами On tap и Choose provider and model, поясняющий, что ключи провайдеров не сохранены, и предлагающий кнопку Open AI Settings." loading="lazy" decoding="async">
+          <figcaption>Специально сделанный <strong>снимок браузера без указанного ключа</strong>, демонстрирующий элементы управления независимой моделью. Предупреждение вполне реально: без сохраненного ключа и действительного адреса назначения ничего отправить нельзя. Настроенные вами провайдер и модель появятся здесь после шага 2.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-online.png">Просмотреть полный снимок настроек онлайн-режима</a>
+        </figure>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-online-chips.png" width="1080" height="2340" alt="Фрагмент нижней части редактора со снимка экрана Android Galaxy S24+: незавершенное выражение среднего значения на JavaScript имеет два усеченных чипа ИИ, values.reduce и eval(values, каждый из которых отмечен звездочкой." loading="lazy" decoding="async">
+          <figcaption><strong>Детальный вид реального снимка экрана Android Galaxy S24+ после выполнения запроса на автодополнение.</strong> Для автодополнения использовалась модель <strong>Gemini 3.5 Flash-Lite через OpenRouter</strong>, в то время как Ассистент оставался на <strong>GLM 5.3 Flash</strong>. Два чипа со значком ✦ сокращены; варианты вывода могут различаться, поэтому проверьте предварительный просмотр перед принятием.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-online-chips.png">Просмотреть исходный полный снимок экрана телефона с онлайн-чипами вариантов</a>
+        </figure>
+        <p class="callout"><strong>Выбирайте код, а не просто чип ИИ.</strong> В этом запросе первый чип предложил <code>values.reduce((a, b) => a + b, 0) / values.length;</code>. Нажмите на него, чтобы просмотреть полный предпросмотр: он суммирует массив и делит на его длину, что дает <strong>15</strong> для этого примера. Второй чип предложил <code>eval(values.join(' + ')) / values.length;</code>. <strong>Отклоните эту ненужную альтернативу с <code>eval</code></strong>: для вычисления среднего значения не требуется превращать строку в исполняемый код. Проверяйте возвращенный код перед принятием и запускайте Run только после проверки.</p>
+        <figure class="phone-figure" id="online-completion-preview">
+          <div class="shot-window shot-window--completion-preview" role="img" aria-label="Фрагмент снимка экрана Android Galaxy S24+ с предварительным просмотром подсказки ИИ: values.reduce((a, b) =&gt; a + b, 0) / values.length;, с кнопками Cancel и Insert all. Клавиатура не показана. Подсказка еще не была вставлена.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-preview.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Полный предварительный просмотр кода на Galaxy S24+.</strong> Новый запрос к Gemini Flash-Lite вернул то же выражение <code>reduce</code>. <strong>Принятие только до определенной строки:</strong> для многострочной подсказки коснитесь или нажмите на последнюю нужную вам строку. Это мгновенно вставит все строки от первой до выбранной, пропустив последующие. <strong>Вставить всё</strong> принимает всю подсказку целиком; <strong>Отмена</strong> ничего не вставляет. В данном примере представлена одна строка кода, пусть она и переносится на экране, поэтому нажатие на нее принимает выражение целиком. Принятие подсказки изменяет исходный код; оно не выполняет ячейку (Run).</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-preview.png">Просмотреть исходный полный снимок экрана телефона с предварительным просмотром автодополнения</a>
+        </figure>
+        <p>Запрашивается до пяти вариантов, но на вашем экране может поместиться меньше. Повторное нажатие сначала перелистывает уже полученные варианты; когда они заканчиваются, можно запросить новые. Коснитесь во время анимации выполнения запроса, чтобы отменить его. Запоздалые ответы отбрасываются по истечении времени ожидания, а ввод текста или перемещение курсора делают старые подсказки неактуальными.</p>
+        <p><strong>Независимый означает независимый:</strong> отдельный выбор модели для автодополнения сохраняется при смене модели Ассистента. Это удобно, когда вам нужен мощный агент, но недорогое автодополнение. Следование за Ассистентом наследует только его конфигурацию, а <em>не</em> его историю бесед или разрешения агента.</p>
+        <aside class="callout" id="completion-privacy">
+          <h3>Знайте, за что вы платите и что отправляете</h3>
+          <p>Онлайн-автодополнение работает <strong>по запросу</strong>: обычный ввод текста ничего не отправляет. Режим <strong>Prefetch while I type</strong> пока недоступен в этом рабочем процессе. Автодополнение отправляет ограниченный контекст текущей ячейки: не более 1,500 символов до курсора, 200 после него и до 12 локальных имен, но не чат Ассистента и не всю рабочую тетрадь целиком. Маскирование секретов работает по принципу наилучших усилий, поэтому проверяйте полезную нагрузку самостоятельно.</p>
+          <p><strong>Всегда разрешать</strong> предоставляет постоянное согласие для этого назначения; при смене провайдера, эндпоинта или модели запрос будет показан снова. <strong>Отправлять не спрашивая</strong> изначально активирует этот выбор, но все же однократно показывает первую реальную полезную нагрузку. Оставьте <strong>Спрашивать каждый раз</strong> на этапе обучения.</p>
+          <p>Лимиты на день и месяц представляют собой <strong>мягкие ограничители расходов только для автодополнения</strong>, а не гарантированные лимиты биллинга у провайдера и не бюджет для запросов Ассистента или AI Prompt. Сбои и отмены могут сохранять зарезервированную сумму списания. Очистка истории расходов не сбрасывает значения установленных лимитов. Для модели без указанной цены необходимо явно задать пределы цен на ввод и вывод, иначе приложение откажется отправлять запрос.</p>
+        </aside>
+      </section>
+
+      <section id="local">
+        <p class="step-label">Шаг 5 · Необязательная загрузка для Android</p>
+        <h2>Попробуйте модель на устройстве</h2>
+        <p>Необязательная модель <strong>Qwen2.5-Coder 0.5B</strong> локально предлагает варианты кода, когда таблицы не дают уверенного ответа. Это небольшая модель автодополнения кода, а <strong>не замена диалоговому агенту</strong>. После установки выполнение инференса не отправляет вводимый код провайдеру и не влечет расходов на API.</p>
+        <ol class="lesson-steps">
+          <li>На поддерживаемом телефоне Android с версией Pro, установленной из <strong>Google Play</strong>, откройте <strong>Меню → Автодополнение → Раздел → Локальная модель (на устройстве)</strong>.</li>
+          <li>Нажмите <strong>Установить</strong> и выделите время и место в хранилище для загрузки объемом примерно <strong>400 МБ</strong>. Текущие версии, установленные из сторонних источников (sideload), не могут загрузить модель через этот процесс.</li>
+          <li>После завершения оставьте <strong>Использовать локальную модель → Когда нет уверенности</strong>. Таблицы отвечают на простые случаи, а модель подключается, когда они не дают однозначного ответа. Значение <strong>Всегда</strong> запускает ее чаще; <strong>Отключено</strong> отключает ее без удаления загруженных файлов.</li>
+        </ol>
+        <figure class="phone-figure" id="local-model-settings">
+          <div class="shot-window shot-window--local-model-settings" role="img" aria-label="Настройки локальной модели на Android Galaxy S24+. Желтыми рамками выделены раздел Local model, статус Ready (398 МБ на этом устройстве) и пункт Use local model: When unsure. Для уже установленной модели отображается Delete вместо Install.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-local-settings.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+              <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-local-settings-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Настройки локальной модели на Galaxy S24+.</strong> Желтыми рамками отмечены переключатель разделов, статус модели <strong>Готово</strong> и <strong>Использовать локальную модель → Когда нет уверенности</strong>. На этом телефоне модель уже загружена, поэтому <strong>Удалить</strong> отображается вместо <strong>Установить</strong>; удалять ее не требуется. На этом снимке отладочной сборки показаны настройки, а не тестирование доставки через Google Play.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-local-settings.png">Просмотреть исходный полный снимок экрана телефона</a>
+        </figure>
+        <ol class="lesson-steps" start="4">
+          <li>Вернитесь в ячейку с кодом и сделайте паузу на незавершенном имени или строке. Результаты зависят от контекста; не каждая пауза вызывает появление подсказки. Примите подходящий полупрозрачный текст или чип, проверьте исходный код, а затем выполните ячейку (Run) отдельным действием.</li>
+        </ol>
+        <h3>На каком телефоне работать комфортно?</h3>
+        <p>Минимальным требованием является <strong>64-разрядный ARM Android минимум с 4 ГБ оперативной памяти</strong>, что не гарантирует безупречной плавности. Практическим ориентиром комфортной работы служит <strong>телефон уровня Galaxy S24+</strong>: Samsung указывает для S24+ объем <strong>12 ГБ ОЗУ</strong>, что оставляет больше запаса для приложения, ядер и модели. Это рекомендуемый уровень производительности, а не требование покупать именно эту модель. <a href="https://news.samsung.com/us/enter-new-era-of-mobile-ai-samsung-galaxy-s24-series/">Спецификации устройств серии Samsung S24</a>.</p>
+        <p>Модель <strong>Galaxy S10+</strong> имеет подходящие варианты с 8 ГБ или 12 ГБ ОЗУ. По неофициальному опыту разработчика, локальное автодополнение может работать на этом устройстве, но ощущаться медленнее, чем дополнение через API; сравнение зависит от модели и сети. <strong>В записанном тесте локального движка S10+ не измерялся</strong>, поэтому это не точное сравнение скорости и не гарантия для каждого устройства. Обращайте внимание на задержки или зависание приложения при сочетании модели с большими рабочими тетрадями и требовательными к памяти ядрами. <a href="https://news.samsung.com/us/galaxy-s10-interactive/">Спецификации устройств серии Samsung S10</a>.</p>
+        <p>Предыдущий тест нативного движка на устройстве класса S24+ показал медианное время первого слова при «горячем» старте около <strong>0.10 с</strong> и при «холодном» старте около <strong>0.24 с</strong> после загрузки. Это примерные результаты тестов, а не гарантии: начальная загрузка без кэша занимала несколько секунд. Загруженная модель добавляла примерно <strong>460–490 МБ</strong> к памяти процесса приложения <em>в дополнение к</em> WebView, средам выполнения Python/R и операционной системе.</p>
+        <p class="callout"><strong>Если старый телефон начинает работать медленно:</strong> установите <strong>Использовать локальную модель → Отключено</strong> и используйте вместо этого таблицы или варианты API по нажатию. В разделе локальных настроек <strong>Дополнительно</strong> установка параметра <strong>Keep loaded after leaving the app → 0</strong> выгружает ее при выходе из приложения; параметры выгрузки при простое и низком заряде батареи также помогают. Сохраните или экспортируйте рабочую тетрадь перед устранением неполадок. Модель без оплаты за API все равно потребляет память, хранилище и заряд аккумулятора.</p>
+      </section>
+
+      <section id="prompt-cells">
+        <p class="step-label">Шаг 6 · Понимайте код в процессе его создания</p>
+        <h2>Завершите специализированной ячейкой AI Prompt</h2>
+        <p>Ассистент удобен для многоэтапной работы. Ячейка <strong>AI Prompt</strong> лучше подходит для небольшого воспроизводимого вопроса о конкретном фрагменте кода: она выполняет <strong>один изолированный запрос</strong>, без истории Ассистента или инструментов. Используйте ее, чтобы узнать, почему вычисление работает, прежде чем расширять его.</p>
+        <p>Здесь мы возвращаемся к созданной на шаге 3 ячейке <code>summary_demo</code> с фиксированным сидом. Мы запрашиваем объяснение этого существующего вычисления — а не еще один случайный массив и не пример автодополнения только среднего значения из шага 4.</p>
+        <ol class="lesson-steps">
+          <li>Добавьте ячейку <strong>AI Prompt</strong> сразу после созданной на шаге 3 ячейки <code>summary_demo</code> на JavaScript — а не фрагмента только со средним значением из шага 4 — чтобы вопрос ниже соответствовал выбранному исходному коду. Оставьте тип ячейки <strong>код</strong>, затем выберите <strong>AI Prompt</strong> в <strong>выпадающем списке языков и режимов</strong>. Если он отсутствует, включите его в <strong>Меню → Языки и режимы</strong>.</li>
+          <li>Вставьте приведенный ниже промпт в <strong>ячейку AI Prompt</strong>, а не в поле сообщения Ассистента. Откройте ее элемент управления <strong>Configure</strong> .
+            <div class="callout" id="ai-prompt-practice-prompt">
+              <pre data-translatable-prompt="ai-explanation"><code>Объясните выбранную ячейку JavaScript строка за строкой.
+Как правило генератора и сид 42 определяют ее входной массив?
+Почему она должна выдавать количество элементов 10, среднее 9.3, минимум 1 и максимум 20?
+Почему сброс сида делает результат повторяемым?
+Объясните, что нужно изменить для пустого массива.
+Предоставьте только краткое объяснение; не переписывайте код.</code></pre>
+            </div>
+            <div class="prompt-config-locations">
+              <figure class="phone-figure" id="ai-prompt-composer-controls">
+                <p class="screen-note"><strong>Редактор новой ячейки</strong></p>
+                <div class="shot-window shot-window--ai-prompt-composer" role="img" aria-label="Редактор новой ячейки на Android с выбранным AI Prompt. Желтыми рамками выделены селектор языка ИИ и кнопка Configure рядом с черновиком.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>До сохранения ячейки:</strong> выберите AI Prompt (отображается как <strong>AI</strong>) и нажмите выделенную кнопку редактора <strong>Настроить</strong>. Она настраивает новый промпт, который вы пишете.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png">Просмотреть полный снимок экрана редактора ячейки</a>
+              </figure>
+              <figure class="phone-figure" id="ai-prompt-edit-controls">
+                <p class="screen-note"><strong>Существующая ячейка во время редактирования</strong></p>
+                <div class="shot-window shot-window--ai-prompt-edit" role="img" aria-label="Сохраненная ячейка AI Prompt на Android в режиме редактирования. Желтой рамкой выделена кнопка Configure в заголовке ячейки над началом промпта.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Для существующей ячейки:</strong> нажмите кнопку <strong>Настроить</strong> в заголовке этой ячейки. Она остается доступной во время редактирования промпта. Обе кнопки открывают одно и то же диалоговое окно настройки; само по себе изменение настроек ничего не отправляет.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png">Просмотреть полный снимок экрана редактирования ячейки</a>
+              </figure>
+            </div>
+          </li>
+          <li>Установите <strong>Поместить итоговый ответ в → Вывод этой ячейки</strong> (значение по умолчанию). В разделе <strong>Контекст для отправки → Включить исходный код из</strong> выберите <strong>Previous 1 cell</strong>. Снимите флажок <strong>Включить сохраненный текст вывода</strong>  для этого упражнения, требующего только исходный код. Убедитесь, что в блоке <strong>Context preview</strong> указано имя <code>summary_demo</code>, затем прокрутите вниз и нажмите <strong>Save configuration</strong>.
+            <figure class="phone-figure" id="ai-prompt-configuration">
+              <div class="shot-window shot-window--ai-prompt-config" role="img" aria-label="Диалоговое окно Configure AI Prompt cell на Android. Желтыми рамками выделены параметры This cell&#39;s output, Previous 1 cell и снятый флажок Include saved output text.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption>Диалоговое окно, открываемое кнопкой <strong>Настроить</strong>. Желтые рамки указывают на место назначения ответа, <strong>1 предыдущая ячейка</strong> и неотмеченный параметр сохраненного вывода. Отправляйте только исходный код предыдущей ячейки <code>summary_demo</code>. Параметр <strong>1 предыдущая ячейка</strong> означает непосредственно предшествующую ячейку по порядку в рабочей тетради; поиск по имени не выполняется.</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png">Просмотреть полный снимок экрана конфигурации</a>
+              <p class="screen-note">Прокрутите диалоговое окно вниз до кнопки <strong>Сохранить конфигурацию</strong>.</p>
+              <div class="shot-window shot-window--ai-prompt-config-save" role="img" aria-label="Нижняя часть диалогового окна конфигурации AI Prompt на Android. Желтой рамкой выделена кнопка Save configuration рядом с Cancel.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png">Просмотреть полный снимок прокрученного диалогового окна</a>
+            </figure>
+          </li>
+          <li>Нажмите кнопку <strong>Выполнить</strong> ячейки AI Prompt. Проверьте выбранный контекст в окне проверки, затем выберите <strong>Отправить ИИ-провайдеру</strong>. Ознакомьтесь с объяснением рядом с исходным кодом и сравните его с известными результатами.</li>
+        </ol>
+        <figure class="phone-figure" id="ai-prompt-explanation">
+          <div class="shot-window shot-window--ai-prompt-result" role="img" aria-label="Фактический вывод AI Prompt на Android от модели GLM 5.3 Flash. Видимый фрагмент объясняет генератор с фиксированным сидом, длину массива, метод reduce, минимум и максимум в summary_demo.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Реальное объяснение от GLM 5.3 Flash на Galaxy S24+.</strong> Один запрос, содержащий только исходный код, сформировал этот ответ в области вывода ячейки AI Prompt; он не изменил и не перезапустил ячейку JavaScript. На изображении показано начало объяснения. Прокрутите вывод, чтобы продолжить чтение, и сверьте ответ с исходным кодом и ожидаемыми результатами шага 3 — объяснение ИИ не гарантирует безошибочности.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png">Просмотреть полный снимок экрана с объяснением</a>
+        </figure>
+        <p class="callout"><strong>Способ контролировать расходы на API и улучшить понимание кода.</strong> Специализированный AI Prompt может отправлять меньше контекста, чем растущий диалог с агентом, и избегать многошагового цикла инструментов, снижая объем входных токенов и потенциальные расходы. Запрашивайте краткие рассуждения, допущения и ожидаемый вывод по мере написания кода. Экономия <strong>не гарантируется</strong>: тарифы модели, длина ответа, токены рассуждения и выбранный контекст по-прежнему имеют значение. Эти запросы используют <strong>провайдера и модель Ассистента</strong>, а не независимую модель автодополнения, и на них не распространяются защитные лимиты расходов на автодополнение.</p>
+        <div id="ai-prompt-apply-example">
+          <h3>Еще один пример · Проверка графика перед заменой ячейки</h3>
+          <p>Теперь попросите AI Prompt написать код в <em>другую</em> ячейку с обязательной проверкой перед заменой чего-либо. Мы построим график того, как выборочная дисперсия меняется по множеству небольших выборок. Это новые выборки из нормального распределения, а не прежний массив целых чисел <code>summary_demo</code>. Цель состоит в том, чтобы освоить цепочку <strong>Настроить → предпросмотр → Применить → Выполнить</strong>, а не овладеть статистикой.</p>
+          <p class="callout"><strong>Дисперсия — это не t-распределение Стьюдента.</strong> Для независимых нормальных выборок объема 10 величина <code>9s² / σ²</code> подчиняется распределению хи-квадрат с 9 степенями свободы. Здесь истинная дисперсия <code>σ² = 1</code>. Распределение Стьюдента описывает стандартизированное выборочное среднее <code>(mean − μ) / (s / √10)</code> с использованием выборочного стандартного отклонения <code>s</code>; здесь оно также имеет 9 степеней свободы. <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda358.htm">NIST: дисперсия</a> · <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm">NIST: среднее</a>.</p>
+          <ol class="lesson-steps">
+            <li>В практической рабочей тетради создайте ячейку <strong>JavaScript</strong>, содержащую <code>// Reviewed plot code will go here.</code>. Выполните этот безобидный комментарий, чтобы сохранить ячейку. Удерживайте нажатой ее <strong>метку In[…] </strong> и назовите ее <code>variance_plot</code>. Сохраняйте это имя уникальным в рабочей тетради; см. <a href="../../../workbooks/named-cells/#name">именование ячеек</a>.</li>
+            <li>Добавьте отдельную ячейку  <strong>AI Prompt</strong>  и вставьте в нее следующий запрос:
+              <div class="callout" id="ai-variance-practice-prompt">
+                <pre data-translatable-prompt="ai-variance"><code>Верните только полный исходный код JavaScript, без блоков разметки Markdown.
+Постройте воспроизводимую гистограмму оценок выборочной дисперсии.
+Смоделируйте 2,000 новых выборок, каждая из которых содержит 10 стандартных нормальных значений N(0,1).
+Не используйте повторно ранее созданный массив целых чисел из summary_demo.
+Инициализируйте state = 42 один раз для всего прогона, а не для каждой выборки. Перед каждой равномерной выборкой задайте state = (16807 * state) % 2147483647, затем u = state / 2147483647.
+Для каждой нормальной выборки используйте два последовательных равномерных значения: sqrt(-2 * log(u1)) * cos(2 * PI * u2). Не используйте повторно оставшийся результат синуса и не применяйте Math.random.
+Для каждой выборки вычислите ее среднее, а затем несмещенную дисперсию sum((x - mean)^2) / 9.
+Нарисуйте на элементе canvas гистограмму с подписями, содержащую 40 столбцов равной ширины от 0 до 4. Горизонтальная ось — выборочная дисперсия; вертикальная ось — количество выборок.
+Отметьте истинную дисперсию генеральной совокупности 1 вертикальной линией с подписью. Используйте светлый фон, темный текст и читаемые метки.
+Выведите объем выборки, число повторений, сид, среднюю выборочную дисперсию, общее число элементов в гистограмме и количество выходов за диапазон (overflow). Считайте переполнения отдельно, а не скрывайте их.
+Отобразите canvas с помощью window.renderImage(canvas.toDataURL("image/png")).
+Не используйте сторонние пакеты, сеть, хранилище и не вносите правки в рабочую тетрадь.</code></pre>
+              </div>
+            </li>
+            <li>Откройте в ячейке AI Prompt элемент управления <strong>Configure</strong>. Установите <strong>Поместить итоговый ответ в → Предпросмотр замены для ячейки</strong>, <strong>Язык ячейки результата → Сохранять целевой язык</strong>, <strong>Ячейка для замены → Именованная ячейка</strong> и <strong>Cell name → variance_plot</strong>. В блоке контекста оставьте <strong>Включить исходный код из → Без других ячеек (по умолчанию)</strong>, затем нажмите <strong>Save configuration</strong>.
+              <figure class="phone-figure" id="ai-variance-configuration">
+                <div class="shot-window shot-window--ai-variance-config" role="img" aria-label="Диалоговое окно Configure AI Prompt cell на Android. Желтыми рамками выделены Replacement preview for a cell, Preserve target language, Named cell, variance_plot и No other cells.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Заменяйте только после проверки.</strong> Эти реальные настройки на S24+ выбирают ячейку JavaScript с уникальным именем <code>variance_plot</code>, сохраняют ее язык и исключают другие ячейки. Прокрутите вниз до кнопки <strong>Сохранить конфигурацию</strong>. Само по себе сохранение ничего не отправляет; при следующем запуске Run запрос по-прежнему будет представлен для проверки.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png">Просмотреть полный снимок экрана настроек замены</a>
+              </figure>
+            </li>
+            <li>Запустите ячейку <strong>AI Prompt</strong>. Проверьте данные, которые будут отправлены, затем выберите <strong>Отправить ИИ-провайдеру</strong>. Значение <strong>No other cells</strong> исключает лишний контекст рабочей тетради; при этом операция замены все равно отправляет <strong>полный исходный код целевой ячейки</strong>. В данном случае это лишь наш безобидный комментарий.</li>
+            <li>Ознакомьтесь с полученным предварительным просмотром <strong>Before / After</strong> . Проверьте полный код на JavaScript: сид 42, 2,000 выборок размера 10, дисперсия, деленная на 9, и отсутствие непредвиденных сетевых вызовов или операций с хранилищем. Выберите <strong>Apply replacement</strong>  только в том случае, если вы одобряете этот исходный код; <strong>Cancel</strong>  оставляет <code>variance_plot</code>  без изменений. Применение изменяет целевую ячейку, но <strong>не выполняет ее</strong>.
+              <figure class="phone-figure" id="ai-variance-approval">
+                <div class="shot-window shot-window--ai-variance-preview-start" role="img" aria-label="Предварительный просмотр замены Before/After на Android. В поле Before находится безобидный комментарий; в поле After начинается сгенерированный код JavaScript с сидом 42 и генератором нормальных выборок.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <p class="shot-detail-label"><strong>Сгенерированный код отображается в предпросмотре для подтверждения.</strong> Это начало фактического ответа модели GLM 5.3 Flash; целевая ячейка пока содержит только наш комментарий. Прочтите раздел After целиком, а не только строки, показанные здесь.</p>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png">Просмотреть полный снимок экрана с началом предпросмотра</a>
+                <div class="shot-window shot-window--ai-variance-preview-apply" role="img" aria-label="Окончание того же предпросмотра сгенерированного кода на Android. Желтыми рамками выделены Apply replacement и Cancel; ни одно из этих действий не выполняет предложенный код.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Прокрутите до конца, чтобы подтвердить или отменить действие.</strong> Кнопка Apply replacement изменяет исходный код именованной ячейки; она не выполняет ее. Середина этого длинного предварительного просмотра опущена на данных детальных снимках. <a href="../../../../pro/ai/tutorial/assets/ai-variance-generated.js">Прочтите сгенерированный исходный код полностью</a>.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png">Просмотреть полный снимок экрана с элементами подтверждения</a>
+              </figure>
+            </li>
+            <li>
+              <p class="callout"><strong>Проверка помогла обнаружить небольшое упущение.</strong> Этот ответ модели заканчивался строкой отчета вместо ее вывода на печать. После применения (Apply) мы лишь заменили эту итоговую строку на <code>console.log(…)</code> перед запуском Run. Проверьте и свой ответ: само по себе изображение не показывает, верны ли итоговые суммы. <a href="../../../../pro/ai/tutorial/assets/ai-variance-reviewed.js">Прочтите исправленный исходный код, который был запущен</a>.</p>
+              <p>Найдите <code>variance_plot</code> и нажмите <strong>ее собственную кнопку Run</strong>. Каждый столбец гистограммы подсчитывает оценки выборочной дисперсии, а не отдельные наблюдения. При использовании в точности приведенного выше генератора ожидается средняя выборочная дисперсия около <strong>0.9852</strong>, сумма по гистограмме <strong>2,000</strong> и переполнение <strong>0</strong>. Истинная дисперсия равна 1; конечное моделирование не обязательно должно давать в точности 1. Повторный запуск с сидом 42 должен воспроизвести тот же график.</p>
+              <figure class="phone-figure" id="ai-variance-output">
+                <div class="shot-window shot-window--ai-variance-plot" role="img" aria-label="Фактический график на Android после отдельного ручного запуска Run: гистограмма 2,000 оценок выборочной дисперсии для нормальных выборок объема 10. Красная линия отмечает истинную дисперсию 1; выведенное среднее равно 0.98521, сумма по гистограмме — 2000, а переполнение — 0.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Результат после применения (Apply), проверки и отдельного ручного запуска Run на S24+.</strong> Фактический график и выведенные контрольные значения соответствуют вычислениям с сидом: средняя выборочная дисперсия <strong>0.98521</strong>, сумма <strong>2,000</strong>, переполнение <strong>0</strong>. Красная линия — это дисперсия генеральной совокупности, а не аппроксимирующая кривая. Ваша модель может оформить код или диаграмму иначе.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png">Просмотреть полный снимок экрана с графиком</a>
+              </figure>
+            </li>
+          </ol>
+          <p class="callout"><strong>Два отдельных подтверждения:</strong> <strong>Отправить ИИ-провайдеру</strong> подтверждает отправку проверенного запроса. <strong>Применить замену</strong> одобряет изменение исходного кода целевой ячейки. Ни то, ни другое действие не выполняет предложенный код JavaScript. Не выбирайте <strong>Новую связанную ячейку</strong> для этой демонстрации: эта опция вставляет невыполненную ячейку результата без данного этапа подтверждения замены.</p>
+        </div>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>Если что-то не работает</h2>
+        <dl>
+          <dt><strong>Нет офлайн-подсказок на телефоне</strong></dt>
+          <dd>Выберите General → Local code completion → On вместо Auto. Проверьте включение чипов, положение курсора, язык и достаточно ли места для дополнительной строки.</dd>
+          <dt><strong>Онлайн-запрос не отправляется</strong></dt>
+          <dd>Проверьте параметр On tap, сохраненный ключ для точной пары провайдера и эндпоинта, указание цен или пределов стоимости для выбранной модели, согласие и общие суммы расходов. Пресет Open не требуется для автодополнения. Необходимы безопасный контекст браузера и API Web Locks; в неподдерживаемых контекстах запросы отклоняются.</dd>
+          <dt><strong>Ассистент запрашивает подтверждение перед выполнением ячейки — или не запрашивает</strong></dt>
+          <dd>Проверьте версию приложения, разрешения на выполнение в Security… и правила в Kernels…. Будущее значение Open по умолчанию — Ask; в версии Pro 1.4.0 по умолчанию выполнение может разрешаться. Отключение Auto-run не является запретом (Deny) для инструмента выполнения. Параметр Always allow для онлайн-дополнения не дает разрешения на выполнение ячеек; см. <a href="#execution-permissions">подтверждение выполнения</a>.</dd>
+          <dt><strong>Автодополнение не учитывает другую ячейку</strong></dt>
+          <dd>Онлайн-варианты используют ограниченный контекст текущей ячейки, а не весь ваш блокнот. Используйте AI Prompt с явно выбранным исходным кодом или Ассистента, если вам требуется более широкое объяснение.</dd>
+          <dt><strong>Кнопка Install недоступна</strong></dt>
+          <dd>Нативный процесс загрузки локальной модели предназначен для поддерживаемых установок Android из Google Play, а не для настольных компьютеров, браузера или текущих установок из сторонних файлов (sideload). Соответствие минимальным требованиям к оперативной памяти не гарантирует высокой скорости.</dd>
+          <dt><strong>Сгенерированный ответ выглядит правдоподобно, но содержит ошибку</strong></dt>
+          <dd>Сравните его с небольшими известными примерами. Проверьте импорты, единицы измерения, поведение при пустых входных данных и побочные эффекты перед запуском. Ответ модели не является доказательством корректности.</dd>
+        </dl>
+        <p><a href="../../../../pro/ai/">Справочник по настройке и рабочим процессам ИИ<span class="english-reference"> (Справочная страница на английском языке)</span></a> · <a href="../../../../pro/remote/">Удаленный доступ и безопасность<span class="english-reference"> (Справочная страница на английском языке)</span></a> · <a href="../../../tutorials/">Все руководства</a></p>
+      </section>
+      <aside class="callout" id="execution-permissions" aria-labelledby="execution-appendix-title">
+        <h2 id="execution-appendix-title">Приложение · Будущая система подтверждения выполнения · предлагаемая Pro 1.5.0</h2>
+        <p><strong>Еще не выпущено:</strong> эти элементы управления описывают реализацию в следующем релизе, а не обещание того, что они есть в вашей версии 1.4.0. Номер выпуска является предварительным.</p>
+        <ul>
+          <li>Меню <strong>Настройки ИИ → Безопасность… → <code>execute_cell</code> / <code>run_cells</code></strong> уже предлагает варианты <strong>Default / Allow / Ask / Deny</strong>. Это обновление меняет унаследованное значение Default для пресета Open на <strong>Спрашивать</strong>; для Full control сохраняется значение Allow. Явные правила для инструментов или ядра могут заменять унаследованные значения по умолчанию; если оба правила заданы явно, приоритет имеет более безопасное. На этапе обучения оставьте Default или Ask. Значение Allow — это переопределение, а не усиленная изоляция; правила ядра Ask/Deny, режим Review и глобальное отключение JavaScript по-прежнему применяются.</li>
+          <li>Прочтите запрос на выполнение перед выбором <strong>Выполнить</strong>; оставьте пункт <strong>Разрешить дальнейшее выполнение ячеек Ассистента без запроса</strong> неотмеченным, чтобы подтвердить только этот запрос. Установка этого флажка изменяет общее правило инструмента выполнения для <strong>всех рабочих тетрадей</strong> до сброса — а не только для этой ячейки, беседы или провайдера. Явное правило ядра Ask скрывает этот параметр.</li>
+          <li>Запросы на инспекцию пространства имен и выполнение вновь созданных ячеек <strong>не могут создать такое постоянное разрешение</strong>. Запрос на выполнение созданной ячейки содержит ограниченный предварительный просмотр кода; длинный предпросмотр заканчивается многоточием. Если он сокращен, выберите Cancel, изучите полный исходный код созданной ячейки и запускайте ее (Run) самостоятельно, только если доверяете ей. Ранее сохраненное разрешение Allow на выполнение все еще может разрешать автозапуск созданных ячеек при включенном Auto-run, поэтому держите Auto-run выключенным.</li>
+          <li>Если вы выберете пресет, отличный от Full control, в то время как сохранено действующее разрешение Allow для инструмента выполнения, предупреждение предложит <strong>Сбросить по умолчанию</strong>, <strong>Оставить «Разрешить»</strong> или <strong>Отмена</strong>. Reset восстанавливает правило инструмента для выбранного пресета без сброса переопределений ядра. Keep сохраняет переопределение. Cancel восстанавливает предыдущий выбранный пресет. Варианты Reset и Keep остаются черновиками изменений до сохранения настроек (Settings).</li>
+        </ul>
+        <p><strong>Подтверждение выполнения не является безоговорочным разрешением на передачу данных.</strong> Вывод инструмента выполнения может возвращаться в модель Ассистента, а разрешенный код может использовать сеть. Параметр онлайн-дополнения <strong>Всегда разрешать</strong>, проверка контекста в AI Prompt и раскрытие конфиденциальности для Remote/MCP остаются раздельными. Выполнение блокнота через MCP использует те же проверки выполнения; эти проверки не изолируют командную оболочку Terminal на брокере.</p>
+      </aside>
+      <aside class="callout" id="planned-workbook-context" aria-labelledby="context-appendix-title">
+        <h2 id="context-appendix-title">Приложение · Планируемый контекст и история рабочей тетради</h2>
+        <p><strong>Только проектное предложение:</strong> эти функции не реализованы и не привязаны к какому-либо релизу. Они не связаны с описанными выше изменениями системы подтверждения выполнения и не задерживают текущий выпуск.</p>
+        <ul>
+          <li><strong>Получение сводки рабочей тетради по мере необходимости.</strong> План предусматривает замену регулярных автоматических предварительных просмотров исходного кода инструментом каталога, содержащим только метаданные: имена ячеек, необязательные описания, языки и типы, а также номер редакции рабочей тетради. Предлагаемый инструмент — <code>list_cells</code> с параметром <code>view: "metadata"</code>; выбранный исходный код Ассистент считывал бы отдельно. Это ограниченный обзор структуры, а не автоматически сгенерированное объяснение ИИ.</li>
+          <li><strong>Прикреплять один раз, а не при каждой отправке (Send).</strong> Предлагаемый флажок <strong>Attach workbook summary this time</strong> мог бы быть изначально отмечен для новой беседы и сниматься после фактической отправки этого вложения. Вы могли бы снять его перед отправкой или установить снова для получения свежего обзора. Его начальное состояние по умолчанию еще требует оценки конфиденциальности и удобства использования. Продолжение беседы не добавляло бы новую сводку, а переключение вкладок не приводило бы к его скрытому повторному включению. Предварительный просмотр и существующие разрешения на чтение и конфиденциальность продолжали бы действовать; для большой рабочей тетради могли бы потребоваться дополнительные страницы.</li>
+          <li><strong>Снятие флажка не удаляет историю.</strong> Это предотвратило бы новое автоматическое прикрепление, но не удалило бы сводки, уже имеющиеся в беседе, и не заблокировало бы разрешенные операции чтения инструментами. Существующие элементы управления контекстом в полноэкранном режиме Agent, ячейках AI Prompt и автодополнении оставались бы раздельными.</li>
+          <li><strong>Изменения между отправками — возможность на перспективу.</strong> Компактные обновления потребовали бы известной базовой линии отправленного контекста и надежных редакций. Правки пользователя можно было бы выделять, но изменения агента, импорты и неизвестные правки также имеют значение. Редактирование исходного кода не приводило бы к автоматической перезаписи описания ячейки; при отсутствии истории или ее устаревании потребовался бы свежий обзор, а не обновление на основе догадок.</li>
+          <li><strong>Необязательная локальная история и синхронизация с GitHub — долгосрочные идеи для Pro.</strong> Локальные контрольные точки отправки могли бы поддерживать сравнение изменений (diff) на базе Git без передачи каких-либо данных. Независимая синхронизация могла бы публиковать рабочую тетрадь в Gist или в выбранный файл репозитория с собственным предпросмотром полезной нагрузки и авторизацией. Включение истории не приводило бы к отправке изменений в GitHub или передаче diff модели ИИ. Git показывает изменения содержимого, а не подтверждение того, что их сделал человек.</li>
+        </ul>
+        <p><strong>Секретный Gist не является приватным.</strong> Любой пользователь, имеющий URL-адрес, может прочитать его; используйте приватный репозиторий, если доступ необходимо ограничить. Удаляйте конфиденциальные данные из исходного кода и описаний рабочей тетради перед публикацией. <a href="https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists/creating-gists">Документация GitHub о видимости Gist</a>.</p>
+      </aside>
+    </article>
+  </main>
+  <footer class="site-footer">
+    <span>Справка SciREPL Pro</span>
+    <nav aria-label="Навигация в подвале">
+      <a href="../../../tutorials/">Все руководства</a>
+      <a href="../../../../pro/">Справка Pro<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+      <a href="../../../../../pro/privacy.html">Конфиденциальность Pro</a>
+    </nav>
+  </footer>
+</body>
+</html>

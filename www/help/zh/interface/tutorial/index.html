@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="通过创建、运行、编辑和导出小型工作簿来学习 SciREPL 界面。">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/zh/interface/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <title>界面演练 · SciREPL 帮助</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">跳至内容</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (英文参考页面)</span></a>
+    <nav aria-label="主导航">
+      <a href="../../../interface/">界面参考<span class="english-reference"> (英文参考页面)</span></a>
+      <a href="../../tutorials/">所有教程</a>
+      <a href="../../../">所有帮助<span class="english-reference"> (英文参考页面)</span></a>
+      <a href="../../../../">打开 Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="教程语言"><details class="tutorial-language-menu"><summary>教程语言: <bdi>简体中文</bdi></summary><nav aria-label="教程语言"><a href="../../../en/interface/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/interface/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="./" lang="zh" hreflang="zh" aria-current="page">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">本教程为机器翻译，母语审校待完成。代码和技术参数保持不变。屏幕截图显示原始英文界面；请将本文中翻译的控件名称与您的应用相对应。</p></aside>
+    <p class="breadcrumbs"><a href="../../../">帮助<span class="english-reference"> (英文参考页面)</span></a> / <a href="../../../interface/">界面<span class="english-reference"> (英文参考页面)</span></a> / 演练</p>
+    <article>
+      <p class="eyebrow">边做边学</p>
+      <h1>创建你的第一个工作簿</h1>
+      <p class="lede">这是 <a href="../../../interface/">界面参考<span class="english-reference"> (英文参考页面)</span></a> 篇幅较长且注重实践的配套内容。你将运行一个 Python 单元格，对其进行修改，并保存一份由你控制的副本。无需 AI 账号或 API 密钥。</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Android 步骤</li>
+        <li class="chip">约 5 分钟</li>
+      </ul>
+      <p class="screen-note">屏幕截图显示了 SciREPL Free v1.3.2 在 Samsung Galaxy S24 系列手机上的界面。本课内容同样适用于 Pro，不过其中的部分控件外观可能有所不同。</p>
+      <nav class="lesson-nav" aria-label="演练步骤">
+        <strong>本课内容</strong>
+        <ol>
+          <li><a href="#find-your-place">找到你的位置</a></li>
+          <li><a href="#write-a-cell">编写并运行单元格</a></li>
+          <li><a href="#edit-a-cell">编辑已保存的单元格</a></li>
+          <li><a href="#save-a-copy">导出工作簿副本</a></li>
+          <li><a href="#what-next">后续尝试内容</a></li>
+        </ol>
+        <p><a href="../../tutorials/">所有教程</a></p>
+      </nav>
+
+      <section id="find-your-place">
+        <p class="step-label">步骤 1</p>
+        <h2>在应用中找到你的位置</h2>
+        <p>顶部一行是<strong>顶栏</strong>。它包含菜单、帮助和状态徽标。工作簿选择器用于选择打开哪个工作簿。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--header" role="img" aria-label="手机顶栏，其中工作簿选择器、菜单按钮和帮助按钮以黄色轮廓标出。">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>黄色轮廓标出了工作簿选择器、菜单和帮助。</figcaption>
+          <p>顶栏下方是工作簿：已保存的单元格及其结果。</p>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">查看完整的手机屏幕截图</a>
+        </figure>
+        <p><strong>新建单元格面板</strong>是输入下一个单元格的地方。当屏幕变窄时，可选的标题按钮可能会消失；在适用的情况下，它们的操作仍可从“菜单”或“帮助”中获取。</p>
+      </section>
+
+      <section id="write-a-cell">
+        <p class="step-label">步骤 2</p>
+        <h2>编写并运行 Python 单元格</h2>
+        <p>在首次运行前，请等待状态徽标显示为 <strong>就绪</strong>。</p>
+        <ol class="lesson-steps">
+          <li>在新建单元格面板中，从语言选择器中选择 <strong>Python</strong>。在较窄的手机屏幕上，闭合的选择器可能仅显示 <strong>Py</strong>。</li>
+          <li>输入这段简短的程序：
+            <pre><code>print("Hello from SciREPL")</code></pre>
+          </li>
+          <li>轻点 <strong>运行</strong>。工作簿中会出现一个已保存的单元格。在其下方，你应该会看到 <code>Hello from SciREPL</code>。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--composer" role="img" aria-label="新建单元格面板，已选中 Py，代码字段中包含 print Hello from SciREPL，且“运行”以黄色轮廓标出。">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-code-ready.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/code-ready-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>下方面板用于创建<em>新</em>单元格：选择 <strong>Py</strong>，输入代码，然后轻点 <strong>运行</strong>。</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-code-ready.png">查看完整的手机屏幕截图</a>
+        </figure>
+        <p class="callout"><strong>首次运行可能需要更长时间。</strong> Python 的运行时必须启动一次。请等待状态恢复为 <strong>就绪</strong>；后续的 Python 单元格通常会复用该运行时。</p>
+        <aside class="callout">
+          <p><strong>如果出现隐私声明：</strong> Python 通常是内置捆绑的，因此本示例应该不需要下载运行时。网络运行时（例如 R 或 Lua 在 Free 中）可能会先显示 SciREPL 的隐私政策；如果 Python 的内置副本需要网络回退，也可能会如此。请阅读该政策，在<em>对话框内部</em>滚动到底部，并在同意时轻点<strong>我已了解</strong>。随后可能会出现一个单独的运行时下载提示，要求你轻点 <strong>下载</strong>。</p>
+          <p><a href="../../../interface/tutorial/assets/privacy-policy-top.jpg">查看隐私政策对话框示例<span class="english-reference"> (英文参考页面)</span></a>（屏幕截图显示的是其顶部；按钮在更下方）。在 Free 1.4.0 与 Pro 1.4.0 中，如果你尚未接受当前的网络披露说明，一条有效的 <code>%pip install</code> 命令在尝试安装软件包之前也会打开此声明。在使用网络功能之前，请参阅<a href="../../../privacy/">隐私和本地数据<span class="english-reference"> (英文参考页面)</span></a>。</p>
+        </aside>
+      </section>
+
+      <section id="edit-a-cell">
+        <p class="step-label">步骤 3</p>
+        <h2>编辑已保存的单元格</h2>
+        <ol class="lesson-steps">
+          <li>轻点已保存单元格自身标题栏中的铅笔图标 <strong>✎</strong>，它位于右上角 <strong>✕</strong> 的左侧。这会打开该单元格以供编辑；在新建单元格面板中输入则会创建另一个单元格。</li>
+          <li>将 <code>Hello from SciREPL</code> 改为 <code>Hello again</code>。</li>
+          <li>选择 <strong>运行</strong> 以保存并运行更改。现在你应该可以在该单元格下方看到 <code>Hello again</code>。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--editing" role="img" aria-label="包含 print Hello again 的已保存单元格编辑器。黄色轮廓标出了已保存单元格右上角的铅笔、可编辑代码字段及其运行按钮。在轻点运行之前，之前的输出仍显示为 Hello from SciREPL。">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-edit-draft.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/edit-draft-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>黄色轮廓显示了已保存单元格的 <strong>✎ 铅笔</strong> 所在位置、你正在编辑的代码以及该单元格的 <strong>运行</strong> 按钮。在此屏幕截图中铅笔呈暗色，因为编辑模式已处于打开状态。运行操作会保存并执行修改；在此之前旧输出仍保持可见。</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-edit-draft.png">查看包含键盘在内的完整手机屏幕截图</a>
+        </figure>
+        <aside class="callout">
+          <p><strong>Pro 快捷方式：</strong> 在触摸屏上，双击已保存单元格的代码即可进行编辑。Free 目前使用 <strong>✎</strong> 按钮。</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--result" role="img" aria-label="包含 print Hello again 的已保存 Python 单元格，下方紧随高亮显示的输出 Hello again。">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-rerun.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/rerun-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>在执行 <strong>运行</strong> 后，已保存单元格下方的输出显示为 <code>Hello again</code>。</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-rerun.png">查看完整的手机屏幕截图</a>
+        </figure>
+        <p>如果你误打开了编辑器，可以使用 <strong>取消</strong> 将其关闭而不运行。已保存单元格内部的语言选择器会更改该单元格；新建单元格选择器则不会。</p>
+      </section>
+
+      <section id="save-a-copy">
+        <p class="step-label">步骤 4</p>
+        <h2>导出工作簿副本</h2>
+        <ol class="lesson-steps">
+          <li>打开 <strong>菜单 → 导出工作簿与软件包</strong>。</li>
+          <li>选择 <strong>仅当前标签页</strong> 或 <strong>所有标签页</strong>，然后选择 SciREPL 格式 <strong>工作簿 (.srwb)</strong>，如果你想要保留特定于 SciREPL 的状态。</li>
+          <li>轻点 <strong>导出</strong> 并选择一个由你控制的目标位置。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--menu" role="img" aria-label="菜单行“导出工作簿和软件包”以黄色轮廓标出，位于“导出文档”与“导入文件”之间。">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>选择 <strong>导出工作簿与软件包</strong>，而不是“导出文档”。</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-menu.png">查看完整的菜单屏幕截图</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="导出对话框，其中工作簿 srwb 格式、“仅限当前标签页”范围以及“导出”按钮以黄色轮廓标出。">
+            <div class="shot-stage">
+              <img src="../../../interface/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>对于单个标签页，保留 <strong>工作簿 (.srwb)</strong> 和 <strong>仅当前标签页</strong>，然后轻点 <strong>导出</strong>。选择 <strong>所有标签页</strong> 可包含整个工作簿。</figcaption>
+          <a class="full-shot-link" href="../../../interface/tutorial/assets/phone-export.png">查看完整的导出对话框屏幕截图</a>
+        </figure>
+        <p class="callout"><strong>为什么要导出？</strong> SciREPL 会恢复本地会话，但本地存储并不是备份，且不会在 Android 应用与浏览器之间自动共享。请参阅<a href="../../../files-export/">文件与导出<span class="english-reference"> (英文参考页面)</span></a>以了解其他格式，包括 <code>.ipynb</code> 和 PDF。</p>
+      </section>
+
+      <section id="what-next">
+        <p class="step-label">步骤 5</p>
+        <h2>后续尝试内容</h2>
+        <p>尝试将 <code>2 + 2</code> 用于另一个 Python 单元格。然后使用工作簿选择器切换标签页。<a href="../../files-export/tutorial/">CSV 工作簿演练</a>从 <strong>菜单 → 浏览软件包、合辑与工作簿</strong> 开始，会安装一个示例，并展示其单元格如何配合本地文件工作。</p>
+        <p><a href="../../workbooks/tutorial/">马尔可夫群演练</a>展示了如何搜索更广泛的目录、打开一个关于魔方转动的现有工作簿、按顺序运行其单元格并更改一个参数。</p>
+        <p>若要快速回顾控件的位置，请返回<a href="../../../interface/">界面参考<span class="english-reference"> (英文参考页面)</span></a>。若要学习另一种语言或添加软件包，请继续阅读<a href="../../../languages-packages/">语言与软件包<span class="english-reference"> (英文参考页面)</span></a>。</p>
+        <aside class="callout"><strong>正在使用 Pro？</strong> 基本工作流程是相同的。Pro 还拥有全屏编辑器和可选的 AI 功能；请参阅 <a href="../../../pro/ai/#full-screen">Pro AI 与全屏工作流<span class="english-reference"> (英文参考页面)</span></a> ，在你熟悉普通单元格之后。</aside>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL 帮助</span><nav aria-label="页脚导航"><a href="../../../interface/">简明界面参考<span class="english-reference"> (英文参考页面)</span></a><a href="../../../">所有帮助<span class="english-reference"> (英文参考页面)</span></a></nav></footer>
+</body>
+</html>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 2340">
+  <title>Approve or cancel the proposed replacement</title>
+  <desc>A yellow outline locates Apply replacement and Cancel at the end of the generated code preview. Applying does not run the code. The underlying Android screenshot is unchanged.</desc>
+  <g fill="none" stroke="#ffd43b" stroke-width="6">
+    <rect id="ai-variance-approval-actions" x="57" y="1578" width="600" height="115" rx="10"/>
+  </g>
+</svg>

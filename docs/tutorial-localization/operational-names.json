@@ -1,0 +1,323 @@
+{
+  "schema": 1,
+  "kind": "controller-authored operational identifiers",
+  "manifestHash": "c2e6f315f7f94b38e579a4e7c7eb152b7730c1c9fb24c91788f807079327e25c",
+  "approval": "Explicitly approved controller editorial inventory; not model or native-language approval",
+  "localCompanions": [
+    {
+      "source": "www/help/workbooks/graphics/assets/workbook-graphics.srwb",
+      "sha256": "6cf5ff6549fc3895b2dbe84d48baaacb92a663788c58a52b59fe26e06dac4171",
+      "notebookName": "Workbook Graphics"
+    },
+    {
+      "source": "www/help/workbooks/named-cells/assets/named-cell-interop.srwb",
+      "sha256": "aa45c507de380f5adea5538f84cef49a867e6971beadee45d61096387f738502",
+      "notebookName": "Named Cell Interop"
+    },
+    {
+      "source": "www/help/files-export/tutorial/assets/csv-basics-seedlings.srwb",
+      "sha256": "9d48768fd656f5034b7aac899fc08f8faf3caae651fcab4b6538ad72e7cbc098",
+      "notebookName": "CSV Basics: Seedling Heights"
+    }
+  ],
+  "externalEnglishReferences": [
+    {
+      "source": "https://raw.githubusercontent.com/s243a/SciREPL-Catalog/v0.4.0/workbooks/en/markov-groups.srwb",
+      "notebookName": "Markov Groups: A Random Walk on Cube Moves",
+      "search": "Markov Groups"
+    },
+    {
+      "source": "https://raw.githubusercontent.com/s243a/SciREPL-Catalog/main/workbooks/en/simpsons-paradox.srwb",
+      "notebookName": "Simpson's Paradox",
+      "firstHeading": "Simpson's Paradox: When Every Group Disagrees with the Total"
+    }
+  ],
+  "englishLanguageOption": {
+    "source": "www/js/package_catalog.js",
+    "method": "_populateSpokenSelect",
+    "localeSource": "www/i18n/manifest.json",
+    "code": "en",
+    "endonym": "English"
+  },
+  "occurrences": [
+    {
+      "route": "files-export/tutorial",
+      "fieldId": "files-export.tutorial.0029",
+      "identifier": "CSV Basics",
+      "openToken": "{{P001}}",
+      "closeToken": "{{P002}}",
+      "innerTemplate": "{{P005}} Basics",
+      "sourceHash": "2efcc357ca1b445de878faab3097189e647253c36bad98fb5412d494c3b8ae7e"
+    },
+    {
+      "route": "files-export/tutorial",
+      "fieldId": "files-export.tutorial.0029",
+      "identifier": "CSV Basics: Seedling Heights",
+      "openToken": "{{P003}}",
+      "closeToken": "{{P004}}",
+      "innerTemplate": "{{P006}} Basics: Seedling Heights",
+      "sourceHash": "2efcc357ca1b445de878faab3097189e647253c36bad98fb5412d494c3b8ae7e"
+    },
+    {
+      "route": "files-export/tutorial",
+      "fieldId": "files-export.tutorial.0035",
+      "identifier": "CSV Basics",
+      "openToken": "{{P001}}",
+      "closeToken": "{{P002}}",
+      "innerTemplate": "{{P003}} Basics",
+      "sourceHash": "02b357133d494b7e1a62075dd132aaac157cd89cc0a860911de362239ed26a96"
+    },
+    {
+      "route": "files-export/tutorial",
+      "fieldId": "files-export.tutorial.0095",
+      "identifier": "CSV Basics: Seedling Heights",
+      "openToken": "{{P000}}",
+      "closeToken": "{{P001}}",
+      "innerTemplate": "{{P002}} Basics: Seedling Heights",
+      "sourceHash": "0ded80d6b3f3cf820c818518ca31023c53f2af11a56145a264949a5f20dfd1b0"
+    },
+    {
+      "route": "workbooks/tutorial",
+      "fieldId": "workbooks.tutorial.0012",
+      "identifier": "Markov Groups: A Random Walk on Cube Moves",
+      "openToken": "{{P000}}",
+      "closeToken": "{{P001}}",
+      "innerTemplate": "Markov Groups: A Random Walk on Cube Moves",
+      "sourceHash": "e4516b26632c6885cb32cbfd89570a6493c50a39cff02f4d2e48b76ab723b936"
+    },
+    {
+      "route": "workbooks/tutorial",
+      "fieldId": "workbooks.tutorial.0036",
+      "identifier": "English",
+      "openToken": "{{P005}}",
+      "closeToken": "{{P006}}",
+      "innerTemplate": "English",
+      "sourceHash": "4432e224e97a2c9b4ceaf730d05bb06e2a2296067b382eee252d9cedccdb21dc"
+    },
+    {
+      "route": "workbooks/tutorial",
+      "fieldId": "workbooks.tutorial.0040",
+      "identifier": "Markov Groups",
+      "openToken": "{{P001}}",
+      "closeToken": "{{P002}}",
+      "innerTemplate": "Markov Groups",
+      "sourceHash": "e62c756d33f2b4c6b79b8cdb03822fd8add01a66e2b327d632158a27af6e5d1c"
+    },
+    {
+      "route": "workbooks/tutorial",
+      "fieldId": "workbooks.tutorial.0040",
+      "identifier": "Markov Groups: A Random Walk on Cube Moves",
+      "openToken": "{{P003}}",
+      "closeToken": "{{P004}}",
+      "innerTemplate": "Markov Groups: A Random Walk on Cube Moves",
+      "sourceHash": "e62c756d33f2b4c6b79b8cdb03822fd8add01a66e2b327d632158a27af6e5d1c"
+    },
+    {
+      "route": "workbooks/tutorial",
+      "fieldId": "workbooks.tutorial.0043",
+      "identifier": "Markov Groups",
+      "openToken": "{{P001}}",
+      "closeToken": "{{P002}}",
+      "innerTemplate": "Markov Groups",
+      "sourceHash": "2ae4b4b9f1c9f752fc0010aaf9a218bd47f58aa7fa3ad12b16f9ecfbe0a58260"
+    },
+    {
+      "route": "workbooks/tutorial",
+      "fieldId": "workbooks.tutorial.0067",
+      "identifier": "Markov Groups: A Random Walk on Cube Moves",
+      "wholeLabel": true,
+      "sourceText": "Markov Groups: A Random Walk on Cube Moves",
+      "sourceHash": "d02073d0cfe1eba58a30788da919516205f791dbeaedc199ddccfa5adf47c767"
+    },
+    {
+      "route": "workbooks/import",
+      "fieldId": "workbooks.import.0012",
+      "identifier": "Simpson's Paradox",
+      "openToken": "{{P004}}",
+      "closeToken": "{{P005}}",
+      "innerTemplate": "Simpson's Paradox",
+      "sourceHash": "af7b0ac38e1dd30e4fbae79640d6453b454947fe69e570b2861e6a8519fb71df"
+    },
+    {
+      "route": "workbooks/import",
+      "fieldId": "workbooks.import.0047",
+      "identifier": "Simpson's Paradox",
+      "openToken": "{{P000}}",
+      "closeToken": "{{P001}}",
+      "innerTemplate": "Simpson's Paradox",
+      "sourceHash": "37d647d74b6983a6c4e635adfe390bc7fb2ebaa504d9ea17bfacd460974b5981"
+    },
+    {
+      "route": "workbooks/import",
+      "fieldId": "workbooks.import.0047",
+      "identifier": "Simpson's Paradox: When Every Group Disagrees with the Total",
+      "openToken": "{{P002}}",
+      "closeToken": "{{P003}}",
+      "innerTemplate": "Simpson's Paradox: When Every Group Disagrees with the Total",
+      "sourceHash": "37d647d74b6983a6c4e635adfe390bc7fb2ebaa504d9ea17bfacd460974b5981"
+    },
+    {
+      "route": "workbooks/import",
+      "fieldId": "workbooks.import.0051",
+      "identifier": "Simpson's Paradox",
+      "openToken": "{{P002}}",
+      "closeToken": "{{P003}}",
+      "innerTemplate": "Simpson's Paradox",
+      "sourceHash": "6faed81d478a0d5c67f7e45583fb515aaab5d9c5750c7bbce348a321fa42231a"
+    },
+    {
+      "route": "workbooks/graphics",
+      "fieldId": "workbooks.graphics.0045",
+      "identifier": "Workbook Graphics",
+      "openToken": "{{P000}}",
+      "closeToken": "{{P001}}",
+      "innerTemplate": "Workbook Graphics",
+      "sourceHash": "38a262a59c1daa3a254f80d436b89bfb9708911ee7fee500ec0f76101386fd07"
+    },
+    {
+      "route": "workbooks/named-cells",
+      "fieldId": "workbooks.named-cells.0033",
+      "identifier": "Named Cell Interop",
+      "openToken": "{{P001}}",
+      "closeToken": "{{P002}}",
+      "innerTemplate": "Named Cell Interop",
+      "sourceHash": "3bd1e8556a9bba01a4839904aa3c741d39f647925678e6b12c05801df51c9881"
+    },
+    {
+      "route": "workbooks/named-cells",
+      "fieldId": "workbooks.named-cells.0036",
+      "identifier": "Named Cell Interop",
+      "openToken": "{{P003}}",
+      "closeToken": "{{P004}}",
+      "innerTemplate": "Named Cell Interop",
+      "sourceHash": "7d41becb9374d1deb6c3b08750cfc48779cb156855ae2a91ddcec3ba45365945"
+    },
+    {
+      "route": "workbooks/named-cells",
+      "fieldId": "workbooks.named-cells.0144",
+      "identifier": "Named Cell Interop",
+      "openToken": "{{P003}}",
+      "closeToken": "{{P004}}",
+      "innerTemplate": "Named Cell Interop",
+      "sourceHash": "67761ef102a5795eca1293fe88480ab6427f2610094bb5ae2aac525154e56629"
+    }
+  ],
+  "controlCorrections": [
+    {
+      "locale": "fr",
+      "fieldId": "tutorials.0044",
+      "sourceHash": "7d8a9e811ac9bc37ee2cd2f63d5c5eb09a2191a7d0cbc354ec7376ca3a98a1e1",
+      "sourceFragment": "the Open agent preset",
+      "before": "le préréglage d'agent Open",
+      "controlKey": "aiSecurity.levelOpen",
+      "operation": "Replace only the exact approved French fragment with its frozen app control label"
+    },
+    {
+      "locale": "fr",
+      "fieldId": "interface.appearance.0075",
+      "sourceHash": "05c0a620831c8e8e93b57dd22868779e49e647411e3ec0605b3b63cf57ac42c4",
+      "sourceFragment": "The defaults are Own row in portrait",
+      "before": "Les valeurs par défaut sont Propre rangée en portrait",
+      "controlKey": "chips.ownRow",
+      "controlToken": "{{P002}}",
+      "operation": "Replace only the exact approved French fragment with its frozen app control label"
+    },
+    {
+      "locale": "bn",
+      "fieldId": "tutorials.0044",
+      "sourceHash": "7d8a9e811ac9bc37ee2cd2f63d5c5eb09a2191a7d0cbc354ec7376ca3a98a1e1",
+      "sourceFragment": "the Open agent preset",
+      "before": "ওপেন এজেন্ট প্রিসেট",
+      "controlKey": "aiSecurity.levelOpen",
+      "glossaryField": "pro.ai.tutorial.0082",
+      "operation": "Replace only the exact approved Bengali fragment with its frozen app control label"
+    },
+    {
+      "locale": "hi",
+      "fieldId": "tutorials.0044",
+      "sourceHash": "7d8a9e811ac9bc37ee2cd2f63d5c5eb09a2191a7d0cbc354ec7376ca3a98a1e1",
+      "sourceFragment": "the Open agent preset",
+      "before": "ओपन एजेंट प्रीसेट",
+      "controlKey": "aiSecurity.levelOpen",
+      "glossaryField": "pro.ai.tutorial.0082",
+      "operation": "Replace only the exact approved Hindi fragment with its frozen app control label"
+    },
+    {
+      "locale": "ja",
+      "fieldId": "tutorials.0044",
+      "sourceHash": "7d8a9e811ac9bc37ee2cd2f63d5c5eb09a2191a7d0cbc354ec7376ca3a98a1e1",
+      "sourceFragment": "the Open agent preset",
+      "before": "Openエージェントプリセット",
+      "controlKey": "aiSecurity.levelOpen",
+      "glossaryField": "pro.ai.tutorial.0082",
+      "glossaryToken": "{{P000}}",
+      "operation": "Replace only the exact approved Japanese fragment with its frozen app control label"
+    },
+    {
+      "locale": "ko",
+      "fieldId": "tutorials.0044",
+      "sourceHash": "7d8a9e811ac9bc37ee2cd2f63d5c5eb09a2191a7d0cbc354ec7376ca3a98a1e1",
+      "sourceFragment": "the Open agent preset",
+      "before": "Open 에이전트 프리셋",
+      "controlKey": "aiSecurity.levelOpen",
+      "glossaryField": "pro.ai.tutorial.0082",
+      "glossaryToken": "{{P000}}",
+      "operation": "Replace only the exact approved Korean fragment with its frozen app control label"
+    },
+    {
+      "locale": "de",
+      "fieldId": "tutorials.0044",
+      "sourceHash": "7d8a9e811ac9bc37ee2cd2f63d5c5eb09a2191a7d0cbc354ec7376ca3a98a1e1",
+      "sourceFragment": "the Open agent preset",
+      "before": "die Open-Agent-Voreinstellung",
+      "controlKey": "aiSecurity.levelOpen",
+      "glossaryField": "pro.ai.tutorial.0082",
+      "glossaryToken": "{{P000}}",
+      "operation": "Replace only the exact approved German fragment with its frozen app control label"
+    },
+    {
+      "locale": "es",
+      "fieldId": "tutorials.0044",
+      "sourceHash": "7d8a9e811ac9bc37ee2cd2f63d5c5eb09a2191a7d0cbc354ec7376ca3a98a1e1",
+      "sourceFragment": "the Open agent preset",
+      "before": "el ajuste predeterminado de agente Open",
+      "controlKey": "aiSecurity.levelOpen",
+      "glossaryField": "pro.ai.tutorial.0082",
+      "glossaryToken": "{{P000}}",
+      "operation": "Replace only the exact approved Spanish fragment with its frozen app control label"
+    },
+    {
+      "locale": "id",
+      "fieldId": "tutorials.0044",
+      "sourceHash": "7d8a9e811ac9bc37ee2cd2f63d5c5eb09a2191a7d0cbc354ec7376ca3a98a1e1",
+      "sourceFragment": "the Open agent preset",
+      "before": "prasetel agen Open",
+      "controlKey": "aiSecurity.levelOpen",
+      "glossaryField": "pro.ai.tutorial.0082",
+      "glossaryToken": "{{P000}}",
+      "operation": "Replace only the exact approved Indonesian fragment with its frozen app control label"
+    },
+    {
+      "locale": "pt-BR",
+      "fieldId": "tutorials.0044",
+      "sourceHash": "7d8a9e811ac9bc37ee2cd2f63d5c5eb09a2191a7d0cbc354ec7376ca3a98a1e1",
+      "sourceFragment": "the Open agent preset",
+      "before": "predefinição de agente Open",
+      "controlKey": "aiSecurity.levelOpen",
+      "glossaryField": "pro.ai.tutorial.0082",
+      "glossaryToken": "{{P000}}",
+      "operation": "Replace only the exact approved Brazilian Portuguese fragment with its frozen app control label"
+    },
+    {
+      "locale": "de",
+      "fieldId": "files-export.tutorial.0076",
+      "sourceHash": "77451d0c3e110d02f12611e7a58e5f889efff842043762a5659abea1d1fb7828",
+      "sourceFragment": "Menu → Import File",
+      "before": "→ Import File",
+      "controlKey": "menu.importFileEGSrwb",
+      "glossaryField": "workbooks.import.0037",
+      "glossaryToken": "{{P000}}",
+      "operation": "Replace only the exact approved German menu-path fragment with its frozen app control name"
+    }
+  ]
+}

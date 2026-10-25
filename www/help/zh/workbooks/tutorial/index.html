@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="zh" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="在 SciREPL 的目录中找到马尔可夫群工作簿，运行其 Python 单元格，编辑随机游走，并导出您自己的工作簿副本。">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/zh/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/tutorial/tutorial.css">
+  <script src="../../../workbooks/tutorial/catalogue-link.js" defer></script>
+  <title>马尔可夫群工作簿操作指南 · SciREPL 帮助</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">跳转到内容</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (英文参考页面)</span></a>
+    <nav aria-label="主导航">
+      <a href="../../../workbooks/">工作簿参考<span class="english-reference"> (英文参考页面)</span></a>
+      <a href="../../tutorials/">全部教程</a>
+      <a href="../../../">全部帮助<span class="english-reference"> (英文参考页面)</span></a>
+      <a href="../../../../">打开 Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="教程语言"><details class="tutorial-language-menu"><summary>教程语言: <bdi>简体中文</bdi></summary><nav aria-label="教程语言"><a href="../../../en/workbooks/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="./" lang="zh" hreflang="zh" aria-current="page">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">本教程为机器翻译，母语审校待完成。代码和技术参数保持不变。屏幕截图显示原始英文界面；请将本文中翻译的控件名称与您的应用相对应。</p></aside>
+    <p class="breadcrumbs"><a href="../../../">帮助<span class="english-reference"> (英文参考页面)</span></a> / <a href="../../../workbooks/">工作簿<span class="english-reference"> (英文参考页面)</span></a> / 马尔可夫群操作指南</p>
+    <article>
+      <p class="eyebrow">边做边学</p>
+      <h1>从目录中探索工作簿</h1>
+      <p class="lede">找到现有的 <strong>Markov Groups: A Random Walk on Cube Moves</strong> 工作簿，运行其四个 Python 单元格，缩短其随机游走，并保存您自己的副本。重点在于使用 SciREPL；您不需要了解矩阵代数或会还原魔方。</p>
+      <p class="callout"><strong>想学习如何使用此应用？</strong> 请按照步骤 1–5 操作：查找、打开、运行、编辑并导出工作簿。您可以在步骤 5 之后停止。<a href="#optional-maths">选读的数学内容</a>在后面；完成本操作指南并不需要它。</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Android 步骤</li>
+        <li class="chip">约 15 分钟</li>
+      </ul>
+      <p class="screen-note">真实手机截图显示了 SciREPL Pro <strong>1.4.0-debug</strong> 在 <strong>Samsung Galaxy S24+</strong> 上的界面，截取于 <time datetime="2026-10-06">6 日十月 2026 年</time>。它们用于说明共享工作簿的工作流程，而非已发布的 Pro 构建版。Free 和其他版本对某些控件的排布可能有所不同。示例来自 SciREPL 目录 <strong>v0.4.0</strong> 的英文工作簿。</p>
+      <nav class="lesson-nav" aria-label="工作簿操作指南步骤">
+        <strong>本课内容</strong>
+        <p><a href="#find-menu">首先，找到菜单</a></p>
+        <ol>
+          <li><a href="#browse">浏览、筛选和搜索</a></li>
+          <li><a href="#open">打开工作簿</a></li>
+          <li><a href="#run">按顺序运行其单元格</a></li>
+          <li><a href="#edit">更改一个值并重新运行</a></li>
+          <li><a href="#export">导出您的工作簿副本</a></li>
+        </ol>
+        <p><a href="#optional-maths">选读：魔方示例背后的数学原理</a></p>
+        <p><a href="../../tutorials/">全部教程</a></p>
+      </nav>
+
+      <section id="find-menu">
+        <p class="step-label">开始之前</p>
+        <h2>找到菜单</h2>
+        <p>在 SciREPL 的<strong>应用顶部标题行</strong>中寻找 <strong>☰ Menu</strong> 按钮。它的图标是<strong>三条水平横线</strong>，在下方以黄色高亮显示。点击它可打开该应用的菜单；步骤 1 会说明应选择哪个菜单项。</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--find-menu" role="img" aria-label="SciREPL 的顶部标题行，其中三条水平横线的 Menu 按钮在问号 Help 按钮旁以黄色高亮显示。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>在此截图中，<strong>☰ Menu</strong> 按钮位于 <strong>? Help</strong> 按钮旁边。即使您的标题行排列有所不同，也请使用这个三条横线图标。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-workbook.png">查看完整截图</a>
+        </figure>
+      </section>
+
+      <section id="browse">
+        <p class="step-label">步骤 1</p>
+        <h2>浏览、筛选和搜索</h2>
+        <ol class="lesson-steps">
+          <li>打开 <strong>菜单 → 浏览软件包、合辑与工作簿</strong>。在 Free 中，可选的 <strong>📦</strong> 标题快捷方式在可见时也会打开相同的屏幕。<a href="../../interface/appearance/#browse-shortcut">外观操作指南</a>介绍了如何启用它。</li>
+          <li>浏览列表或使用其筛选器。对于此英文示例，请选择 <strong>English</strong>（在 <strong>自然语言</strong> 下），以及 <strong>Python</strong>（在 <strong>内核</strong> 下）。<strong>所有自然语言</strong> 与内核的 <strong>全部</strong> 选项同样有效，但会显示更多条目。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse" role="img" aria-label="SciREPL 浏览屏幕，其目录控件以黄色高亮显示。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-browse.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>“浏览”汇总了软件包、套件和工作簿模板。其搜索和筛选功能可帮助您缩小列表范围。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-browse.png">查看完整浏览截图</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>在搜索字段中键入 <strong>Markov Groups</strong>。在 <strong>工作簿</strong> 下找到 <strong>Markov Groups: A Random Walk on Cube Moves</strong>。安装前请核对完整标题：这是一个工作簿模板，而不是要添加到 Python 的软件包。</li>
+          <li>如果键盘遮挡了结果，请使用其隐藏键盘按钮或按一次 Android <strong>上一步</strong> 将其关闭。保持“浏览”处于打开状态，并滚动到匹配的工作簿。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--search" role="img" aria-label="针对 Markov Groups 的“浏览”搜索，其中匹配的工作簿及其“安装”控件以黄色高亮显示。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-search.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/search-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>搜索 <strong>Markov Groups</strong>，然后检查匹配工作簿的标题和 <strong>安装</strong> 按钮。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-search.png">查看完整搜索截图</a>
+        </figure>
+        <p><strong>还有哪些可用内容？</strong> <a id="catalogue-workbooks-link" href="https://github.com/s243a/SciREPL-Catalog/tree/main/workbooks/en">在 GitHub 上浏览工作簿列表（<bdi id="catalogue-workbooks-language">English</bdi>）</a>。同一课程的不同语言版本是单独的条目，而不是不同的课程。</p>
+        <div class="catalogue-language-choice" id="catalogue-language-choice" hidden>
+          <label for="catalogue-workbooks-locale">工作簿语言：</label>
+          <select id="catalogue-workbooks-locale">
+            <option value="ar" lang="ar">العربية</option>
+            <option value="bn" lang="bn">বাংলা</option>
+            <option value="de" lang="de">Deutsch</option>
+            <option value="en" lang="en" selected>English</option>
+            <option value="es" lang="es">Español</option>
+            <option value="fr" lang="fr">Français</option>
+            <option value="hi" lang="hi">हिन्दी</option>
+            <option value="id" lang="id">Bahasa Indonesia</option>
+            <option value="ja" lang="ja">日本語</option>
+            <option value="ko" lang="ko">한국어</option>
+            <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+            <option value="ru" lang="ru">Русский</option>
+            <option value="zh" lang="zh">中文</option>
+          </select>
+        </div>
+        <p>GitHub 链接显示最新的开发内容。SciREPL 通常使用最新的稳定目录版本，因此在 GitHub 上显示的一些工作簿可能尚未出现在“浏览”中。在 SciREPL 中，清除搜索并尝试 <strong>CSV</strong>、<strong>Prolog</strong>、<strong>Lua</strong> 或 <strong>statistics</strong>；在探索其他语言时，请在内核下选择 <strong>全部</strong>。</p>
+        <p class="callout"><strong>如果出现隐私提示：</strong>获取或刷新远程目录需要网络连接。请阅读告知内容，在<em>对话框内</em>滚动到底部，仅在您同意的情况下点击<strong>我已了解</strong>。关闭提示将阻止网络刷新；内置条目和之前缓存的目录条目可能仍会显示。请参阅<a href="../../../privacy/">隐私和本地数据<span class="english-reference"> (英文参考页面)</span></a>。</p>
+        <p class="callout"><strong>没有匹配的工作簿？</strong>请检查语言和内核筛选器，然后使用目录的 <strong>刷新</strong> 控件。较旧版本的应用可能没有相同的目录控件。或者，<a download="markov-groups.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/v0.4.0/workbooks/en/markov-groups.srwb">将固定的 v0.4.0 工作簿文件</a>保存到您的设备，然后选择 <strong>菜单 → 导入文件</strong> 并选择 <code>markov-groups.srwb</code>。如果您的浏览器将该文件显示为文本，请使用其保存/下载操作并保留 <code>.srwb</code> 扩展名。<a href="../import/">手动工作簿导入操作指南</a>展示了使用来自 GitHub 的 <code>main</code> 分支中的辛普森悖论（Simpson's Paradox）的操作步骤；选择上面的马尔可夫文件即可继续本课。</p>
+      </section>
+
+      <section id="open">
+        <p class="step-label">步骤 2</p>
+        <h2>打开工作簿并检查其单元格</h2>
+        <ol class="lesson-steps">
+          <li>点击工作簿卡片上的 <strong>安装</strong>。如果按钮已显示为 <strong>已安装</strong>，请退出“浏览”菜单，改从工作簿选择器中选择现有的工作簿。</li>
+          <li>工作簿通常会成为当前选中的标签页。如果“浏览”菜单仍处于打开状态，请将其退出。如果自动切换已关闭，请选择 <strong><bdi lang="en" dir="ltr">Markov Groups: A Random Walk on Cube Moves</bdi></strong> ，从 <strong><svg role="img" aria-label="向下箭头" width="16" height="16" viewBox="0 0 16 16" style="vertical-align: -.125em;"><path d="M3 5.5 8 10.5 13 5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> 工作簿选择器</strong> 旁边，位于 <strong>SciREPL</strong> 标题行中。</li>
+          <li>阅读开篇文本，然后浏览各个单元格。Markdown 单元格用于解释课程；Python 单元格包含您将要运行的代码。每个 Python 单元格都有一个名称以帮助您找到它。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--workbook" role="img" aria-label="已打开的马尔可夫群工作簿，其标题和工作簿控件以黄色高亮显示。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/workbook-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>目录中的工作簿会以可编辑单元格的形式打开。其简介给出了 Python 的运行顺序。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-workbook.png">查看完整工作簿截图</a>
+        </figure>
+        <p class="callout"><strong>“安装”并不代表“运行”。</strong>安装此远程目录工作簿会添加其单元格，但不会执行其 Python 代码。v0.4.0 模板没有保存的 Python 输出，因此请检查代码并自行运行。不需要 AI 账号、API 密钥、外部数据集或安装额外软件包；代码使用 NumPy 以及 SciREPL 的 Python 运行时。</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">步骤 3</p>
+        <h2>按顺序运行这四个 Python 单元格</h2>
+        <p>对于已保存的单元格，点击该单元格标题中的 <strong>✎ 铅笔</strong>，然后点击该单元格自带的 <strong>运行</strong>。这会执行现有的单元格；底部的新建单元格面板则用于创建不同的单元格。</p>
+        <aside class="callout" data-editions="pro"><strong>Pro 快捷方式：</strong> 双击已保存的代码以打开其编辑器，然后点击该单元格自带的 <strong>运行</strong>。Free 在本操作指南中使用 <strong>✎ 铅笔</strong> 图标。</aside>
+        <p class="callout"><strong>这些名称是什么意思？</strong><code>cube_moves</code> 和 <code>check_moves</code> 是显示在单元格上的名称，而不是要键入的命令。找到匹配的名称，然后使用该单元格的铅笔和“运行”。<a href="../named-cells/">命名单元格与跨语言路径教程</a>展示了如何分配名称并将其用作诸如 <code>/nb/cube_moves/.code</code> 的引用。</p>
+        <ol class="lesson-steps">
+          <li>运行 <code>cube_moves</code>。它定义了转动和辅助函数。预期输出 <code>Built six clockwise quarter-turn matrices with fixed face centres.</code></li>
+          <li>运行 <code>check_moves</code>。它会检查没有贴纸丢失、中心块保持固定，并且每个四分之一转重复四次后回到初始状态。在六行通过的检查之后，预期输出 <code>All six moves passed. U and R do not commute.</code></li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--checks" role="img" aria-label="手机上全新运行的 check_moves 输出，通过的检查以黄色高亮显示。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-checks.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/checks-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>打印出的检查结果是运行 <code>check_moves</code> 产生的新结果，而不是目录提供的已保存结果。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-checks.png">查看完整检查截图</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>运行 <code>show_turn</code>。它会打印 U 层转动循环以及转动前后的贴纸标签。前顶行从 <code>[19, 20, 21]</code> 变为 <code>[46, 47, 48]</code>。对比 <code>U then R equals R then U: False</code> 表明转动顺序至关重要。</li>
+        </ol>
+        <p><strong>部分打印输出：</strong></p>
+        <pre id="show-turn-output" style="white-space: pre-wrap; overflow-wrap: anywhere;"><code>U cycles, shown as one-based sticker positions:
+1 -&gt; 3 -&gt; 9 -&gt; 7 -&gt; 1
+2 -&gt; 6 -&gt; 8 -&gt; 4 -&gt; 2
+19 -&gt; 37 -&gt; 28 -&gt; 46 -&gt; 19
+20 -&gt; 38 -&gt; 29 -&gt; 47 -&gt; 20
+21 -&gt; 39 -&gt; 30 -&gt; 48 -&gt; 21
+
+F top row labels before U: [19, 20, 21]
+F top row labels after U:  [46, 47, 48]
+
+U then R equals R then U: False</code></pre>
+        <p>此处省略了长面的字母列表。循环行使用<strong>从一开始的位置</strong>；行对比显示<strong>贴纸标签</strong>。尽管复原状态下的魔方最初赋予它们匹配的编号，但它们的含义不同。</p>
+        <ol class="lesson-steps" start="4">
+          <li>运行 <code>random_walk</code>。它会打印单贴纸概率总和 <code>1.0</code>、一条 12 步的采样路径、最终的面字母标签，以及一条确认每个贴纸标签和所有六个中心块均得以保留的消息。</li>
+        </ol>
+        <p>这些 Python 单元格已按所需顺序排列。请勿重新排序：后面的单元格会重用来自 <code>cube_moves</code> 的定义。如需一次运行多个单元格，请参阅<a href="#batch-run-note">“运行下方全部”与“运行所有单元格”</a>。</p>
+        <p class="callout"><strong>首次运行较慢？</strong>Python 可能需要时间进行初始化，且运行时下载或网络回退可能需要您的同意。等待状态徽标恢复为 <strong>就绪</strong> 并检查单元格的输出是否有错误。如果重启后后面的单元格报告未定义的名称，请从头开始运行 Python 单元格；已保存的输出并不等同于活动的 Python 定义。</p>
+        <p>此工作簿打印文本和面字母列表。它不会绘制魔方或制作魔方动画，并且其带种子的短路径并不是均匀混合打乱的证据。</p>
+      </section>
+
+      <section id="edit">
+        <p class="step-label">步骤 4</p>
+        <h2>缩短游走并重新运行已保存的单元格</h2>
+        <ol class="lesson-steps">
+          <li>找到 <code>random_walk</code> 并点击<em>其</em> <strong>✎ 铅笔</strong>。</li>
+          <li>找到这一行并仅将 <code>size=12</code> 更改为 <code>size=6</code>:
+            <pre><code>moves = rng.choice(MOVE_OPTIONS, size=12).tolist()</code></pre>
+            <p>保持 <code>np.random.default_rng(7)</code> 不变。随机种子使此示例具有可重现性。</p>
+          </li>
+          <li>点击该已保存单元格编辑器中的 <strong>运行</strong> 按钮。输出已刷新；<code>Sampled moves:</code> 行现在包含六个选项而不是十二个。即使 <code>I</code> 让魔方保持不动，它也算作一个选项。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--edit" role="img" aria-label="正在编辑已保存的 random_walk 单元格，其中 size 等于六，并且该单元格的“运行”控件以黄色高亮显示。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-edit.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>更改已保存单元格中的一个值，然后使用<em>该单元格自带的</em>“运行”。仅进行编辑不会刷新其先前的输出。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-edit.png">查看完整编辑截图</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--six-moves" role="img" aria-label="重新运行后显示六个采样选项的最新 random_walk 输出，以黄色高亮显示。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-six-moves.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/six-moves-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>较短的采样路径是您编辑的直观结果。最后的消息仍然确认轨迹保留了贴纸标签和中心块。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-six-moves.png">查看完整六选项结果截图</a>
+        </figure>
+        <p>对于本次更改，在较早的定义已加载的情况下，只需重新运行 <code>random_walk</code>。如果您改为编辑 <code>cube_moves</code>，则也需要重新运行后面的 Python 单元格。输出记录的是其上一次执行的结果；当另一个单元格发生变化时，它们不会自动重新计算。</p>
+        <p>如果您误打开了编辑器，请选择 <strong>取消</strong>。要恢复到原始示例，请将 <code>size=6</code> 改回 <code>size=12</code> 并再次运行该单元格。</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">步骤 5</p>
+        <h2>导出您自己的工作簿副本</h2>
+        <ol class="lesson-steps">
+          <li>保持选中马尔可夫群工作簿，然后打开 <strong>菜单 → 导出工作簿与软件包</strong>，而不是“导出文档”。</li>
+          <li>选择 <strong>工作簿 (.srwb)</strong> 和 <strong>仅当前标签页</strong>。</li>
+          <li>点击 <strong>导出</strong> 并将副本保存到您控制的位置。Android 会打开共享/保存流程；浏览器会下载文件。请保留 <code>.srwb</code> 扩展名。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="“导出”对话框，其中“工作簿 (.srwb)”、“仅当前标签页”和“导出”以黄色高亮显示。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>“工作簿”格式和“仅当前标签页”会保存此编辑过的工作簿，而不包含无关的标签页。本课不需要仅限 Pro 的 <strong>包含 AI 对话</strong> 选项；请保持未勾选状态。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-export.png">查看完整导出截图</a>
+        </figure>
+        <p>该工作簿不需要单独的数据文件，因此对于本课而言，一份 <code>.srwb</code> 副本就足够了。您可以使用 <strong>菜单 → 导入文件</strong> 重新打开它；启动新的运行时时，请从头开始运行其 Python 单元格。</p>
+        <p class="callout"><strong>本地恢复并非备份。</strong>清除应用/网站存储空间或卸载应用可能会移除本地工作成果。Android 和浏览器会话不会自动共享您的编辑内容。“导出”不会将您的更改发布到目录中；它会为您提供一份独立的副本。</p>
+        <p>有关已保存单元格编辑的基础知识，请参阅<a href="../../interface/tutorial/">首个工作簿界面操作指南</a>。有关读取并携带单独数据文件的示例，请尝试 <a href="../../files-export/tutorial/">CSV 工作簿操作指南</a>。<a href="../../../workbooks/">工作簿参考<span class="english-reference"> (英文参考页面)</span></a>涵盖了单元格类型和持久单元格名称。</p>
+      </section>
+
+      <aside class="callout" id="batch-run-note" aria-labelledby="batch-run-heading">
+        <h3 id="batch-run-heading">运行下方全部与运行所有单元格</h3>
+        <ul>
+          <li><strong>运行下方全部：</strong>使用已保存单元格的 <strong>✎ 铅笔</strong> 打开它，然后选择 <strong>运行下方所有单元格</strong>（紧凑图标为 <strong>▶↓</strong>）。它会按顺序运行该单元格<em>以及</em>其下方的每个单元格。</li>
+          <li><strong>菜单 → 运行所有单元格：</strong>从第一个单元格到最后一个单元格运行选定的工作簿。它不是运行每个工作簿标签页的命令。</li>
+        </ul>
+        <p>批量运行期间，请先检查代码并保持选中此工作簿。在全新的 Python 会话之后，请从 <code>cube_moves</code> 开始，以便后面的单元格具有其定义。这些操作会执行代码；将某个解释称为“选读”并不会让应用跳过其代码单元格。</p>
+      </aside>
+
+      <p class="callout" id="walkthrough-complete"><strong>您已完成 SciREPL 操作指南。</strong>您已经找到、打开、运行、编辑并导出了工作簿。如果您只是想学习如何使用该应用，可以在此停止。如果您想探索魔方数学和开发工作簿，请继续阅读下方内容。</p>
+
+      <section id="optional-maths">
+        <p class="step-label">选读内容</p>
+        <h2>魔方示例背后的数学原理</h2>
+        <h3>输出背后的深层含义</h3>
+        <p>该工作簿追踪 <strong>54 个单独标记的贴纸</strong>，而不仅仅是六种颜色。合法的转动会重新排列这些标签。同一个四分之一转重复四次会回到初始排列，但是当转动不同面的顺序发生改变时，可能会产生不同的结果。</p>
+        <p>随机游走在 13 个选项中进行选择：保持静止（<code>I</code>）、六个四分之一转以及它们的六个逆转动。其 <strong>54×54 概率矩阵描述的是单个贴纸的位置</strong>，而不是魔方的每个完整配置。概率总和为 <code>1.0</code> 意味着该贴纸的位置概率之和为一；这并不能证明魔方已被均匀打乱。</p>
+        <p class="callout"><strong>想了解面的方向吗？</strong>工作簿的 <code>coordinates</code> 单元格给出了全局坐标轴以及每个面的向右、向上和向外法向量。<a href="../graphics/">图片、图表与公式教程</a>展示了如何将这类解释放入工作簿中。坐标图正在添加到目录的开发副本中；上面固定的 v0.4.0 副本不包含它们。</p>
+        <div id="stage4-preview">
+          <h3>选读：预览修订后的阶段 4</h3>
+          <p>上面的步骤和手机截图使用的是稳定的 <strong>v0.4.0</strong> 工作簿。<a download="markov-groups-stage4-preview.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/f88d9b9e26364eeb5e7ff1ee9bcce5f27d47c66e/workbooks/en/markov-groups.srwb">修订后的工作簿下载</a>是一个<strong>开发预览版</strong>，尚不是稳定目录版本。如果您想尝试其更简短的、交错排列的说明与代码单元格，请使用 <strong>菜单 → 导入文件</strong> 将其导入。</p>
+          <p>在该预览版中，如上文所述首先运行 <code>cube_moves</code>、<code>check_moves</code> 和 <code>show_turn</code>。然后：</p>
+          <ol class="lesson-steps">
+            <li>运行 <code>transition_matrix</code>。它会构建 <code>T</code>，即在均匀随机选择一个选项（<code>I</code>、某个面的四分之一转或其逆转动）后单个贴纸位置的概率矩阵。</li>
+            <li>运行 <code>sticker_step</code>。它跟踪<strong>贴纸标签 1</strong>，其初始位置为<strong>从零开始的位置 0</strong>。其位置概率总和为 <code>1.0</code>。下方的图表显示了该单元格计算出的目标位置概率。</li>
+          </ol>
+          <figure id="sticker-probability-figure" aria-describedby="sticker-probability-caption" style="margin: 24px 0;">
+            <img src="../../../workbooks/tutorial/assets/sticker-one-step.svg" width="400" height="380" style="display: block; width: min(100%, 560px); height: auto;" alt="在进行一次随机移动后，贴纸标签 1 停留在位置 0 的概率为十三分之七，到达位置 2、6、18、35、42 或 47 的概率各为十三分之一。">
+            <figcaption id="sticker-probability-caption"><strong>这是一个概率条形图，而不是分箱直方图。</strong>该插图由 <code>after_one_step = T @ location_probability</code> 计算得出；它不是手机截图，也不是工作簿生成的新输出。位置从零开始。其他 47 个位置的概率为零，已予省略。贴纸的标签保持为 1。</figcaption>
+          </figure>
+          <div class="table-wrap">
+            <table aria-label="贴纸标签 1 的精确单步概率">
+              <thead><tr><th>目标位置</th><th>概率</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>7/13 ≈ 53.85%</td></tr>
+                <tr><td>2、6、18、35、42、47（各）</td><td>1/13 ≈ 7.69%</td></tr>
+                <tr><td>所有其他 47 个位置</td><td>0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <ol class="lesson-steps" start="3">
+            <li>运行 <code>random_walk</code>。它采样一条包含 12 个选项的路径，该路径针对<strong>整个魔方</strong>，并使用来自 <code>transition_matrix</code> 的定义。这与上述单个贴纸的概率不同。步骤 4 的 <code>size=12</code> 编辑在任一版本中的该单元格内均可正常工作。</li>
+          </ol>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL 帮助</span><nav aria-label="页脚导航"><a href="../../../workbooks/">工作簿参考<span class="english-reference"> (英文参考页面)</span></a><a href="../../../">全部帮助<span class="english-reference"> (英文参考页面)</span></a></nav></footer>
+</body>
+</html>

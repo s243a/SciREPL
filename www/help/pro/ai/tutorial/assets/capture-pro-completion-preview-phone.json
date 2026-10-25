@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "sourceRepository": "SciREPL-Pro",
+  "device": {
+    "model": "SM-S926W",
+    "name": "Galaxy S24+",
+    "package": "com.unifyweaver.scirepl.pro.debug",
+    "versionName": "1.4.0-debug",
+    "versionCode": 25,
+    "appCache": "scirepl-app-v461",
+    "buildCommit": null
+  },
+  "captureMethod": "Android screencap; unmodified full-screen PNG",
+  "request": {
+    "backend": "openrouter",
+    "model": "google/gemini-3.5-flash-lite",
+    "count": 1,
+    "status": 200,
+    "inputTokens": 172,
+    "outputTokens": 120,
+    "providerReportedUsd": 0.0003516,
+    "providerBillIndependentlyVerified": false,
+    "maxOutputTokens": 500,
+    "guardedBeforeDispatch": true,
+    "source": "const values = [12, 15, 18];\nconst average = ",
+    "privateWorkbookSent": false
+  },
+  "preview": {
+    "text": "values.reduce((a, b) => a + b, 0) / values.length;",
+    "logicalLineCount": 1,
+    "visuallyWrapped": true,
+    "displayedTier": "unverified",
+    "sourceUnchangedWhenOpened": true,
+    "accepted": false,
+    "codeExecuted": false
+  },
+  "screenshot": {
+    "file": "phone-completion-preview.png",
+    "width": 1080,
+    "height": 2340,
+    "sha256": "645cd4158fdf0f7e258620b4e4888cb20a2e2da04b47f71a06a7ae0ccc8f8d00",
+    "capturedAtUtc": "2026-10-12T22:27:12.005Z"
+  },
+  "displayView": { "x": 0, "y": 690, "width": 1080, "height": 390 },
+  "cleanup": {
+    "originalWorkbookRestored": true,
+    "originalDraftRestored": true,
+    "originalLanguageRestored": true,
+    "settingsRestored": true,
+    "emptyCaptureWorkbookRemoved": true,
+    "providerCredentialsNotExposedOrModified": true,
+    "spendingTalliesAndLedgerPreserved": true,
+    "originalCompletionFetchRestored": true,
+    "temporaryAdbForwardRemoved": true
+  },
+  "limitations": [
+    "A new provider request returned the same first reduce expression as the earlier chips capture; the remaining alternatives can differ.",
+    "This one-line preview does not demonstrate partial acceptance of a multi-line suggestion; visual wrapping is not a line boundary.",
+    "The unverified label is not a runtime check; no kernel was started or code run for this capture.",
+    "The installed build commit is unknown, so this is not a test of upcoming execution permissions."
+  ]
+}

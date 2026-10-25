@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="id" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Unduh berkas buku kerja SciREPL, temukan Menu → Impor Berkas, pilih di Android atau desktop, dan periksa sel-selnya sebelum menjalankannya.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/id/workbooks/import/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/import/tutorial.css">
+  <title>Impor berkas buku kerja · Bantuan SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/import/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/import/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/import/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/import/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/import/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/import/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/import/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/import/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/import/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/import/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/import/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/import/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/import/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/import/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Lompat ke konten</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+    <nav aria-label="Navigasi utama">
+      <a href="../../../workbooks/">Referensi buku kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+      <a href="../../tutorials/">Semua tutorial</a>
+      <a href="../../../">Semua bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+      <a href="../../../../">Buka PWA Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Bahasa tutorial"><details class="tutorial-language-menu"><summary>Bahasa tutorial: <bdi>Bahasa Indonesia</bdi></summary><nav aria-label="Bahasa tutorial"><a href="../../../en/workbooks/import/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/import/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/import/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/import/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/import/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/import/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/import/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="./" lang="id" hreflang="id" aria-current="page">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/import/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/import/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/import/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/import/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/import/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutorial hasil terjemahan mesin; peninjauan oleh penutur asli masih tertunda. Kode dan nilai teknis tidak diubah. Tangkapan layar menampilkan antarmuka asli bahasa Inggris; cocokkan nama kontrol yang diterjemahkan dalam teks ini dengan aplikasi Anda.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / <a href="../../../workbooks/">Buku Kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / Impor berkas buku kerja</p>
+    <article>
+      <p class="eyebrow">Belajar sambil praktik</p>
+      <h1>Impor sendiri berkas buku kerja</h1>
+      <p class="lede">Sudah memiliki berkas buku kerja, atau tidak dapat menemukan pelajaran di Jelajahi? Simpan berkas tersebut ke perangkat Anda, lalu gunakan <strong>Menu → Impor Berkas</strong> untuk menambahkannya ke SciREPL. Panduan singkat ini menggunakan <strong>Simpson's Paradox</strong> dari cabang GitHub <code>main</code> katalog; Anda tidak perlu memasang paket atau menulis kode untuk mengimpornya.</p>
+      <p>SciREPL mengimpor dua format notebook: <strong><code>.srwb</code></strong>, format buku kerjanya sendiri, dan <strong><code>.ipynb</code></strong>, format notebook Jupyter. Contoh ini menggunakan <code>.srwb</code>; <a href="#other-formats">catatan format di bawah</a> menjelaskan perbedaan perilaku eksekusi impor Jupyter.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Langkah-langkah Android + peramban</li>
+        <li class="chip">Sekitar 3 menit</li>
+      </ul>
+      <p class="screen-note">Tangkapan layar Menu adalah tangkapan Android nyata pada <strong>Samsung Galaxy S24+</strong>, yang memperlihatkan <strong>SciREPL Free 1.4.0-debug</strong>, bukan penginstalan Play Store. Tangkapan layar buku kerja yang diimpor adalah <strong>tangkapan peramban Chromium terpisah dari Free 1.4.0 pada viewport berukuran seluler</strong>; ini bukan bukti impor pemilih berkas Android. Keduanya diambil pada <time datetime="2026-10-06">6 Oktober 2026</time>. Edisi, versi, dan pemilih berkas lain mungkin menata kontrol secara berbeda. Contohnya adalah berkas <code>simpsons-paradox.srwb</code> berbahasa Inggris dari Katalog SciREPL cabang <code>main</code> sebagaimana ditinjau untuk panduan ini; cabang tersebut dapat berubah. <a href="../../../workbooks/import/assets/capture-receipt.json">Detail tangkapan dan sumber<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> mencatat dimensi gambar yang tepat dan hash berkas yang ditinjau.</p>
+      <nav class="lesson-nav" aria-label="Langkah-langkah impor buku kerja manual">
+        <strong>Dalam pelajaran ini</strong>
+        <ol>
+          <li><a href="#download">Simpan berkas buku kerja</a></li>
+          <li><a href="#import">Temukan Menu dan impor berkas</a></li>
+          <li><a href="#check">Periksa tab buku kerja baru</a></li>
+          <li><a href="#next">Lanjutkan dengan pelajaran</a></li>
+        </ol>
+        <p><a href="#other-formats">Format lain dan keamanan</a> · <a href="#troubleshooting">Jika ada yang tampak keliru</a></p>
+        <p><a href="../../tutorials/">Semua tutorial</a></p>
+      </nav>
+
+      <section id="download">
+        <p class="step-label">Langkah 1</p>
+        <h2>Simpan berkas buku kerja ke perangkat Anda</h2>
+        <p>Di GitHub, cabang <code>main</code> dapat berisi buku kerja atau pembaruan yang belum ada dalam rilis katalog stabil terbaru yang ditampilkan oleh Jelajahi. Rilis katalog berubah secara independen dari rilis aplikasi. Impor berkas langsung memungkinkan Anda mencoba buku kerja tepercaya tanpa menunggu kemunculannya di Jelajahi.</p>
+        <ol class="lesson-steps">
+          <li><a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">Lihat Simpson's Paradox di GitHub</a>, lalu <a download="simpsons-paradox.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/main/workbooks/en/simpsons-paradox.srwb">unduh berkas buku kerja sebenarnya (.srwb)</a>. Tautan kedua membuka berkas mentah, bukan halaman web GitHub.</li>
+          <li>Jika peramban Anda menampilkan berkas sebagai teks alih-alih mengunduhnya, gunakan tindakan <strong>simpan/unduh</strong> peramban. Simpan berkas buku kerja itu sendiri, bukan tangkapan layar atau halaman HTML.</li>
+          <li>Pertahankan nama berkas <code>simpsons-paradox.srwb</code> dan ekstensi <code>.srwb</code>-nya. Perhatikan tempat penyimpanannya: Android umumnya menggunakan <strong>Downloads</strong>; di desktop mungkin berupa Downloads atau folder yang Anda pilih.</li>
+        </ol>
+        <p><strong>Ini bukan unduhan rilis yang disematkan.</strong> <code>main</code> adalah cabang pengembangan: konten dan sel berkas dapat berubah setelah tangkapan layar ini diambil. Berkas yang Anda simpan adalah salinan lokal; perubahan GitHub di kemudian hari tidak memperbarui tab yang diimpor secara otomatis.</p>
+        <p class="callout"><strong>Mengunduh bukanlah mengimpor.</strong> Menyimpan berkas akan menempatkannya di perangkat Anda; ini belum membuka buku kerja di SciREPL. Anda tidak perlu membukanya di editor teks atau menaruhnya di tampilan Berkas SciREPL. Langkah berikutnya memilih berkas yang diunduh tersebut.</p>
+        <p>Jika Anda sudah memiliki berkas <code>.srwb</code> tepercaya dari orang lain, gunakan berkas tersebut dan lewati pengunduhan contoh. Judul buku kerja dan jumlah selnya akan berbeda dari pemeriksaan di Langkah 3.</p>
+      </section>
+
+      <section id="import">
+        <p class="step-label">Langkah 2</p>
+        <h2>Temukan Menu dan pilih Impor Berkas</h2>
+        <ol class="lesson-steps">
+          <li>Kembali ke SciREPL. Pada <strong>baris header di bagian atas aplikasi</strong>, temukan <strong>☰ Menu</strong>, tombol dengan <strong>tiga garis horizontal</strong>, lalu ketuk atau klik tombol tersebut.</li>
+          <li>Pilih <strong>📂 Impor berkas (misalnya .srwb, .ipynb, .csv, .py, .zip)</strong>. Jika menu lebih tinggi dari layar, gulir <em>di dalam menu</em> untuk menemukannya.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-menu" role="img" aria-label="Tangkapan layar Samsung Galaxy S24+ dari Menu SciREPL Free yang terbuka, dengan entri Impor Berkas yang disorot dengan warna kuning.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Pilih <strong>📂 Impor Berkas</strong> di menu aplikasi. Anotasi kuning menunjuk ke entri impor pada <strong>Free 1.4.0-debug di Android</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/phone-menu.png">Lihat tangkapan layar Menu Android lengkap</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li><strong>Di Android:</strong> pemilih berkas sistem akan terbuka. Cari di <strong>Downloads</strong>, atau telusuri tempat Anda menyimpan berkas tersebut. Pilih <code>simpsons-paradox.srwb</code>. Pemilih tersebut merupakan bawaan Android, sehingga tata letaknya dan kontrol pemilihan atau <strong>Buka</strong> akhir bergantung pada perangkat Anda.</li>
+          <li><strong>Di desktop:</strong> gunakan pemilih berkas untuk menemukan folder yang Anda pilih saat mengunduh. Pilih <code>simpsons-paradox.srwb</code> dan konfirmasikan pilihan tersebut. Gunakan cara ini alih-alih mencari layar Downloads Android.</li>
+          <li>Kembali di SciREPL, tunggu hingga impor selesai. Jika menu masih terbuka, tutup menu untuk melihat buku kerja.</li>
+        </ol>
+        <p class="callout"><strong>Buku kerja bukanlah pengunggahan berkas data.</strong> Mengimpor berkas <code>.srwb</code> akan menambahkan buku kerjanya sebagai tab terpisah, atau beberapa tab terpisah jika berkas berisi beberapa buku kerja. Tab Anda yang sudah ada tetap dipertahankan. Tindakan ini tidak memasukkan buku kerja ke tampilan Berkas, dan tidak menggantikan buku kerja Anda saat ini.</p>
+      </section>
+
+      <section id="check">
+        <p class="step-label">Langkah 3</p>
+        <h2>Periksa buku kerja baru sebelum menjalankan apa pun</h2>
+        <ol class="lesson-steps">
+          <li>Cari <strong>Simpson's Paradox</strong> di pemilih buku kerja. Pilih tab baru tersebut jika belum terpilih. Pengantar buku kerja ini berjudul <strong>Simpson's Paradox: When Every Group Disagrees with the Total</strong>.</li>
+          <li>Baca pengantar dan gulir ke seluruh sel. Versi yang ditinjau untuk tangkapan layar ini memiliki <strong>tujuh sel</strong>: tiga sel teks, tiga sel <strong>R</strong>, dan satu sel <strong>JavaScript</strong>. Versi yang lebih baru di <code>main</code> mungkin berbeda.</li>
+          <li>Temukan sel R bernama <code>data</code>, <code>compute</code>, dan <code>viz</code>, secara berurutan. Sel JavaScript bernama <code>js_check</code> dan merupakan pemeriksaan terpisah yang bersifat opsional. Baca teks penjelasan serta kodenya.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-result" role="img" aria-label="Tangkapan layar peramban Chromium dari SciREPL Free 1.4.0 pada viewport berukuran seluler, menampilkan buku kerja Simpson&#39;s Paradox yang diimpor dan judulnya yang disorot dengan warna kuning.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/browser-imported.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/imported-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Hasil impor peramban:</strong> buku kerja <strong>Simpson's Paradox</strong> yang diimpor terbuka sebagai sel yang dapat diedit di <strong>Free 1.4.0 di Chromium</strong>, di sini pada viewport 390 × 844. Ini bukan tangkapan layar Android. Mengimpor belum menjalankan sel R atau JavaScript-nya.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/browser-imported.png">Lihat tangkapan layar lengkap buku kerja yang diimpor di peramban</a>
+        </figure>
+        <p class="callout"><strong>Impor tidak berarti Jalankan untuk .srwb.</strong> SciREPL tidak mengeksekusi kode saat Anda mengimpor berkas <code>.srwb</code>, bahkan jika eksekusi otomatis diaktifkan untuk impor lainnya. Periksa kode dari sumber yang tidak dikenal atau tidak tepercaya sebelum memilih <strong>Jalankan</strong> atau <strong>Jalankan semua sel</strong>.</p>
+        <p><strong>Impor .srwb biasa saat ini menghapus output sel kode yang tersimpan</strong>, bahkan ketika berkas memuatnya. Teks Markdown tetap dipertahankan dan dirender, itulah sebabnya pengantar langsung muncul. Untuk membuat ulang bagan atau gambar lain yang dihasilkan oleh kode, jalankan kembali sel kodenya, dengan sel yang dependen secara berurutan. Impor tidak memulihkan variabel runtime R aktif atau variabel runtime lainnya.</p>
+      </section>
+
+      <section id="next">
+        <p class="step-label">Langkah 4</p>
+        <h2>Opsional: jalankan pelajaran yang diimpor</h2>
+        <p>Impor manual Anda telah selesai; menjalankan kode adalah langkah terpisah. Simpson's Paradox menggunakan <strong>data pengajaran sintetis</strong> untuk menunjukkan bagaimana perbandingan di dalam kelompok dapat berbeda dari perbandingan keseluruhan. Untuk mempelajarinya, ketuk <strong>✎ pensil</strong> pada sel kode yang tersimpan, periksa kodenya, lalu pada <em>sel tersebut</em>, gunakan tombol <strong>Jalankan</strong>.</p>
+        <ol class="lesson-steps">
+          <li>Jalankan sel R <code>data</code>, lalu baca sel teks <code>pause</code> dan buat prediksinya sebelum menjalankan <code>compute</code>. Lanjutkan dengan <code>viz</code> untuk membuat bagan. Sel R berikutnya bergantung pada sel sebelumnya. Sel-sel tersebut menggunakan base R; Anda tidak perlu memasang paket R tambahan.</li>
+          <li>Jika Anda menginginkan pemeriksaan JavaScript terpisah, jalankan <code>js_check</code>. Sel ini bersifat mandiri: tidak bergantung pada sel R dan tidak memerlukan inisialisasi R.</li>
+        </ol>
+        <p class="callout"><strong>Eksekusi R pertama:</strong> pada SciREPL, runtime webR mungkin perlu mengunduh dan melakukan inisialisasi. Pemberitahuan jaringan/privasi mungkin muncul; baca dan setujui hanya jika Anda ingin melanjutkan. Tunggu hingga runtime siap dan periksa kemungkinan kesalahan pada sel. Mengimpor buku kerja saja belum memuat definisi R-nya.</p>
+        <p>Untuk contoh lain dengan panduan eksekusi dan pengeditan yang lebih lengkap, lihat <a href="../tutorial/#run">pelajaran Markov Groups</a>. Itu adalah buku kerja yang berbeda, dengan empat sel Python; <a href="../tutorial/#export">langkah ekspornya</a> juga mengilustrasikan cara menyimpan salinan buku kerja yang telah diedit.</p>
+        <p class="callout"><strong>Simpan salinan yang Anda kendalikan.</strong> Berkas yang diunduh adalah salinan buku kerja asli, bukan cadangan dari pengeditan selanjutnya. Ekspor salinan buku kerja untuk menyimpan perubahan Anda. Menghapus penyimpanan aplikasi atau peramban dapat menghapus pekerjaan lokal, dan sesi Android serta peramban tidak membagikan perubahan Anda secara otomatis.</p>
+      </section>
+
+      <section id="other-formats">
+        <p class="step-label">Format lain dan keamanan</p>
+        <h2>Ketahui apa yang dibawa berkas Anda</h2>
+        <p><strong>Notebook Jupyter (.ipynb)</strong> juga menggunakan <strong>Menu → Impor Berkas</strong>, tetapi perilaku eksekusinya berbeda dari <code>.srwb</code>. Jika <strong>Jalankan sel otomatis saat mengimpor buku kerja</strong> diaktifkan, impor <code>.ipynb</code> dapat secara otomatis menjalankan sel kode yang tidak memiliki output tersimpan.</p>
+        <p class="callout"><strong>Impor berkas notebook hanya dari sumber yang Anda percayai.</strong> Sebelum mengimpor <code>.ipynb</code>, buka <strong>Menu → Pengaturan → Impor &amp; Pengeditan</strong> dan pastikan <strong>Jalankan sel otomatis saat mengimpor buku kerja</strong> dalam keadaan <strong>nonaktif</strong> (tidak dicentang). Opsi ini nonaktif secara default, tetapi periksa pengaturan Anda saat ini. Menonaktifkannya bukan jaminan bahwa sembarang notebook aman; periksa kode notebook tepercaya sebelum memutuskan secara eksplisit apakah akan menjalankannya.</p>
+        <p><strong>Berkas data terpisah:</strong> ekspor <code>.srwb</code> normal tidak membawa berkas CSV terpisah atau data lain yang disimpan dalam sistem berkas virtual SciREPL (tampilan <strong>Berkas</strong>). Versi Simpson's Paradox ini membuat data sintetisnya di dalam kode, sehingga tidak memerlukan berkas data terpisah. Untuk buku kerja yang membaca CSV, ikuti <a href="../../files-export/tutorial/#export">langkah ekspor arsip Paket panduan CSV</a> dan <a href="../../files-export/tutorial/#reopen">langkah membuka kembali</a> untuk membawa dan memulihkan buku kerja beserta datanya. Arsip paket dan impor <code>.zip</code> berada di luar cakupan pelajaran berkas buku kerja singkat ini.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">Jika ada yang tampak keliru</p>
+        <h2>Periksa berkas dan tab yang dipilih</h2>
+        <ul>
+          <li><strong>Pemilih tidak dapat menemukan berkas:</strong> periksa daftar unduhan peramban Anda untuk melihat tempat berkas disimpan, lalu telusuri folder tersebut. Mengunduh di desktop tidak memasukkan berkas ke folder Downloads ponsel Anda.</li>
+          <li><strong>Nama berkas berakhiran .txt atau .html:</strong> kembali ke tautan unduhan buku kerja dan simpan berkas sebenarnya dengan ekstensi <code>.srwb</code>-nya. Mengubah nama halaman HTML menjadi <code>.srwb</code> tidak mengubahnya menjadi buku kerja.</li>
+          <li><strong>Anda masih melihat buku kerja lama Anda:</strong> tutup menu dan periksa pemilih buku kerja untuk melihat judul yang baru. Tab yang sudah ada tetap dipertahankan.</li>
+          <li><strong>Anda mengimpornya dua kali:</strong> impor lain akan menambahkan salinan lain; ini tidak memperbarui atau menggantikan tab sebelumnya. Periksa salinan mana yang sedang Anda edit sebelum membuat perubahan.</li>
+          <li><strong>Judul atau sel tidak cocok:</strong> pastikan Anda memilih <code>simpsons-paradox.srwb</code>, bukan unduhan yang berbeda atau berkas dari pelajaran lain. Berkas di <code>main</code> dapat berubah; bandingkan salinan Anda dengan <a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">berkas GitHub saat ini</a> dan periksa kode yang tidak dikenal sebelum menjalankannya.</li>
+        </ul>
+        <p>Untuk dasar-dasar tab buku kerja dan pengeditan sel yang tersimpan, lihat <a href="../../interface/tutorial/">panduan antarmuka buku kerja pertama</a>. <a href="../../../workbooks/">Referensi buku kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> menjelaskan struktur buku kerja dan jenis sel.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Bantuan SciREPL</span><nav aria-label="Navigasi footer"><a href="../../../workbooks/">Referensi buku kerja<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a><a href="../../../">Semua bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a></nav></footer>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{
+  "captureMethod": "Android screencap; unmodified full-screen PNG",
+  "device": {
+    "model": "SM-S926W",
+    "appPackage": "com.unifyweaver.scirepl.pro.debug",
+    "version": "1.4.0-debug",
+    "versionCode": 25,
+    "sourceCommit": null,
+    "activeCache": "scirepl-app-v461"
+  },
+  "settings": {
+    "section": "local",
+    "selectedMode": "unsure",
+    "selectedModeLabel": "When unsure",
+    "status": "Ready (398 MB on this device)",
+    "installVisible": false,
+    "deleteVisible": true,
+    "advancedOpen": false
+  },
+  "screenshot": {
+    "file": "phone-local-settings.png",
+    "width": 1080,
+    "height": 2340,
+    "sha256": "3d70f4ef8e13ec509843b8e5d091d5f07910affd156500f3ec552c274a94bef7",
+    "capturedAtUtc": "2026-10-12T23:25:45.874Z"
+  },
+  "displayView": { "x": 0, "y": 90, "width": 1080, "height": 1080 },
+  "providerRequests": 0,
+  "externalRequests": 0,
+  "installPressed": false,
+  "deletePressed": false,
+  "modelDownloaded": false,
+  "inferenceRequested": false,
+  "codeExecuted": false,
+  "cleanup": {
+    "originalWorkbookRestored": true,
+    "originalDraftRestored": true,
+    "originalLanguageUnchanged": true,
+    "settingsRestored": true,
+    "emptyCaptureWorkbookRemoved": true,
+    "completionScreenClosed": true,
+    "originalCompletionFetchRestored": true
+  }
+}

@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="ru" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Присваивайте имена ячейкам SciREPL, читайте их исходный код и вывод через виртуальную файловую систему /nb, а также передавайте данные или сгенерированный код между JavaScript, Bash и Python.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ru/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/named-cells/tutorial.css">
+  <title>Именованные ячейки и межъязыковые пути · Справка SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/named-cells/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/named-cells/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/named-cells/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/named-cells/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/named-cells/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/named-cells/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/named-cells/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/named-cells/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/named-cells/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+    <nav aria-label="Основная навигация"><a href="../../../workbooks/">Справочник по рабочим книгам<span class="english-reference"> (Справочная страница на английском языке)</span></a><a href="../../tutorials/">Все руководства</a><a href="../../../">Вся справка<span class="english-reference"> (Справочная страница на английском языке)</span></a><a href="../../../../">Открыть PWA Free</a></nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Язык руководства"><details class="tutorial-language-menu"><summary>Язык руководства: <bdi>Русский</bdi></summary><nav aria-label="Язык руководства"><a href="../../../en/workbooks/named-cells/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/named-cells/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/named-cells/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/named-cells/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/named-cells/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/named-cells/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/named-cells/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/named-cells/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/named-cells/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/named-cells/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/named-cells/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="./" lang="ru" hreflang="ru" aria-current="page">Русский</a>
+      <a href="../../../zh/workbooks/named-cells/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Машинный перевод руководства; ожидает проверки носителем языка. Код и технические значения оставлены без изменений. На снимках экрана показан оригинальный интерфейс на английском языке; сопоставляйте переведенные названия элементов управления в этом тексте с вашим приложением.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Справка<span class="english-reference"> (Справочная страница на английском языке)</span></a> / <a href="../../../workbooks/">Рабочие книги<span class="english-reference"> (Справочная страница на английском языке)</span></a> / Именованные ячейки и пути</p>
+    <article>
+      <p class="eyebrow">Обучение на практике</p>
+      <h1>Присваивание имен ячейкам и связывание программ</h1>
+      <p class="lede">Ячейке можно присвоить понятное имя, такое как <code>numbers</code>, вместо того чтобы обращаться к ней только по позиции. Другие ячейки могут считывать ее последний текстовый вывод через <code>/nb/numbers/.output</code> или обмениваться данными через обычный файл в <code>/shared/</code>. Попробуйте оба способа с помощью JavaScript и Bash, затем сгенерируйте небольшую программу Bash в другой ячейке — без автоматического выполнения сгенерированного кода.</p>
+      <ul class="meta"><li class="chip chip-free">Рабочий процесс Free + Pro</li><li class="chip">Примеры, проверенные в браузере</li><li class="chip">Около 15 минут</li></ul>
+      <p class="screen-note">Пошаговое руководство и снимки экрана были проверены в <strong>браузерной сборке SciREPL Free</strong> от <time datetime="2026-10-06">6 октября 2026</time> года. Это полные снимки узкого окна браузера, <strong>а не снимки экрана Android</strong>. Версия Pro и все выпущенные версии для этого руководства не проверялись. В основном упражнении используются встроенные JavaScript и Bash: пакеты, вызовы моделей или загрузка сред выполнения не требуются. Python — необязательный заключительный шаг.</p>
+      <p class="callout"><strong>Что здесь означает «пути»:</strong> <code>/nb/</code> — это виртуальное представление <em>ячеек текущей выбранной рабочей книги</em>, доступное для программ. Это не папка в «Загрузках» Android и не отдельный экран «Path View». В проверенной версии Free экран <strong>Файлы и хранилище</strong> не предназначен для обзора <code>/nb/</code>; позже мы специально скопируем некоторые данные в общий файл, который этот экран может показать.</p>
+      <nav class="lesson-nav" aria-label="Шаги руководства по именованным ячейкам">
+        <strong>В этом уроке</strong>
+        <ol>
+          <li><a href="#open">Импорт небольшой рабочей книги с примером</a></li>
+          <li><a href="#name">Поиск и изменение имени ячейки</a></li>
+          <li><a href="#produce">Запуск ячейки, создающей данные</a></li>
+          <li><a href="#paths">Чтение ячеек по их путям</a></li>
+          <li><a href="#shared-file">Обмен данными через общий файл JSON</a></li>
+          <li><a href="#generate">Генерация исходного кода другой ячейки с последующим ручным запуском</a></li>
+          <li><a href="#update">Изменение данных и обновление результатов</a></li>
+        </ol>
+        <p><a href="#python">Необязательный модуль чтения на Python</a> · <a href="#more">Другие примеры рабочих книг</a> · <a href="#troubleshooting">Если что-то пошло не так</a></p>
+        <p><a href="../../tutorials/">Все руководства</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">Шаг 1</p>
+        <h2>Импорт примера без запуска</h2>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/named-cells/assets/named-cell-interop.srwb" download="named-cell-interop.srwb">Скачайте пример рабочей книги с именованными ячейками (.srwb)</a>. Сохраните сам файл и оставьте его расширение <code>.srwb</code>. Если браузер отображает текст, воспользуйтесь действием сохранения/скачивания.</li>
+          <li>В верхней строке заголовка SciREPL найдите <strong>☰ Menu</strong> — кнопку с <strong>тремя горизонтальными линиями</strong>. Откройте ее и выберите <strong>📂 Импортировать файл (например, .srwb, .ipynb, .csv, .py, .zip)</strong>. При необходимости прокрутите меню.</li>
+          <li>Выберите <code>named-cell-interop.srwb</code> в средстве выбора файлов вашего устройства. Закройте меню, если оно осталось открытым, затем выберите новую вкладку <strong>Named Cell Interop</strong> в средстве выбора рабочей книги. Стрелка <strong>▾</strong> средства выбора находится рядом с названием приложения. Ваши существующие рабочие книги сохранятся.</li>
+          <li>Прочитайте введение, затем найдите семь ячеек с кодом, названных <code>numbers</code>, <code>inspect_cells</code>, <code>write_shared</code>, <code>read_shared</code>, <code>generate_report</code>, <code>bash_report</code> и <code>python_total</code>. Они уже названы, чтобы вы могли следовать упражнению.</li>
+        </ol>
+        <p class="callout"><strong>Импорт — это не запуск.</strong> Обычный импорт <code>.srwb</code> не выполняет код, даже если включено автовыполнение. Не выбирайте «Запустить все ячейки» для этого урока: порядок имеет значение, а последняя ячейка Python необязательна. Проверяйте незнакомый код перед его запуском.</p>
+        <p>Требуется более подробное описание шагов скачивания и выбора файлов? Воспользуйтесь <a href="../import/">руководством по ручному импорту рабочих книг</a>. Чтобы следовать этому уроку, оставьте выбранной вкладку <strong>Named Cell Interop</strong>: <code>/nb/</code> относится к активной рабочей книге, а не ко всем открытым вкладкам.</p>
+      </section>
+
+      <section id="name">
+        <p class="step-label">Шаг 2</p>
+        <h2>Поиск и изменение имени ячейки</h2>
+        <p>У сохраненной ячейки с кодом в собственном заголовке есть <strong>метка приглашения In[…] </strong>, а у именованной ячейки также отображается ее имя. Именно эту метку следует использовать для присвоения имени, а не <strong>✎ карандаш</strong>, который редактирует исходный код ячейки. Отображаемый номер идентифицирует сохраненную карточку; после изменения порядка он не обязательно должен совпадать с текущей позицией ячейки в пути <code>/nb/In[N]/...</code>. Для ссылок рекомендуется использовать имена.</p>
+        <figure class="phone-figure">
+          <div class="annotated-shot" role="img" aria-label="Снимок экрана браузера, на котором метка In ячейки numbers и элемент управления «карандаш» обведены желтым цветом; ниже показаны ее исходный код и вывод JSON.">
+            <img src="../../../workbooks/named-cells/assets/browser-named-cell.png" alt="" loading="lazy" decoding="async">
+            <img class="shot-annotation" src="../../../workbooks/named-cells/assets/browser-named-cell-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          </div>
+          <figcaption>Два желтых контура обозначают <strong>метку In[…] </strong> сохраненной ячейки, которая открывает диалоговое окно переименования по двойному щелчку или долгому нажатию, и ее <strong>✎ карандаш</strong>, открывающий редактор исходного кода. Имя <code>numbers</code> отображается справа. Этот снимок браузера показывает вывод после шага 3; на настольном компьютере наведите курсор на карточку, чтобы отобразить ее элементы управления.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-named-cell.png">Посмотреть полный снимок экрана браузера</a>
+        </figure>
+        <ol class="lesson-steps">
+          <li>Найдите <code>numbers</code>. На настольном компьютере <strong>дважды щелкните по ее метке In[…] </strong>. На сенсорном устройстве <strong>нажмите и удерживайте эту метку</strong>. В проверенной сборке одиночный щелчок не вызывает окно именования.</li>
+          <li>В диалоговом окне замените <code>numbers</code> на <code>measurements</code>, затем подтвердите с помощью <strong>ОК</strong>. Имя в заголовке ячейки изменится; исходный код и язык останутся прежними.</li>
+          <li>Снова откройте это же диалоговое окно и измените имя <strong>обратно на <code>numbers</code></strong>, затем выберите <strong>ОК</strong>. Следующие ячейки используют это имя, поэтому восстановите его перед продолжением.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-name-dialog.png" alt="Снимок экрана узкого окна браузера с диалоговым окном имени ячейки в SciREPL Free, где введено значение measurements и показаны элементы управления подтверждением и отменой." loading="lazy" decoding="async">
+          <figcaption>Имя редактируется в отдельном диалоговом окне. Переименование ячейки не приводит к автоматическому обновлению ссылок в других ячейках: <code>/nb/numbers/.output</code> также пришлось бы изменить, если бы вы оставили новое имя.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-name-dialog.png">Посмотреть полный снимок экрана диалогового окна именования в браузере</a>
+        </figure>
+        <p>Выбирайте понятные и простые имена, такие как <code>cube_moves</code> или <code>check_moves</code>. Имена должны быть уникальными в пределах рабочей книги; они не могут содержать <code>/</code>, начинаться с <code>.</code> или быть зарезервированной позиционной меткой, такой как <code>In[2]</code>. Очистка поля имени удаляет его.</p>
+        <p>Вот почему в руководстве может быть сказано: <strong>«Запустите <code>cube_moves</code>, затем <code>check_moves</code>»</strong>: это имена ячеек, которые нужно найти в рабочей книге, а не файлы, которые необходимо скачивать отдельно. Имена служат более надежными ссылками, чем позиции, когда вы вставляете или перемещаете ячейки.</p>
+      </section>
+
+      <section id="produce">
+        <p class="step-label">Шаг 3</p>
+        <h2>Запуск ячейки, создающей данные</h2>
+        <p>Найдите <code>numbers</code>. Нажмите на ее <strong>✎ карандаш</strong>, проверьте исходный код и убедитесь, что для ячейки задано <strong>код → JS - JavaScript</strong>. Затем используйте кнопку <em>этой сохраненной ячейки</em> <strong>▶ Выполнить</strong>, а не панель новой ячейки, которая добавляет еще одну ячейку.</p>
+        <p class="callout"><strong>Быстрое действие в Pro:</strong> вы также можете открыть редактор сохраненной ячейки, <strong>дважды коснувшись текста исходного кода ячейки</strong> в Pro. Значок <strong>✎ карандаш</strong> работает в обеих редакциях. Это сочетание для редактирования отличается от двойного щелчка или долгого нажатия на <strong>метку In[…] </strong> для изменения ее имени.</p>
+        <pre><code data-cell-example="numbers">console.log(JSON.stringify({values: [3, 5, 8]}));</code></pre>
+        <p>Ожидается следующий однострочный вывод:</p>
+        <pre><code>{"values":[3,5,8]}</code></pre>
+        <p>Результатом является <strong>текст JSON</strong>. Благодаря его структуре другому языку проще прочитать его, чем произвольный текст сообщения. Мы не передаем активный объект JavaScript и не используем общие переменные JavaScript с Bash или Python.</p>
+      </section>
+
+      <section id="paths">
+        <p class="step-label">Шаг 4</p>
+        <h2>Чтение ячейки через виртуальную файловую систему</h2>
+        <p>Виртуальный каталог для <code>numbers</code> содержит свойства с префиксом-точкой. Путь объединяет точку монтирования рабочей книги, идентификатор ячейки и нужное свойство:</p>
+        <pre class="path-tree" aria-label="Виртуальные пути для ячейки numbers"><code>/nb/                         current workbook's cells
+└── numbers/                 this named cell
+    ├── .code                source text
+    ├── .output              latest text output
+    ├── .language            javascript
+    ├── .type                code
+    └── .name                numbers</code></pre>
+        <div class="table-wrap">
+          <table>
+            <caption>Свойства ячеек, используемые интерфейсом путей рабочей книги</caption>
+            <thead><tr><th scope="col">Свойство</th><th scope="col">Что возвращает чтение</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>.code</code></th><td>Текущий исходный код независимо от того, выполнялся ли он.</td></tr>
+              <tr><th scope="row"><code>.output</code></th><td>Последний текстовый вывод. Доступен только для чтения: формируется при выполнении. Может быть пустым или устаревшим.</td></tr>
+              <tr><th scope="row"><code>.language</code></th><td>Сохраненный идентификатор языка, например <code>javascript</code> или <code>bash</code>.</td></tr>
+              <tr><th scope="row"><code>.type</code></th><td>Тип ячейки, например <code>code</code> или <code>markdown</code>.</td></tr>
+              <tr><th scope="row"><code>.name</code></th><td>Назначенное имя или пустой текст, если ячейка безымянная.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Теперь нажмите <strong>✎ карандаш</strong> на ячейке <code>inspect_cells</code>, проверьте <strong>код → Bash</strong> и запустите ее. При этом считываются исходный код ячейки-источника, ее вывод JSON и ее язык, а затем выводится список идентификаторов ячеек текущей рабочей книги. Это не приводит к записи или изменению каких-либо ячеек или файлов.</p>
+        <pre><code data-cell-example="inspect_cells">printf 'Source:\n'
+cat /nb/numbers/.code
+printf '\nOutput:\n'
+cat /nb/numbers/.output
+printf '\nLanguage:\n'
+cat /nb/numbers/.language
+printf '\nCell names and positions:\n'
+ls /nb/</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-cell-paths.png" alt="Снимок экрана узкого окна браузера ячейки Bash inspect_cells, показывающий исходный код ячейки numbers, вывод JSON, язык и виртуальный список ячеек." loading="lazy" decoding="async">
+          <figcaption>Bash считывает свойства ячейки с помощью стандартных путей <code>cat</code>. Эти пути обращаются к данным рабочей книги; оболочка Android или физическая папка на телефоне здесь не задействованы. Снимок экрана браузера SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-cell-paths.png">Посмотреть полный снимок экрана браузера с путями ячеек</a>
+        </figure>
+        <h3>Имена, позиции и относительные ссылки</h3>
+        <p>К той же ячейке можно обращаться и по ее <strong>текущей позиции с отсчетом от 1</strong>, например, <code>/nb/In[2]/.output</code> означает вторую ячейку в текущем порядке. Учитывайте также ячейки Markdown. Это не постоянный идентификатор карточки: после изменения порядка отображаемый номер In[…] может отличаться от позиции, используемой этим путем. Позиционные ссылки меняют свое значение при изменении порядка или вставке ячеек; ссылки по именам продолжают указывать на именованную ячейку.</p>
+        <p>Bash и JavaScript также поддерживают ссылки относительно выполняемой ячейки: <code>/nb/-1/.output</code> означает предыдущую ячейку, а <code>/nb/./.code</code> — текущую ячейку. Они требуют контекста выполнения и зависят от порядка ячеек. В этом руководстве вместо этого используются явные имена; оно не полагается на идентичное поведение относительных ссылок во всех языках.</p>
+      </section>
+
+      <section id="shared-file">
+        <p class="step-label">Шаг 5</p>
+        <h2>Обмен данными через общий файл</h2>
+        <p><strong>Общая виртуальная файловая система</strong> содержит обычные файлы, которые могут использовать ядра различных языков. Здесь <code>/shared/</code> означает хранилище, управляемое внутри сеанса браузера/приложения SciREPL, а не папку «Загрузки» Android, папку на вашем компьютере или облачную синхронизацию. Общие файлы содержат текст или байты; они не делают активные переменные одного языка доступными для другого.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Два способа обращения программ к данным</caption>
+            <thead><tr><th scope="col">Путь</th><th scope="col">К чему обращается</th><th scope="col">Что его обновляет</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>/nb/numbers/.output</code></th><td>Последний текстовый вывод ячейки в выбранной рабочей книге.</td><td>Повторный запуск этой ячейки.</td></tr>
+              <tr><th scope="row"><code>/shared/data/named-cell-tutorial/values.json</code></th><td>Обычный файл JSON, доступный для разных ядер и вкладок рабочей книги.</td><td>Программа или редактор файлов, явно выполняющие запись в этот файл.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Запись обычного файла JSON</h3>
+        <p>Нажмите <strong>✎ карандаш</strong> на ячейке <code>write_shared</code>, проверьте <strong>код → JS - JavaScript</strong>, затем запустите ее. Это действие считывает последний текстовый вывод ячейки-генератора и сохраняет его как общий текстовый файл JSON. Общая файловая система создает родительские папки по мере необходимости.</p>
+        <pre><code data-cell-example="write_shared">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+window.sharedVFS.writeFile('/shared/data/named-cell-tutorial/values.json', text, 'javascript');
+console.log('Saved JSON to /shared/data/named-cell-tutorial/values.json');</code></pre>
+        <p>В результате создается <strong>отдельный файл, содержащий копию</strong> вывода JSON, а не еще одно имя для <code>/nb/numbers/.output</code>. Выделенная папка позволяет отделить небольшой временный файл примера от других ваших данных; повторный запуск <code>write_shared</code> перезаписывает именно этот файл урока.</p>
+        <h3>Чтение файла из другой программы</h3>
+        <p>Нажмите <strong>✎ карандаш</strong> на ячейке <code>read_shared</code>, проверьте <strong>код → JS - JavaScript</strong>, затем запустите ее. Эта независимая программа считывает сохраненный файл, а не ячейку <code>numbers</code>:</p>
+        <pre><code data-cell-example="read_shared">const text = window.sharedVFS.readFile('/shared/data/named-cell-tutorial/values.json', 'utf8');
+if (!text) throw new Error('Run write_shared first.');
+const record = JSON.parse(text);
+console.log(record.values.reduce((sum, value) =&gt; sum + value, 0));</code></pre>
+        <p>Ожидается <code>16</code>. Явный вызов <code>'utf8'</code> считывает байты файла как текст для синтаксического анализа JSON. У каждого ядра есть свой файловый API: JavaScript здесь использует вспомогательный инструмент общей файловой системы; Python может использовать <code>open(...)</code>, как показано в необязательном шаге ниже. Это не полноценная файловая система операционной системы.</p>
+        <p>Для отдельной межъязыковой проверки вы можете добавить новую ячейку <strong>код → Bash</strong> и выполнить эту команду. Она считывает тот же обычный файл и выводит <code>{"values":[3,5,8]}</code>:</p>
+        <pre><code>cat /shared/data/named-cell-tutorial/values.json</code></pre>
+        <h3>Просмотр того же файла в графическом интерфейсе файлов</h3>
+        <ol class="lesson-steps">
+          <li>Откройте <strong>☰ Menu → Файлы и хранилище</strong>.</li>
+          <li>Найдите общую папку <code>data</code>, затем <code>named-cell-tutorial</code> и <code>values.json</code>. Выберите этот файл, чтобы просмотреть его текст JSON.</li>
+          <li>Убедитесь, что он содержит <code>{"values":[3,5,8]}</code>, затем закройте «Files &amp; Storage», чтобы продолжить работу с рабочей книгой.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-shared-values.png" alt="Снимок экрана узкого окна браузера экрана Files &amp; Storage в SciREPL Free, показывающий скопированный файл values.json и его содержимое JSON." loading="lazy" decoding="async">
+          <figcaption>Специальное копирование в общую файловую систему делает JSON доступным в графическом интерфейсе файлов. В проверенной версии Free экран не отображает сам <code>/nb/</code>. Снимок экрана браузера SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-shared-values.png">Посмотреть полный снимок экрана браузера с общим файлом</a>
+        </figure>
+        <p class="callout"><strong>Копия не обновляется автоматически.</strong> Изменение или повторный запуск <code>numbers</code> изменяет последний вывод ячейки, а не существующий файл <code>values.json</code>. Повторно запустите <code>write_shared</code>, чтобы обновить копию, затем <code>read_shared</code>, чтобы заново произвести вычисления на ее основе. Файлы сохраняются в локальном хранилище приложения/браузера, однако очистка этого хранилища или удаление приложения могут привести к их удалению. Локальное хранение не заменяет резервную копию; экспортируйте файлы, которые необходимо сохранить.</p>
+        <p>Информацию о просмотре, редактировании и экспорте общих файлов см. в <a href="../../files-export/tutorial/#edit-file">руководстве по CSV и Files &amp; Storage</a>. Экспорт только рабочей книги <code>.srwb</code> не включает отдельные файлы, такие как эта копия JSON; используйте <a href="../../files-export/tutorial/#export">экспорт архива пакета</a>, чтобы объединить рабочую книгу и выбранные файлы данных.</p>
+      </section>
+
+      <section id="generate">
+        <p class="step-label">Шаг 6</p>
+        <h2>Генерация кода для другой ячейки с последующим ручным запуском</h2>
+        <p>До сих пор Bash читал вывод JavaScript. Теперь JavaScript будет использовать тот же текст JSON для вычисления общей суммы и запишет небольшую программу Bash в <em>существующую</em> ячейку <code>bash_report</code>. Запись кода и выполнение кода — это два отдельных действия.</p>
+        <ol class="program-flow" aria-label="Поток данных и сгенерированного кода">
+          <li><code>numbers</code><span>Запуск → текст JSON</span></li>
+          <li><code>generate_report</code><span>Чтение JSON → запись исходного кода Bash</span></li>
+          <li><code>bash_report</code><span>Проверка → ручной запуск</span></li>
+        </ol>
+        <p class="callout"><strong>Эта операция записи заменяет исходный код.</strong> Используйте вспомогательную ячейку-черновик <code>bash_report</code>, а не ячейку с результатами работы, которую вам необходимо сохранить. Создайте резервную копию перед попыткой записи исходного кода в собственной рабочей книге. Не перезаписывайте сам генератор и не изменяйте <code>.language</code> программным путем в этом упражнении.</p>
+        <ol class="lesson-steps">
+          <li>Убедитесь, что <code>bash_report</code> существует и ее языком является <strong>Bash</strong>. Ее исходный код показан ниже; пока не запускайте ее.</li>
+          <li>Откройте <strong>☰ Menu → Настройки → VFS блокнота</strong>. Для выполнения записи генератором параметр <strong>Разрешить ячейкам изменять другие ячейки</strong> должен быть отмечен. В проверенной сборке он включен по умолчанию, но проверьте свои настройки. Вам <em>не</em> требуется включать чтение между записными книжками, запись между записными книжками или программное выполнение. Закройте настройки.</li>
+          <li>Нажмите <strong>✎ карандаш</strong> на ячейке <code>generate_report</code>, проверьте <strong>код → JS - JavaScript</strong> и запустите ее.</li>
+        </ol>
+        <pre><code data-cell-example="generate_report">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+const data = JSON.parse(text);
+const total = data.values.reduce((sum, value) =&gt; sum + value, 0);
+const updated = window.notebookVFS.writeFile(
+  '/nb/bash_report/.code', `echo "Total: ${total}"`
+);
+if (!updated) throw new Error('Check bash_report exists and cell writes are allowed.');
+console.log('Updated bash_report source; inspect it, then run it yourself.');</code></pre>
+        <p>Целевая ячейка изначально содержит следующий заполнитель:</p>
+        <pre><code data-cell-example="bash_report">echo "Run generate_report first"</code></pre>
+        <p>После успешной работы генератора исходным кодом ячейки <code>bash_report</code> становится <code>echo "Total: 16"</code>. Запись <strong>не запустила Bash</strong>. Нажмите <strong>✎ карандаш</strong> этой ячейки, чтобы проверить новый исходный код, затем нажмите <em>ее собственную кнопку</em> <strong>▶ Выполнить</strong>. Ожидается <code>Total: 16</code>.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-generated-report.png" alt="Снимок экрана узкого окна браузера SciREPL Free, показывающий сгенерированный исходный код Bash echo Total: 16 в bash_report и Total: 16 после ручного запуска." loading="lazy" decoding="async">
+          <figcaption>Целевая ячейка по-прежнему является ячейкой Bash. JavaScript предоставил ее исходный код; ваше отдельное действие <strong>▶ Выполнить</strong> создало вывод под ней. Снимок экрана браузера SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-generated-report.png">Посмотреть полный снимок экрана браузера со сгенерированным отчетом</a>
+        </figure>
+        <p><code>readFile(...)</code> возвращает текст; неизвестная ячейка или свойство возвращает <code>null</code>. <code>writeFile(...)</code> сообщает об успешности записи. Проверки в генераторе останавливают его выполнение, если у ячейки-генератора нет вывода или целевая ячейка недоступна для записи. Имена чувствительны к регистру: сохраняйте точное написание.</p>
+      </section>
+
+      <section id="update">
+        <p class="step-label">Шаг 7</p>
+        <h2>Изменение данных и обновление каждого зависимого шага</h2>
+        <ol class="lesson-steps">
+          <li>Отредактируйте <code>numbers</code> с помощью ее <strong>✎ карандаша</strong>. Замените <code>[3, 5, 8]</code> на <code>[4, 5, 8]</code>, затем запустите эту ячейку. Ее JSON теперь содержит <code>4</code>.</li>
+          <li>Взгляните на <code>bash_report</code> перед запуском чего-либо еще. Ее прежний исходный код и вывод остаются неизменными: автоматическое обновление зависимостей отсутствует.</li>
+          <li>Повторно запустите <code>generate_report</code>. Это изменит исходный код отчета на <code>echo "Total: 17"</code>, но его старый вывод <code>Total: 16</code> может оставаться видимым.</li>
+          <li>Проверьте и повторно запустите <code>bash_report</code>. Теперь ее выводом является <code>Total: 17</code>.</li>
+          <li>Перед обновлением файла повторно запустите <code>read_shared</code>: она по-прежнему показывает <code>16</code> из старой копии JSON. Теперь повторно запустите <code>write_shared</code>, затем <code>read_shared</code>; путь через файл также покажет <code>17</code>. Снова откройте <code>values.json</code> в Files &amp; Storage, чтобы проверить измененный файл.</li>
+        </ol>
+        <p class="callout"><strong>Исходный код, вывод и скопированные файлы — это разные вещи.</strong> Завершите открытое редактирование исходного кода с помощью <strong>▶ Выполнить</strong> этой ячейки перед ее потребителями; несохраненный черновик в редакторе — это не сохраненный <code>.code</code>. Запись исходного кода не выполняет целевую ячейку, а скопированный файл не отслеживает последующие изменения. Следуйте явному порядку: источник данных → генератор → отчет. Отображаемый старый вывод не является доказательством того, что текущий исходный код был выполнен.</p>
+        <p>Экспортируйте рабочую книгу, чтобы сохранить изменения исходного кода и имена. Обычный импорт <code>.srwb</code> в настоящее время сбрасывает сохраненные выводы кода, поэтому после повторного открытия перезапустите <code>numbers</code> перед считывающими ячейками, затем генератор и отчет. Для отдельных общих файлов данных требуется экспорт файла или пакета. См. <a href="../../../files-export/">справочник по файлам и экспорту<span class="english-reference"> (Справочная страница на английском языке)</span></a>.</p>
+      </section>
+
+      <section id="python">
+        <p class="step-label">Необязательно</p>
+        <h2>Чтение обоих путей из Python</h2>
+        <p>Вы можете остановиться на этом этапе, не запуская Python. Чтобы опробовать третий язык, сначала запустите <code>numbers</code> и <code>write_shared</code>, затем проверьте и запустите <code>python_total</code> как <strong>код → Python</strong>:</p>
+        <pre><code data-cell-example="python_total">import json
+record = json.loads(nb_read('numbers', '.output'))
+print('Cell output:', sum(record['values']))
+with open('/shared/data/named-cell-tutorial/values.json') as source:
+    saved = json.load(source)
+print('Shared file:', sum(saved['values']))</code></pre>
+        <p>Ожидаются <code>Cell output: 16</code> и <code>Shared file: 16</code> для исходных данных, или <code>17</code> в обеих строках после обновления обоих путей на шаге 7. В Python обращение <code>nb_read('numbers', '.output')</code> считывает последний текстовый вывод именованной ячейки. Отдельный вызов <code>open(...)</code> считывает общий файл с использованием стандартного синтаксиса файлов Python. Стандартный модуль <code>json</code> выполняет синтаксический анализ обоих; <code>%pip install</code> не требуется. Если была обновлена только ячейка-источник, две суммы могут различаться.</p>
+        <p>При первом использовании Python может потребоваться инициализировать или загрузить свою среду выполнения. В зависимости от вашей сборки и ранее предоставленных согласий может появиться уведомление о конфиденциальности/сети; ознакомьтесь с ним перед подтверждением. Этот необязательный шаг не требуется для упражнения с JavaScript/Bash, а сам по себе импорт сопутствующей книги не запускает Python.</p>
+      </section>
+
+      <section id="more">
+        <p class="step-label">Продолжение изучения</p>
+        <h2>Знакомство с этим шаблоном в других рабочих книгах</h2>
+        <p>Именованные ячейки обеспечивают простую границу взаимодействия: одна программа создает текст, другая считывает его или использует для генерации исходного кода. В каталоге уже есть более крупные примеры для ознакомления:</p>
+        <ul>
+          <li><strong>Анализ ожидаемой продолжительности жизни</strong> считывает обычные файлы CSV из <code>/shared/data/</code> на Python и R: это путь через общие файлы, а не чтение именованных ячеек. Он загружает наборы данных и использует пакеты; ознакомьтесь с требованиями к настройке и согласиям перед его запуском.</li>
+          <li><strong>Prolog генерирует R</strong> считывает исходный код именованной ячейки Prolog с помощью <code>nb_read(..., '.code', ...)</code> и записывает сгенерированный исходный код R с помощью <code>nb_write('r_factorial', '.code', ...)</code>. Ячейка R запускается отдельно.</li>
+          <li><strong>Prolog генерирует TypR</strong> объединяет сгенерированные определения с именованной ячейкой запроса, содержащей только исходный код, а затем записывает <code>typr_output</code>. Ячейка <code>#!source</code> доступна для чтения как исходный код без ее выполнения.</li>
+        </ul>
+        <p>Найдите эти названия в <strong>☰ Menu → Browse Packages…</strong>. Они предназначены для дополнительного чтения, <strong>а не являются сертифицированными руководствами по выполнению для данного руководства</strong>; доступные редакции и требования к настройке различаются. Рабочим книгам с генерацией на базе Prolog требуется зависимость <strong>unifyweaver-scirepl</strong>, установленная через Browse; сам по себе импорт исходной рабочей книги не устанавливает эту зависимость. Для импортированной вручную <code>.ipynb</code> сначала убедитесь, что параметр <strong>Меню → Настройки → Импорт и редактирование → Автоматически выполнять ячейки при импорте книги</strong> выключен, так как при этой настройке импорт Jupyter может выполнять код. См. <a href="../tutorial/">руководство по Browse</a> и <a href="../import/">руководство по ручному импорту</a>.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">Если что-то выглядит неправильно</p>
+        <h2>Проверьте имя, рабочую книгу и порядок запуска</h2>
+        <ul>
+          <li><strong>Диалоговое окно именования не открывается:</strong> дважды щелкните или нажмите и удерживайте <strong>метку In[…] </strong> сохраненной ячейки, а не ее исходный код, вывод или карандаш. Одиночный щелчок не вызывает окно именования.</li>
+          <li><strong>Не удается найти ячейку-источник:</strong> оставьте выбранной вкладку <strong>Named Cell Interop</strong>, восстановите точное имя <code>numbers</code> и проверьте написание и регистр символов. Переименование не перезаписывает пути в других ячейках.</li>
+          <li><strong>Генератор сообщает «Run numbers first»:</strong> проверьте и запустите <code>numbers</code>. Импорт или простое редактирование ее исходного кода не заполняет <code>.output</code>.</li>
+          <li><strong>Ошибка синтаксического анализа JSON:</strong> сравните ячейку-источник с полным примером. Ее выводом должен быть исключительно JSON, без заголовков или дополнительных выводимых сообщений.</li>
+          <li><strong>Не удалось записать отчет:</strong> убедитесь, что существующая ячейка <code>bash_report</code> находится в этой рабочей книге и что флажок <strong>Разрешить ячейкам изменять другие ячейки</strong> установлен. Не включайте программное выполнение для решения проблемы с записью исходного кода.</li>
+          <li><strong>В отчете по-прежнему указано 16:</strong> после редактирования данных запустите <code>numbers</code>, затем <code>generate_report</code>, затем <code>bash_report</code>. Обновите скопированный файл отдельно с помощью <code>write_shared</code>, затем повторно запустите <code>read_shared</code>.</li>
+          <li><strong>Не удается найти /nb в Files &amp; Storage:</strong> в проверенной сборке на этом экране отображаются общие файлы, а не эта виртуальная точка подключения ячеек. Запустите <code>write_shared</code> и найдите вместо этого ее созданную вручную копию <code>values.json</code>.</li>
+        </ul>
+        <p>В <a href="../../interface/tutorial/">руководстве по интерфейсу первой рабочей книги</a> объясняются заголовок и карандаш сохраненной ячейки; в <a href="../graphics/">руководстве по графике</a> показаны другие способы получения результата ячейкой.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Справка SciREPL</span><nav aria-label="Навигация в нижнем колонтитуле"><a href="../../../workbooks/">Справочник по рабочим книгам<span class="english-reference"> (Справочная страница на английском языке)</span></a><a href="../../../">Вся справка<span class="english-reference"> (Справочная страница на английском языке)</span></a></nav></footer>
+</body>
+</html>

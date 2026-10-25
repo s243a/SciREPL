@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ru" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Отображайте ярлык Browse для SciREPL и настраивайте кнопки заголовка, метку Run, тему и пространство строки состояния Android через Menu → Appearance.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ru/interface/appearance/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../interface/appearance/tutorial.css">
+  <title>Руководство по внешнему виду · Справка SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/appearance/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/appearance/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/appearance/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/appearance/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/appearance/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/appearance/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/appearance/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/appearance/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/appearance/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/appearance/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/appearance/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/appearance/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/appearance/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/interface/appearance/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+    <nav aria-label="Основная навигация">
+      <a href="../../../interface/">Справочник по интерфейсу<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+      <a href="../../tutorials/">Все руководства</a>
+      <a href="../../../">Вся справка<span class="english-reference"> (Справочная страница на английском языке)</span></a>
+      <a href="../../../../">Открыть Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Язык руководства"><details class="tutorial-language-menu"><summary>Язык руководства: <bdi>Русский</bdi></summary><nav aria-label="Язык руководства"><a href="../../../en/interface/appearance/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/appearance/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/appearance/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/appearance/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/appearance/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/appearance/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/appearance/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/appearance/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/appearance/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/interface/appearance/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/appearance/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="./" lang="ru" hreflang="ru" aria-current="page">Русский</a>
+      <a href="../../../zh/interface/appearance/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Машинный перевод руководства; ожидает проверки носителем языка. Код и технические значения оставлены без изменений. На снимках экрана показан оригинальный интерфейс на английском языке; сопоставляйте переведенные названия элементов управления в этом тексте с вашим приложением.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Справка<span class="english-reference"> (Справочная страница на английском языке)</span></a> / <a href="../../../interface/">Интерфейс<span class="english-reference"> (Справочная страница на английском языке)</span></a> / Обзор внешнего вида</p>
+    <article>
+      <p class="eyebrow">Настройте интерфейс под себя</p>
+      <h1>Показать «Обзор» и настроить внешний вид</h1>
+      <p class="lede">Поместите ярлык <strong>📦 Browse</strong> в заголовок <strong>SciREPL Free</strong>, затем выберите удобные кнопки и светлую или тёмную тему. Общие элементы управления внешним видом также полезны в Pro; отдельный раздел только для Pro посвящён полноэкранному редактированию, дополнительным клавишам и динамической подсветке синтаксиса. Вы можете сделать это без изменения или запуска ячеек рабочей книги.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro (см. метки)</li>
+        <li class="chip">Скриншоты Android</li>
+        <li class="chip">Около 3 минут</li>
+      </ul>
+      <p class="screen-note">Все пять скриншотов — это реальные снимки экрана <strong>SciREPL Free 1.4.0-debug</strong> на <strong>Samsung Galaxy S24+</strong>, сделанные <time datetime="2026-10-06">6 октября 2026</time>. Они показывают приложение с отладочной подписью, а не установку из Play Store. Показанные шаги используют элементы управления Free 1.4.0. Ярлык «Обзора» в заголовке доступен только в Free; пользователи Pro могут открыть тот же каталог из Меню. Приведённый ниже текст только для Pro проверен на соответствие кодовой базе Pro 1.4.0; эти элементы управления не проиллюстрированы данными изображениями Free, а в более старых меню могут быть различия.</p>
+      <nav class="lesson-nav" aria-label="Шаги обзора внешнего вида">
+        <strong>В этом уроке</strong>
+        <ol>
+          <li><a href="#open-appearance">Открыть «Внешний вид»</a></li>
+          <li><a href="#browse-shortcut">Показать ярлык «Обзора»</a></li>
+          <li><a href="#buttons">Настроить кнопки и «Запуск»</a></li>
+          <li><a href="#pro-editor">Только Pro: полноэкранное редактирование, дополнительные клавиши и динамические цвета</a></li>
+          <li><a href="#theme">Выбрать тему</a></li>
+          <li><a href="#android-space">Необязательно: память Android и восстановление</a></li>
+        </ol>
+        <p><a href="../../tutorials/">Все руководства</a></p>
+      </nav>
+
+      <section id="open-appearance">
+        <p class="step-label">Шаг 1</p>
+        <h2>Откройте Меню → Внешний вид</h2>
+        <ol class="lesson-steps">
+          <li>Найдите <strong>☰ Menu</strong> — кнопку с тремя горизонтальными линиями в заголовке в верхней части приложения.</li>
+          <li>Нажмите на неё, затем выберите <strong>🎨 Внешний вид</strong>. Если меню не помещается на экране по высоте, прокрутите его, чтобы найти нужный пункт.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-menu" role="img" aria-label="Меню SciREPL с пунктом «Внешний вид», выделенным жёлтым цветом.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Выберите <strong>🎨 Внешний вид</strong> в меню приложения.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-menu.png">Посмотреть полный скриншот меню</a>
+        </figure>
+        <p class="callout"><strong>Изменения вступают в силу сразу при их выборе.</strong> Для обычных элементов управления ниже не требуется кнопка «Сохранить» или «Применить». Закрытие «Внешнего вида» с помощью <strong>×</strong> не отменяет ваши изменения, и выбранные параметры сохраняются для следующего запуска приложения.</p>
+      </section>
+
+      <section id="browse-shortcut">
+        <p class="step-label">Шаг 2</p>
+        <h2>Free 1.4.0: показать ярлык «📦 Обзор»</h2>
+        <p><strong>Используете Pro?</strong> Пропустите настройку этого ярлыка и используйте <strong>Меню → Обзор пакетов, коллекций и книг</strong>. В следующих разделах описаны общие элементы управления внешним видом.</p>
+        <ol class="lesson-steps">
+          <li>Откройте <strong>Меню → Внешний вид</strong>, затем прокрутите до <strong>Ярлыки в заголовке</strong>.</li>
+          <li>Найдите <strong>Показывать ярлык обзора</strong> и выберите <strong>Всегда</strong>.</li>
+          <li>Закройте «Внешний вид» с помощью <strong>×</strong>. Кнопка <strong>📦</strong> теперь находится в заголовке; нажмите на неё, чтобы открыть <strong>Обзор пакетов, коллекций и книг</strong>.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-shortcuts" role="img" aria-label="Раздел быстрых команд заголовка SciREPL Free, где желтым цветом выделены быстрая команда «Обзор» и стрелки ее приоритета.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-shortcuts.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/shortcuts-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>В <strong>Free 1.4.0</strong> используйте выпадающий список рядом с <strong>Показывать ярлык обзора</strong>, чтобы определить, должна ли кнопка 📦 оставаться видимой.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-shortcuts.png">Посмотреть полный снимок экрана с быстрыми командами</a>
+        </figure>
+        <p>У этих вариантов разное назначение:</p>
+        <ul>
+          <li><strong>Всегда:</strong> оставлять быструю команду видимой, даже если для заголовка потребуется еще одна строка.</li>
+          <li><strong>Когда есть место:</strong> значение по умолчанию для Обзора. Показывать только тогда, когда помещается; более узкий экран, увеличенные кнопки или более длинное сообщение о состоянии могут привести к его скрытию.</li>
+          <li><strong>Никогда:</strong> скрывать быструю команду заголовка.</li>
+        </ul>
+        <p>Кнопки <strong>↑</strong> и <strong>↓</strong> определяют, какая необязательная быстрая команда уступит свое место первой при нехватке пространства. Переместите быструю команду выше, чтобы она оставалась дольше, или ниже, чтобы она исчезала раньше. Они меняют приоритет, а не расположение значков в заголовке.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-header" role="img" aria-label="Заголовок SciREPL Free с выделенной желтым цветом быстрой командой Обзора со значком коробки с пакетом.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-header.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/header-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Быстрая команда заголовка Free <strong>📦</strong> открывает тот же каталог, что и <strong>Меню → Обзор пакетов, коллекций и книг</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-header.png">Посмотреть полный снимок экрана с заголовком</a>
+        </figure>
+        <p class="callout"><strong>Нет кнопки 📦?</strong> Вариант через Меню по-прежнему работает, если быстрая команда скрыта или не предусмотрена в вашей версии. Для компактного заголовка верните Обзор в положение <strong>Когда есть место</strong> вместо того, чтобы принудительно отображать каждую необязательную быструю команду.</p>
+        <p>Если вы зашли сюда, чтобы найти рабочую книгу, теперь вы можете <a href="../../workbooks/tutorial/#browse">вернуться к руководству по группам Маркова</a> и выполнить поиск в каталоге.</p>
+      </section>
+
+      <section id="buttons">
+        <p class="step-label">Шаг 3</p>
+        <h2>Выбор удобных кнопок и подписи для Запуска</h2>
+        <p>Снова откройте <strong>Меню → Внешний вид</strong> и найдите <strong>Кнопки</strong>. Переместите ползунок <strong>Размер кнопок</strong>; его процентное значение и расположенный рядом <strong>Предпросмотр</strong> сразу же изменятся. Значение по умолчанию составляет <strong>100%</strong>. По более крупным кнопкам заголовка легче нажимать, но они оставляют меньше места для необязательных быстрых команд.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-options" role="img" aria-label="Элементы управления макетом и кнопками в разделе «Внешний вид», включая «Скрыть строку состояния Android» и «Размер кнопок», выделены желтым цветом.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-options.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/options-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Размер кнопок</strong> регулирует элементы управления заголовка. Настройка строки состояния, предназначенная только для Android, описана ниже.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-options.png">Посмотреть полный снимок экрана с макетом и кнопками</a>
+        </figure>
+        <p>Выпадающий список <strong>Кнопка «Выполнить»</strong> управляет действием «Запуск» на <em>панели новой ячейки</em>, а не кнопками «Запуск» в редакторах сохраненных ячеек:</p>
+        <ul>
+          <li><strong>Авто (только значок при нехватке места):</strong> значение по умолчанию. Сохранять подпись, когда она помещается, или использовать только значок ▶, чтобы оставить место для ввода текста.</li>
+          <li><strong>Только значок:</strong> всегда использовать компактную кнопку ▶.</li>
+          <li><strong>Всегда показывать подпись:</strong> сохранять текст даже на узком экране.</li>
+        </ul>
+        <p>В разделе «Внешний вид» нет ползунка масштабирования текста. <strong>Размер кнопок</strong> не является общей настройкой размера шрифта. Free 1.4.0 и Pro 1.3.0 автоматически увеличивают компактные элементы управления заголовка для поддержки системного масштабирования текста в Android.</p>
+      </section>
+
+      <section id="pro-editor">
+        <p class="step-label">Необязательно · только Pro</p>
+        <h2>Только Pro: полноэкранное редактирование, дополнительные клавиши и подсветка синтаксиса</h2>
+        <p>Это элементы управления редактора <strong>SciREPL Pro 1.4.0</strong>, а не элементы управления, показанные на снимках экрана Free выше. Дополнительные клавиши и динамические цвета являются отдельными настройками.</p>
+        <h3>Переход в полноэкранный режим редактирования</h3>
+        <ol class="lesson-steps">
+          <li><strong>Новая ячейка:</strong> нажмите кнопку <strong>⤢ Полноэкранный режим</strong> в поле кода новой ячейки. Направленные наружу диагональные стрелки означают развертывание редактора.</li>
+          <li><strong>Сохраненная ячейка:</strong> нажмите на значок <strong>✎ карандаша</strong> этой ячейки для ее редактирования, затем нажмите <strong>⤢</strong> в углу поля кода этой ячейки.</li>
+        </ol>
+        <p>Редактор занимает весь экран, чтобы поместилось больше кода. Включенные дополнительные клавиши и подсказки остаются доступными над клавиатурой; цвета синтаксиса используют ту же настройку, описанную ниже. Переход в полноэкранный режим <strong>не</strong> выполняет код.</p>
+        <p>Нажмите на <strong>метку редактора вверху</strong>, чтобы вернуться в блокнот с открытым черновиком; <strong>Назад</strong> или <kbd>Esc</kbd> также выполняет выход из полноэкранного режима. Для сохраненной ячейки <strong>Готово</strong> применяет черновик без выполнения, а <strong>Отмена</strong> отменяет правку. Для новой ячейки «Готово» и «Отмена» выходят из полноэкранного режима без очистки черновика или создания ячейки; «Выполнить» — это отдельное действие.</p>
+        <p><strong>Не то же самое, что «Панели во весь экран».</strong> Этот отдельный параметр в разделе «Внешний вид» управляет верхним полем панелей и диалоговых окон; он не открывает полноэкранный редактор кода.</p>
+        <h3>Отображение строки дополнительных клавиш</h3>
+        <p>Откройте <strong>Меню → Автодополнение → Раздел → Общие</strong>. Установите <strong>Дополнительные клавиши над клавиатурой → Вкл.</strong>; значение по умолчанию — <strong>Отключено</strong>. Эта строка предлагает Esc, Tab, удаление отступа, стрелки, Home, End, Run и знаки препинания. Проведите по ней вбок, чтобы добраться до клавиш, которые не поместились. Выбор On не выполняет код, но клавиша <strong>▶ Выполнить</strong> в этой строке выполняет — проверьте исходный код перед нажатием.</p>
+        <p>В том же разделе <strong>Чипы в портретной ориентации</strong> и <strong>Чипы в альбомной ориентации</strong> позволяют выбрать <strong>Отдельная строка</strong> или <strong>Заменять дополнительные клавиши</strong>. Значения по умолчанию — «Собственная строка» в книжной ориентации и «Заменять дополнительные клавиши» в альбомной: пока отображаются варианты, они могут временно занимать место клавиш. При отключенных дополнительных клавишах варианты используют собственную строку. <strong>Дополнительные панели в альбомной ориентации</strong> предлагает <strong>Отключено</strong>, <strong>Когда есть место</strong> (по умолчанию) или <strong>Всегда</strong>. Вариант «При наличии места» использует <strong>Минимум видимых строк кода</strong>, изначально <strong>8</strong>, поэтому при небольшой высоте в альбомной ориентации необязательные строки могут скрываться.</p>
+        <h3>Включение или отключение динамической подсветки синтаксиса</h3>
+        <p>Откройте <strong>Меню → Внешний вид → Подсветка синтаксиса при вводе</strong>. Выберите <strong>Вкл.</strong>, чтобы выделять цветом поддерживаемый код во время редактирования, или <strong>Отключено</strong> для обычного текста. Значение по умолчанию, <strong>Авто (включено на компьютере, выключено для сенсорного ввода)</strong>, включает цвета в браузерах на настольных компьютерах и отключает их на телефонах. Если ввод кажется менее отзывчивым, выберите Off; подсветка может снижать скорость ввода на более медленных устройствах. Код длиннее <strong>6000 символов</strong> остается без подсветки даже при выборе On.</p>
+        <p>Цвета не проверяют и не выполняют код, не отправляют запрос к API и не включают автодополнение. Изменение этой настройки вступает в силу немедленно и не меняет ваш исходный код.</p>
+        <h3>В разделе «Файлы и хранилище» есть отдельный переключатель</h3>
+        <p>Для текстового файла перейдите в <strong>Меню → Files &amp; Storage (VFS / Paths)</strong>, выберите файл, а затем выберите <strong>Во весь экран</strong>. Флажок <strong>Подсветка синтаксиса</strong> этого редактора не зависит от настройки динамических цветов во «Внешнем виде» и по умолчанию отключен. Он недоступен для нераспознанных типов файлов или файлов размером более 100,000 символов. Его дополнительные клавиши используют общую настройку с автодополнением, но могут скрываться, если редактору файлов не хватает места. Пункт <strong>Сохранить</strong> файла сохраняет ваши изменения; простое переключение цветов этого не делает.</p>
+      </section>
+
+      <section id="theme">
+        <p class="step-label">Шаг 4</p>
+        <h2>Выбор светлой, темной или системной темы</h2>
+        <p>Прокрутите до пункта <strong>Тема</strong> и выберите <strong>Тёмная</strong>, <strong>Светлая</strong> или <strong>Как в системе</strong>. Темная тема используется по умолчанию. Вариант «Как в системе» следует настройкам светлой или темной темы вашего устройства; это самостоятельный выбор пользователя, а не значение по умолчанию.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--appearance-theme" role="img" aria-label="Выпадающий список тем во «Внешнем виде», выделенный желтым цветом.">
+            <div class="shot-stage">
+              <img src="../../../interface/appearance/assets/phone-theme.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../interface/appearance/assets/theme-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Выберите встроенную тему, затем закройте «Внешний вид», чтобы продолжить работу с приложением с этим оформлением.</figcaption>
+          <a class="full-shot-link" href="../../../interface/appearance/assets/phone-theme.png">Посмотреть полный снимок экрана с темой</a>
+        </figure>
+        <p>Для этого урока вам не понадобятся <strong>Пользовательская</strong>, <strong>Настроить…</strong>, редактор тем JSON или <strong>Дополнительно: пользовательский CSS</strong>. Эти расширенные параметры выходят за рамки данного руководства для начинающих.</p>
+      </section>
+
+      <section id="android-space">
+        <p class="step-label">Необязательные завершающие штрихи</p>
+        <h2>Пространство Android и возврат к настройкам по умолчанию</h2>
+        <p>В разделе <strong>Макет</strong> оставьте выбранным <strong>Верхний отступ → Авто</strong>. Он следует сообщаемой устройством безопасной зоне, чтобы над заголовком оставалось необходимое пространство; вам не нужно угадывать значение в пикселях.</p>
+        <p>В приложении для Android <strong>Скрывать строку состояния Android</strong> предлагает:</p>
+        <ul>
+          <li><strong>Никогда:</strong> значение по умолчанию; оставляет часы и строку состояния уведомлений видимыми.</li>
+          <li><strong>В альбомной ориентации:</strong> скрывать эту строку, когда телефон расположен горизонтально; восстанавливать ее в портретной.</li>
+          <li><strong>Всегда:</strong> скрывать ее в обеих ориентациях.</li>
+        </ul>
+        <p>Этот параметр влияет только на строку <em>состояния</em> Android, а не на панель навигации или жестов. Он отсутствует в браузере/PWA и интерфейсе Windows. В Pro 1.3.0 вместо этого предусмотрен флажок с названием <strong>Скрывать строку состояния Android в альбомной ориентации</strong>.</p>
+        <p class="callout"><strong>Хотите отменить изменения внешнего вида?</strong> <strong>Сбросить по умолчанию</strong> восстанавливает тему по умолчанию, размер кнопок заголовка, верхнее поле, быстрые команды и параметры строки состояния, а также удаляет пользовательские параметры темы/CSS. Это действие не удаляет ячейки вашей рабочей книги. Оно <em>не</em> сбрасывает отдельную кнопку «Запуск» или настройки языка интерфейса; при необходимости выберите вариант <strong>Авто</strong> для «Запуска» самостоятельно.</p>
+        <p>Когда закончите, закройте «Внешний вид» с помощью <strong>×</strong>. Перейдите к <a href="../../workbooks/tutorial/">руководству по рабочей книге групп Маркова</a> или вернитесь к <a href="../../../interface/">краткому справочнику по интерфейсу<span class="english-reference"> (Справочная страница на английском языке)</span></a>.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Справка SciREPL</span><nav aria-label="Навигация в подвале"><a href="../../../interface/">Справочник по интерфейсу<span class="english-reference"> (Справочная страница на английском языке)</span></a><a href="../../../">Вся справка<span class="english-reference"> (Справочная страница на английском языке)</span></a></nav></footer>
+</body>
+</html>

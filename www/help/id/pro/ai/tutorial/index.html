@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="id" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Panduan langkah demi langkah SciREPL Pro: saran tabel bebas biaya API, penyiapan kunci API, preset agen Open, penyelesaian online dan lokal, serta sel AI Prompt yang terfokus.">
+  <meta name="theme-color" content="#06101d">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/id/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../styles.css">
+  <link rel="stylesheet" href="../../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../../pro/ai/tutorial/tutorial.css">
+  <title>AI dan penyelesaian, langkah demi langkah · Bantuan SciREPL Pro</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/pro/ai/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/pro/ai/tutorial/">
+  <link rel="stylesheet" href="../../../../tutorial-locales.css">
+</head>
+<body data-editions="pro" data-platforms="android windows-preview">
+  <a class="skip-link" href="#main">Lompat ke konten</a>
+  <header class="site-header">
+    <a class="brand" href="../../../../">sci<span>REPL</span> Help<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+    <nav aria-label="Navigasi utama">
+      <a href="../../../tutorials/">Semua tutorial</a>
+      <a href="../../../../pro/ai/">Referensi AI<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+      <a href="../../../../pro/">Bantuan Pro<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Bahasa tutorial"><details class="tutorial-language-menu"><summary>Bahasa tutorial: <bdi>Bahasa Indonesia</bdi></summary><nav aria-label="Bahasa tutorial"><a href="../../../../en/pro/ai/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../../ar/pro/ai/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../../bn/pro/ai/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../../de/pro/ai/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../../es/pro/ai/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../../fr/pro/ai/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../../hi/pro/ai/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="./" lang="id" hreflang="id" aria-current="page">Bahasa Indonesia</a>
+      <a href="../../../../ja/pro/ai/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../../ko/pro/ai/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../../pt-BR/pro/ai/tutorial/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../../ru/pro/ai/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../../zh/pro/ai/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutorial hasil terjemahan mesin; peninjauan oleh penutur asli masih tertunda. Kode dan nilai teknis tidak diubah. Tangkapan layar menampilkan antarmuka asli bahasa Inggris; cocokkan nama kontrol yang diterjemahkan dalam teks ini dengan aplikasi Anda.</p></aside>
+    <p class="breadcrumbs"><a href="../../../../">Bantuan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / <a href="../../../../pro/">Pro<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> / AI dan penyelesaian</p>
+    <article>
+      <p class="eyebrow">Belajar sambil praktik · Pro</p>
+      <h1>Dari saran offline hingga pengodean berbantuan AI</h1>
+      <p class="lede">Mulailah dengan saran berbasis tabel cepat yang tidak memungut biaya per permintaan. Kemudian siapkan Asisten, minta alternatif online, coba model di perangkat, dan akhiri dengan sel AI Prompt terfokus yang menjelaskan kode Anda.</p>
+      <ul class="meta">
+        <li class="chip chip-pro">Hanya Pro</li>
+        <li class="chip">Pro 1.4.0 + kontrol eksekusi mendatang</li>
+        <li class="chip">Model lokal: Android</li>
+      </ul>
+      <p class="screen-note">Sebagian besar tangkapan layar menampilkan aplikasi Android; beberapa merupakan tangkapan browser. Tata letak dapat bervariasi bergantung pada versi aplikasi Anda.</p>
+      <p class="callout"><strong>Periksa versi Anda.</strong> Perubahan eksekusi dalam <a href="#execution-permissions">lampiran</a> direncanakan untuk <strong>usulan Pro 1.5.0</strong>, yang <strong>belum dirilis</strong>; nomor rilis final dapat berubah.</p>
+      <p class="callout"><strong>“Free” di sini berarti tanpa biaya API.</strong> Saran tabel dan model di perangkat tidak menagih penyedia. Hal itu tidak menjadikannya fitur edisi Free: panduan langkah demi langkah ini ditujukan untuk <strong>SciREPL Pro</strong>. Permintaan online menggunakan akun penyedia Anda sendiri dan dapat memerlukan biaya.</p>
+      <nav class="lesson-nav" aria-label="Langkah-langkah panduan AI dan penyelesaian">
+        <strong>Dalam pelajaran ini</strong>
+        <ol>
+          <li><a href="#tables">Mulai dengan saran tabel offline</a></li>
+          <li><a href="#key">Simpan kunci API</a></li>
+          <li><a href="#agent">Bangun contoh kecil dengan preset agen Open</a></li>
+          <li><a href="#online">Minta penyelesaian berbasis API</a></li>
+          <li><a href="#local">Coba model di perangkat</a></li>
+          <li><a href="#prompt-cells">Gunakan sel AI Prompt untuk memahami kode</a></li>
+        </ol>
+        <p><a href="../../../tutorials/">Pilih tutorial lain</a> · <a href="#troubleshooting">Jika ada yang tidak berfungsi</a></p>
+      </nav>
+
+      <section id="tables">
+        <p class="step-label">Langkah 1 · Kunci API tidak diperlukan</p>
+        <h2>Mulai dengan saran tabel offline</h2>
+        <p>Temukan <strong>☰ Menu</strong> di header aplikasi: ini adalah tombol dengan <strong>tiga garis horizontal</strong>. Buka <strong>Pelengkapan</strong>. Pemilih <strong>Bagian</strong> di dalamnya memisahkan <strong>Umum</strong>, <strong>Saran AI (online)</strong>, dan <strong>Model lokal (di perangkat)</strong>. Mulailah dengan General.</p>
+        <ol class="lesson-steps">
+          <li>Atur <strong>Pelengkapan kode lokal → Aktif</strong>. Jika tidak, default <strong>Otomatis (aktif di desktop, nonaktif di layar sentuh)</strong> akan membiarkannya nonaktif di ponsel.</li>
+          <li>Atur <strong>Chip saran → Aktif</strong> dan pertahankan <strong>Saran → Di posisi kursor</strong>. Untuk mengisolasi tabel, atur <strong>Saran AI → Nonaktif</strong> di bagian online dan <strong>Gunakan model lokal → Nonaktif</strong> di bagian lokal, jika salah satunya sebelumnya telah diaktifkan. Kembali ke General.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-general" role="img" aria-label="Layar General Completion browser Pro. Batas kuning menunjukkan judul Ghost text dan Suggestion chips, Suggestions: At cursor, serta Suggestion chips: On.">
+            <div class="shot-stage shot-stage--completion-general">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general.png" width="414" height="820" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/completion-general-overlay.svg" width="414" height="820" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Kontrol General yang sebenarnya dalam <strong>tangkapan browser sempit, bukan tangkapan layar Android</strong>. Batas kuning menunjukkan <strong>Saran → Di posisi kursor</strong>, <strong>Chip saran → Aktif</strong>, dan judul bagiannya. Menu drop-down Section berada di bagian atas; pengaturan di bagian bawah mungkin mengharuskan Anda menggulir.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-general.png">Lihat tangkapan pengaturan lengkap</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>Tutup Completion. Dalam buku kerja latihan baru, pilih sel <strong>kode</strong> dan bahasa <strong>JavaScript</strong>. Ketik <code>cons</code>, dengan tanda sisip di bagian akhir dan tanpa pilihan teks. Huruf-huruf awal dari <code>const</code> ini disebut <strong>prefiks</strong>. Perhatikan <code>const</code>.</li>
+          <li>Pada tangkapan layar di bawah ini, <code>cons</code> diikuti oleh <code>t</code> samar—<strong>teks bayangan</strong> inline. Ketuk <strong>Terima</strong> atau tekan <kbd>Tab</kbd> untuk menyisipkan saran, menghasilkan <code>const</code>. Jika chip <code>const</code> yang muncul, mengetuknya adalah cara lain untuk menerima kandidat tersebut. Selesaikan sendiri baris tersebut, misalnya <code>const values = [12, 15, 18];</code>.</li>
+        </ol>
+        <p class="callout"><strong>Accept bukanlah Run.</strong> Menerima saran akan mengedit kode sumber; tindakan ini tidak mengeksekusi sel. Contoh JavaScript dan Python di bagian ini mendemonstrasikan pelengkapan otomatis saat mengedit. Menjalankan sel latihan ini bukan bagian dari bagian ini. Dengan hanya lapisan tabel offline yang diaktifkan, mengetikkan prefiks tidak akan mengirimkan permintaan API atau memulai runtime bahasa hanya untuk membuat saran.</p>
+        <p class="note"><strong>Prefetch online di masa mendatang:</strong> mode keikutsertaan (opt-in) direncanakan dapat mengirimkan permintaan model saat Anda mengetik. Fitur ini belum tersedia, dan belum ada nomor rilis yang ditetapkan untuknya. Pernyataan tanpa permintaan di atas menjelaskan lapisan tabel offline saat ini, bukan mode masa mendatang ini.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-javascript.png" width="1080" height="2340" alt="Detail komposer bagian bawah dari tangkapan layar Android Galaxy S24+ yang sebenarnya: JavaScript cons diikuti oleh bayangan t samar dan tombol Accept, dengan chip saran diaktifkan dan baris tombol tambahan disembunyikan." loading="lazy" decoding="async">
+          <figcaption><strong>Tampilan detail dari tangkapan layar Android Galaxy S24+ yang sebenarnya.</strong> Penyelesaian tabel JavaScript menawarkan <code>const</code> untuk <code>cons</code>: <code>t</code> samar adalah teks bayangan, dengan <strong>Terima</strong> terlihat dan chip diaktifkan. API dan model lokal dinonaktifkan. Baris tombol tambahan disembunyikan di sini untuk memperlihatkan kontras dengan gambar berikutnya; ini adalah kontrol opsional terpisah, bukan persyaratan untuk penyelesaian.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-javascript.png">Lihat tangkapan layar ponsel lengkap tanpa modifikasi dari penyelesaian JavaScript cons → const</a>
+        </figure>
+        <p><strong>Lihat dua tampilan offline di ponsel.</strong> Biarkan <strong>Chip saran → Aktif</strong>, pilih <strong>Python</strong>, dan ketik <code>pri</code>. <code>nt</code> samar setelah tanda sisip menawarkan <code>print</code>; itu bukan bagian dari sumber Anda sampai Anda menerimanya. <strong>Anda tidak perlu menonaktifkan chip untuk melihat teks bayangan.</strong> Kandidat tunggal dapat muncul sebagai teks bayangan, sedangkan chip menawarkan pilihan saat beberapa kandidat cocok. Tetap nonaktifkan <strong>Saran AI</strong> dan <strong>Gunakan model lokal</strong> untuk kedua contoh.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-ghost.png" width="1080" height="2340" alt="Detail komposer bagian bawah dari tangkapan layar Android Galaxy S24+: kode sumber Python pri diikuti oleh teks bayangan samar nt dan tombol Accept. Chip saran diaktifkan." loading="lazy" decoding="async">
+          <figcaption><strong>Tampilan detail dari tangkapan layar Android Galaxy S24+ yang sebenarnya.</strong> Penyelesaian tabel offline menawarkan satu sufiks samar pada tanda sisip dengan <strong>Chip saran → Aktif</strong>. API dan model lokal dinonaktifkan.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-ghost.png">Lihat tangkapan layar ponsel lengkap tanpa modifikasi dari teks bayangan</a>
+        </figure>
+        <p>Dengan chip yang masih <strong>Aktif</strong>, ganti input latihan dengan tiga baris ini, dengan membiarkan tanda sisip berada setelah <code>sample_m</code> yang belum selesai. Baris tersebut menawarkan <code>sample_mean</code> dan <code>sample_median</code> dari nama-nama dalam kode sumber Anda sendiri. Ketuk chip untuk memilih kandidat; tidak seperti teks bayangan, baris ini menampilkan alternatif.</p>
+        <pre><code>sample_mean = 0
+sample_median = 0
+sample_m</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-table-chips.png" width="1080" height="2340" alt="Detail komposer bagian bawah dari tangkapan layar Android Galaxy S24+: kode sumber Python mendefinisikan sample_mean dan sample_median, lalu sample_m, dengan chip kandidat sample_mean dan sample_median." loading="lazy" decoding="async">
+          <figcaption><strong>Tampilan detail dari tangkapan layar Android Galaxy S24+ yang sebenarnya.</strong> Dengan chip aktif, kandidat offline yang berasal dari kode sumber menawarkan dua nama di atas. API dan model lokal tetap nonaktif.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-table-chips.png">Lihat tangkapan layar ponsel lengkap tanpa modifikasi dari chip kandidat</a>
+        </figure>
+        <p><strong>Baris tombol tambahan</strong> yang terlihat pada gambar ponsel Python dan <strong>warna sintaks saat mengetik</strong> adalah kontrol Pro opsional yang terpisah. Lihat <a href="../../../interface/appearance/#pro-editor">Panduan tampilan: tombol tambahan dan warna sintaks</a> untuk mengaktifkan atau menonaktifkan salah satunya, serta menemukan kotak centang penyorotan terpisah pada editor file.</p>
+        <p>Setelah mencoba tampilan penyelesaian ini, beralihlah kembali ke <strong>JavaScript</strong> dan biarkan chip tetap aktif untuk sisa pelajaran ini.</p>
+        <p>Chip offline yang ditampilkan di sini, yang diaktifkan di bawah <strong>Pelengkapan → Umum → Chip saran</strong>, menggabungkan tabel nama yang dikurasi dengan informasi kode lokal. Pada Python, hal tersebut mencakup variabel dan fungsi yang ditemukan dalam kode buku kerja serta nama kernel dan atribut objek yang di-cache, termasuk metode. Frekuensi dan riwayat penerimaan membantu menentukan peringkatnya. Bahasa lain memiliki cakupan berbeda: daftar statis, definisi yang belum dijalankan, atau snapshot usang mungkin menyarankan nama yang saat ini tidak tersedia dalam cakupan. <strong>Penyelesaian berbasis tabel bukanlah model bahasa</strong> dan tidak melakukan penalaran tentang tugas Anda.</p>
+        <p><strong>Hanya di akhir sel</strong> merupakan alternatif jika saran di tengah sel mengganggu Anda. Pilihan teks, string, komentar, atau nama yang terpotong mungkin sengaja tidak menghasilkan saran. Dalam orientasi lanskap pendek, baris opsional dapat menghilang untuk menyisakan ruang bagi kode; lihat <a href="../../../interface/appearance/">Pengaturan tampilan</a>.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--completion-position">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-position.png" width="1080" height="2340" alt="Detail layar General Completion Android Galaxy S24+ yang sebenarnya: menu drop-down Suggestions terbuka dengan At cursor dipilih dan End of cell only di bawahnya." loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Tangkapan layar Android Galaxy S24+ yang sebenarnya.</strong> Di <strong>Pelengkapan → Umum → Teks bayangan → Saran</strong>, pilih <strong>Di posisi kursor</strong> atau <strong>Hanya di akhir sel</strong>. Opsi yang terakhir berarti akhir dari <em>seluruh sel</em>, bukan setiap baris. Menu Android yang diperluas menutupi pengaturan indentasi di dekatnya; pengaturan tersebut adalah kontrol terpisah, bukan bagian dari pilihan ini.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-position.png">Lihat tangkapan layar ponsel lengkap tanpa modifikasi dari menu Suggestions yang diperluas</a>
+        </figure>
+      </section>
+
+      <section id="key">
+        <p class="step-label">Langkah 2 · Penyiapan online</p>
+        <h2>Simpan kunci API</h2>
+        <p>Kunci API memungkinkan SciREPL menggunakan akun penyedia yang Anda kontrol. Dapatkan kunci dari penyedia tersebut, periksa harga saat ini dan batas akunnya, serta gunakan hanya buku kerja latihan kecil dengan data non-pribadi untuk pelajaran ini.</p>
+        <ol class="lesson-steps">
+          <li>Buka <strong>Menu → 🤖 AI Assistant (Pro)</strong>. Ketuk <strong>⚙ roda gigi</strong> pada panel untuk membuka AI Settings.
+            <p class="callout"><strong>Tidak melihat roda gigi tersebut?</strong> Keyboard dapat menggeser atau menggulir panel Asisten. Seret konten panel ke bawah untuk menggulir kembali ke arah atas dan menampilkan roda gigi; menutup keyboard juga dapat memberi Anda lebih banyak ruang.</p>
+          </li>
+          <li>Atur <strong>Atur model untuk → Asisten AI</strong>. Pilih <strong>Backend</strong> (mis. OpenRouter) dan <strong>Model</strong>, lalu periksa endpoint jika backend Anda menggunakan endpoint yang dapat dikonfigurasi.</li>
+          <li>Masukkan <strong>Kunci API</strong> yang cocok. Gunakan <strong>Kunci tersimpan</strong> untuk mengelola kunci bagi pasangan penyedia/endpoint lainnya. Kunci untuk satu tujuan tidak secara otomatis menjadi kunci untuk tujuan lain.</li>
+          <li>Ketuk <strong>Simpan</strong>. Menyimpan pengaturan saja tidak akan membuat permintaan model. Biarkan panel tetap terbuka untuk langkah berikutnya.</li>
+        </ol>
+        <p class="callout"><strong>Jauhkan kunci dari buku kerja.</strong> Jangan menempelkannya ke dalam sel, prompt, tangkapan layar, atau file yang diekspor. Kunci yang disimpan tetap berada di penyimpanan lokal aplikasi/browser, tanpa enkripsi tingkat aplikasi; lindungi perangkat dan jangan menjalankan kode yang tidak tepercaya. <a href="../../../../../pro/privacy.html">Kebijakan privasi Pro</a> menjelaskan apa yang disimpan dan dikirimkan.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--key-setup" role="img" aria-label="AI Settings browser Pro tanpa kunci. Batas kuning mengidentifikasi Configure model for: AI Assistant, Backend: OpenRouter, Model: GLM 5.3 Flash, dan bidang API Key yang kosong.">
+            <div class="shot-stage shot-stage--key-setup">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup.png" width="390" height="538" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-key-setup-overlay.svg" width="390" height="538" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Tangkapan browser tanpa kunci</strong> yang baru dari AI Settings, bukan tangkapan layar Android. Batas kuning menandai bidang yang harus diatur: <strong>Atur model untuk</strong>, <strong>Backend</strong>, <strong>Model</strong>, dan <strong>Kunci API</strong>. <code>sk-…</code> yang samar adalah placeholder, bukan kunci yang disimpan. Gulir lebih jauh ke bawah untuk mencapai <strong>Simpan</strong>; tidak ada kunci yang dimasukkan atau permintaan yang dikirim untuk gambar ini.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-key-setup.png">Lihat tangkapan layar konfigurasi AI tanpa modifikasi</a>
+        </figure>
+        <p>Model berbiaya rendah dan berkemampuan alat (tool-capable) adalah titik awal yang tepat untuk Asisten. Contoh yang dapat dibandingkan mencakup <a href="https://openrouter.ai/z-ai/glm-5.3-flash">GLM 5.3 Flash</a>, <a href="https://developers.openai.com/api/docs/models/gpt-6-luna">GPT-6 Luna</a>, <a href="https://www.anthropic.com/claude/haiku">Claude Haiku 5.5</a>, dan <a href="https://api-docs.deepseek.com/quick_start/pricing">DeepSeek V4 Flash</a>. ID model yang tepat, versi yang tersedia, dukungan alat, dan harga bergantung pada versi aplikasi dan penyedia Anda; periksa pemilih saat ini dan dokumentasi penyedia. Model yang baru diumumkan mungkin memerlukan pembaruan aplikasi sebelum muncul. Nantinya, Anda dapat memilih model terjangkau lainnya khusus untuk penyelesaian.</p>
+        <aside class="callout" id="custom-model">
+          <p><strong>Model tidak ada dalam daftar?</strong> Di <strong>Pengaturan AI → Atur model untuk → Asisten AI</strong>, pilih <strong>Backend</strong> yang benar terlebih dahulu, lalu masukkan <strong>ID model API persis</strong> dari penyedia di <strong>Atau masukkan ID model khusus</strong>, di bawah pemilih Model, dan ketuk <strong>Simpan</strong>. Bidang ini sudah tersedia di Pro 1.4.0.</p>
+          <p>Verifikasi ID dengan penyedia yang Anda pilih, bukan hanya nama pemasaran model tersebut. Untuk OpenRouter, sertakan prefiks organisasi—misalnya, <code>anthropic/claude-haiku-5.5</code> pada <a href="https://openrouter.ai/anthropic/claude-haiku-5.5">halaman modelnya</a>. Masukkan ID tersebut, bukan URL halaman tersebut. ID kustom lebih diutamakan daripada menu drop-down; memilih model yang terdaftar lagi akan mengosongkan bidang kustom.</p>
+          <p><strong>ID tidak menambahkan dukungan API.</strong> Model harus mendukung panggilan alat melalui API yang digunakan SciREPL. Periksa akses penyedia, kompatibilitas, dan harga saat ini; penyimpanan tidak memvalidasinya atau membuat permintaan model.</p>
+        </aside>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--custom-model" role="img" aria-label="AI Settings browser Pro tanpa kunci. Batas kuning mengidentifikasi Backend: OpenRouter dan bidang ID model kustom yang berisi anthropic/claude-haiku-5.5, di bawah pemilih Model.">
+            <div class="shot-stage shot-stage--custom-model">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model.png" width="390" height="456" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-custom-model-overlay.svg" width="390" height="456" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Tangkapan browser tanpa kunci</strong> yang sebenarnya, bukan tangkapan layar Android. Batas kuning di bawah Model menunjukkan bidang ID kustom. Menu drop-down masih menampilkan GLM 5.3 Flash, tetapi ID Haiku yang diketikkan akan lebih diutamakan saat Save. API Key dan Save berada di bawah potongan gambar ini; tidak ada kunci yang dimasukkan, Save tidak ditekan, dan tidak ada permintaan model yang dikirim. Ini adalah contoh konfigurasi, bukan pengujian bahwa model berfungsi.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-custom-model.png">Lihat tangkapan layar model kustom tanpa modifikasi</a>
+        </figure>
+      </section>
+
+      <section id="agent">
+        <p class="step-label">Langkah 3 · Penggunaan alat yang disengaja</p>
+        <h2>Bangun contoh kecil dengan preset agen Open</h2>
+        <p><strong>Terbuka</strong> adalah preset keamanan <strong>paling permisif kedua</strong>, setelah <strong>Kontrol penuh</strong>. Secara default, preset ini mengizinkan pengeditan buku catatan, dengan lebih sedikit konfirmasi dibandingkan Cautious. Apakah eksekusi meminta izin bergantung pada versi dan pengaturan izin Anda; lihat <a href="#execution-permissions">lampiran persetujuan eksekusi mendatang</a>. Gunakan secara sengaja dalam buku kerja latihan—bukan sebagai persyaratan untuk pelengkapan otomatis.</p>
+        <ol class="lesson-steps">
+          <li>Di AI Settings, pilih <strong>Tingkat Keamanan → Open</strong> dan <strong>Penulisan agen → Lembar kerja aktif</strong>. Biarkan penelusuran sumber nonaktif dan nonaktifkan <strong>Jalankan otomatis sel yang dibuat oleh AI</strong>. Di bawah <strong>Kernel…</strong>, atur <strong>JavaScript → Tanya</strong>, lalu simpan. Aturan kernel ini tetap meminta konfirmasi meskipun Allow pada alat eksekusi telah disimpan sebelumnya.
+            <p class="callout" id="auto-run-warning"><strong>Auto-run nonaktif bukanlah penguncian eksekusi.</strong> Ini menghentikan sel yang baru dibuat agar tidak berjalan secara otomatis; ini tidak menonaktifkan permintaan <code>execute_cell</code> atau <code>run_cells</code> terpisah. Default Open pada Pro 1.4.0 yang telah dirilis dapat mengizinkannya tanpa bertanya. Default Open mendatang akan meminta konfirmasi, tetapi Allow eksplisit pada alat atau kernel dapat mengubah default tersebut. <strong>Pengaturan AI → Kernel… → JavaScript → Tanya</strong> menjaga eksekusi JavaScript pada latihan ini tetap memerlukan konfirmasi. Tindakan Run sel secara manual oleh Anda sendiri tetap merupakan tindakan terpisah. <a href="#execution-permissions">Kontrol eksekusi rilis berikutnya dirinci dalam lampiran.</a></p>
+            <aside class="callout" id="sandbox">
+              <p>Jika Anda menginginkan lebih banyak konfirmasi, gunakan <strong>Hati-hati</strong> sebagai gantinya. Open tetap mematuhi kontrol penelusuran sumber dan cakupan penulisan terpisah; Full control mengabaikan kedua kontrol kasar tersebut. Izin individual dan gerbang keamanan lainnya tetap penting. <strong>Peninjauan</strong> adalah pembatasan tambahan yang sebagian besar hanya-baca, yang akan menghambat demonstrasi pembuatan sel ini.</p>
+              <h3>Apa yang dilindungi—dan tidak dilindungi—oleh sandbox browser</h3>
+              <p>Eksekusi buku kerja normal berjalan di browser/WebView dan runtime bahasanya, dengan sistem file virtual alih-alih akses tanpa batas ke file ponsel Anda. Itu adalah batasan yang berguna, <strong>bukan jaminan bahwa kode tidak dapat membahayakan</strong>. JavaScript yang diizinkan dan jembatan ke sana dapat menjangkau data aplikasi dan kredensial yang disimpan; pembatasan jaringan bersifat best-effort setelah kode yang diizinkan dimulai, bukan batasan isolasi yang harus Anda percayai untuk menyimpan rahasia. Konfirmasi eksekusi mendatang menambahkan langkah persetujuan, bukan isolasi dari data aplikasi. Gunakan buku kerja latihan dan pastikan isinya bersifat non-pribadi.</p>
+              <p><strong>Terminal Remote/MCP berbeda:</strong> fitur ini dapat mengekspos shell sungguhan pada host broker, di luar sandbox lokal browser. Tetap nonaktifkan Remote dan Terminal di sini. Lihat <a href="../../../../pro/remote/">Remote dan keamanan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> sebelum mengaktifkannya. Kalimat sopan “jangan…” dalam prompt bukanlah kontrol keamanan.</p>
+            </aside>
+          </li>
+          <li>Di panel Asisten, pilih <strong>Buku kerja ini</strong>. Biarkan <strong>Review</strong>, <strong>Remote</strong>, dan <strong>Terminal</strong> nonaktif untuk contoh penyedia langsung ini.
+            <figure class="phone-figure" id="assistant-context-controls">
+              <p class="screen-note">Header panel</p>
+              <div class="shot-window shot-window--assistant-context-header" role="img" aria-label="Detail bagian atas panel Asisten Android. Batas kuning menyoroti This workbook yang dipilih di menu drop-down percakapan.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <p class="screen-note">Kontrol bawah</p>
+              <div class="shot-window shot-window--assistant-context-footer" role="img" aria-label="Detail bagian bawah panel Asisten Android yang sama. Batas kuning menyoroti Review, Remote, dan Terminal, semuanya tidak dicentang. Kotak pesan kosong dan tombol Send terlihat.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-assistant-context-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption><strong>Dua detail dari tangkapan layar Android Galaxy S24+ yang sebenarnya.</strong> Batas kuning menunjukkan <strong>Buku kerja ini</strong> dan <strong>Peninjauan</strong>, <strong>Jarak Jauh</strong> serta <strong>Terminal</strong> (semuanya tidak dicentang). Bagian tengah panel yang kosong dihilangkan. Tidak ada prompt yang dikirim.</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-assistant-context.png">Lihat tangkapan layar panel Asisten lengkap tanpa modifikasi</a>
+            </figure>
+          </li>
+          <li>Kirim prompt latihan pada callout di bawah ini. Tombol <strong>Kirim</strong> pada panel sudah memulai perulangan alat agen: tidak ada tombol pengalih “Mode agen” tambahan di sini. Tombol <strong>Agen</strong> pada editor layar penuh merupakan alur kerja terpisah.
+            <div class="callout" id="assistant-practice-prompt">
+              <p><strong>Salin prompt ini.</strong> Tempelkan ke dalam <strong>kotak pesan Asisten</strong>, bukan sel kode, lalu ketuk <strong>Kirim</strong>.</p>
+              <pre data-translatable-prompt="assistant-practice"><code>Dalam buku kerja latihan ini, tambahkan penjelasan Markdown yang diikuti
+oleh satu sel JavaScript bernama summary_demo. Buat array input
+berisi 10 bilangan bulat pseudorandom dari 1 hingga 20 inklusif.
+Gunakan generator Park-Miller dengan state awal 42. Untuk setiap
+nilai, pertama-tama perbarui state = (16807 * state) % 2147483647;
+lalu tambahkan 1 + Math.floor(20 * state / 2147483647).
+Buat array dengan aturan ini; jangan melakukan hard-code pada nilainya
+atau menggunakan Math.random. Reset state ke 42 pada setiap tindakan Run sel.
+Cetak array input yang dibuat, lalu hitung jumlahnya (panjang
+array), rata-rata aritmatika, minimum, dan maksimum. Cetak setiap
+hasil pada baris berlabel tersendiri dengan console.log.
+Gunakan array JavaScript, aritmatika, dan Math.floor biasa,
+tanpa paket.
+Jangan menjalankan sel atau mengubah sel yang ada. Jangan gunakan file,
+penyimpanan, API DOM, atau permintaan jaringan. Jelaskan hasil yang
+diharapkan agar saya dapat meninjau kodenya.</code></pre>
+            </div>
+          </li>
+          <li>Baca penjelasan yang diusulkan dan sel <code>summary_demo</code> yang baru. Periksa apakah kode tersebut membuat input menggunakan aturan yang disebutkan dan menghitung ringkasan dari array tersebut. Jalankan sendiri sel tersebut, lalu bandingkan dengan pemeriksaan di bawah. Hasil yang diharapkan adalah jumlah <strong>10</strong>, rata-rata <strong>9.3</strong>, minimum <strong>1</strong>, maksimum <strong>20</strong>.</li>
+        </ol>
+        <aside class="callout" id="seeded-summary-check">
+          <h3>Periksa input serta ringkasannya</h3>
+          <p>Seed mengunci urutan tersebut, sehingga input yang tampak acak ini dapat direproduksi. Dengan aturan pembaruan-sebelum-penarikan di atas, hasil yang diharapkan:</p>
+          <pre><code>Input: [1, 11, 15, 6, 8, 4, 20, 11, 11, 6]
+Count: 10
+Mean: 9.3
+Minimum: 1
+Maximum: 20</code></pre>
+          <p>Label output mungkin berbeda, tetapi angka-angkanya harus cocok. Menjalankan sel lagi akan menghasilkan input dan ringkasan yang sama. Seed yang berbeda mengubah latihan ini; generator kecil ini ditujukan untuk demonstrasi yang dapat direproduksi, bukan keacakan yang sensitif terhadap keamanan.</p>
+        </aside>
+        <figure class="phone-figure" id="assistant-seeded-result">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/phone-agent-result.png" width="1080" height="2340" alt="Tangkapan layar Android Galaxy S24+ sebenarnya yang menampilkan bagian dari kode sumber summary_demo JavaScript yang ditinjau dan output dengan seed-nya: input 1, 11, 15, 6, 8, 4, 20, 11, 11, 6; jumlah 10, rata-rata 9.3, min 1, maks 20." loading="lazy" decoding="async">
+          <figcaption><strong>Tangkapan layar Android Galaxy S24+ sebenarnya dari latihan vektor dengan seed di atas.</strong> GLM 5.3 Flash membuat sel latihan, dijeda pada batas empat langkah, dan selesai setelah satu penekanan <strong>Lanjutkan</strong>. Kode diperiksa dan dijalankan secara manual—bukan secara otomatis oleh agen—dan menghasilkan input yang diharapkan, jumlah 10, rata-rata 9.3, minimum 1, dan maksimum 20. Tindakan Run manual kedua mereproduksi hasil yang sama. Tangkapan layar menampilkan output dan sebagian kode sumber; gulir ke atas di dalam sel untuk memeriksa seed dan baris-baris pertamanya.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-agent-result.png">Lihat tangkapan layar ponsel lengkap dari kode dan hasil yang ditinjau</a>
+        </figure>
+        <p><strong>Sebelum Send:</strong> Asisten menyertakan percakapan yang dipilih dan pratinjau terbatas dari sel buku kerja saat ini (hingga 500 karakter pertama dari setiap sel, ditambah metadata). Alat yang diizinkan dapat mengirim lebih banyak. Menonaktifkan penelusuran sumber <em>tidak</em> menghentikan pratinjau buku kerja untuk dikirimkan. Hal itu berbeda dari muatan sel saat ini yang lebih kecil yang digunakan oleh penyelesaian di bawah. <a href="#planned-workbook-context">Perubahan konteks buku kerja yang direncanakan dijelaskan dalam lampiran.</a></p>
+        <p><strong>Dijeda dengan tombol Continue?</strong> <strong>Batas agen (per eksekusi) → Langkah maks</strong>, yang disorot di bawah, mengontrol batas alokasi langkah untuk satu kali proses berbatas (bounded run). Agen mungkin mencapai batas tersebut sebelum selesai. Baca apa yang telah dilakukannya, lalu tekan <strong>Lanjutkan</strong> jika tugas belum selesai dan Anda menginginkan proses berbatas lainnya. Melanjutkan dapat menimbulkan lebih banyak biaya API; tindakan ini tidak diperlukan setelah <strong>Selesai</strong>.</p>
+        <figure class="phone-figure" id="assistant-run-controls">
+          <div class="shot-window shot-window--assistant-open" role="img" aria-label="AI Settings browser Pro yang digulir. Batas kuning menunjukkan Auto-run cells created by AI: tidak dicentang, Allow source browsing: tidak dicentang, Agent writes: Active worksheet, Max steps dengan petunjuk default 25, dan Security Level: Open.">
+            <div class="shot-stage shot-stage--assistant-open">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open.png" width="390" height="1100" alt="" loading="lazy" decoding="async">
+              <img src="../../../../pro/ai/tutorial/assets/assistant-open-overlay.svg" width="390" height="1100" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>AI Settings yang digulir ke eksekusi dan izin. Batas kuning mengidentifikasi <strong>Jalankan otomatis sel yang dibuat oleh AI</strong> dan <strong>Allow source browsing</strong> (keduanya tidak dicentang), <strong>Cakupan penulisan agen → Lembar kerja aktif</strong>, <strong>Langkah maks</strong> di bawah <strong>Batas agen (per eksekusi)</strong>, serta <strong>Tingkat Keamanan → Terbuka</strong>. <strong>Tangkapan browser ini mendahului pembaruan persetujuan eksekusi</strong>; ini bukan permintaan penyedia atau pengujian keamanan. Label Open-nya menjelaskan pengaturan default lama dan lebih panjang daripada yang dapat ditampilkan menu drop-down yang sempit. Dialog persetujuan dan penggantian (override) mendatang tidak digambarkan.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/assistant-open.png">Lihat tangkapan pengaturan lengkap yang digulir tanpa modifikasi</a>
+        </figure>
+      </section>
+
+      <section id="online">
+        <p class="step-label">Langkah 4 · Minta alternatif kapan pun Anda menginginkannya</p>
+        <h2>Minta penyelesaian berbasis API</h2>
+        <ol class="lesson-steps">
+          <li>Buka <strong>Menu → Pelengkapan</strong>, lalu pilih <strong>Bagian → Saran AI (online)</strong>. Atur <strong>Saran AI → Saat diketuk</strong>.</li>
+          <li>Pertahankan <strong>Model pelengkapan → Ikuti Asisten AI</strong> untuk mewarisi penyedia, endpoint, dan modelnya. Atau pilih <strong>Pilih penyedia dan model</strong>, pilih penyedia/endpoint yang disimpan dan model berbiaya rendah yang cocok untuk saran singkat. Tidak ada kunci yang dimasukkan pada layar ini; <strong>Buka Pengaturan AI</strong> memungkinkan Anda menambahkannya terlebih dahulu.</li>
+          <li>Buka <strong>Lanjutan</strong> bagian ini untuk memeriksa batas waktu (timeout) balasan dan pengaman pengeluaran. Pengaturan default-nya adalah <strong>6 detik</strong>, <strong>$0.25/hari</strong>, dan <strong>$5/bulan</strong>. Periksa harga sebelum menaikkannya.</li>
+          <li>Kembali ke editor <strong>JavaScript</strong> dan masukkan cuplikan latihan ini:
+            <pre><code>const values = [12, 15, 18];
+const average = </code></pre>
+            Biarkan tanda sisip berada setelah baris <code>const average = </code> yang belum selesai. Ketuk <strong>…</strong> di akhir baris saran, gunakan tombol tambahan <strong>…AI</strong>, atau tekan <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd>.</li>
+          <li>Tinjau muatan (payload) dan tujuan sebenarnya dari permintaan pertama sebelum mengirimkannya. Chip AI memiliki penanda <strong>✦</strong>. Ketuk salah satu untuk menerimanya; chip yang terpotong atau multi-baris akan membuka pratinjau terlebih dahulu. Tinjau kode sumber yang dihasilkan sebelum Run.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../../pro/ai/tutorial/assets/completion-online.png" width="414" height="820" alt="Layar penyelesaian online browser Pro dengan On tap dan Choose provider and model, yang menjelaskan bahwa tidak ada kunci penyedia yang disimpan dan menawarkan Open AI Settings." loading="lazy" decoding="async">
+          <figcaption><strong>Tangkapan browser tanpa kunci</strong> yang disengaja dari kontrol model independen. Peringatannya nyata: tanpa kunci yang disimpan dan tujuan yang valid, tidak ada yang dapat dikirimkan. Penyedia dan model yang Anda konfigurasi akan muncul di sini setelah Langkah 2.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/completion-online.png">Lihat tangkapan pengaturan online lengkap</a>
+        </figure>
+        <figure class="phone-figure">
+          <img class="tutorial-shot tutorial-shot--composer-detail" src="../../../../pro/ai/tutorial/assets/phone-online-chips.png" width="1080" height="2340" alt="Detail komposer bagian bawah dari tangkapan layar Android Galaxy S24+: ekspresi average JavaScript yang belum selesai memiliki dua chip AI yang terpotong, values.reduce dan eval(values, masing-masing ditandai dengan bintang." loading="lazy" decoding="async">
+          <figcaption><strong>Tampilan detail dari tangkapan layar Android Galaxy S24+ sebenarnya setelah permintaan penyelesaian nyata.</strong> Penyelesaian menggunakan <strong>Gemini 3.5 Flash-Lite melalui OpenRouter</strong> sementara Asisten tetap berada pada <strong>GLM 5.3 Flash</strong>. Kedua chip ✦ tersebut terpotong; output bervariasi, jadi periksa pratinjau sebelum menerima.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-online-chips.png">Lihat tangkapan layar ponsel lengkap tanpa modifikasi dari chip kandidat online</a>
+        </figure>
+        <p class="callout"><strong>Pilih kodenya, bukan hanya chip AI.</strong> Dalam permintaan ini, chip pertama mengusulkan <code>values.reduce((a, b) => a + b, 0) / values.length;</code>. Ketuk untuk memeriksa pratinjau lengkap: kode ini menjumlahkan array dan membaginya dengan panjangnya, menghasilkan <strong>15</strong> untuk contoh ini. Chip kedua mengusulkan <code>eval(values.join(' + ')) / values.length;</code>. <strong>Tolak alternatif <code>eval</code> yang tidak perlu tersebut</strong>: menghitung rata-rata tidak perlu mengubah string menjadi kode yang dapat dieksekusi. Periksa sendiri kode yang dikembalikan sebelum menerimanya, dan jalankan (Run) hanya setelah ditinjau.</p>
+        <figure class="phone-figure" id="online-completion-preview">
+          <div class="shot-window shot-window--completion-preview" role="img" aria-label="Detail Android Galaxy S24+ dari pratinjau saran AI: values.reduce((a, b) =&gt; a + b, 0) / values.length;, dengan tombol Cancel dan Insert all. Keyboard dihilangkan. Belum ada saran yang disisipkan.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-completion-preview.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pratinjau kode lengkap pada Galaxy S24+.</strong> Permintaan baru Gemini Flash-Lite mengembalikan ekspresi <code>reduce</code> yang sama. <strong>Terima hanya sampai baris tertentu:</strong> untuk saran multi-baris, ketuk atau klik baris terakhir yang Anda inginkan. Ini akan langsung menyisipkan semuanya dari baris pertama hingga baris tersebut, tanpa menyertakan baris-baris setelahnya. <strong>Sisipkan semua</strong> menerima seluruh saran; <strong>Batal</strong> tidak menyisipkan apa pun. Contoh ini adalah satu baris kode, meskipun terbungkus (wrap) di layar, sehingga mengetuknya akan menerima seluruh ekspresi. Menerima saran akan mengedit kode sumber; tindakan ini tidak mengeksekusi (Run) sel.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-completion-preview.png">Lihat tangkapan layar ponsel lengkap tanpa modifikasi dari pratinjau penyelesaian</a>
+        </figure>
+        <p>Permintaan tersebut meminta hingga lima alternatif, tetapi layar Anda mungkin hanya memuat lebih sedikit. Ketukan berikutnya pertama-tama akan membuka halaman alternatif yang telah diterima; setelah semuanya habis, fitur ini dapat meminta lebih banyak. Ketuk saat permintaan sedang berputar untuk membatalkannya. Balasan yang datang terlambat akan dibuang saat waktu tunggu (timeout) habis, dan mengetik atau memindahkan tanda sisip akan membuat saran lama menjadi usang.</p>
+        <p><strong>Independen berarti independen:</strong> pilihan penyelesaian yang terpisah akan tetap terpisah saat Anda mengubah model Asisten. Ini berguna saat Anda menginginkan agen yang andal tetapi pelengkapan otomatis yang murah. Mengikuti Asisten akan mewarisi identitasnya, <em>bukan</em> percakapan atau izin agennya.</p>
+        <aside class="callout" id="completion-privacy">
+          <h3>Ketahui apa yang Anda bayar dan kirimkan</h3>
+          <p>Penyelesaian online bersifat <strong>on demand (sesuai permintaan)</strong>: pengetikan biasa tidak mengirimkan apa pun. <strong>Prefetch saat saya mengetik</strong> belum tersedia dalam alur kerja ini. Penyelesaian mengirimkan konteks sel saat ini yang dibatasi: paling banyak 1,500 karakter sebelum tanda sisip, 200 setelahnya, dan hingga 12 nama lokal—bukan obrolan Asisten atau seluruh buku kerja. Penyamaran rahasia bersifat best-effort, jadi tinjau sendiri muatannya.</p>
+          <p><strong>Selalu izinkan</strong> memberikan persetujuan tetap untuk tujuan tersebut; perubahan penyedia, endpoint, atau model akan meminta persetujuan lagi. <strong>Kirim tanpa bertanya</strong> pada awalnya mengaktifkan pilihan tersebut tetapi tetap menampilkan muatan nyata pertama sekali. Pertahankan <strong>Tanyakan setiap kali</strong> saat sedang mempelajari fitur ini.</p>
+          <p>Jumlah harian/bulanan adalah <strong>pengaman pengeluaran fleksibel (soft spending guards) khusus penyelesaian</strong>, bukan batas penagihan penyedia yang dijamin dan bukan anggaran untuk permintaan Asisten atau AI Prompt. Kegagalan dan pembatalan dapat mempertahankan biaya yang dicadangkan. Menghapus riwayat pengeluaran tidak menyetel ulang total batas. Model tanpa harga yang tercantum memerlukan batas harga input/output eksplisit, atau aplikasi akan menolak untuk mengirimkan permintaan.</p>
+        </aside>
+      </section>
+
+      <section id="local">
+        <p class="step-label">Langkah 5 · Unduhan Android opsional</p>
+        <h2>Coba model di perangkat</h2>
+        <p>Model opsional <strong>Qwen2.5-Coder 0.5B</strong> menyarankan kode secara lokal saat tabel tidak yakin. Ini adalah model pelengkapan kode kecil, <strong>bukan pengganti agen percakapan</strong>. Setelah diinstal, inferensi tidak mengirimkan kode yang diketik ke penyedia dan tidak dikenai biaya API.</p>
+        <ol class="lesson-steps">
+          <li>Pada ponsel Android yang memenuhi syarat dengan Pro terinstal dari <strong>Google Play</strong>, buka <strong>Menu → Pelengkapan → Bagian → Model lokal (di perangkat)</strong>.</li>
+          <li>Ketuk <strong>Instal</strong> dan berikan waktu serta penyimpanan untuk unduhan sekitar <strong>400 MB</strong>. Penginstalan sideload saat ini tidak dapat mengunduh model melalui alur ini.</li>
+          <li>Jika sudah siap, pertahankan <strong>Gunakan model lokal → Saat tidak yakin</strong>. Tabel menjawab kasus-kasus mudah; model berkontribusi saat tabel ragu. <strong>Selalu</strong> menjalankannya lebih sering; <strong>Nonaktif</strong> menghentikannya tanpa menghapus hasil unduhan.</li>
+        </ol>
+        <figure class="phone-figure" id="local-model-settings">
+          <div class="shot-window shot-window--local-model-settings" role="img" aria-label="Pengaturan Local model Android Galaxy S24+. Batas kuning menunjukkan bagian Local model, Ready (398 MB di perangkat ini), dan Use local model: When unsure. Model yang sudah diinstal menampilkan Delete alih-alih Install.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-local-settings.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+              <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-local-settings-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Pengaturan model lokal pada Galaxy S24+.</strong> Batas kuning menunjukkan pemilih bagian, status <strong>Siap</strong> model, dan <strong>Gunakan model lokal → Saat tidak yakin</strong>. Ponsel ini sudah memiliki model tersebut, sehingga <strong>Hapus</strong> muncul alih-alih <strong>Instal</strong>; Anda tidak perlu menghapusnya. Gambar versi debug ini menunjukkan pengaturan, bukan pengujian pengiriman Google Play.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-local-settings.png">Lihat tangkapan layar ponsel lengkap tanpa modifikasi</a>
+        </figure>
+        <ol class="lesson-steps" start="4">
+          <li>Kembali ke sel kode dan jeda pada nama atau baris yang belum selesai. Hasil bervariasi bergantung pada konteks; tidak setiap jeda menghasilkan saran. Terima teks bayangan atau chip yang sesuai, periksa kode sumber, lalu jalankan (Run) secara terpisah.</li>
+        </ol>
+        <h3>Ponsel mana yang nyaman digunakan?</h3>
+        <p>Kelayakan minimum adalah <strong>Android ARM 64-bit dengan setidaknya 4 GB RAM</strong>, bukan jaminan performa yang mulus. Ponsel <strong>kelas Galaxy S24+</strong> adalah target kenyamanan praktis: Samsung mencantumkan <strong>12 GB RAM</strong> untuk S24+, memberikan ruang lebih luas bagi aplikasi, kernel, dan model. Ini adalah tingkat performa yang disarankan, bukan keharusan untuk membeli model tersebut. <a href="https://news.samsung.com/us/enter-new-era-of-mobile-ai-samsung-galaxy-s24-series/">Spesifikasi seri S24 Samsung</a>.</p>
+        <p>Sebuah <strong>Galaxy S10+</strong> memiliki varian 8 GB atau 12 GB yang memenuhi syarat. Pengalaman informal pengelola menunjukkan bahwa penyelesaian lokal dapat berfungsi di sana tetapi terasa lebih lambat dibandingkan penyelesaian API; perbandingannya bergantung pada model dan jaringan. <strong>Tolok ukur engine lokal yang dicatat tidak mengukur S10+</strong>, jadi ini bukan perbandingan kecepatan terukur atau jaminan untuk setiap perangkat. Waspadai jeda (lag) atau aplikasi yang tidak responsif saat menggabungkan model dengan buku kerja besar dan kernel yang boros memori. <a href="https://news.samsung.com/us/galaxy-s10-interactive/">Spesifikasi seri S10 Samsung</a>.</p>
+        <p>Pengujian engine bawaan kelas S24+ sebelumnya mengukur median kata pertama saat warm sekitar <strong>0.10 detik</strong> dan median kata pertama saat cold sekitar <strong>0.24 detik</strong>, setelah pemuatan. Ini adalah contoh hasil tolok ukur, bukan jaminan: pemuatan awal tanpa cache memerlukan waktu beberapa detik. Model yang dimuat menambahkan sekitar <strong>460–490 MB</strong> memori proses aplikasi, <em>sebagai tambahan dari</em> WebView, runtime Python/R, dan sistem operasi.</p>
+        <p class="callout"><strong>Jika ponsel lama menjadi lambat:</strong> atur <strong>Gunakan model lokal → Nonaktif</strong> dan gunakan tabel atau alternatif API saat diketuk sebagai gantinya. Di bawah <strong>Lanjutan</strong> lokal, menyetel <strong>Keep loaded after leaving the app → 0</strong> akan melepaskannya saat Anda keluar; kontrol idle-unload dan baterai lemah juga membantu. Simpan/ekspor buku kerja Anda sebelum memecahkan masalah. Model tanpa biaya API tetap menggunakan penyimpanan, memori, dan baterai.</p>
+      </section>
+
+      <section id="prompt-cells">
+        <p class="step-label">Langkah 6 · Pahami kode saat Anda membangunnya</p>
+        <h2>Akhiri dengan sel AI Prompt yang terfokus</h2>
+        <p>Asisten berguna untuk pekerjaan multi-langkah. Sel <strong>AI Prompt</strong> lebih baik untuk pertanyaan kecil dan dapat diulang tentang bagian kode tertentu: sel ini membuat <strong>satu permintaan terisolasi</strong>, tanpa riwayat Asisten atau alat. Gunakan sel ini untuk menanyakan mengapa suatu perhitungan berhasil sebelum mengembangkannya.</p>
+        <p>Di sini kita kembali ke Langkah 3 untuk sel <code>summary_demo</code> acak dengan seed. Kita meminta penjelasan tentang perhitungan yang sudah ada tersebut—bukan array acak lainnya, dan bukan contoh penyelesaian khusus-rata-rata dari Langkah 4.</p>
+        <ol class="lesson-steps">
+          <li>Tambahkan sel <strong>AI Prompt</strong> tepat setelah Langkah 3 pada sel <code>summary_demo</code> JavaScript—bukan cuplikan khusus-rata-rata dari Langkah 4—sehingga pertanyaan di bawah cocok dengan sumber yang dipilih. Pertahankan tipe sel sebagai <strong>kode</strong>, lalu pilih <strong>AI Prompt</strong> dari <strong>menu drop-down bahasa/mode</strong>. Jika tidak ada, aktifkan di bawah <strong>Menu → Bahasa dan mode</strong>.</li>
+          <li>Tempelkan prompt di bawah ini ke dalam <strong>sel AI Prompt</strong>, bukan kotak pesan Asisten. Buka kontrol <strong>Konfigurasi</strong> miliknya.
+            <div class="callout" id="ai-prompt-practice-prompt">
+              <pre data-translatable-prompt="ai-explanation"><code>Jelaskan sel JavaScript yang dipilih baris demi baris.
+Bagaimana aturan generator dan seed 42 menentukan array inputnya?
+Mengapa kode tersebut melaporkan jumlah 10, rata-rata 9.3, minimum 1, dan maksimum 20?
+Mengapa menyetel ulang seed membuat hasilnya dapat diulang?
+Jelaskan apa yang perlu diubah untuk array kosong.
+Kembalikan penjelasan singkat saja; jangan menulis ulang kodenya.</code></pre>
+            </div>
+            <div class="prompt-config-locations">
+              <figure class="phone-figure" id="ai-prompt-composer-controls">
+                <p class="screen-note"><strong>Komposer sel baru</strong></p>
+                <div class="shot-window shot-window--ai-prompt-composer" role="img" aria-label="Komposer sel baru Android dengan AI Prompt dipilih. Batas kuning menunjukkan pemilih bahasa AI dan tombol Configure di samping draf.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Sebelum sel disimpan:</strong> pilih AI Prompt (ditampilkan sebagai <strong>AI</strong>) dan ketuk <strong>Konfigurasikan</strong> yang disorot pada komposer. Ini mengonfigurasi prompt baru yang sedang Anda tulis.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-composer.png">Lihat tangkapan layar komposer lengkap</a>
+              </figure>
+              <figure class="phone-figure" id="ai-prompt-edit-controls">
+                <p class="screen-note"><strong>Sel yang ada saat mengedit</strong></p>
+                <div class="shot-window shot-window--ai-prompt-edit" role="img" aria-label="Sel AI Prompt tersimpan Android dalam mode edit. Batas kuning menunjukkan Configure di header sel di atas awal prompt.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Untuk sel yang sudah ada:</strong> ketuk <strong>Konfigurasikan</strong> pada header sel tersebut. Tombol ini tetap tersedia saat Anda mengedit prompt. Kedua tombol membuka dialog konfigurasi yang sama; mengubah pengaturan saja tidak akan mengirimkan apa pun.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-edit.png">Lihat tangkapan layar pengeditan sel lengkap</a>
+              </figure>
+            </div>
+          </li>
+          <li>Atur <strong>Tempatkan respons akhir di → Output sel ini</strong>, yaitu default-nya. Di bawah <strong>Konteks untuk dikirim → Sertakan sumber dari</strong>, pilih <strong>Sel 1 sebelumnya</strong>. Hapus centang pada <strong>Sertakan teks output yang disimpan</strong> untuk latihan khusus sumber ini. Pastikan bahwa <strong>Pratinjau konteks</strong> mencantumkan nama <code>summary_demo</code>, lalu gulir ke bawah dan ketuk <strong>Simpan konfigurasi</strong>.
+            <figure class="phone-figure" id="ai-prompt-configuration">
+              <div class="shot-window shot-window--ai-prompt-config" role="img" aria-label="Dialog Configure AI Prompt cell Android. Batas kuning menunjukkan This cell&#39;s output, Previous 1 cell, dan Include saved output text yang tidak dicentang.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <figcaption>Dialog yang dibuka oleh <strong>Konfigurasikan</strong>. Batas kuning menunjukkan tujuan respons, <strong>1 sel sebelumnya</strong>, dan opsi output tersimpan yang tidak dicentang. Kirim hanya sumber <code>summary_demo</code> sebelumnya. <strong>1 sel sebelumnya</strong> berarti sel tepat sebelumnya dalam urutan buku kerja; opsi ini tidak mencari berdasarkan nama.</figcaption>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config.png">Lihat tangkapan layar konfigurasi lengkap</a>
+              <p class="screen-note">Gulir ke bawah pada dialog untuk mencapai <strong>Simpan konfigurasi</strong>.</p>
+              <div class="shot-window shot-window--ai-prompt-config-save" role="img" aria-label="Bagian bawah dialog konfigurasi AI Prompt Android. Batas kuning menunjukkan Save configuration di samping Cancel.">
+                <div class="shot-stage">
+                  <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                </div>
+              </div>
+              <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-config-save.png">Lihat tangkapan layar dialog yang digulir lengkap</a>
+            </figure>
+          </li>
+          <li>Ketuk <strong>Jalankan</strong> pada sel AI Prompt. Periksa konteks yang dipilih dalam tinjauan, lalu pilih <strong>Kirim ke penyedia AI</strong>. Baca penjelasan di samping kode sumber dan bandingkan dengan hasil yang diketahui.</li>
+        </ol>
+        <figure class="phone-figure" id="ai-prompt-explanation">
+          <div class="shot-window shot-window--ai-prompt-result" role="img" aria-label="Output AI Prompt Android sebenarnya dari GLM 5.3 Flash. Cuplikan yang terlihat menjelaskan generator ber-seed, panjang array, reduce, minimum, dan maksimum dalam summary_demo.">
+            <div class="shot-stage">
+              <img src="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>Penjelasan GLM 5.3 Flash nyata pada Galaxy S24+.</strong> Satu permintaan khusus sumber menghasilkan balasan ini di output sel AI Prompt; tindakan ini tidak mengubah atau menjalankan ulang sel JavaScript. Gambar menunjukkan awal dari penjelasan tersebut. Gulir output untuk melanjutkan, dan periksa jawaban terhadap kode sumber serta hasil yang diharapkan dari Langkah 3—penjelasan AI bukan jaminan kebenaran.</figcaption>
+          <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-prompt-result.png">Lihat tangkapan layar penjelasan lengkap</a>
+        </figure>
+        <p class="callout"><strong>Cara untuk mengontrol biaya API dan meningkatkan pemahaman.</strong> AI Prompt yang terfokus dapat mengirimkan konteks yang lebih sedikit daripada percakapan agen yang terus berkembang serta menghindari loop alat multi-langkah, sehingga mengurangi token input dan berpotensi menurunkan tagihan. Mintalah penalaran yang ringkas, asumsi, dan output yang diharapkan saat Anda menulis kode. Penghematan <strong>tidak dijamin</strong>: tarif model, panjang respons, token penalaran, dan konteks yang Anda pilih tetap berpengaruh. Permintaan ini menggunakan <strong>penyedia/model Asisten</strong>, bukan model penyelesaian independen, dan berada di luar pengaman pengeluaran penyelesaian.</p>
+        <div id="ai-prompt-apply-example">
+          <h3>Contoh lain · Tinjau plot sebelum mengganti sel</h3>
+          <p>Sekarang mintalah AI Prompt untuk menulis kode ke dalam sel yang <em>berbeda</em>, dengan tinjauan sebelum apa pun diganti. Kita akan membuat plot bagaimana estimasi varians berubah di banyak sampel kecil. Ini adalah sampel normal baru—bukan array bilangan bulat <code>summary_demo</code> sebelumnya. Tujuannya adalah untuk mempelajari <strong>Konfigurasikan → pratinjau → Terapkan → Jalankan</strong>, bukan untuk menguasai statistiknya.</p>
+          <p class="callout"><strong>Varians bukanlah t-Student.</strong> Untuk sampel normal independen berukuran 10, <code>9s² / σ²</code> mengikuti distribusi chi-kuadrat dengan derajat kebebasan 9. Di sini varians sebenarnya <code>σ² = 1</code>. Sedangkan t-Student menjelaskan rata-rata sampel terstandardisasi <code>(mean − μ) / (s / √10)</code>, menggunakan estimasi deviasi standar <code>s</code>; ini juga memiliki derajat kebebasan 9 di sini. <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda358.htm">NIST: varians</a> · <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm">NIST: rata-rata</a>.</p>
+          <ol class="lesson-steps">
+            <li>Dalam buku kerja latihan, buat sel <strong>JavaScript</strong> yang berisi <code>// Reviewed plot code will go here.</code> Jalankan komentar yang tidak berbahaya tersebut untuk menyimpan sel. Tekan lama pada label <strong>In[…] miliknya</strong> dan beri nama <code>variance_plot</code>. Pertahankan nama tersebut agar tetap unik di buku kerja; lihat <a href="../../../workbooks/named-cells/#name">penamaan sel</a>.</li>
+            <li>Tambahkan sel <strong>AI Prompt</strong> terpisah dan tempelkan permintaan ini ke dalamnya:
+              <div class="callout" id="ai-variance-practice-prompt">
+                <pre data-translatable-prompt="ai-variance"><code>Kembalikan hanya kode sumber JavaScript lengkap, tanpa pembatas Markdown.
+Buat histogram yang dapat direproduksi dari estimasi varians sampel.
+Simulasikan 2,000 sampel baru, masing-masing berisi 10 nilai N(0,1) normal-standar.
+Jangan gunakan kembali array bilangan bulat sebelumnya dari summary_demo.
+Inisialisasi state = 42 sekali untuk seluruh proses, bukan per sampel. Sebelum setiap penarikan seragam, tetapkan state = (16807 * state) % 2147483647, lalu u = state / 2147483647.
+Untuk setiap penarikan normal gunakan dua bilangan seragam berturut-turut: sqrt(-2 * log(u1)) * cos(2 * PI * u2). Jangan gunakan kembali hasil sinus cadangan atau menggunakan Math.random.
+Untuk setiap sampel, hitung rata-ratanya, lalu varians tidak bias sum((x - mean)^2) / 9.
+Gambarlah histogram canvas berlabel dengan 40 bin dengan lebar yang sama dari 0 hingga 4. Sumbu horizontal adalah estimasi varians; sumbu vertikal adalah jumlah sampel.
+Tandai varians populasi sebenarnya 1 dengan garis vertikal berlabel. Gunakan latar belakang terang, teks gelap, dan label yang mudah dibaca.
+Cetak ukuran sampel, pengulangan, seed, rata-rata estimasi varians, total histogram, dan jumlah luapan apa pun. Hitung luapan secara terpisah alih-alih menyembunyikannya.
+Tampilkan canvas dengan window.renderImage(canvas.toDataURL("image/png")).
+Jangan gunakan paket, jaringan, penyimpanan, atau pengeditan buku kerja apa pun.</code></pre>
+              </div>
+            </li>
+            <li>Buka bagian <strong>Konfigurasi</strong> pada AI Prompt. Atur <strong>Tempatkan respons akhir di → Pratinjau penggantian untuk sebuah sel</strong>, <strong>Bahasa sel hasil → Pertahankan bahasa target</strong>, <strong>Sel yang akan diganti → Sel bernama</strong>, dan <strong>Nama sel → variance_plot</strong>. Di bawah konteks, pertahankan <strong>Sertakan sumber dari → Tidak ada sel lain (default)</strong>, lalu <strong>Simpan konfigurasi</strong>.
+              <figure class="phone-figure" id="ai-variance-configuration">
+                <div class="shot-window shot-window--ai-variance-config" role="img" aria-label="Dialog Configure AI Prompt cell Android. Batas kuning menunjukkan Replacement preview for a cell, Preserve target language, Named cell, variance_plot, dan No other cells.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-config-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Ganti hanya setelah peninjauan.</strong> Pengaturan S24+ sebenarnya ini memilih sel JavaScript bernama unik <code>variance_plot</code>, mempertahankan bahasanya, dan menghilangkan sel-sel lain. Gulir ke bawah ke <strong>Simpan konfigurasi</strong>. Menyimpan saja tidak akan mengirimkan apa pun; tindakan Run berikutnya tetap menyajikan permintaan untuk ditinjau.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-config.png">Lihat tangkapan layar pengaturan penggantian lengkap</a>
+              </figure>
+            </li>
+            <li>Jalankan (Run) sel <strong>AI Prompt</strong>. Tinjau apa yang akan dikirim, lalu pilih <strong>Kirim ke penyedia AI</strong>. Opsi <strong>Tidak ada sel lain</strong> mengecualikan konteks buku kerja tambahan; penggantian tetap mengirimkan <strong>kode sumber lengkap dari sel target</strong>. Di sini, itu hanya komentar kami yang tidak berbahaya.</li>
+            <li>Baca pratinjau <strong>Sebelum / Sesudah</strong> yang dikembalikan. Periksa JavaScript lengkap: seed 42, 2,000 sampel berukuran 10, varians dibagi 9, dan tidak ada jaringan atau penyimpanan yang tidak terduga. Pilih <strong>Terapkan penggantian</strong> hanya jika Anda menerima sumber tersebut; <strong>Batal</strong> membiarkan <code>variance_plot</code> tidak berubah. Menerapkan akan mengedit sel tujuan tetapi <strong>tidak menjalankannya</strong>.
+              <figure class="phone-figure" id="ai-variance-approval">
+                <div class="shot-window shot-window--ai-variance-preview-start" role="img" aria-label="Pratinjau penggantian Sebelum/Sesudah Android. Sebelum adalah komentar yang tidak berbahaya; Sesudah memulai JavaScript yang dihasilkan dengan seed 42 dan generator sampel normal.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <p class="shot-detail-label"><strong>Kode yang dihasilkan ada di pratinjau persetujuan.</strong> Ini adalah awal dari respons GLM 5.3 Flash yang sebenarnya; target masih hanya berisi komentar kami. Baca seluruh bagian Sesudah, bukan hanya baris-baris yang ditampilkan di sini.</p>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-start.png">Lihat tangkapan layar awal pratinjau lengkap</a>
+                <div class="shot-window shot-window--ai-variance-preview-apply" role="img" aria-label="Bagian akhir dari pratinjau kode yang dihasilkan Android yang sama. Batas kuning menunjukkan Apply replacement dan Cancel; kedua tindakan tersebut tidak menjalankan kode yang diusulkan.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                    <img class="shot-overlay" src="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply-overlay.svg" width="1080" height="2340" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Gulir ke bagian akhir untuk menyetujui atau membatalkan.</strong> Menerapkan penggantian akan mengubah kode sumber sel bernama; tindakan ini tidak mengeksekusinya. Bagian tengah dari pratinjau panjang ini dihilangkan dari tampilan detail ini. <a href="../../../../pro/ai/tutorial/assets/ai-variance-generated.js">Baca kode sumber lengkap yang dihasilkan</a>.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-preview-apply.png">Lihat tangkapan layar kontrol persetujuan lengkap</a>
+              </figure>
+            </li>
+            <li>
+              <p class="callout"><strong>Peninjauan menemukan sedikit kelalaian.</strong> Respons model ini diakhiri dengan string laporan alih-alih mencetaknya. Setelah Apply, kami hanya mengedit laporan akhir tersebut menjadi <code>console.log(…)</code> sebelum Run. Periksa juga respons Anda: gambar saja tidak menunjukkan apakah totalnya benar. <a href="../../../../pro/ai/tutorial/assets/ai-variance-reviewed.js">Baca kode sumber terkoreksi yang dijalankan</a>.</p>
+              <p>Temukan <code>variance_plot</code> dan ketuk <strong>tombol Run miliknya sendiri</strong>. Setiap bilah histogram menghitung estimasi varians sampel—bukan pengamatan individual. Dengan generator persis di atas, harapkan rata-rata estimasi varians mendekati <strong>0.9852</strong>, total histogram sebesar <strong>2,000</strong>, dan luapan <strong>0</strong>. Varians sebenarnya adalah 1; simulasi berhingga tidak harus menghasilkan rata-rata tepat 1. Menjalankan ulang dari seed 42 akan mereproduksi plot yang sama.</p>
+              <figure class="phone-figure" id="ai-variance-output">
+                <div class="shot-window shot-window--ai-variance-plot" role="img" aria-label="Plot Android sebenarnya setelah tindakan Run manual terpisah: histogram dari 2,000 estimasi varians sampel dari sampel normal berukuran 10. Garis merah menandai varians sebenarnya 1; rata-rata tercetak adalah 0.98521, total histogram 2000, dan luapan 0.">
+                  <div class="shot-stage">
+                    <img src="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png" width="1080" height="2340" alt="" loading="lazy" decoding="async">
+                  </div>
+                </div>
+                <figcaption><strong>Output setelah Apply, peninjauan, dan tindakan Run manual terpisah pada S24+.</strong> Plot dan pemeriksaan tercetak yang sebenarnya cocok dengan perhitungan ber-seed: rata-rata estimasi varians <strong>0.98521</strong>, total <strong>2,000</strong>, luapan <strong>0</strong>. Garis merah adalah varians populasi, bukan kurva pas (fitted curve). Model Anda mungkin memformat kode atau diagram secara berbeda.</figcaption>
+                <a class="full-shot-link" href="../../../../pro/ai/tutorial/assets/phone-ai-variance-plot.png">Lihat tangkapan layar plot lengkap</a>
+              </figure>
+            </li>
+          </ol>
+          <p class="callout"><strong>Dua persetujuan terpisah:</strong> <strong>Kirim ke penyedia AI</strong> menyetujui pembagian permintaan yang ditinjau. <strong>Terapkan penggantian</strong> menyetujui pengeditan kode sumber target. Keduanya tidak menjalankan JavaScript yang diusulkan. Jangan pilih <strong>Sel baru yang tertaut</strong> untuk demonstrasi ini: opsi tersebut menyisipkan sel hasil yang belum dijalankan tanpa langkah persetujuan penggantian ini.</p>
+        </div>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>Jika ada yang tidak berfungsi</h2>
+        <dl>
+          <dt><strong>Tidak ada saran offline di ponsel</strong></dt>
+          <dd>Pilih General → Local code completion → On alih-alih Auto. Periksa chip, posisi tanda sisip, bahasa, dan apakah baris opsional memiliki ruang.</dd>
+          <dt><strong>Tidak ada permintaan online</strong></dt>
+          <dd>Periksa On tap, kunci yang disimpan untuk penyedia/endpoint yang tepat, entri atau batas harga model yang dipilih, persetujuan, dan total pengeluaran. Open tidak diperlukan untuk penyelesaian. Konteks browser yang aman dan Web Locks diperlukan; konteks yang tidak didukung akan menolak permintaan.</dd>
+          <dt><strong>Asisten meminta izin sebelum menjalankan sel—atau tidak meminta izin</strong></dt>
+          <dd>Periksa versi aplikasi Anda, izin eksekusi Security…, dan aturan Kernels…. Default Open mendatang adalah Ask; default Pro 1.4.0 dapat mengizinkan eksekusi. Auto-run nonaktif bukanlah Deny pada alat eksekusi. Always allow pada penyelesaian online tidak memberikan izin eksekusi sel; lihat <a href="#execution-permissions">persetujuan eksekusi</a>.</dd>
+          <dt><strong>Penyelesaian tidak memahami sel lain</strong></dt>
+          <dd>Alternatif online menggunakan konteks sel saat ini yang dibatasi, bukan buku catatan lengkap Anda. Gunakan AI Prompt dengan sumber yang dipilih secara eksplisit, atau Asisten, saat Anda memerlukan penjelasan yang lebih luas.</dd>
+          <dt><strong>Install tidak tersedia</strong></dt>
+          <dd>Alur model lokal bawaan ditujukan untuk instalasi Android Google Play yang memenuhi syarat, bukan untuk desktop/browser atau distribusi sideload saat ini. Memenuhi batas minimum RAM tidak menjamin kecepatan.</dd>
+          <dt><strong>Jawaban yang dihasilkan tampak masuk akal tetapi salah</strong></dt>
+          <dd>Bandingkan dengan contoh-contoh kecil yang telah diketahui. Periksa impor, satuan, perilaku input kosong, dan efek samping sebelum menjalankan. Respons model bukanlah bukti kebenaran.</dd>
+        </dl>
+        <p><a href="../../../../pro/ai/">Referensi penyiapan dan alur kerja AI<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> · <a href="../../../../pro/remote/">Remote dan keamanan<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a> · <a href="../../../tutorials/">Semua tutorial</a></p>
+      </section>
+      <aside class="callout" id="execution-permissions" aria-labelledby="execution-appendix-title">
+        <h2 id="execution-appendix-title">Lampiran · Persetujuan eksekusi mendatang · usulan Pro 1.5.0</h2>
+        <p><strong>Belum dirilis:</strong> kontrol-kontrol ini menjelaskan implementasi rilis berikutnya, bukan janji bahwa penginstalan 1.4.0 Anda memilikinya. Nomor rilis bersifat sementara.</p>
+        <ul>
+          <li><strong>Pengaturan AI → Keamanan… → <code>execute_cell</code> / <code>run_cells</code></strong> sudah menawarkan <strong>Default / Allow / Ask / Deny</strong>. Pembaruan ini mengubah Default turunan dari Open menjadi <strong>Tanya</strong>; Full control tetap mempertahankan Allow. Aturan alat atau kernel eksplisit dapat menggantikan default turunan; jika keduanya eksplisit, aturan yang lebih aman yang akan berlaku. Biarkan Default atau Ask saat sedang belajar. Allow adalah pengabaian (override), bukan sandbox yang lebih kuat; Ask/Deny kernel, Review, dan penonaktifan JavaScript global tetap berlaku.</li>
+          <li>Baca permintaan eksekusi sebelum memilih <strong>Jalankan</strong>; biarkan <strong>Izinkan eksekusi sel Asisten di masa mendatang tanpa bertanya</strong> tidak dicentang untuk menyetujui permintaan itu saja. Mencentangnya akan mengubah aturan alat eksekusi bersama di <strong>semua buku kerja</strong> hingga disetel ulang—bukan hanya untuk sel, percakapan, atau penyedia ini. Aturan kernel Ask yang eksplisit akan menyembunyikan opsi tersebut.</li>
+          <li>Prompt inspeksi namespace dan sel yang baru dibuat <strong>tidak dapat membuat izin tetap tersebut</strong>. Prompt eksekusi sel yang baru dibuat menyertakan pratinjau kode yang dibatasi; pratinjau yang panjang diakhiri dengan elipsis. Jika terpotong, pilih Cancel, periksa kode sumber lengkap sel yang baru dibuat, dan jalankan (Run) sendiri hanya jika Anda memercayainya. Allow eksekusi yang disimpan sebelumnya masih dapat mengizinkan autorun sel yang dibuat saat Auto-run aktif, jadi tetap nonaktifkan Auto-run di sini.</li>
+          <li>Jika Anda memilih preset selain Full control saat Allow pada alat eksekusi yang disimpan tetap berlaku, peringatan akan menawarkan <strong>Atur ulang ke Bawaan</strong>, <strong>Pertahankan Izinkan</strong>, atau <strong>Batal</strong>. Reset akan memulihkan aturan alat dari preset yang dipilih tanpa menghapus pengabaian kernel. Keep mempertahankan pengabaian tersebut. Cancel memulihkan pilihan preset sebelumnya. Reset dan Keep tetap berupa perubahan draf hingga Anda menyimpan Pengaturan (Settings).</li>
+        </ul>
+        <p><strong>Persetujuan eksekusi bukanlah izin menyeluruh untuk membagikan data.</strong> Output alat eksekusi dapat dikembalikan ke model Asisten, dan kode yang diizinkan dapat menggunakan jaringan. <strong>Selalu izinkan</strong> pada penyelesaian online, peninjauan konteks AI Prompt, dan pengungkapan privasi Remote/MCP tetap terpisah. Eksekusi buku catatan MCP menggunakan pemeriksaan eksekusi yang sama; pemeriksaan tersebut tidak memasukkan shell Terminal broker ke dalam sandbox.</p>
+      </aside>
+      <aside class="callout" id="planned-workbook-context" aria-labelledby="context-appendix-title">
+        <h2 id="context-appendix-title">Lampiran · Konteks dan riwayat buku kerja yang direncanakan</h2>
+        <p><strong>Hanya proposal desain:</strong> fitur-fitur ini belum diimplementasikan atau ditetapkan ke suatu rilis. Fitur ini terpisah dari perubahan persetujuan eksekusi mendatang di atas dan tidak memblokir rilis saat ini.</p>
+        <ul>
+          <li><strong>Ambil ringkasan buku kerja saat diperlukan.</strong> Rencana ini menggantikan pratinjau sumber otomatis yang berulang dengan alat direktori khusus metadata: nama sel, deskripsi opsional, bahasa, dan tipe, ditambah revisi buku kerja. Alat yang diusulkan adalah <code>list_cells</code> dengan <code>view: "metadata"</code>; Asisten akan membaca kode sumber yang dipilih secara terpisah. Ini adalah gambaran umum berbatas, bukan penjelasan AI yang dibuat secara otomatis.</li>
+          <li><strong>Lampirkan sekali alih-alih pada setiap Send.</strong> Kotak centang <strong>Attach workbook summary this time</strong> yang diusulkan dapat diawali dalam kondisi tercentang untuk percakapan baru dan tidak dicentang setelah lampiran tersebut benar-benar terkirim. Anda dapat menghapus centangnya sebelum mengirim atau mencentangnya lagi untuk gambaran umum baru. Pengaturan default awalnya masih memerlukan tinjauan privasi dan kegunaan. Kelanjutan percakapan tidak akan menambahkan ringkasan lain, dan beralih tab tidak akan mengaktifkannya kembali secara diam-diam. Pratinjau dan izin baca/privasi yang ada tetap berlaku; buku kerja yang besar mungkin memerlukan halaman lebih lanjut.</li>
+          <li><strong>Tidak dicentang tidak menghapus riwayat.</strong> Tindakan ini akan menghentikan lampiran otomatis yang baru, bukan menghapus ringkasan yang sudah ada di percakapan atau mencegah pembacaan alat yang diizinkan. Kontrol konteks Agen layar penuh, AI Prompt, dan penyelesaian yang sudah ada akan tetap terpisah.</li>
+          <li><strong>Perubahan antar-pengiriman adalah opsi di masa mendatang.</strong> Pembaruan ringkas akan memerlukan garis dasar konteks terkirim yang diketahui dan revisi yang andal. Pengeditan oleh manusia dapat disorot, tetapi pengeditan agen, impor, dan perubahan yang tidak diketahui juga penting. Pengeditan sumber tidak akan secara otomatis menulis ulang deskripsi sel; riwayat yang hilang atau usang akan memerlukan gambaran umum baru alih-alih pembaruan tebakan.</li>
+          <li><strong>Riwayat lokal opsional dan sinkronisasi GitHub adalah ide jangka panjang Pro.</strong> Titik pemeriksaan (checkpoint) Send lokal dapat mendukung diff berbasis Git tanpa membagikan apa pun. Sinkronisasi independen dapat memublikasikan buku kerja ke Gist atau file yang dipilih di repositori, dengan pratinjau muatan dan otorisasi tersendiri. Mengaktifkan riwayat tidak akan melakukan push ke GitHub atau mengirimkan diff ke AI. Git menampilkan perubahan konten, bukan bukti bahwa manusialah yang membuatnya.</li>
+        </ul>
+        <p><strong>Gist rahasia tidak bersifat privat.</strong> Siapa pun yang memiliki URL-nya dapat membacanya; gunakan repositori privat saat akses harus dibatasi. Jauhkan rahasia dari kode sumber dan deskripsi buku kerja sebelum memublikasikannya. <a href="https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists/creating-gists">Dokumentasi visibilitas Gist GitHub</a>.</p>
+      </aside>
+    </article>
+  </main>
+  <footer class="site-footer">
+    <span>Bantuan SciREPL Pro</span>
+    <nav aria-label="Navigasi footer">
+      <a href="../../../tutorials/">Semua tutorial</a>
+      <a href="../../../../pro/">Bantuan Pro<span class="english-reference"> (Halaman referensi bahasa Inggris)</span></a>
+      <a href="../../../../../pro/privacy.html">Privasi Pro</a>
+    </nav>
+  </footer>
+</body>
+</html>

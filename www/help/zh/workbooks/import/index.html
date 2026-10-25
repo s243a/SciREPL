@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="下载 SciREPL 工作簿文件，找到 Menu → Import File，在 Android 或桌面设备上选择该文件，并在运行前检查其单元格。">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/zh/workbooks/import/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/import/tutorial.css">
+  <title>导入工作簿文件 · SciREPL 帮助</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/import/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/import/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/import/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/import/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/import/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/import/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/import/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/import/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/import/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/import/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/import/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/import/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/import/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/import/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">跳转至主要内容</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (英文参考页面)</span></a>
+    <nav aria-label="主导航">
+      <a href="../../../workbooks/">工作簿参考<span class="english-reference"> (英文参考页面)</span></a>
+      <a href="../../tutorials/">所有教程</a>
+      <a href="../../../">所有帮助<span class="english-reference"> (英文参考页面)</span></a>
+      <a href="../../../../">打开 Free PWA</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="教程语言"><details class="tutorial-language-menu"><summary>教程语言: <bdi>简体中文</bdi></summary><nav aria-label="教程语言"><a href="../../../en/workbooks/import/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/import/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/import/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/import/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/import/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/import/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/import/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/import/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/import/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/import/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/import/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/import/" lang="ru" hreflang="ru">Русский</a>
+      <a href="./" lang="zh" hreflang="zh" aria-current="page">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">本教程为机器翻译，母语审校待完成。代码和技术参数保持不变。屏幕截图显示原始英文界面；请将本文中翻译的控件名称与您的应用相对应。</p></aside>
+    <p class="breadcrumbs"><a href="../../../">帮助<span class="english-reference"> (英文参考页面)</span></a> / <a href="../../../workbooks/">工作簿<span class="english-reference"> (英文参考页面)</span></a> / 导入工作簿文件</p>
+    <article>
+      <p class="eyebrow">边做边学</p>
+      <h1>亲自动手导入工作簿文件</h1>
+      <p class="lede">已经拥有工作簿文件，或者在“浏览”中找不到课程？将文件保存到您的设备，然后使用 <strong>菜单 → Import File</strong> 将其添加到 SciREPL。本简短操作指南使用 <strong>Simpson's Paradox</strong>，该示例来自目录的 GitHub <code>main</code> 分支；您无需安装任何包或编写代码即可导入它。</p>
+      <p>SciREPL 支持导入两种笔记本格式：其自带的工作簿格式 <strong><code>.srwb</code></strong>，以及 Jupyter 笔记本格式 <strong><code>.ipynb</code></strong>。本示例使用 <code>.srwb</code>；<a href="#other-formats">下文的格式说明</a>解释了 Jupyter 导入的不同执行行为。</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Android 和浏览器操作步骤</li>
+        <li class="chip">约 3 分钟</li>
+      </ul>
+      <p class="screen-note">菜单截图是在 <strong>Samsung Galaxy S24+</strong> 上截取的真实 Android 界面，显示的是 <strong>SciREPL Free 1.4.0-debug</strong>，而非 Play 商店安装版本。导入工作簿的截图则是单独在 <strong>Chromium 浏览器中以移动设备视口截取的 Free 1.4.0</strong>；它不能作为 Android 文件选择器导入的证明。两者均截取于 <time datetime="2026-10-06">6 日（十月 2026 年）</time>。其他版本、型号以及文件选择器的控件排列可能有所不同。示例选用的是英文 <code>simpsons-paradox.srwb</code> 文件，源自本指南审查时的 SciREPL Catalog 的 <code>main</code> 分支；该分支后续可能会更改。<a href="../../../workbooks/import/assets/capture-receipt.json">截图与来源详情<span class="english-reference"> (英文参考页面)</span></a>记录了确切的图片尺寸和审查时的文件哈希值。</p>
+      <nav class="lesson-nav" aria-label="手动导入工作簿的步骤">
+        <strong>本课内容</strong>
+        <ol>
+          <li><a href="#download">保存工作簿文件</a></li>
+          <li><a href="#import">找到 Menu 并导入文件</a></li>
+          <li><a href="#check">检查新的工作簿标签页</a></li>
+          <li><a href="#next">继续进行课程</a></li>
+        </ol>
+        <p><a href="#other-formats">其他格式与安全性</a> · <a href="#troubleshooting">如果出现异常</a></p>
+        <p><a href="../../tutorials/">所有教程</a></p>
+      </nav>
+
+      <section id="download">
+        <p class="step-label">步骤 1</p>
+        <h2>将工作簿文件保存到您的设备</h2>
+        <p>GitHub 的 <code>main</code> 分支可能包含尚未出现在“浏览”所显示的最新稳定目录版本中的工作簿或更新。目录版本的更新独立于应用程序版本。直接导入文件可让您尝试受信任的工作簿，而无需等待其出现在“浏览”中。</p>
+        <ol class="lesson-steps">
+          <li><a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">在 GitHub 上查看 Simpson's Paradox</a>，然后<a download="simpsons-paradox.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/main/workbooks/en/simpsons-paradox.srwb">下载实际的工作簿文件 (.srwb)</a>。第二个链接打开的是原始文件，而不是 GitHub 网页。</li>
+          <li>如果您的浏览器将该文件显示为文本而非直接下载，请使用浏览器的<strong>保存/下载</strong>操作。请保存工作簿文件本身，而不是屏幕截图或 HTML 页面。</li>
+          <li>请保留文件名 <code>simpsons-paradox.srwb</code> 及其 <code>.srwb</code> 扩展名。注意文件的保存位置：Android 通常保存在 <strong>Downloads</strong>；在桌面设备上可能是“下载”文件夹或您选择的某个文件夹。</li>
+        </ol>
+        <p><strong>这并非固定发布版本的下载。</strong> <code>main</code> 是开发分支：截取这些屏幕截图后，文件的内容和单元格可能会发生变化。您保存的文件是本地副本；后续 GitHub 的更改不会自动更新您已导入的标签页。</p>
+        <p class="callout"><strong>下载并不等于导入。</strong> 保存文件只是将其存放在您的设备上，尚未在 SciREPL 中打开工作簿。您不需要在文本编辑器中打开它，也不需要将其放入 SciREPL 的“文件”视图中。下一步将选择该已下载的文件。</p>
+        <p>如果您已经从他人处获得了受信任的 <code>.srwb</code> 文件，可以直接使用该文件并跳过示例下载。其工作簿标题和单元格数量将与步骤 3 中的检查项有所不同。</p>
+      </section>
+
+      <section id="import">
+        <p class="step-label">步骤 2</p>
+        <h2>找到 Menu 并选择 Import File</h2>
+        <ol class="lesson-steps">
+          <li>返回 SciREPL。在<strong>应用程序顶部的标题行</strong>中，找到 <strong>☰ Menu</strong>（即带有<strong>三条水平线</strong>的按钮），然后点按或点击它。</li>
+          <li>选择 <strong>📂 导入文件（如 .srwb、.ipynb、.csv、.py、.zip）</strong>。如果菜单高度超过屏幕，请在<em>菜单内部滚动</em>以找到它。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-menu" role="img" aria-label="SciREPL Free 打开的 Menu 的 Samsung Galaxy S24+ 屏幕截图，其中 Import File 选项以黄色高亮标出。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/phone-menu.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>在应用菜单中选择 <strong>📂 Import File</strong>。黄色标注指向 <strong>Android 上的 Free 1.4.0-debug</strong> 中的导入选项。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/phone-menu.png">查看完整的 Android Menu 屏幕截图</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li><strong>在 Android 上：</strong>系统文件选择器将打开。查看 <strong>Downloads</strong>，或浏览到您保存该文件的位置。选择 <code>simpsons-paradox.srwb</code>。该选择器属于 Android 系统，因此其布局以及最终的<strong>打开</strong>或选择控件取决于您的设备。</li>
+          <li><strong>在桌面设备上：</strong>使用文件选择器找到您在下载时选择的文件夹。选择 <code>simpsons-paradox.srwb</code> 并确认选择。请使用此途径，而不是寻找 Android 的 Downloads 界面。</li>
+          <li>返回 SciREPL，等待导入完成。如果菜单仍处于打开状态，请将其关闭以查看工作簿。</li>
+        </ol>
+        <p class="callout"><strong>工作簿并非数据文件上传。</strong>导入 <code>.srwb</code> 文件会将其工作簿作为一个独立的标签页添加；如果文件包含多个工作簿，则添加为多个独立标签页。您现有的标签页都会保留。它不会将工作簿放入“文件”视图，也不会替换您当前的工作簿。</p>
+      </section>
+
+      <section id="check">
+        <p class="step-label">步骤 3</p>
+        <h2>在运行任何内容前检查新工作簿</h2>
+        <ol class="lesson-steps">
+          <li>在工作簿选择器中寻找 <strong>Simpson's Paradox</strong>。如果尚未选中该新标签页，请将其选中。其简介标题为 <strong>Simpson's Paradox: When Every Group Disagrees with the Total</strong>。</li>
+          <li>阅读简介并滚动浏览各单元格。截取这些截图时审查的版本包含<strong>七个单元格</strong>：三个文本单元格、三个 <strong>R</strong> 单元格和一个 <strong>JavaScript</strong> 单元格。<code>main</code> 上的后续版本可能会有所不同。</li>
+          <li>依次找到名为 <code>data</code>、<code>compute</code> 和 <code>viz</code> 的 R 单元格。JavaScript 单元格名为 <code>js_check</code>，是一个独立的可选检查项。请同时阅读说明文本与代码。</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--import-result" role="img" aria-label="SciREPL Free 1.4.0 在移动设备大小视口下的 Chromium 浏览器屏幕截图，显示已导入的 Simpson&#39;s Paradox 工作簿及其以黄色高亮标出的标题。">
+            <div class="shot-stage">
+              <img src="../../../workbooks/import/assets/browser-imported.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/import/assets/imported-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption><strong>浏览器导入结果：</strong>导入的 <strong>Simpson's Paradox</strong> 工作簿在 <strong>Chromium 中的 Free 1.4.0</strong> 中打开为可编辑单元格，此处视口为 390 × 844。这并非 Android 屏幕截图。导入操作并未运行其 R 或 JavaScript 单元格。</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/import/assets/browser-imported.png">查看完整的浏览器导入工作簿屏幕截图</a>
+        </figure>
+        <p class="callout"><strong>对于 .srwb，导入并不意味着运行。</strong> SciREPL 在导入 <code>.srwb</code> 文件时不会执行代码，即使已为其他导入启用了自动执行。在选择 <strong>运行</strong> 或 <strong>运行所有单元格</strong> 之前，请先检查来自不熟悉或不可信来源的代码。</p>
+        <p><strong>普通 .srwb 导入目前会丢弃已保存的代码单元格输出</strong>，即使文件中包含这些输出也是如此。Markdown 文本会被保留并渲染，这就是简介能立即显示的原因。若要重新生成图表或其他由代码生成的图像，请按顺序重新运行相关的代码单元格及其依赖单元格。导入操作不会恢复活动的 R 或其他运行时变量。</p>
+      </section>
+
+      <section id="next">
+        <p class="step-label">步骤 4</p>
+        <h2>可选：运行已导入的课程</h2>
+        <p>您的手动导入已完成；运行代码是一个单独的步骤。Simpson's Paradox 使用<strong>教学用合成数据</strong>来展示组内比较如何与整体比较产生分歧。若要探索该课程，请点按已保存代码单元格的 <strong>✎ 铅笔图标</strong>，检查代码，然后使用<em>该单元格的</em> <strong>运行</strong> 按钮。</p>
+        <ol class="lesson-steps">
+          <li>运行 R 单元格 <code>data</code>，然后阅读文本单元格 <code>pause</code> 并在运行 <code>compute</code> 之前作出预测。接着运行 <code>viz</code> 以生成图表。后面的 R 单元格依赖于前面的单元格。它们使用的是基础 R；您不需要安装额外的 R 包。</li>
+          <li>如果您想进行单独的 JavaScript 检查，请运行 <code>js_check</code>。它是独立的：既不依赖于 R 单元格，也不需要启动 R。</li>
+        </ol>
+        <p class="callout"><strong>首次运行 R：</strong> SciREPL 的 webR 运行时可能需要下载并初始化。可能会出现网络/隐私提示；请仔细阅读，仅在您希望继续时同意。等待运行时就绪并检查单元格是否有错误。仅导入工作簿并不会加载其 R 定义。</p>
+        <p>有关包含更完整运行与编辑演练的另一个示例，请参见<a href="../tutorial/#run">马尔可夫组课程</a>。那是另一个不同的工作簿，包含四个 Python 单元格；其<a href="../tutorial/#export">导出步骤</a>还演示了如何保存已编辑的工作簿副本。</p>
+        <p class="callout"><strong>保留一份由您控制的副本。</strong> 下载的文件是原始工作簿副本，而不是后续编辑的备份。导出工作簿副本以保存您的更改。清除应用或浏览器存储可能会移除本地工作内容，并且 Android 和浏览器会话不会自动共享您的更改。</p>
+      </section>
+
+      <section id="other-formats">
+        <p class="step-label">其他格式与安全性</p>
+        <h2>了解您的文件所包含的内容</h2>
+        <p><strong>Jupyter 笔记本 (.ipynb)</strong> 也使用 <strong>菜单 → Import File</strong>，但它们的执行行为与 <code>.srwb</code> 不同。如果启用了 <strong>导入工作簿时自动执行单元格</strong>，导入 <code>.ipynb</code> 时可能会自动运行没有已保存输出的代码单元格。</p>
+        <p class="callout"><strong>仅从您信任的来源导入笔记本文件。</strong> 在导入 <code>.ipynb</code> 之前，打开 <strong>菜单 → 设置 → 导入与编辑</strong> 并确保 <strong>导入工作簿时自动执行单元格</strong> 处于<strong>关闭</strong>状态（未勾选）。该选项默认处于关闭状态，但请检查您当前的设置。将其关闭并不能保证任意笔记本都是安全的；在明确决定是否运行之前，请务必检查受信任笔记本的代码。</p>
+        <p><strong>独立数据文件：</strong> 普通的 <code>.srwb</code> 导出不包含独立的 CSV 文件或存储在 SciREPL 虚拟文件系统（<strong>Files</strong> 视图）中的其他数据。此版本的 Simpson's Paradox 在代码中创建其合成数据，因此不需要单独的数据文件。对于读取 CSV 的工作簿，请遵循 <a href="../../files-export/tutorial/#export">CSV 操作指南的“打包归档导出”</a>和<a href="../../files-export/tutorial/#reopen">重新打开步骤</a>，以同时携带并恢复工作簿及其数据。软件包归档和 <code>.zip</code> 导入不在本篇简短的工作簿文件课程范围之内。</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">如果出现异常</p>
+        <h2>检查文件和选中的标签页</h2>
+        <ul>
+          <li><strong>选择器找不到文件：</strong> 检查浏览器的下载列表以查看文件的保存位置，然后浏览到该文件夹。在桌面设备上下载并不会将文件保存到手机的 Downloads 文件夹中。</li>
+          <li><strong>文件名以 .txt 或 .html 结尾：</strong> 返回工作簿下载链接，并保存带有 <code>.srwb</code> 扩展名的实际文件。将 HTML 页面重命名为 <code>.srwb</code> 并不能将其变为工作簿。</li>
+          <li><strong>仍显示旧的工作簿：</strong> 关闭菜单并在工作簿选择器中查找新标题。现有标签页均会被保留。</li>
+          <li><strong>导入了两次：</strong> 再次导入会添加另一份副本；它不会更新或替换先前的标签页。在进行更改之前，请确认您正在编辑的是哪一份副本。</li>
+          <li><strong>标题或单元格不匹配：</strong> 请检查您选择的是否为 <code>simpsons-paradox.srwb</code>，而非其他下载文件或来自其他课程的文件。<code>main</code> 上的文件可能会发生更改；请将您的副本与<a href="https://github.com/s243a/SciREPL-Catalog/blob/main/workbooks/en/simpsons-paradox.srwb">当前的 GitHub 文件</a>进行对比，并在运行前检查不熟悉的代码。</li>
+        </ul>
+        <p>有关工作簿标签页和已保存单元格编辑的基础知识，请参见<a href="../../interface/tutorial/">首个工作簿界面演练</a>。<a href="../../../workbooks/">工作簿参考<span class="english-reference"> (英文参考页面)</span></a>解释了工作簿结构和单元格类型。</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL 帮助</span><nav aria-label="页脚导航"><a href="../../../workbooks/">工作簿参考<span class="english-reference"> (英文参考页面)</span></a><a href="../../../">所有帮助<span class="english-reference"> (英文参考页面)</span></a></nav></footer>
+</body>
+</html>

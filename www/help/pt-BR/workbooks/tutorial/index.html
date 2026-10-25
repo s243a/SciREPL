@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="pt-BR" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Encontre a pasta de trabalho Markov Groups no catálogo do SciREPL, execute suas células Python, edite um passeio aleatório e exporte sua própria cópia da pasta de trabalho.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/tutorial/tutorial.css">
+  <script src="../../../workbooks/tutorial/catalogue-link.js" defer></script>
+  <title>Passo a passo da pasta de trabalho Markov Groups · Ajuda do SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/tutorial/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/tutorial/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/tutorial/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/tutorial/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/tutorial/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/tutorial/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/tutorial/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/tutorial/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/tutorial/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/tutorial/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/tutorial/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Pular para o conteúdo</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Página de referência em inglês)</span></a>
+    <nav aria-label="Navegação primária">
+      <a href="../../../workbooks/">Referência de pastas de trabalho<span class="english-reference"> (Página de referência em inglês)</span></a>
+      <a href="../../tutorials/">Todos os tutoriais</a>
+      <a href="../../../">Toda a ajuda<span class="english-reference"> (Página de referência em inglês)</span></a>
+      <a href="../../../../">Abrir o PWA Free</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Idioma do tutorial"><details class="tutorial-language-menu"><summary>Idioma do tutorial: <bdi>Português (Brasil)</bdi></summary><nav aria-label="Idioma do tutorial"><a href="../../../en/workbooks/tutorial/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/tutorial/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/tutorial/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/tutorial/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/workbooks/tutorial/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/workbooks/tutorial/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/tutorial/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/tutorial/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/tutorial/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/tutorial/" lang="ko" hreflang="ko">한국어</a>
+      <a href="./" lang="pt-BR" hreflang="pt-BR" aria-current="page">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/tutorial/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/tutorial/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutorial traduzido por máquina; a revisão no idioma nativo está pendente. O código e os valores técnicos não foram alterados. As capturas de tela mostram a interface original em inglês; faça a correspondência dos nomes de controles traduzidos neste texto com o seu aplicativo.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Ajuda<span class="english-reference"> (Página de referência em inglês)</span></a> / <a href="../../../workbooks/">Pastas de trabalho<span class="english-reference"> (Página de referência em inglês)</span></a> / Passo a passo de Markov Groups</p>
+    <article>
+      <p class="eyebrow">Aprenda na prática</p>
+      <h1>Explore um caderno de trabalho do catálogo</h1>
+      <p class="lede">Encontre o caderno de trabalho existente <strong>Markov Groups: A Random Walk on Cube Moves</strong>, execute suas quatro células Python, encurte seu passeio aleatório e salve sua própria cópia. O foco está em usar o SciREPL; você não precisa saber álgebra matricial ou resolver um Cubo de Rubik.</p>
+      <p class="callout"><strong>Veio aqui para aprender o aplicativo?</strong> Siga as Etapas 1–5: encontre, abra, execute, edite e exporte um caderno de trabalho. Você pode parar após a Etapa 5. A <a href="#optional-maths">matemática opcional</a> vem depois; ela não é necessária para concluir este passo a passo.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free + Pro</li>
+        <li class="chip">Etapas no Android</li>
+        <li class="chip">Cerca de 15 minutos</li>
+      </ul>
+      <p class="screen-note">Capturas de tela reais de celular mostram o SciREPL Pro <strong>1.4.0-debug</strong> em um <strong>Samsung Galaxy S24+</strong>, capturadas em <time datetime="2026-10-06">6 de outubro de 2026</time>. Elas ilustram o fluxo de trabalho de caderno de trabalho compartilhado, não uma versão lançada do Pro. O Free e outras versões podem organizar alguns controles de forma diferente. O exemplo é o caderno de trabalho em inglês do Catálogo SciREPL <strong>v0.4.0</strong>.</p>
+      <nav class="lesson-nav" aria-label="Etapas do passo a passo do caderno de trabalho">
+        <strong>Nesta lição</strong>
+        <p><a href="#find-menu">Primeiro, encontre o menu</a></p>
+        <ol>
+          <li><a href="#browse">Navegue, filtre e pesquise</a></li>
+          <li><a href="#open">Abra o caderno de trabalho</a></li>
+          <li><a href="#run">Execute suas células em ordem</a></li>
+          <li><a href="#edit">Altere um valor e execute novamente</a></li>
+          <li><a href="#export">Exporte sua cópia do caderno de trabalho</a></li>
+        </ol>
+        <p><a href="#optional-maths">Opcional: a matemática por trás do exemplo do cubo</a></p>
+        <p><a href="../../tutorials/">Todos os tutoriais</a></p>
+      </nav>
+
+      <section id="find-menu">
+        <p class="step-label">Antes de começar</p>
+        <h2>Encontre o menu</h2>
+        <p>No SciREPL, procure na <strong>linha de cabeçalho na parte superior do aplicativo</strong> pelo botão <strong>☰ Menu</strong>. Seu ícone é de <strong>três linhas horizontais</strong>, destacado em amarelo abaixo. Toque nele para abrir o menu do aplicativo; a Etapa 1 mostra qual item de menu escolher.</p>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--find-menu" role="img" aria-label="Linha de cabeçalho superior do SciREPL, com o botão Menu de três linhas horizontais destacado em amarelo ao lado do botão de Ajuda com ponto de interrogação.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/menu-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>O botão <strong>☰ Menu</strong> fica ao lado do botão <strong>? Help</strong> nesta captura de tela. Use o ícone de três linhas mesmo que seu cabeçalho tenha uma organização diferente.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-workbook.png">Ver a captura de tela completa</a>
+        </figure>
+      </section>
+
+      <section id="browse">
+        <p class="step-label">Etapa 1</p>
+        <h2>Navegue, filtre e pesquise</h2>
+        <ol class="lesson-steps">
+          <li>Abra <strong>Menu → Navegar por pacotes, coleções e pastas de trabalho</strong>. No Free, o atalho opcional de cabeçalho <strong>📦</strong> abre a mesma tela quando estiver visível. O <a href="../../interface/appearance/#browse-shortcut">passo a passo de Aparência</a> mostra como ativá-lo.</li>
+          <li>Navegue pela lista ou use seus filtros. Para este exemplo em inglês, escolha <strong>English</strong> sob <strong>Idioma falado</strong> e <strong>Python</strong> sob <strong>Kernel</strong>. <strong>Todos os idiomas falados</strong> e a opção <strong>Todos</strong> do kernel também funcionam, mas mostram mais entradas.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--browse" role="img" aria-label="Tela Navegar do SciREPL com seus controles de catálogo destacados em amarelo.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-browse.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/browse-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Navegar reúne pacotes, pacotes integrados e modelos de caderno de trabalho. Sua pesquisa e seus filtros ajudam a refinar a lista.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-browse.png">Ver a captura de tela completa de Navegar</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>Digite <strong>Markov Groups</strong> no campo de busca. Em <strong>Pastas de trabalho</strong>, localize <strong>Markov Groups: A Random Walk on Cube Moves</strong>. Verifique o título completo antes de instalar: este é um modelo de pasta de trabalho, não um pacote para adicionar ao Python.</li>
+          <li>Se o teclado cobrir o resultado, use o botão de ocultar teclado ou pressione o <strong>Voltar</strong> do Android uma vez para dispensá-lo. Mantenha Navegar aberto e role até a pasta de trabalho correspondente.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--search" role="img" aria-label="Busca em Navegar por Markov Groups com a pasta de trabalho correspondente e seu controle Instalar destacados em amarelo.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-search.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/search-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Pesquise por <strong>Markov Groups</strong> e, em seguida, verifique o título da pasta de trabalho correspondente e o botão <strong>Instalar</strong>.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-search.png">Ver a captura de tela completa da busca</a>
+        </figure>
+        <p><strong>O que mais está disponível?</strong> <a id="catalogue-workbooks-link" href="https://github.com/s243a/SciREPL-Catalog/tree/main/workbooks/en">Navegue pela lista de pastas de trabalho no GitHub (<bdi id="catalogue-workbooks-language">Inglês</bdi>)</a>. As edições de idioma de uma lição são entradas separadas, não lições diferentes.</p>
+        <div class="catalogue-language-choice" id="catalogue-language-choice" hidden>
+          <label for="catalogue-workbooks-locale">Idioma da pasta de trabalho:</label>
+          <select id="catalogue-workbooks-locale">
+            <option value="ar" lang="ar">العربية</option>
+            <option value="bn" lang="bn">বাংলা</option>
+            <option value="de" lang="de">Deutsch</option>
+            <option value="en" lang="en" selected>English</option>
+            <option value="es" lang="es">Español</option>
+            <option value="fr" lang="fr">Français</option>
+            <option value="hi" lang="hi">हिन्दी</option>
+            <option value="id" lang="id">Bahasa Indonesia</option>
+            <option value="ja" lang="ja">日本語</option>
+            <option value="ko" lang="ko">한국어</option>
+            <option value="pt-BR" lang="pt-BR">Português (Brasil)</option>
+            <option value="ru" lang="ru">Русский</option>
+            <option value="zh" lang="zh">中文</option>
+          </select>
+        </div>
+        <p>O link do GitHub mostra o conteúdo de desenvolvimento mais recente. O SciREPL normalmente usa a versão estável mais recente do catálogo, portanto algumas pastas de trabalho exibidas no GitHub podem ainda não aparecer em Navegar. No SciREPL, limpe a busca e tente <strong>CSV</strong>, <strong>Prolog</strong>, <strong>Lua</strong> ou <strong>statistics</strong>; escolha <strong>Todos</strong> em Kernel ao explorar outros idiomas.</p>
+        <p class="callout"><strong>Se um aviso de privacidade for exibido:</strong> buscar ou atualizar o catálogo remoto requer uma conexão de rede. Leia o aviso, role <em>dentro da caixa de diálogo</em> até o fim e toque em <strong>I Understand</strong> apenas se concordar. Fechar o aviso impede essa atualização de rede; entradas integradas e entradas do catálogo armazenadas em cache anteriormente ainda poderão aparecer. Consulte <a href="../../../privacy/">privacidade e dados locais<span class="english-reference"> (Página de referência em inglês)</span></a>.</p>
+        <p class="callout"><strong>Nenhuma pasta de trabalho correspondente?</strong> Verifique os filtros de idioma e kernel e, em seguida, use o controle <strong>Atualizar</strong> do catálogo. Um aplicativo mais antigo pode não ter os mesmos controles de catálogo. Como alternativa, <a download="markov-groups.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/v0.4.0/workbooks/en/markov-groups.srwb">salve o arquivo de pasta de trabalho fixado v0.4.0</a> no seu dispositivo, depois escolha <strong>Menu → Import File</strong> e selecione <code>markov-groups.srwb</code>. Se o seu navegador exibir o arquivo como texto, use a ação de salvar/baixar dele e mantenha a extensão <code>.srwb</code>. O <a href="../import/">passo a passo de importação manual de pasta de trabalho</a> mostra as etapas usando Simpson's Paradox do GitHub na ramificação <code>main</code>; escolha o arquivo de Markov acima para continuar esta lição.</p>
+      </section>
+
+      <section id="open">
+        <p class="step-label">Etapa 2</p>
+        <h2>Abra a pasta de trabalho e inspecione suas células</h2>
+        <ol class="lesson-steps">
+          <li>Toque em <strong>Instalar</strong> no cartão da pasta de trabalho. Se o botão já indicar <strong>Instalado</strong>, saia do menu Navegar e escolha a pasta de trabalho existente no seletor de pastas de trabalho.</li>
+          <li>A pasta de trabalho normalmente se torna a guia selecionada. Se o menu Navegar permanecer aberto, saia dele. Se a troca automática estiver desativada, escolha <strong><bdi lang="en" dir="ltr">Markov Groups: A Random Walk on Cube Moves</bdi></strong> a partir do <strong><svg role="img" aria-label="chevron para baixo" width="16" height="16" viewBox="0 0 16 16" style="vertical-align: -.125em;"><path d="M3 5.5 8 10.5 13 5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> seletor de pasta de trabalho</strong> ao lado de <strong>SciREPL</strong> no cabeçalho.</li>
+          <li>Leia o texto de abertura e, em seguida, role pelas células. As células Markdown explicam a lição; as células Python contêm o código que você executará. Cada célula Python tem um nome para ajudar a encontrá-la.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--workbook" role="img" aria-label="A pasta de trabalho Markov Groups aberta, com seu título e controles da pasta de trabalho destacados em amarelo.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-workbook.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/workbook-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>A pasta de trabalho do catálogo abre como células editáveis. Sua introdução fornece a ordem de execução do Python.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-workbook.png">Ver a captura de tela completa da pasta de trabalho</a>
+        </figure>
+        <p class="callout"><strong>Instalar não significa Executar.</strong> A instalação desta pasta de trabalho do catálogo remoto adiciona suas células sem executar seu código Python. O modelo v0.4.0 não tem saídas de Python salvas, portanto inspecione o código e execute-o você mesmo. Nenhuma conta de IA, chave de API, conjunto de dados externo ou instalação de pacote adicional é necessária; o código usa NumPy com o SciREPL em seu ambiente de execução Python.</p>
+      </section>
+
+      <section id="run">
+        <p class="step-label">Etapa 3</p>
+        <h2>Execute as quatro células Python em ordem</h2>
+        <p>Para uma célula salva, toque no <strong>✎ lápis</strong> no cabeçalho dessa célula e, em seguida, toque no próprio <strong>Executar</strong> dessa célula. Isso executa a célula existente; o painel inferior de nova célula cria uma célula diferente.</p>
+        <aside class="callout" data-editions="pro"><strong>Atalho do Pro:</strong> toque duas vezes no código salvo para abrir seu editor e, em seguida, toque no próprio <strong>Executar</strong>. O Free usa o <strong>✎ lápis</strong> neste passo a passo.</aside>
+        <p class="callout"><strong>O que esses nomes significam?</strong> <code>cube_moves</code> e <code>check_moves</code> são nomes exibidos nas células, não comandos para digitar. Encontre o nome correspondente e use o lápis dessa célula e Executar. O <a href="../named-cells/">tutorial sobre células nomeadas e caminhos entre linguagens</a> mostra como atribuir nomes e usá-los como referências, como <code>/nb/cube_moves/.code</code>.</p>
+        <ol class="lesson-steps">
+          <li>Execute <code>cube_moves</code>. Ele define os movimentos e auxiliares. Aguarde <code>Built six clockwise quarter-turn matrices with fixed face centres.</code></li>
+          <li>Execute <code>check_moves</code>. Ele verifica se nenhum adesivo é perdido, se os centros permanecem fixos e se quatro repetições de cada quarto de volta retornam ao início. Após seis linhas aprovadas, aguarde <code>All six moves passed. U and R do not commute.</code></li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--checks" role="img" aria-label="Saída recente de check_moves no telefone, com as verificações aprovadas destacadas em amarelo.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-checks.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/checks-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>As verificações impressas são resultados recentes da execução de <code>check_moves</code>, não resultados salvos fornecidos pelo catálogo.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-checks.png">Ver a captura de tela completa das verificações</a>
+        </figure>
+        <ol class="lesson-steps" start="3">
+          <li>Execute <code>show_turn</code>. Ele imprime os ciclos de giro U e os rótulos dos adesivos antes e depois de um movimento. A linha superior frontal muda de <code>[19, 20, 21]</code> para <code>[46, 47, 48]</code>. A comparação <code>U then R equals R then U: False</code> mostra que a ordem dos movimentos importa.</li>
+        </ol>
+        <p><strong>Parte da saída impressa:</strong></p>
+        <pre id="show-turn-output" style="white-space: pre-wrap; overflow-wrap: anywhere;"><code>U cycles, shown as one-based sticker positions:
+1 -&gt; 3 -&gt; 9 -&gt; 7 -&gt; 1
+2 -&gt; 6 -&gt; 8 -&gt; 4 -&gt; 2
+19 -&gt; 37 -&gt; 28 -&gt; 46 -&gt; 19
+20 -&gt; 38 -&gt; 29 -&gt; 47 -&gt; 20
+21 -&gt; 39 -&gt; 30 -&gt; 48 -&gt; 21
+
+F top row labels before U: [19, 20, 21]
+F top row labels after U:  [46, 47, 48]
+
+U then R equals R then U: False</code></pre>
+        <p>A longa lista de letras das faces é omitida aqui. As linhas de ciclo usam <strong>posições baseadas em um</strong>; a comparação de linhas mostra <strong>rótulos de adesivos</strong>. Esses são significados diferentes, embora o cubo resolvido inicialmente forneça a eles números correspondentes.</p>
+        <ol class="lesson-steps" start="4">
+          <li>Execute <code>random_walk</code>. Ele imprime um total de probabilidade de um adesivo de <code>1.0</code>, um caminho amostrado de 12 etapas, rótulos finais de letras das faces e uma mensagem confirmando que cada rótulo de adesivo e todos os seis centros foram preservados.</li>
+        </ol>
+        <p>As células Python já estão na ordem necessária. Não as reordene: células posteriores reutilizam definições de <code>cube_moves</code>. Para executar várias células de uma vez, consulte <a href="#batch-run-note">Run All Below e Run All Cells</a>.</p>
+        <p class="callout"><strong>Primeira execução mais lenta?</strong> O Python pode precisar de tempo para inicializar, e um download do ambiente de execução ou recurso alternativo de rede pode exigir seu consentimento. Aguarde o selo de status retornar para <strong>pronto</strong> e verifique a saída da célula em busca de erros. Se uma célula posterior relatar um nome indefinido após uma reinicialização, execute as células do Python desde o início; a saída salva não é o mesmo que definições ativas do Python.</p>
+        <p>Este livro de exercícios exibe texto e listas de letras de faces. Ele não desenha nem anima um cubo, e seu caminho curto com semente não é evidência de um embaralhamento uniformemente misturado.</p>
+      </section>
+
+      <section id="edit">
+        <p class="step-label">Passo 4</p>
+        <h2>Encurte a caminhada e execute novamente a célula salva</h2>
+        <ol class="lesson-steps">
+          <li>Localize <code>random_walk</code> e toque em <em>seu</em> <strong>✎ lápis</strong>.</li>
+          <li>Localize esta linha e altere apenas <code>size=12</code> para <code>size=6</code>:
+            <pre><code>moves = rng.choice(MOVE_OPTIONS, size=12).tolist()</code></pre>
+            <p>Deixe <code>np.random.default_rng(7)</code> inalterado. A semente torna este exemplo reproduzível.</p>
+          </li>
+          <li>Toque no botão <strong>Executar</strong> no editor dessa célula salva. A saída é atualizada; a linha <code>Sampled moves:</code> agora contém seis opções em vez de doze. <code>I</code> conta como uma opção, mesmo que deixe o cubo parado.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--edit" role="img" aria-label="A célula salva random_walk sendo editada, com tamanho igual a seis e o controle Run da célula destacado em amarelo.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-edit.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/edit-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>Altere um valor na célula salva e use o Run <em>dessa célula</em>. Apenas editar não atualiza sua saída anterior.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-edit.png">Ver a captura de tela completa da edição</a>
+        </figure>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--six-moves" role="img" aria-label="Nova saída de random_walk mostrando seis opções amostradas após a reexecução, destacada em amarelo.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-six-moves.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/six-moves-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>O caminho amostrado mais curto é o resultado visível da sua edição. A mensagem final ainda confirma que a trajetória preserva os rótulos dos adesivos e os centros.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-six-moves.png">Ver a captura de tela completa do resultado de seis opções</a>
+        </figure>
+        <p>Para esta alteração, execute novamente apenas <code>random_walk</code> enquanto as definições anteriores estiverem carregadas. Se você editar <code>cube_moves</code> em vez disso, execute novamente as células posteriores do Python também. As saídas registram sua última execução; elas não são recalculadas automaticamente quando outra célula é alterada.</p>
+        <p>Se você abriu o editor por engano, escolha <strong>Cancelar</strong>. Para retornar ao exemplo original, altere <code>size=6</code> de volta para <code>size=12</code> e execute a célula novamente.</p>
+      </section>
+
+      <section id="export">
+        <p class="step-label">Passo 5</p>
+        <h2>Exporte sua própria cópia do livro de exercícios</h2>
+        <ol class="lesson-steps">
+          <li>Mantenha o livro de exercícios Markov Groups selecionado e abra <strong>Menu → Exportar pastas de trabalho e pacotes</strong>, e não Export Document.</li>
+          <li>Escolha <strong>Pasta de trabalho (.srwb)</strong> e <strong>Apenas guia atual</strong>.</li>
+          <li>Toque em <strong>Exportar</strong> e salve a cópia em um local que você controle. O Android abre um fluxo de compartilhamento/salvamento; um navegador baixa um arquivo. Mantenha a extensão <code>.srwb</code>.</li>
+        </ol>
+        <figure class="phone-figure">
+          <div class="shot-window shot-window--export" role="img" aria-label="Caixa de diálogo de exportação com Workbook srwb, Current tab only e Export destacados em amarelo.">
+            <div class="shot-stage">
+              <img src="../../../workbooks/tutorial/assets/phone-export.png" alt="" loading="lazy" decoding="async">
+              <img src="../../../workbooks/tutorial/assets/export-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <figcaption>O formato Workbook e Current tab only salvam este livro de exercícios editado sem incluir abas não relacionadas. A opção exclusiva do Pro <strong>Incluir conversa da IA</strong> não é necessária para esta lição; deixe-a desmarcada.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/tutorial/assets/phone-export.png">Ver a captura de tela completa da exportação</a>
+        </figure>
+        <p>O livro de exercícios não precisa de arquivo de dados separado, portanto uma cópia em <code>.srwb</code> é suficiente para esta lição. Você pode reabri-lo com <strong>Menu → Import File</strong>; execute suas células do Python desde o início ao iniciar um novo ambiente de execução.</p>
+        <p class="callout"><strong>A recuperação local não é um backup.</strong> Limpar o armazenamento do aplicativo/site ou desinstalá-lo pode remover o trabalho local. As sessões do Android e do navegador não compartilham automaticamente as suas edições. A exportação não publica suas alterações no catálogo; ela fornece uma cópia separada.</p>
+        <p>Para os conceitos básicos de edição de células salvas, consulte o <a href="../../interface/tutorial/">passo a passo da interface do primeiro livro de exercícios</a>. Para ver um exemplo que lê e transporta um arquivo de dados separado, experimente o <a href="../../files-export/tutorial/">passo a passo do livro de exercícios CSV</a>. A <a href="../../../workbooks/">referência de livros de exercícios<span class="english-reference"> (Página de referência em inglês)</span></a> aborda tipos de células e nomes estáveis de células.</p>
+      </section>
+
+      <aside class="callout" id="batch-run-note" aria-labelledby="batch-run-heading">
+        <h3 id="batch-run-heading">Executar tudo abaixo e executar todas as células</h3>
+        <ul>
+          <li><strong>Executar tudo abaixo:</strong> abra uma célula salva com o seu <strong>✎ lápis</strong> e escolha <strong>Executar todas as células abaixo</strong> (o ícone compacto é <strong>▶↓</strong>). Isso executa essa célula <em>e</em> todas as células abaixo dela, em ordem.</li>
+          <li><strong>Menu → Executar todas as células:</strong> executa o livro de exercícios selecionado da sua primeira à sua última célula. Não é um comando para executar todas as abas de livros de exercícios.</li>
+        </ul>
+        <p>Inspecione o código primeiro e mantenha este livro de exercícios selecionado enquanto o lote é executado. Após uma nova sessão do Python, comece a partir de <code>cube_moves</code> para que as células posteriores tenham suas definições. Essas ações executam código; chamar uma explicação de “opcional” não faz o aplicativo pular suas células de código.</p>
+      </aside>
+
+      <p class="callout" id="walkthrough-complete"><strong>Você concluiu o passo a passo do SciREPL.</strong> Você encontrou, abriu, executou, editou e exportou um livro de exercícios. Se você só queria aprender o aplicativo, pode parar por aqui. Continue abaixo se quiser explorar a matemática do cubo e o livro de exercícios de desenvolvimento.</p>
+
+      <section id="optional-maths">
+        <p class="step-label">Leitura opcional</p>
+        <h2>A matemática por trás do exemplo do cubo</h2>
+        <h3>Um pouco do significado por trás da saída</h3>
+        <p>O livro de exercícios rastreia <strong>54 adesivos rotulados individualmente</strong>, não apenas seis cores. Um movimento válido reorganiza esses rótulos. Quatro repetições de um quarto de volta retornam à disposição inicial, mas giros de faces diferentes podem gerar resultados distintos quando sua ordem se altera.</p>
+        <p>O passeio aleatório escolhe entre 13 opções: ficar parado (<code>I</code>), seis quartos de volta e seus seis inversos. Sua <strong>matriz de probabilidade 54×54 descreve a localização de um adesivo</strong>, não cada configuração completa do cubo. Um total de probabilidade de <code>1.0</code> significa que as probabilidades de localização desse adesivo somam um; isso não prova que o cubo esteja uniformemente embaralhado.</p>
+        <p class="callout"><strong>Curioso sobre as direções das faces?</strong> A célula <code>coordinates</code> do livro de exercícios fornece os eixos globais e a normal para a direita, para cima e para fora de cada face. O <a href="../graphics/">tutorial de imagens, diagramas e equações</a> mostra como colocar esse tipo de explicação em um livro de exercícios. Diagramas de coordenadas estão sendo adicionados à cópia de desenvolvimento do catálogo; a cópia fixada v0.4.0 acima não os inclui.</p>
+        <div id="stage4-preview">
+          <h3>Opcional: prévia da Etapa 4 revisada</h3>
+          <p>As etapas e capturas de tela do telefone acima usam o livro de exercícios estável <strong>v0.4.0</strong>. O <a download="markov-groups-stage4-preview.srwb" href="https://raw.githubusercontent.com/s243a/SciREPL-Catalog/f88d9b9e26364eeb5e7ff1ee9bcce5f27d47c66e/workbooks/en/markov-groups.srwb">download do livro de exercícios revisado</a> é uma <strong>prévia de desenvolvimento</strong>, ainda não o catálogo estável. Importe-o com <strong>Menu → Importar arquivo</strong> se você quiser experimentar suas células de código e explicações intercaladas mais curtas.</p>
+          <p>Nessa prévia, execute <code>cube_moves</code>, <code>check_moves</code> e <code>show_turn</code> primeiro, como acima. Depois:</p>
+          <ol class="lesson-steps">
+            <li>Execute <code>transition_matrix</code>. Ele constrói <code>T</code>, a matriz de probabilidade para a localização de um adesivo após uma opção escolhida uniformemente: <code>I</code>, um quarto de volta de face ou seu inverso.</li>
+            <li>Execute <code>sticker_step</code>. Ele acompanha o <strong>rótulo de adesivo 1</strong>, inicialmente na <strong>posição de base zero 0</strong>. Suas probabilidades de localização somam <code>1.0</code>. O gráfico abaixo mostra as probabilidades de destino calculadas por essa célula.</li>
+          </ol>
+          <figure id="sticker-probability-figure" aria-describedby="sticker-probability-caption" style="margin: 24px 0;">
+            <img src="../../../workbooks/tutorial/assets/sticker-one-step.svg" width="400" height="380" style="display: block; width: min(100%, 560px); height: auto;" alt="Após um movimento aleatório, o rótulo do adesivo 1 tem probabilidade de sete treze avos de permanecer na posição 0, e de um treze avos cada de alcançar as posições 2, 6, 18, 35, 42 ou 47.">
+            <figcaption id="sticker-probability-caption"><strong>Um gráfico de barras de probabilidade, não um histograma agrupado.</strong> Esta ilustração é calculada a partir de <code>after_one_step = T @ location_probability</code>; não é uma captura de tela de celular nem uma nova saída produzida pela pasta de trabalho. As posições são baseadas em zero. As outras 47 posições têm probabilidade zero e são omitidas. O rótulo do adesivo permanece 1.</figcaption>
+          </figure>
+          <div class="table-wrap">
+            <table aria-label="Probabilidades exatas de um passo para o rótulo do adesivo 1">
+              <thead><tr><th>Posição de destino</th><th>Probabilidade</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>7/13 ≈ 53.85%</td></tr>
+                <tr><td>2, 6, 18, 35, 42, 47 (cada)</td><td>1/13 ≈ 7.69%</td></tr>
+                <tr><td>Todas as outras 47 posições</td><td>0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <ol class="lesson-steps" start="3">
+            <li>Execute <code>random_walk</code>. Ele amostra um caminho de 12 opções para o <strong>cubo inteiro</strong>, usando as definições de <code>transition_matrix</code>. Isso é diferente das probabilidades de um único adesivo acima. A edição da Etapa 4 <code>size=12</code> funciona nesta célula em qualquer uma das edições.</li>
+          </ol>
+        </div>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Ajuda do SciREPL</span><nav aria-label="Navegação do rodapé"><a href="../../../workbooks/">Referência das pastas de trabalho<span class="english-reference"> (Página de referência em inglês)</span></a><a href="../../../">Toda a ajuda<span class="english-reference"> (Página de referência em inglês)</span></a></nav></footer>
+</body>
+</html>

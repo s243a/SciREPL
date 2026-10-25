@@ -26,7 +26,7 @@ Start with the public [SciREPL Help](https://s243a.github.io/SciREPL/help/). Sha
 - **Lua kernel** — Lua via Fengari, with `nb.read()`, `nb.write()`, `nb.list()`, and `nb.name()` access to notebook cells
 - **R kernel** — Full R via webR (WASM), loaded on demand (~50 MB, cached after first use). Supports plotting, `install.packages()`, and SharedVFS file sharing.
 - **TypR kernel** — Typed R superset via typr-wasm (~2.5 MB). Compiles TypR to R, then executes through webR. Supports `#!typecheck`, `#!transpile`, and `#!show-r` directives.
-- **Named source-only cells** — TypR and Lua cells beginning with `#!source` remain highlighted and VFS-readable without executing or producing an output card
+- **Named source-only cells** — code cells in any supported language beginning with `#!source` remain highlighted and VFS-readable without executing or producing an output card
 - **Kernel abstraction layer** — Pluggable architecture for adding new language runtimes
 - **Package system v2** — Install packages with notebooks, data files, Python modules, Prolog knowledge bases, and WASM libraries. See [docs/packages.md](docs/packages.md).
 - **SharedVFS** — In-memory filesystem shared across all kernels. Python, Bash, Prolog, R, and JavaScript can read/write the same files. Persisted to IndexedDB — files survive page reloads.

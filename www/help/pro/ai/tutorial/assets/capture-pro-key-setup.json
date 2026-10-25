@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "sourceRepository": "SciREPL-Pro",
+  "sourceSha": "38316dbb3d12cc628b57af392c9ede49f36d71d0",
+  "sourceVersion": {
+    "version": "1.4.0",
+    "releaseChannel": "development",
+    "androidVersionCode": 25
+  },
+  "sourceGuards": {
+    "exactShaBeforeAndAfter": true,
+    "trackedSourceCleanBeforeAndAfter": true
+  },
+  "capturedAtUtc": "2026-10-08T22:11:11.617Z",
+  "browser": {
+    "engine": "Chromium",
+    "version": "145.0.7632.6",
+    "headless": true
+  },
+  "viewport": {
+    "width": 430,
+    "height": 1100,
+    "deviceScaleFactor": 1
+  },
+  "sourceRoute": "http://127.0.0.1:8108/index.html",
+  "routePolicy": "Local same-origin GET static files only; server rejects proxy routes and non-GET. Abort every external and non-GET request. Service workers blocked. Fresh non-persistent, keyless context.",
+  "introductoryStorage": {
+    "scirepl_onboarding_seen": "1",
+    "scirepl_auto_download": "0",
+    "scirepl_whats_new_seen_version": "current source version after DOMContentLoaded"
+  },
+  "actualUi": {
+    "route": "Menu → AI Assistant (Pro) → gear → AI Settings",
+    "configureModelFor": "assistant",
+    "backend": "openrouter",
+    "model": "z-ai/glm-5.3-flash",
+    "modelSelectedFromActualPreset": true,
+    "customModelFieldEmpty": true,
+    "apiKeyEmpty": true,
+    "settingsSaved": false,
+    "saveVisibleInCapture": false
+  },
+  "providerStoreList": [],
+  "servedPathCount": 104,
+  "blockedRequests": [],
+  "externalResponses": [],
+  "pageErrors": [],
+  "screenshot": {
+    "file": "assistant-key-setup.png",
+    "width": 390,
+    "height": 538,
+    "sha256": "ceb73b0b475c9d65bb95a6095b63c8ba3e73af99c826493b091712fc46ad4743",
+    "clip": {
+      "x": 20,
+      "y": 0,
+      "width": 390,
+      "height": 538
+    },
+    "description": "Unmodified real browser pixels of the upper AI Settings region; actual preset selected through UI, API key blank."
+  },
+  "overlay": {
+    "file": "assistant-key-setup-overlay.svg",
+    "width": 390,
+    "height": 538,
+    "sha256": "344c0801be18451be1385431bffebf0c8926fe0573663c9cf5c19aeba2bb3d75",
+    "highlights": [
+      {
+        "id": "configure-target",
+        "selectors": [
+          "#ai-settings-modal .ai-model-scope-row"
+        ],
+        "bounds": {
+          "x": 22,
+          "y": 68,
+          "width": 346,
+          "height": 67
+        }
+      },
+      {
+        "id": "backend-setting",
+        "selectors": [
+          "#ai-settings-assistant-section [data-i18n=\"aiSettings.backend\"]",
+          "#ai-settings-backend"
+        ],
+        "bounds": {
+          "x": 22,
+          "y": 145,
+          "width": 346,
+          "height": 53
+        }
+      },
+      {
+        "id": "model-setting",
+        "selectors": [
+          "#ai-settings-assistant-section [data-i18n=\"aiSettings.model\"]",
+          "#ai-settings-model"
+        ],
+        "bounds": {
+          "x": 22,
+          "y": 220,
+          "width": 346,
+          "height": 53
+        }
+      },
+      {
+        "id": "api-key-setting",
+        "selectors": [
+          "#ai-settings-assistant-section [data-i18n=\"aiSettings.apiKey\"]",
+          "#ai-settings-key"
+        ],
+        "bounds": {
+          "x": 22,
+          "y": 468.78,
+          "width": 346,
+          "height": 60
+        }
+      }
+    ]
+  },
+  "limitations": [
+    "Browser UI configuration capture only; not Android, provider/model execution, credential validation, Play delivery, or native-engine testing.",
+    "The model/backend are staged dialog selections. No key was entered and Save was not pressed.",
+    "Save is below the cropped upper region; scroll farther in the real dialog to reach it."
+  ]
+}

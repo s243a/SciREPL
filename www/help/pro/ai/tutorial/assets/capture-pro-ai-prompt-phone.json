@@ -1,0 +1,131 @@
+{
+  "captureMethod": "Android screencap; unmodified full-screen PNG",
+  "device": {
+    "model": "SM-S926W",
+    "appPackage": "com.unifyweaver.scirepl.pro.debug",
+    "version": "1.4.0-debug",
+    "versionCode": 25,
+    "sourceCommit": null,
+    "activeCache": "scirepl-app-v461"
+  },
+  "screenshots": [
+    {
+      "file": "phone-ai-prompt-composer.png",
+      "width": 1080,
+      "height": 2340,
+      "sha256": "478f504d33455d51e497777263c168b6925a355f9eeaa7b47c34284b859f28e0",
+      "capturedAtUtc": "2026-10-12T23:33:36.540Z",
+      "providerRequestsAtCapture": 0,
+      "displayView": { "x": 0, "y": 1590, "width": 1080, "height": 550 }
+    },
+    {
+      "file": "phone-ai-prompt-edit.png",
+      "width": 1080,
+      "height": 2340,
+      "sha256": "5e2355964aacd9b176b7db31a2488ffa4c3a658b56b1cf9b9ae323d8ef90a8ca",
+      "capturedAtUtc": "2026-10-12T23:33:38.559Z",
+      "providerRequestsAtCapture": 0,
+      "displayView": { "x": 0, "y": 980, "width": 1080, "height": 360 }
+    },
+    {
+      "file": "phone-ai-prompt-config.png",
+      "width": 1080,
+      "height": 2340,
+      "sha256": "4d13b79959fe697fc5eced0eb77abc8c96a6ab0327075bb44f053ce7a5542187",
+      "capturedAtUtc": "2026-10-12T23:33:41.489Z",
+      "providerRequestsAtCapture": 0,
+      "displayView": { "x": 0, "y": 95, "width": 1080, "height": 1285 }
+    },
+    {
+      "file": "phone-ai-prompt-result.png",
+      "width": 1080,
+      "height": 2340,
+      "sha256": "7656d7a89bf89f440f0d2256bf819e8b539ce1ea42ad473d6883c6a70fd68f0b",
+      "capturedAtUtc": "2026-10-12T23:37:15.227Z",
+      "providerRequestsAtCapture": 1,
+      "displayView": { "x": 0, "y": 225, "width": 1080, "height": 1400 },
+      "rects": {
+        "output": {
+          "x": 12,
+          "y": 268.9702453613281,
+          "width": 387.4285888671875,
+          "height": 1100.2381591796875
+        }
+      },
+      "viewport": {
+        "width": 411,
+        "height": 891,
+        "dpr": 2.625
+      }
+    },
+    {
+      "file": "phone-ai-prompt-config-save.png",
+      "width": 1080,
+      "height": 2340,
+      "sha256": "73d42029f904163f89fea887c66485b291d84a0b4ba84fccf753c916007b195c",
+      "capturedAtUtc": "2026-10-12T23:37:18.219Z",
+      "providerRequestsAtCapture": 1,
+      "displayView": { "x": 0, "y": 2110, "width": 1080, "height": 170 },
+      "rects": {
+        "save": {
+          "x": 210.71429443359375,
+          "y": 816.827392578125,
+          "width": 171.95237731933594,
+          "height": 42
+        },
+        "cancel": {
+          "x": 28.761905670166016,
+          "y": 816.827392578125,
+          "width": 171.95237731933594,
+          "height": 42
+        }
+      },
+      "viewport": {
+        "width": 411,
+        "height": 891,
+        "dpr": 2.625
+      }
+    }
+  ],
+  "exercise": {
+    "source": "let state = 42;\nconst values = [];\nfor (let i = 0; i < 10; i++) {\n  state = (16807 * state) % 2147483647;\n  values.push(1 + Math.floor(20 * state / 2147483647));\n}\nconst count = values.length;\nconst mean = values.reduce((sum, value) => sum + value, 0) / count;\nconst minimum = Math.min(...values);\nconst maximum = Math.max(...values);\nconsole.log(\"Input:\", JSON.stringify(values));\nconsole.log(\"Count:\", count);\nconsole.log(\"Mean:\", mean);\nconsole.log(\"Minimum:\", minimum);\nconsole.log(\"Maximum:\", maximum);",
+    "prompt": "Explain the selected JavaScript cell line by line.\nHow do the generator rule and seed 42 determine its input array?\nWhy should it report count 10, mean 9.3, minimum 1 and maximum 20?\nWhy does resetting the seed make the result repeatable?\nExplain what needs changing for an empty array.\nReturn a short explanation only; do not rewrite the code.",
+    "summaryName": "summary_demo",
+    "summaryOutput": "Input: [1,11,15,6,8,4,20,11,11,6]\nCount: 10\nMean: 9.3\nMinimum: 1\nMaximum: 20",
+    "promptName": "explain_summary",
+    "configuration": {
+      "placement": "output",
+      "scope": "previous-1",
+      "includeSavedOutputs": false
+    },
+    "request": {
+      "backend": "openrouter",
+      "model": "z-ai/glm-5.3-flash",
+      "requests": 1,
+      "maxOutputTokens": 2048,
+      "selectedSourceCount": 1,
+      "sourceOnly": true,
+      "chatHistorySent": false,
+      "toolsAvailable": false,
+      "reviewedBeforeSending": true,
+      "text": "**Line-by-line summary**\n\n1. `let state = 42;` — the PRNG seed.\n2. `const values = [];` — empty array that will hold the generated numbers.\n3. The `for` loop runs exactly 10 times (`i < 10`), so exactly 10 values get pushed.\n4. `state = (16807 * state) % 2147483647;` — a Lehmer/minimum-standard LCG: multiply the state by 16807 and take the modulus 2³¹−1 each step.\n5. `values.push(1 + Math.floor(20 * state / 2147483647));` — maps the state (0 … 2³¹−2) into the integer range 1…20: `20*state/M` is in [0,20), floored gives 0…19, +1 shifts to 1…20.\n6. `count = values.length` — therefore always 10 for this loop.\n7. `mean = values.reduce(...) / count` — sum of the array divided by 10.\n8. `Math.min(...values)` / `Math.max(...values)` — spread the array into min/max.\n9. The `console.log` lines print the array and the four statistics.\n\n**Why those outputs**\n\nWith seed 42 the LCG produces one fixed sequence of states; each is mapped to 1–20, giving a specific 10-element array. That array happens to sum to 93 (mean = 93/10 = 9.3) with smallest element 1 and largest 20, and the loop length guarantees count 10.\n\n**Repeatability**\n\n`state` starts at 42 every run, and each next value depends only on the previous state, so the whole sequence — and hence count, mean, min, max — is identical on every execution. Changing the seed changes the sequence; no seed means no determinism.\n\n**Empty-array case**\n\nIf the loop count were 0 (or the array were filtered to empty), `count` = 0 makes the mean a 0/0 division → `NaN`, and `Math.min()`/`Math.max()` with no arguments return `Infinity`/`-Infinity`. You'd need a guard (e.g., return early or use `count ? sum/count : 0` and check `values.length` before min/max).",
+      "usage": {
+        "inputTokens": 331,
+        "outputTokens": 922,
+        "totalTokens": 1253
+      },
+      "finishReason": "stop"
+    },
+    "sourcesUnchanged": true
+  },
+  "cleanup": {
+    "originalWorkbookRestored": true,
+    "originalDraftRestored": true,
+    "originalLanguageRestored": true,
+    "settingsRestored": true,
+    "captureWorkbookRemoved": true,
+    "originalRequestRestored": true,
+    "providerCredentialsNotExposedOrModified": true
+  },
+  "rotationRestored": true
+}

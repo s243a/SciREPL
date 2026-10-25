@@ -25,6 +25,7 @@
     "Session-AppState": "sesi"
   },
   "strings": {
+    "help.keyboardTrustNotice": "SciREPL tidak berafiliasi dengan proyek-proyek ini. Aplikasi papan ketik dapat membaca semua yang Anda ketik, termasuk kata sandi dan kunci API. Hanya instal papan ketik yang Anda percayai, tinjau izinnya, dan selalu perbarui.",
     "__literal": [
       "app.search.position",
       "common.ok",
@@ -261,7 +262,7 @@
     "help.cellLanguage": "Bahasa sel",
     "help.eachCellRemembersItsLanguage": "Setiap sel mengingat bahasa pemrogramannya. Untuk mengubahnya, klik ✎ lalu gunakan menu tarik-turun bahasa. Klik <strong>All→</strong> untuk menerapkan bahasa ke semua sel kode di buku catatan.",
     "help.sourceOnlyCellsTyprDirectives": "Sel sumber saja dan direktif TypR",
-    "help.putSourceOnFirstLine": "Tempatkan <code>#!source</code> di baris pertama sel TypR atau Lua bernama untuk menjaga kode yang disorot tetap dapat dibaca melalui Notebook VFS tanpa menjalankannya. Direktif lainnya khusus untuk TypR:",
+    "help.putSourceOnFirstLine": "Tempatkan <code>#!source</code> di baris pertama sel kode bernama dalam bahasa apa pun yang didukung untuk menjaga kode yang disorot tetap dapat dibaca melalui Notebook VFS tanpa menjalankannya. Direktif lainnya khusus untuk TypR:",
     "help.sourceCellShowsSourceOnly": "<code>#!source</code> — Sel menampilkan <strong>hanya sumber</strong>, sengaja tanpa <code>Out [n]</code>, dan tetap dapat dibaca melalui Notebook VFS.",
     "help.typecheckTypeCheckFollowingCode": "<code>#!typecheck</code> — Memeriksa tipe kode berikut tanpa mengeksekusinya.",
     "help.transpileShowTranspiledRCode": "<code>#!transpile</code> — Menampilkan kode R hasil transpilasi.",

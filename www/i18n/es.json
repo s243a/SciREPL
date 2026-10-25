@@ -25,6 +25,7 @@
     "Session-AppState": "sesión"
   },
   "strings": {
+    "help.keyboardTrustNotice": "SciREPL no está afiliado a estos proyectos. Las aplicaciones de teclado pueden leer todo lo que escribes, incluidas contraseñas y claves API. Instala únicamente un teclado de confianza, revisa sus permisos y mantenlo actualizado.",
     "__literal": [
       "app.search.position",
       "app.status.error",
@@ -262,7 +263,7 @@
     "help.cellLanguage": "Lenguaje de la celda",
     "help.eachCellRemembersItsLanguage": "Cada celda recuerda su lenguaje. Para cambiar el lenguaje de una celda, haz clic en ✎ para editarla y luego usa el menú desplegable de lenguaje. Haz clic en <strong>All→</strong> para aplicar el lenguaje a todas las celdas de código del cuaderno.",
     "help.sourceOnlyCellsTyprDirectives": "Celdas de solo código fuente y directivas TypR",
-    "help.putSourceOnFirstLine": "Coloca <code>#!source</code> en la primera línea de una celda con nombre de TypR o Lua para mantener el código resaltado disponible a través del VFS del cuaderno sin ejecutarlo. Las directivas restantes son específicas de TypR:",
+    "help.putSourceOnFirstLine": "Coloca <code>#!source</code> en la primera línea de una celda de código con nombre en cualquier lenguaje compatible para mantener el código resaltado disponible a través del VFS del cuaderno sin ejecutarlo. Las directivas restantes son específicas de TypR:",
     "help.sourceCellShowsSourceOnly": "<code>#!source</code> — la celda muestra <strong>Solo fuente</strong>, intencionalmente no tiene <code>Out [n]</code> y permanece accesible para lectura a través del VFS del cuaderno.",
     "help.typecheckTypeCheckFollowingCode": "<code>#!typecheck</code> — comprueba los tipos del código siguiente sin ejecutarlo.",
     "help.transpileShowTranspiledRCode": "<code>#!transpile</code> — muestra el código R transpilado.",

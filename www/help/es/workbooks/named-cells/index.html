@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="es" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Asigne nombre a las celdas de SciREPL, lea su código fuente y salida a través del sistema de archivos virtual /nb y transfiera datos o código generado entre JavaScript, Bash y Python.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/es/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../workbooks/named-cells/tutorial.css">
+  <title>Celdas con nombre y rutas entre lenguajes · Ayuda de SciREPL</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/workbooks/named-cells/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/workbooks/named-cells/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/workbooks/named-cells/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/workbooks/named-cells/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/workbooks/named-cells/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/workbooks/named-cells/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/workbooks/named-cells/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/workbooks/named-cells/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/workbooks/named-cells/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/workbooks/named-cells/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/workbooks/named-cells/">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+</head>
+<body data-editions="free pro" data-platforms="android pwa windows-preview">
+  <a class="skip-link" href="#main">Saltar al contenido</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (Página de referencia en inglés)</span></a>
+    <nav aria-label="Navegación principal"><a href="../../../workbooks/">Referencia de libros de trabajo<span class="english-reference"> (Página de referencia en inglés)</span></a><a href="../../tutorials/">Todos los tutoriales</a><a href="../../../">Toda la ayuda<span class="english-reference"> (Página de referencia en inglés)</span></a><a href="../../../../">Abrir la PWA Free</a></nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="Idioma del tutorial"><details class="tutorial-language-menu"><summary>Idioma del tutorial: <bdi>Español</bdi></summary><nav aria-label="Idioma del tutorial"><a href="../../../en/workbooks/named-cells/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/workbooks/named-cells/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/workbooks/named-cells/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/workbooks/named-cells/" lang="de" hreflang="de">Deutsch</a>
+      <a href="./" lang="es" hreflang="es" aria-current="page">Español</a>
+      <a href="../../../fr/workbooks/named-cells/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/workbooks/named-cells/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/workbooks/named-cells/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/workbooks/named-cells/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/workbooks/named-cells/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/workbooks/named-cells/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/workbooks/named-cells/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/workbooks/named-cells/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">Tutorial traducido automáticamente; la revisión por un hablante nativo está pendiente. El código y los valores técnicos no han cambiado. Las capturas de pantalla muestran la interfaz original en inglés; haz coincidir los nombres de los controles traducidos en este texto con tu aplicación.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">Ayuda<span class="english-reference"> (Página de referencia en inglés)</span></a> / <a href="../../../workbooks/">Libros de trabajo<span class="english-reference"> (Página de referencia en inglés)</span></a> / Celdas con nombre y rutas</p>
+    <article>
+      <p class="eyebrow">Aprenda practicando</p>
+      <h1>Asignar nombre a celdas y conectar programas</h1>
+      <p class="lede">Una celda puede tener un nombre útil como <code>numbers</code>, en lugar de ser conocida únicamente por su posición. Otras celdas pueden leer su salida de texto más reciente a través de <code>/nb/numbers/.output</code>, o intercambiar datos mediante un archivo ordinario en <code>/shared/</code>. Pruebe ambas vías con JavaScript y Bash, y luego genere un pequeño programa de Bash en otra celda, sin ejecutar automáticamente el código generado.</p>
+      <ul class="meta"><li class="chip chip-free">Flujo de trabajo de Free + Pro</li><li class="chip">Ejemplos verificados en el navegador</li><li class="chip">Aproximadamente 15 minutos</li></ul>
+      <p class="screen-note">La guía práctica y las capturas de pantalla se verificaron en la <strong>versión de navegador de SciREPL Free</strong> el <time datetime="2026-10-06">6 de octubre de 2026</time>. Estas son capturas completas en navegador estrecho, <strong>no capturas de pantalla de Android</strong>. Pro y el resto de versiones publicadas no se han verificado para esta guía. El ejercicio principal utiliza JavaScript y Bash integrados: no se necesitan paquetes, llamadas a modelos ni descargas en tiempo de ejecución. Python es un último paso opcional.</p>
+      <p class="callout"><strong>Qué significa «rutas» aquí:</strong> <code>/nb/</code> es una vista virtual de las <em>celdas del libro de trabajo seleccionado actualmente</em>, disponible para los programas. No es una carpeta en las Descargas de Android ni una pantalla independiente de «Vista de rutas». En la versión Free verificada, la pantalla <strong>Archivos y almacenamiento</strong> no explora <code>/nb/</code>; más adelante copiaremos deliberadamente algunos datos en un archivo compartido que dicha pantalla sí puede mostrar.</p>
+      <nav class="lesson-nav" aria-label="Pasos de la guía práctica de celdas con nombre">
+        <strong>En esta lección</strong>
+        <ol>
+          <li><a href="#open">Importar el pequeño libro de trabajo de ejemplo</a></li>
+          <li><a href="#name">Buscar y cambiar el nombre de una celda</a></li>
+          <li><a href="#produce">Ejecutar la celda que produce datos</a></li>
+          <li><a href="#paths">Leer celdas a través de sus rutas</a></li>
+          <li><a href="#shared-file">Intercambiar datos a través de un archivo JSON compartido</a></li>
+          <li><a href="#generate">Generar el código fuente de otra celda y luego ejecutarlo usted mismo</a></li>
+          <li><a href="#update">Modificar los datos y actualizar los resultados</a></li>
+        </ol>
+        <p><a href="#python">Lector opcional de Python</a> · <a href="#more">Otros ejemplos de libros de trabajo</a> · <a href="#troubleshooting">Si algo sale mal</a></p>
+        <p><a href="../../tutorials/">Todos los tutoriales</a></p>
+      </nav>
+
+      <section id="open">
+        <p class="step-label">Paso 1</p>
+        <h2>Importar el ejemplo sin ejecutarlo</h2>
+        <ol class="lesson-steps">
+          <li><a href="../../../workbooks/named-cells/assets/named-cell-interop.srwb" download="named-cell-interop.srwb">Descargue el libro de trabajo de ejemplo de celdas con nombre (.srwb)</a>. Guarde el archivo propiamente dicho y conserve su extensión <code>.srwb</code>. Si el navegador muestra texto, use su acción de guardar o descargar.</li>
+          <li>En la cabecera superior de SciREPL, busque <strong>☰ Menú</strong> (el botón con <strong>tres líneas horizontales</strong>). Ábralo y elija <strong>📂 Importar archivo (p. ej. .srwb, .ipynb, .csv, .py, .zip)</strong>. Desplácese por el menú si es necesario.</li>
+          <li>Seleccione <code>named-cell-interop.srwb</code> en el selector de archivos de su dispositivo. Salga del menú si permanece abierto y luego seleccione la nueva pestaña <strong>Named Cell Interop</strong> en el selector de libros de trabajo. La flecha <strong>▾</strong> del selector se encuentra cerca del título de la aplicación. Sus libros de trabajo existentes se conservan.</li>
+          <li>Lea la introducción y luego busque las siete celdas de código llamadas <code>numbers</code>, <code>inspect_cells</code>, <code>write_shared</code>, <code>read_shared</code>, <code>generate_report</code>, <code>bash_report</code> y <code>python_total</code>. Ya tienen nombre asignado para que pueda seguir el ejercicio.</li>
+        </ol>
+        <p class="callout"><strong>Importar no es Ejecutar.</strong> La importación ordinaria de <code>.srwb</code> no ejecuta código, incluso si la ejecución automática está habilitada. No elija Ejecutar todas las celdas para esta lección: el orden importa y la última celda de Python es opcional. Inspeccione el código no familiar antes de ejecutarlo.</p>
+        <p>¿Necesita los pasos de descarga y selección con más detalle? Utilice la <a href="../import/">guía práctica de importación manual de libros de trabajo</a>. Para seguir esta lección, mantenga seleccionado <strong>Named Cell Interop</strong>: <code>/nb/</code> hace referencia al libro de trabajo activo, no a todas las pestañas abiertas.</p>
+      </section>
+
+      <section id="name">
+        <p class="step-label">Paso 2</p>
+        <h2>Buscar y cambiar el nombre de una celda</h2>
+        <p>Una celda de código guardada tiene una <strong>etiqueta de indicación In[…] </strong> en su propia cabecera, y una celda con nombre también muestra su nombre. Esta es la etiqueta que se utiliza para asignar nombres, no el <strong>✎ lápiz</strong>, que edita el código fuente de la celda. El número mostrado identifica la tarjeta guardada; tras reordenar, no tiene por qué coincidir con la posición actual de la celda en una ruta de <code>/nb/In[N]/...</code>. Es preferible usar nombres para las referencias.</p>
+        <figure class="phone-figure">
+          <div class="annotated-shot" role="img" aria-label="Captura de pantalla del navegador con la etiqueta In y el control de lápiz de la celda numbers resaltados en amarillo; su código fuente y su salida JSON aparecen debajo.">
+            <img src="../../../workbooks/named-cells/assets/browser-named-cell.png" alt="" loading="lazy" decoding="async">
+            <img class="shot-annotation" src="../../../workbooks/named-cells/assets/browser-named-cell-overlay.svg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+          </div>
+          <figcaption>Los dos contornos amarillos identifican la <strong>etiqueta In[…] </strong> de la celda guardada, que abre el diálogo de asignación de nombre con un doble clic o una pulsación prolongada, y su <strong>✎ lápiz</strong>, que abre el editor de código fuente. El nombre <code>numbers</code> aparece a la derecha. Esta captura de navegador muestra la salida después del Paso 3; en el escritorio, pase el cursor sobre la tarjeta para mostrar sus controles.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-named-cell.png">Ver la captura de pantalla completa del navegador</a>
+        </figure>
+        <ol class="lesson-steps">
+          <li>Busque <code>numbers</code>. En el escritorio, <strong>haga doble clic en su etiqueta In[…] </strong>. En un dispositivo táctil, <strong>mantenga pulsada dicha etiqueta</strong>. En la compilación verificada, un solo clic no activa el gesto para asignar nombre.</li>
+          <li>En el diálogo, reemplace <code>numbers</code> por <code>measurements</code> y luego confirme con <strong>OK</strong>. El nombre en la cabecera de la celda cambia; el código fuente y el lenguaje no lo hacen.</li>
+          <li>Vuelva a abrir el mismo diálogo y cambie el nombre <strong>de nuevo a <code>numbers</code></strong>, y luego elija <strong>OK</strong>. Las celdas siguientes utilizan ese nombre, así que restablézcalo antes de continuar.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-name-dialog.png" alt="Captura de pantalla en navegador estrecho del diálogo de nombre de celda de SciREPL Free con mediciones introducidas y controles de confirmación y cancelación." loading="lazy" decoding="async">
+          <figcaption>El nombre se edita en su propio diálogo. Cambiar el nombre de una celda no reescribe las referencias en otras celdas: <code>/nb/numbers/.output</code> también tendría que cambiar si conservara el nuevo nombre.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-name-dialog.png">Ver la captura de pantalla completa del diálogo de asignación de nombre en el navegador</a>
+        </figure>
+        <p>Elija nombres distintivos y sencillos como <code>cube_moves</code> o <code>check_moves</code>. Los nombres deben ser únicos dentro del libro de trabajo; no pueden contener <code>/</code>, comenzar con <code>.</code> ni ser una etiqueta posicional reservada como <code>In[2]</code>. Dejar el nombre vacío lo elimina.</p>
+        <p>Por eso un tutorial puede decir <strong>«Ejecute <code>cube_moves</code>, luego <code>check_moves</code>»</strong>: esos son nombres de celda que debe buscar en el libro de trabajo, no archivos que deba descargar por separado. Los nombres son mejores referencias que las posiciones al insertar o mover celdas.</p>
+      </section>
+
+      <section id="produce">
+        <p class="step-label">Paso 3</p>
+        <h2>Ejecutar la celda que produce datos</h2>
+        <p>Busque <code>numbers</code>. Toque su propio <strong>✎ lápiz</strong>, inspeccione el código fuente y compruebe que la celda es <strong>Código → JS - JavaScript</strong>. Luego, en <em>esa celda guardada</em>, use el botón <strong>▶ Ejecutar</strong> (no el panel de nueva celda, que añade otra celda).</p>
+        <p class="callout"><strong>Atajo de Pro:</strong> también puede abrir el editor de una celda guardada <strong>tocando dos veces el texto del código fuente de la celda</strong> en Pro. El <strong>✎ lápiz</strong> funciona en ambas ediciones. Este atajo de edición es diferente de hacer doble clic o mantener pulsada la <strong>etiqueta In[…] </strong> para cambiar su nombre.</p>
+        <pre><code data-cell-example="numbers">console.log(JSON.stringify({values: [3, 5, 8]}));</code></pre>
+        <p>Espere esta salida de una sola línea:</p>
+        <pre><code>{"values":[3,5,8]}</code></pre>
+        <p>El resultado es <strong>texto JSON</strong>. Su estructura hace que sea más fácil de leer para otro lenguaje que un mensaje en prosa. No estamos pasando un objeto JavaScript en vivo ni compartiendo variables de JavaScript con Bash o Python.</p>
+      </section>
+
+      <section id="paths">
+        <p class="step-label">Paso 4</p>
+        <h2>Leer una celda a través del sistema de archivos virtual</h2>
+        <p>El directorio virtual para <code>numbers</code> tiene propiedades con prefijo de punto. Una ruta combina el montaje del libro de trabajo, el identificador de la celda y la propiedad que desea:</p>
+        <pre class="path-tree" aria-label="Rutas virtuales para la celda numbers"><code>/nb/                         current workbook's cells
+└── numbers/                 this named cell
+    ├── .code                source text
+    ├── .output              latest text output
+    ├── .language            javascript
+    ├── .type                code
+    └── .name                numbers</code></pre>
+        <div class="table-wrap">
+          <table>
+            <caption>Propiedades de celda utilizadas por la interfaz de rutas del libro de trabajo</caption>
+            <thead><tr><th scope="col">Propiedad</th><th scope="col">Qué le proporciona su lectura</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>.code</code></th><td>El código fuente actual, se haya ejecutado o no dicho código fuente.</td></tr>
+              <tr><th scope="row"><code>.output</code></th><td>La última salida de texto. Es de solo lectura: la ejecución la proporciona. Puede estar vacía o desactualizada.</td></tr>
+              <tr><th scope="row"><code>.language</code></th><td>El identificador de lenguaje almacenado, como <code>javascript</code> o <code>bash</code>.</td></tr>
+              <tr><th scope="row"><code>.type</code></th><td>El tipo de celda, como <code>code</code> o <code>markdown</code>.</td></tr>
+              <tr><th scope="row"><code>.name</code></th><td>El nombre asignado, o texto vacío si la celda no tiene nombre.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Ahora abra el <strong>✎ lápiz</strong> en <code>inspect_cells</code>, compruebe <strong>Código → Bash</strong> y ejecútela. Esto lee el código fuente del productor, su salida JSON y su lenguaje, y luego lista los identificadores de celda del libro de trabajo actual. No escribe ni modifica ninguna celda ni archivo.</p>
+        <pre><code data-cell-example="inspect_cells">printf 'Source:\n'
+cat /nb/numbers/.code
+printf '\nOutput:\n'
+cat /nb/numbers/.output
+printf '\nLanguage:\n'
+cat /nb/numbers/.language
+printf '\nCell names and positions:\n'
+ls /nb/</code></pre>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-cell-paths.png" alt="Captura de pantalla en navegador estrecho de la celda inspect_cells de Bash que muestra el código fuente de la celda numbers, la salida JSON, el lenguaje y el listado de celdas virtuales." loading="lazy" decoding="async">
+          <figcaption>Bash lee las propiedades de la celda con rutas de aspecto ordinario en <code>cat</code>. Estas rutas direccionan datos del libro de trabajo; no interviene ninguna shell de Android ni carpeta física del teléfono. Captura de navegador de SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-cell-paths.png">Ver la captura de pantalla completa de rutas de celda en el navegador</a>
+        </figure>
+        <h3>Nombres, posiciones y referencias relativas</h3>
+        <p>La misma celda también se puede direccionar por su <strong>posición actual basada en 1</strong>; por ejemplo, <code>/nb/In[2]/.output</code> significa la segunda celda en el orden actual. Cuente también las celdas de Markdown. Este no es un identificador de tarjeta permanente: tras reordenar, el número In[…] impreso puede diferir de la posición utilizada por esta ruta. Las referencias por posición cambian de significado al reordenar o insertar celdas; las referencias por nombre continúan identificando la celda con nombre.</p>
+        <p>Bash y JavaScript también admiten referencias relativas a la celda en ejecución: <code>/nb/-1/.output</code> significa la celda anterior y <code>/nb/./.code</code> significa la celda actual. Requieren un contexto de ejecución y dependen del orden de las celdas. Este tutorial utiliza nombres explícitos en su lugar; no depende de que las referencias relativas se comporten de manera idéntica en todos los lenguajes.</p>
+      </section>
+
+      <section id="shared-file">
+        <p class="step-label">Paso 5</p>
+        <h2>Intercambiar datos a través de un archivo compartido</h2>
+        <p><strong>El sistema de archivos virtual compartido</strong> contiene archivos ordinarios que los diferentes kernels de lenguaje pueden usar. Aquí, <code>/shared/</code> significa almacenamiento gestionado dentro de la sesión de navegador o aplicación de SciREPL, no las Descargas de Android, una carpeta de su ordenador ni sincronización en la nube. Los archivos compartidos transportan texto o bytes; no ponen las variables en vivo de un lenguaje a disposición de otro.</p>
+        <div class="table-wrap">
+          <table>
+            <caption>Dos formas en que los programas pueden hacer referencia a los datos</caption>
+            <thead><tr><th scope="col">Ruta</th><th scope="col">Qué direcciona</th><th scope="col">Qué lo actualiza</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><code>/nb/numbers/.output</code></th><td>Última salida de texto de una celda en el libro de trabajo seleccionado.</td><td>Ejecutar esa celda de nuevo.</td></tr>
+              <tr><th scope="row"><code>/shared/data/named-cell-tutorial/values.json</code></th><td>Un archivo JSON ordinario, disponible entre diferentes kernels y pestañas de libros de trabajo.</td><td>Un programa o editor de archivos que escribe explícitamente ese archivo.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Escribir un archivo JSON ordinario</h3>
+        <p>Abra el <strong>✎ lápiz</strong> en <code>write_shared</code>, compruebe <strong>Código → JS - JavaScript</strong> y luego ejecútela. Esto lee la última salida de texto del productor y la guarda como un archivo de texto JSON compartido. El sistema de archivos compartido crea las carpetas contenedoras según sea necesario.</p>
+        <pre><code data-cell-example="write_shared">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+window.sharedVFS.writeFile('/shared/data/named-cell-tutorial/values.json', text, 'javascript');
+console.log('Saved JSON to /shared/data/named-cell-tutorial/values.json');</code></pre>
+        <p>El resultado es un <strong>archivo independiente que contiene una copia</strong> de la salida JSON, no otro nombre para <code>/nb/numbers/.output</code>. La carpeta dedicada mantiene el pequeño archivo temporal de ejemplo separado del resto de sus datos; volver a ejecutar <code>write_shared</code> sobrescribe este archivo exacto de la lección.</p>
+        <h3>Leer el archivo desde un programa diferente</h3>
+        <p>Abra el <strong>✎ lápiz</strong> en <code>read_shared</code>, compruebe <strong>Código → JS - JavaScript</strong> y luego ejecútela. Este programa independiente lee el archivo guardado, no la celda <code>numbers</code>:</p>
+        <pre><code data-cell-example="read_shared">const text = window.sharedVFS.readFile('/shared/data/named-cell-tutorial/values.json', 'utf8');
+if (!text) throw new Error('Run write_shared first.');
+const record = JSON.parse(text);
+console.log(record.values.reduce((sum, value) =&gt; sum + value, 0));</code></pre>
+        <p>Espere <code>16</code>. El <code>'utf8'</code> explícito lee los bytes del archivo como texto para el análisis de JSON. Cada kernel tiene su propia API de archivos: JavaScript utiliza aquí el asistente del sistema de archivos compartido; Python puede utilizar <code>open(...)</code>, como se muestra en el paso opcional a continuación. Este no es un sistema de archivos completo del sistema operativo.</p>
+        <p>Para una comprobación independiente entre lenguajes, puede añadir una nueva celda <strong>Código → Bash</strong> y ejecutar este comando. Lee el mismo archivo ordinario e imprime <code>{"values":[3,5,8]}</code>:</p>
+        <pre><code>cat /shared/data/named-cell-tutorial/values.json</code></pre>
+        <h3>Ver el mismo archivo en la interfaz gráfica de archivos</h3>
+        <ol class="lesson-steps">
+          <li>Abra <strong>☰ Menú → Archivos y almacenamiento</strong>.</li>
+          <li>Busque la carpeta compartida <code>data</code>, luego <code>named-cell-tutorial</code> y <code>values.json</code>. Seleccione el archivo para ver su texto JSON.</li>
+          <li>Compruebe que contiene <code>{"values":[3,5,8]}</code> y luego cierre Files &amp; Storage para continuar con el libro de trabajo.</li>
+        </ol>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-shared-values.png" alt="Captura de pantalla en navegador estrecho de la pantalla Files &amp; Storage de SciREPL Free que muestra el archivo copiado values.json y su contenido JSON." loading="lazy" decoding="async">
+          <figcaption>Una copia deliberada en el sistema de archivos compartido hace que el JSON esté disponible en la interfaz gráfica de archivos. La pantalla de Free verificada no lista <code>/nb/</code> propiamente dicho. Captura de navegador de SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-shared-values.png">Ver la captura de pantalla completa del archivo compartido en el navegador</a>
+        </figure>
+        <p class="callout"><strong>Una copia no se actualiza automáticamente.</strong> Modificar o volver a ejecutar <code>numbers</code> cambia la salida más reciente de su celda, no el <code>values.json</code> existente. Vuelva a ejecutar <code>write_shared</code> para actualizar la copia y luego <code>read_shared</code> para recalcular a partir de ella. Los archivos se conservan en el almacenamiento local de la aplicación o navegador, pero borrar dicho almacenamiento o desinstalar la aplicación puede eliminarlos. La persistencia local no es una copia de seguridad; exporte los archivos que necesite conservar.</p>
+        <p>Para ver, editar y exportar archivos compartidos, consulte la <a href="../../files-export/tutorial/#edit-file">guía práctica de CSV y Files &amp; Storage</a>. Una exportación de solo libro de trabajo en <code>.srwb</code> no incluye archivos independientes como esta copia de JSON; utilice la <a href="../../files-export/tutorial/#export">exportación de archivo de paquete</a> para incluir conjuntamente el libro de trabajo y los archivos de datos seleccionados.</p>
+      </section>
+
+      <section id="generate">
+        <p class="step-label">Paso 6</p>
+        <h2>Generar el código de otra celda y luego ejecutarlo usted mismo</h2>
+        <p>Hasta ahora Bash ha leído la salida de JavaScript. Ahora JavaScript utilizará ese mismo texto JSON para calcular un total y escribir un programa corto de Bash en la <em>existente</em> celda <code>bash_report</code>. Escribir código y ejecutar código son dos acciones independientes.</p>
+        <ol class="program-flow" aria-label="Flujo de datos y código generado">
+          <li><code>numbers</code><span>Ejecutar → texto JSON</span></li>
+          <li><code>generate_report</code><span>Leer JSON → escribir código fuente de Bash</span></li>
+          <li><code>bash_report</code><span>Inspeccionar → ejecutar manualmente</span></li>
+        </ol>
+        <p class="callout"><strong>Esta escritura reemplaza el código fuente.</strong> Utilice la celda temporal <code>bash_report</code> complementaria, no una celda con trabajo que necesite conservar. Haga una copia de seguridad antes de probar escrituras de código fuente en su propio libro de trabajo. No sobrescriba el propio generador ni modifique <code>.language</code> mediante programación en este ejercicio.</p>
+        <ol class="lesson-steps">
+          <li>Compruebe que <code>bash_report</code> existe y que su lenguaje es <strong>Bash</strong>. Su código fuente inicial se muestra a continuación; no lo ejecute todavía.</li>
+          <li>Abra <strong>☰ Menú → Ajustes → VFS del cuaderno</strong>. <strong>Permitir que las celdas modifiquen otras celdas</strong> debe estar marcado para la escritura del generador. Está activado por defecto en la compilación verificada, pero compruebe su configuración. <em>No</em> necesita habilitar lecturas entre cuadernos, escrituras entre cuadernos ni ejecución programática. Cierre Configuración.</li>
+          <li>Abra el <strong>✎ lápiz</strong> en <code>generate_report</code>, compruebe <strong>Código → JS - JavaScript</strong> y ejecútela.</li>
+        </ol>
+        <pre><code data-cell-example="generate_report">const text = window.notebookVFS.readFile('/nb/numbers/.output');
+if (!text) throw new Error('Run numbers first.');
+const data = JSON.parse(text);
+const total = data.values.reduce((sum, value) =&gt; sum + value, 0);
+const updated = window.notebookVFS.writeFile(
+  '/nb/bash_report/.code', `echo "Total: ${total}"`
+);
+if (!updated) throw new Error('Check bash_report exists and cell writes are allowed.');
+console.log('Updated bash_report source; inspect it, then run it yourself.');</code></pre>
+        <p>El destino comienza con este marcador de posición:</p>
+        <pre><code data-cell-example="bash_report">echo "Run generate_report first"</code></pre>
+        <p>Una vez que el generador tiene éxito, el código fuente de <code>bash_report</code> pasa a ser <code>echo "Total: 16"</code>. La escritura <strong>no ha ejecutado Bash</strong>. Abra el <strong>✎ lápiz</strong> de esa celda para inspeccionar el nuevo código fuente y luego toque <em>su propio</em> <strong>▶ Ejecutar</strong>. Espere <code>Total: 16</code>.</p>
+        <figure class="phone-figure">
+          <img class="tutorial-shot" src="../../../workbooks/named-cells/assets/browser-generated-report.png" alt="Captura de pantalla en navegador estrecho de SciREPL Free que muestra el código fuente generado de Bash echo Total: 16 en bash_report y Total: 16 tras una ejecución manual." loading="lazy" decoding="async">
+          <figcaption>El destino sigue siendo una celda de Bash. JavaScript proporcionó su código fuente; su acción independiente de <strong>▶ Ejecutar</strong> produjo la salida debajo de ella. Captura de navegador de SciREPL Free.</figcaption>
+          <a class="full-shot-link" href="../../../workbooks/named-cells/assets/browser-generated-report.png">Ver la captura de pantalla completa del informe generado en el navegador</a>
+        </figure>
+        <p><code>readFile(...)</code> devuelve texto; una celda o propiedad desconocida devuelve <code>null</code>. <code>writeFile(...)</code> informa si la escritura se realizó con éxito. Las comprobaciones en el generador lo detienen si el productor no tiene salida o si no se puede escribir en el destino. Los nombres distinguen mayúsculas de minúsculas: conserve la ortografía exacta.</p>
+      </section>
+
+      <section id="update">
+        <p class="step-label">Paso 7</p>
+        <h2>Modificar los datos y actualizar cada paso dependiente</h2>
+        <ol class="lesson-steps">
+          <li>Edite <code>numbers</code> con su <strong>✎ lápiz</strong>. Cambie <code>[3, 5, 8]</code> a <code>[4, 5, 8]</code> y luego ejecute esa celda. Su JSON ahora contiene <code>4</code>.</li>
+          <li>Observe <code>bash_report</code> antes de ejecutar cualquier otra cosa. Su código fuente y salida anteriores permanecen sin cambios: no hay actualización automática de dependencias.</li>
+          <li>Vuelva a ejecutar <code>generate_report</code>. Esto cambia el código fuente del informe a <code>echo "Total: 17"</code>, pero su antigua salida <code>Total: 16</code> puede seguir visible.</li>
+          <li>Inspeccione y vuelva a ejecutar <code>bash_report</code>. Ahora su salida es <code>Total: 17</code>.</li>
+          <li>Antes de actualizar el archivo, vuelva a ejecutar <code>read_shared</code>: todavía muestra <code>16</code> de la copia más antigua de JSON. Ahora vuelva a ejecutar <code>write_shared</code> y luego <code>read_shared</code>; la vía del archivo también muestra <code>17</code>. Vuelva a abrir <code>values.json</code> en Files &amp; Storage para inspeccionar el archivo modificado.</li>
+        </ol>
+        <p class="callout"><strong>El código fuente, la salida y los archivos copiados son cosas diferentes.</strong> Finalice una edición abierta de código fuente con el botón <strong>▶ Ejecutar</strong> de esa celda antes que sus consumidores; un borrador no guardado en el editor no es el <code>.code</code> almacenado. Una escritura de código fuente no ejecuta el destino, y un archivo copiado no sigue los cambios posteriores. Siga el orden explícito: productor → generador → informe. Una salida antigua visible no es prueba de que el código fuente actual se haya ejecutado.</p>
+        <p>Exporte el libro de trabajo para conservar sus modificaciones de código fuente y nombres. Actualmente, la importación ordinaria de <code>.srwb</code> descarta las salidas de código guardadas, por lo que tras volver a abrir, vuelva a ejecutar <code>numbers</code> antes de sus lectores, y luego el generador y el informe. Los archivos de datos compartidos independientes requieren una exportación de archivos o de paquetes. Consulte la <a href="../../../files-export/">referencia de archivos y exportación<span class="english-reference"> (Página de referencia en inglés)</span></a>.</p>
+      </section>
+
+      <section id="python">
+        <p class="step-label">Opcional</p>
+        <h2>Leer ambas vías desde Python</h2>
+        <p>Puede detenerse aquí sin iniciar Python. Para probar un tercer lenguaje, primero ejecute <code>numbers</code> y <code>write_shared</code>, y luego inspeccione y ejecute <code>python_total</code> como <strong>Código → Python</strong>:</p>
+        <pre><code data-cell-example="python_total">import json
+record = json.loads(nb_read('numbers', '.output'))
+print('Cell output:', sum(record['values']))
+with open('/shared/data/named-cell-tutorial/values.json') as source:
+    saved = json.load(source)
+print('Shared file:', sum(saved['values']))</code></pre>
+        <p>Espere <code>Cell output: 16</code> y <code>Shared file: 16</code> para los datos originales, o <code>17</code> en ambas líneas después de actualizar ambas vías en el Paso 7. En Python, <code>nb_read('numbers', '.output')</code> lee la última salida de texto de la celda con nombre. El <code>open(...)</code> independiente lee el archivo compartido utilizando la sintaxis normal de archivos de Python. El módulo estándar <code>json</code> analiza ambos; no se necesita <code>%pip install</code>. Si solo se actualizó el productor, los dos totales pueden diferir.</p>
+        <p>En su primer uso, Python puede necesitar inicializar o descargar su entorno de ejecución. Puede aparecer un aviso de privacidad o red según su compilación y consentimiento previo; léalo antes de aceptar. Este paso opcional no es necesario para el ejercicio de JavaScript/Bash, e importar el archivo complementario por sí solo no inicia Python.</p>
+      </section>
+
+      <section id="more">
+        <p class="step-label">Seguir explorando</p>
+        <h2>Reconocer el patrón en otros libros de trabajo</h2>
+        <p>Las celdas con nombre proporcionan un límite de interoperabilidad sencillo: un programa produce texto y otro lo lee o lo utiliza para generar código fuente. El catálogo ya cuenta con ejemplos más amplios para inspeccionar:</p>
+        <ul>
+          <li><strong>Análisis de esperanza de vida</strong> lee archivos CSV ordinarios desde <code>/shared/data/</code> en Python y R: la vía de archivos compartidos, no lecturas de celdas con nombre. Descarga conjuntos de datos y utiliza paquetes; lea sus requisitos de configuración y consentimiento antes de ejecutarlo.</li>
+          <li><strong>Prolog genera R</strong> lee el código fuente con nombre de Prolog con <code>nb_read(..., '.code', ...)</code> y escribe el código fuente de R generado con <code>nb_write('r_factorial', '.code', ...)</code>. La celda de R se ejecuta por separado.</li>
+          <li><strong>Prolog genera TypR</strong> combina definiciones generadas con una celda de consulta con nombre de solo código fuente, y luego escribe <code>typr_output</code>. Una celda de <code>#!source</code> se puede leer como código fuente sin ejecutarla.</li>
+        </ul>
+        <p>Busque estos títulos en <strong>☰ Menú → Browse Packages…</strong>. Son lecturas complementarias, <strong>no guías prácticas de ejecución certificadas para esta guía</strong>; la edición disponible y las necesidades de configuración difieren. Los libros de trabajo de generación con Prolog requieren la dependencia <strong>unifyweaver-scirepl</strong> instalada a través de Browse; importar un libro de trabajo sin procesar por sí solo no instala esa dependencia. Para un <code>.ipynb</code> importado manualmente, compruebe primero que <strong>Menú → Ajustes → Importación y edición → Ejecutar celdas automáticamente al importar un libro de trabajo</strong> esté desactivado, ya que las importaciones de Jupyter pueden ejecutar código con esa opción activada. Consulte <a href="../tutorial/">la guía práctica de Browse</a> y <a href="../import/">la guía de importación manual</a>.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="step-label">Si algo parece incorrecto</p>
+        <h2>Comprobar el nombre, el libro de trabajo y el orden de ejecución</h2>
+        <ul>
+          <li><strong>El diálogo de asignación de nombre no se abre:</strong> haga doble clic o mantenga pulsada la <strong>etiqueta In[…] </strong> de la celda guardada, no su código fuente, salida ni lápiz. Un solo clic no es el gesto para asignar nombre.</li>
+          <li><strong>No se puede encontrar el productor:</strong> mantenga seleccionado <strong>Named Cell Interop</strong>, restaure el nombre exacto <code>numbers</code> y compruebe la ortografía y el uso de mayúsculas y minúsculas. Cambiar el nombre no reescribe las rutas en otras celdas.</li>
+          <li><strong>El generador dice «Run numbers first»:</strong> inspeccione y ejecute <code>numbers</code>. Importar o simplemente editar su código fuente no rellena <code>.output</code>.</li>
+          <li><strong>Falla el análisis de JSON:</strong> compare el productor con el ejemplo completo. Su salida debe ser únicamente JSON, no un encabezado o un mensaje impreso adicional.</li>
+          <li><strong>No se pudo escribir el informe:</strong> compruebe que la celda <code>bash_report</code> existente esté en este libro de trabajo y que <strong>Permitir que las celdas modifiquen otras celdas</strong> esté marcado. No habilite la ejecución programática para solucionar un problema de escritura de código fuente.</li>
+          <li><strong>El informe sigue siendo 16:</strong> después de editar los datos, ejecute <code>numbers</code>, luego <code>generate_report</code> y después <code>bash_report</code>. Actualice el archivo copiado por separado con <code>write_shared</code> y luego vuelva a ejecutar <code>read_shared</code>.</li>
+          <li><strong>No encuentra /nb en Files &amp; Storage:</strong> esa pantalla muestra archivos compartidos, no este montaje de celdas virtuales en la compilación verificada. Ejecute <code>write_shared</code> y busque en su lugar su copia deliberada de <code>values.json</code>.</li>
+        </ul>
+        <p>El <a href="../../interface/tutorial/">tutorial de interfaz del primer libro de trabajo</a> explica la cabecera y el lápiz de la celda guardada; el <a href="../graphics/">tutorial de gráficos</a> muestra otras formas en que una celda puede producir un resultado.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>Ayuda de SciREPL</span><nav aria-label="Navegación de pie de página"><a href="../../../workbooks/">Referencia de libros de trabajo<span class="english-reference"> (Página de referencia en inglés)</span></a><a href="../../../">Toda la ayuda<span class="english-reference"> (Página de referencia en inglés)</span></a></nav></footer>
+</body>
+</html>

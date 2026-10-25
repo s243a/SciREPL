@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 456">
+  <title>Custom Assistant model ID</title>
+  <desc>Yellow borders locate the real Backend and custom model ID fields. The original browser pixels are unchanged.</desc>
+  <g fill="none" stroke="#ffd43b" stroke-width="3">
+    <rect id="backend-setting" x="22" y="145" width="346" height="53" rx="6"/>
+    <rect id="custom-model-setting" x="22" y="411.78" width="346" height="35" rx="6"/>
+  </g>
+</svg>

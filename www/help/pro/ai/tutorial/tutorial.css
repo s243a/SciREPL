@@ -1,0 +1,139 @@
+.tutorial-shot {
+  display: block;
+  width: min(100%, 430px);
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.tutorial-shot--composer-detail {
+  width: min(100%, 560px);
+  aspect-ratio: 1080 / 700;
+  object-fit: cover;
+  object-position: bottom;
+}
+
+.shot-window--completion-general {
+  width: min(100%, 430px);
+  aspect-ratio: 414 / 820;
+}
+
+.shot-stage--completion-general { aspect-ratio: 414 / 820; }
+
+.shot-window--completion-position {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 640;
+  --shift: -33.119658%; /* Show original pixels 775–1415 of the 2340-pixel image. */
+}
+
+.shot-window--key-setup {
+  width: min(100%, 430px);
+  aspect-ratio: 390 / 538;
+}
+
+.shot-stage--key-setup { aspect-ratio: 390 / 538; }
+
+.shot-window--custom-model {
+  width: min(100%, 430px);
+  aspect-ratio: 390 / 456;
+}
+
+.shot-stage--custom-model { aspect-ratio: 390 / 456; }
+
+.shot-window--assistant-open {
+  width: min(100%, 430px);
+  aspect-ratio: 390 / 713; /* Keep execution, step limits and security; the full PNG is linked. */
+}
+
+.shot-stage--assistant-open { aspect-ratio: 390 / 1100; }
+
+.shot-window--assistant-context-header {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 180;
+  --shift: -3.846153846%; /* Original pixels 90–270; the full PNG stays intact. */
+}
+
+.shot-window--assistant-context-footer {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 410;
+  --shift: -79.487179487%; /* Original pixels 1860–2270 from the same screenshot. */
+}
+
+.shot-window--completion-preview {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 390;
+  --shift: -29.487179487%; /* Original pixels 690–1080: preview only, no keyboard. */
+}
+
+.shot-window--local-model-settings {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 1080;
+  --shift: -3.846153846%; /* Original pixels 90–1170: section, Ready status and use mode. */
+}
+
+.prompt-config-locations {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.prompt-config-locations > .phone-figure { min-width: 0; }
+
+.shot-window--ai-prompt-composer {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 550;
+  --shift: -67.948717949%; /* Original pixels 1590–2140: composer controls and draft. */
+}
+
+.shot-window--ai-prompt-edit {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 360;
+  --shift: -41.880341880%; /* Original pixels 980–1340: saved-cell header and start of prompt. */
+}
+
+.shot-window--ai-prompt-config {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 1285;
+  --shift: -4.059829060%; /* Original pixels 95–1380: settings and complete source-only note. */
+}
+
+.shot-window--ai-prompt-config-save {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 170;
+  --shift: -90.170940171%; /* Original pixels 2110–2280: Cancel and Save configuration. */
+}
+
+.shot-window--ai-prompt-result {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 1400;
+  --shift: -9.615384615%; /* Original pixels 225–1625: opening explanation, without composer. */
+}
+
+.shot-window--ai-variance-config {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 1560;
+  --shift: -16.239316239%; /* Original pixels 380–1940: replacement settings and context. */
+}
+
+.shot-window--ai-variance-preview-start {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 1060;
+  --shift: -9.615384615%; /* Original pixels 225–1285: Before/After and opening code. */
+}
+
+.shot-window--ai-variance-preview-apply {
+  width: min(100%, 430px);
+  aspect-ratio: 1080 / 630;
+  --shift: -47.008547009%; /* Original pixels 1100–1730: final code and Apply/Cancel. */
+}
+
+.shot-window--ai-variance-plot {
+  width: min(100%, 560px);
+  aspect-ratio: 1080 / 900;
+  --shift: -9.615384615%; /* Original pixels 225–1125: plot and printed statistics. */
+}
+
+@media (max-width: 760px) {
+  .prompt-config-locations { grid-template-columns: minmax(0, 1fr); }
+}
