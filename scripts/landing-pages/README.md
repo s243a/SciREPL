@@ -47,12 +47,12 @@ network. Pages here are always fresh and stay out of the app cache. A push to
 
 ## Behaviour
 
-- **Play links** carry a `referrer`, so Play Console can credit installs to
-  their source. A visitor who arrives with UTM tags has those tags copied into
-  the referrer by a small inline script. The referrer is serialised with
-  `URLSearchParams` and then encoded, so values containing `+`, `&` or `=`
-  arrive intact. Everyone else gets the page default.
-  Without JavaScript the links still work, using the default.
+- **Play links** carry a fixed `referrer` set in the page config, so Play
+  Console can credit installs to the guide page. It is built into the HTML:
+  the page never reads its own URL or rewrites links, so every visitor
+  (including Google's ad review) sees identical content. Ad clicks are counted
+  in Google Ads itself. The referrer is serialised with `URLSearchParams` and
+  then encoded, so values containing `+`, `&` or `=` arrive intact.
 - **Copy buttons** on code blocks appear only when the Clipboard API is
   available.
 - **Analytics** are off. Setting `analytics.cloudflareToken` in a config would
