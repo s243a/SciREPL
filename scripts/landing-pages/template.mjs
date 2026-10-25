@@ -23,7 +23,7 @@ function playHref(base, ref) {
 
 function playLink(page, edition, cls, label) {
   const base = page.play[edition];
-  return `<a class="${cls}" href="${esc(playHref(base, page.play.referrer))}" data-play-base="${esc(base)}">${esc(label)}</a>`;
+  return `<a class="${cls}" href="${esc(playHref(base, page.play.referrer))}">${esc(label)}</a>`;
 }
 
 const ctaRow = (page) => `<div class="cta-row">
@@ -106,20 +106,10 @@ function section(s, page, assetBase) {
   </section>`;
 }
 
-// Keeps Play attribution honest: visitors who arrive with UTM tags (an ad,
-// a forum post) carry them to the Play listing; everyone else gets the
-// page's default referrer. Also reveals the Copy buttons when the
-// Clipboard API is available.
+// Reveals the Copy buttons when the Clipboard API is available. The page
+// never reads its own URL or changes links: every visitor, ad click or not,
+// gets the same HTML and the same Play links with the page's fixed referrer.
 const PAGE_SCRIPT = `(function () {
-  var keys = ${JSON.stringify(UTM_KEYS)};
-  var params = new URLSearchParams(location.search);
-  if (params.get('utm_source')) {
-    var ref = new URLSearchParams();
-    keys.forEach(function (k) { if (params.get(k)) ref.append(k, params.get(k)); });
-    document.querySelectorAll('a[data-play-base]').forEach(function (a) {
-      a.href = a.getAttribute('data-play-base') + '&referrer=' + encodeURIComponent(ref.toString());
-    });
-  }
   if (navigator.clipboard) {
     document.querySelectorAll('.copy-btn').forEach(function (btn) {
       btn.hidden = false;
