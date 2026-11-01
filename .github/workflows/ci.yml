@@ -6,6 +6,7 @@ name: CI
 # on this passing (see build-release.yml), so a red suite blocks publication.
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
   push:
     branches:
       - main
@@ -32,6 +33,9 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+
+      - name: Candidate identity, unsigned Android assets and publication boundaries
+        run: node tests/test_android_candidate.mjs && node tests/test_candidate_workflow.mjs
 
       - name: Component licences and release metadata
         run: npm run licenses:check && npm run release:check
@@ -196,3 +200,124 @@ jobs:
       - run: npx playwright install chromium
       - name: PWA offline/release regression
         run: node tests/test_pwa_release.mjs
+
+  # Explicit release-label checks only: ordinary PRs do not pay for platform
+  # packaging, and tagging/publishing is never part of these candidate jobs.
+  # Add the release label BEFORE pushing the candidate commit. Label events do
+  # not run this workflow or replace core test results with skipped contexts.
+  windows-candidate:
+    if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'release')
+    needs: [test, pwa-release]
+    runs-on: windows-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install
+      - run: npm run licenses:check && npm run release:check
+      - name: Read safe candidate artifact label
+        id: artifact
+        shell: bash
+        run: echo "label=$(node scripts/release-artifact-label.mjs)" >> "$GITHUB_OUTPUT"
+      - run: npm run configure
+      - run: npm run fetch:bundles
+      - run: npm run verify:bundles
+      - run: npm run windows:install
+      - run: npm run package:windows
+      - name: Verify the actual packaged Windows application
+        run: node desktop/electron/test/run-all.mjs packaged
+      - name: Zip the tested candidate
+        shell: pwsh
+        env:
+          SCIREPL_ARTIFACT_LABEL: ${{ steps.artifact.outputs.label }}
+        run: |
+          $tree = 'desktop/electron/out/SciREPL-win32-x64'
+          if (-not (Test-Path $tree)) { throw "packaging produced nothing at $tree" }
+          $zip = "SciREPL-${env:SCIREPL_ARTIFACT_LABEL}-windows-x64-portable.zip"
+          if (Get-Command 7z -ErrorAction SilentlyContinue) {
+            7z a -tzip -mx=5 "$zip" "$tree/*"
+            if ($LASTEXITCODE -ne 0) { throw "7z failed with $LASTEXITCODE" }
+          } else {
+            Compress-Archive -Path "$tree/*" -DestinationPath "$zip" -CompressionLevel Optimal
+          }
+      - name: Upload tested Windows candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: free-windows-candidate
+          path: SciREPL-*-windows-x64-portable.zip
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+      - name: Upload Windows test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: free-windows-candidate-test-results
+          path: desktop/electron/test/results/
+          if-no-files-found: warn
+
+  android-candidate:
+    if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'release')
+    needs: [test, pwa-release]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm install
+      - run: npm run licenses:check && npm run release:check
+      - name: Read safe candidate artifact label
+        id: artifact
+        run: echo "label=$(node scripts/release-artifact-label.mjs)" >> "$GITHUB_OUTPUT"
+      - run: npm run configure
+      - run: npm run fetch:bundles
+      - run: npm run verify:bundles
+      - run: npx cap sync android
+      - name: Build unsigned Free APK and Play bundle
+        env:
+          SCIREPL_RELEASE_STORE_FILE: ''
+          SCIREPL_RELEASE_STORE_PASSWORD: ''
+          SCIREPL_RELEASE_KEY_ALIAS: ''
+          SCIREPL_RELEASE_KEY_PASSWORD: ''
+        run: |
+          test ! -e android/release-signing.properties
+          cd android
+          ./gradlew assembleRelease bundleRelease
+      - name: Fetch pinned bundle validator
+        run: node scripts/validate-android-candidate.mjs --fetch-bundletool "$RUNNER_TEMP/bundletool.jar"
+      - name: Validate unsigned Free Android candidate
+        run: |
+          mkdir -p dist
+          node scripts/validate-android-candidate.mjs \
+            --aab android/app/build/outputs/bundle/release/app-release.aab \
+            --apk android/app/build/outputs/apk/release/app-release-unsigned.apk \
+            --bundletool "$RUNNER_TEMP/bundletool.jar" > dist/ANDROID_VALIDATION.json
+      - name: Name and hash validated Android candidate
+        env:
+          SCIREPL_ARTIFACT_LABEL: ${{ steps.artifact.outputs.label }}
+        run: |
+          cp android/app/build/outputs/apk/release/app-release-unsigned.apk \
+             "dist/SciREPL-${SCIREPL_ARTIFACT_LABEL}-unsigned.apk"
+          cp android/app/build/outputs/bundle/release/app-release.aab \
+             "dist/SciREPL-${SCIREPL_ARTIFACT_LABEL}-play-unsigned.aab"
+          sha256sum dist/*.aab dist/*.apk dist/ANDROID_VALIDATION.json > dist/SHA256SUMS.txt
+      - name: Upload validated unsigned Android candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: free-android-candidate
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
