@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { BUNDLETOOL, apkSigningBlock, bundleManifest, checkApkBadging, checkBundleManifest, entryProblems, fetchBundletool, inspectArchive, parseArgs, releaseIdentity, sourceFiles, validateCandidate, verifyBundletool } from '../scripts/validate-android-candidate.mjs';
+import { BUNDLETOOL, CAPACITOR_GENERATED_WEB, androidWebFiles, apkSigningBlock, bundleManifest, checkApkBadging, checkBundleManifest, entryProblems, fetchBundletool, inspectArchive, parseArgs, releaseIdentity, sourceFiles, validateCandidate, verifyBundletool } from '../scripts/validate-android-candidate.mjs';
 
 const require = createRequire(import.meta.url);
 const JSZip = require('../www/vendor/jszip/jszip.min.js');
@@ -99,6 +99,60 @@ try {
     const file = await archive('aab', 'valid.aab');
     const result = await inspectArchive(file, 'aab', expected);
     assert.equal(result.publicAssets, Object.keys(sources).length);
+  });
+  await verify('only the pinned empty generated Capacitor bridges augment source web assets', async () => {
+    const lock = { packages: Object.fromEntries(Object.entries(CAPACITOR_GENERATED_WEB.pins).map(([name, pin]) => [`node_modules/${name}`, { ...pin }])) };
+    for (const [name, pin] of Object.entries(CAPACITOR_GENERATED_WEB.pins)) {
+      assert.equal(require(`${name}/package.json`).version, pin.version, 'installed generator dependencies must match the reviewed version');
+    }
+    const bridgeDirectory = path.join(temporary, 'generated-bridges');
+    mkdirSync(bridgeDirectory);
+    // Exercise the pinned CLI's actual fixed-output helper in an isolated
+    // directory. Never use existing cap-sync output as the expected baseline.
+    await require('@capacitor/cli/dist/cordova.js').createEmptyCordovaJS({ android: { webDirAbs: bridgeDirectory } }, 'android');
+    for (const name of CAPACITOR_GENERATED_WEB.names) assert.equal(readFileSync(path.join(bridgeDirectory, name)).length, 0);
+    put('package-lock.json', JSON.stringify(lock));
+    const generated = androidWebFiles(temporary);
+    assert.equal(generated.size, expected.size + 2);
+    for (const [name, value] of expected) assert.deepEqual(generated.get(name), value, 'source www byte expectations remain unchanged');
+    assert.deepEqual(CAPACITOR_GENERATED_WEB.names, ['cordova.js', 'cordova_plugins.js']);
+    for (const name of CAPACITOR_GENERATED_WEB.names) assert.deepEqual(generated.get(name), {
+      bytes: 0, sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    });
+    for (const kind of ['aab', 'apk']) {
+      const prefix = kind === 'aab' ? 'base/assets/public/' : 'assets/public/';
+      const bridges = { [prefix + 'cordova.js']: '', [prefix + 'cordova_plugins.js']: '' };
+      const valid = await archive(kind, `bridges.${kind}`, bridges);
+      assert.equal((await inspectArchive(valid, kind, generated)).publicAssets, expected.size + 2);
+      for (const name of CAPACITOR_GENERATED_WEB.names) {
+        const missing = await archive(kind, `missing-${name}.${kind}`, { ...bridges, [prefix + name]: null });
+        await assert.rejects(() => inspectArchive(missing, kind, generated), /Web asset missing/);
+        const tampered = await archive(kind, `tampered-${name}.${kind}`, { ...bridges, [prefix + name]: 'injected bridge' });
+        await assert.rejects(() => inspectArchive(tampered, kind, generated), /web asset size differs/);
+      }
+      const extra = await archive(kind, `extra-bridge.${kind}`, { ...bridges, [prefix + 'cordova_extra.js']: '' });
+      await assert.rejects(() => inspectArchive(extra, kind, generated), /Unexpected packaged web asset/);
+      const changed = await archive(kind, `changed-source-with-bridges.${kind}`, { ...bridges, [prefix + 'index.html']: 'x'.repeat(sources['index.html'].length) });
+      await assert.rejects(() => inspectArchive(changed, kind, generated), /bytes differ.*index\.html/);
+    }
+    for (const name of CAPACITOR_GENERATED_WEB.names) {
+      for (const text of ['', 'source injection']) {
+        const collision = put(`www/${name}`, text);
+        assert.throws(() => androidWebFiles(temporary), /collides with generated Android bridge/);
+        rmSync(collision);
+      }
+    }
+    for (const name of Object.keys(CAPACITOR_GENERATED_WEB.pins)) {
+      for (const field of ['version', 'integrity']) {
+        const changed = structuredClone(lock);
+        changed.packages[`node_modules/${name}`][field] = 'unreviewed';
+        put('package-lock.json', JSON.stringify(changed));
+        assert.throws(() => androidWebFiles(temporary), /requires reviewed/);
+      }
+    }
+    put('package-lock.json', JSON.stringify({ packages: {} }));
+    assert.throws(() => androidWebFiles(temporary), /requires reviewed/);
+    put('package-lock.json', JSON.stringify(lock));
   });
   await verify('missing or changed packaged web assets fail closed', async () => {
     const missing = await archive('aab', 'missing.aab', { 'base/assets/public/sw.js': null });

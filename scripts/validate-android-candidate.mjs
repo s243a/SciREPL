@@ -18,6 +18,19 @@ export const BUNDLETOOL = Object.freeze({
   sha256: 'a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29',
   url: 'https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar',
 });
+// @capacitor/cli 7.4.5 dist/cordova.js: handleCordovaPluginsJS's no-Cordova-
+// plugins branch calls createEmptyCordovaJS, which writes these exact empty
+// strings. They are required generated assets, not exceptions to www hashing.
+// A dependency upgrade needs an explicit review of this deterministic output.
+export const CAPACITOR_GENERATED_WEB = Object.freeze({
+  pins: Object.freeze({
+    '@capacitor/cli': Object.freeze({ version: '7.4.5', integrity: 'sha512-ApKxpzcWTqmyTD+WxBvL7UJt+x0xr9Vqa+S4Iqbl/R2kC0tf1ay22wE9pOrdWXbTqFbNhBuUuRvTvZ6Edp7QzQ==' }),
+    '@capacitor/core': Object.freeze({ version: '8.0.2', integrity: 'sha512-EXZfxkL6GFJS2cb7TIBR7RiHA5iz6ufDcl1VmUpI2pga3lJ5Ck2+iqbx7N+osL3XYem9ad4XCidJEMm64DX6UQ==' }),
+  }),
+  names: Object.freeze(['cordova.js', 'cordova_plugins.js']),
+  bytes: 0,
+  sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+});
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const demand = (condition, message) => { if (!condition) throw new Error(message); };
 
@@ -90,6 +103,21 @@ export function sourceFiles(www) {
   demand(files.has('index.html') && files.has('js/kernel_config.js') && files.has('sw.js'), 'Prepared web assets are incomplete');
   const config = readFileSync(path.join(www, 'js/kernel_config.js'), 'utf8');
   demand(/"profile"\s*:\s*"full"/.test(config), 'Free release must use the full profile');
+  return files;
+}
+
+export function androidWebFiles(root = ROOT) {
+  const files = sourceFiles(path.join(root, 'www'));
+  const lock = JSON.parse(readFileSync(path.join(root, 'package-lock.json'), 'utf8'));
+  for (const [name, pin] of Object.entries(CAPACITOR_GENERATED_WEB.pins)) {
+    const locked = lock.packages?.[`node_modules/${name}`];
+    demand(locked?.version === pin.version && locked.integrity === pin.integrity,
+      `Generated Android bridge requires reviewed ${name} ${pin.version} lock pin`);
+  }
+  for (const name of CAPACITOR_GENERATED_WEB.names) {
+    demand(!files.has(name), `Source web asset collides with generated Android bridge: ${name}`);
+    files.set(name, { bytes: CAPACITOR_GENERATED_WEB.bytes, sha256: CAPACITOR_GENERATED_WEB.sha256 });
+  }
   return files;
 }
 
@@ -192,7 +220,7 @@ export async function validateCandidate({ root = ROOT, aab, apk, bundletool, aap
   demand(!apk || existsSync(apk), 'APK is missing; build assembleRelease first');
   demand(bundletool, 'Pass --bundletool with the pinned official jar');
   verifyBundletool(bundletool);
-  const identity = releaseIdentity(root), expected = sourceFiles(path.join(root, 'www'));
+  const identity = releaseIdentity(root), expected = androidWebFiles(root);
   const command = (program, args) => run(program, args, { cwd: root, encoding: 'utf8', timeout: 120_000, maxBuffer: 4 * 1024 * 1024 });
   const manifest = bundleManifest(aab, bundletool, command);
   checkBundleManifest(manifest, identity);
