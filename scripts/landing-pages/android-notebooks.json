@@ -1,0 +1,172 @@
+{
+  "$comment": "Guide page for people looking for Python/Jupyter-style notebooks on Android. Build with: node scripts/build-landing-pages.mjs",
+  "slug": "android-notebooks",
+  "siteBase": "https://s243a.github.io/SciREPL/pro/guides/",
+  "brandHref": "../../",
+  "title": "Python Notebooks on Android — SciREPL",
+  "metaDescription": "Write and run Python notebook cells on Android. NumPy, SymPy and interactive plots run locally on your phone; open and save .ipynb files.",
+  "ogImage": "img/og-android-notebooks.png",
+  "analytics": { "cloudflareToken": "" },
+
+  "eyebrow": "SciREPL for Android",
+  "h1": "Python notebooks on Android",
+  "lede": "Jupyter-style cells, outputs and interactive plots, running on your phone instead of a server. NumPy and SymPy are built in, and `.ipynb` files open with their outputs intact.",
+  "fineprint": "One-time purchase · No subscription · No ads · Android 7.0+ · Or [try the free web version](https://s243a.github.io/SciREPL/) in your browser.",
+  "chips": ["Python", "NumPy", "SymPy", "Interactive plots", "R", "Prolog", ".ipynb import/export", "Works offline"],
+  "hero": {
+    "src": "img/notebook-python-plot.webp",
+    "width": 800,
+    "height": 1320,
+    "alt": "SciREPL on a phone: a Python cell creating a NumPy array and calling plot(x, np.sin(x)), with the sine-wave chart shown below it.",
+    "caption": "A NumPy cell and its interactive plot."
+  },
+
+  "play": {
+    "pro": "https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl.pro",
+    "free": "https://play.google.com/store/apps/details?id=com.unifyweaver.scirepl",
+    "referrer": { "utm_source": "scirepl_guides", "utm_medium": "landing", "utm_campaign": "android-notebooks" },
+    "proLabel": "Get SciREPL Pro on Google Play",
+    "freeLabel": "Try the free edition",
+    "headerLabel": "Get Pro"
+  },
+
+  "sections": [
+    {
+      "id": "how",
+      "nav": "How it works",
+      "type": "cards",
+      "heading": "A notebook built for a phone screen",
+      "items": [
+        { "title": "Cells, like Jupyter", "body": "Write code in a cell, press Run, and the output appears below it. Variables carry over between cells, and you can edit, re-run, reorder or delete any cell." },
+        { "title": "Kernels run on the device", "body": "Python runs inside the app through Pyodide (WebAssembly), with NumPy and SymPy preloaded. No server or account is involved." },
+        { "title": "Rich output", "body": "SymPy results render as typeset math. `plot()` draws charts you can pinch-zoom and pan, and Matplotlib's `plt.show()` renders inline images." },
+        { "title": "Notes between the code", "body": "Switch a cell from Code to Md to write Markdown with `$inline$` and `$$display$$` LaTeX math." }
+      ]
+    },
+    {
+      "id": "examples",
+      "nav": "Examples",
+      "type": "examples",
+      "heading": "Try these examples",
+      "lede": "Each screenshot is real output from the code beside it. Copy each block into its own cell and press Run.",
+      "items": [
+        {
+          "title": "Plot a function",
+          "body": "`plot()` is built in. The chart is interactive: pinch to zoom, drag to pan, and tap a point to read its value.",
+          "lang": "python",
+          "langLabel": "PYTHON",
+          "code": "import numpy as np\nx = np.linspace(0, 2*np.pi, 200)\nplot(x, np.sin(x))",
+          "note": "This is the cell in the screenshot at the top of the page."
+        },
+        {
+          "title": "Symbolic math with SymPy",
+          "body": "Differentiate, integrate and solve, with results rendered as LaTeX. The ∑ Math Mode button inserts common SymPy functions, so there is less to type on a phone keyboard.",
+          "lang": "python",
+          "langLabel": "PYTHON",
+          "cells": [
+            "from sympy import symbols, diff, integrate, sin, exp\nx = symbols('x')\ndiff(sin(x)*exp(x), x)",
+            "integrate(x**2 * exp(-x), x)"
+          ],
+          "image": {
+            "src": "img/notebook-sympy-latex.webp", "width": 800, "height": 1140,
+            "alt": "Two SymPy cells: the derivative of sin(x)·exp(x) and the integral of x²·exp(−x), both shown as typeset formulas.",
+            "caption": "The derivative and the integral, typeset."
+          }
+        },
+        {
+          "title": "Mix in other languages",
+          "body": "Each cell has its own language. Choose PL in the language selector to write Prolog. R, Bash, JavaScript, Lua and others work the same way, and every language can read and write the same files under `/shared`.",
+          "lang": "prolog",
+          "langLabel": "PROLOG",
+          "cells": [
+            "parent(tom, bob).\nparent(bob, ann).\ngrandparent(X, Z) :- parent(X, Y), parent(Y, Z).",
+            "grandparent(tom, Who)."
+          ],
+          "note": "Run these as two cells. A cell that defines rules is loaded as a program, so the query goes in its own cell.",
+          "image": {
+            "src": "img/notebook-prolog-query.webp", "width": 800, "height": 900,
+            "alt": "Two Prolog cells: facts and a grandparent rule, then the query grandparent(tom, Who) answering Who = ann.",
+            "caption": "Facts and a rule, then a query."
+          }
+        }
+      ]
+    },
+    {
+      "id": "notebooks",
+      "nav": "Notebooks",
+      "type": "checks",
+      "heading": "Bring your notebooks with you",
+      "lede": "SciREPL reads and writes the standard Jupyter format, so work moves between your phone and a laptop.",
+      "items": [
+        "Open `.ipynb` files with ☰ Menu → Import File. Saved outputs (text, images, LaTeX, tables) show straight away, without re-running anything.",
+        "Export back to `.ipynb` with outputs included, so the notebook still displays in Jupyter or on GitHub.",
+        "Export a readable document as HTML, Markdown, PDF, DOCX or LaTeX, with highlighted code, plots and equations.",
+        "Also imports `.py` and `.pl` source files, CSV data, and SciREPL's own `.srwb` workbooks.",
+        "Keep several notebooks open in tabs. They save automatically and come back when you reopen the app.",
+        "Send a notebook anywhere with Android's share sheet."
+      ]
+    },
+    {
+      "id": "free-vs-pro",
+      "nav": "Free vs Pro",
+      "type": "table",
+      "heading": "Free or Pro?",
+      "lede": "Both editions run the same notebook. Pro bundles every runtime for offline use and adds the AI features.",
+      "columns": ["", "SciREPL (free)", "SciREPL Pro"],
+      "rows": [
+        ["Python with NumPy and SymPy", "Yes", "Yes"],
+        ["Prolog, Bash, JavaScript, Lua, TypR, ClojureScript", "Yes", "Yes"],
+        ["R (webR)", "Downloads on first use (~50 MB)", "Yes, bundled for offline use"],
+        ["`.ipynb` import/export; HTML, PDF, DOCX, LaTeX export", "Yes", "Yes"],
+        ["AI assistant and AI code completion", "—", "Yes, using an AI service you choose"],
+        ["MCP and remote-agent clients", "—", "Yes"],
+        ["Windows build", "—", "Preview (unsigned)"],
+        ["Price", "Free", "One-time purchase"]
+      ]
+    },
+    {
+      "id": "limits",
+      "nav": "Limits",
+      "type": "limits",
+      "heading": "What it is not built for",
+      "lede": "Worth knowing before you install:",
+      "items": [
+        "Python runs as WebAssembly, so heavy numerical work is slower than native Python on a laptop.",
+        "`%pip install` works for pure-Python packages from PyPI. Packages with compiled C extensions need a prebuilt WebAssembly version, and many do not have one.",
+        "There is no GPU, so it is not for training machine-learning models or processing very large datasets.",
+        "Installing extra Python or R packages needs a network connection. The bundled runtimes do not.",
+        "It is single-user: there is no real-time collaboration or shared server.",
+        "Requires Android 7.0 or later. There is no iOS version; Pro also has an unsigned Windows preview."
+      ]
+    },
+    {
+      "id": "start",
+      "nav": "Get started",
+      "type": "steps",
+      "heading": "Get started",
+      "items": [
+        "Install SciREPL Pro, or the free edition, from Google Play.",
+        "Open the app. The input bar is at the bottom: pick a language on the left (Py, R, PL…), type some code, and press ▶ Run.",
+        "Paste one of the [examples](#examples) above to check that everything works.",
+        "To open an existing notebook, use ☰ Menu → Import File and choose a `.ipynb` file.",
+        "Tap ? in the header for the built-in help. Every help example can be copied, or inserted as a new cell."
+      ]
+    }
+  ],
+
+  "closing": {
+    "heading": "Carry your notebooks in your pocket",
+    "body": "SciREPL Pro is a one-time purchase on Google Play, with no subscription and no ads. Or start with the free edition: notebooks move between the two as `.ipynb` files."
+  },
+
+  "footer": {
+    "links": [
+      { "label": "Help and tutorials", "href": "../../../help/" },
+      { "label": "SciREPL Pro", "href": "../../" },
+      { "label": "Privacy policy", "href": "../../privacy.html" },
+      { "label": "Source code", "href": "https://github.com/s243a/SciREPL" },
+      { "label": "Free web version", "href": "../../../" }
+    ],
+    "note": "Screenshots show SciREPL's notebook interface at phone size, captured from the web edition; the Android apps use the same interface. SciREPL is an independent project, not affiliated with Project Jupyter. Jupyter is a trademark of NumFOCUS."
+  }
+}

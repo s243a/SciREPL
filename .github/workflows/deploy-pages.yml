@@ -27,7 +27,7 @@ concurrency:
 
 jobs:
   test:
-    # Match the Chromium platform supported by locked Playwright.
+    # Keep the runner compatible with the Chromium builds in locked Playwright.
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:

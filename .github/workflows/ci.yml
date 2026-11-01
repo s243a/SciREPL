@@ -15,7 +15,7 @@ on:
 
 jobs:
   test:
-    # Locked Playwright does not support ubuntu-latest after its 26.04 rollout.
+    # Keep the runner compatible with the Chromium builds in locked Playwright.
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -180,6 +180,7 @@ jobs:
   # offline/reload cycle, so it runs in a dedicated job rather than sharing the
   # long-running suite above.
   pwa-release:
+    # Keep the runner compatible with the Chromium builds in locked Playwright.
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
