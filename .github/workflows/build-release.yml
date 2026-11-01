@@ -272,8 +272,14 @@ jobs:
           name: windows-portable-zip
           path: dist
 
+      - name: Stage prepared GitHub release notes
+        run: |
+          release_version=$(node -p "require('./package.json').version")
+          test -s "docs/releases/${release_version}-github-notes.txt"
+          cp "docs/releases/${release_version}-github-notes.txt" dist/RELEASE_NOTES.md
+
       - name: Hash the candidate assets
-        run: sha256sum dist/*.aab dist/*.apk dist/*.zip > dist/SHA256SUMS.txt
+        run: sha256sum dist/*.aab dist/*.apk dist/*.zip dist/RELEASE_NOTES.md > dist/SHA256SUMS.txt
 
       - name: Upload tested unsigned assets
         uses: actions/upload-artifact@v4
@@ -309,60 +315,10 @@ jobs:
             dist/SciREPL-${{ github.ref_name }}-unsigned.apk
             dist/SciREPL-${{ github.ref_name }}-pwa.zip
             dist/SciREPL-${{ github.ref_name }}-windows-x64-portable.zip
+            dist/RELEASE_NOTES.md
             dist/SHA256SUMS.txt
           fail_on_unmatched_files: true
           prerelease: true
-          body: |
-            > **Pre-release** — unsigned APK for testing. After signing, upload `SciREPL-${{ github.ref_name }}.apk` and mark as latest release.
-
-            ## Downloads
-
-            - **Google Play bundle (unsigned):** `SciREPL-${{ github.ref_name }}-play-unsigned.aab` — sign with the upload key, verify the highest Free Play version code, and use CLOSED testing before a production rollout. AABs do not use APK zipalign.
-            - **Android APK (signed):** Upload pending — download `SciREPL-${{ github.ref_name }}.apk` once available
-            - **Android APK (unsigned):** `SciREPL-${{ github.ref_name }}-unsigned.apk` — requires signing before install (see below)
-            - **PWA (zip):** `SciREPL-${{ github.ref_name }}-pwa.zip` — unzip and serve over HTTPS or localhost (service workers do not run from `file://`)
-            - **PWA (live):** [https://s243a.github.io/SciREPL/](https://s243a.github.io/SciREPL/) — install from browser, no app store needed
-            - **Windows portable (unsigned, x64):** `SciREPL-${{ github.ref_name }}-windows-x64-portable.zip` — extract and run, no installer
-
-            ## Running the Windows portable build
-
-            Extract the zip to a local folder (not a network path) and run **SciREPL.exe**.
-            There is no installer and nothing is registered with the operating system.
-
-            The build is **unsigned**, so Windows SmartScreen shows "Windows protected
-            your PC" on first run — choose **More info → Run anyway**. That is expected
-            for an unsigned build and is not a sign of a problem.
-
-            Bash/Brush, ClojureScript/Scittle, SWI-Prolog and Python/Pyodide are bundled
-            and work offline. Lua and R download from their CDNs on first use, then run
-            offline from SciREPL's own runtime cache. Application data lives under
-            `%APPDATA%\SciREPL-Free-Electron`. See `docs/WINDOWS_PREVIEW.md`.
-
-            ## Updating the PWA
-
-            If you already have the PWA installed, make sure you're running the latest version:
-
-            - **Desktop:** Press `Ctrl+Shift+R` to force-reload and clear the service worker cache
-            - **Mobile / newer versions:** Open the **Menu** and tap **Reload App**
-
-            ## Signing the Unsigned APK
-
-            If you prefer to sign the APK yourself:
-
-            1. Zipalign:
-               ```bash
-               zipalign -v 4 SciREPL-${{ github.ref_name }}-unsigned.apk \
-                 SciREPL-${{ github.ref_name }}-aligned.apk
-               ```
-            2. Sign with apksigner (v2):
-               ```bash
-               apksigner sign --ks your-keystore.keystore \
-                 --ks-key-alias your-alias \
-                 --out SciREPL-${{ github.ref_name }}.apk \
-                 SciREPL-${{ github.ref_name }}-aligned.apk
-               ```
-            3. Install: `adb install SciREPL-${{ github.ref_name }}.apk`
-
-            **For maintainers:** After signing, upload the signed APK and edit this release to add a changelog and mark as latest.
+          body_path: dist/RELEASE_NOTES.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

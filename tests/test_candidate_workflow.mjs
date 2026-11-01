@@ -1,7 +1,9 @@
 // Offline safety/metadata gates for manual and release-labelled PR builds.
 // These tests do not dispatch Actions or create/sign/upload any release.
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runInNewContext } from 'node:vm';
@@ -86,6 +88,47 @@ verify('Android validation gates every upload and the pushed tag gains a Play AA
   assert.doesNotMatch(upload, /continue-on-error|always\(|^        if:/m);
   assert.match(job(release, 'publish'), /dist\/SciREPL-\$\{\{ github\.ref_name \}\}-play-unsigned\.aab/);
   assert.match(job(release, 'publish'), /fail_on_unmatched_files: true/);
+});
+
+verify('prepared version-specific notes are required, hashed and used as the release body', () => {
+  const build = job(release, 'build'), publish = job(release, 'publish');
+  const staging = step(build, 'Stage prepared GitHub release notes');
+  const hash = step(build, 'Hash the candidate assets');
+  assert.match(staging, /docs\/releases\/\$\{release_version\}-github-notes\.txt/);
+  assert.match(staging, /test -s/);
+  assert.doesNotMatch(staging, /continue-on-error|always\(|\|\||^        if:/m);
+  assert.ok(build.indexOf('Stage prepared GitHub release notes') < build.indexOf('Upload tested unsigned assets'));
+  assert.match(hash, /dist\/RELEASE_NOTES\.md/);
+  assert.match(publish, /^          body_path: dist\/RELEASE_NOTES\.md$/m);
+  assert.match(publish, /^            dist\/RELEASE_NOTES\.md$/m, 'The notes named by SHA256SUMS are also a release asset');
+  assert.doesNotMatch(publish, /^          body: \|$/m);
+
+  const fixture = mkdtempSync(path.join(tmpdir(), 'scirepl-candidate-notes-'));
+  const script = staging.match(/^        run: \|\n([\s\S]*)$/m)?.[1].split('\n').map(line => line.startsWith('          ') ? line.slice(10) : line).join('\n');
+  const command = source => spawnSync('bash', ['-e', '-o', 'pipefail', '-c', source], {
+    cwd: fixture, encoding: 'utf8', timeout: 10_000,
+    env: { ...process.env, PATH: `${path.dirname(process.execPath)}:${process.env.PATH}` },
+  });
+  try {
+    writeFileSync(path.join(fixture, 'package.json'), JSON.stringify(pkg));
+    mkdirSync(path.join(fixture, 'dist'));
+    mkdirSync(path.join(fixture, 'docs/releases'), { recursive: true });
+    const destination = path.join(fixture, 'dist/RELEASE_NOTES.md');
+    assert.notEqual(command(script).status, 0, 'Missing prepared notes must fail the build');
+    assert.equal(existsSync(destination), false);
+    writeFileSync(path.join(fixture, 'docs/releases/1.4.0-github-notes.txt'), 'Wrong version');
+    assert.notEqual(command(script).status, 0, 'Never inherit previous-version notes');
+    const notes = '# SciREPL Free 1.5.0\nPrepared candidate notes.\n';
+    writeFileSync(path.join(fixture, 'docs/releases/1.5.0-github-notes.txt'), notes);
+    assert.equal(command(script).status, 0);
+    assert.equal(readFileSync(destination, 'utf8'), notes);
+    for (const extension of ['aab', 'apk', 'zip']) writeFileSync(path.join(fixture, `dist/fixture.${extension}`), extension);
+    const hashCommand = hash.match(/^        run: (.+)$/m)?.[1];
+    assert.equal(command(hashCommand).status, 0);
+    assert.equal(command('sha256sum -c dist/SHA256SUMS.txt').status, 0);
+    writeFileSync(destination, 'Changed notes');
+    assert.notEqual(command('sha256sum -c dist/SHA256SUMS.txt').status, 0, 'Downloaded-note tampering fails the publication hash gate');
+  } finally { rmSync(fixture, { recursive: true, force: true }); }
 });
 
 verify('platform PR packaging is opt-in, and label events cannot replace core results', () => {
