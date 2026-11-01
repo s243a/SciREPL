@@ -11,6 +11,6 @@
   },
   "devDependencies": {
     "@electron/packager": "20.2.0",
-    "electron": "43.3.0"
+    "electron": "43.8.6"
   }
 }

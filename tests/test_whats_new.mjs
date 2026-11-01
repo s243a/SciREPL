@@ -8,6 +8,13 @@ const APP_URL = `http://localhost:${PORT}/index.html`;
 const PACKAGE = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const PACKAGE_VERSION = PACKAGE.version;
 const RELEASE_CHANNEL = PACKAGE.releaseChannel;
+const DISPLAY_LOCALES = ['en', 'ar', 'bn', 'de', 'es', 'fr', 'hi', 'id', 'ja', 'ko', 'pt-BR', 'ru', 'zh'];
+const RELEASE_150_KEYS = [
+    'whatsNew.highlightLocalizedTutorials',
+    'whatsNew.highlightSourceOnlyCells',
+    'whatsNew.highlightPrologBindings',
+    'whatsNew.highlightKeyboardTrust',
+];
 
 let failures = 0;
 const check = (name, passed, detail = '') => {
@@ -123,6 +130,9 @@ try {
             ].join(',') && /%pip install/.test(window.t('whatsNew.highlightPipConsent'))
                 && /privacy policy/i.test(window.t('whatsNew.highlightPipConsent'));
         }));
+    check('1.5.0 freezes only its online-guide, source-only, Prolog and keyboard-warning delta',
+        await page.evaluate(keys => JSON.stringify(window.SCIREPL_RELEASE_HIGHLIGHTS['1.5.0'])
+            === JSON.stringify(keys), RELEASE_150_KEYS));
     check('the release link remains valid before a tag exists', /\/releases\/?$/.test(release.href), release.href);
     check('focus moves into the modal', release.focusInside);
     check('the display-language picker is above the release title', release.languageBeforeTitle);
@@ -354,6 +364,47 @@ try {
         && compactHeader.withinViewport && compactHeader.scrollWidth <= compactHeader.innerWidth,
         JSON.stringify(compactHeader));
     await compact.close();
+
+    console.log('\n5. Frozen 1.5.0 highlights in every supported display language');
+    const localized = await existingContext({ markCurrent: true });
+    const { page: localizedPage, errors: localizedErrors } = await load(localized);
+    // Exercise the frozen summary explicitly so this regression remains useful
+    // after a later app release changes the current-version table.
+    await localizedPage.evaluate(() => {
+        window.whatsNew.version = '1.5.0';
+        window.whatsNew.releaseChannel = 'release';
+        window.whatsNew.requestOpen({ source: 'help' });
+    });
+    await localizedPage.waitForSelector('#whats-new-modal:not(.hidden)');
+    for (const locale of DISPLAY_LOCALES) {
+        const catalogue = JSON.parse(readFileSync(new URL(`../www/i18n/${locale}.json`, import.meta.url), 'utf8'));
+        await localizedPage.selectOption('#whats-new-language', locale);
+        await localizedPage.waitForFunction(code => document.documentElement.lang === code, locale);
+        const actual = await localizedPage.evaluate(() => ({
+            version: document.getElementById('whats-new-version').textContent,
+            expectedVersion: window.t('whatsNew.version', { version: '1.5.0' }),
+            selected: document.getElementById('whats-new-language').value,
+            direction: document.documentElement.dir,
+            highlights: [...document.querySelectorAll('#whats-new-highlights li')]
+                .map(element => element.textContent),
+        }));
+        const expected = RELEASE_150_KEYS.map(key => catalogue.strings[key]);
+        // Arabic DOM text intentionally adds bounded Latin-run isolates.
+        // Compare the catalogue prose independently, then verify the safety
+        // markup rather than mistaking those invisible controls for fallback.
+        const prose = actual.highlights.map(text => text.replace(/[\u2066-\u2069]/g, ''));
+        check(`${locale}: all four frozen highlights use the selected catalogue, not an English fallback`,
+            JSON.stringify(prose) === JSON.stringify(expected), JSON.stringify(actual));
+        check(`${locale}: the picker, version and direction match the selected display language`,
+            actual.selected === locale && actual.version === actual.expectedVersion
+            && actual.version.includes('1.5.0') && actual.direction === (locale === 'ar' ? 'rtl' : 'ltr'),
+            JSON.stringify(actual));
+        if (locale === 'ar') check('Arabic highlights retain bounded LTR isolates around the Latin identifiers',
+            actual.highlights.slice(0, 3).every(text => text.includes('\u2066') && text.includes('\u2069')));
+    }
+    check('all-locale release rendering produces no page errors', localizedErrors.length === 0,
+        localizedErrors.join(' | '));
+    await localized.close();
 } finally {
     await browser.close();
 }

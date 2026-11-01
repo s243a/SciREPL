@@ -1,0 +1,23 @@
+# SciREPL Free 1.5.0
+
+This update connects the Free app to language-aware online tutorials and fixes source-only cells and Prolog result display.
+
+## What's changed
+
+- Help and Files & Storage open online tutorials in the selected display language. The tutorial index requested by Free excludes Pro-only guides and keeps that Free view when navigating between lessons or changing languages.
+- Tutorial entry labels and the in-app What's New summary cover all 13 bundled interface languages. Tutorials are online reading, not a new offline bundle; opening them does not import a workbook, execute code or grant a permission.
+- A cell beginning with `#!source` is stored without execution in every code language, including when an import asks to execute ordinary cells. Converting an existing cell to source-only clears stale output.
+- Prolog results omit unbound variables and opaque handles instead of displaying `[object Object]`; normal bound answers remain visible.
+- Keyboard trust warnings are translated in all supported interface languages.
+- The Windows portable preview updates Electron to 43.8.6, including security fixes.
+
+Help Copy/Insert, including non-executing Insert and Show/Undo, already shipped in Free 1.4.0 and is retained unchanged.
+
+## Downloads and platform notes
+
+- The Play AAB and standalone APK are unsigned build inputs. They must be verified and signed with the appropriate existing key before upload or installation. An unsigned artifact is not signed Play-delivered testing clearance.
+- The PWA ZIP must be served over HTTPS or localhost. Online Help/tutorial pages remain separately published web content.
+- The Windows portable build is an unsigned preview. Extract it to a local folder and run SciREPL.exe; it is not a Microsoft Store package.
+- Runtime and optional package downloads retain their existing consent and network requirements. This update adds no Pro AI or local-model functionality to Free.
+
+Non-English UI catalogues remain draft translations, not native-speaker approval. Shared tutorial screenshots and workbook companions outside the translated prose inventory may remain in English.

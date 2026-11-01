@@ -44,6 +44,12 @@
             'whatsNew.highlightHelpExamples',
             'whatsNew.highlightPipConsent',
         ]),
+        '1.5.0': Object.freeze([
+            'whatsNew.highlightLocalizedTutorials',
+            'whatsNew.highlightSourceOnlyCells',
+            'whatsNew.highlightPrologBindings',
+            'whatsNew.highlightKeyboardTrust',
+        ]),
         unreleased: Object.freeze([]),
     });
 })();

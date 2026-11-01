@@ -1,0 +1,90 @@
+<en-US>
+• Open online tutorials from Help and Files & Storage in your display language, with a Free-only tutorial index.
+• #!source cells now stay non-executing across code languages.
+• Cleaner Prolog results, without stray [object Object] values.
+• Translated keyboard trust warnings.
+</en-US>
+
+<ar>
+• افتح دروس الإنترنت من المساعدة والملفات والتخزين بلغة العرض، مع فهرس خاص بإصدار Free.
+• لا تُنفّذ خلايا #!source في جميع لغات البرمجة.
+• نتائج Prolog أوضح دون قيم [object Object] غير المفيدة.
+• تحذيرات مترجمة بشأن الثقة بلوحة المفاتيح.
+</ar>
+
+<bn-BD>
+• সহায়তা এবং ফাইল ও স্টোরেজ থেকে প্রদর্শনের ভাষায় অনলাইন টিউটোরিয়াল খুলুন, শুধু Free-এর জন্য সূচি সহ।
+• সব কোডের ভাষায় #!source সেল না চালিয়ে রাখা হয়।
+• অপ্রয়োজনীয় [object Object] ছাড়া পরিচ্ছন্ন Prolog ফলাফল।
+• কীবোর্ডের বিশ্বস্ততা সংক্রান্ত সতর্কতার অনুবাদ।
+</bn-BD>
+
+<de-DE>
+• Online-Tutorials aus Hilfe und Dateien & Speicher in Ihrer Anzeigesprache, mit einem reinen Free-Tutorialindex.
+• #!source-Zellen werden in allen Codesprachen nicht ausgeführt.
+• Klarere Prolog-Ergebnisse ohne störende [object Object]-Werte.
+• Übersetzte Warnungen zur Vertrauenswürdigkeit von Tastaturen.
+</de-DE>
+
+<es-ES>
+• Tutoriales en línea desde Ayuda y Archivos y almacenamiento en el idioma de la interfaz, con un índice solo para Free.
+• Las celdas #!source no se ejecutan en ningún lenguaje de código.
+• Resultados Prolog más claros, sin valores [object Object] innecesarios.
+• Advertencias de confianza del teclado traducidas.
+</es-ES>
+
+<fr-FR>
+• Tutoriels en ligne dans la langue d’affichage depuis l’Aide et Fichiers et stockage, avec un index réservé à Free.
+• Les cellules #!source ne sont pas exécutées, dans tous les langages de code.
+• Résultats Prolog plus clairs, sans valeurs [object Object] parasites.
+• Avertissements de confiance du clavier traduits.
+</fr-FR>
+
+<hi-IN>
+• सहायता और फ़ाइलें और संग्रहण से प्रदर्शन भाषा में ऑनलाइन ट्यूटोरियल खोलें, केवल Free के लिए सूचकांक के साथ।
+• सभी कोड भाषाओं में #!source सेल बिना चलाए रखे जाते हैं।
+• अनावश्यक [object Object] मानों के बिना साफ़ Prolog परिणाम।
+• कीबोर्ड की विश्वसनीयता संबंधी चेतावनियों का अनुवाद।
+</hi-IN>
+
+<id>
+• Buka tutorial daring dari Bantuan serta Berkas & penyimpanan dalam bahasa tampilan Anda, dengan indeks khusus Free.
+• Sel #!source tidak dijalankan dalam semua bahasa kode.
+• Hasil Prolog lebih bersih, tanpa nilai [object Object] yang mengganggu.
+• Peringatan kepercayaan papan ketik diterjemahkan.
+</id>
+
+<ja-JP>
+• ヘルプと「ファイルとストレージ」から表示言語に合ったオンラインチュートリアルを開けます。Free 専用の一覧を用意しました。
+• すべてのコード言語で #!source セルを実行せずに保存します。
+• 不要な [object Object] 値を除き、Prolog の結果を見やすくしました。
+• キーボードの信頼性に関する警告を翻訳しました。
+</ja-JP>
+
+<ko-KR>
+• 도움말과 파일 및 스토리지에서 표시 언어에 맞는 온라인 자습서를 열 수 있으며 Free 전용 목록을 제공합니다.
+• 모든 코드 언어에서 #!source 셀을 실행하지 않고 보관합니다.
+• 불필요한 [object Object] 값을 제거하여 Prolog 결과가 더 깔끔해졌습니다.
+• 키보드 신뢰 경고를 번역했습니다.
+</ko-KR>
+
+<pt-BR>
+• Tutoriais on-line pela Ajuda e Arquivos e armazenamento no idioma da interface, com um índice exclusivo do Free.
+• Células #!source não são executadas em nenhuma linguagem de código.
+• Resultados Prolog mais claros, sem valores [object Object] desnecessários.
+• Avisos de confiança do teclado traduzidos.
+</pt-BR>
+
+<ru-RU>
+• Онлайн-уроки из справки и раздела «Файлы и хранилище» на языке интерфейса, с отдельным каталогом для Free.
+• Ячейки #!source сохраняются без выполнения на любом языке программирования.
+• Более понятные результаты Prolog без лишних значений [object Object].
+• Переведены предупреждения о доверии клавиатуре.
+</ru-RU>
+
+<zh-CN>
+• 从帮助及“文件与存储”打开所选显示语言的在线教程，并提供仅含 Free 教程的目录。
+• 所有代码语言中的 #!source 单元格均保存而不执行。
+• Prolog 结果不再显示多余的 [object Object] 值。
+• 翻译了键盘信任警告。
+</zh-CN>
