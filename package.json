@@ -1,9 +1,9 @@
 {
   "name": "sci-repl",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "releaseChannel": "release",
   "android": {
-    "versionCode": 16
+    "versionCode": 17
   },
   "description": "Mobile Scientific REPL \u2014 Python + Pyodide + Plotly.js",
   "main": "index.js",
@@ -12,6 +12,7 @@
     "configure": "node scripts/configure-build.mjs",
     "fetch:bundles": "node scripts/fetch-bundles.mjs",
     "test:header-scaling": "node tests/test_header_scaling.mjs",
+    "test:tutorial-links": "node tests/test_tutorial_links.mjs && node tests/test_tutorial_free_index.mjs",
     "test:help": "node tests/test_help_site.mjs && node scripts/build-named-cell-example.mjs --check && node scripts/build-landing-pages.mjs --check && node tests/test_workbook_graphics.mjs && node tests/test_named_cell_tutorial.mjs && npm run test:tutorial-locales",
     "tutorials:extract": "node scripts/tutorial_locale_extract.mjs",
     "tutorials:render": "node scripts/tutorial_locale_render.mjs",
@@ -49,7 +50,7 @@
     "sw:lock": "node scripts/check-sw-shell.mjs --write",
     "licenses:generate": "node scripts/generate-third-party-notices.mjs",
     "licenses:check": "node scripts/generate-third-party-notices.mjs --check",
-    "release:check": "node scripts/check-release-version.mjs",
+    "release:check": "node scripts/check-release-version.mjs && node tests/test_free_release_notes.mjs",
     "test:pip-resolver": "node tests/test_pip_resolver.mjs",
     "test:pip-cell": "node tests/test_pip_cell.mjs",
     "test:header-shortcuts": "node tests/test_header_shortcuts.mjs",

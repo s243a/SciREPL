@@ -1,13 +1,16 @@
-# A `v*` tag runs the branch gates, then builds the unsigned Android APK, the
-# PWA zip and the unsigned portable Windows application, and attaches all three
-# to a pre-release. Release assets do not expire; the workflow artifacts uploaded
-# by windows-portable-preview.yml are deleted after fourteen days.
-name: Build Release (APK + PWA + Windows)
+# A manual run builds tested unsigned candidate artifacts only. A pushed v* tag
+# also creates a GitHub pre-release after every gate passes. A manual run, even
+# when selecting an existing tag, never creates a release or publishes Pages.
+name: Build Release or Candidate (AAB + APK + PWA + Windows)
 
 on:
   push:
     tags:
       - 'v*'  # Triggers on version tags like v0.1.0, v1.0.0-beta, etc.
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   # Release must not publish an artifact the suites have not passed. This runs
@@ -23,6 +26,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm install
+      - run: node tests/test_android_candidate.mjs && node tests/test_candidate_workflow.mjs
       - run: npm run licenses:check && npm run release:check
       - run: npm run configure
       - run: npm run fetch:bundles
@@ -46,6 +50,7 @@ jobs:
       - run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
       - run: node tests/test_appearance.mjs
       - run: node tests/test_onboarding.mjs
+      - run: npm run test:tutorial-links
       - run: npm run test:status-bar
       - run: npm run test:landscape-composer
       - run: node tests/test_help_examples.mjs
@@ -88,6 +93,11 @@ jobs:
       - name: Check committed component notices and release metadata
         run: npm run licenses:check && npm run release:check
 
+      - name: Read safe artifact label
+        id: artifact
+        shell: bash
+        run: echo "label=$(node scripts/release-artifact-label.mjs)" >> "$GITHUB_OUTPUT"
+
       # The Free profile. build-portable.mjs refuses to package the `pro`
       # profile or a tree containing the offline R runtime, so this is enforced
       # rather than assumed.
@@ -111,10 +121,12 @@ jobs:
 
       - name: Zip the portable application
         shell: pwsh
+        env:
+          SCIREPL_ARTIFACT_LABEL: ${{ steps.artifact.outputs.label }}
         run: |
           $tree = 'desktop/electron/out/SciREPL-win32-x64'
           if (-not (Test-Path $tree)) { throw "packaging produced nothing at $tree" }
-          $zip = "SciREPL-${{ github.ref_name }}-windows-x64-portable.zip"
+          $zip = "SciREPL-${env:SCIREPL_ARTIFACT_LABEL}-windows-x64-portable.zip"
           if (Get-Command 7z -ErrorAction SilentlyContinue) {
             7z a -tzip -mx=5 "$zip" "$tree/*"
             if ($LASTEXITCODE -ne 0) { throw "7z failed with $LASTEXITCODE" }
@@ -127,7 +139,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-portable-zip
-          path: SciREPL-${{ github.ref_name }}-windows-x64-portable.zip
+          path: SciREPL-*-windows-x64-portable.zip
           if-no-files-found: error
           retention-days: 7
           # Already a compressed archive; recompressing buys nothing.
@@ -148,8 +160,6 @@ jobs:
     # Keep the runner compatible with the Chromium builds in locked Playwright.
     runs-on: ubuntu-24.04
     timeout-minutes: 60
-    permissions:
-      contents: write  # Required to create releases
     
     steps:
       - name: Checkout code
@@ -168,6 +178,10 @@ jobs:
       
       - name: Install dependencies
         run: npm install
+
+      - name: Read safe artifact label
+        id: artifact
+        run: echo "label=$(node scripts/release-artifact-label.mjs)" >> "$GITHUB_OUTPUT"
 
       - name: Check committed component notices and release metadata
         run: npm run licenses:check && npm run release:check
@@ -212,22 +226,43 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
       
-      - name: Build unsigned APK
+      - name: Build unsigned APK and Play bundle
+        env:
+          SCIREPL_RELEASE_STORE_FILE: ''
+          SCIREPL_RELEASE_STORE_PASSWORD: ''
+          SCIREPL_RELEASE_KEY_ALIAS: ''
+          SCIREPL_RELEASE_KEY_PASSWORD: ''
         run: |
+          test ! -e android/release-signing.properties
           cd android
-          ./gradlew assembleRelease
-      
-      - name: Rename APK for clarity
+          ./gradlew assembleRelease bundleRelease
+
+      - name: Fetch the pinned bundle validator
+        run: node scripts/validate-android-candidate.mjs --fetch-bundletool "$RUNNER_TEMP/bundletool.jar"
+
+      - name: Validate unsigned Free Android artifacts
         run: |
-          mv android/app/build/outputs/apk/release/app-release-unsigned.apk \
-             android/app/build/outputs/apk/release/SciREPL-${{ github.ref_name }}-unsigned.apk || \
-          mv android/app/build/outputs/apk/release/app-release.apk \
-             android/app/build/outputs/apk/release/SciREPL-${{ github.ref_name }}-unsigned.apk
+          node scripts/validate-android-candidate.mjs \
+            --aab android/app/build/outputs/bundle/release/app-release.aab \
+            --apk android/app/build/outputs/apk/release/app-release-unsigned.apk \
+            --bundletool "$RUNNER_TEMP/bundletool.jar"
+      
+      - name: Name the validated Android artifacts
+        env:
+          SCIREPL_ARTIFACT_LABEL: ${{ steps.artifact.outputs.label }}
+        run: |
+          mkdir -p dist
+          cp android/app/build/outputs/apk/release/app-release-unsigned.apk \
+             "dist/SciREPL-${SCIREPL_ARTIFACT_LABEL}-unsigned.apk"
+          cp android/app/build/outputs/bundle/release/app-release.aab \
+             "dist/SciREPL-${SCIREPL_ARTIFACT_LABEL}-play-unsigned.aab"
 
       - name: Package PWA as zip
+        env:
+          SCIREPL_ARTIFACT_LABEL: ${{ steps.artifact.outputs.label }}
         run: |
           cd www
-          zip -r ../SciREPL-${{ github.ref_name }}-pwa.zip . \
+          zip -r "../dist/SciREPL-${SCIREPL_ARTIFACT_LABEL}-pwa.zip" . \
             -x "*.DS_Store"
           cd ..
 
@@ -235,65 +270,55 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: windows-portable-zip
+          path: dist
+
+      - name: Stage prepared GitHub release notes
+        run: |
+          release_version=$(node -p "require('./package.json').version")
+          test -s "docs/releases/${release_version}-github-notes.txt"
+          cp "docs/releases/${release_version}-github-notes.txt" dist/RELEASE_NOTES.md
+
+      - name: Hash the candidate assets
+        run: sha256sum dist/*.aab dist/*.apk dist/*.zip dist/RELEASE_NOTES.md > dist/SHA256SUMS.txt
+
+      - name: Upload tested unsigned assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: free-release-assets
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+  publish:
+    # Checking only ref_type would publish a manual run selected on a tag.
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download tested release assets
+        uses: actions/download-artifact@v4
+        with:
+          name: free-release-assets
+          path: dist
+
+      - name: Verify downloaded asset hashes
+        run: sha256sum -c dist/SHA256SUMS.txt
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            android/app/build/outputs/apk/release/SciREPL-${{ github.ref_name }}-unsigned.apk
-            SciREPL-${{ github.ref_name }}-pwa.zip
-            SciREPL-${{ github.ref_name }}-windows-x64-portable.zip
+            dist/SciREPL-${{ github.ref_name }}-play-unsigned.aab
+            dist/SciREPL-${{ github.ref_name }}-unsigned.apk
+            dist/SciREPL-${{ github.ref_name }}-pwa.zip
+            dist/SciREPL-${{ github.ref_name }}-windows-x64-portable.zip
+            dist/RELEASE_NOTES.md
+            dist/SHA256SUMS.txt
+          fail_on_unmatched_files: true
           prerelease: true
-          body: |
-            > **Pre-release** — unsigned APK for testing. After signing, upload `SciREPL-${{ github.ref_name }}.apk` and mark as latest release.
-
-            ## Downloads
-
-            - **Android APK (signed):** Upload pending — download `SciREPL-${{ github.ref_name }}.apk` once available
-            - **Android APK (unsigned):** `SciREPL-${{ github.ref_name }}-unsigned.apk` — requires signing before install (see below)
-            - **PWA (zip):** `SciREPL-${{ github.ref_name }}-pwa.zip` — unzip and serve over HTTPS or localhost (service workers do not run from `file://`)
-            - **PWA (live):** [https://s243a.github.io/SciREPL/](https://s243a.github.io/SciREPL/) — install from browser, no app store needed
-            - **Windows portable (unsigned, x64):** `SciREPL-${{ github.ref_name }}-windows-x64-portable.zip` — extract and run, no installer
-
-            ## Running the Windows portable build
-
-            Extract the zip to a local folder (not a network path) and run **SciREPL.exe**.
-            There is no installer and nothing is registered with the operating system.
-
-            The build is **unsigned**, so Windows SmartScreen shows "Windows protected
-            your PC" on first run — choose **More info → Run anyway**. That is expected
-            for an unsigned build and is not a sign of a problem.
-
-            Bash/Brush, ClojureScript/Scittle, SWI-Prolog and Python/Pyodide are bundled
-            and work offline. Lua and R download from their CDNs on first use, then run
-            offline from SciREPL's own runtime cache. Application data lives under
-            `%APPDATA%\SciREPL-Free-Electron`. See `docs/WINDOWS_PREVIEW.md`.
-
-            ## Updating the PWA
-
-            If you already have the PWA installed, make sure you're running the latest version:
-
-            - **Desktop:** Press `Ctrl+Shift+R` to force-reload and clear the service worker cache
-            - **Mobile / newer versions:** Open the **Menu** and tap **Reload App**
-
-            ## Signing the Unsigned APK
-
-            If you prefer to sign the APK yourself:
-
-            1. Zipalign:
-               ```bash
-               zipalign -v 4 SciREPL-${{ github.ref_name }}-unsigned.apk \
-                 SciREPL-${{ github.ref_name }}-aligned.apk
-               ```
-            2. Sign with apksigner (v2):
-               ```bash
-               apksigner sign --ks your-keystore.keystore \
-                 --ks-key-alias your-alias \
-                 --out SciREPL-${{ github.ref_name }}.apk \
-                 SciREPL-${{ github.ref_name }}-aligned.apk
-               ```
-            3. Install: `adb install SciREPL-${{ github.ref_name }}.apk`
-
-            **For maintainers:** After signing, upload the signed APK and edit this release to add a changelog and mark as latest.
+          body_path: dist/RELEASE_NOTES.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -30,6 +30,20 @@
     "Session-AppState": "The current working state of the app. Not a meeting or a class."
   },
   "__senseOf": {
+    "whatsNew.highlightLocalizedTutorials": [
+      "Language-Interface"
+    ],
+    "whatsNew.highlightSourceOnlyCells": [
+      "Cell-Notebook",
+      "Language-Programming",
+      "Run-Execute"
+    ],
+    "whatsNew.highlightPrologBindings": [
+      "Language-Programming"
+    ],
+    "whatsNew.highlightKeyboardTrust": [
+      "Language-Interface"
+    ],
     "help.exampleUndoUnavailable": [
       "Cell-Notebook",
       "Notebook-Document"
@@ -202,6 +216,10 @@
     ]
   },
   "__context": {
+    "whatsNew.highlightLocalizedTutorials": "Free 1.5.0 release highlight. Help and Files & Storage are existing app areas. Display language means the app UI locale, not a programming language. Tutorials require a network connection; the Free index omits guides for Pro-only features.",
+    "whatsNew.highlightSourceOnlyCells": "Free 1.5.0 release highlight. Preserve the exact marker #!source. These cells store source text rather than executing it; previous output is removed when a formerly executable cell becomes source-only.",
+    "whatsNew.highlightPrologBindings": "Free 1.5.0 release highlight. Preserve Prolog and [object Object] exactly. Unbound variables and opaque handles are internal Prolog values, not useful displayed answers; normal bound answers still display.",
+    "whatsNew.highlightKeyboardTrust": "Free 1.5.0 release highlight. The existing warning about trusting third-party keyboard applications is now present in every supported UI locale. It does not add or grant any Android permission.",
     "help.exampleUndoUnavailable": "Shown and announced when Undo cannot safely remove the inserted cell because the user switched notebooks or the cell is gone. Nothing was deleted.",
     "help.exampleShowUnavailable": "Announced after Help closes when Show cannot find the inserted cell (deleted, or its notebook was closed).",
     "whatsNew.highlightStatusBar": "Release highlight for the Android-only status-bar setting. Reuse the existing translations of the menu path and of Never / In landscape / Always.",
@@ -474,6 +492,10 @@
     "whatsNew.highlightShortLandscapeComposer": "In short landscape, hide the new-cell panel to give the notebook the full height. Bring it back with the header button or by swiping up at the end of the notebook; it also hides while the keyboard is open for a cell you are editing.",
     "whatsNew.highlightHelpExamples": "Help examples have Copy and Insert buttons. Insert adds the example as a new cell at the end of the notebook without running it.",
     "whatsNew.highlightPipConsent": "%pip install now asks you to accept the current privacy policy before it can contact a package index or CDN, even for a package that already appears installed.",
+    "whatsNew.highlightLocalizedTutorials": "Help and Files & Storage now open online tutorials in your display language. The Free tutorial index excludes Pro-only guides.",
+    "whatsNew.highlightSourceOnlyCells": "Cells starting with #!source are now stored without running in every code language. Stale output is cleared when a cell becomes source-only.",
+    "whatsNew.highlightPrologBindings": "Prolog results now hide unbound variables and opaque handles instead of showing [object Object]. Normal bound values remain visible.",
+    "whatsNew.highlightKeyboardTrust": "Keyboard trust warnings are now translated in every supported display language. Only install keyboards you trust.",
     "whatsNew.releaseNotes": "Read the full release notes",
     "menu.showTour": "🧭 Take the Tour",
     "searchReplaceRow.replace": "Replace",
@@ -556,6 +578,8 @@
     "help.shortcutAtEndOfLine": "at end of line",
     "help.shortcutSuppressOutput": "Suppress output",
     "help.documentation": "Documentation",
+    "help.tutorialIndex": "Tutorials (online)",
+    "vfs.workbookImportTutorial": "Workbook import tutorial (online)",
     "help.fullDocumentationGithubReadme": "Full documentation: <a href=\"https://github.com/s243a/SciREPL#readme\" target=\"_blank\">GitHub README</a>",
     "help.version": "Version",
     "help.scireplVersion": "<strong>SciREPL v{version}</strong>",

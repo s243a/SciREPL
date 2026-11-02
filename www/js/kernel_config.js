@@ -16,7 +16,7 @@
 window.KERNEL_CONFIG = {
   "app": {
     "name": "SciREPL",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "releaseChannel": "release",
     "releaseUrl": "https://github.com/s243a/SciREPL/releases",
     "repository": "https://github.com/s243a/SciREPL",
@@ -25,7 +25,7 @@ window.KERNEL_CONFIG = {
   "profile": "full",
   "components": {
     "scirepl": {
-      "version": "1.4.0",
+      "version": "1.5.0",
       "licenseExpression": "MIT",
       "sourceUrl": "https://github.com/s243a/SciREPL",
       "delivery": {
@@ -319,9 +319,9 @@ window.KERNEL_CONFIG = {
       "sources": []
     },
     "electron": {
-      "version": "43.3.0",
+      "version": "43.8.6",
       "licenseExpression": "MIT",
-      "sourceUrl": "https://github.com/electron/electron/tree/v43.3.0",
+      "sourceUrl": "https://github.com/electron/electron/tree/v43.8.6",
       "delivery": {
         "kind": "platform",
         "platform": "Electron desktop"

@@ -80,7 +80,7 @@ Electron is declared in `desktop/electron/package.json`, **not** in the root
 is what the Android build and the existing CI do — must not download a ~220 MB
 Chromium runtime. Only `npm run windows:install` does.
 
-Electron is pinned exactly (`43.3.0`, no range).
+Electron is pinned exactly (`43.8.6`, no range).
 
 ## Origin model
 

@@ -38,7 +38,25 @@ for (const locale of locales) {
       const value = renderEditorialField(field, restored, locale, { keepReason: kept[field.id], inventory });
       return { start: field.start, end: field.end, value };
     });
-    const rendered = decoratePage(replaceRanges(source, replacements), page.route, locale, chrome);
+    let rendered = decoratePage(replaceRanges(source, replacements), page.route, locale, chrome);
+    if (page.route === 'tutorials') {
+      // Edition selection is presentation, not translated prose. Keep the
+      // accepted source and locale records intact, and retain the full shared
+      // index unless the app explicitly requests its Free-only view.
+      const proSection = '<section aria-labelledby="ai-tutorials">';
+      const proChip = '<li class="chip chip-pro">';
+      if (!rendered.includes(proSection) || !rendered.includes(proChip)) throw new Error(`${locale}: tutorial edition markers no longer match the index`);
+      rendered = rendered.replace(proSection, '<section aria-labelledby="ai-tutorials" data-tutorial-editions="pro">')
+        .replace(proChip, '<li class="chip chip-pro" data-tutorial-editions="pro">');
+    }
+    if (page.route !== 'pro/ai/tutorial') {
+      const editionScript = path.posix.relative(`help/${locale}/${page.route}`, 'help/tutorial-edition.js');
+      // Not deferred: the script sets the CSS selector before body parsing, so
+      // the Pro-only section cannot flash before DOMContentLoaded removes it.
+      // Shared lessons retain this explicit view in navigation back to the
+      // index, while the Pro walkthrough and the default URLs are unchanged.
+      rendered = rendered.replace('</head>', `  <script src="${editionScript}"></script>\n</head>`);
+    }
     const output = path.join(ROOT, 'www', 'help', locale, page.route, 'index.html');
     staged.push({ output, rendered, locale, route: page.route });
     count++;

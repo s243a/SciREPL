@@ -6,6 +6,8 @@
 .tutorial-language-menu a[aria-current] { font-weight: bold; outline: 2px solid currentColor; }
 .tutorial-translation-notice { font-size: .9rem; margin-block-end: 0; }
 .english-reference { font-size: .85em; }
+/* The Free app requests this fixed index view; the shared index stays full. */
+html[data-tutorial-edition="free"] [data-tutorial-editions="pro"] { display: none; }
 html[dir="rtl"] .lesson-steps, html[dir="rtl"] .lesson-nav ol { padding-inline-start: 1.6rem; padding-inline-end: 0; }
 html[dir="rtl"] pre, html[dir="rtl"] code, html[dir="rtl"] kbd, html[dir="rtl"] .path-tree { direction: ltr; unicode-bidi: isolate; text-align: left; }
 html[dir="rtl"] .shot-window, html[dir="rtl"] .shot-stage { direction: ltr; }

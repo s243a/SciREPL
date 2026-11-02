@@ -451,11 +451,11 @@
     {
       "id": "electron",
       "name": "Electron",
-      "version": "43.3.0",
+      "version": "43.8.6",
       "licenseExpression": "MIT",
       "licenseDocuments": ["MIT"],
       "copyright": "Copyright (c) Electron contributors; Chromium third-party notices ship with Electron builds",
-      "sourceUrl": "https://github.com/electron/electron/tree/v43.3.0",
+      "sourceUrl": "https://github.com/electron/electron/tree/v43.8.6",
       "delivery": { "kind": "platform", "platform": "Electron desktop" },
       "packageName": "electron",
       "packageLock": "desktop/electron/package-lock.json",
