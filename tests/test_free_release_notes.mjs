@@ -56,6 +56,9 @@ for (const locale of LOCALES) {
 }
 
 function validatePlayNotes(text) {
+    // Git may check these copy/paste notes out with Windows CRLF endings.
+    // Normalize only paired CRLF; locale, content and length gates stay strict.
+    text = text.replace(/\r\n/g, '\n');
     const pattern = /<([A-Za-z0-9-]+)>\n([\s\S]*?)\n<\/\1>/g;
     const blocks = [...text.matchAll(pattern)];
     assert.deepEqual(blocks.map(match => match[1]), PLAY_LOCALES, 'exact supported Play locale tags, once each');
@@ -71,18 +74,27 @@ function validatePlayNotes(text) {
     return blocks;
 }
 
-const playNotes = read('docs/releases/1.5.0-play-notes.txt');
+const playNotes = read('docs/releases/1.5.0-play-notes.txt').replace(/\r\n/g, '\n');
 const blocks = validatePlayNotes(playNotes);
 checks++;
+equal(validatePlayNotes(playNotes.replace(/\n/g, '\r\n')), blocks,
+    'Windows CRLF notes retain the exact LF locale blocks and prose');
+equal(validatePlayNotes(playNotes.replace(/\n/, '\r\n')), blocks,
+    'mixed LF/CRLF notes retain the exact locale blocks and prose');
 for (const [name, invalid] of [
     ['missing locale', playNotes.replace(/<ar>\n[\s\S]*?\n<\/ar>\n/, '')],
     ['duplicate locale', playNotes + '\n' + blocks[0][0]],
     ['too long', playNotes.replace(blocks[0][2], 'x'.repeat(501))],
     ['untagged prose', 'Upload instructions\n' + playNotes],
     ['lost marker', playNotes.replace('#!source', '#source')],
+    ['wrong locale', playNotes.replace('<ar>', '<tr>').replace('</ar>', '</tr>')],
+    ['mismatched closing tag', playNotes.replace('</ar>', '</tr>')],
+    ['bare CR delimiter', playNotes.replace('<en-US>\n', '<en-US>\r')],
 ]) {
-    assert.throws(() => validatePlayNotes(invalid), undefined, name);
-    checks++;
+    for (const [ending, candidate] of [['LF', invalid], ['CRLF', invalid.replace(/\n/g, '\r\n')]]) {
+        assert.throws(() => validatePlayNotes(candidate), undefined, `${name} (${ending})`);
+        checks++;
+    }
 }
 check(read('docs/releases/1.5.0-github-notes.txt').includes('already shipped in Free 1.4.0'),
     'full notes do not reannounce existing Help Copy/Insert as new');
