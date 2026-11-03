@@ -8,7 +8,19 @@ import { readFile, stat } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { extname, resolve, sep } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { chromium } from 'playwright';
+
+// Keep renderer-only regressions in the existing release CI entry point.
+// A separate test process makes failures fatal before opening a server/browser;
+// the browser suite cannot accidentally overwrite node:test's exit status.
+const prologValues = spawnSync(process.execPath, ['--test', fileURLToPath(
+    new URL('./test_prolog_values.mjs', import.meta.url),
+)], { stdio: 'inherit' });
+if (prologValues.error) throw prologValues.error;
+if (prologValues.status !== 0) {
+    throw new Error(`Prolog value regressions failed (status ${prologValues.status}, signal ${prologValues.signal || 'none'})`);
+}
 
 // Derived from sw.js, not hardcoded — the cache version bumps whenever an
 // app-shell asset changes (enforced by scripts/check-sw-shell.mjs), and this
@@ -386,10 +398,23 @@ try {
             number: 'X = 42.',
             compound: 'X = foo(bar).',
             dict: 'X = person{name:alice}.',
+            nested: 'X = outer(foo(bar), [a, b], tag{a:1,b:foo(bar)}).',
+            quoted: `X = 'two words'('Upper', 'can\\'t', 'a\\\\b').`,
+            string: 'X = "say \\"hi\\"\\\\\\n".',
+            list: 'X = [foo(bar), "hello", person{name:alice}].',
+            improper: 'X = [a, foo(bar) | _].',
+            rational: 'X is 1 rdiv 3.',
+            bigInteger: 'X = 123456789012345678901234567890.',
+            emptyDict: 'X = empty{}.',
+            variableTag: 'X = _{}.',
+            dictionaryKeys: `X = schema{'$t':v, args:[bar], functor:foo}.`,
+            blobKey: `X = _{'$t':b, v:1}.`,
+            numericAtomKeys: `X = _{'007':v, '-0':w}.`,
         };
         const output = {};
         for (const [name, query] of Object.entries(queries)) {
             const result = await window.kernelManager.execute(query, 'prolog');
+            if (result.error) throw new Error(`${name}: ${result.error}`);
             output[name] = result.stdout || '';
         }
         return output;
@@ -398,10 +423,41 @@ try {
         'unbound Prolog variables are omitted from displayed bindings', bindingCases.unbound);
     assert(!/\bS\s*=|\[object Object\]/.test(bindingCases.opaque),
         'opaque Prolog handles are omitted from displayed bindings', bindingCases.opaque);
-    assert(/\bX\s*=\s*42\b/.test(bindingCases.number),
-        'bound numeric Prolog values remain visible', bindingCases.number);
-    assert(/\bX\s*=/.test(bindingCases.compound) && /\bX\s*=/.test(bindingCases.dict),
-        'compound and dictionary Prolog bindings remain visible', JSON.stringify(bindingCases));
+    const expectedBindings = {
+        number: 'X = 42',
+        compound: 'X = foo(bar)',
+        dict: 'X = person{name:alice}',
+        nested: 'X = outer(foo(bar), [a, b], tag{a:1, b:foo(bar)})',
+        quoted: `X = 'two words'('Upper', 'can\\'t', 'a\\\\b')`,
+        string: 'X = "say \\"hi\\"\\\\\\n"',
+        list: 'X = [foo(bar), "hello", person{name:alice}]',
+        improper: 'X = [a, foo(bar) | _]',
+        rational: 'X = 1r3',
+        bigInteger: 'X = 123456789012345678901234567890',
+        emptyDict: 'X = empty{}',
+        variableTag: 'X = _{}',
+    };
+    for (const [name, expected] of Object.entries(expectedBindings)) {
+        assert(bindingCases[name].trim() === expected,
+            `actual bundled Prolog ${name} binding renders exactly`,
+            JSON.stringify({ expected, actual: bindingCases[name] }));
+    }
+    // SWI's dictionary enumeration follows runtime atom IDs, not lexical key
+    // order. These simple values have no nested field separators: require the
+    // exact tag and complete rendered field set without pinning that order.
+    for (const [name, { tag, fields }] of Object.entries({
+        dictionaryKeys: { tag: 'schema', fields: ["'$t':v", 'args:[bar]', 'functor:foo'] },
+        blobKey: { tag: '_', fields: ["'$t':b", 'v:1'] },
+        numericAtomKeys: { tag: '_', fields: ["'007':v", "'-0':w"] },
+    })) {
+        const actual = bindingCases[name].trim();
+        const prefix = `X = ${tag}{`;
+        const actualFields = actual.startsWith(prefix) && actual.endsWith('}')
+            ? actual.slice(prefix.length, -1).split(', ').sort() : null;
+        assert(JSON.stringify(actualFields) === JSON.stringify([...fields].sort()),
+            `actual bundled Prolog ${name} preserves every dictionary key and value`,
+            JSON.stringify({ tag, fields, actual }));
+    }
 
     console.log('4. Going offline before installing the dependency-aware bundle...');
     await context.setOffline(true);
