@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Connect SciREPL Pro to your own Ollama or OpenAI-compatible server: full endpoint URLs, private HTTPS access from a phone, CORS, saved keys and a small first request.">
+  <meta name="theme-color" content="#06101d">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/en/pro/ai/self-hosted/">
+  <link rel="stylesheet" href="../../../../styles.css">
+  <title>Use your own AI server · SciREPL Pro Help</title>
+  <style>p code, li code, td code { overflow-wrap: anywhere; }</style>
+</head>
+<body data-editions="pro" data-platforms="android windows-preview">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="../../../../">sci<span>REPL</span> Help</a>
+    <nav aria-label="Primary navigation">
+      <a href="../../../../pro/">Pro help</a>
+      <a href="../../../../pro/ai/">AI reference</a>
+      <a href="../../../tutorials/">All tutorials</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <p class="breadcrumbs"><a href="../../../../">Help</a> / <a href="../../../../pro/">Pro</a> / Your own AI server</p>
+    <article>
+      <p class="eyebrow">Step-by-step setup · Pro</p>
+      <h1>Use your own AI server</h1>
+      <p class="lede">Connect Pro to an Ollama server or another compatible chat-completions endpoint that you control. Configure its provider in AI Settings, then test with one no-tools AI Prompt cell before trying the Assistant's workbook tools.</p>
+      <ul class="meta"><li class="chip chip-pro">Pro only</li><li class="chip">Current Pro 1.5.0 controls</li><li class="chip">English-first guide</li></ul>
+      <p class="note" id="language-scope"><strong>This new guide is currently English only.</strong> It is separate from the existing translated tutorial set. It describes current endpoint controls, not a promise that every server, model or network configuration has been tested.</p>
+      <p class="callout"><strong>Three different things:</strong> a self-hosted model is a <em>Direct AI provider</em>; Android's on-device completion model is a separate feature; <strong>Remote bridge</strong> connects an external coding agent through an MCP broker. This lesson does not require Remote, an SSH session or a coding agent.</p>
+      <p>Here the computer runs the model and the phone is the client. You do not need to install an Ollama server or download a model onto Android for this setup. Pro's optional Android on-device completion model is not that server.</p>
+      <nav aria-label="Setup steps"><a href="#server">1. Check the server</a> · <a href="#phone">2. Reach it securely</a> · <a href="#settings">3. Set up Pro</a> · <a href="#first-request">4. Send a small request</a> · <a href="#troubleshooting">Troubleshooting</a></nav>
+
+      <section id="server">
+        <h2>1. Check the server on its own computer</h2>
+        <p>Install Ollama using its <a href="https://docs.ollama.com/quickstart">official setup instructions</a>. Choose a local model that fits that computer's memory; downloads can be large. This guide does not require an Ollama cloud model or a paid cloud API key.</p>
+        <p class="note">Command examples use a Linux/macOS shell. WSL and Windows can have different loopback network namespaces: WSL's <code>127.0.0.1</code> is not automatically the Windows Ollama app's <code>127.0.0.1</code>. Run the gateway and Ollama in the same host OS/network namespace, or arrange explicit, approved local forwarding. Native Windows uses different quoting and environment-variable syntax; follow Ollama's Windows instructions when configuring its Windows app.</p>
+        <p>On the server computer, list the models you have installed:</p>
+        <pre><code>ollama list</code></pre>
+        <p>Keep the exact model name, including its tag. If needed, deliberately download a model with <code>ollama pull MODEL_NAME</code>, replacing <code>MODEL_NAME</code> with your choice. If the server is not running, start it with <code>ollama serve</code>; do not start a second copy over an existing desktop app or service.</p>
+        <p>Verify a small request there first. Replace <code>MODEL_NAME</code> below with the installed name:</p>
+        <pre><code>curl http://127.0.0.1:11434/v1/chat/completions \
+  -H 'Content-Type: application/json' \
+  -d '{"model":"MODEL_NAME","messages":[{"role":"user","content":"Say hello in one sentence."}],"stream":false}'</code></pre>
+        <p>The response should contain <code>choices[0].message.content</code>. This uses Ollama's <a href="https://docs.ollama.com/api/openai-compatibility">OpenAI-compatible chat-completions API</a>, not its native <code>/api/chat</code> API. Terminal success proves server/model readiness, not phone connectivity or browser CORS.</p>
+      </section>
+
+      <section id="phone">
+        <h2>2. Reach it securely from SciREPL</h2>
+        <p><strong>Localhost means the device running SciREPL.</strong> On a phone it is the phone, not your PC. Use the computer's private HTTPS hostname when the model runs elsewhere.</p>
+        <div class="table-wrap"><table><thead><tr><th>Server location</th><th>Full API Endpoint</th></tr></thead><tbody>
+          <tr><td>Same device, reachable on loopback</td><td><code>http://127.0.0.1:11434/v1/chat/completions</code></td></tr>
+          <tr><td>Another computer through a private TLS proxy</td><td><code>https://YOUR_HOST:8443/v1/chat/completions</code></td></tr>
+        </tbody></table></div>
+        <p class="warning"><strong>HTTPS is required for a non-loopback host.</strong> Plain LAN HTTP, such as <code>http://192.168.1.20:11434/…</code>, and plain HTTP to a Tailscale IP are rejected by the current endpoint policy. A private network does not bypass it. The device must trust the certificate and its hostname must match; do not disable certificate checks.</p>
+        <h3>Prepare a loopback gateway before Tailscale Serve</h3>
+        <p><strong>Do not point Serve directly at Ollama.</strong> Serve preserves the public-facing Host header, which a loopback-bound Ollama server can reject. <code>OLLAMA_ORIGINS</code> controls CORS, not this Host check. Put a trusted, reviewed gateway at <code>127.0.0.1:11435</code> in front of Ollama at <code>127.0.0.1:11434</code>.</p>
+        <p>The gateway must check its own Bearer token, allow only your intended app origins, answer their CORS preflights, and normalize the upstream <code>Host</code> to <code>localhost:11434</code>. Your app uses the <em>gateway's</em> credential. The following NGINX fragment illustrates only the loopback/upstream routing and Host rewrite, following <a href="https://docs.ollama.com/faq#how-can-i-use-ollama-with-a-proxy-server">Ollama's proxy example</a> and the <a href="https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_set_header">NGINX header reference</a>:</p>
+        <pre><code>server {
+    listen 127.0.0.1:11435;
+    location = /v1/chat/completions {
+        proxy_pass http://127.0.0.1:11434;
+        proxy_set_header Host localhost:11434;
+    }
+}</code></pre>
+        <p class="warning"><strong>This fragment is not a complete secure gateway.</strong> It omits Bearer-token authentication and CORS/preflight policy. Use an existing gateway with those controls, or have its administrator complete and review the configuration before sharing it. Do not deploy this routing fragment alone, accept every origin, or expose Ollama's listener to the network to get around a 403.</p>
+        <p>Verify that the gateway rejects a missing/wrong token, accepts your intended app origin and the <code>Authorization</code>/<code>Content-Type</code> headers, and successfully proxies one small authenticated chat request. The gateway and Ollama must be reachable from the same host OS/network namespace. Only then enable the private HTTPS mapping below.</p>
+        <h3>Share the prepared gateway privately</h3>
+        <ol class="steps">
+          <li>Put the server computer and phone on your authorized Tailscale network. Restrict which devices/users can reach the service. Enable tailnet HTTPS certificate support when prompted.</li>
+          <li>Keep Ollama on <code>127.0.0.1:11434</code> and the prepared gateway on <code>127.0.0.1:11435</code>. Check existing mappings first with <code>tailscale serve status</code>.</li>
+          <li>If HTTPS port <code>8443</code> is unused in that configuration, run this on the server computer. It changes Serve configuration; do not overwrite an existing mapping:</li>
+        </ol>
+        <pre><code>tailscale serve --https=8443 http://127.0.0.1:11435</code></pre>
+        <p>Copy the exact HTTPS hostname and port printed by Serve, then append <code>/v1/chat/completions</code>. Keep this foreground command running while testing; stop this session with <kbd>Ctrl+C</kbd> when done. Use <strong>Serve, not Funnel</strong>: private tailnet access is the goal, not a public model server. Check the <a href="https://tailscale.com/docs/reference/tailscale-cli/serve">current Serve command reference</a> and <a href="https://tailscale.com/docs/features/tailscale-serve">access and HTTPS requirements</a>.</p>
+        <h3>Allow the app's web origin, not every website</h3>
+        <p>The gateway must permit the app's actual <code>Origin</code> through CORS, including preflight requests for JSON and the Authorization header. Android Pro normally uses <code>https://localhost</code>; a browser preview uses its page's own origin. Origin is not the model server's hostname. A preflight must be handled without requiring the Bearer token on the <code>OPTIONS</code> request; the actual <code>POST</code> still requires authentication. Check request/log information rather than guessing.</p>
+        <p>Ollama supports <code>OLLAMA_ORIGINS</code>. For example, a manually managed server for Android Pro can be started with:</p>
+        <pre><code>OLLAMA_HOST=127.0.0.1:11434 OLLAMA_ORIGINS=https://localhost ollama serve</code></pre>
+        <p>Use this instead of another running Ollama instance, not alongside it. It may be needed when the gateway forwards the validated app origin upstream; it does not replace gateway authentication or fix a wrong Host header. For the Windows/macOS app or a Linux service, follow <a href="https://docs.ollama.com/faq#how-do-i-configure-ollama-server">Ollama's platform-specific environment/restart instructions</a> and <a href="https://docs.ollama.com/faq#how-can-i-allow-additional-web-origins-to-access-ollama">origin guidance</a>. Allow only the origins you need. CORS is not authentication; tailnet access controls and the authenticated gateway still matter.</p>
+        <p class="note"><strong>Related SciREPL networking instructions:</strong> the public <a href="https://github.com/s243a/SciREPL-MCP/blob/main/docs/platforms.md#private-remote-access-with-tailscale">SciREPL-MCP Tailscale guide</a> and <a href="https://github.com/s243a/SciREPL-MCP/blob/main/packages/broker/README.md#private-android-access-with-tailscale">broker setup guide</a> explain private Serve access. Reuse the transport concepts, <em>not</em> their broker URLs: <code>wss://HOST/app</code> and <code>https://HOST/mcp</code> are MCP routes. Neither is a Direct AI model endpoint.</p>
+      </section>
+
+      <section id="settings">
+        <h2>3. Set up Pro's AI Assistant</h2>
+        <ol class="steps">
+          <li>Open <strong>Menu → AI Assistant (Pro)</strong>, then the panel's <strong>⚙ gear → AI Settings</strong>.</li>
+          <li>Set <strong>Configure model for → AI Assistant</strong>, then <strong>Backend → Ollama (local)</strong>. Keep <strong>Remote bridge</strong> off for this Direct AI setup.</li>
+          <li>In <strong>Model</strong>, use <strong>Or enter custom model ID</strong> for the exact installed ID if it is not listed.</li>
+          <li>Set <strong>API Endpoint</strong> to the <em>complete</em> chat URL, including <code>/v1/chat/completions</code>. SciREPL does not append that suffix. A hostname or <code>/v1</code> alone is insufficient.</li>
+          <li>Set <strong>API Key</strong> for this provider/endpoint pair. Current Pro requires a nonempty saved key even for a keyless local Ollama server. For a standard local server that ignores it, use the non-secret placeholder <code>ollama</code>. If your server/proxy authenticates requests, use its real key instead. Do not send a paid cloud-provider key to an unrelated server.</li>
+          <li>Tap <strong>Save</strong>. Saving does not make a model request. A key saved for a different endpoint is not automatically reused. Current AI Prompt requests follow this Assistant provider, model, endpoint and key.</li>
+        </ol>
+        <p class="warning"><strong>Protect saved keys.</strong> They are stored locally without application-level encryption and the matching key is sent to the selected endpoint. Keep secrets out of cells, screenshots and exports; read the <a href="../../../../../pro/privacy.html">Pro privacy policy</a>.</p>
+        <h3>Another OpenAI-compatible server</h3>
+        <p>The configurable <strong>Ollama (local)</strong> backend can also target a trusted server implementing the compatible chat-completions request/response format. Use its full HTTPS chat URL, exact model ID and authentication. The label does not guarantee every server works. The <strong>OpenAI</strong> backend uses its fixed provider endpoint; it is not the custom-server choice. Start with the no-tools AI Prompt test below: tools, reasoning options and streaming support vary.</p>
+      </section>
+
+      <section id="first-request">
+        <h2>4. Test with a no-tools AI Prompt cell</h2>
+        <ol class="steps">
+          <li>Create an empty practice workbook, with no private code, files or conversation. Keep the cell type <strong>Code</strong> and choose <strong>AI Prompt</strong> in the language/mode dropdown. If absent, enable it under <strong>Menu → Languages &amp; modes</strong>. Do not put this test in the Assistant's message box.</li>
+          <li>Enter <q>Reply with the digit 2 only.</q> Open the cell's <strong>Configure</strong> control. Set <strong>Put final response in → This cell’s output (default)</strong> and <strong>Context to send → Include source from → No other cells (default)</strong>. Tap <strong>Save configuration</strong>.</li>
+          <li>Press <strong>Run</strong>. Read the <strong>Direct AI</strong> disclosure before accepting it. If a request-context review appears, confirm that no other cells are selected. Declining cancels the send. This sends one isolated prompt plus fixed system guidance, without Assistant history, automatic every-cell previews or tools. Your chosen server and proxy can receive or log it; self-hosted does not mean data stays on the phone.</li>
+          <li>Check for <code>2</code> in this cell's output. This validates one small text request, not every model feature. It does not execute generated code or create a workbook-tool grant.</li>
+        </ol>
+        <p><strong>Current provider behavior:</strong> AI Prompt cells use <strong>Follow AI Assistant</strong>. The <strong>Independent provider and model (preview)</strong> settings are not the active request path yet. For now, change the Assistant's provider/model/endpoint when you want to change this Prompt test's destination. See the existing <a href="../tutorial/#prompt-cells">AI Prompt cell walkthrough</a> for the configuration controls.</p>
+        <p class="warning"><strong>The Assistant is a later, different test.</strong> Its requests advertise workbook tools even when <strong>Review</strong> is selected. Use a model/server that supports compatible tool calling, then review tool permissions before attempting workbook tasks. Review does not turn the Assistant into a no-tools chat endpoint; do not grant standing execution or file access merely to test connectivity.</p>
+      </section>
+
+      <section id="troubleshooting">
+        <h2>Troubleshooting in order</h2>
+        <ul>
+          <li><strong>Terminal request fails:</strong> fix server availability, installed model ID, memory or authentication on the server first.</li>
+          <li><strong>Phone cannot reach the host:</strong> check both devices, tailnet access rules, Serve port and hostname/certificate trust. A model on your PC is not at the phone's localhost.</li>
+          <li><strong>Endpoint rejected:</strong> use HTTPS for a remote host and a complete URL. Do not bypass the policy with an insecure LAN URL.</li>
+          <li><strong>CORS/preflight error:</strong> allow the exact app origin and required headers at the server/proxy. Terminal success alone does not test CORS.</li>
+          <li><strong>No API key configured or HTTP 401/403:</strong> save the gateway's key for this exact provider/endpoint; a dummy is only for a genuinely keyless direct server. Check the gateway's token/access policy and the upstream Host rewrite. Changing CORS origins alone does not fix Ollama's Host rejection.</li>
+          <li><strong>AI Prompt works but Assistant fails:</strong> check tool-calling support. A successful no-tools Prompt does not prove that the model accepts Assistant tool definitions.</li>
+          <li><strong>404, model missing or unsupported parameters:</strong> check the chat path, model ID and compatibility. Native Ollama API URLs are not chat-completions endpoints.</li>
+        </ul>
+        <p>This English-first guide can grow with verified app support. It does not claim a built-in server installer, automatic LAN discovery, universal model/tool compatibility or automatic SSH/MCP setup.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL Pro documentation · English-first guide</span><nav aria-label="Footer navigation"><a href="../../../../pro/">Pro help</a><a href="../../../../pro/ai/">AI reference</a><a href="https://github.com/s243a/SciREPL/issues">Report a documentation problem</a></nav></footer>
+</body>
+</html>
