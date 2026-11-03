@@ -109,6 +109,11 @@
                 if (this._pending) this._scheduleAttempt(120);
             }, { once: true });
 
+            // Startup can finish between construction and DOMContentLoaded,
+            // before the listener above exists. Subscribe first, then reconcile
+            // the durable flag so a missed event cannot strand Help requests.
+            this._appReady = this._appReady || Boolean(window.__SCIREPL_APP_READY);
+
             this._render();
             // Only an install that had already completed/grandfathered onboarding
             // when this release loaded is eligible for the upgrade prompt here.

@@ -2,6 +2,7 @@
 // Run the dev server first: node server.js
 import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
+import './test_whats_new_readiness.mjs';
 
 const PORT = process.env.PORT || 8085;
 const APP_URL = `http://localhost:${PORT}/index.html`;
