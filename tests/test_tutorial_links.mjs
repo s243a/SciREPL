@@ -95,7 +95,7 @@ try {
     ]);
     const longestLabels = [...catalogues].sort((a, b) =>
         b[1]['help.tutorialIndex'].length - a[1]['help.tutorialIndex'].length)
-        .slice(0, 2).map(([locale]) => locale);
+        .slice(0, 3).map(([locale]) => locale);
     for (const locale of new Set([...longestLabels, 'ar'])) {
         freshProfiles.push({ locale, viewport: { width: 844, height: 390 }, scale: 1.5 });
     }
@@ -120,8 +120,10 @@ try {
             localStorage.setItem('scirepl_auto_execute', '0');
             localStorage.setItem('scirepl_onboarding_seen', '1');
             localStorage.setItem('scirepl_i18n_show_drafts', '1');
-            addEventListener('DOMContentLoaded', () => localStorage.setItem(
-                'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
+            addEventListener('DOMContentLoaded', () => {
+                const version = window.KERNEL_CONFIG?.app?.version;
+                if (version) localStorage.setItem('scirepl_whats_new_seen_version', version);
+            }, { once: true });
         });
         try {
             const page = await context.newPage();
@@ -227,8 +229,10 @@ try {
             localStorage.setItem('scirepl_auto_execute', '0');
             localStorage.setItem('scirepl_onboarding_seen', '1');
             localStorage.setItem('scirepl_i18n_show_drafts', '1');
-            addEventListener('DOMContentLoaded', () => localStorage.setItem(
-                'scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
+            addEventListener('DOMContentLoaded', () => {
+                const version = window.KERNEL_CONFIG?.app?.version;
+                if (version) localStorage.setItem('scirepl_whats_new_seen_version', version);
+            }, { once: true });
         }, native);
         const page = await context.newPage();
         page.on('pageerror', error => errors.push(error.message));
