@@ -1026,31 +1026,99 @@ class PrologKernel {
     }
 
     /**
-     * Format a Prolog value for display.
+     * swipl-wasm exports wrapper constructors on prolog. Do not identify them
+     * by $t alone: a perfectly ordinary Prolog dictionary can have that key.
      */
-    _formatValue(value) {
+    _isRuntimeValue(value, name) {
+        const ctor = this._swipl?.prolog?.[name];
+        return typeof ctor === 'function' && value instanceof ctor;
+    }
+
+    _quoteProlog(text, quote) {
+        const escapes = { '\n': '\\n', '\r': '\\r', '\t': '\\t', '\b': '\\b', '\f': '\\f' };
+        return quote + String(text).replace(/[\\'"\x00-\x1f\x7f]/g, char => {
+            if (char === '\\' || char === quote) return '\\' + char;
+            if (char === '\'' || char === '"') return char;
+            return escapes[char] || '\\x' + char.charCodeAt(0).toString(16) + '\\';
+        }) + quote;
+    }
+
+    _formatAtom(value) {
+        return /^[a-z][A-Za-z0-9_]*$/.test(value) ? value : this._quoteProlog(value, "'");
+    }
+
+    /**
+     * Format the live swipl-wasm values, before their lossy toJSON methods run.
+     * Keep atom/string and compound/dict distinctions, including nested values.
+     * Guards bound our JS traversal; upstream conversion of cyclic Prolog terms
+     * is outside this formatter's control.
+     */
+    _formatValue(value, state = { ancestors: new Set(), depth: 0, remaining: 10000 }) {
+        if (state.remaining-- <= 0 || state.depth >= 100) return '<truncated>';
         if (value === null || value === undefined) return 'null';
-        if (typeof value === 'string') return value;
-        if (typeof value === 'number') return String(value);
+        if (typeof value === 'string') return this._formatAtom(value);
+        if (typeof value === 'number' || typeof value === 'bigint') return String(value);
         if (typeof value === 'boolean') return value ? 'true' : 'false';
-        if (Array.isArray(value)) {
-            return '[' + value.map(v => this._formatValue(v)).join(', ') + ']';
+        if (typeof value !== 'object') return String(value);
+        if (this._isRuntimeValue(value, 'Var')) return '_';
+        if (this._isRuntimeValue(value, 'Blob')) return '<opaque>';
+        if (this._isRuntimeValue(value, 'String')) return this._quoteProlog(value.v, '"');
+        if (this._isRuntimeValue(value, 'Rational')) {
+            // The pinned runtime's Rational.toString() reverses n and d.
+            return String(value.n) + 'r' + String(value.d);
         }
-        if (typeof value === 'object' && value.$t === 'v') return '_';
-        if (typeof value === 'object' && value.$t === 'b') return '<opaque>';
-        if (typeof value === 'object' && value.functor) {
-            // Compound term
-            if (value.args && value.args.length > 0) {
-                return value.functor + '(' + value.args.map(a => this._formatValue(a)).join(', ') + ')';
+        if (state.ancestors.has(value)) return '<cycle>';
+        state.ancestors.add(value);
+        state.depth++;
+        const format = item => this._formatValue(item, state);
+        const sequence = items => {
+            const output = [];
+            for (const item of items) {
+                if (state.remaining <= 0) { output.push('<truncated>'); break; }
+                output.push(format(item));
             }
-            return value.functor;
+            return output.join(', ');
+        };
+        try {
+            if (Array.isArray(value)) return '[' + sequence(value) + ']';
+            if (this._isRuntimeValue(value, 'Compound')) {
+                // 3/8/2 stores arguments under the functor-named property, not
+                // .args. The functor named "functor" overwrites that metadata.
+                const functor = typeof value.functor === 'string' ? value.functor : 'functor';
+                const args = Object.hasOwn(value, functor) && value[functor];
+                if (Array.isArray(args)) {
+                    return this._formatAtom(functor) + '(' + sequence(args) + ')';
+                }
+            }
+            if (this._isRuntimeValue(value, 'List') && Array.isArray(value.v)) {
+                return '[' + sequence(value.v) +
+                    (Object.hasOwn(value, 't') ? ' | ' + format(value.t) : '') + ']';
+            }
+            const prototype = Object.getPrototypeOf(value);
+            if (prototype !== null && Object.getPrototypeOf(prototype) !== null) return '<opaque>';
+            const descriptors = Object.getOwnPropertyDescriptors(value);
+            // A Prolog dict has data properties. Foreign JS objects must not
+            // turn into invented dicts or execute accessors just by displaying.
+            if (Object.values(descriptors).some(item => !Object.hasOwn(item, 'value'))) return '<opaque>';
+            const entries = [];
+            for (const [key, descriptor] of Object.entries(descriptors)) {
+                if (key === '$tag') continue;
+                if (state.remaining <= 0) { entries.push('<truncated>'); break; }
+                // SWI converts dictionary keys to JS property strings. Numeric
+                // keys have canonical spellings; '007' and '-0' remain atoms.
+                const label = /^(?:0|-?[1-9]\d*)$/.test(key) ? key : this._formatAtom(key);
+                entries.push(label + ':' + format(descriptor.value));
+            }
+            const tag = Object.hasOwn(descriptors, '$tag') ? format(descriptors.$tag.value) : '_';
+            return tag + '{' + entries.join(', ') + '}';
+        } finally {
+            state.depth--;
+            state.ancestors.delete(value);
         }
-        return String(value);
     }
 
     _isHiddenBindingValue(value) {
-        return !!value && typeof value === 'object' &&
-            (value.$t === 'v' || value.$t === 'b');
+        return this._isRuntimeValue(value, 'Var') || this._isRuntimeValue(value, 'Blob');
     }
 
     async destroy() {
