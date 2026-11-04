@@ -1,7 +1,7 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v235';
+const CACHE_VERSION = 'v236';
 
 // Marker entry recording whether an app cache finished installing. Stored in
 // the cache itself so the answer travels with it and survives a restart.
@@ -112,6 +112,7 @@ const APP_SHELL = [
   './js/export.js',
   './js/file_io.js',
   './js/prelude.py',
+  './js/scirepl_matplotlib_backend.py',
   './js/sharedfs.py',
   './js/r_prelude.R',
   './js/prolog_prelude.pl',
