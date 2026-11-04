@@ -7,6 +7,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runInNewContext } from 'node:vm';
+import { createServer } from 'node:http';
 import { preparePublicPagesServiceWorker } from '../scripts/prepare-public-pages-sw.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -42,6 +43,7 @@ const expected = [
   'help/pro/index.html',
   'help/pro/ai/index.html',
   'help/pro/ai/tutorial/index.html',
+  'help/en/pro/ai/self-hosted/index.html',
   'help/pro/remote/index.html',
   'pro/help/index.html',
 ];
@@ -80,6 +82,63 @@ check('Free/shared contents precede Pro contents',
   rootHelp.indexOf('Free and shared notebook help') < rootHelp.indexOf('Optional Pro extensions'));
 check('Help home directly links to All tutorials',
   /<a\b[^>]*href=["']tutorials\/["'][^>]*>All tutorials<\/a>/i.test(rootHelp));
+
+const selfHostedPath = 'help/en/pro/ai/self-hosted/index.html';
+const selfHostedGuide = readFileSync(path.join(WWW, selfHostedPath), 'utf8');
+const selfHostedText = selfHostedGuide.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
+check('Self-hosted guide is an explicit English-only Pro supplement, not invented translated mirrors',
+  /<html lang="en" dir="ltr">/.test(selfHostedGuide)
+    && /currently English only/.test(selfHostedText)
+    && !/hreflang=|tutorial-language-menu|Machine-translated/i.test(selfHostedGuide)
+    && !JSON.parse(readFileSync(path.join(ROOT, 'docs/tutorial-localization/source.json'), 'utf8'))
+      .pages.some(page => page.route === 'pro/ai/self-hosted'));
+check('Self-hosted guide follows actual scoped Ollama endpoint and key controls',
+  ['Configure model for → AI Assistant', 'Backend → Ollama (local)', 'API Endpoint',
+    'Or enter custom model ID', 'nonempty saved key', 'complete', '/v1/chat/completions',
+    'does not append', 'Saving does not make a model request'].every(text => selfHostedText.includes(text)));
+check('Self-hosted guide separates phone localhost, HTTPS policy, TLS and CORS',
+  ['Localhost means the device running SciREPL', 'HTTPS is required for a non-loopback host',
+    'Plain LAN HTTP', 'do not disable certificate checks', 'CORS is not authentication',
+    'Authorization header', 'terminal success alone does not test CORS'].every(text =>
+    selfHostedText.toLowerCase().includes(text.toLowerCase())));
+check('Self-hosted guide keeps the server loopback-bound with narrowly scoped origins',
+  selfHostedGuide.includes('OLLAMA_HOST=127.0.0.1:11434 OLLAMA_ORIGINS=https://localhost')
+    && selfHostedGuide.includes('tailscale serve --https=8443 http://127.0.0.1:11435')
+    && !selfHostedGuide.includes('tailscale serve --https=8443 http://127.0.0.1:11434')
+    && !/OLLAMA_ORIGINS\s*=\s*["']?\*|OLLAMA_HOST\s*=\s*0\.0\.0\.0/.test(selfHostedGuide));
+check('Self-hosted guide requires a Host-normalizing authenticated gateway before Serve',
+  ['Do not point Serve directly at Ollama', 'proxy_set_header Host localhost:11434;',
+    'listen 127.0.0.1:11435;', 'not a complete secure gateway', 'Bearer-token authentication',
+    'CORS/preflight policy', 'missing/wrong token', 'not automatically the Windows Ollama app']
+    .every(text => selfHostedText.includes(text))
+    && selfHostedGuide.includes('https://docs.ollama.com/faq#how-can-i-use-ollama-with-a-proxy-server'));
+check('Self-hosted guide distinguishes Direct AI from MCP and private Serve from Funnel',
+  ['Direct AI provider', 'Serve, not Funnel', 'wss://HOST/app', 'https://HOST/mcp',
+    'Neither is a Direct AI model endpoint', 'Read the Direct AI disclosure',
+    'no private code', 'do not grant standing execution'].every(text => selfHostedText.includes(text)));
+check('Self-hosted guide keeps inference on the computer rather than installing an Android server',
+  selfHostedText.includes('the computer runs the model and the phone is the client')
+    && selfHostedText.includes('do not need to install an Ollama server or download a model onto Android'));
+check('Self-hosted first request uses the current no-tools Prompt path following the Assistant',
+  ['Test with a no-tools AI Prompt cell', 'Reply with the digit 2 only',
+    'This cell’s output (default)', 'No other cells (default)', 'Save configuration',
+    'one isolated prompt plus fixed system guidance', 'Follow AI Assistant',
+    'Independent provider and model (preview)', 'not the active request path yet',
+    'advertise workbook tools even when Review is selected'].every(text => selfHostedText.includes(text))
+    && !selfHostedText.includes('configure AI Prompt cells separately')
+    && !selfHostedText.includes('This Assistant setup does not silently configure every AI surface'));
+check('Self-hosted guide links current official and public SciREPL-MCP instructions',
+  ['https://docs.ollama.com/api/openai-compatibility',
+    'https://docs.ollama.com/faq#how-can-i-allow-additional-web-origins-to-access-ollama',
+    'https://tailscale.com/docs/reference/tailscale-cli/serve',
+    'https://github.com/s243a/SciREPL-MCP/blob/main/docs/platforms.md#private-remote-access-with-tailscale',
+    'https://github.com/s243a/SciREPL-MCP/blob/main/packages/broker/README.md#private-android-access-with-tailscale']
+    .every(url => selfHostedGuide.includes(`href="${url}"`)));
+for (const [reference, href] of [
+  ['help/pro/index.html', '../en/pro/ai/self-hosted/'],
+  ['help/pro/ai/index.html', '../../en/pro/ai/self-hosted/'],
+]) check(`${reference} discovers the English-only self-hosted supplement`,
+  readFileSync(path.join(WWW, reference), 'utf8').includes(`href="${href}">self-hosted AI setup guide (English)</a>`));
 
 const tutorialIndexPath = 'help/tutorials/index.html';
 const tutorialIndex = readFileSync(path.join(WWW, tutorialIndexPath), 'utf8');
@@ -1681,8 +1740,23 @@ for (const file of linkedHtml) {
   }
 }
 
-const browser = await chromium.launch({ headless: true });
+// Pages resolves directory routes; server.js deliberately serves only exact
+// files. Use a real local static fixture for directory-link click roundtrips.
+const supplementServer = createServer((req, res) => {
+  try {
+    let relative = decodeURIComponent(new URL(req.url, 'http://fixture').pathname);
+    if (relative.endsWith('/')) relative += 'index.html';
+    const file = path.resolve(WWW, '.' + relative);
+    if (!file.startsWith(WWW + path.sep) || !statSync(file).isFile()) throw new Error('missing');
+    res.writeHead(200, { 'Content-Type': file.endsWith('.css') ? 'text/css' : 'text/html' });
+    res.end(readFileSync(file));
+  } catch { res.writeHead(404); res.end('Not found'); }
+});
+await new Promise(resolve => supplementServer.listen(0, '127.0.0.1', resolve));
+const supplementOrigin = `http://127.0.0.1:${supplementServer.address().port}`;
+let browser;
 try {
+  browser = await chromium.launch({ headless: true });
   const catalogueFolder = 'https://github.com/s243a/SciREPL-Catalog/tree/main/workbooks/';
   const tutorialRoute = `${TEST_ORIGIN}/help/workbooks/tutorial/index.html`;
   const folders = ['ar', 'bn', 'de', 'en', 'es', 'fr', 'hi', 'id', 'ja', 'ko', 'pt-BR', 'ru', 'zh'];
@@ -1734,6 +1808,19 @@ try {
       && !await noScript.locator('#catalogue-language-choice').isVisible());
   await noScript.close();
   const pages = contentPages.map(rel => `/${rel}`);
+  const selfHostedPage = await browser.newPage({ javaScriptEnabled: false, viewport: { width: 844, height: 390 } });
+  await selfHostedPage.goto(`${supplementOrigin}/help/pro/`, { waitUntil: 'networkidle' });
+  await selfHostedPage.getByRole('link', { name: 'self-hosted AI setup guide (English)', exact: true }).click();
+  check('Pro help opens the exact English self-hosted route without JavaScript',
+    selfHostedPage.url() === `${supplementOrigin}/help/en/pro/ai/self-hosted/`
+      && await selfHostedPage.getByRole('heading', { name: 'Use your own AI server', exact: true }).isVisible());
+  check('Self-hosted guide fits short landscape',
+    await selfHostedPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1));
+  await selfHostedPage.locator('.site-header').getByRole('link', { name: 'AI reference', exact: true }).click();
+  await selfHostedPage.getByRole('link', { name: 'self-hosted AI setup guide (English)', exact: true }).click();
+  check('AI reference has a working self-hosted guide roundtrip',
+    selfHostedPage.url() === `${supplementOrigin}/help/en/pro/ai/self-hosted/`);
+  await selfHostedPage.close();
   for (const route of pages) {
     const page = await browser.newPage({ viewport: { width: 320, height: 800 } });
     await page.goto(`${TEST_ORIGIN}${route}`, { waitUntil: 'networkidle' });
@@ -1752,7 +1839,8 @@ try {
     await page.close();
   }
 } finally {
-  await browser.close();
+  if (browser) await browser.close();
+  await new Promise(resolve => supplementServer.close(resolve));
 }
 
 console.log(`\n${failures ? `FAIL: ${failures} help check(s) failed` : 'PASS: public help checks passed'}`);

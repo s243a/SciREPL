@@ -13,6 +13,19 @@ names with their app. Machine translations carry a native-review-pending notice.
 
 ## Controlled translation process
 
+### Additive English-only guides
+
+The self-hosted AI guide at `www/help/en/pro/ai/self-hosted/index.html` is an
+English-first, hand-authored supplement, linked from the unfrozen Pro reference
+pages. Like the other reference Help pages, it does not use the locale renderer.
+It is not one of `ROUTES`' nine frozen tutorial sources and has no translated
+mirrors yet. Keep the existing 13,632 accepted fields, translation receipts and
+117 generated pages unchanged when updating it. Do not add invented locale
+alternates or silently redirect other-language routes to English. Future
+translation requires a separately scoped source/inventory update.
+
+### Existing frozen tutorial workflow
+
 1. Extract source-offset fields using `tutorial_locale_extract.mjs`. Pass
    `--pro-i18n-root` to the checked Pro app's `www/i18n` directory to snapshot
    actual Pro control labels. The manifest records immutable source hashes.
