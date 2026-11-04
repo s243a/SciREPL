@@ -60,11 +60,12 @@ for (const viewport of profiles) for (const scenario of scenarios) {
     const startup = await page.evaluate(() => {
       window._matplotlibStaticMedia = new Set(document.querySelectorAll('canvas,img'));
       const p = window.kernelManager.getKernel('python').getPyodide();
-      return { version: p.version, imported: p.runPython('"matplotlib" in __import__("sys").modules'), pyplot: p.runPython('"matplotlib.pyplot" in __import__("sys").modules') };
+      return { version: p.version, imported: p.runPython('"matplotlib" in __import__("sys").modules'), pyplot: p.runPython('"matplotlib.pyplot" in __import__("sys").modules'), width: document.documentElement.scrollWidth, bodyWidth: document.body.scrollWidth, viewport: document.documentElement.clientWidth };
     });
     check('startup uses pinned Pyodide', startup.version === python.version, startup);
     check('startup does not eagerly import matplotlib/pyplot', !startup.imported && !startup.pyplot, startup);
     check('startup does not download matplotlib', matplotlibDownloads.length === 0, matplotlibDownloads);
+    check('startup body and document fit the viewport', startup.width <= startup.viewport + 1 && startup.bodyWidth <= startup.viewport + 1, startup);
     console.log(`  PASS lazy startup ${label}: ${JSON.stringify(startup)}`);
     if (scenario === 'ordinary') {
       const install = await bounded(page.evaluate(async () => {
@@ -87,7 +88,7 @@ for (const viewport of profiles) for (const scenario of scenarios) {
         id, text: card?.querySelector('.card-body')?.textContent || '', error: card?.classList.contains('card-error') || false,
         images: images.map(img => ({ png: img.src.startsWith('data:image/png;base64,'), loaded: img.complete && img.naturalWidth > 0, left: img.getBoundingClientRect().left, right: img.getBoundingClientRect().right, owner: img.closest('.card-output')?.dataset.cellId })),
         detached: detached.map(element => ({ tag: element.tagName, id: element.id, width: element.getBoundingClientRect().width })),
-        width: document.documentElement.scrollWidth, viewport: document.documentElement.clientWidth,
+        width: document.documentElement.scrollWidth, bodyWidth: document.body.scrollWidth, viewport: document.documentElement.clientWidth,
         figures: p.runPython('len(plt.get_fignums())'),
       };
     }, String(id));
@@ -97,7 +98,7 @@ for (const viewport of profiles) for (const scenario of scenarios) {
       check(`${name}: no execution error`, !result.error, result);
       check(`${name}: exact inline PNG count/ownership`, result.images.length === count && result.images.every(image => image.png && image.loaded && image.owner === String(id)), result);
       check(`${name}: no detached plot media`, result.detached.length === 0, result);
-      check(`${name}: no viewport overflow`, result.width <= result.viewport + 1 && result.images.every(image => image.left >= -1 && image.right <= result.viewport + 1), result);
+      check(`${name}: no viewport overflow`, result.width <= result.viewport + 1 && result.bodyWidth <= result.viewport + 1 && result.images.every(image => image.left >= -1 && image.right <= result.viewport + 1), result);
       check(`${name}: figures closed after show`, result.figures === 0, result);
       return result;
     };
@@ -153,9 +154,9 @@ for (const viewport of profiles) for (const scenario of scenarios) {
       const card = window._cells.find(cell => cell.code === code).outputCard;
       const images = [...card.querySelectorAll('img')];
       await Promise.all(images.map(image => image.decode()));
-      return { count: images.length, png: images.every(image => image.src.startsWith('data:image/png;base64,') && image.naturalWidth > 0), detached: [...document.querySelectorAll('canvas')].filter(element => !element.closest('.card-output')).length, width: document.documentElement.scrollWidth, viewport: document.documentElement.clientWidth };
+      return { count: images.length, png: images.every(image => image.src.startsWith('data:image/png;base64,') && image.naturalWidth > 0), detached: [...document.querySelectorAll('canvas')].filter(element => !element.closest('.card-output')).length, width: document.documentElement.scrollWidth, bodyWidth: document.body.scrollWidth, viewport: document.documentElement.clientWidth };
     }, firstCode);
-    check('saved first plot reloads as one inline PNG without rerunning Python', restored.count === 1 && restored.png && restored.detached === 0 && restored.width <= restored.viewport + 1, restored);
+    check('saved first plot reloads as one inline PNG without rerunning Python', restored.count === 1 && restored.png && restored.detached === 0 && restored.width <= restored.viewport + 1 && restored.bodyWidth <= restored.viewport + 1, restored);
     check('no uncaught browser errors', errors.length === 0, errors);
     console.log(`  PASS repeat/multiple/deferred show ${label}`);
   } catch (error) {
