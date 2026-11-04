@@ -570,15 +570,25 @@ try {
     assert(!offlineReload.online, 'browser remained offline during reload');
     assert(offlineReload.title === 'Sci REPL', 'offline app shell rendered', offlineReload.title);
     const offlineTutorialLinks = await page.evaluate(async () => {
+        // The Run button can be enabled while startup localization is still
+        // loading. Finish that activation before requesting our test locale;
+        // otherwise the startup default may supersede this direct API call.
+        await window.i18n.init();
         await window.i18n.activate('ar');
         return {
+            locale: window.i18n.current,
+            documentLocale: document.documentElement.lang,
+            helperPresent: !!window.scireplTutorials,
             index: document.getElementById('help-tutorial-index').href,
             import: document.getElementById('workbook-import-tutorial').href,
         };
     });
-    assert(offlineTutorialLinks.index === 'https://s243a.github.io/SciREPL/help/ar/tutorials/?edition=free'
+    assert(offlineTutorialLinks.helperPresent && offlineTutorialLinks.locale === 'ar'
+        && offlineTutorialLinks.documentLocale === 'ar'
+        && offlineTutorialLinks.index === 'https://s243a.github.io/SciREPL/help/ar/tutorials/?edition=free'
         && offlineTutorialLinks.import === 'https://s243a.github.io/SciREPL/help/ar/workbooks/import/?edition=free',
-        'cached tutorial helper updates both Free guide links after an offline locale switch');
+        'cached tutorial helper updates both Free guide links after an offline locale switch',
+        JSON.stringify(offlineTutorialLinks));
     await page.evaluate(() => window.i18n.activate('en'));
     assert(pageErrors.length === 0, 'offline app reload raises no uncaught page errors', pageErrors.join(' | '));
 

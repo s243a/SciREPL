@@ -22,6 +22,10 @@ verify('manifest protects the exact English source and covers all nine routes', 
   assert.deepEqual(manifest.locales, LOCALES);
   const { manifestHash, ...payload } = manifest; assert.equal(manifestHash, sha(JSON.stringify(payload)));
 });
+verify('English-first self-hosted guide remains outside the frozen accepted tutorial inventory', () => {
+  assert.equal(manifest.pages.some(page => page.route === 'pro/ai/self-hosted'), false);
+  assert.equal(ROUTES.includes('pro/ai/self-hosted'), false);
+});
 verify('incomplete locale inventories fail closed before rendering', () => {
   const status = inspectLocaleRecord(manifest, 'fr', { locale: 'fr', manifestHash: manifest.manifestHash, translations: {}, receipts: [] });
   assert.equal(status.complete, false); assert.equal(status.translated, 0); assert.equal(status.missing.length, status.fields);

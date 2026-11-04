@@ -3,7 +3,7 @@
 
 import { chromium } from 'playwright';
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync as readFileBytes, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runInNewContext } from 'node:vm';
@@ -12,6 +12,16 @@ import { preparePublicPagesServiceWorker } from '../scripts/prepare-public-pages
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WWW = path.join(ROOT, 'www');
+// Pages overlays current public files/tests onto the stable app checkout; it
+// does not publish source-only docs metadata. Keep every file read in this
+// suite within the artifact so full-checkout CI cannot conceal that coupling.
+const readFileSync = (file, options) => {
+  const relative = path.relative(WWW, path.resolve(file));
+  if (relative === '..' || relative.startsWith('..' + path.sep) || path.isAbsolute(relative)) {
+    throw new Error('Public Help checks may read only www artifacts: ' + file);
+  }
+  return readFileBytes(file, options);
+};
 const ORIGIN = 'https://s243a.github.io';
 const BASE_PATH = '/SciREPL/';
 const TEST_ORIGIN = process.env.HELP_TEST_ORIGIN || 'http://localhost:8085';
@@ -47,6 +57,11 @@ const expected = [
   'help/pro/remote/index.html',
   'pro/help/index.html',
 ];
+
+let sourceMetadataRejected = false;
+try { readFileSync(path.join(ROOT, 'docs/tutorial-localization/source.json'), 'utf8'); }
+catch (error) { sourceMetadataRejected = error.message.startsWith('Public Help checks may read only www artifacts:'); }
+check('Public Help file reads reject repository-only metadata even in a full checkout', sourceMetadataRejected);
 
 const walkHtml = dir => readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
   const full = path.join(dir, entry.name);
@@ -89,9 +104,7 @@ const selfHostedText = selfHostedGuide.replace(/<[^>]*>/g, ' ').replace(/\s+/g, 
 check('Self-hosted guide is an explicit English-only Pro supplement, not invented translated mirrors',
   /<html lang="en" dir="ltr">/.test(selfHostedGuide)
     && /currently English only/.test(selfHostedText)
-    && !/hreflang=|tutorial-language-menu|Machine-translated/i.test(selfHostedGuide)
-    && !JSON.parse(readFileSync(path.join(ROOT, 'docs/tutorial-localization/source.json'), 'utf8'))
-      .pages.some(page => page.route === 'pro/ai/self-hosted'));
+    && !/hreflang=|tutorial-language-menu|Machine-translated/i.test(selfHostedGuide));
 check('Self-hosted guide follows actual scoped Ollama endpoint and key controls',
   ['Configure model for → AI Assistant', 'Backend → Ollama (local)', 'API Endpoint',
     'Or enter custom model ID', 'nonempty saved key', 'complete', '/v1/chat/completions',
