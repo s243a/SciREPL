@@ -59,6 +59,13 @@ class PythonKernel {
 
         if (km) km.updateProgress(window.t('runtime.loadingHelpers'));
 
+        // Register the lazy inline backend before the prelude or user code can
+        // import matplotlib. No plotting package is imported/downloaded here.
+        const matplotlibBackendResp = await fetch('js/scirepl_matplotlib_backend.py');
+        if (!matplotlibBackendResp.ok) throw new Error('Matplotlib inline backend could not be loaded');
+        this._pyodide.FS.writeFile('/home/pyodide/scirepl_matplotlib_backend.py',
+            await matplotlibBackendResp.text());
+
         // Load the prelude
         const preludeResp = await fetch('js/prelude.py');
         const preludeCode = await preludeResp.text();

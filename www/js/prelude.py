@@ -1,6 +1,13 @@
 # prelude.py — Loaded into Pyodide at startup.
 # Pre-imports and bridge functions for the Sci REPL.
 
+# Select the lazy inline backend BEFORE any library can import pyplot. This
+# also covers installing matplotlib and calling show() in the same cell; a
+# post-execution hook cannot intercept that first show(). The backend itself
+# is only imported when matplotlib actually needs it, not at kernel startup.
+import os as _scirepl_os
+_scirepl_os.environ['MPLBACKEND'] = 'module://scirepl_matplotlib_backend'
+
 import numpy as np
 import json
 import js  # Pyodide's JS interop module
@@ -224,25 +231,12 @@ async def pip_install(*packages):
 # ---- Matplotlib inline backend ----
 
 def _setup_matplotlib_hook():
-    """Monkey-patch plt.show() to render figures as inline PNG images."""
+    """Compatibility helper for the existing %pip/post-cell setup paths."""
     import matplotlib
-    matplotlib.use('agg')
+    matplotlib.use('module://scirepl_matplotlib_backend')
     import matplotlib.pyplot as plt
-
-    def _inline_show(*args, **kwargs):
-        import io, base64
-        figs = [plt.figure(i) for i in plt.get_fignums()]
-        for fig in figs:
-            buf = io.BytesIO()
-            fig.savefig(buf, format='png', dpi=100, bbox_inches='tight',
-                        facecolor='#0d1117', edgecolor='none')
-            buf.seek(0)
-            data_url = 'data:image/png;base64,' + base64.b64encode(buf.read()).decode()
-            js.renderImage(data_url)
-            buf.close()
-        plt.close('all')
-
-    plt.show = _inline_show
+    from scirepl_matplotlib_backend import show
+    plt.show = show
 
 
 print("✓ Sci REPL ready" + (" (with SymPy)" if _SYMPY_AVAILABLE else " (NumPy only)"))
