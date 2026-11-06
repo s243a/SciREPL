@@ -31,6 +31,9 @@ jobs:
       - name: Pages workflow — stable runtime and matching PWA validation
         run: node tests/test_pages_workflow.mjs
 
+      - name: Localized Free release notes for Pages
+        run: node tests/test_public_release_notes.mjs
+
       - name: Install dependencies
         run: npm install
 

@@ -113,6 +113,27 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: node scripts/prepare-public-pages-sw.mjs www/sw.js
 
+      - name: Stage localized Free release notes from the selected release
+        shell: bash
+        run: |
+          set -euo pipefail
+          notes_ref='refs/tags/v1.5.0'
+          # The main path has already selected a stable tag. Do not overlay
+          # unreleased notes from main, or stage 1.5.0 notes on an older tag.
+          if ! git show-ref --verify --quiet "$notes_ref"; then
+            echo 'Free 1.5.0 notes await their release tag.'
+            exit 0
+          fi
+          git merge-base --is-ancestor "${notes_ref}^{commit}" HEAD || {
+            status=$?
+            if [[ "$status" != 1 ]]; then exit "$status"; fi
+            echo 'The selected release predates Free 1.5.0 notes.'
+            exit 0
+          }
+          # Only this Pages job writes into its upload tree. Android, Windows,
+          # and standalone PWA builds never stage these website-only pages.
+          node scripts/render-free-release-notes.mjs --output www/help/releases/v1.5.0
+
       - name: Install dependencies
         run: npm install
 

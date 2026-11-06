@@ -65,10 +65,14 @@ function validatePlayNotes(text) {
     assert.equal(text.replace(pattern, '').trim(), '', 'no untagged draft instructions can be pasted as notes');
     for (const [, locale, body] of blocks) {
         assert.ok(body.length <= 500 && [...body].length <= 500, `${locale}: Play notes fit 500 characters`);
-        assert.equal(body.split('\n').length, 4, `${locale}: four focused release bullets`);
-        assert.ok(body.split('\n').every(line => line.startsWith('• ')), `${locale}: plain bullet text`);
-        for (const token of ['Free', '#!source', 'Prolog', '[object Object]']) {
+        const lines = body.split('\n');
+        assert.equal(lines.length, 4, `${locale}: four focused release bullets`);
+        assert.ok(lines.every(line => line.startsWith('• ')), `${locale}: plain bullet text`);
+        for (const token of ['Free', '#!source']) {
             assert.ok(body.includes(token), `${locale}: preserve ${token}`);
+        }
+        for (const token of ['Prolog', '[object Object]', 'Matplotlib']) {
+            assert.ok(lines[2].includes(token), `${locale}: output-fixes bullet preserves ${token}`);
         }
     }
     return blocks;
@@ -87,6 +91,7 @@ for (const [name, invalid] of [
     ['too long', playNotes.replace(blocks[0][2], 'x'.repeat(501))],
     ['untagged prose', 'Upload instructions\n' + playNotes],
     ['lost marker', playNotes.replace('#!source', '#source')],
+    ['lost plotting fix', playNotes.replace('Matplotlib', 'plotting')],
     ['wrong locale', playNotes.replace('<ar>', '<tr>').replace('</ar>', '</tr>')],
     ['mismatched closing tag', playNotes.replace('</ar>', '</tr>')],
     ['bare CR delimiter', playNotes.replace('<en-US>\n', '<en-US>\r')],
@@ -96,6 +101,9 @@ for (const [name, invalid] of [
         checks++;
     }
 }
-check(read('docs/releases/1.5.0-github-notes.txt').includes('already shipped in Free 1.4.0'),
+const githubNotes = read('docs/releases/1.5.0-github-notes.txt');
+check(githubNotes.includes('already shipped in Free 1.4.0'),
     'full notes do not reannounce existing Help Copy/Insert as new');
+check(githubNotes.includes('compound terms and dictionaries') && githubNotes.includes('first Matplotlib plot appears inline'),
+    'full notes describe both output fixes');
 console.log(`Free release notes: ${checks} checks passed; ${blocks.length} Play locales, longest ${Math.max(...blocks.map(match => match[2].length))}/500 characters.`);

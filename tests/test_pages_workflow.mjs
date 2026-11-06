@@ -1,7 +1,7 @@
 // Exercise the real Pages preparation/selection shell with offline Git fixtures.
 // No browser, downloads, provider requests, runtime edits or live deployments.
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -42,6 +42,7 @@ function step(name) {
 
 const prepare = step('Validate and keep public-page updates on the latest stable Free release');
 const locate = step('Locate the test suites for this ref');
+const releaseNotes = step('Stage localized Free release notes from the selected release');
 const pwa = step('Run PWA offline catalog tests');
 const upload = step('Upload tested Pages artifact');
 
@@ -92,7 +93,8 @@ function fixture({ pwaLayout = 'tests', cellLayout = 'tests', failingPwa = false
     git(['add', '.'], repo); git(['commit', '-m', 'Newer main fixture'], repo);
     // A newer prerelease is not a stable publication base.
     git(['tag', 'v9.0.0-beta.1'], repo);
-    const env = { RUNNER_TEMP: runner, GITHUB_ENV: envFile };
+    const env = { RUNNER_TEMP: runner, GITHUB_ENV: envFile,
+      PATH: path.dirname(process.execPath) + path.delimiter + process.env.PATH };
     const runPrepare = () => command('bash', ['-c', prepare.run], repo, env);
     const runLocate = () => command('bash', ['-c', locate.run], repo, env);
     const selectedEnv = () => Object.fromEntries(readFileSync(envFile, 'utf8').trim()
@@ -185,6 +187,54 @@ verify('a failing selected stable PWA suite remains a hard failure', () => {
     assert.equal(f.runPrepare().status, 0);
     assert.equal(f.runLocate().status, 0);
     assert.equal(f.runPwa().status, 23);
+  });
+});
+
+verify('Free notes cannot stage before their tag or on an older selected release', () => {
+  fixture({}, f => {
+    const renderer = 'scripts/render-free-release-notes.mjs';
+    put(f.repo, renderer, 'throw new Error("must-not-stage-unreleased-notes");\n');
+    git(['add', renderer], f.repo);
+    git(['commit', '-m', 'Future release notes'], f.repo);
+    const before = command('bash', ['-c', releaseNotes.run], f.repo, f.env);
+    assert.equal(before.status, 0, before.stderr);
+    assert.match(before.stdout, /await their release tag/);
+    git(['tag', 'v1.5.0'], f.repo);
+    git(['checkout', '--detach', 'v1.4.0'], f.repo);
+    const older = command('bash', ['-c', releaseNotes.run], f.repo, f.env);
+    assert.equal(older.status, 0, older.stderr);
+    assert.match(older.stdout, /selected release predates/);
+    assert.equal(existsSync(path.join(f.repo, 'www/help/releases')), false);
+  });
+});
+
+verify('the tagged release stages notes under public Help only, before validation and upload', () => {
+  assert.ok(workflow.indexOf(releaseNotes.source) < workflow.indexOf('      - name: Public help links'));
+  fixture({}, f => {
+    const renderer = 'scripts/render-free-release-notes.mjs';
+    const dir = 'www/help/releases/v1.5.0';
+    put(f.repo, renderer, `import assert from 'node:assert/strict';
+import { mkdirSync, writeFileSync } from 'node:fs';
+assert.deepEqual(process.argv.slice(2), ['--output', ${JSON.stringify(dir)}]);
+mkdirSync(process.argv[3], { recursive: true });
+writeFileSync(process.argv[3] + '/index.html', 'tagged release notes');\n`);
+    git(['add', renderer], f.repo);
+    git(['commit', '-m', 'Release notes renderer'], f.repo);
+    git(['tag', 'v1.5.0'], f.repo);
+    const runtime = readFileSync(path.join(f.repo, 'www/js/runtime.js'));
+    const staged = command('bash', ['-c', releaseNotes.run], f.repo, f.env);
+    assert.equal(staged.status, 0, staged.stderr);
+    assert.equal(readFileSync(path.join(f.repo, dir, 'index.html'), 'utf8'), 'tagged release notes');
+    assert.deepEqual(readFileSync(path.join(f.repo, 'www/js/runtime.js')), runtime);
+  });
+});
+
+verify('missing renderer for a released version is a hard failure', () => {
+  fixture({}, f => {
+    git(['tag', 'v1.5.0'], f.repo);
+    const missing = command('bash', ['-c', releaseNotes.run], f.repo, f.env);
+    assert.notEqual(missing.status, 0);
+    assert.match(missing.stderr, /render-free-release-notes\.mjs/);
   });
 });
 
