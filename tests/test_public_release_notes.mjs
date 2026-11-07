@@ -44,7 +44,16 @@ for (const [lang, play] of expected) {
     const notes = /<ul class="notes">([\s\S]*?)<\/ul>/.exec(page)?.[1];
     const sourceBlock = new RegExp(`<${play}>\\n([\\s\\S]*?)\\n</${play}>`).exec(source)?.[1];
     assert.ok(notes && sourceBlock, `${lang}: source and HTML notes are both present`);
-    assert.deepEqual([...notes.matchAll(/<li>([^<]*)<\/li>/g)].map(m => `• ${decodeHtml(m[1])}`),
+    if (lang === 'ar') {
+        for (const literal of ['#!source', '[object Object]']) {
+            assert.ok(notes.includes(`<bdi dir="ltr">${literal}</bdi>`), `${lang}: preserve complete LTR ${literal}`);
+        }
+        assert.doesNotMatch(notes, /[\u202a-\u202e\u2066-\u2069]/u, 'no invisible characters in copied prose');
+    } else {
+        assert.doesNotMatch(notes, /<bdi\b/, `${lang}: unchanged LTR rendering`);
+    }
+    const textNotes = notes.replace(/<bdi dir="ltr">([^<]*)<\/bdi>/g, '$1');
+    assert.deepEqual([...textNotes.matchAll(/<li>([^<]*)<\/li>/g)].map(m => `• ${decodeHtml(m[1])}`),
         sourceBlock.split('\n'), `${lang}: all four complete Play bullets, in order`);
     const nav = /<nav aria-label="([^"]+)">([\s\S]*?)<\/nav>/.exec(page);
     assert.ok(nav && nav[1].trim(), `${lang}: localized navigation label`);

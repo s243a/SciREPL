@@ -138,6 +138,9 @@ jobs:
       - name: Pip cell semantics (failed installs stop the cell; dep healing)
         run: node tests/test_pip_cell.mjs
 
+      - name: Matplotlib first plot with bundled Python and real package installs
+        run: npm run test:matplotlib-first-show -- --focused
+
       - name: Right-to-left layout
         run: node tests/test_rtl_layout.mjs
 

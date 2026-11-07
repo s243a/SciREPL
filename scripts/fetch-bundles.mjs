@@ -25,7 +25,7 @@ import { createHash } from 'node:crypto';
 import { loadComponentManifest, readJson, resolvedRuntime } from './component-manifest.mjs';
 import { installStagedBundle } from './bundle-staging.mjs';
 import {
-  PYODIDE_CORE_FILES, PYODIDE_WANTED_PACKAGES, runtimeBundleSpec,
+  PYODIDE_BUNDLE_LOCK, PYODIDE_CORE_FILES, PYODIDE_WANTED_PACKAGES, pyodideBundleLock, runtimeBundleSpec,
 } from './bundle-recipes.mjs';
 import { verifyPyodideWheelNotices } from './pyodide-wheel-notices.mjs';
 
@@ -129,10 +129,12 @@ async function bundlePython() {
       const lock = JSON.parse(readFileSync(join(stage, 'pyodide-lock.json'), 'utf8'));
       const wheels = resolvePyodidePackages(lock, PYODIDE_WANTED_PACKAGES);
       for (const wheel of wheels) await download(`${PYODIDE_BASE}/${wheel}`, join(stage, wheel));
+      writeFileSync(join(stage, PYODIDE_BUNDLE_LOCK),
+        JSON.stringify(pyodideBundleLock(lock, wheels, PYODIDE_BASE)) + '\n');
       return {
         python: lock.info?.python || null,
         abiVersion: lock.info?.abi_version || null,
-        files: [...core, ...wheels].sort(),
+        files: [...core, ...wheels, PYODIDE_BUNDLE_LOCK].sort(),
       };
     },
     validate: async (stage) => verifyPyodideWheelNotices(ROOT, { vendorDir: stage }),

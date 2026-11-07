@@ -61,6 +61,7 @@ jobs:
       - run: npm run test:lang-selector
       - run: npm run test:math-palette
       - run: npm run test:pip-cell
+      - run: npm run test:matplotlib-first-show -- --focused
       - run: node tests/test_rtl_layout.mjs
       - run: node tests/test_i18n_dynamic.mjs
       - run: npm run test:runtime-metadata

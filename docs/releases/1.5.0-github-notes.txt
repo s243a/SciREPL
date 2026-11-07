@@ -9,8 +9,9 @@ This update connects the Free app to language-aware online tutorials and fixes s
 - Help and Files & Storage open online tutorials in the selected display language. The tutorial index requested by Free excludes Pro-only guides and keeps that Free view when navigating between lessons or changing languages.
 - Tutorial entry labels and the in-app What's New summary cover all 13 bundled interface languages. Tutorials are online reading, not a new offline bundle; opening them does not import a workbook, execute code or grant a permission.
 - A cell beginning with `#!source` is stored without execution in every code language, including when an import asks to execute ordinary cells. Converting an existing cell to source-only clears stale output.
+- Arabic What's New keeps code markers such as `#!source` in their original left-to-right order and copies them exactly.
 - Prolog results display compound terms and dictionaries correctly, including nested values. Unbound variables and opaque handles are omitted instead of showing stray `[object Object]` values.
-- The first Matplotlib plot appears inline in the cell output, including when Matplotlib is installed and used in the same cell. The plot stays within the output area and is restored on reload without rerunning the cell.
+- The first Matplotlib plot appears inline in the cell output, including when Matplotlib is installed and used in the same cell. The plot stays within the output area and is restored on reload without rerunning the cell. The bundled Python runtime now fetches missing Pyodide wheels for `micropip.install()` and `pip_install()` from its versioned package repository. Matplotlib is not bundled, so a fresh install needs network access; use `%pip install matplotlib` for install verification and clearer download errors.
 - Keyboard trust warnings are translated in all supported interface languages.
 - The Windows portable preview updates Electron to 43.8.6, including security fixes.
 

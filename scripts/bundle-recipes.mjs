@@ -6,6 +6,24 @@ export const PYODIDE_WANTED_PACKAGES = [
   'numpy', 'sympy', 'micropip', 'pandas', 'narwhals',
 ];
 
+export const PYODIDE_BUNDLE_LOCK = 'scirepl-pyodide-lock.json';
+
+// Keep the upstream lock on disk unmodified. Pyodide resolves absolute
+// file_name URLs as-is and still checks the upstream SHA-256 for each entry.
+export function pyodideBundleLock(lock, bundledFiles, baseUrl) {
+  const local = new Set(bundledFiles);
+  const base = new URL(baseUrl.replace(/\/$/, '') + '/');
+  const packages = Object.fromEntries(Object.entries(lock.packages).map(([name, entry]) => {
+    const file = entry.file_name;
+    if (typeof file !== 'string' || !/^[a-z0-9_+.-]+\.(?:whl|tar|zip|tar\.gz)$/i.test(file)
+        || !/^[a-f0-9]{64}$/i.test(entry.sha256)) {
+      throw new Error(`Invalid Pyodide lock asset for '${name}'`);
+    }
+    return [name, local.has(file) ? entry : { ...entry, file_name: new URL(file, base).href }];
+  }));
+  return { ...lock, packages };
+}
+
 export function runtimeBundleSpec(language, component, resolved, options = {}) {
   const common = {
     schema: 1,
@@ -29,6 +47,7 @@ export function runtimeBundleSpec(language, component, resolved, options = {}) {
       ...common,
       baseUrl: resolved.baseUrl,
       coreFiles: PYODIDE_CORE_FILES,
+      packageIndex: PYODIDE_BUNDLE_LOCK,
       wantedPackages: PYODIDE_WANTED_PACKAGES,
       // The exact resolved wheel set is part of the build recipe, not merely a
       // post-fetch check. Updating a transitive wheel or its embedded notice

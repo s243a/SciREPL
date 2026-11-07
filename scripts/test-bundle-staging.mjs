@@ -3,6 +3,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { inspectCompletedBundle, installStagedBundle, renameWithRetry } from './bundle-staging.mjs';
+import { pyodideBundleLock } from './bundle-recipes.mjs';
 
 const root = mkdtempSync(path.join(tmpdir(), 'scirepl-bundle-staging-'));
 const dir = path.join(root, 'runtime');
@@ -14,6 +15,27 @@ let passed = 0;
 function assert(condition, message) { if (!condition) throw new Error(message); passed++; }
 
 try {
+  const sampleWheel = (file_name, depends = []) => ({ file_name, depends, sha256: 'a'.repeat(64) });
+  const lock = { info: { version: '0.27.4' }, packages: {
+    numpy: sampleWheel('numpy.whl'),
+    matplotlib: sampleWheel('matplotlib.whl', ['numpy']),
+  } };
+  const cdn = 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full';
+  const derived = pyodideBundleLock(lock, ['numpy.whl'], cdn);
+  assert(derived.packages.numpy.file_name === 'numpy.whl', 'bundled wheel stays local');
+  assert(derived.packages.matplotlib.file_name === `${cdn}/matplotlib.whl`,
+    'unbundled wheel points to the versioned upstream directory');
+  assert(derived.packages.matplotlib.sha256 === lock.packages.matplotlib.sha256
+    && derived.packages.matplotlib.depends.join() === 'numpy'
+    && lock.packages.matplotlib.file_name === 'matplotlib.whl',
+  'derivation preserves upstream hash/dependencies and does not mutate the upstream lock');
+  for (const entry of [sampleWheel('../unexpected.whl'), { ...sampleWheel('no-hash.whl'), sha256: '' }]) {
+    let invalid = false;
+    try { pyodideBundleLock({ packages: { unexpected: entry } }, [], cdn); }
+    catch (error) { invalid = /Invalid Pyodide lock asset/.test(error.message); }
+    assert(invalid, 'untrusted paths and missing integrity hashes are rejected');
+  }
+
   const first = await installStagedBundle({
     dir, component: v1, bundleSpec: recipeA,
     build: async (stage) => {

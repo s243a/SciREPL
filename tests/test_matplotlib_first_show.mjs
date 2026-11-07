@@ -1,6 +1,6 @@
 // Real cold Pyodide + app Run regressions. Never installs a plotting hook or
-// pre-imports pyplot from the test. Network scenarios use the app's supported
-// exact-version CDN source override, not partial-vendor package-response mocks.
+// pre-imports pyplot from the test. Run npm run fetch:bundles before testing:
+// install cases must boot the default bundled runtime, not an all-CDN copy.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -13,11 +13,14 @@ const config = { window: {} };
 runInNewContext(readFileSync(path.join(ROOT, 'www/js/kernel_config.js'), 'utf8'), config);
 const python = config.window.KERNEL_CONFIG.languages.python;
 const cdn = python.sources.find(source => source.type === 'cdn' && source.url.includes('cdn.jsdelivr.net/')).url;
-const BASE = process.env.SCIREPL_TEST_BASE || `http://localhost:${process.env.PORT || 8085}/`;
+const BASE = (process.env.SCIREPL_TEST_BASE || `http://localhost:${process.env.PORT || 8085}/`).replace(/\/?$/, '/');
+const bundledLoader = new URL(python.sources.find(source => source.type === 'local').url, BASE).href;
+const bundledBase = new URL('.', bundledLoader).href;
+const cdnBase = new URL('.', cdn).href;
 const TIMEOUT = 180_000;
 const focused = process.argv.includes('--focused');
 const profiles = focused ? [{ width: 412, height: 915 }] : [{ width: 412, height: 915 }, { width: 915, height: 412 }];
-const scenarios = focused ? ['ordinary', 'micropip'] : ['ordinary', 'micropip', 'pip'];
+const scenarios = focused ? ['micropip', 'pip-helper', 'pip'] : ['ordinary', 'micropip', 'pip-helper', 'pip'];
 const plot = 'import os\nos.chdir("/tmp")\nimport matplotlib.pyplot as plt\nplt.plot([0,1,2,3,4,5], [0,1,4,9,16,25])\nplt.title("squares")\nplt.show()\nprint("SCIREPL_MPL_DONE")';
 const failures = [];
 let checks = 0;
@@ -34,20 +37,33 @@ for (const viewport of profiles) for (const scenario of scenarios) {
   let browser;
   try {
     browser = await chromium.launch({ headless: true });
-    const context = await browser.newContext({ viewport, isMobile: true, hasTouch: true, locale: 'en-US' });
+    const context = await browser.newContext({ viewport, isMobile: true, hasTouch: true, locale: 'en-US', serviceWorkers: 'block' });
     await context.addInitScript(({ source }) => {
       localStorage.setItem('scirepl_privacy_accepted', '1');
       localStorage.setItem('scirepl_onboarding_seen', '1');
       localStorage.setItem('scirepl_auto_download', '1');
       if (source) localStorage.setItem('scirepl_python_source', source);
       addEventListener('DOMContentLoaded', () => localStorage.setItem('scirepl_whats_new_seen_version', window.KERNEL_CONFIG.app.version), { once: true });
-    }, { source: scenario === 'pip' ? null : cdn });
+    }, { source: scenario === 'ordinary' ? cdn : null });
     const page = await context.newPage();
     page.setDefaultTimeout(TIMEOUT);
     const errors = [];
-    const matplotlibDownloads = [];
+    const runtimeLoaders = [];
+    const cdnRequests = [];
+    const wheelRequests = [];
     page.on('pageerror', error => errors.push(error.message));
-    page.on('request', request => { if (/matplotlib.*\.(?:whl|tar)/i.test(request.url())) matplotlibDownloads.push(request.url()); });
+    page.on('response', response => {
+      if (response.ok() && response.request().method() === 'GET' && response.url().endsWith('/pyodide.js')) runtimeLoaders.push(response.url());
+    });
+    page.on('request', request => {
+      const url = request.url();
+      if (url.startsWith(cdnBase)) cdnRequests.push(url);
+      if (/\.whl$/i.test(url)) wheelRequests.push(url);
+    });
+    const pythonCdnRoute = url => url.href.startsWith(cdnBase);
+    // The same-origin server stays available, but bundled Python must boot
+    // without the external package host. Allow the CDN for explicit installs.
+    if (scenario !== 'ordinary') await page.route(pythonCdnRoute, route => route.abort());
     page.on('dialog', dialog => dialog.type() === 'confirm' ? dialog.accept() : dialog.dismiss());
     await page.goto(BASE, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.i18n && window.kernelManager && window._appInternals);
@@ -63,8 +79,14 @@ for (const viewport of profiles) for (const scenario of scenarios) {
       return { version: p.version, imported: p.runPython('"matplotlib" in __import__("sys").modules'), pyplot: p.runPython('"matplotlib.pyplot" in __import__("sys").modules'), width: document.documentElement.scrollWidth, bodyWidth: document.body.scrollWidth, viewport: document.documentElement.clientWidth };
     });
     check('startup uses pinned Pyodide', startup.version === python.version, startup);
+    check('startup loads the intended runtime, not a silent CDN fallback', runtimeLoaders.length === 1 && runtimeLoaders[0] === (scenario === 'ordinary' ? cdn : bundledLoader), runtimeLoaders);
+    if (scenario !== 'ordinary') {
+      check('bundled startup makes no Pyodide CDN requests', cdnRequests.length === 0, cdnRequests);
+      check('bundled startup loads the local NumPy and micropip wheels', ['numpy-', 'micropip-'].every(prefix => wheelRequests.some(url => url.startsWith(bundledBase + prefix))), wheelRequests);
+      await page.unroute(pythonCdnRoute);
+    }
     check('startup does not eagerly import matplotlib/pyplot', !startup.imported && !startup.pyplot, startup);
-    check('startup does not download matplotlib', matplotlibDownloads.length === 0, matplotlibDownloads);
+    check('startup does not download matplotlib', wheelRequests.every(url => !/matplotlib/i.test(new URL(url).pathname)), wheelRequests);
     check('startup body and document fit the viewport', startup.width <= startup.viewport + 1 && startup.bodyWidth <= startup.viewport + 1, startup);
     console.log(`  PASS lazy startup ${label}: ${JSON.stringify(startup)}`);
     if (scenario === 'ordinary') {
@@ -89,7 +111,7 @@ for (const viewport of profiles) for (const scenario of scenarios) {
         images: images.map(img => ({ png: img.src.startsWith('data:image/png;base64,'), loaded: img.complete && img.naturalWidth > 0, left: img.getBoundingClientRect().left, right: img.getBoundingClientRect().right, owner: img.closest('.card-output')?.dataset.cellId })),
         detached: detached.map(element => ({ tag: element.tagName, id: element.id, width: element.getBoundingClientRect().width })),
         width: document.documentElement.scrollWidth, bodyWidth: document.body.scrollWidth, viewport: document.documentElement.clientWidth,
-        figures: p.runPython('len(plt.get_fignums())'),
+        figures: p.runPython('len(plt.get_fignums()) if "plt" in globals() else -1'),
       };
     }, String(id));
     const assertOutput = async (id, count, name) => {
@@ -110,12 +132,22 @@ for (const viewport of profiles) for (const scenario of scenarios) {
       await page.waitForFunction(before => window._cells.length === before + 1 && window._currentOutputCard === null && !document.getElementById('run-btn').disabled, before);
       return page.evaluate(() => window._cells.at(-1).id);
     };
-    const firstCode = scenario === 'ordinary' ? plot : scenario === 'micropip'
-      ? `import micropip\nawait micropip.install("matplotlib")\n${plot}`
-      : `%pip install matplotlib\n${plot}`;
+    const installCode = {
+      ordinary: '',
+      micropip: 'import micropip\nawait micropip.install("matplotlib")\n',
+      'pip-helper': 'await pip_install("matplotlib")\n',
+      pip: '%pip install matplotlib\n',
+    };
+    const firstCode = installCode[scenario] + plot;
     const first = await run(firstCode);
     const firstResult = await assertOutput(first, 1, 'first cold Run');
     check('first Run reached the Python completion marker', firstResult.text.includes('SCIREPL_MPL_DONE'), firstResult);
+    if (scenario !== 'ordinary') {
+      const nonBundledWheel = /^(?:matplotlib[-_]|contourpy-)/i;
+      const wheel = url => new URL(url).pathname.split('/').at(-1);
+      check('bundled install loads Matplotlib and its dependencies from the exact-version CDN', ['matplotlib-', 'contourpy-'].every(prefix => wheelRequests.some(url => url.startsWith(cdnBase + prefix))), wheelRequests);
+      check('bundled install does not request absent local Matplotlib wheels', wheelRequests.every(url => !url.startsWith(bundledBase) || !nonBundledWheel.test(wheel(url))), wheelRequests);
+    }
     console.log(`  PASS cold first plot ${label}: ${JSON.stringify(firstResult)}`);
 
     const repeated = await run('plt.show()\nprint("SCIREPL_MPL_REPEAT_EMPTY")');

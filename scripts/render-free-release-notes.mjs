@@ -30,6 +30,13 @@ const escapeHtml = value => value.replace(/[&<>"']/g, character => ({
 })[character]);
 const dir = lang => lang === 'ar' ? 'rtl' : 'ltr';
 const route = lang => lang === 'en' ? '' : `${lang}/`;
+const rtlLiterals = /(#!source|\[object Object\]|%pip install(?: matplotlib)?|\b(?:Free|Prolog|Matplotlib)\b)/g;
+
+function renderBullet(bullet, lang) {
+    if (dir(lang) !== 'rtl') return escapeHtml(bullet);
+    return bullet.split(rtlLiterals).map((part, index) =>
+        index % 2 ? `<bdi dir="ltr">${escapeHtml(part)}</bdi>` : escapeHtml(part)).join('');
+}
 
 /** Read the ordered, explicitly tagged Play source without dropping any prose. */
 export function parsePlayReleaseNotes(source) {
@@ -98,7 +105,7 @@ export function renderReleaseNotes(source) {
             const href = other.lang === lang ? './' : (lang === 'en' ? './' : '../') + route(other.lang);
             return `        <li><a href="${href}" lang="${other.lang}" dir="${dir(other.lang)}"${other.lang === lang ? ' aria-current="page"' : ''}>${escapeHtml(other.name)}</a></li>`;
         }).join('\n');
-        const items = bullets.map(bullet => `      <li>${escapeHtml(bullet)}</li>`).join('\n');
+        const items = bullets.map(bullet => `      <li>${renderBullet(bullet, lang)}</li>`).join('\n');
         return [`${route(lang)}index.html`, `<!doctype html>
 <html lang="${lang}" dir="${dir(lang)}">
 <head>

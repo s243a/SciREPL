@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { inspectCompletedBundle } from './bundle-staging.mjs';
 import { loadComponentManifest, readJson, resolvedRuntime } from './component-manifest.mjs';
-import { runtimeBundleSpec } from './bundle-recipes.mjs';
+import { PYODIDE_BUNDLE_LOCK, pyodideBundleLock, runtimeBundleSpec } from './bundle-recipes.mjs';
 import { verifyPyodideWheelNotices } from './pyodide-wheel-notices.mjs';
 
 const ROOT = path.resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -31,10 +31,21 @@ for (const language of profile.bundle || []) {
   const options = language === 'python'
     ? { packages: byId.get('pyodide-wheels')?.packages || [] }
     : {};
+  const resolved = resolvedRuntime(component, packageSpec);
   const state = inspectCompletedBundle(
     dir, component,
-    runtimeBundleSpec(language, component, resolvedRuntime(component, packageSpec), options));
+    runtimeBundleSpec(language, component, resolved, options));
   if (!state.current) throw new Error(`${language} bundle is incomplete/stale: ${state.reason}`);
+  if (language === 'python') {
+    const upstream = readJson(path.join(dir, 'pyodide-lock.json'));
+    const files = state.receipt.inventory.map(item => item.path);
+    const expected = pyodideBundleLock(upstream, files, resolved.baseUrl);
+    const indexPath = path.join(dir, PYODIDE_BUNDLE_LOCK);
+    if (!files.includes(PYODIDE_BUNDLE_LOCK)
+        || readFileSync(indexPath, 'utf8') !== JSON.stringify(expected) + '\n') {
+      throw new Error('Pyodide bundle package index does not match its upstream lock and local inventory');
+    }
+  }
   for (const artifact of component.artifacts || []) {
     const absolute = path.join(ROOT, artifact.path);
     if (!existsSync(absolute)) throw new Error(`${language} artifact is missing: ${artifact.path}`);

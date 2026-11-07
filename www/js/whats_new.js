@@ -18,6 +18,30 @@
     const SEEN_VERSION_KEY = 'scirepl_whats_new_seen_version';
     const ONBOARDING_KEY = 'scirepl_onboarding_seen';
     const BLOCKING_MODALS = ['privacy-modal', 'runtime-download-modal'];
+    const HIGHLIGHT_LITERALS = /(#!source|\[object Object\]|%pip install(?: matplotlib)?|\b(?:Prolog|Matplotlib)\b)/g;
+
+    function renderHighlight(item, key) {
+        if (document.documentElement.dir === 'rtl') {
+            const parts = window.t(key).split(HIGHLIGHT_LITERALS);
+            if (parts.length > 1) {
+                // Keep punctuation, spaces and Latin text in a single visual
+                // unit without inserting invisible characters into copied code.
+                // WhatsNew rebuilds this list on i18n:changed.
+                for (const [index, text] of parts.entries()) {
+                    if (index % 2 === 0) {
+                        item.append(text);
+                    } else {
+                        const literal = document.createElement('bdi');
+                        literal.dir = 'ltr';
+                        literal.textContent = text;
+                        item.append(literal);
+                    }
+                }
+                return;
+            }
+        }
+        window.setI18nText(item, key);
+    }
 
     function visibleModal(modal) {
         return Boolean(modal && !modal.classList.contains('hidden'));
@@ -295,7 +319,7 @@
             list.replaceChildren();
             for (const key of keys) {
                 const item = document.createElement('li');
-                window.setI18nText(item, key);
+                renderHighlight(item, key);
                 list.appendChild(item);
             }
             list.hidden = keys.length === 0;

@@ -50,10 +50,22 @@ class PythonKernel {
         }
 
         if (km) km.updateProgress(window.t('runtime.pythonInitializing'));
-        // indexURL = directory containing pyodide.js, so package wheels load from
-        // the same source (local vendor dir or CDN) that served the loader.
+        // Keep the core runtime and bundled wheels at the loader's indexURL.
+        // Only the app's own partial bundle needs a separate package index:
+        // Pyodide's browser loader does not fall back to CDN for missing wheels.
         const indexURL = pyodideJsUrl.replace(/[^/]*$/, '');
-        this._pyodide = await loadPyodide({ indexURL });
+        const options = { indexURL };
+        const config = PythonKernel.runtimeConfig();
+        if (config.sources?.some(source => source.type === 'local' && source.url === pyodideJsUrl)) {
+            const lockFileURL = new URL('scirepl-pyodide-lock.json', new URL(indexURL, document.baseURI)).href;
+            try {
+                const response = await fetch(lockFileURL);
+                if (response.ok && (await response.json()).info?.version === config.version) {
+                    options.lockFileURL = lockFileURL;
+                }
+            } catch (_) { /* An older bundle can still boot with its upstream index. */ }
+        }
+        this._pyodide = await loadPyodide(options);
         await this._pyodide.loadPackage(['numpy', 'sympy']);
         await this._pyodide.loadPackage('micropip');
 
