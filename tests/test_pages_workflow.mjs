@@ -90,6 +90,7 @@ function fixture({ pwaLayout = 'tests', cellLayout = 'tests', failingPwa = false
     put(repo, 'tests/test_help_site.mjs', 'new-help-suite\n');
     put(repo, 'tests/test_pwa_release.mjs', mainPwa);
     put(repo, 'scripts/prepare-public-pages-sw.mjs', 'new-public-sw-helper\n');
+    put(repo, 'docs/releases/1.5.0-publication.json', JSON.stringify({ schemaVersion: 1, version: '1.5.0', status: 'prerelease' }));
     git(['add', '.'], repo); git(['commit', '-m', 'Newer main fixture'], repo);
     // A newer prerelease is not a stable publication base.
     git(['tag', 'v9.0.0-beta.1'], repo);
@@ -120,7 +121,7 @@ verify('main publication keeps its stable-tag boundary and fresh Help/helper ove
 verify('publication-validation changes trigger main Pages publication', () => {
   const paths = workflow.match(/^    paths:\n((?:      - [^\n]+\n)+)/m)?.[1] || '';
   for (const required of ['www/help/**', 'www/pro/**', '.github/workflows/deploy-pages.yml',
-    'scripts/prepare-public-pages-sw.mjs', 'tests/test_help_site.mjs']) {
+    'scripts/prepare-public-pages-sw.mjs', 'docs/releases/1.5.0-publication.json', 'tests/test_help_site.mjs']) {
     assert.ok(paths.includes(`      - '${required}'\n`), `Missing Pages push path: ${required}`);
   }
 });
@@ -215,7 +216,7 @@ verify('the tagged release stages notes under public Help only, before validatio
     const dir = 'www/help/releases/v1.5.0';
     put(f.repo, renderer, `import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync } from 'node:fs';
-assert.deepEqual(process.argv.slice(2), ['--output', ${JSON.stringify(dir)}]);
+assert.deepEqual(process.argv.slice(2), ['--output', ${JSON.stringify(dir)}, '--status-file', 'docs/releases/1.5.0-publication.json']);
 mkdirSync(process.argv[3], { recursive: true });
 writeFileSync(process.argv[3] + '/index.html', 'tagged release notes');\n`);
     git(['add', renderer], f.repo);
@@ -226,6 +227,42 @@ writeFileSync(process.argv[3] + '/index.html', 'tagged release notes');\n`);
     assert.equal(staged.status, 0, staged.stderr);
     assert.equal(readFileSync(path.join(f.repo, dir, 'index.html'), 'utf8'), 'tagged release notes');
     assert.deepEqual(readFileSync(path.join(f.repo, 'www/js/runtime.js')), runtime);
+  });
+});
+
+verify('main can promote website status without moving the release tag or changing tagged app/prose bytes', () => {
+  fixture({}, f => {
+    const renderer = 'scripts/render-free-release-notes.mjs';
+    const prose = 'docs/releases/1.5.0-play-notes.txt';
+    const statusPath = 'docs/releases/1.5.0-publication.json';
+    put(f.repo, renderer, readFileSync(path.join(ROOT, renderer), 'utf8'));
+    put(f.repo, prose, readFileSync(path.join(ROOT, prose), 'utf8'));
+    put(f.repo, statusPath, JSON.stringify({ schemaVersion: 1, version: '1.5.0', status: 'prerelease' }));
+    git(['add', '.'], f.repo); git(['commit', '-m', 'Tagged prerelease website'], f.repo);
+    git(['tag', 'v1.5.0'], f.repo);
+    const taggedCommit = git(['rev-parse', 'v1.5.0'], f.repo);
+    const runtimeBytes = readFileSync(path.join(f.repo, 'www/js/runtime.js'));
+    const taggedProse = readFileSync(path.join(f.repo, prose));
+    const initial = command('bash', ['-c', releaseNotes.run], f.repo, f.env);
+    assert.equal(initial.status, 0, initial.stderr);
+    assert.match(readFileSync(path.join(f.repo, 'www/help/releases/v1.5.0/index.html'), 'utf8'), /data-release-status="prerelease"/);
+
+    // Promotion is an ordinary main Pages publication, not an application build
+    // and not a moved tag. New main app/prose bytes must not leak into it.
+    put(f.repo, statusPath, JSON.stringify({ schemaVersion: 1, version: '1.5.0', status: 'released' }));
+    put(f.repo, 'www/js/runtime.js', 'future-app-must-not-leak\n');
+    put(f.repo, prose, 'future-release-prose-must-not-leak\n');
+    git(['add', '.'], f.repo); git(['commit', '-m', 'Promote published release notes'], f.repo);
+    const prepared = f.runPrepare();
+    assert.equal(prepared.status, 0, prepared.stderr);
+    const promoted = command('bash', ['-c', releaseNotes.run], f.repo, f.env);
+    assert.equal(promoted.status, 0, promoted.stderr);
+    assert.equal(git(['rev-parse', 'v1.5.0'], f.repo), taggedCommit, 'tag stays immutable');
+    assert.deepEqual(readFileSync(path.join(f.repo, 'www/js/runtime.js')), runtimeBytes);
+    assert.deepEqual(readFileSync(path.join(f.repo, prose)), taggedProse);
+    const page = readFileSync(path.join(f.repo, 'www/help/releases/v1.5.0/index.html'), 'utf8');
+    assert.match(page, /data-release-status="released"><strong>Released<\/strong>/);
+    assert.doesNotMatch(page, /future-release-prose|<p class="release-status" data-release-status="prerelease"/);
   });
 });
 
