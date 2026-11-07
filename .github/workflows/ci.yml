@@ -31,6 +31,9 @@ jobs:
       - name: Pages workflow — stable runtime and matching PWA validation
         run: node tests/test_pages_workflow.mjs
 
+      - name: Localized Free release notes for Pages
+        run: node tests/test_public_release_notes.mjs
+
       - name: Install dependencies
         run: npm install
 
@@ -134,6 +137,9 @@ jobs:
 
       - name: Pip cell semantics (failed installs stop the cell; dep healing)
         run: node tests/test_pip_cell.mjs
+
+      - name: Matplotlib first plot with bundled Python and real package installs
+        run: npm run test:matplotlib-first-show -- --focused
 
       - name: Right-to-left layout
         run: node tests/test_rtl_layout.mjs

@@ -380,7 +380,11 @@ try {
     for (const locale of DISPLAY_LOCALES) {
         const catalogue = JSON.parse(readFileSync(new URL(`../www/i18n/${locale}.json`, import.meta.url), 'utf8'));
         await localizedPage.selectOption('#whats-new-language', locale);
-        await localizedPage.waitForFunction(code => document.documentElement.lang === code, locale);
+        const expected = RELEASE_150_KEYS.map(key => catalogue.strings[key]);
+        await localizedPage.waitForFunction(([code, firstHighlight]) =>
+            document.documentElement.lang === code
+            && document.querySelector('#whats-new-highlights li')?.textContent
+                .replace(/[\u2066-\u2069]/g, '') === firstHighlight, [locale, expected[0]]);
         const actual = await localizedPage.evaluate(() => ({
             version: document.getElementById('whats-new-version').textContent,
             expectedVersion: window.t('whatsNew.version', { version: '1.5.0' }),
@@ -389,10 +393,8 @@ try {
             highlights: [...document.querySelectorAll('#whats-new-highlights li')]
                 .map(element => element.textContent),
         }));
-        const expected = RELEASE_150_KEYS.map(key => catalogue.strings[key]);
-        // Arabic DOM text intentionally adds bounded Latin-run isolates.
-        // Compare the catalogue prose independently, then verify the safety
-        // markup rather than mistaking those invisible controls for fallback.
+        // The ordinary RTL renderer still isolates Latin prose; copyable
+        // highlights below must instead retain their exact catalogue bytes.
         const prose = actual.highlights.map(text => text.replace(/[\u2066-\u2069]/g, ''));
         check(`${locale}: all four frozen highlights use the selected catalogue, not an English fallback`,
             JSON.stringify(prose) === JSON.stringify(expected), JSON.stringify(actual));
@@ -400,8 +402,46 @@ try {
             actual.selected === locale && actual.version === actual.expectedVersion
             && actual.version.includes('1.5.0') && actual.direction === (locale === 'ar' ? 'rtl' : 'ltr'),
             JSON.stringify(actual));
-        if (locale === 'ar') check('Arabic highlights retain bounded LTR isolates around the Latin identifiers',
-            actual.highlights.slice(0, 3).every(text => text.includes('\u2066') && text.includes('\u2069')));
+        if (locale === 'ar') {
+            await localized.grantPermissions(['clipboard-read', 'clipboard-write']);
+            const literals = [['#!source', 1], ['[object Object]', 2]];
+            for (const [literal, bullet] of literals) {
+                check(`Arabic: the complete ${literal} highlight is free of injected controls`,
+                    actual.highlights[bullet] === expected[bullet]);
+            }
+            const originalViewport = localizedPage.viewportSize();
+            for (const [orientation, width, height] of [['portrait', 390, 844], ['landscape', 844, 390]]) {
+                await localizedPage.setViewportSize({ width, height });
+                for (const [literal] of literals) {
+                    const visual = await localizedPage.evaluate(token => {
+                        const node = [...document.querySelectorAll('#whats-new-highlights bdi')]
+                            .find(element => element.textContent === token);
+                        if (!node || node.dir !== 'ltr') return false;
+                        const style = getComputedStyle(node);
+                        const range = document.createRange();
+                        const boxes = [...token].map((_, index) => {
+                            range.setStart(node.firstChild, index);
+                            range.setEnd(node.firstChild, index + 1);
+                            return range.getBoundingClientRect();
+                        });
+                        range.selectNodeContents(node);
+                        const selection = window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        return style.direction === 'ltr' && style.unicodeBidi === 'isolate'
+                            && boxes.every((box, index) => box.height > 0 && (!index
+                                || box.top > boxes[index - 1].top
+                                || (box.top === boxes[index - 1].top && box.left >= boxes[index - 1].left)));
+                    }, literal);
+                    check(`Arabic ${orientation}: ${literal} renders in exact left-to-right order`, visual);
+                    await localizedPage.keyboard.press('ControlOrMeta+c');
+                    const copied = await localizedPage.evaluate(() => navigator.clipboard.readText());
+                    check(`Arabic ${orientation}: browser copies ${literal} byte-for-byte`, copied === literal,
+                        JSON.stringify(copied));
+                }
+            }
+            await localizedPage.setViewportSize(originalViewport);
+        }
     }
     check('all-locale release rendering produces no page errors', localizedErrors.length === 0,
         localizedErrors.join(' | '));
