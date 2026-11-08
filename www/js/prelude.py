@@ -212,6 +212,50 @@ def wasm_call(module_name, func_name, args=None):
 
 import micropip as _micropip
 
+def _configure_package_install_consent():
+    from functools import wraps
+    from inspect import signature
+    from importlib.metadata import distribution, PackageNotFoundError
+    from packaging.requirements import Requirement, InvalidRequirement
+    from _scirepl_package_network import ensure_consent, verify_builtin_dependencies
+
+    original = _micropip.install
+    if getattr(original, '_scirepl_consent_guarded', False):
+        return
+    parameters = signature(original)
+
+    @wraps(original)
+    async def install(*args, **kwargs):
+        bound = parameters.bind(*args, **kwargs)
+        requirements = bound.arguments.get('requirements')
+        # Never consume or rewrite a caller's iterable. Native micropip handles
+        # all request/options semantics first; this snapshot only checks known
+        # built-in distributions after a successful call.
+        requested = (requirements,) if isinstance(requirements, str) else tuple(requirements) if isinstance(requirements, (list, tuple)) else ()
+        await ensure_consent()
+        result = await original(*args, **kwargs)
+        if bound.arguments.get('deps', True):
+            for text in requested:
+                try:
+                    req = Requirement(text)
+                except (InvalidRequirement, TypeError):
+                    continue  # Bare wheel URLs were handled by micropip.
+                if req.url or (req.marker and not any(req.marker.evaluate({'extra': extra}) for extra in ('', *req.extras))):
+                    continue
+                try:
+                    dist = distribution(req.name)
+                except PackageNotFoundError:
+                    continue
+                if (dist.read_text('PYODIDE_SOURCE') or '').strip() == 'pyodide':
+                    await verify_builtin_dependencies(req.name, dist.version)
+        return result
+
+    install._scirepl_consent_guarded = True
+    _micropip.install = install
+
+_configure_package_install_consent()
+del _configure_package_install_consent
+
 async def pip_install(*packages):
     """Install packages from PyPI using micropip.
 
@@ -226,6 +270,7 @@ async def pip_install(*packages):
             print(f"  Installed {pkg}")
         except Exception as e:
             print(f"  Failed to install {pkg}: {e}")
+            raise
 
 
 # ---- Matplotlib inline backend ----
