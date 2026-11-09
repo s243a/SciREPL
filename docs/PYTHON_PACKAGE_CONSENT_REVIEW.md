@@ -11,6 +11,12 @@ those heads, not automatically to a changed candidate.
 - Cover public micropip PackageManager, install.__wrapped__, and the compiled
   pyodide_js.loadPackage path, as well as ordinary micropip, pip_install and
   %pip. Install the Python HTTP hook before micropip captures pyfetch.
+- Cover every file type beneath exact configured/active Pyodide runtime
+  directories, not just wheels. Claude's second review reproduced pre-consent
+  OpenBLAS/OpenSSL/geos `.zip` requests on the previous v239 candidate. The
+  follow-up also covers `.tar` and opaque future asset names without gating
+  unrelated archive URLs or broad CDN hosts. Same-origin bundled files remain
+  local; no new package fallback or SciPy support is added to Pro.
 - Preserve arbitrary custom package indexes, explicit wheel URLs, native
   arguments, return values and exceptions. Do not infer package absence from
   failed metadata/download requests.
@@ -54,8 +60,11 @@ The complete public signature/forwarding remains regression-tested.
 Recheck the exact new source commit and packaged asset hashes, then repeat:
 
 1. Fresh bundled Python startup without disclosure or package traffic.
-2. Public PackageManager, unwrapped install and direct loadPackage: no
-   outbound request before acceptance; dismissal stops the cell tail.
+2. Public PackageManager, unwrapped install and direct loadPackage, including
+   scipy/OpenBLAS, ssl/OpenSSL, geos zip and numpy-tests tar: no outbound request
+   before acceptance; dismissal stops the cell tail. Accept reaches the requested
+   asset, and blocked downloads still fail truthfully. Check page and service
+   worker traffic if a service worker is active.
 3. Raw/helper/%pip bundled pandas: no prompt and no external package requests.
 4. Failed dependency download, truthful error, retry in the same interpreter,
    first inline Matplotlib plot and output restoration.

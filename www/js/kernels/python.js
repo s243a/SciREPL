@@ -23,7 +23,7 @@ class PythonKernel {
         return source.url;
     }
 
-    static configurePackageInstalls(pyodide) {
+    static configurePackageInstalls(pyodide, indexURL) {
         // Pyodide 0.27 reports wheel failures through errorCallback but resolves
         // loadPackage's promise. Micropip otherwise mistakes that for success.
         // Install before the first micropip import, which captures this public
@@ -76,19 +76,30 @@ class PythonKernel {
                 await pyodide.loadPackage(names);
             },
         });
-        PythonKernel.installPackageFetchGuard();
+        PythonKernel.installPackageFetchGuard(indexURL);
     }
 
     // Micropip's Python HTTP hook handles arbitrary indexes/wheel URLs. This
     // additional boundary catches the compiled loader and direct loadPackage.
-    // Ask only for outbound traffic, never for bundled or already-loaded wheels.
-    static installPackageFetchGuard() {
+    // Pyodide also loads shared libraries as .zip/.tar (or other file types).
+    // Cover its exact configured/active runtime directories, not arbitrary
+    // archives on unrelated CDN paths. Local assets still need no consent.
+    static installPackageFetchGuard(indexURL) {
+        const roots = PythonKernel._packageFetchRoots ||= new Set();
+        const sources = (PythonKernel.runtimeConfig().sources || [])
+            .filter(source => source?.type === 'cdn' && source.url).map(source => source.url);
+        if (indexURL) sources.push(indexURL);
+        for (const source of sources) roots.add(new URL('.', new URL(source, document.baseURI)).href);
         if (window.fetch?._scireplPackageNetwork) return;
         const original = window.fetch;
         if (typeof original !== 'function') return;
         const guarded = async (input, init) => {
             const url = new URL(typeof input === 'string' || input instanceof URL ? input : input.url, document.baseURI);
-            if (/\.whl$/i.test(url.pathname)) await PythonKernel.requirePackageNetworkConsent(url.href);
+            const runtimeAsset = [...roots].some(root => {
+                const base = new URL(root);
+                return url.origin === base.origin && url.pathname.startsWith(base.pathname);
+            });
+            if (/\.whl$/i.test(url.pathname) || runtimeAsset) await PythonKernel.requirePackageNetworkConsent(url.href);
             return original.call(window, input, init);
         };
         guarded._scireplPackageNetwork = true;
@@ -165,7 +176,7 @@ class PythonKernel {
             }
         }
         this._pyodide = await loadPyodide(options);
-        PythonKernel.configurePackageInstalls(this._pyodide);
+        PythonKernel.configurePackageInstalls(this._pyodide, indexURL);
         await this._pyodide.loadPackage(['numpy', 'sympy']);
         await this._pyodide.loadPackage('micropip');
 

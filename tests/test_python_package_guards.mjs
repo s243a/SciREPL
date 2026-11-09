@@ -75,6 +75,41 @@ assert.equal(await fetchGuard(new URL('https://packages.test/package.whl?x=1'), 
 assert.equal(fetchCalls, 2);
 console.log('Actual package-fetch gating, local bypass and option contracts passed.');
 
+// Shared libraries are not always wheels. Register exact release directories
+// even after the wrapper exists, including an actual custom loader index.
+context.window.KERNEL_CONFIG = { languages: { python: { sources: [
+    { type: 'cdn', url: 'https://cdn.test/pyodide/v0.27.4/full/pyodide.js' },
+] } } };
+Kernel.installPackageFetchGuard('https://custom-runtime.test/runtime/');
+assert.equal(context.window.fetch, fetchGuard, 'registering new roots does not stack wrappers');
+consent = false;
+const beforeArchives = fetchCalls;
+for (const url of [
+    'https://cdn.test/pyodide/v0.27.4/full/openblas-0.3.26.zip',
+    'https://cdn.test/pyodide/v0.27.4/full/OPENSSL.ZIP?revision=1',
+    'https://cdn.test/pyodide/v0.27.4/full/numpy-tests.tar',
+    'https://cdn.test/pyodide/v0.27.4/full/future-library.data',
+    'https://custom-runtime.test/runtime/opaque-package?download=1',
+]) await assert.rejects(fetchGuard({ url }), /privacyRequired/, url);
+assert.equal(fetchCalls, beforeArchives, 'all runtime asset types stop before native fetch');
+const beforeUnrelated = gateCalls;
+for (const url of [
+    'vendor/pyodide/geos.zip',
+    'vendor/pyodide/numpy-tests.tar',
+    'https://cdn.test/pyodide/v0.27.40/full/geos.zip',
+    'https://cdn.test/other/geos.zip',
+    'https://cdn.test.evil/pyodide/v0.27.4/full/geos.zip',
+]) await fetchGuard(url);
+assert.equal(gateCalls, beforeUnrelated, 'local and unrelated archive requests retain native semantics');
+consent = true;
+assert.equal(await fetchGuard('https://cdn.test/pyodide/v0.27.4/full/geos.zip?x=1', options), options,
+    'accepted archive requests preserve exact fetch options and AbortSignal');
+context.window.kernelManager = {};
+const beforeMissingGate = fetchCalls;
+await assert.rejects(fetchGuard('https://cdn.test/pyodide/v0.27.4/full/geos.zip'), /disclosure is unavailable/);
+assert.equal(fetchCalls, beforeMissingGate, 'unavailable disclosure cannot dispatch an archive');
+console.log('All runtime archive types, active-index roots, path scope and fail-closed contracts passed.');
+
 const prelude = readFileSync(new URL('../www/js/prelude.py', import.meta.url), 'utf8');
 const section = prelude.split('# ---- Package installation via micropip ----')[1].split('# ---- Matplotlib inline backend ----')[0];
 const python = spawnSync('python3', ['-c', `

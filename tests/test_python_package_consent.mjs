@@ -67,6 +67,8 @@ const fixtureIndex = {
 };
 
 const browser = await chromium.launch({ headless: true });
+// Observe the compiled loader's real page fetches without service-worker
+// interception. Device review separately observes both page and SW targets.
 const context = await browser.newContext({ serviceWorkers: 'block' });
 const requests = [];
 const fixtureRequests = [];
@@ -150,18 +152,48 @@ try {
         ['public PackageManager', 'import micropip\nawait micropip.PackageManager().install("attrs")\nprint("DENIED_TAIL_RAN")'],
         ['unwrapped install', 'import micropip\nawait micropip.install.__wrapped__("attrs")\nprint("DENIED_TAIL_RAN")'],
         ['direct loadPackage', 'from pyodide_js import loadPackage\nawait loadPackage("attrs")\nprint("DENIED_TAIL_RAN")'],
+        ['scipy shared-library zip', 'import micropip\nawait micropip.install("scipy")\nprint("DENIED_TAIL_RAN")'],
+        ['ssl shared-library zip', 'import micropip\nawait micropip.install("ssl")\nprint("DENIED_TAIL_RAN")'],
+        ['direct geos zip', 'from pyodide_js import loadPackage\nawait loadPackage("geos")\nprint("DENIED_TAIL_RAN")'],
+        ['direct numpy-tests tar', 'from pyodide_js import loadPackage\nawait loadPackage("numpy-tests")\nprint("DENIED_TAIL_RAN")'],
         ['helper', 'await pip_install("networkx")\nprint("DENIED_TAIL_RAN")'],
         ['%pip', '%pip install networkx\nprint("DENIED_TAIL_RAN")'],
     ]) {
         await clearConsent();
         const baseline = requests.length, pending = await startCell(code);
         await page.locator('#privacy-modal:not(.hidden)').waitFor();
-        check(`${name}: current disclosure appears before any package request`, requests.length === baseline);
+        check(`${name}: current disclosure appears before any package request`, requests.length === baseline,
+            requests.slice(baseline));
         await page.locator('#privacy-modal .modal-close').click();
         const result = await finishCell(pending);
         check(`${name}: dismissal raises an error and prevents cell tail`, denied(result)
             && !result.text.includes('DENIED_TAIL_RAN'), result.text);
         check(`${name}: denied install emits no package request`, requests.length === baseline);
+    }
+
+    console.log('2a. Acceptance gates compiled archives, then preserves real download failures');
+    for (const [name, code, archive] of [
+        ['scipy', 'import micropip\nawait micropip.install("scipy")', /\/openblas-[^/]+\.zip$/],
+        ['ssl', 'import micropip\nawait micropip.install("ssl")', /\/openssl-[^/]+\.zip$/],
+        ['geos', 'from pyodide_js import loadPackage\nawait loadPackage("geos")', /\/geos-[^/]+\.zip$/],
+        ['numpy-tests', 'from pyodide_js import loadPackage\nawait loadPackage("numpy-tests")', /\/numpy-tests\.tar$/],
+    ]) {
+        await clearConsent();
+        const baseline = requests.length;
+        const pending = await startCell(code + '\nprint("ARCHIVE_ACCEPTED_TAIL_RAN")');
+        await page.locator('#privacy-modal:not(.hidden)').waitFor();
+        check(`${name}: archive stays undispatched while disclosure awaits a decision`, requests.length === baseline);
+        await page.locator('#privacy-accept-btn').click();
+        const result = await finishCell(pending);
+        check(`${name}: recorded acceptance reaches the actual compiled archive fetch`,
+            requests.slice(baseline).some(url => archive.test(new URL(url).pathname))
+            && await page.evaluate(() => window.kernelManager.hasCurrentPrivacyConsent()), requests.slice(baseline));
+        check(`${name}: blocked archive fails truthfully without success or cell tail`, result.error
+            && !result.text.includes('ARCHIVE_ACCEPTED_TAIL_RAN')
+            && !/(?:^|\n)\s*Installed\b/.test(result.text), result.text);
+        const next = await runCell('print("STDOUT_AFTER_ARCHIVE_FAILURE")');
+        check(`${name}: ordinary Python execution survives the failed archive install`, !next.error
+            && next.text.includes('STDOUT_AFTER_ARCHIVE_FAILURE'), next.text);
     }
 
     await clearConsent();
