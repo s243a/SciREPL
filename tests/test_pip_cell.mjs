@@ -248,8 +248,10 @@ const FIXTURE_LOCK = {
     const tOk = await runCell('%pip install fixture-depa\nprint("TAIL_OK")', 'TAIL_OK');
     testLog('control: a SUCCESSFUL install still runs the tail', tOk.includes('TAIL_OK'), tOk.slice(-160));
 
-    // ---- 4b. %pip asks before its first possible package request ----
-    console.log('4b. Network consent precedes a valid %pip install...');
+    // ---- 4b. Bundled/already-installed %pip needs no network disclosure.
+    // Actual download denial/bypass cases use the real loader in the separate
+    // test_python_package_consent suite, not an eager installer preflight.
+    console.log('4b. Local %pip remains usable without network consent...');
     await page.evaluate(() => {
       const pyodide = window.kernelManager.getKernel('python').getPyodide();
       const original = pyodide.runPythonAsync.bind(pyodide);
@@ -286,51 +288,24 @@ const FIXTURE_LOCK = {
         && window._pipInstallCalls === 0)
         && !invalidWithoutConsent.includes('INVALID_TAIL'));
 
-    await startPipCell('%pip install fixture-depa\nprint("DENIED_TAIL")');
-    await page.waitForFunction(() => !document.getElementById('privacy-modal').classList.contains('hidden'));
-    testLog('unconsented %pip opens privacy notice before installer call',
-      await page.evaluate(() => window._pipInstallCalls === 0));
-    await page.locator('#privacy-modal .modal-close').click();
-    const deniedOutput = await waitForPipCell('Privacy policy must be accepted');
-    testLog('dismissing privacy notice prevents install and cell tail',
-      await page.evaluate(() => window._pipInstallCalls === 0)
-        && !deniedOutput.includes('DENIED_TAIL'));
+    await startPipCell('%pip install fixture-depa\nprint("LOCAL_TAIL")');
+    const localOutput = await waitForPipCell('LOCAL_TAIL');
+    testLog('installed local package and cell tail work without accepting disclosure',
+      localOutput.includes('LOCAL_TAIL') && await page.evaluate(() => window._pipInstallCalls === 1
+        && !window.kernelManager.hasCurrentPrivacyConsent()
+        && document.getElementById('privacy-modal').classList.contains('hidden')));
 
-    // Fail closed if a future consent implementation resolves without
-    // recording acceptance (for example, after a UI race or bad stub).
     await page.evaluate(() => {
-      window._realEnsureNetworkConsent = window.kernelManager.ensureNetworkConsent;
-      window.kernelManager.ensureNetworkConsent = async () => {};
+      localStorage.setItem('scirepl_privacy_accepted', '1');
+      localStorage.setItem('scirepl_privacy_accepted_revision', 'old-revision');
     });
-    await startPipCell('%pip install fixture-depa\nprint("NOOP_TAIL")');
-    const noopOutput = await waitForPipCell('Privacy policy must be accepted');
-    testLog('resolving consent without acceptance cannot start pip',
-      await page.evaluate(() => window._pipInstallCalls === 0)
-        && !noopOutput.includes('NOOP_TAIL'));
-    await page.evaluate(() => {
-      window.kernelManager.ensureNetworkConsent = window._realEnsureNetworkConsent;
-      delete window._realEnsureNetworkConsent;
-    });
-
-    // A consent flag from an older disclosure is not enough for this
-    // app-managed package request; the current revision must be accepted.
-    await page.evaluate(() => localStorage.setItem('scirepl_privacy_accepted', '1'));
-    await startPipCell('%pip install fixture-depa\nprint("CONSENT_TAIL")');
-    await page.waitForFunction(() => !document.getElementById('privacy-modal').classList.contains('hidden'));
-    testLog('legacy consent without current revision still waits for consent',
-      await page.evaluate(() => window._pipInstallCalls === 0));
-    await page.locator('#privacy-accept-btn').click();
-    const acceptedOutput = await waitForPipCell('CONSENT_TAIL');
-    testLog('accepting current notice installs then runs cell tail',
-      await page.evaluate(() => window._pipInstallCalls === 1
-        && window.kernelManager.hasCurrentPrivacyConsent())
-        && acceptedOutput.includes('CONSENT_TAIL'));
-
-    const repeated = await runCell('%pip install fixture-depa\nprint("CONSENT_REPEAT")', 'CONSENT_REPEAT');
-    testLog('current consent runs later %pip without another notice',
-      repeated.includes('CONSENT_REPEAT')
-        && await page.evaluate(() => window._pipInstallCalls === 2
-          && document.getElementById('privacy-modal').classList.contains('hidden')));
+    const repeated = await runCell('%pip install fixture-depa\nprint("LOCAL_REPEAT")', 'LOCAL_REPEAT');
+    testLog('outdated revision does not block an entirely local repeated install',
+      repeated.includes('LOCAL_REPEAT') && await page.evaluate(() => window._pipInstallCalls === 2
+        && !window.kernelManager.hasCurrentPrivacyConsent()
+        && document.getElementById('privacy-modal').classList.contains('hidden')));
+    await page.evaluate(() => localStorage.setItem('scirepl_privacy_accepted_revision',
+      window.kernelManager.constructor.PRIVACY_POLICY_REVISION));
 
     testLog('deterministic sections made ZERO CDN requests',
       cdnRequests.length === cdnBaselineAfterBoot,

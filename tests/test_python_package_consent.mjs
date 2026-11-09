@@ -12,9 +12,11 @@ const BASE = (process.env.SCIREPL_TEST_BASE || `http://localhost:${process.env.P
 const APP_VERSION = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 const PINNED_CDN = 'https://cdn.jsdelivr.net/pyodide/v0.27.4/full/';
 const FIXTURE_ROOT = `${BASE}/__installer_test__/`;
+const FOREIGN_FIXTURE_ROOT = 'https://scirepl-installer-fixture.invalid/';
 const TIMEOUT = 180_000;
 const hosts = new Set(['cdn.jsdelivr.net', 'unpkg.com', 'pypi.org', 'files.pythonhosted.org']);
-const packageRequest = url => hosts.has(new URL(url).hostname) || url.startsWith(FIXTURE_ROOT);
+const packageRequest = url => hosts.has(new URL(url).hostname) || url.startsWith(FIXTURE_ROOT)
+    || url.startsWith(FOREIGN_FIXTURE_ROOT);
 let checks = 0;
 const check = (message, condition, detail) => {
     checks++;
@@ -49,8 +51,10 @@ print(base64.b64encode(buf.getvalue()).decode())
 
 const optionFile = 'scirepl_options_fixture-1.0.0rc1-py3-none-any.whl';
 const urlFile = 'scirepl_url_fixture-1.0.0-py3-none-any.whl';
+const aliasFile = 'scirepl_alias_fixture-1.0.0-py3-none-any.whl';
 const optionWheel = wheel('scirepl-options-fixture', '1.0.0rc1', 'scirepl_options_fixture');
 const urlWheel = wheel('scirepl-url-fixture', '1.0.0', 'scirepl_url_fixture');
+const aliasWheel = wheel('scirepl-alias-fixture', '1.0.0', 'scirepl_alias_fixture');
 const prelude = readFileSync(new URL('../www/js/prelude.py', import.meta.url), 'utf8');
 const wrapperStart = prelude.indexOf('def _configure_package_install_consent():');
 const wrapperEnd = prelude.indexOf('\n_configure_package_install_consent()', wrapperStart);
@@ -75,6 +79,11 @@ await context.addInitScript(version => {
 }, APP_VERSION);
 await context.route('**/*', async route => {
     const request = route.request(), url = request.url();
+    if (url.startsWith(FOREIGN_FIXTURE_ROOT)) {
+        assert.equal(url, FOREIGN_FIXTURE_ROOT + aliasFile, 'Unexpected foreign fixture URL');
+        return route.fulfill({ body: aliasWheel, contentType: 'application/octet-stream',
+            headers: { 'Access-Control-Allow-Origin': '*' } });
+    }
     if (url.startsWith(FIXTURE_ROOT)) {
         fixtureRequests.push({ url, cookie: request.headers().cookie || '' });
         if (url.endsWith(optionFile)) return route.fulfill({ body: optionWheel, contentType: 'application/octet-stream' });
@@ -138,6 +147,9 @@ try {
     console.log('2. Raw, aliased, helper and magic installs fail closed before network');
     for (const [name, code] of [
         ['raw micropip', 'import micropip\nawait micropip.install("networkx")\nprint("DENIED_TAIL_RAN")'],
+        ['public PackageManager', 'import micropip\nawait micropip.PackageManager().install("attrs")\nprint("DENIED_TAIL_RAN")'],
+        ['unwrapped install', 'import micropip\nawait micropip.install.__wrapped__("attrs")\nprint("DENIED_TAIL_RAN")'],
+        ['direct loadPackage', 'from pyodide_js import loadPackage\nawait loadPackage("attrs")\nprint("DENIED_TAIL_RAN")'],
         ['helper', 'await pip_install("networkx")\nprint("DENIED_TAIL_RAN")'],
         ['%pip', '%pip install networkx\nprint("DENIED_TAIL_RAN")'],
     ]) {
@@ -169,9 +181,25 @@ try {
         });
     }
 
+    console.log('2b. Fully bundled installs and marker-only requirements need no network consent');
+    await clearConsent();
+    const bundledStart = requests.length;
+    for (const code of [
+        'import micropip\nawait micropip.install("pandas")\nimport pandas\nprint("BUNDLED_READY")',
+        '%pip install pandas\nprint("BUNDLED_READY")',
+        'await micropip.install("numpy")\nprint("BUNDLED_READY")',
+        'await micropip.install("scirepl-never-requested; sys_platform == \'not_a_runtime\'")\nprint("BUNDLED_READY")',
+    ]) {
+        const result = await runCell(code);
+        check('offline/no-op installer completes with no disclosure, acceptance or external traffic',
+            !result.error && result.text.includes('BUNDLED_READY') && requests.length === bundledStart
+            && await page.locator('#privacy-modal').isHidden()
+            && await page.evaluate(() => !window.kernelManager.hasCurrentPrivacyConsent()), result.text);
+    }
+
     await clearConsent(true);
     const aliasStart = requests.length;
-    const alias = await startCell('from micropip import install as user_install\nrequirements = ["numpy"]\nawait user_install(requirements, deps=False)\nprint("ALIAS_ACCEPTED")');
+    const alias = await startCell(`from micropip import install as user_install\nrequirements = [${JSON.stringify(FOREIGN_FIXTURE_ROOT + aliasFile)}]\nawait user_install(requirements, credentials="omit")\nimport scirepl_alias_fixture\nprint("ALIAS_ACCEPTED")`);
     await page.locator('#privacy-modal:not(.hidden)').waitFor();
     check('legacy consent and from-import/dynamic list still require current acceptance', requests.length === aliasStart);
     await page.locator('#privacy-accept-btn').click();

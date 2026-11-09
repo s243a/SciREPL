@@ -39,13 +39,15 @@ class PythonKernel {
                         if (typeof options.errorCallback === 'function') options.errorCallback(message);
                     },
                 });
-                if (errors.length) throw new Error('Python package download/install failed: ' + errors.slice(0, 3).join('; '));
+                if (errors.length) throw new Error('Python package download/install failed: '
+                    + errors.slice(0, 3).map(message => message.replace(/:\s*$/, '')).join('; '));
                 return result;
             };
             strict._scireplStrict = true;
             pyodide.loadPackage = strict;
         }
         pyodide.registerJsModule('_scirepl_package_network', {
+            before_fetch: (url) => PythonKernel.requirePackageNetworkConsent(url),
             ensure_consent: async () => {
                 const manager = window.kernelManager;
                 if (typeof manager?.ensureNetworkConsent !== 'function'
@@ -70,12 +72,39 @@ class PythonKernel {
                 // The root can be installed even though one lazy compiled
                 // dependency failed. Native micropip then short-circuits on a
                 // retry. Repair only this requested built-in's missing closure.
-                await manager.ensureNetworkConsent();
-                if (!manager.hasCurrentPrivacyConsent()) throw new Error(window.t('kernelManager.privacyRequired'));
                 const names = Object.entries(entries).filter(([, entry]) => files.has(entry.file_name)).map(([key]) => key);
                 await pyodide.loadPackage(names);
             },
         });
+        PythonKernel.installPackageFetchGuard();
+    }
+
+    // Micropip's Python HTTP hook handles arbitrary indexes/wheel URLs. This
+    // additional boundary catches the compiled loader and direct loadPackage.
+    // Ask only for outbound traffic, never for bundled or already-loaded wheels.
+    static installPackageFetchGuard() {
+        if (window.fetch?._scireplPackageNetwork) return;
+        const original = window.fetch;
+        if (typeof original !== 'function') return;
+        const guarded = async (input, init) => {
+            const url = new URL(typeof input === 'string' || input instanceof URL ? input : input.url, document.baseURI);
+            if (/\.whl$/i.test(url.pathname)) await PythonKernel.requirePackageNetworkConsent(url.href);
+            return original.call(window, input, init);
+        };
+        guarded._scireplPackageNetwork = true;
+        window.fetch = guarded;
+    }
+
+    static async requirePackageNetworkConsent(input) {
+        const url = new URL(String(input), document.baseURI);
+        if (!['http:', 'https:'].includes(url.protocol) || url.origin === location.origin) return;
+        const manager = window.kernelManager;
+        if (typeof manager?.ensureNetworkConsent !== 'function'
+            || typeof manager?.hasCurrentPrivacyConsent !== 'function') {
+            throw new Error('Network disclosure is unavailable; Python package download was not started.');
+        }
+        await manager.ensureNetworkConsent();
+        if (!manager.hasCurrentPrivacyConsent()) throw new Error(window.t('kernelManager.privacyRequired'));
     }
 
     async init() {

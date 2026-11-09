@@ -47,13 +47,50 @@ context.window.kernelManager = {};
 await assert.rejects(modules.get('_scirepl_package_network').ensure_consent(), /disclosure is unavailable/);
 console.log('Public package loader and consent bridge contracts passed.');
 
+// Exercise the actual JavaScript wheel-fetch wrapper, including URL queries,
+// case-insensitive extensions, Request-like objects and local offline assets.
+context.URL = URL;
+context.document = { baseURI: 'https://scirepl.test/app/' };
+context.location = { origin: 'https://scirepl.test' };
+let fetchCalls = 0;
+context.window.fetch = async (_input, init) => { fetchCalls++; return init; };
+context.window.kernelManager = {
+    ensureNetworkConsent: async () => { gateCalls++; },
+    hasCurrentPrivacyConsent: () => consent,
+};
+Kernel.installPackageFetchGuard();
+const fetchGuard = context.window.fetch;
+Kernel.installPackageFetchGuard();
+assert.equal(context.window.fetch, fetchGuard, 'fetch guard setup is idempotent');
+consent = false;
+const beforeLocal = gateCalls;
+await fetchGuard('vendor/bundled.whl');
+assert.equal(gateCalls, beforeLocal, 'same-origin bundled wheel never requests disclosure');
+await assert.rejects(fetchGuard({ url: 'https://packages.test/Package.WHL?version=1' }), /privacyRequired/);
+assert.equal(fetchCalls, 1, 'unrecorded consent cannot reach native external fetch');
+consent = true;
+const options = { credentials: 'omit', signal: new AbortController().signal };
+assert.equal(await fetchGuard(new URL('https://packages.test/package.whl?x=1'), options), options,
+    'accepted requests preserve the exact options and AbortSignal');
+assert.equal(fetchCalls, 2);
+console.log('Actual package-fetch gating, local bypass and option contracts passed.');
+
 const prelude = readFileSync(new URL('../www/js/prelude.py', import.meta.url), 'utf8');
 const section = prelude.split('# ---- Package installation via micropip ----')[1].split('# ---- Matplotlib inline backend ----')[0];
 const python = spawnSync('python3', ['-c', `
 import asyncio, contextlib, inspect, io, json, sys, types
 import importlib.metadata as metadata
 section = json.loads(sys.argv[1])
-state = {'allow': False, 'fail': False, 'calls': [], 'gate': 0, 'verified': []}
+state = {'allow': False, 'fail': False, 'calls': [], 'gate': 0, 'verified': [], 'fetches': []}
+pyodide = types.ModuleType('pyodide')
+http = types.ModuleType('pyodide.http')
+async def pyfetch(url, **kwargs):
+    state['fetches'].append((url, kwargs))
+    return 'native fetch'
+http.pyfetch = pyfetch
+pyodide.http = http
+sys.modules['pyodide'] = pyodide
+sys.modules['pyodide.http'] = http
 native_distribution = metadata.distribution
 class FixtureDistribution:
     version = '1.0'
@@ -63,6 +100,8 @@ metadata.distribution = lambda name: FixtureDistribution() if name == 'scirepl-e
 micropip = types.ModuleType('micropip')
 async def original(requirements, keep_going=False, deps=True, credentials=None, pre=False, index_urls=None, verbose=None):
     state['calls'].append((requirements, keep_going, deps, credentials, pre, index_urls, verbose))
+    if requirements == 'networked-package':
+        await http.pyfetch('https://custom-index.test/simple/package/', credentials=credentials)
     if state['fail']:
         raise RuntimeError('download failed')
     return 'native return'
@@ -73,6 +112,9 @@ async def ensure_consent():
     if not state['allow']:
         raise RuntimeError('consent required')
 bridge.ensure_consent = ensure_consent
+async def before_fetch(url):
+    await ensure_consent()
+bridge.before_fetch = before_fetch
 async def verify_builtin_dependencies(name, version):
     state['verified'].append((name, version))
 bridge.verify_builtin_dependencies = verify_builtin_dependencies
@@ -85,13 +127,17 @@ exec(section, namespace)
 assert micropip.install is guard, 'prelude setup must not wrap a second time'
 assert inspect.signature(guard) == inspect.signature(original)
 async def main():
+    assert await micropip.install('bundled-local') == 'native return'
+    assert state['gate'] == 0 and state['fetches'] == [], 'local installs must not ask for network consent'
     try:
-        await micropip.install('not-started')
+        await micropip.install('networked-package')
         raise AssertionError('missing consent must fail')
     except RuntimeError as error:
         assert 'consent required' in str(error)
-    assert state['calls'] == []
+    assert state['fetches'] == [], 'missing consent stops before native fetch'
     state['allow'] = True
+    assert await http.pyfetch('https://custom-index.test/opaque-endpoint', credentials='omit') == 'native fetch'
+    assert state['fetches'][-1] == ('https://custom-index.test/opaque-endpoint', {'credentials': 'omit'})
     from micropip import install
     req = ['pkg; python_version >= "3"', 'https://example.test/custom.whl']
     result = await install(req, keep_going=True, deps=False, credentials='omit', pre=True, index_urls=['https://example.test/simple'], verbose=True)
