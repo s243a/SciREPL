@@ -497,6 +497,7 @@
     "whatsNew.highlightPrologBindings": "Prolog results now hide unbound variables and opaque handles instead of showing [object Object]. Normal bound values remain visible.",
     "whatsNew.highlightKeyboardTrust": "Keyboard trust warnings are now translated in every supported display language. Only install keyboards you trust.",
     "whatsNew.releaseNotes": "Read the full release notes",
+    "whatsNew.githubReleaseNotes": "GitHub release notes",
     "menu.showTour": "🧭 Take the Tour",
     "searchReplaceRow.replace": "Replace",
     "searchReplaceRow.all": "All",

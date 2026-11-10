@@ -101,14 +101,19 @@
         <div class="modal-content">
             <button class="modal-close" data-i18n-aria-label="common.close" data-i18n-title="common.close" aria-label="Close" title="Close">&times;</button>
             <h2 data-i18n="help.scireplHelp">SciREPL Help</h2>
+            <p id="help-app-version" data-i18n-html="help.scireplVersion"><strong>SciREPL</strong></p>
             <div class="help-examples-live visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
 
-            <p><a id="help-tutorial-index" class="vfs-btn tutorial-link"
+            <div class="vfs-actions help-quick-actions">
+                <a id="help-tutorial-index" class="vfs-btn tutorial-link"
                   href="https://s243a.github.io/SciREPL/help/en/tutorials/?edition=free" data-tutorial-guide="index"
                   target="_blank" rel="noopener noreferrer"
-                  data-i18n="help.tutorialIndex">Tutorials (online)</a></p>
-            <p><button id="btn-show-tour" class="vfs-btn" data-i18n="help.showTour">Show the tour again</button></p>
-            <p><button id="btn-show-whats-new" class="vfs-btn" data-i18n="help.showWhatsNew">What’s new in this version</button></p>
+                  data-i18n="help.tutorialIndex">Tutorials (online)</a>
+                <button id="btn-show-tour" class="vfs-btn" data-i18n="help.showTour">Show the tour again</button>
+                <button id="btn-show-whats-new" class="vfs-btn" data-i18n="help.showWhatsNew">What’s new in this version</button>
+                <a id="help-support-link" class="vfs-btn" href="https://ko-fi.com/V7V51TYA76" target="_blank"
+                    rel="noopener noreferrer" data-i18n="help.supportOnKoFi">Support me on Ko-fi</a>
+            </div>
             <h3 data-i18n="help.landscapeKeyboards">On-screen keyboards</h3>
             <p data-i18n="help.landscapeKeyboardsIntro">The default keyboard works, but a coding keyboard gives you Tab, brackets and arrow keys without switching layers, and a shorter keyboard leaves more room for code. Suggestions by orientation:</p>
             <p class="help-keyboard-group" data-i18n="help.keyboardGroupPortrait">Portrait</p>
@@ -479,17 +484,11 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             <h3 data-i18n="help.documentation">Documentation</h3>
             <p data-i18n-html="help.fullDocumentationGithubReadme">Full documentation: <a href="https://github.com/s243a/SciREPL#readme" target="_blank">GitHub README</a>
             </p>
-            <h3 data-i18n="help.version">Version</h3>
-            <p id="help-app-version" data-i18n-html="help.scireplVersion"><strong>SciREPL</strong></p>
             <p data-i18n="help.includesFeatureList">Includes: Multi-language (Python, R, Prolog, Bash, JavaScript, Lua), editable cells, markdown cells, session persistence with auto-save and crash recovery, Math Mode palette, .ipynb import/export with output preservation, .srwb workbook format, rich export (HTML, Markdown, PDF, DOCX with native equations, LaTeX) with syntax highlighting, virtual filesystem, search paths, URL file fetching, multi-notebook support, package catalog with one-click install, language settings, package format (.zip/.tar.gz)</p>
 
             <h3 data-i18n="help.privacy">Privacy</h3>
             <p><a href="#" id="help-privacy-link" data-i18n="privacy.privacyPolicy">Privacy Policy</a></p>
 
-            <div class="vfs-actions" style="margin-top: 15px;">
-                <a class="vfs-btn" href="https://ko-fi.com/V7V51TYA76" target="_blank"
-                    rel="noopener noreferrer" data-i18n="help.supportOnKoFi">Support me on Ko-fi</a>
-            </div>
         </div>
     </div>
 
@@ -506,7 +505,8 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
             <p data-i18n="whatsNew.intro">This release makes SciREPL easier to learn, personalise and trust.</p>
             <ul id="whats-new-highlights" class="whats-new-highlights"></ul>
             <div class="whats-new-actions">
-                <a id="whats-new-release-link" class="vfs-btn" href="https://github.com/s243a/SciREPL/releases" target="_blank" rel="noopener noreferrer" data-i18n="whatsNew.releaseNotes">Read the full release notes</a>
+                <a id="whats-new-full-notes-link" class="vfs-btn" target="_blank" rel="noopener noreferrer" data-i18n="whatsNew.releaseNotes" hidden>Read the full release notes</a>
+                <a id="whats-new-release-link" class="vfs-btn" href="https://github.com/s243a/SciREPL/releases" target="_blank" rel="noopener noreferrer" data-i18n="whatsNew.githubReleaseNotes">GitHub release notes</a>
                 <button id="whats-new-done" class="vfs-btn" data-i18n="tour.done">Done</button>
             </div>
         </div>

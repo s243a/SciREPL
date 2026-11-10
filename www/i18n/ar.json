@@ -193,6 +193,7 @@
     "whatsNew.highlightPrologBindings": "تُخفي نتائج Prolog الآن المتغيرات غير المرتبطة والمقابض المعتمة بدلًا من عرض [object Object]. تظل القيم المرتبطة العادية ظاهرة.",
     "whatsNew.highlightKeyboardTrust": "أصبحت تحذيرات الثقة بلوحة المفاتيح مترجمة إلى جميع لغات العرض المدعومة. ثبّت فقط لوحات مفاتيح تثق بها.",
     "whatsNew.releaseNotes": "قراءة ملاحظات الإصدار الكاملة",
+    "whatsNew.githubReleaseNotes": "ملاحظات الإصدار على GitHub",
     "menu.showTour": "🧭 بدء الجولة الإرشادية",
     "searchReplaceRow.replace": "استبدال",
     "searchReplaceRow.all": "الكل",

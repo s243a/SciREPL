@@ -18,6 +18,12 @@
     const SEEN_VERSION_KEY = 'scirepl_whats_new_seen_version';
     const ONBOARDING_KEY = 'scirepl_onboarding_seen';
     const BLOCKING_MODALS = ['privacy-modal', 'runtime-download-modal'];
+    // Keep in sync with the website-only renderer and release deployment
+    // (scripts/render-free-release-notes.mjs). Don't guess a future version's
+    // route or make a network request just to open this dialog.
+    const FULL_NOTES_VERSION = '1.5.0';
+    const FULL_NOTES_ROOT = 'https://s243a.github.io/SciREPL/help/releases/v1.5.0/';
+    const FULL_NOTES_LOCALES = new Set(['en', 'ar', 'bn', 'de', 'es', 'fr', 'hi', 'id', 'ja', 'ko', 'pt-BR', 'ru', 'zh']);
     const HIGHLIGHT_LITERALS = /(#!source|\[object Object\]|%pip install(?: matplotlib)?|\b(?:Prolog|Matplotlib)\b)/g;
 
     function renderHighlight(item, key) {
@@ -296,6 +302,19 @@
             }
             const release = document.getElementById('whats-new-release-link');
             if (release) release.href = this.releaseUrl;
+            const fullNotes = document.getElementById('whats-new-full-notes-link');
+            if (fullNotes) {
+                fullNotes.hidden = this._isUnreleasedBuild() || this.version !== FULL_NOTES_VERSION;
+                if (fullNotes.hidden) {
+                    fullNotes.removeAttribute('href');
+                    fullNotes.removeAttribute('hreflang');
+                } else {
+                    const current = window.i18n?.current;
+                    const locale = FULL_NOTES_LOCALES.has(current) ? current : 'en';
+                    fullNotes.href = FULL_NOTES_ROOT + (locale === 'en' ? '' : locale + '/');
+                    fullNotes.hreflang = locale;
+                }
+            }
             const helpVersion = document.getElementById('help-app-version');
             if (helpVersion) {
                 window.setI18nHtml(helpVersion, 'help.scireplVersion', {

@@ -193,6 +193,7 @@
     "whatsNew.highlightPrologBindings": "Prolog 结果现在会隐藏未绑定变量和不透明句柄，而不是显示 [object Object]。正常的绑定值仍然可见。",
     "whatsNew.highlightKeyboardTrust": "键盘信任警告现已翻译为所有受支持的显示语言。请仅安装您信任的键盘。",
     "whatsNew.releaseNotes": "阅读完整发布说明",
+    "whatsNew.githubReleaseNotes": "GitHub 发布说明",
     "menu.showTour": "🧭 开始导览",
     "searchReplaceRow.replace": "替换",
     "searchReplaceRow.all": "全部",

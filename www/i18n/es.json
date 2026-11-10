@@ -202,6 +202,7 @@
     "whatsNew.highlightPrologBindings": "Los resultados de Prolog ocultan ahora las variables sin vincular y los identificadores opacos en lugar de mostrar [object Object]. Los valores vinculados normales siguen visibles.",
     "whatsNew.highlightKeyboardTrust": "Las advertencias de confianza del teclado ya están traducidas a todos los idiomas de interfaz compatibles. Instala únicamente teclados de confianza.",
     "whatsNew.releaseNotes": "Leer las notas de la versión completas",
+    "whatsNew.githubReleaseNotes": "Notas de la versión en GitHub",
     "menu.showTour": "🧭 Ver la guía",
     "searchReplaceRow.replace": "Reemplazar",
     "searchReplaceRow.all": "Todo",

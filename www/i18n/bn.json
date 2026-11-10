@@ -193,6 +193,7 @@
     "whatsNew.highlightPrologBindings": "Prolog-এর ফলাফলে এখন [object Object] দেখানোর বদলে মানহীন চলক ও অস্বচ্ছ হ্যান্ডল লুকানো হয়। সাধারণ নির্ধারিত মানগুলি দৃশ্যমান থাকে।",
     "whatsNew.highlightKeyboardTrust": "কীবোর্ডের বিশ্বস্ততা সংক্রান্ত সতর্কতাগুলি এখন সমর্থিত সব প্রদর্শনের ভাষায় অনূদিত। শুধু বিশ্বস্ত কীবোর্ড ইনস্টল করুন।",
     "whatsNew.releaseNotes": "সম্পূর্ণ রিলিজ নোট পড়ুন",
+    "whatsNew.githubReleaseNotes": "GitHub-এ রিলিজ নোট",
     "menu.showTour": "🧭 ট্যুর শুরু করুন",
     "searchReplaceRow.replace": "প্রতিস্থাপন",
     "searchReplaceRow.all": "সবগুলো",

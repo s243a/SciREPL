@@ -193,6 +193,7 @@
     "whatsNew.highlightPrologBindings": "Prolog के परिणाम अब [object Object] दिखाने के बजाय असंबद्ध चर और अपारदर्शी हैंडल छिपाते हैं। सामान्य संबद्ध मान दिखाई देते रहते हैं।",
     "whatsNew.highlightKeyboardTrust": "कीबोर्ड की विश्वसनीयता से जुड़ी चेतावनियाँ अब सभी समर्थित प्रदर्शन भाषाओं में अनूदित हैं। केवल भरोसेमंद कीबोर्ड स्थापित करें।",
     "whatsNew.releaseNotes": "पूरे रिलीज़ नोट पढ़ें",
+    "whatsNew.githubReleaseNotes": "GitHub पर रिलीज़ नोट",
     "menu.showTour": "🧭 टूर लें",
     "searchReplaceRow.replace": "बदलें",
     "searchReplaceRow.all": "सभी",
