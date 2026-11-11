@@ -444,10 +444,14 @@ try {
             && actual.version.includes('1.5.0') && actual.direction === (locale === 'ar' ? 'rtl' : 'ltr'),
             JSON.stringify(actual));
         const plain = text => text.replace(/[\u2066-\u2069]/g, '');
-        check(`${locale}: full notes link uses the renderer's canonical destination and localized label`,
+        check(`${locale}: release highlights link uses the renderer's canonical destination and localized label`,
             actual.notes.href === PUBLIC_NOTES.get(locale)?.url && actual.notes.lang === locale
             && plain(actual.notes.text) === catalogue.strings['whatsNew.releaseNotes'],
             JSON.stringify(actual.notes));
+        if (locale === 'en') {
+            check('English calls the short Pages notes Release highlights',
+                actual.notes.text === 'Release highlights', actual.notes.text);
+        }
         check(`${locale}: GitHub release notes keep the original URL and use a distinct localized label`,
             actual.github.href === GITHUB_RELEASES
             && plain(actual.github.text) === catalogue.strings['whatsNew.githubReleaseNotes']
@@ -505,16 +509,16 @@ try {
     const actions = await localizedPage.evaluate(() =>
         [...document.querySelectorAll('.whats-new-actions > *')]
             .filter(element => !element.hidden).map(element => [element.id, element.textContent]));
-    check('Spanish presents GitHub, translated notes, then Done', JSON.stringify(actions) === JSON.stringify([
+    check('Spanish presents GitHub, release highlights, then Done', JSON.stringify(actions) === JSON.stringify([
         ['whats-new-release-link', 'Leer en GitHub'],
-        ['whats-new-full-notes-link', 'Leer las notas de la versión traducidas'],
+        ['whats-new-full-notes-link', 'Resumen de la versión'],
         ['whats-new-done', 'Listo'],
     ]), JSON.stringify(actions));
     const spanishPopup = localizedPage.waitForEvent('popup');
     await localizedPage.click('#whats-new-full-notes-link');
     const spanish = await spanishPopup;
     await spanish.waitForLoadState('domcontentloaded');
-    check('the full-notes action opens the actual rendered Spanish page',
+    check('the release highlights action opens the actual rendered Spanish page',
         spanish.url() === PUBLIC_NOTES.get('es').url && await spanish.evaluate(() =>
             document.documentElement.lang === 'es' && window.opener === null));
     await spanish.close();

@@ -496,7 +496,7 @@
     "whatsNew.highlightSourceOnlyCells": "Cells starting with #!source are now stored without running in every code language. Stale output is cleared when a cell becomes source-only.",
     "whatsNew.highlightPrologBindings": "Prolog results now hide unbound variables and opaque handles instead of showing [object Object]. Normal bound values remain visible.",
     "whatsNew.highlightKeyboardTrust": "Keyboard trust warnings are now translated in every supported display language. Only install keyboards you trust.",
-    "whatsNew.releaseNotes": "Read the release notes",
+    "whatsNew.releaseNotes": "Release highlights",
     "whatsNew.githubReleaseNotes": "Read on GitHub",
     "menu.showTour": "🧭 Take the Tour",
     "searchReplaceRow.replace": "Replace",

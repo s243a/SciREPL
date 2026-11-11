@@ -193,7 +193,7 @@
     "whatsNew.highlightSourceOnlyCells": "#!source で始まるセルは、すべてのコード言語で実行せずに保存されるようになりました。セルをソース専用に変更すると、古い出力が消去されます。",
     "whatsNew.highlightPrologBindings": "Prolog の結果では、[object Object] を表示する代わりに、未束縛の変数と不透明なハンドルを非表示にします。通常の束縛済みの値は引き続き表示されます。",
     "whatsNew.highlightKeyboardTrust": "キーボードの信頼性に関する警告を、対応するすべての表示言語に翻訳しました。信頼できるキーボードだけをインストールしてください。",
-    "whatsNew.releaseNotes": "翻訳されたリリースノートを読む",
+    "whatsNew.releaseNotes": "リリースの主な変更点",
     "whatsNew.githubReleaseNotes": "GitHub で読む",
     "menu.showTour": "🧭 ツアーを開始",
     "searchReplaceRow.replace": "置換",

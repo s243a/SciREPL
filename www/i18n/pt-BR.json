@@ -199,7 +199,7 @@
     "whatsNew.highlightSourceOnlyCells": "Células que começam com #!source agora são salvas sem executar em todas as linguagens de código. A saída antiga é apagada quando a célula passa a ser somente fonte.",
     "whatsNew.highlightPrologBindings": "Os resultados Prolog agora ocultam variáveis não vinculadas e identificadores opacos em vez de mostrar [object Object]. Os valores vinculados normais continuam visíveis.",
     "whatsNew.highlightKeyboardTrust": "Os avisos de confiança do teclado agora estão traduzidos para todos os idiomas de interface compatíveis. Instale apenas teclados em que confie.",
-    "whatsNew.releaseNotes": "Ler as notas de lançamento traduzidas",
+    "whatsNew.releaseNotes": "Destaques da versão",
     "whatsNew.githubReleaseNotes": "Ler no GitHub",
     "menu.showTour": "🧭 Fazer o tour",
     "searchReplaceRow.replace": "Substituir",

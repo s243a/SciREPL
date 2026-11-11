@@ -192,7 +192,7 @@
     "whatsNew.highlightSourceOnlyCells": "تُحفظ الآن الخلايا التي تبدأ بـ #!source دون تنفيذها في جميع لغات البرمجة. يُمسح الناتج القديم عندما تصبح الخلية مخصصة للمصدر فقط.",
     "whatsNew.highlightPrologBindings": "تُخفي نتائج Prolog الآن المتغيرات غير المرتبطة والمقابض المعتمة بدلًا من عرض [object Object]. تظل القيم المرتبطة العادية ظاهرة.",
     "whatsNew.highlightKeyboardTrust": "أصبحت تحذيرات الثقة بلوحة المفاتيح مترجمة إلى جميع لغات العرض المدعومة. ثبّت فقط لوحات مفاتيح تثق بها.",
-    "whatsNew.releaseNotes": "قراءة ملاحظات الإصدار المترجمة",
+    "whatsNew.releaseNotes": "أبرز مستجدات الإصدار",
     "whatsNew.githubReleaseNotes": "اقرأ على GitHub",
     "menu.showTour": "🧭 بدء الجولة الإرشادية",
     "searchReplaceRow.replace": "استبدال",
