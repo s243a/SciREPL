@@ -502,6 +502,14 @@ try {
     await localizedPage.selectOption('#whats-new-language', 'es');
     await localizedPage.waitForFunction(() => document.documentElement.lang === 'es'
         && document.getElementById('whats-new-full-notes-link').hreflang === 'es');
+    const actions = await localizedPage.evaluate(() =>
+        [...document.querySelectorAll('.whats-new-actions > *')]
+            .filter(element => !element.hidden).map(element => [element.id, element.textContent]));
+    check('Spanish presents GitHub, translated notes, then Done', JSON.stringify(actions) === JSON.stringify([
+        ['whats-new-release-link', 'Leer en GitHub'],
+        ['whats-new-full-notes-link', 'Leer las notas de la versión traducidas'],
+        ['whats-new-done', 'Listo'],
+    ]), JSON.stringify(actions));
     const spanishPopup = localizedPage.waitForEvent('popup');
     await localizedPage.click('#whats-new-full-notes-link');
     const spanish = await spanishPopup;
