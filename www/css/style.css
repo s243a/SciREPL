@@ -852,6 +852,21 @@ html, body {
     word-break: break-word;
 }
 
+.help-quick-actions > .vfs-btn,
+.whats-new-actions > .vfs-btn {
+    min-height: 44px;
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.help-quick-actions a.vfs-btn {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
 .help-action-legend {
     display: flex;
     align-items: center;
@@ -3605,7 +3620,7 @@ body.force-mobile .vfs-delete-btn {
     gap: 10px;
 }
 
-.whats-new-actions a.vfs-btn {
+.whats-new-actions a.vfs-btn:not([hidden]) {
     display: inline-flex;
     align-items: center;
     text-decoration: none;

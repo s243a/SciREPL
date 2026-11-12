@@ -2,14 +2,26 @@
 // Run the dev server first: node server.js
 import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
+import { RELEASE_ROOT, renderReleaseNotes } from '../scripts/render-free-release-notes.mjs';
 import './test_whats_new_readiness.mjs';
 
 const PORT = process.env.PORT || 8085;
 const APP_URL = `http://localhost:${PORT}/index.html`;
+const APP_ORIGIN = new URL(APP_URL).origin;
+const GITHUB_RELEASES = 'https://github.com/s243a/SciREPL/releases';
 const PACKAGE = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const PACKAGE_VERSION = PACKAGE.version;
 const RELEASE_CHANNEL = PACKAGE.releaseChannel;
 const DISPLAY_LOCALES = ['en', 'ar', 'bn', 'de', 'es', 'fr', 'hi', 'id', 'ja', 'ko', 'pt-BR', 'ru', 'zh'];
+// Exercise the exact canonical URLs emitted by the Pages renderer without
+// contacting GitHub or requiring the release tag to have deployed first.
+const PUBLIC_NOTES = new Map([...renderReleaseNotes(readFileSync(
+    new URL('../docs/releases/1.5.0-play-notes.txt', import.meta.url), 'utf8'))
+    .values()].map(html => {
+    const locale = /<html lang="([^"]+)"/.exec(html)[1];
+    const url = /<link rel="canonical" href="([^"]+)">/.exec(html)[1];
+    return [locale, { url, html }];
+}));
 const RELEASE_150_KEYS = [
     'whatsNew.highlightLocalizedTutorials',
     'whatsNew.highlightSourceOnlyCells',
@@ -36,8 +48,8 @@ async function load(context) {
     return { page, errors };
 }
 
-async function existingContext({ markCurrent = false } = {}) {
-    const context = await browser.newContext();
+async function existingContext({ markCurrent = false, ...options } = {}) {
+    const context = await browser.newContext(options);
     await context.addInitScript((mark) => {
         localStorage.setItem('scirepl_privacy_accepted', '1');
         localStorage.setItem('scirepl_onboarding_seen', '1');
@@ -134,7 +146,7 @@ try {
     check('1.5.0 freezes only its online-guide, source-only, Prolog and keyboard-warning delta',
         await page.evaluate(keys => JSON.stringify(window.SCIREPL_RELEASE_HIGHLIGHTS['1.5.0'])
             === JSON.stringify(keys), RELEASE_150_KEYS));
-    check('the release link remains valid before a tag exists', /\/releases\/?$/.test(release.href), release.href);
+    check('the GitHub link keeps the existing releases destination', release.href === GITHUB_RELEASES, release.href);
     check('focus moves into the modal', release.focusInside);
     check('the display-language picker is above the release title', release.languageBeforeTitle);
 
@@ -366,8 +378,24 @@ try {
         JSON.stringify(compactHeader));
     await compact.close();
 
-    console.log('\n5. Frozen 1.5.0 highlights in every supported display language');
-    const localized = await existingContext({ markCurrent: true });
+    console.log('\n5. Frozen 1.5.0 highlights and release-note links in every supported display language');
+    check('the Pages renderer covers exactly the 13 display languages',
+        JSON.stringify([...PUBLIC_NOTES.keys()].sort()) === JSON.stringify([...DISPLAY_LOCALES].sort()));
+    const localized = await existingContext({ markCurrent: true, serviceWorkers: 'block',
+        viewport: { width: 320, height: 844 } });
+    const externalRequests = [];
+    const notesByURL = new Map([...PUBLIC_NOTES.values()].map(({ url, html }) => [url, html]));
+    await localized.route('**/*', route => {
+        const request = route.request(), url = request.url();
+        const parsed = new URL(url);
+        if (parsed.origin === APP_ORIGIN && !parsed.pathname.startsWith('/proxy')) return route.continue();
+        externalRequests.push(url);
+        if (request.isNavigationRequest() && request.method() === 'GET') {
+            if (notesByURL.has(url)) return route.fulfill({ contentType: 'text/html', body: notesByURL.get(url) });
+            if (url === GITHUB_RELEASES) return route.fulfill({ contentType: 'text/html', body: '<title>GitHub releases fixture</title>' });
+        }
+        return route.abort('blockedbyclient');
+    });
     const { page: localizedPage, errors: localizedErrors } = await load(localized);
     // Exercise the frozen summary explicitly so this regression remains useful
     // after a later app release changes the current-version table.
@@ -385,14 +413,27 @@ try {
             document.documentElement.lang === code
             && document.querySelector('#whats-new-highlights li')?.textContent
                 .replace(/[\u2066-\u2069]/g, '') === firstHighlight, [locale, expected[0]]);
-        const actual = await localizedPage.evaluate(() => ({
-            version: document.getElementById('whats-new-version').textContent,
-            expectedVersion: window.t('whatsNew.version', { version: '1.5.0' }),
-            selected: document.getElementById('whats-new-language').value,
-            direction: document.documentElement.dir,
-            highlights: [...document.querySelectorAll('#whats-new-highlights li')]
-                .map(element => element.textContent),
-        }));
+        const actual = await localizedPage.evaluate(() => {
+            const link = id => {
+                const anchor = document.getElementById(id);
+                return {
+                    tag: anchor.tagName, href: anchor.href, lang: anchor.hreflang,
+                    target: anchor.target, rel: [...anchor.relList], text: anchor.textContent,
+                    visible: Boolean(anchor.getClientRects().length),
+                    fits: anchor.scrollWidth <= anchor.clientWidth + 1,
+                };
+            };
+            return {
+                version: document.getElementById('whats-new-version').textContent,
+                expectedVersion: window.t('whatsNew.version', { version: '1.5.0' }),
+                selected: document.getElementById('whats-new-language').value,
+                direction: document.documentElement.dir,
+                highlights: [...document.querySelectorAll('#whats-new-highlights li')]
+                    .map(element => element.textContent),
+                notes: link('whats-new-full-notes-link'),
+                github: link('whats-new-release-link'),
+            };
+        });
         // The ordinary RTL renderer still isolates Latin prose; copyable
         // highlights below must instead retain their exact catalogue bytes.
         const prose = actual.highlights.map(text => text.replace(/[\u2066-\u2069]/g, ''));
@@ -402,6 +443,23 @@ try {
             actual.selected === locale && actual.version === actual.expectedVersion
             && actual.version.includes('1.5.0') && actual.direction === (locale === 'ar' ? 'rtl' : 'ltr'),
             JSON.stringify(actual));
+        const plain = text => text.replace(/[\u2066-\u2069]/g, '');
+        check(`${locale}: release highlights link uses the renderer's canonical destination and localized label`,
+            actual.notes.href === PUBLIC_NOTES.get(locale)?.url && actual.notes.lang === locale
+            && plain(actual.notes.text) === catalogue.strings['whatsNew.releaseNotes'],
+            JSON.stringify(actual.notes));
+        if (locale === 'en') {
+            check('English calls the short Pages notes Release highlights',
+                actual.notes.text === 'Release highlights', actual.notes.text);
+        }
+        check(`${locale}: GitHub release notes keep the original URL and use a distinct localized label`,
+            actual.github.href === GITHUB_RELEASES
+            && plain(actual.github.text) === catalogue.strings['whatsNew.githubReleaseNotes']
+            && actual.github.text !== actual.notes.text, JSON.stringify(actual.github));
+        check(`${locale}: both native links fit at 320px and open without an opener`,
+            [actual.notes, actual.github].every(link => link.tag === 'A' && link.visible && link.fits
+                && link.target === '_blank' && link.rel.includes('noopener') && link.rel.includes('noreferrer')),
+            JSON.stringify([actual.notes, actual.github]));
         if (locale === 'ar') {
             await localized.grantPermissions(['clipboard-read', 'clipboard-write']);
             const literals = [['#!source', 1], ['[object Object]', 2]];
@@ -442,6 +500,69 @@ try {
             }
             await localizedPage.setViewportSize(originalViewport);
         }
+    }
+    check('opening the dialog and changing languages makes no external request',
+        externalRequests.length === 0, JSON.stringify(externalRequests));
+    await localizedPage.selectOption('#whats-new-language', 'es');
+    await localizedPage.waitForFunction(() => document.documentElement.lang === 'es'
+        && document.getElementById('whats-new-full-notes-link').hreflang === 'es');
+    const actions = await localizedPage.evaluate(() =>
+        [...document.querySelectorAll('.whats-new-actions > *')]
+            .filter(element => !element.hidden).map(element => [element.id, element.textContent]));
+    check('Spanish presents GitHub, release highlights, then Done', JSON.stringify(actions) === JSON.stringify([
+        ['whats-new-release-link', 'Leer en GitHub'],
+        ['whats-new-full-notes-link', 'Resumen de la versión'],
+        ['whats-new-done', 'Listo'],
+    ]), JSON.stringify(actions));
+    const spanishPopup = localizedPage.waitForEvent('popup');
+    await localizedPage.click('#whats-new-full-notes-link');
+    const spanish = await spanishPopup;
+    await spanish.waitForLoadState('domcontentloaded');
+    check('the release highlights action opens the actual rendered Spanish page',
+        spanish.url() === PUBLIC_NOTES.get('es').url && await spanish.evaluate(() =>
+            document.documentElement.lang === 'es' && window.opener === null));
+    await spanish.close();
+    const githubPopup = localizedPage.waitForEvent('popup');
+    await localizedPage.click('#whats-new-release-link');
+    const github = await githubPopup;
+    await github.waitForLoadState('domcontentloaded');
+    check('the GitHub action still opens the same releases listing in Spanish mode',
+        github.url() === GITHUB_RELEASES && await github.evaluate(() => window.opener === null));
+    await github.close();
+    check('only the two explicit clicks request external pages',
+        JSON.stringify(externalRequests) === JSON.stringify([PUBLIC_NOTES.get('es').url, GITHUB_RELEASES]),
+        JSON.stringify(externalRequests));
+
+    const unknownLocale = await localizedPage.evaluate(() => {
+        const locale = window.i18n.current;
+        const notes = document.getElementById('whats-new-full-notes-link');
+        try {
+            window.i18n.current = '../unknown';
+            window.whatsNew._render();
+            return { href: notes.href, lang: notes.hreflang, visible: Boolean(notes.getClientRects().length) };
+        } finally {
+            window.i18n.current = locale;
+            window.whatsNew._render();
+        }
+    });
+    check('an unsupported locale falls back to the known English Pages root',
+        unknownLocale.visible && unknownLocale.href === RELEASE_ROOT && unknownLocale.lang === 'en',
+        JSON.stringify(unknownLocale));
+    for (const [version, channel] of [['1.5.0', 'development'], ['9.9.9', 'release']]) {
+        const unavailable = await localizedPage.evaluate(([version, channel]) => {
+            window.whatsNew.version = version;
+            window.whatsNew.releaseChannel = channel;
+            window.whatsNew._render();
+            const notes = document.getElementById('whats-new-full-notes-link');
+            return {
+                hidden: !notes.getClientRects().length,
+                hasHref: notes.hasAttribute('href'),
+                github: document.getElementById('whats-new-release-link').href,
+            };
+        }, [version, channel]);
+        check(`${version}/${channel}: no guessed Pages destination; GitHub is still available`,
+            unavailable.hidden && !unavailable.hasHref && unavailable.github === GITHUB_RELEASES,
+            JSON.stringify(unavailable));
     }
     check('all-locale release rendering produces no page errors', localizedErrors.length === 0,
         localizedErrors.join(' | '));

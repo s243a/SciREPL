@@ -91,6 +91,13 @@ the pinned fetch script is the preferred way to reproduce the distributed tree.
    release-gated.
 5. Run `node scripts/check-release-version.mjs --tag=vX.Y.Z` before creating
    the tag. Tag builds run the same comparison and refuse a mismatched tag.
+6. For a build that offers localized Pages release notes in What's New,
+   verify the live notes for that version before distributing the build.
+   The Free 1.5.0 renderer publishes only after the release tag is available
+   to the Pages workflow. Verify the English root and the locale routes
+   (for example `/help/releases/v1.5.0/es/`), including their language and
+   publication status. A local render is not proof of deployment. The
+   separate GitHub release-notes button remains available independently.
 
 After tagging, switch the channel back to `development` before adding the next
 set of unreleased highlights.
