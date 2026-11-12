@@ -210,7 +210,71 @@ def wasm_call(module_name, func_name, args=None):
 
 # ---- Package installation via micropip ----
 
+# Micropip captures pyfetch at import time. Gate that actual HTTP operation
+# first, so public PackageManager and unwrapped install calls are covered too.
+def _configure_package_fetch_consent():
+    from functools import wraps
+    import pyodide.http as http
+    from _scirepl_package_network import before_fetch
+    original = http.pyfetch
+    if getattr(original, '_scirepl_package_network', False):
+        return
+
+    @wraps(original)
+    async def pyfetch(url, **kwargs):
+        await before_fetch(url)
+        return await original(url, **kwargs)
+
+    pyfetch._scirepl_package_network = True
+    http.pyfetch = pyfetch
+
+_configure_package_fetch_consent()
+del _configure_package_fetch_consent
+
 import micropip as _micropip
+
+def _configure_package_install_consent():
+    from functools import wraps
+    from inspect import signature
+    from importlib.metadata import distribution, PackageNotFoundError
+    from packaging.requirements import Requirement, InvalidRequirement
+    from _scirepl_package_network import verify_builtin_dependencies
+
+    original = _micropip.install
+    if getattr(original, '_scirepl_consent_guarded', False):
+        return
+    parameters = signature(original)
+
+    @wraps(original)
+    async def install(*args, **kwargs):
+        bound = parameters.bind(*args, **kwargs)
+        requirements = bound.arguments.get('requirements')
+        # Never consume or rewrite a caller's iterable. Native micropip handles
+        # all request/options semantics first; this snapshot only checks known
+        # built-in distributions after a successful call.
+        requested = (requirements,) if isinstance(requirements, str) else tuple(requirements) if isinstance(requirements, (list, tuple)) else ()
+        result = await original(*args, **kwargs)
+        if bound.arguments.get('deps', True):
+            for text in requested:
+                try:
+                    req = Requirement(text)
+                except (InvalidRequirement, TypeError):
+                    continue  # Bare wheel URLs were handled by micropip.
+                if req.url or (req.marker and not any(req.marker.evaluate({'extra': extra}) for extra in ('', *req.extras))):
+                    continue
+                try:
+                    dist = distribution(req.name)
+                except PackageNotFoundError:
+                    continue
+                if (dist.read_text('PYODIDE_SOURCE') or '').strip() == 'pyodide':
+                    await verify_builtin_dependencies(req.name, dist.version)
+        return result
+
+    install._scirepl_consent_guarded = True
+    _micropip.install = install
+
+_configure_package_install_consent()
+del _configure_package_install_consent
 
 async def pip_install(*packages):
     """Install packages from PyPI using micropip.
@@ -226,6 +290,7 @@ async def pip_install(*packages):
             print(f"  Installed {pkg}")
         except Exception as e:
             print(f"  Failed to install {pkg}: {e}")
+            raise
 
 
 # ---- Matplotlib inline backend ----

@@ -8,6 +8,7 @@ class PythonKernel {
     constructor() {
         this._pyodide = null;
         this._ready = false;
+        this._packageIndex = null;
         this._syncedToPyodide = new Map(); // path → modified timestamp
     }
 
@@ -22,8 +23,104 @@ class PythonKernel {
         return source.url;
     }
 
+    static configurePackageInstalls(pyodide, indexURL) {
+        // Pyodide 0.27 reports wheel failures through errorCallback but resolves
+        // loadPackage's promise. Micropip otherwise mistakes that for success.
+        // Install before the first micropip import, which captures this public
+        // function. Do not reinterpret requirements or eagerly import packages.
+        if (!pyodide.loadPackage._scireplStrict) {
+            const original = pyodide.loadPackage.bind(pyodide);
+            const strict = async (names, options = {}) => {
+                const errors = [];
+                const result = await original(names, {
+                    ...options,
+                    errorCallback(message) {
+                        errors.push(String(message));
+                        if (typeof options.errorCallback === 'function') options.errorCallback(message);
+                    },
+                });
+                if (errors.length) throw new Error('Python package download/install failed: '
+                    + errors.slice(0, 3).map(message => message.replace(/:\s*$/, '')).join('; '));
+                return result;
+            };
+            strict._scireplStrict = true;
+            pyodide.loadPackage = strict;
+        }
+        pyodide.registerJsModule('_scirepl_package_network', {
+            before_fetch: (url) => PythonKernel.requirePackageNetworkConsent(url),
+            ensure_consent: async () => {
+                const manager = window.kernelManager;
+                if (typeof manager?.ensureNetworkConsent !== 'function'
+                    || typeof manager?.hasCurrentPrivacyConsent !== 'function') {
+                    throw new Error('Network disclosure is unavailable; Python package installation was not started.');
+                }
+                await manager.ensureNetworkConsent();
+                if (!manager.hasCurrentPrivacyConsent()) throw new Error(window.t('kernelManager.privacyRequired'));
+            },
+            verify_builtin_dependencies: async (name, version) => {
+                const manager = window.kernelManager;
+                const index = manager?.getKernel('python')?.getPackageIndex?.();
+                const resolver = window.PipResolver;
+                if (!index || !resolver) return; // Custom runtimes retain their native package index semantics.
+                const normalized = resolver.normName(name);
+                const entries = resolver.indexLock(index);
+                const root = entries[normalized];
+                if (!root || root.version !== version) return;
+                const loaded = new Set(Object.keys(pyodide.loadedPackages).map(resolver.normName));
+                const files = new Set(resolver.resolveDepsOf(index, normalized, loaded));
+                if (!files.size) return;
+                // The root can be installed even though one lazy compiled
+                // dependency failed. Native micropip then short-circuits on a
+                // retry. Repair only this requested built-in's missing closure.
+                const names = Object.entries(entries).filter(([, entry]) => files.has(entry.file_name)).map(([key]) => key);
+                await pyodide.loadPackage(names);
+            },
+        });
+        PythonKernel.installPackageFetchGuard(indexURL);
+    }
+
+    // Micropip's Python HTTP hook handles arbitrary indexes/wheel URLs. This
+    // additional boundary catches the compiled loader and direct loadPackage.
+    // Pyodide also loads shared libraries as .zip/.tar (or other file types).
+    // Cover its exact configured/active runtime directories, not arbitrary
+    // archives on unrelated CDN paths. Local assets still need no consent.
+    static installPackageFetchGuard(indexURL) {
+        const roots = PythonKernel._packageFetchRoots ||= new Set();
+        const sources = (PythonKernel.runtimeConfig().sources || [])
+            .filter(source => source?.type === 'cdn' && source.url).map(source => source.url);
+        if (indexURL) sources.push(indexURL);
+        for (const source of sources) roots.add(new URL('.', new URL(source, document.baseURI)).href);
+        if (window.fetch?._scireplPackageNetwork) return;
+        const original = window.fetch;
+        if (typeof original !== 'function') return;
+        const guarded = async (input, init) => {
+            const url = new URL(typeof input === 'string' || input instanceof URL ? input : input.url, document.baseURI);
+            const runtimeAsset = [...roots].some(root => {
+                const base = new URL(root);
+                return url.origin === base.origin && url.pathname.startsWith(base.pathname);
+            });
+            if (/\.whl$/i.test(url.pathname) || runtimeAsset) await PythonKernel.requirePackageNetworkConsent(url.href);
+            return original.call(window, input, init);
+        };
+        guarded._scireplPackageNetwork = true;
+        window.fetch = guarded;
+    }
+
+    static async requirePackageNetworkConsent(input) {
+        const url = new URL(String(input), document.baseURI);
+        if (!['http:', 'https:'].includes(url.protocol) || url.origin === location.origin) return;
+        const manager = window.kernelManager;
+        if (typeof manager?.ensureNetworkConsent !== 'function'
+            || typeof manager?.hasCurrentPrivacyConsent !== 'function') {
+            throw new Error('Network disclosure is unavailable; Python package download was not started.');
+        }
+        await manager.ensureNetworkConsent();
+        if (!manager.hasCurrentPrivacyConsent()) throw new Error(window.t('kernelManager.privacyRequired'));
+    }
+
     async init() {
         if (this._ready) return;
+        this._packageIndex = null;
 
         const km = window.kernelManager;
 
@@ -60,12 +157,26 @@ class PythonKernel {
             const lockFileURL = new URL('scirepl-pyodide-lock.json', new URL(indexURL, document.baseURI)).href;
             try {
                 const response = await fetch(lockFileURL);
-                if (response.ok && (await response.json()).info?.version === config.version) {
-                    options.lockFileURL = lockFileURL;
+                if (response.ok) {
+                    const lock = await response.json();
+                    if (lock.info?.version === config.version && lock.packages) {
+                        options.lockFileURL = lockFileURL;
+                        this._packageIndex = lock;
+                    }
                 }
             } catch (_) { /* An older bundle can still boot with its upstream index. */ }
+            if (!this._packageIndex) {
+                try {
+                    const response = await fetch(new URL('pyodide-lock.json', new URL(indexURL, document.baseURI)));
+                    if (response.ok) {
+                        const lock = await response.json();
+                        if (lock.info?.version === config.version && lock.packages) this._packageIndex = lock;
+                    }
+                } catch (_) { /* The installer will report unavailable package metadata. */ }
+            }
         }
         this._pyodide = await loadPyodide(options);
+        PythonKernel.configurePackageInstalls(this._pyodide, indexURL);
         await this._pyodide.loadPackage(['numpy', 'sympy']);
         await this._pyodide.loadPackage('micropip');
 
@@ -116,6 +227,10 @@ del _pkg_dir
 
     isReady() {
         return this._ready;
+    }
+
+    getPackageIndex() {
+        return this._packageIndex?.info?.version === this._pyodide?.version ? this._packageIndex : null;
     }
 
     getName() {

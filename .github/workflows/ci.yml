@@ -138,6 +138,9 @@ jobs:
       - name: Pip cell semantics (failed installs stop the cell; dep healing)
         run: node tests/test_pip_cell.mjs
 
+      - name: Python package consent, native installer options and failure recovery
+        run: npm run test:python-packages
+
       - name: Matplotlib first plot with bundled Python and real package installs
         run: npm run test:matplotlib-first-show -- --focused
 

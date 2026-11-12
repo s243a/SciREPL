@@ -33,7 +33,7 @@ Start with the public [SciREPL Help](https://s243a.github.io/SciREPL/help/). Sha
 - **Cross-kernel WASM FFI** — Package and distribute pre-compiled Rust WASM libraries callable from JavaScript, Python, and Prolog
 - **Rich output** — LaTeX math rendering, interactive Plotly charts, tables
 - **Hybrid plotting** — Python `plot()` → Plotly.js (pinch-zoom, pan, hover), R `plotly()` → interactive Plotly charts
-- **Matplotlib support** — `import matplotlib.pyplot as plt; plt.show()` renders inline PNG images. A fresh install needs network access; use `%pip install matplotlib` for verified installation. `await micropip.install("matplotlib")` and `await pip_install("matplotlib")` also fetch the missing wheels online, but raw `micropip` may return without raising if a wheel download fails.
+- **Matplotlib support** — `import matplotlib.pyplot as plt; plt.show()` renders inline PNG images. A fresh install needs network access; use `%pip install matplotlib` for import verification. `await micropip.install("matplotlib")` and `await pip_install("matplotlib")` also fetch missing wheels online. All three installer entry points require acceptance of the current network disclosure, and failed downloads stop the cell instead of reporting a successful install. Bundled Python still starts offline without that disclosure. This is an installer consent check, not a sandbox against arbitrary networking in user-written code.
 - **Syntax highlighting** — Code cells display with keyword coloring via highlight.js (Python, JavaScript, R, Bash, Prolog, Lua, TypR)
 - **Find & Replace** — `Ctrl+F` / `Cmd+F` or header search button (mobile-friendly) to search across all cells with match navigation and replace
 - **Editable cells** — Click the pencil icon to edit and re-run any cell

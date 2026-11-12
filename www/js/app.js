@@ -856,9 +856,8 @@
      * Ensure a Pyodide-distribution (or micropip-installed) package is
      * genuinely importable, healing missing transitive dependencies from
      * the OFFICIAL Pyodide lockfile for this interpreter version. Shared by
-     * the %pip magic, tests, and any future programmatic installer — raw
-     * pyodide.loadPackage() silently no-ops for packages outside the Free
-     * build's partial vendored bundle.
+     * the %pip magic and tests. The local runtime index remains authoritative
+     * when external package metadata is unavailable.
      * @returns {ok, healed, message?}
      */
     window.ensurePyodidePackage = async function (requirementText) {
@@ -888,6 +887,8 @@
             }
         };
         const loadFiles = async (files) => {
+            await km2.ensureNetworkConsent();
+            if (!km2.hasCurrentPrivacyConsent()) throw new Error(window.t('kernelManager.privacyRequired'));
             // lock file_name entries are CDN-relative; absolute URLs pass through
             await pyodide.loadPackage(files.map(f => /^https?:\/\//i.test(f) ? f : cdnBase + f));
             pyodide.runPython(`import importlib; importlib.invalidate_caches()`);
@@ -898,15 +899,18 @@
                 `%pip: '${req.raw}' cannot be satisfied — this environment already has ${req.name} ${version}, ` +
                 `which does not match, and the Pyodide distribution pins one version per release.` };
         }
-        let lock = null;
+        let lock = window._pyodideCdnLock || kernel.getPackageIndex?.() || null;
+        let lockError = null;
         try {
-            if (!window._pyodideCdnLock) {
+            if (!lock) {
+                await km2.ensureNetworkConsent();
+                if (!km2.hasCurrentPrivacyConsent()) throw new Error(window.t('kernelManager.privacyRequired'));
                 const resp = await fetch(cdnBase + 'pyodide-lock.json');
                 if (!resp.ok) throw new Error(`CDN lockfile HTTP ${resp.status}`);
                 window._pyodideCdnLock = await resp.json();
+                lock = window._pyodideCdnLock;
             }
-            lock = window._pyodideCdnLock;
-        } catch (_) { /* verify without recovery below */ }
+        } catch (error) { lockError = String(error?.message || error); }
         // "Present" = loaded in pyodide OR carrying importlib metadata (a
         // PyPI/micropip install this call didn't make). Consulted during
         // graph traversal so present wheels are never reloaded — and never
@@ -985,6 +989,10 @@ _scirepl_modules_for(${JSON.stringify(dist)})
                     `%pip: '${req.raw}': ${req.name} ${version} is installed, but no importable module name ` +
                     `could be determined from its metadata — failing closed rather than reporting an unverified install.` };
             }
+        } else if (lockError) {
+            return { ok: false, healed: 0, message:
+                `%pip: '${req.raw}' could not be verified because package metadata could not be downloaded. ` +
+                `Check your connection and retry (${lockError}).` };
         } else {
             // NO evidence of a distribution anywhere — not in the lock, no
             // installed metadata. Guessing an import name here once let
@@ -1076,14 +1084,8 @@ _scirepl_modules_for(${JSON.stringify(dist)})
                         window.renderText(`%pip: extras are not supported yet (${withExtras.map(r => r.raw).join(', ')}) — nothing on this line was installed`, true);
                         continue;
                     }
-                    // Even an apparently installed package can make micropip
-                    // or the verification helper contact a package index/CDN.
-                    // Obtain the current network disclosure before either runs.
-                    await km.ensureNetworkConsent();
-                    if (!km.hasCurrentPrivacyConsent()) {
-                        throw new Error(window.t('kernelManager.privacyRequired'));
-                    }
-                    requirements.push(...parsed);
+                    // Actual package HTTP requests obtain the disclosure at
+                    // the download boundary. Bundled/no-op installs stay local.
                     const pkgList = parsed.map(r => `'${r.raw.replace(/'/g, "\\'")}'`).join(', ');
                     pyodide.runPython(`
 import io, sys
@@ -1091,10 +1093,19 @@ _pip_stdout = io.StringIO()
 _pip_old_stdout = sys.stdout
 sys.stdout = _pip_stdout
 `);
-                    await pyodide.runPythonAsync(`await pip_install(${pkgList})`);
-                    pyodide.runPython(`sys.stdout = _pip_old_stdout`);
+                    let installError = null;
+                    try {
+                        await pyodide.runPythonAsync(`await pip_install(${pkgList})`);
+                    } catch (error) {
+                        installError = String(error?.message || error);
+                        failures.push(installError);
+                    } finally {
+                        pyodide.runPython(`sys.stdout = _pip_old_stdout`);
+                    }
                     const pipOut = pyodide.runPython(`_pip_stdout.getvalue()`);
-                    if (pipOut) window.renderText(pipOut, false);
+                    if (pipOut) window.renderText(pipOut, !!installError);
+                    if (installError) window.renderText(`%pip: package installation failed: ${installError}`, true);
+                    else requirements.push(...parsed);
                 }
                 pyodide.runPython(`import importlib, importlib.util, importlib.metadata; importlib.invalidate_caches()`);
 
@@ -1221,26 +1232,32 @@ _sci_repl_old_stdout = sys.stdout
 sys.stdout = _sci_repl_stdout
 `);
 
-        let result = await pyodide.runPythonAsync(code);
-
-        // Auto-setup matplotlib hook if matplotlib was imported
+        let result, executionError = null;
         try {
-            pyodide.runPython(`
+            result = await pyodide.runPythonAsync(code);
+
+            // Auto-setup matplotlib hook if matplotlib was imported
+            try {
+                pyodide.runPython(`
 if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_scirepl_hooked', False):
     _setup_matplotlib_hook()
     sys.modules['matplotlib']._scirepl_hooked = True
 `);
-        } catch(e) { /* matplotlib not imported or hook failed, ignore */ }
-
-        pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`);
+            } catch(e) { /* matplotlib not imported or hook failed, ignore */ }
+        } catch (error) {
+            executionError = error;
+        } finally {
+            pyodide.runPython(`sys.stdout = _sci_repl_old_stdout`);
+        }
         const printed = pyodide.runPython(`_sci_repl_stdout.getvalue()`);
 
         // Sync Pyodide → SharedVFS after execution
         if (kernel._syncFromPyodide) kernel._syncFromPyodide();
 
         if (printed && printed.length > 0) {
-            window.renderText(printed, false);
+            window.renderText(printed, !!executionError);
         }
+        if (executionError) throw executionError;
 
         const suppressOutput = code.trimEnd().endsWith(';');
 
