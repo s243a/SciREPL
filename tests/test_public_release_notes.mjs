@@ -1,11 +1,11 @@
 // Static Free release-note rendering and explicit-output CLI contract.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parsePlayReleaseNotes, RELEASE_ROOT, renderReleaseNotes } from '../scripts/render-free-release-notes.mjs';
+import { parsePlayReleaseNotes, parseReleaseStatus, RELEASE_ROOT, renderReleaseNotes } from '../scripts/render-free-release-notes.mjs';
 
 const source = readFileSync(new URL('../docs/releases/1.5.0-play-notes.txt', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 const expected = [
@@ -26,6 +26,19 @@ const parsed = parsePlayReleaseNotes(source);
 assert.deepEqual(parsed.map(({ lang, play, name }) => [lang, play, name]), expected);
 assert.deepEqual(parsePlayReleaseNotes(source.replace(/\n/g, '\r\n')), parsed, 'CRLF checkout keeps the same prose');
 const pages = renderReleaseNotes(source);
+const statusMetadata = { schemaVersion: 1, version: '1.5.0', status: 'prerelease' };
+const currentStatus = parseReleaseStatus(readFileSync(new URL('../docs/releases/1.5.0-publication.json', import.meta.url), 'utf8'));
+assert.ok(['prerelease', 'released'].includes(currentStatus), 'checked-in status supports a later metadata-only promotion');
+const defaultCliPages = renderReleaseNotes(source, currentStatus);
+assert.equal(parseReleaseStatus(JSON.stringify({ ...statusMetadata, status: 'released' })), 'released');
+for (const invalid of [null, [], {}, { ...statusMetadata, extra: true }, { ...statusMetadata, version: '1.4.0' },
+    { ...statusMetadata, schemaVersion: 2 }, { ...statusMetadata, status: 'stable' },
+    { ...statusMetadata, status: '<script>not-status</script>' }]) {
+    assert.throws(() => parseReleaseStatus(JSON.stringify(invalid)), /Expected release status/);
+}
+assert.throws(() => parseReleaseStatus('not JSON'), /must be valid JSON/);
+assert.throws(() => renderReleaseNotes(source, 'stable'), /Unknown release status/);
+const promotedPages = renderReleaseNotes(source, 'released');
 assert.deepEqual([...pages.keys()], expected.map(([lang]) => prefix(lang) + 'index.html'));
 assert.deepEqual(renderReleaseNotes(source), pages, 'pure rendering is deterministic');
 
@@ -38,6 +51,15 @@ for (const [lang, play] of expected) {
     assert.ok(page.includes(`<title>SciREPL Free 1.5.0 · ${heading}</title>`), `${lang}: localized title`);
     if (lang !== 'en') assert.notEqual(heading, 'Release notes', `${lang}: no English heading fallback`);
     assert.ok(page.includes('<meta name="viewport" content="width=device-width, initial-scale=1">'));
+    const status = /<p class="release-status" data-release-status="prerelease"><strong>([^<]+)<\/strong><\/p>/.exec(page)?.[1];
+    assert.ok(status?.trim(), `${lang}: visible prerelease/testing status`);
+    if (lang !== 'en') assert.notEqual(status, 'Pre-release · In testing', `${lang}: localized status, not English fallback`);
+    const promoted = promotedPages.get(prefix(lang) + 'index.html');
+    const releasedLabel = /<p class="release-status" data-release-status="released"><strong>([^<]+)<\/strong><\/p>/.exec(promoted)?.[1];
+    assert.ok(releasedLabel?.trim() && releasedLabel !== status, `${lang}: explicit promoted status`);
+    if (lang !== 'en') assert.notEqual(releasedLabel, 'Released', `${lang}: localized promoted status`);
+    const withoutStatus = html => html.replace(/<p class="release-status"[^>]+><strong>[^<]+<\/strong><\/p>/, '');
+    assert.equal(withoutStatus(promoted), withoutStatus(page), `${lang}: promotion changes only website status`);
     assert.deepEqual([...page.matchAll(/<link rel="canonical" href="([^"]+)">/g)].map(m => m[1]), [canonical]);
     assert.deepEqual([...page.matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)">/g)].map(m => m.slice(1)),
         [...expected.map(([other]) => [other, destination(other)]), ['x-default', RELEASE_ROOT]], `${lang}: 13 alternates and x-default`);
@@ -102,8 +124,25 @@ try {
     assert.equal(run.status, 0, run.stderr);
     assert.deepEqual(readdirSync(scratch), ['preview'], 'pages go only beneath the supplied output root');
     assert.deepEqual(readdirSync(output).sort(), ['index.html', ...expected.slice(1).map(([lang]) => lang)].sort());
-    for (const [file, page] of pages) assert.equal(readFileSync(join(output, file), 'utf8'), page);
+    for (const [file, page] of defaultCliPages) assert.equal(readFileSync(join(output, file), 'utf8'), page);
     assert.equal(cli('--output', output).status, 0, 'explicit regeneration is supported');
+    const statusFile = join(scratch, 'status.json');
+    writeFileSync(statusFile, JSON.stringify({ ...statusMetadata, status: 'released' }));
+    const promoted = cli('--output', output, '--status-file', statusFile);
+    assert.equal(promoted.status, 0, promoted.stderr);
+    for (const [file, page] of promotedPages) assert.equal(readFileSync(join(output, file), 'utf8'), page);
+    for (const invalid of [JSON.stringify({ ...statusMetadata, status: 'production' }), 'not JSON', 'x'.repeat(4097)]) {
+        writeFileSync(statusFile, invalid);
+        const rejected = cli('--output', join(scratch, 'invalid-status-output'), '--status-file', statusFile);
+        assert.equal(rejected.status, 1, 'malformed/oversized metadata cannot generate pages');
+        assert.equal(readdirSync(scratch).includes('invalid-status-output'), false);
+    }
+    assert.equal(cli('--output', output, '--status-file', join(scratch, 'missing.json')).status, 1, 'missing status fails closed');
+    assert.equal(cli('--output', output, '--status-file').status, 1, 'status value required');
+    const statusLink = join(scratch, 'status-link.json');
+    symlinkSync(process.platform === 'win32' ? output : statusFile, statusLink,
+        process.platform === 'win32' ? 'junction' : 'file');
+    assert.equal(cli('--output', output, '--status-file', statusLink).status, 1, 'status symlink is rejected');
     const blocked = join(scratch, 'blocked');
     mkdirSync(blocked);
     symlinkSync(output, join(blocked, 'ar'), process.platform === 'win32' ? 'junction' : 'dir');
@@ -112,4 +151,4 @@ try {
 } finally {
     rmSync(scratch, { recursive: true, force: true });
 }
-console.log('Public Free release notes: 13 static locale pages, exact bullets, safe routes, and explicit-output CLI passed.');
+console.log('Public Free release notes: 13 localized prerelease/promoted pages, exact bullets, safe status schema/routes, and explicit-output CLI passed.');

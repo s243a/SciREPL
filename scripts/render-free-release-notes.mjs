@@ -6,6 +6,47 @@ import { fileURLToPath } from 'node:url';
 export const RELEASE_ROOT = 'https://s243a.github.io/SciREPL/help/releases/v1.5.0/';
 const PRODUCT = 'SciREPL Free 1.5.0';
 const SOURCE = new URL('../docs/releases/1.5.0-play-notes.txt', import.meta.url);
+const STATUS_SOURCE = new URL('../docs/releases/1.5.0-publication.json', import.meta.url);
+
+// Website publication status is separate from frozen app/package identity.
+// The Pages overlay can promote this metadata without moving a tag or rebuilding
+// the native app. A missing/invalid status file must never imply "released".
+const STATUS_LABELS = {
+    en: ['Pre-release · In testing', 'Released'],
+    ar: ['إصدار تجريبي · قيد الاختبار', 'تم الإصدار'],
+    bn: ['প্রাক্‌-প্রকাশ সংস্করণ · পরীক্ষা চলছে', 'প্রকাশিত'],
+    de: ['Vorabversion · Im Test', 'Veröffentlicht'],
+    es: ['Versión preliminar · En pruebas', 'Publicado'],
+    fr: ['Préversion · En cours de test', 'Publié'],
+    hi: ['पूर्व-रिलीज़ · परीक्षण जारी है', 'जारी किया गया'],
+    id: ['Prarilis · Dalam pengujian', 'Dirilis'],
+    ja: ['プレリリース · テスト中', 'リリース済み'],
+    ko: ['사전 릴리스 · 테스트 중', '출시됨'],
+    'pt-BR': ['Pré-lançamento · Em testes', 'Lançado'],
+    ru: ['Предварительный выпуск · Тестирование', 'Выпущено'],
+    zh: ['预发布版本 · 测试中', '已发布'],
+};
+
+export function parseReleaseStatus(source) {
+    let metadata;
+    try { metadata = JSON.parse(source); }
+    catch (_) { throw new Error('Release status must be valid JSON'); }
+    if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)
+        || Object.keys(metadata).sort().join(',') !== 'schemaVersion,status,version'
+        || metadata.schemaVersion !== 1 || metadata.version !== '1.5.0'
+        || !['prerelease', 'released'].includes(metadata.status)) {
+        throw new Error('Expected release status schema 1, version 1.5.0, and prerelease/released status');
+    }
+    return metadata.status;
+}
+
+function readReleaseStatus(file) {
+    const stat = lstatSync(file);
+    if (!stat.isFile() || stat.size <= 0 || stat.size > 4096) {
+        throw new Error('Release status must be a small regular JSON file, not a symlink');
+    }
+    return parseReleaseStatus(readFileSync(file, 'utf8'));
+}
 
 // [Play tag, app route / language tag, autonym, title, language navigation]
 const LOCALES = [
@@ -84,6 +125,9 @@ const CSS = `
   main { max-inline-size: 48rem; margin-inline: auto; padding: clamp(1rem, 4vw, 2.5rem); border: 1px solid var(--border); border-radius: .75rem; background: var(--paper); }
   h1 { margin-block: 0 1rem; line-height: 1.25; font-size: clamp(1.45rem, 5vw, 2.25rem); }
   h1 span { display: block; margin-block-start: .35rem; font-size: .72em; }
+  .release-status { display: inline-block; margin-block: 0 1rem; padding: .25rem .65rem; border: 1px solid currentColor; border-radius: .4rem; }
+  .release-status[data-release-status="prerelease"] { color: #795500; background: #fff3cf; }
+  @media (prefers-color-scheme: dark) { .release-status[data-release-status="prerelease"] { color: #ffe6a3; background: #423513; } }
   h2 { margin-block: 0 .5rem; font-size: 1.15rem; }
   .notes { padding-inline-start: 1.4rem; }
   .notes li + li { margin-block-start: .6rem; }
@@ -95,9 +139,11 @@ const CSS = `
 `;
 
 /** Return fixed relative output paths mapped to complete, standalone HTML. */
-export function renderReleaseNotes(source) {
+export function renderReleaseNotes(source, status = 'prerelease') {
+    if (!['prerelease', 'released'].includes(status)) throw new Error('Unknown release status');
     return new Map(parsePlayReleaseNotes(source).map(locale => {
         const { lang, title, languages, bullets } = locale;
+        const statusLabel = STATUS_LABELS[lang][status === 'prerelease' ? 0 : 1];
         const canonical = RELEASE_ROOT + route(lang);
         const alternates = LOCALES.map(other =>
             `  <link rel="alternate" hreflang="${other.lang}" href="${RELEASE_ROOT}${route(other.lang)}">`).join('\n');
@@ -120,6 +166,7 @@ ${alternates}
 <body>
   <main>
     <h1><bdi dir="ltr">${PRODUCT}</bdi> <span>${escapeHtml(title)}</span></h1>
+    <p class="release-status" data-release-status="${status}"><strong>${escapeHtml(statusLabel)}</strong></p>
     <ul class="notes">
 ${items}
     </ul>
@@ -162,12 +209,14 @@ function writePages(directory, pages) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
     const args = process.argv.slice(2);
-    if (args.length !== 2 || args[0] !== '--output' || !args[1].trim() || args[1].startsWith('--')) {
-        console.error('Usage: node scripts/render-free-release-notes.mjs --output DIR');
+    if (![2, 4].includes(args.length) || args[0] !== '--output' || !args[1].trim() || args[1].startsWith('--')
+        || (args.length === 4 && (args[2] !== '--status-file' || !args[3].trim() || args[3].startsWith('--')))) {
+        console.error('Usage: node scripts/render-free-release-notes.mjs --output DIR [--status-file FILE]');
         process.exitCode = 1;
     } else {
         try {
-            const pages = renderReleaseNotes(readFileSync(SOURCE, 'utf8'));
+            const status = readReleaseStatus(args.length === 4 ? resolve(args[3]) : STATUS_SOURCE);
+            const pages = renderReleaseNotes(readFileSync(SOURCE, 'utf8'), status);
             writePages(args[1], pages);
             console.log(`Rendered ${pages.size} Free 1.5.0 release-note pages to ${resolve(args[1])}`);
         } catch (error) {

@@ -14,6 +14,7 @@ on:
       - 'www/help/**'
       - '.github/workflows/deploy-pages.yml'
       - 'scripts/prepare-public-pages-sw.mjs'
+      - 'docs/releases/1.5.0-publication.json'
       - 'tests/test_help_site.mjs'
 
 permissions:
@@ -45,11 +46,12 @@ jobs:
           set -euo pipefail
 
           pages_overlay="${RUNNER_TEMP}/scirepl-public-pages"
-          mkdir -p "${pages_overlay}/pro" "${pages_overlay}/help" "${pages_overlay}/scripts"
+          mkdir -p "${pages_overlay}/pro" "${pages_overlay}/help" "${pages_overlay}/scripts" "${pages_overlay}/docs/releases"
           cp -a www/pro/. "${pages_overlay}/pro/"
           cp -a www/help/. "${pages_overlay}/help/"
           cp tests/test_help_site.mjs "${pages_overlay}/test_help_site.mjs"
           cp scripts/prepare-public-pages-sw.mjs "${pages_overlay}/scripts/prepare-public-pages-sw.mjs"
+          cp docs/releases/1.5.0-publication.json "${pages_overlay}/docs/releases/1.5.0-publication.json"
 
           stable_tag=""
           while IFS= read -r candidate; do
@@ -77,6 +79,8 @@ jobs:
           cp "${pages_overlay}/test_help_site.mjs" tests/test_help_site.mjs
           mkdir -p scripts
           cp "${pages_overlay}/scripts/prepare-public-pages-sw.mjs" scripts/prepare-public-pages-sw.mjs
+          mkdir -p docs/releases
+          cp "${pages_overlay}/docs/releases/1.5.0-publication.json" docs/releases/1.5.0-publication.json
           echo "Publishing public pages over stable Free release ${stable_tag} ($(git rev-parse HEAD))."
 
       - name: Locate the test suites for this ref
@@ -132,7 +136,9 @@ jobs:
           }
           # Only this Pages job writes into its upload tree. Android, Windows,
           # and standalone PWA builds never stage these website-only pages.
-          node scripts/render-free-release-notes.mjs --output www/help/releases/v1.5.0
+          # Status comes from the public Pages overlay, not immutable package
+          # identity. Promotion updates this JSON on main without moving a tag.
+          node scripts/render-free-release-notes.mjs --output www/help/releases/v1.5.0 --status-file docs/releases/1.5.0-publication.json
 
       - name: Install dependencies
         run: npm install
