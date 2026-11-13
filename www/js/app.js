@@ -1998,19 +1998,6 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                     window.sessionManager.addToHistory(code);
                     window.sessionManager.session.historyIndex = -1;
                 }
-                saveCellsToSession();
-
-                // Capture output for NotebookVFS (text + HTML)
-                const body = outputCard.querySelector('.card-body');
-                if (body) {
-                    cell.lastOutput = body.textContent || '';
-                    cell.lastOutputHtml = body.innerHTML || '';
-                }
-
-                if (body && body.children.length === 0) {
-                    outputCard.remove();
-                    cell.outputCard = null;
-                }
             } catch (err) {
                 if (language === 'python') {
                     const kernel = km.getKernel('python');
@@ -2025,6 +2012,19 @@ if 'matplotlib' in sys.modules and not getattr(sys.modules.get('matplotlib'), '_
                 // runs when error rendering itself threw.
                 window._currentOutputCard = null;
             }
+
+            // Capture rendered text, plots, and handled errors before saving.
+            // Android may close the WebView without another save on unload.
+            const body = outputCard.querySelector('.card-body');
+            if (body) {
+                cell.lastOutput = body.textContent || '';
+                cell.lastOutputHtml = body.innerHTML || '';
+                if (body.children.length === 0) {
+                    outputCard.remove();
+                    cell.outputCard = null;
+                }
+            }
+            saveCellsToSession();
         }
 
         input.value = '';

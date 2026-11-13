@@ -214,6 +214,64 @@ const URL = `http://localhost:${PORT}/`;
     testLog('All cells deleted', emptyCount === 0 && emptyDOM === 0,
       `cells=${emptyCount}, DOM=${emptyDOM}`);
 
+    console.log('8. Testing immediate output persistence...');
+    await page.selectOption('#lang-selector', 'javascript');
+    const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ9sAAAAASUVORK5CYII=';
+    async function runAndReadSnapshot(code) {
+      await page.fill('#code-input', code);
+      await page.click('#run-btn');
+      await page.waitForFunction(code => window._cells.at(-1)?.code === code
+        && window._currentOutputCard === null && document.getElementById('code-input').value === '', code);
+      // Read the serialized snapshot before any later action or unload can save again.
+      return page.evaluate(code => {
+        const cell = window._cells.at(-1);
+        const body = cell.outputCard?.querySelector('.card-body');
+        const session = JSON.parse(localStorage.getItem(window.sessionManager.STORAGE_KEY));
+        const notebook = session.notebooks.find(nb => nb.id === session.activeNotebookId);
+        const pick = cells => cells?.find(item => item.code === code);
+        return {
+          rendered: body ? { text: body.textContent, html: body.innerHTML } : null,
+          saved: pick(session.cells),
+          notebookCount: session.notebooks.length,
+          notebookSaved: pick(notebook?.cells),
+        };
+      }, code);
+    }
+    const matches = (saved, rendered) => Boolean(saved && rendered
+      && saved.lastOutput === rendered.text && saved.lastOutputHtml === rendered.html);
+    const single = await runAndReadSnapshot('console.log("single-save-marker");');
+    testLog('Single-notebook text is persisted as soon as Run finishes',
+      single.rendered?.text === 'single-save-marker' && matches(single.saved, single.rendered));
+
+    await page.evaluate(() => {
+      const manager = window.notebookManager;
+      const scratch = manager.createNotebook({ name: 'Output persistence' });
+      manager.switchTo(scratch.id);
+    });
+    const multi = await runAndReadSnapshot(`window.renderImage(${JSON.stringify(png)}); console.log("plot-save-marker");`);
+    testLog('Text and inline image are immediately persisted in both snapshots',
+      multi.notebookCount === 2 && multi.rendered?.text === 'plot-save-marker'
+      && multi.rendered.html.includes(png) && matches(multi.saved, multi.rendered)
+      && matches(multi.notebookSaved, multi.rendered));
+
+    const empty = await runAndReadSnapshot('const no_output_expected = 1;');
+    testLog('Empty output removes the output card but still saves the code',
+      !empty.rendered && empty.saved?.lastOutput === '' && empty.saved?.lastOutputHtml === ''
+      && empty.notebookSaved?.lastOutput === '' && empty.notebookSaved?.lastOutputHtml === '');
+
+    await page.evaluate(() => {
+      const manager = window.kernelManager;
+      const original = manager.execute;
+      manager.execute = async function (...args) {
+        this.execute = original;
+        throw new Error('handled-run-error-marker');
+      };
+    });
+    const error = await runAndReadSnapshot('console.log("unreachable");');
+    testLog('A handled execution error is immediately persisted with the cell',
+      error.rendered?.text === 'handled-run-error-marker' && matches(error.saved, error.rendered)
+      && matches(error.notebookSaved, error.rendered));
+
     // --- Summary ---
     console.log('\n' + '='.repeat(50));
     const passCount = results.filter(r => r.passed).length;
