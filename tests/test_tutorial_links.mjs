@@ -25,6 +25,7 @@ function equal(actual, expected, message) { assert.deepEqual(actual, expected, m
 
 const source = read('www/index.html');
 const helperSource = read('www/js/tutorial_links.js');
+const SUPPORT_URL = 'https://ko-fi.com/V7V51TYA76';
 equal(readdirSync(path.join(ROOT, 'www/i18n')).filter(name => name.endsWith('.json')
     && name !== 'manifest.json' && !name.startsWith('privacy.')).sort(),
 LOCALES.map(locale => `${locale}.json`).sort(), 'test every bundled display locale');
@@ -48,11 +49,19 @@ for (const link of LINKS) {
             `${locale}: ${link.guide} resolves to a rendered local guide`);
     }
 }
-const helpActionOrder = ['id="help-tutorial-index"', 'id="btn-show-tour"',
-    'id="btn-show-whats-new"', 'data-i18n="help.landscapeKeyboards"'].map(token => source.indexOf(token));
+const helpActionOrder = ['data-i18n="help.scireplHelp"', 'id="help-app-version"',
+    'id="help-tutorial-index"', 'id="btn-show-tour"', 'id="btn-show-whats-new"',
+    'id="help-support-link"', 'data-i18n="help.landscapeKeyboards"'].map(token => source.indexOf(token));
 check(helpActionOrder.every((position, index) => position > source.indexOf('id="help-modal"')
     && (index === 0 || position > helpActionOrder[index - 1])),
-    'Help starts with the tutorial index, Tour and What\'s New before keyboard guidance');
+    'Help puts the version and quick actions, including Support, before keyboard guidance');
+equal((source.match(/\bid="help-app-version"/g) || []).length, 1, 'Help has exactly one version label');
+const supportAnchors = source.match(/<a\b[^>]*id="help-support-link"[^>]*>/g) || [];
+equal(supportAnchors.length, 1, 'Help has one native support link');
+for (const [attribute, value] of Object.entries({ href: SUPPORT_URL, target: '_blank',
+    rel: 'noopener noreferrer', 'data-i18n': 'help.supportOnKoFi' })) {
+    check(supportAnchors[0].includes(`${attribute}="${value}"`), `Help support: ${attribute}`);
+}
 check(!source.includes('tour-ai-tutorial') && !helperSource.includes('pro/ai/tutorial/'),
     'Free does not acquire Pro-only AI or completion tutorial routes');
 check(read('www/sw.js').includes("'./js/tutorial_links.js'"),
@@ -157,7 +166,10 @@ try {
                 const modal = document.getElementById('help-modal');
                 const content = modal.querySelector('.modal-content');
                 const link = document.getElementById('help-tutorial-index');
+                const version = document.getElementById('help-app-version');
+                const support = document.getElementById('help-support-link');
                 const r = link.getBoundingClientRect(), c = content.getBoundingClientRect();
+                const vr = version.getBoundingClientRect();
                 const clip = { left: Math.max(0, c.left + content.clientLeft),
                     right: Math.min(innerWidth, c.left + content.clientLeft + content.clientWidth),
                     top: Math.max(0, c.top + content.clientTop),
@@ -170,13 +182,24 @@ try {
                     fits: link.scrollWidth <= link.clientWidth + 1,
                     hit: Boolean(hit && (hit === link || link.contains(hit))),
                     text: link.textContent, href: link.href, count: document.querySelectorAll('#help-tutorial-index').length,
-                    scale: window.appearance.getButtonScale() };
+                    scale: window.appearance.getButtonScale(),
+                    version: version.textContent, configuredVersion: window.KERNEL_CONFIG.app.version,
+                    versionInView: vr.top >= clip.top - 1 && vr.bottom <= clip.bottom + 1,
+                    versionBeforeTutorial: Boolean(version.compareDocumentPosition(link)
+                        & Node.DOCUMENT_POSITION_FOLLOWING),
+                    support: { href: support.href, text: support.textContent } };
             });
             equal(geometry.scrollTop, 0, `${label}: real Help opens at the top before any scroll or focus`);
             equal(geometry.count, 1, `${label}: one tutorial-index control`);
             equal(geometry.scale, scale, `${label}: real Appearance button scale is applied`);
             equal(geometry.text, catalogues.get(locale)['help.tutorialIndex'], `${label}: existing localized label`);
             equal(geometry.href, expectedURL, `${label}: selected-language Free-only index`);
+            check(geometry.versionInView && geometry.versionBeforeTutorial
+                && geometry.version.includes(geometry.configuredVersion),
+            `${label}: configured version is visible at the top before the tutorial action`);
+            equal(geometry.support.href, SUPPORT_URL, `${label}: donation destination is unchanged`);
+            equal(geometry.support.text.replace(/[\u2066-\u2069]/g, ''),
+                catalogues.get(locale)['help.supportOnKoFi'], `${label}: existing donation label is localized`);
             check(geometry.fullyVisible && geometry.fits && geometry.width >= 43.5
                 && geometry.height >= 43.5 && geometry.hit, `${label}: first-viewport 44px link is fully readable and hit-testable`);
             equal(requests, [], `${label}: displaying Help makes no external request`);

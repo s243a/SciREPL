@@ -142,6 +142,14 @@ for (const viewport of profiles) for (const scenario of scenarios) {
     const first = await run(firstCode);
     const firstResult = await assertOutput(first, 1, 'first cold Run');
     check('first Run reached the Python completion marker', firstResult.text.includes('SCIREPL_MPL_DONE'), firstResult);
+    const immediatelySaved = await page.evaluate(code => {
+      const state = JSON.parse(localStorage.getItem(window.sessionManager.STORAGE_KEY));
+      const cell = (state?.cells || []).find(cell => cell.code === code);
+      return { png: cell?.lastOutputHtml.includes('data:image/png;base64,') ?? false,
+        marker: cell?.lastOutput.includes('SCIREPL_MPL_DONE') ?? false };
+    }, firstCode);
+    check('first plot and marker are stored before a later Run or unload',
+      immediatelySaved.png && immediatelySaved.marker, immediatelySaved);
     if (scenario !== 'ordinary') {
       const nonBundledWheel = /^(?:matplotlib[-_]|contourpy-)/i;
       const wheel = url => new URL(url).pathname.split('/').at(-1);
@@ -173,15 +181,9 @@ for (const viewport of profiles) for (const scenario of scenarios) {
     }, plot), `${label} direct Python kernel execution`);
     check('direct kernel execution succeeds', !direct.error, direct);
     await assertOutput(direct.id, 1, 'direct kernel execution');
-    // Actual reload includes the app's normal beforeunload save. An early
-    // in-memory storage snapshot is not evidence of a relaunch failure.
+    // Reload also exercises restoring the already-saved output without running Python.
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForFunction(code => window._cells?.some(cell => cell.code === code && cell.outputCard?.querySelector('img')), firstCode);
-    const persisted = await page.evaluate(code => {
-      const state = JSON.parse(localStorage.getItem(window.sessionManager.STORAGE_KEY));
-      return (state?.cells || []).find(cell => cell.code === code)?.lastOutputHtml || '';
-    }, firstCode);
-    check('first plot is persisted by the ordinary Run/save flow', persisted.includes('data:image/png;base64,'));
     const restored = await page.evaluate(async code => {
       const card = window._cells.find(cell => cell.code === code).outputCard;
       const images = [...card.querySelectorAll('img')];
