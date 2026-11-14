@@ -278,7 +278,16 @@ jobs:
         run: |
           release_version=$(node -p "require('./package.json').version")
           test -s "docs/releases/${release_version}-github-notes.txt"
+          test -s docs/releases/github-notes-downloads.md
+          # Version-specific notes first, then the shared Downloads section
+          # with this version's asset names filled in.
           cp "docs/releases/${release_version}-github-notes.txt" dist/RELEASE_NOTES.md
+          printf '\n' >> dist/RELEASE_NOTES.md
+          sed "s/{version}/${release_version}/g" docs/releases/github-notes-downloads.md >> dist/RELEASE_NOTES.md
+          if grep -n '{version}' dist/RELEASE_NOTES.md; then
+            echo "Unfilled {version} placeholder in release notes" >&2
+            exit 1
+          fi
 
       - name: Hash the candidate assets
         run: sha256sum dist/*.aab dist/*.apk dist/*.zip dist/RELEASE_NOTES.md > dist/SHA256SUMS.txt
