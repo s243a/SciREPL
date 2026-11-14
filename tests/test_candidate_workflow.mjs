@@ -139,11 +139,11 @@ verify('platform PR packaging is opt-in, and label events cannot replace core re
     assert.equal(allowed(source, 'pull_request', 'branch', { releaseLabel: false }), false);
     assert.equal(allowed(source, 'push', 'branch'), false);
     assert.equal(allowed(source, 'workflow_dispatch', 'branch'), false);
-    assert.match(source, /^    needs: \[test, pwa-release\]$/m);
+    assert.match(source, /^    needs: \[test, test-runtimes, test-ui, pwa-release\]$/m);
     assert.match(source, /^      contents: read$/m);
     assert.doesNotMatch(source, /action-gh-release|deploy-pages|git (?:tag|push)|jarsigner|apksigner sign|npx playwright install/);
   }
-  for (const name of ['test', 'pwa-release']) {
+  for (const name of ['test', 'test-runtimes', 'test-ui', 'pwa-release']) {
     assert.doesNotMatch(job(ci, name), /^    if:/m, `${name} must run normally, not overwrite a prior failure with a label-based skip`);
   }
 });

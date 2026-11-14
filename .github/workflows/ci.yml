@@ -1,20 +1,30 @@
 name: CI
 
-# The real gate. Runs on every pull request and on pushes to the main and
-# feature branches — not filtered to www/pro/**, so an ordinary Appearance,
-# i18n or service-worker change is actually tested. The release workflow depends
-# on this passing (see build-release.yml), so a red suite blocks publication.
+# The real gate. Runs on every pull request and on pushes to main. It's not
+# filtered to www/pro/**, so an ordinary Appearance, i18n or service-worker
+# change is actually tested. The release workflow depends on this passing (see
+# build-release.yml), so a red suite blocks publication.
+#
+# Feature branches are tested through their pull request. A push trigger for
+# them as well would run the same suites twice for every push.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
   push:
     branches:
       - main
-      - 'feat/**'
-      - 'fix/**'
-      - 'codex/**'
 
+# A newer push to the same pull request cancels its superseded run. Each push
+# to main gets its own group, so every main commit is still tested.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('ci-pr-{0}', github.event.pull_request.number) || format('ci-run-{0}', github.run_id) }}
+  cancel-in-progress: true
+
+# The browser suites are split across three parallel jobs so the gate finishes
+# in roughly the time of the slowest group rather than the sum of all of them.
+# Each job sets up its own runtimes and dev server; setup takes about 20 s.
 jobs:
+  # Static gates, Help, tutorials, localization and cold Matplotlib.
   test:
     # Keep the runner compatible with the Chromium builds in locked Playwright.
     runs-on: ubuntu-24.04
@@ -81,6 +91,71 @@ jobs:
       - name: Service worker — shell-guard cannot be bypassed
         run: node tests/test_sw_shell_guard.mjs
 
+      - name: Start dev server
+        run: node server.js &
+
+      - name: Wait for server
+        run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
+
+      - name: Public help links, metadata and narrow layouts
+        run: npm run test:help
+
+      # Browser suites. These need the bundled runtimes fetched above.
+      - name: Appearance and localization
+        run: node tests/test_appearance.mjs
+
+      - name: App tutorial entry links
+        run: node tests/test_tutorial_links.mjs
+
+      - name: What's New and header shortcuts
+        run: node tests/test_whats_new.mjs
+
+      - name: Language selectors expose full native option names
+        run: node tests/test_lang_selector.mjs
+
+      - name: Right-to-left layout
+        run: node tests/test_rtl_layout.mjs
+
+      - name: Composer Run button fits long-label locales
+        run: npm run test:composer-fit
+
+      - name: Generated and dynamic localization
+        run: node tests/test_i18n_dynamic.mjs
+
+      - name: Help examples — Copy and Insert
+        run: node tests/test_help_examples.mjs
+
+      # The full run covers both orientations and every scenario, including
+      # the portrait micropip/helper/%pip cases the --focused mode selects.
+      - name: Matplotlib cold first-show placement
+        run: npm run test:matplotlib-first-show
+
+  # Python packages, runtimes, catalogue and the service worker.
+  test-runtimes:
+    # Keep the runner compatible with the Chromium builds in locked Playwright.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Configure build
+        run: npm run configure
+
+      - name: Fetch bundled runtimes
+        run: npm run fetch:bundles
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
       - name: Python packaging >=26 for the specifier differential
         uses: actions/setup-python@v5
         with:
@@ -98,42 +173,8 @@ jobs:
       - name: Wait for server
         run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
 
-      - name: Public help links, metadata and narrow layouts
-        run: npm run test:help
-
-      # Browser suites. These need the bundled runtimes fetched above.
-      - name: Appearance and localization
-        run: node tests/test_appearance.mjs
-
-      - name: Onboarding tour
-        run: node tests/test_onboarding.mjs
-
-      - name: App tutorial entry links
-        run: node tests/test_tutorial_links.mjs
-
-      - name: Android status-bar hiding and the status-bar allowance
-        run: npm run test:status-bar
-
-      - name: Android hardware Back routing
-        run: npm run test:android-back
-
-      - name: Android debug identity and launcher resources
-        run: npm run test:android-debug-identity
-
       - name: Workbook close and Android cloud-file import
         run: npm run test:workbook-close-import
-
-      - name: What's New and header shortcuts
-        run: node tests/test_whats_new.mjs
-
-      - name: Language selectors expose full native option names
-        run: node tests/test_lang_selector.mjs
-
-      - name: Header shortcuts — three states, priority and fit
-        run: node tests/test_header_shortcuts.mjs
-
-      - name: Math palette, contexts, layout invariants
-        run: node tests/test_math_palette.mjs
 
       - name: Pip cell semantics (failed installs stop the cell; dep healing)
         run: node tests/test_pip_cell.mjs
@@ -141,44 +182,11 @@ jobs:
       - name: Python package consent, native installer options and failure recovery
         run: npm run test:python-packages
 
-      - name: Matplotlib first plot with bundled Python and real package installs
-        run: npm run test:matplotlib-first-show -- --focused
-
-      - name: Right-to-left layout
-        run: node tests/test_rtl_layout.mjs
-
-      - name: Composer Run button fits long-label locales
-        run: npm run test:composer-fit
-
-      - name: Short-landscape composer collapse
-        run: npm run test:landscape-composer
-
-      - name: Header controls follow scaled text
-        run: npm run test:header-scaling
-
-      - name: Generated and dynamic localization
-        run: node tests/test_i18n_dynamic.mjs
-
       - name: Runtime provenance and version controls
         run: npm run test:runtime-metadata
 
       - name: Service worker offline and upgrade coherence
         run: node tests/test_sw_offline.mjs
-
-      - name: Auto-save and crash recovery
-        run: node tests/test_autosave.mjs
-
-      - name: Cell operations
-        run: node tests/test_cell_ops.mjs
-
-      - name: Help examples — Copy and Insert
-        run: node tests/test_help_examples.mjs
-
-      - name: JavaScript kernel
-        run: node tests/test_js_kernel.mjs
-
-      - name: Matplotlib cold first-show placement
-        run: npm run test:matplotlib-first-show
 
       - name: Notebook VFS
         run: node tests/test_notebook_vfs.mjs
@@ -192,9 +200,74 @@ jobs:
       - name: Verified catalogue workbook import
         run: npm run test:catalog:import
 
+  # Layout, Android chrome, the tour, the header, auto-save and cell operations.
+  test-ui:
+    # Keep the runner compatible with the Chromium builds in locked Playwright.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Configure build
+        run: npm run configure
+
+      - name: Fetch bundled runtimes
+        run: npm run fetch:bundles
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
+      - name: Start dev server
+        run: node server.js &
+
+      - name: Wait for server
+        run: sleep 2 && curl -sf http://localhost:8085/ > /dev/null
+
+      - name: Onboarding tour
+        run: node tests/test_onboarding.mjs
+
+      - name: Android status-bar hiding and the status-bar allowance
+        run: npm run test:status-bar
+
+      - name: Android hardware Back routing
+        run: npm run test:android-back
+
+      - name: Android debug identity and launcher resources
+        run: npm run test:android-debug-identity
+
+      - name: Header shortcuts — three states, priority and fit
+        run: node tests/test_header_shortcuts.mjs
+
+      - name: Math palette, contexts, layout invariants
+        run: node tests/test_math_palette.mjs
+
+      - name: Short-landscape composer collapse
+        run: npm run test:landscape-composer
+
+      - name: Header controls follow scaled text
+        run: npm run test:header-scaling
+
+      - name: Auto-save and crash recovery
+        run: node tests/test_autosave.mjs
+
+      - name: Cell operations
+        run: node tests/test_cell_ops.mjs
+
+      - name: JavaScript kernel
+        run: node tests/test_js_kernel.mjs
+
   # test_pwa_release starts its OWN server (on :8086) and drives a full install/
   # offline/reload cycle, so it runs in a dedicated job rather than sharing the
-  # long-running suite above.
+  # browser suites above.
   pwa-release:
     # Keep the runner compatible with the Chromium builds in locked Playwright.
     runs-on: ubuntu-24.04
@@ -219,7 +292,7 @@ jobs:
   # not run this workflow or replace core test results with skipped contexts.
   windows-candidate:
     if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'release')
-    needs: [test, pwa-release]
+    needs: [test, test-runtimes, test-ui, pwa-release]
     runs-on: windows-latest
     timeout-minutes: 90
     permissions:
@@ -274,7 +347,7 @@ jobs:
 
   android-candidate:
     if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'release')
-    needs: [test, pwa-release]
+    needs: [test, test-runtimes, test-ui, pwa-release]
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
