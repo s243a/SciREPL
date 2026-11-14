@@ -120,8 +120,13 @@ verify('prepared version-specific notes are required, hashed and used as the rel
     assert.notEqual(command(script).status, 0, 'Never inherit previous-version notes');
     const notes = '# SciREPL Free 1.5.0\nPrepared candidate notes.\n';
     writeFileSync(path.join(fixture, 'docs/releases/1.5.0-github-notes.txt'), notes);
+    assert.notEqual(command(script).status, 0, 'Missing shared Downloads section must fail the build');
+    const downloads = '## Downloads\n\n- `SciREPL-v{version}.apk` and `SciREPL-v{version}-pwa.zip`\n';
+    writeFileSync(path.join(fixture, 'docs/releases/github-notes-downloads.md'), downloads);
     assert.equal(command(script).status, 0);
-    assert.equal(readFileSync(destination, 'utf8'), notes);
+    assert.equal(readFileSync(destination, 'utf8'),
+      `${notes}\n## Downloads\n\n- \`SciREPL-v${pkg.version}.apk\` and \`SciREPL-v${pkg.version}-pwa.zip\`\n`,
+      'Version notes come first, then the shared Downloads section with this version filled in');
     for (const extension of ['aab', 'apk', 'zip']) writeFileSync(path.join(fixture, `dist/fixture.${extension}`), extension);
     const hashCommand = hash.match(/^        run: (.+)$/m)?.[1];
     assert.equal(command(hashCommand).status, 0);
