@@ -47,6 +47,13 @@ function arg(name, fallback) {
 }
 const platform = arg('platform', 'win32');
 const arch = arg('arch', 'x64');
+// `store` builds the tree that build-msix.mjs packs for the Microsoft Store
+// pilot: same content, Store-appropriate metadata. Tested the same way.
+const channel = arg('channel', 'preview');
+if (!['preview', 'store'].includes(channel)) {
+  console.error(`\n[build-portable] Unknown --channel ${channel}; use preview or store.\n`);
+  process.exit(1);
+}
 
 /* ------------------------------ preflight ------------------------------ */
 
@@ -148,18 +155,20 @@ const buildInfo = {
   appVersion,
   profile,
   edition: 'free',
-  channel: 'preview',
+  channel,
   commit: gitCommit(),
   builtAt: new Date().toISOString(),
   electron: JSON.parse(
     readFileSync(path.join(ELECTRON_DIR, 'package.json'), 'utf8')
   ).devDependencies.electron,
-  note: 'Unsigned portable preview. Not a release build; not Store packaging.',
+  note: channel === 'store'
+    ? 'Tree for the Microsoft Store pilot MSIX (build-msix.mjs). The Store signs submitted packages.'
+    : 'Unsigned portable preview. Not a release build; not Store packaging.',
 };
 writeFileSync(buildInfoPath, JSON.stringify(buildInfo, null, 2));
 
 console.log('[build-portable] packaging');
-for (const [k, v] of Object.entries({ platform, arch, appVersion, profile, commit: buildInfo.commit })) {
+for (const [k, v] of Object.entries({ platform, arch, channel, appVersion, profile, commit: buildInfo.commit })) {
   console.log(`  ${k.padEnd(12)} ${v}`);
 }
 
@@ -198,7 +207,9 @@ const appPaths = await packager({
   icon: path.join(WWW_ROOT, 'icons', 'icon-512'),
   win32metadata: {
     CompanyName: 'SciREPL',
-    FileDescription: 'SciREPL — scientific REPL (Free, unsigned preview)',
+    FileDescription: channel === 'store'
+      ? 'SciREPL — scientific REPL (Free)'
+      : 'SciREPL — scientific REPL (Free, unsigned preview)',
     ProductName: 'SciREPL',
     OriginalFilename: 'SciREPL.exe',
   },

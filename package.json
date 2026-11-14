@@ -40,6 +40,7 @@
     "dev:windows": "npm run licenses:check && node desktop/electron/scripts/dev-windows.mjs",
     "setup:windows": "npm run licenses:check && node desktop/electron/scripts/dev-windows.mjs --skip-launch",
     "package:windows": "npm run licenses:check && npm run configure && node desktop/electron/packaging/build-portable.mjs",
+    "package:windows:msix": "node desktop/electron/packaging/build-msix.mjs",
     "test:windows": "node desktop/electron/test/run-all.mjs",
     "test:windows:unit": "node desktop/electron/test/run-all.mjs --unit",
     "i18n:manifest": "node scripts/build-i18n-manifest.mjs",

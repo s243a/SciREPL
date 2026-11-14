@@ -26,7 +26,7 @@ const { installRuntimeCache } = require('./runtime-cache');
 const { installApplicationMenu } = require('./menu');
 const { createNativeI18n, SUPPORTED_LOCALES } = require('./native-i18n');
 
-const { resolveWwwRoot, resolveBuildInfoPath, resolveRepoRoot } = require('./paths');
+const { resolveWwwRoot, resolveBuildInfoPath, resolveRepoRoot, resolveUserDataDir } = require('./paths');
 
 /**
  * Content locations. These differ between the development checkout and a
@@ -48,11 +48,11 @@ const REPO_ROOT = resolveRepoRoot(LAYOUT); // null when packaged
  * Electron app's storage, and keeping it explicit makes the "does IndexedDB
  * survive restart" test meaningful and lets tests point at a scratch profile.
  */
-if (process.env.SCIREPL_USER_DATA) {
-  app.setPath('userData', process.env.SCIREPL_USER_DATA);
-} else {
-  app.setPath('userData', path.join(app.getPath('appData'), 'SciREPL-Free-Electron'));
-}
+app.setPath('userData', resolveUserDataDir({
+  appData: app.getPath('appData'),
+  windowsStore: process.windowsStore === true,
+  env: process.env,
+}));
 
 /**
  * Build metadata written by desktop/electron/packaging/build-portable.mjs.
@@ -113,7 +113,9 @@ function readProfile() {
 app.setName('SciREPL');
 // Groups windows correctly on the Windows task bar and keeps the identity
 // stable across builds.
-if (process.platform === 'win32') app.setAppUserModelId('com.unifyweaver.scirepl');
+// A Store (MSIX) install already has a package-assigned identity; overriding it
+// can break taskbar grouping and pinning for the packaged app.
+if (process.platform === 'win32' && !process.windowsStore) app.setAppUserModelId('com.unifyweaver.scirepl');
 
 // NOTE for Linux packaging, measured rather than assumed: neither
 // `app.setName()` above nor Chromium's `--class` switch changes how a desktop
