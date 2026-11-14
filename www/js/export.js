@@ -1245,35 +1245,26 @@ ${cellsHtml}
     async _loadDocxLibrary() {
         if (this._docxLoaded && window.docx) return;
 
-        const sources = window.KERNEL_CONFIG?.components?.docx?.sources || [];
-        const candidates = sources.filter((item) => item?.type === 'cdn' && item.url);
-        if (!candidates.length) {
+        // The DOCX library ships with the app (third-party-components.json,
+        // www/vendor/docx). It is loaded only when DOCX export is used, from
+        // the app's own files: there is no CDN fallback, so exporting never
+        // downloads code or contacts a third party.
+        await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'vendor/docx/docx.iife.js';
+            script.onload = resolve;
+            script.onerror = () => {
+                script.remove();
+                reject(new Error('Bundled DOCX library failed to load'));
+            };
+            document.head.appendChild(script);
+        });
+        if (!window.docx) {
             throw new Error(this._t(
                 'exportRuntime.docxLoadFailed',
-                'Failed to load DOCX library from CDN'));
+                'Failed to load the bundled DOCX library'));
         }
-
-        for (const source of candidates) {
-            try {
-                await new Promise((resolve, reject) => {
-                    const script = document.createElement('script');
-                    script.src = source.url;
-                    script.onload = resolve;
-                    script.onerror = () => {
-                        script.remove();
-                        reject(new Error('DOCX source failed: ' + source.url));
-                    };
-                    document.head.appendChild(script);
-                });
-                this._docxLoaded = true;
-                return;
-            } catch (error) {
-                console.warn('[Export] ' + error.message);
-            }
-        }
-        throw new Error(this._t(
-            'exportRuntime.docxLoadFailed',
-            'Failed to load DOCX library from CDN'));
+        this._docxLoaded = true;
     }
 
     async exportDOCX() {
@@ -1288,7 +1279,7 @@ ${cellsHtml}
             await this._loadDocxLibrary();
         } catch (e) {
             this._alert('exportRuntime.docxLoadHelp',
-                'Could not load DOCX library. Check your internet connection.');
+                'Could not load the DOCX library. Reload the app and try again.');
             return;
         }
 

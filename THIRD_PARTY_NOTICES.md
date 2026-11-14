@@ -260,15 +260,11 @@ SciREPL Free downloads this runtime on first R use; it is not embedded in the Fr
 ## docx
 
 - **Version:** 9.6.0
-- **Delivery:** Downloaded on demand (first DOCX export)
+- **Delivery:** Bundled with SciREPL
 - **Licence:** MIT
 - **Source:** https://github.com/dolanmiu/docx/tree/9.6.0
-- **Provenance:** Exact upstream CDN release
+- **Provenance:** Upstream npm release dist/index.iife.js, checked against the registry integrity hash
 - **Copyright:** Copyright (c) 2016 Dolan and contributors
-
-**Pinned runtime sources:**
-- https://cdn.jsdelivr.net/npm/docx@9.6.0/dist/index.iife.js
-- https://unpkg.com/docx@9.6.0/dist/index.iife.js
 
 ## Capacitor and official plugins
 

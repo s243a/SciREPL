@@ -1,7 +1,7 @@
 // Service Worker for SciREPL PWA
 // Caches app shell on install, caches CDN runtimes (Pyodide, swipl-wasm) on first fetch.
 
-const CACHE_VERSION = 'v244';
+const CACHE_VERSION = 'v245';
 
 // Marker entry recording whether an app cache finished installing. Stored in
 // the cache itself so the answer travels with it and survives a restart.
@@ -132,6 +132,7 @@ const APP_SHELL = [
   './vendor/marked/marked.min.js',
   './vendor/plotly/plotly-basic.min.js',
   './vendor/jszip/jszip.min.js',
+  './vendor/docx/docx.iife.js',
   './vendor/pako/pako_inflate.min.js',
   './vendor/brush/brush_wasm.js',
   './vendor/brush/brush_wasm_bg.wasm',
