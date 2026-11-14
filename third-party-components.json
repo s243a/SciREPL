@@ -411,12 +411,12 @@
       "licenseDocuments": ["MIT"],
       "copyright": "Copyright (c) 2016 Dolan and contributors",
       "sourceUrl": "https://github.com/dolanmiu/docx/tree/9.6.0",
-      "delivery": { "kind": "downloaded", "when": "first DOCX export" },
-      "provenance": { "modified": false, "basis": "Exact upstream CDN release" },
-      "runtime": { "sources": [
-        { "type": "cdn", "url": "https://cdn.jsdelivr.net/npm/docx@{version}/dist/index.iife.js" },
-        { "type": "cdn", "url": "https://unpkg.com/docx@{version}/dist/index.iife.js" }
-      ] }
+      "delivery": { "kind": "bundled" },
+      "provenance": { "modified": false, "basis": "Upstream npm release dist/index.iife.js, checked against the registry integrity hash" },
+      "vendorRoots": ["docx"],
+      "artifacts": [
+        { "path": "www/vendor/docx/docx.iife.js", "sha256": "b7378f4ff2a976df67bb938b2ff4079dbe39cc9adeabd71ca1baafc28fa90a53", "size": 857587 }
+      ]
     },
     {
       "id": "capacitor",
