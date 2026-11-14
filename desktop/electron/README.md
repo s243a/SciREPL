@@ -20,9 +20,11 @@ code paths because `window.Capacitor` is absent.
 Phase 0.5 added a one-command developer launch and an unsigned **portable
 preview** so the app can be evaluated on Windows without a toolchain.
 
-There is still no Microsoft Store integration, no MSIX, no entitlement logic and
-no signing — deliberately. The preview is not a release. To run it, see
-[`docs/WINDOWS_PREVIEW.md`](../../docs/WINDOWS_PREVIEW.md).
+The preview is not a release. To run it, see
+[`docs/WINDOWS_PREVIEW.md`](../../docs/WINDOWS_PREVIEW.md). A Store-pilot MSIX
+can be packed from the same tested tree (`npm run package:windows:msix`, see
+[`docs/WINDOWS_MSIX_PILOT.md`](../../docs/WINDOWS_MSIX_PILOT.md)); it is
+unsigned (the Store signs submissions) and has no entitlement logic or updater.
 
 ## Commands
 
