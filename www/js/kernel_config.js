@@ -282,21 +282,9 @@ window.KERNEL_CONFIG = {
       "licenseExpression": "MIT",
       "sourceUrl": "https://github.com/dolanmiu/docx/tree/9.6.0",
       "delivery": {
-        "kind": "downloaded",
-        "when": "first DOCX export"
+        "kind": "bundled"
       },
-      "sources": [
-        {
-          "type": "cdn",
-          "url": "https://cdn.jsdelivr.net/npm/docx@9.6.0/dist/index.iife.js",
-          "urlTemplate": "https://cdn.jsdelivr.net/npm/docx@{version}/dist/index.iife.js"
-        },
-        {
-          "type": "cdn",
-          "url": "https://unpkg.com/docx@9.6.0/dist/index.iife.js",
-          "urlTemplate": "https://unpkg.com/docx@{version}/dist/index.iife.js"
-        }
-      ]
+      "sources": []
     },
     "capacitor": {
       "version": "core/android 8.0.2; app 8.1.1; browser/share 8.0.1; filesystem 8.1.2",

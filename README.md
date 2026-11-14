@@ -306,7 +306,8 @@ See [docs/packages.md](docs/packages.md) for full documentation.
 ### Optional network-loaded components
 
 The standard Free release bundles Python/Pyodide, SWI-Prolog, ClojureScript,
-Bash, TypR, JavaScript, and the application interface. These components may
+Bash, TypR, JavaScript, the DOCX export library (`docx@9.6.0`), and the
+application interface. These components may
 still use the network when notebook code explicitly installs packages or fetches
 data. The following optional components are downloaded only when requested:
 
@@ -314,7 +315,6 @@ data. The following optional components are downloaded only when requested:
 |-----------|--------|------------------|-------------|
 | webR | webr.r-wasm.org (with exact-version mirrors where configured) | ~50MB | First R cell execution |
 | Fengari | cdn.jsdelivr.net or unpkg.com | ~200KB | First Lua cell execution |
-| DOCX export library | cdn.jsdelivr.net | varies | First DOCX export |
 
 Runtime-version metadata is checked separately through jsDelivr only after the
 current network privacy policy has been accepted. A version check does not
