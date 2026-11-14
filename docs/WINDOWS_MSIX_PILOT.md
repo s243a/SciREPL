@@ -129,6 +129,35 @@ administrator** for steps 3 and 5.
   and settings survive; then uninstall and confirm the folder is removed.
 - Keyboard-only use, 150–200% display scaling.
 
+## What the packaged Free app downloads
+
+Checked against the 1.5.0 MSIX payload and `www/js` on `main` (9021909).
+Bundled in the package (`resources/www/vendor`): Pyodide, SWI-Prolog,
+Scittle, Brush, TypR, plus Plotly, KaTeX, Marked, highlight.js, JSZip and pako.
+
+| Download | Trigger | Consent | Integrity | Code? |
+| --- | --- | --- | --- | --- |
+| Lua (fengari, jsdelivr/unpkg) | first Lua run | privacy consent + download confirm | none | yes |
+| R (webR, webr.r-wasm.org / jsdelivr) | first R run | privacy consent + download confirm | none | yes |
+| R packages (repo.r-wasm.org) | user `install.packages()` | only the R first-load consent | none | yes |
+| Python packages (Pyodide CDN, PyPI) | user import / `%pip` | per-request network consent guard | lockfile hashes for Pyodide wheels | yes (user-chosen) |
+| CDN fallback for bundled kernels | bundled copy missing/failing, or a non-bundled version chosen | privacy consent + confirm | none | yes |
+| **DOCX library (docx 9.6.0, jsdelivr/unpkg)** | **DOCX export** | **none** | **none** | **yes: app functionality** |
+| Latest-version metadata (data.jsdelivr.com) | Languages dialog | privacy consent | n/a | no (JSON) |
+| Workbook catalogue (s243a.github.io, GitHub) | user refresh/import | catalogue consent | sha256 + size limits | no (notebook data) |
+
+Custom kernel-source URLs are rejected in Electron (no allowlist exposed by
+`preload.js`). There is no update check; Help links open in the system browser.
+
+**Before submission:**
+- **Bundle the DOCX library** in the desktop build (or gate it behind
+  consent). It is app functionality fetched as remote script without consent,
+  which is the case Store policy 10.2.2 and the privacy policy both care about.
+- Decide whether R package installs need their own consent prompt or whether
+  the R first-load disclosure covers them, and say so in the reviewer notes.
+- Reviewer notes: list bundled kernels as the offline example; Lua/R and
+  Python packages as optional, user-initiated downloads behind a prompt.
+
 ## Owner inputs still needed
 
 - Partner Center account (individual registration is free), publisher display
