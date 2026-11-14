@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "version": "1.5.0",
+  "scope": "Translated non-legal highlights only. The full English notes retain the current release status and complete validation limitations. Target translations are drafts, not native-language approval.",
+  "locales": {
+    "en": {
+      "name": "English",
+      "status": "source",
+      "title": "Release highlights",
+      "notice": "These are highlights, not the full release notes. Read the full English notes for current release availability, testing status and limitations. Translations are drafts and have not received native-language approval.",
+      "fullNotes": "Full English notes and release status",
+      "languages": "Languages",
+      "tutorials": "Online tutorials",
+      "bullets": [
+        "Copy Help examples or insert them as new cells at the end of the notebook, without running them.",
+        "Help and walkthroughs open online tutorials in the selected display language. These guides are not bundled offline.",
+        "Offline Bash and Prolog completion uses local tables, without a model request or sending code off the device.",
+        "Execution consent, run ownership and permissions are checked before cells run. Theme contrast, scrolling dialogs and walkthrough placement are improved."
+      ]
+    },
+    "ar": {
+      "name": "العربية",
+      "status": "draft",
+      "title": "أبرز تغييرات الإصدار",
+      "notice": "هذه أبرز التغييرات وليست ملاحظات الإصدار الكاملة. راجع الملاحظات الإنجليزية الكاملة لمعرفة إتاحة الإصدار وحالة الاختبار والقيود الحالية. الترجمات مسودات ولم تحصل على موافقة مراجعين ناطقين باللغة الأم.",
+      "fullNotes": "الملاحظات الإنجليزية الكاملة وحالة الإصدار",
+      "languages": "اللغات",
+      "tutorials": "الدروس التعليمية عبر الإنترنت",
+      "bullets": [
+        "انسخ أمثلة المساعدة أو أدرجها كخلايا جديدة في نهاية دفتر الملاحظات، من دون تشغيلها.",
+        "تفتح المساعدة والجولات الإرشادية دروسًا عبر الإنترنت بلغة العرض المحددة. هذه الأدلة غير مضمّنة للاستخدام دون اتصال.",
+        "يستخدم الإكمال التلقائي لـ Bash وProlog دون اتصال جداول محلية، من دون طلب إلى نموذج أو إرسال الشيفرة خارج الجهاز.",
+        "يجري التحقق من الموافقة على التنفيذ وملكية عملية التشغيل والأذونات قبل تشغيل الخلايا. حُسّن تباين السمات والحوارات القابلة للتمرير ومواضع الجولات الإرشادية."
+      ]
+    },
+    "bn": {
+      "name": "বাংলা",
+      "status": "draft",
+      "title": "সংস্করণের প্রধান পরিবর্তন",
+      "notice": "এখানে শুধু প্রধান পরিবর্তনগুলি দেওয়া হয়েছে, সম্পূর্ণ সংস্করণ নোট নয়। সংস্করণের বর্তমান উপলব্ধতা, পরীক্ষার অবস্থা ও সীমাবদ্ধতার জন্য সম্পূর্ণ ইংরেজি নোট পড়ুন। অনুবাদগুলি খসড়া; মাতৃভাষী পর্যালোচকের অনুমোদন পায়নি।",
+      "fullNotes": "সম্পূর্ণ ইংরেজি নোট ও সংস্করণের অবস্থা",
+      "languages": "ভাষা",
+      "tutorials": "অনলাইন টিউটোরিয়াল",
+      "bullets": [
+        "সহায়তার উদাহরণগুলি কপি করুন অথবা না চালিয়ে নোটবুকের শেষে নতুন সেল হিসেবে যোগ করুন।",
+        "সহায়তা ও নির্দেশিত ভ্রমণ নির্বাচিত প্রদর্শনভাষায় অনলাইন টিউটোরিয়াল খোলে। এই নির্দেশিকাগুলি অফলাইনে ব্যবহারের জন্য অ্যাপের সঙ্গে দেওয়া হয় না।",
+        "Bash ও Prolog-এর অফলাইন কোড পূরণ স্থানীয় সারণি ব্যবহার করে; কোনো মডেলকে অনুরোধ পাঠায় না বা ডিভাইসের বাইরে কোড পাঠায় না।",
+        "সেল চালানোর আগে নির্বাহের সম্মতি, চালনার মালিকানা ও অনুমতি পরীক্ষা করা হয়। থিমের বৈপরীত্য, স্ক্রলযোগ্য ডায়ালগ ও নির্দেশিত ভ্রমণের অবস্থান উন্নত হয়েছে।"
+      ]
+    },
+    "de": {
+      "name": "Deutsch",
+      "status": "draft",
+      "title": "Wichtigste Neuerungen",
+      "notice": "Dies sind nur die wichtigsten Neuerungen, nicht die vollständigen Versionshinweise. Angaben zur aktuellen Verfügbarkeit, zum Teststatus und zu Einschränkungen stehen in den vollständigen englischen Hinweisen. Die Übersetzungen sind Entwürfe und wurden nicht muttersprachlich freigegeben.",
+      "fullNotes": "Vollständige englische Hinweise und Veröffentlichungsstatus",
+      "languages": "Sprachen",
+      "tutorials": "Online-Tutorials",
+      "bullets": [
+        "Beispiele aus der Hilfe kopieren oder als neue Zellen am Ende des Notebooks einfügen, ohne sie auszuführen.",
+        "Hilfe und Einführungstouren öffnen Online-Tutorials in der ausgewählten Anzeigesprache. Diese Anleitungen sind nicht für die Offline-Nutzung enthalten.",
+        "Die Offline-Vervollständigung für Bash und Prolog verwendet lokale Tabellen, ohne Modellanfrage und ohne Code vom Gerät zu senden.",
+        "Vor der Ausführung von Zellen werden Ausführungszustimmung, Zuständigkeit des Laufs und Berechtigungen geprüft. Themenkontrast, scrollbare Dialoge und die Platzierung von Einführungstouren wurden verbessert."
+      ]
+    },
+    "es": {
+      "name": "Español",
+      "status": "draft",
+      "title": "Novedades principales",
+      "notice": "Estos son los cambios principales, no las notas completas de la versión. Consulta las notas completas en inglés para conocer la disponibilidad, el estado de las pruebas y las limitaciones actuales. Las traducciones son borradores y no cuentan con aprobación de revisores nativos.",
+      "fullNotes": "Notas completas en inglés y estado de la versión",
+      "languages": "Idiomas",
+      "tutorials": "Tutoriales en línea",
+      "bullets": [
+        "Copia los ejemplos de la Ayuda o insértalos como celdas nuevas al final del cuaderno, sin ejecutarlos.",
+        "La Ayuda y los recorridos abren tutoriales en línea en el idioma de visualización seleccionado. Estas guías no se incluyen para usarlas sin conexión.",
+        "El autocompletado sin conexión de Bash y Prolog usa tablas locales, sin solicitar un modelo ni enviar código fuera del dispositivo.",
+        "Antes de ejecutar celdas se comprueban el consentimiento de ejecución, la titularidad de la ejecución y los permisos. Se mejoran el contraste de los temas, los diálogos desplazables y la ubicación de los recorridos."
+      ]
+    },
+    "fr": {
+      "name": "Français",
+      "status": "draft",
+      "title": "Principales nouveautés",
+      "notice": "Il s'agit des principales nouveautés, et non des notes de version complètes. Consultez les notes complètes en anglais pour connaître la disponibilité, l'état des tests et les limites actuelles. Les traductions sont des brouillons et n'ont pas été approuvées par des réviseurs de langue maternelle.",
+      "fullNotes": "Notes complètes en anglais et état de la version",
+      "languages": "Langues",
+      "tutorials": "Tutoriels en ligne",
+      "bullets": [
+        "Copiez les exemples de l'Aide ou insérez-les comme nouvelles cellules à la fin du carnet, sans les exécuter.",
+        "L'Aide et les visites guidées ouvrent des tutoriels en ligne dans la langue d'affichage choisie. Ces guides ne sont pas intégrés pour une utilisation hors ligne.",
+        "La complétion hors ligne de Bash et Prolog utilise des tables locales, sans requête à un modèle ni envoi de code hors de l'appareil.",
+        "Le consentement à l'exécution, la propriété de l'exécution et les autorisations sont vérifiés avant l'exécution des cellules. Le contraste des thèmes, les boîtes de dialogue défilantes et le placement des visites guidées sont améliorés."
+      ]
+    },
+    "hi": {
+      "name": "हिन्दी",
+      "status": "draft",
+      "title": "रिलीज़ के प्रमुख बदलाव",
+      "notice": "यह केवल प्रमुख बदलावों का सार है, पूरी रिलीज़ टिप्पणियाँ नहीं। रिलीज़ की वर्तमान उपलब्धता, परीक्षण की स्थिति और सीमाओं के लिए पूरी अंग्रेज़ी टिप्पणियाँ पढ़ें। अनुवाद मसौदे हैं और उन्हें मातृभाषी समीक्षकों की स्वीकृति नहीं मिली है।",
+      "fullNotes": "पूरी अंग्रेज़ी टिप्पणियाँ और रिलीज़ की स्थिति",
+      "languages": "भाषाएँ",
+      "tutorials": "ऑनलाइन ट्यूटोरियल",
+      "bullets": [
+        "सहायता के उदाहरणों को कॉपी करें या उन्हें चलाए बिना नोटबुक के अंत में नई कोशिकाओं के रूप में डालें।",
+        "सहायता और निर्देशित परिचय चुनी गई प्रदर्शन भाषा में ऑनलाइन ट्यूटोरियल खोलते हैं। ये मार्गदर्शिकाएँ ऑफलाइन उपयोग के लिए ऐप में शामिल नहीं हैं।",
+        "Bash और Prolog का ऑफलाइन कोड पूर्णन स्थानीय तालिकाओं का उपयोग करता है; मॉडल को अनुरोध या डिवाइस से बाहर कोड नहीं भेजता।",
+        "कोशिकाएँ चलने से पहले निष्पादन की सहमति, रन का स्वामित्व और अनुमतियाँ जाँची जाती हैं। थीम का कंट्रास्ट, स्क्रॉल करने योग्य संवाद और निर्देशित परिचय का स्थान बेहतर किया गया है।"
+      ]
+    },
+    "id": {
+      "name": "Bahasa Indonesia",
+      "status": "draft",
+      "title": "Sorotan rilis",
+      "notice": "Ini hanya sorotan perubahan, bukan catatan rilis lengkap. Baca catatan lengkap berbahasa Inggris untuk ketersediaan rilis, status pengujian, dan batasan terkini. Terjemahan masih berupa draf dan belum disetujui peninjau penutur asli.",
+      "fullNotes": "Catatan lengkap berbahasa Inggris dan status rilis",
+      "languages": "Bahasa",
+      "tutorials": "Tutorial daring",
+      "bullets": [
+        "Salin contoh Bantuan atau sisipkan sebagai sel baru di akhir buku catatan, tanpa menjalankannya.",
+        "Bantuan dan panduan langkah demi langkah membuka tutorial daring dalam bahasa tampilan yang dipilih. Panduan ini tidak disertakan untuk penggunaan luring.",
+        "Pelengkapan kode Bash dan Prolog secara luring memakai tabel lokal, tanpa permintaan model atau mengirim kode keluar dari perangkat.",
+        "Persetujuan eksekusi, kepemilikan proses, dan izin diperiksa sebelum sel dijalankan. Kontras tema, dialog yang dapat digulir, dan penempatan panduan ditingkatkan."
+      ]
+    },
+    "ja": {
+      "name": "日本語",
+      "status": "draft",
+      "title": "主な変更点",
+      "notice": "これは主な変更点の要約であり、リリースノート全文ではありません。現在の公開状況、テスト状況、制限事項は英語の全文をご覧ください。翻訳は草稿であり、母語話者による承認は受けていません。",
+      "fullNotes": "英語のリリースノート全文と公開状況",
+      "languages": "言語",
+      "tutorials": "オンラインチュートリアル",
+      "bullets": [
+        "ヘルプのサンプルをコピーするか、実行せずにノートブックの末尾へ新しいセルとして挿入できます。",
+        "ヘルプとガイドツアーから、選択中の表示言語のオンラインチュートリアルを開けます。これらのガイドはオフライン用には同梱されません。",
+        "Bash と Prolog のオフライン補完はローカルの表を使用し、モデルへのリクエストや端末外へのコード送信を行いません。",
+        "セルの実行前に、実行への同意、実行の所有権、権限を確認します。テーマのコントラスト、スクロール可能なダイアログ、ガイドツアーの配置を改善しました。"
+      ]
+    },
+    "ko": {
+      "name": "한국어",
+      "status": "draft",
+      "title": "주요 변경 사항",
+      "notice": "이 페이지는 주요 변경 사항의 요약이며 전체 릴리스 노트가 아닙니다. 현재 출시 여부, 테스트 상태 및 제한 사항은 전체 영어 노트를 확인하세요. 번역은 초안이며 원어민 검토자의 승인을 받지 않았습니다.",
+      "fullNotes": "전체 영어 노트 및 출시 상태",
+      "languages": "언어",
+      "tutorials": "온라인 튜토리얼",
+      "bullets": [
+        "도움말 예제를 복사하거나 실행하지 않고 노트북 끝에 새 셀로 삽입할 수 있습니다.",
+        "도움말과 안내 투어에서 선택한 표시 언어의 온라인 튜토리얼을 엽니다. 이 가이드는 오프라인 사용을 위해 포함되어 있지 않습니다.",
+        "Bash 및 Prolog의 오프라인 코드 완성은 로컬 표를 사용하며 모델을 요청하거나 기기 밖으로 코드를 보내지 않습니다.",
+        "셀을 실행하기 전에 실행 동의, 실행 소유권 및 권한을 확인합니다. 테마 대비, 스크롤 가능한 대화상자 및 안내 투어 배치가 개선되었습니다."
+      ]
+    },
+    "pt-BR": {
+      "name": "Português (Brasil)",
+      "status": "draft",
+      "title": "Principais novidades",
+      "notice": "Estes são os destaques, não as notas completas da versão. Consulte as notas completas em inglês para saber a disponibilidade, o estado dos testes e as limitações atuais. As traduções são rascunhos e não receberam aprovação de revisores nativos.",
+      "fullNotes": "Notas completas em inglês e estado da versão",
+      "languages": "Idiomas",
+      "tutorials": "Tutoriais on-line",
+      "bullets": [
+        "Copie os exemplos da Ajuda ou insira-os como novas células no fim do caderno, sem executá-los.",
+        "A Ajuda e os passeios guiados abrem tutoriais on-line no idioma de exibição selecionado. Esses guias não estão incluídos para uso off-line.",
+        "O preenchimento off-line de Bash e Prolog usa tabelas locais, sem solicitar um modelo ou enviar código para fora do dispositivo.",
+        "O consentimento de execução, a titularidade da execução e as permissões são verificados antes de executar as células. Foram melhorados o contraste dos temas, os diálogos com rolagem e a posição dos passeios guiados."
+      ]
+    },
+    "ru": {
+      "name": "Русский",
+      "status": "draft",
+      "title": "Основные изменения",
+      "notice": "Это краткий обзор изменений, а не полные примечания к выпуску. Сведения о текущей доступности выпуска, состоянии тестирования и ограничениях приведены в полном английском тексте. Переводы являются черновиками и не одобрены рецензентами — носителями языка.",
+      "fullNotes": "Полный английский текст и состояние выпуска",
+      "languages": "Языки",
+      "tutorials": "Онлайн-руководства",
+      "bullets": [
+        "Копируйте примеры из справки или вставляйте их как новые ячейки в конец блокнота без выполнения.",
+        "Справка и ознакомительные туры открывают онлайн-руководства на выбранном языке интерфейса. Эти руководства не включены в приложение для автономного использования.",
+        "Автодополнение Bash и Prolog без подключения использует локальные таблицы, не обращается к модели и не отправляет код с устройства.",
+        "Перед выполнением ячеек проверяются согласие на выполнение, принадлежность запуска и разрешения. Улучшены контраст тем, прокручиваемые диалоги и размещение ознакомительных туров."
+      ]
+    },
+    "zh": {
+      "name": "简体中文",
+      "status": "draft",
+      "title": "主要更新",
+      "notice": "此处仅为更新摘要，并非完整发行说明。有关当前版本的可用情况、测试状态和限制，请阅读完整英文说明。翻译为草稿，尚未获得母语审阅者的认可。",
+      "fullNotes": "完整英文说明及版本状态",
+      "languages": "语言",
+      "tutorials": "在线教程",
+      "bullets": [
+        "复制帮助中的示例，或将其作为新单元格插入到笔记本末尾，而不运行示例。",
+        "帮助和引导教程会使用选定的显示语言打开在线教程。这些指南未打包供离线使用。",
+        "Bash 和 Prolog 的离线补全使用本地表格，不请求模型，也不向设备外发送代码。",
+        "运行单元格前会检查执行同意、运行归属和权限。主题对比度、可滚动对话框和引导教程的位置已得到改进。"
+      ]
+    }
+  }
+}

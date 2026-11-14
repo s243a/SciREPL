@@ -115,7 +115,7 @@ export function parsePlayReleaseNotes(source) {
     return notes;
 }
 
-const CSS = `
+export const RELEASE_NOTE_CSS = `
   :root { color-scheme: light dark; --paper: #fff; --page: #f3f6fb; --ink: #182335; --link: #154483; --border: #bbc8da; }
   @media (prefers-color-scheme: dark) {
     :root { --paper: #182335; --page: #101927; --ink: #f1f5fc; --link: #add0ff; --border: #61718a; }
@@ -161,7 +161,7 @@ export function renderReleaseNotes(source, status = 'prerelease') {
   <link rel="canonical" href="${canonical}">
 ${alternates}
   <link rel="alternate" hreflang="x-default" href="${RELEASE_ROOT}">
-  <style>${CSS}</style>
+  <style>${RELEASE_NOTE_CSS}</style>
 </head>
 <body>
   <main>
