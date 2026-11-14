@@ -22,26 +22,32 @@ download, and a project-managed update path.
 [Microsoft distribution paths](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/choose-distribution-path)
 · [MSI/EXE requirements](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/msi/app-package-requirements)
 
-## 1. Reduce certification risk before rebuilding the packaging stack
+## 1. Document and test the download behavior
 
-- Inventory exactly what can be downloaded and executed today: bundled
-  engines, first-use Lua/R, optional kernel-source overrides and CDN fallback,
-  user-initiated Pyodide packages, and notebook-provided code. Separate these
-  from fetching workbook data or documentation. Trace where bytes are
-  fetched, verified, cached and executed, and which actions require consent.
+- Keep the notebook's runtime and package downloads in the Free pilot.
+  Inventory bundled engines, first-use Lua/R, optional kernel-source
+  overrides and CDN fallback, user-initiated Pyodide packages, and
+  notebook-provided code. Separate these from workbook data and documentation.
+  Record where the relevant downloads are fetched, verified, cached and
+  executed, and which need consent. Ship the built-in UI and new app
+  functionality as packaged updates, not as downloaded replacement scripts.
 - Current [Microsoft Store policies](https://learn.microsoft.com/en-us/windows/apps/publish/store-policies#102-security)
   §10.2.2 restrict dynamic inclusion that changes the described functionality
   or introduces policy violations, not every user-script or dependency
   download. §10.2.3 addresses malware and secondary software; §10.2.9
   addresses the external MSI/EXE installer path. Even accurately describing
   notebook execution and language-package downloads is not certification.
-- Prepare an exact Store-profile proposal for the pilot: bundling pinned
-  Lua/R and restricting unpinned engine overrides are options to reduce
-  ambiguity, not requirements assumed from the rule. Keep useful notebook
-  functionality unless a specific unresolved policy or security issue
-  requires a narrower profile. Document what is offline and what needs
-  network access, draft the certification instructions, and ask Microsoft
-  for clarification if a proposed download path remains ambiguous.
+- Draft listing copy: “Run code and work with scientific notebooks on your
+  PC. Some language runtimes and Python packages need an internet connection
+  to download. Bundled runtimes work offline.” Confirm against the exact
+  package. Explain the difference between the runtime download prompt,
+  the optional auto-download setting, and network privacy consent; don't
+  promise a separate prompt for each package or request. Give reviewers
+  a bundled offline example plus a clean-profile test to decline, then
+  allow an optional download. Review custom runtime URLs separately.
+  Bundling Lua/R or restricting overrides is a fallback if a specific
+  security or certification issue calls for it, not a prerequisite inferred
+  from §10.2.2.
 - Account registration announcements cover both
   [individuals](https://blogs.windows.com/windowsdeveloper/2025/09/10/free-developer-registration-for-individual-developers-on-microsoft-store/)
   and [companies](https://blogs.windows.com/windowsdeveloper/2026/05/07/publish-to-microsoft-store-as-a-company-now-with-free-registration-and-faster-onboarding/).
@@ -49,6 +55,18 @@ download, and a project-managed update path.
   Confirm owner, desired publisher name, product-name availability and
   packaging identity in Partner Center before tying an installer to them.
   Account creation and name reservation are separate owner actions.
+
+## What to have ready when this work starts
+
+| Needed | Owner or input |
+| --- | --- |
+| Partner Center access | Owner signs in and confirms publisher, Free name, package identity, and intended tester group. No credentials or identity documents in the repo. |
+| Windows verification | Windows x64 runner plus a clean user account or VM for install, update, offline launch and uninstall. Only the later sideload test needs a scoped test certificate. |
+| Listing and review | App/logo assets, matching screenshots, privacy and support URLs, supported language descriptions, and certification instructions for offline and optional downloads. |
+| Separate Google Play lane | The Windows package does not set Play metadata or change Android releases. For Android, use the edition's own release checklist, verify Play build codes/settings account-side, and test the signed candidate on the Closed track. |
+
+Start with the Free build and a short walkthrough. No Partner Center
+submission, signer setup, public launch or paid Pro listing is implied here.
 
 ## 2. Make and verify one Free package
 
