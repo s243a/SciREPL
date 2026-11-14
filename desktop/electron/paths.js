@@ -58,4 +58,26 @@ function resolveRepoRoot({ isPackaged, moduleDir }) {
   return isPackaged ? null : path.resolve(moduleDir, '..', '..');
 }
 
-module.exports = { resolveWwwRoot, resolveBuildInfoPath, resolveRepoRoot };
+/**
+ * The profile directory (Electron `userData`).
+ *
+ * The Store (MSIX) build uses its own folder name. Under MSIX on Windows 10
+ * 1903 and later, a file that already exists in the real %APPDATA% is opened
+ * in place, while new files go to the package's private copy. Reusing the
+ * portable preview's folder name would therefore make a Store install open,
+ * and partly write into, a preview user's existing profile, and uninstalling
+ * would not remove it. A fresh name is created new, so it is always private
+ * to the package.
+ * https://learn.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-behind-the-scenes
+ *
+ * @param {object} o
+ * @param {string}  o.appData       `app.getPath('appData')`
+ * @param {boolean} o.windowsStore  `process.windowsStore` (true only under MSIX)
+ * @param {object}  [o.env]         environment, for the SCIREPL_USER_DATA override
+ */
+function resolveUserDataDir({ appData, windowsStore, env = {} }) {
+  if (env.SCIREPL_USER_DATA) return path.resolve(env.SCIREPL_USER_DATA);
+  return path.join(appData, windowsStore ? 'SciREPL-Free-Store' : 'SciREPL-Free-Electron');
+}
+
+module.exports = { resolveWwwRoot, resolveBuildInfoPath, resolveRepoRoot, resolveUserDataDir };

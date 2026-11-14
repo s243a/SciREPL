@@ -37,8 +37,10 @@ export function storeVersion(appVersion) {
   if (parts.some((n) => n > 65535)) {
     throw new Error(`App version "${appVersion}" has a part above 65535, which MSIX cannot represent.`);
   }
-  if (parts[0] === 0 && parts[1] === 0 && parts[2] === 0) {
-    throw new Error('App version 0.0.0 is not a releasable package version.');
+  // The Store rejects a package whose major version is 0.
+  // https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/msix/app-package-requirements
+  if (parts[0] === 0) {
+    throw new Error(`App version "${appVersion}" has major version 0, which the Store does not accept.`);
   }
   return `${parts.join('.')}.0`;
 }
@@ -51,10 +53,13 @@ export function storeVersion(appVersion) {
  * half-configured identity is an error, not a silent mix with placeholders.
  */
 export function resolveIdentity(env = {}) {
+  // Trimmed: a value pasted with a trailing space or CR must not become part
+  // of the identity.
+  const clean = (v) => (typeof v === 'string' ? v.trim() : v);
   const supplied = {
-    name: env.SCIREPL_MSIX_IDENTITY_NAME,
-    publisher: env.SCIREPL_MSIX_PUBLISHER,
-    publisherDisplayName: env.SCIREPL_MSIX_PUBLISHER_DISPLAY_NAME,
+    name: clean(env.SCIREPL_MSIX_IDENTITY_NAME),
+    publisher: clean(env.SCIREPL_MSIX_PUBLISHER),
+    publisherDisplayName: clean(env.SCIREPL_MSIX_PUBLISHER_DISPLAY_NAME),
   };
   const given = Object.values(supplied).filter((v) => v !== undefined && v !== '');
   if (given.length === 0) return { ...PLACEHOLDER_IDENTITY, placeholder: true };
@@ -64,8 +69,9 @@ export function resolveIdentity(env = {}) {
       'SCIREPL_MSIX_PUBLISHER_DISPLAY_NAME (from Partner Center), or none of them for a local test build.'
     );
   }
-  // Package name: 3–50 characters, letters, digits, '.' and '-'.
-  if (!/^[A-Za-z0-9.-]{3,50}$/.test(supplied.name)) {
+  // Package name: 3–50 characters, letters, digits, '.' and '-', not ending
+  // in '.'. MakeAppx enforces the full schema (reserved names and so on).
+  if (!/^[A-Za-z0-9.-]{3,50}$/.test(supplied.name) || supplied.name.endsWith('.')) {
     throw new Error(`SCIREPL_MSIX_IDENTITY_NAME "${supplied.name}" is not a valid package name.`);
   }
   // Publisher is a distinguished name, as Partner Center shows it (CN=…).
@@ -84,6 +90,14 @@ export function xmlEscape(value) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;');
 }
+
+/**
+ * Windows 10 1903. From this version MSIX file-system virtualization reads
+ * existing AppData files in place and redirects only new ones; earlier
+ * versions copy on write. Requiring 1903 leaves one behaviour to test, and
+ * all earlier Windows 10 versions are out of support.
+ */
+export const MIN_WINDOWS_VERSION = '10.0.18362.0';
 
 /** Logo files the manifest references, with their pixel sizes. */
 export const LOGO_ASSETS = Object.freeze([
@@ -137,7 +151,7 @@ export function buildManifest({
     <Logo>Assets\\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.22621.0" />
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="${MIN_WINDOWS_VERSION}" MaxVersionTested="10.0.22621.0" />
   </Dependencies>
   <Resources>
 ${languages.map((l) => `    <Resource Language="${e(l)}" />`).join('\n')}

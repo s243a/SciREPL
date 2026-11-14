@@ -1,12 +1,13 @@
 /**
- * build-msix.mjs — wrap the tested portable build in an MSIX for the
+ * build-msix.mjs — wrap the tested Store-channel build in an MSIX for the
  * Microsoft Store pilot (Free edition, Windows x64).
  *
- *   npm run package:windows                       # builds out/SciREPL-win32-x64
- *   node desktop/electron/packaging/build-msix.mjs
+ *   npm run package:windows -- --channel store     # builds out/SciREPL-win32-x64
+ *   node desktop/electron/test/run-all.mjs packaged  # tests that tree
+ *   npm run package:windows:msix                    # packs it
  *
- * It packs the portable tree unchanged, so what was tested by
- * `run-all.mjs packaged` is what goes into the package. Windows only: it needs
+ * The packaged tree is copied as built and tested; this script only adds
+ * AppxManifest.xml and the logo files next to it. Windows only: it needs
  * MakeAppx.exe from the Windows SDK (found automatically, or set
  * SCIREPL_MAKEAPPX) and PowerShell to render the logo sizes.
  *
@@ -22,7 +23,7 @@
  *   - touch Partner Center.
  */
 
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync, mkdtempSync, rmSync, cpSync, mkdirSync, readdirSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -33,38 +34,11 @@ const ELECTRON_DIR = path.resolve(fileURLToPath(new URL('..', import.meta.url)))
 const REPO_ROOT = path.resolve(ELECTRON_DIR, '..', '..');
 const OUT_DIR = path.join(ELECTRON_DIR, 'out');
 const PORTABLE_DIR = path.join(OUT_DIR, 'SciREPL-win32-x64');
+const RESOURCES = path.join(PORTABLE_DIR, 'resources');
 const ICON_SOURCE = path.join(REPO_ROOT, 'www', 'icons', 'icon-512.png');
 
-function fail(message) {
-  console.error(`\n[build-msix] ${message}\n`);
-  process.exit(1);
-}
-
-if (process.platform !== 'win32') fail('MSIX packing needs Windows (MakeAppx.exe and PowerShell).');
-
-/* ------------------------------ inputs ------------------------------ */
-
-for (const [p, what] of [
-  [path.join(PORTABLE_DIR, 'SciREPL.exe'), 'the portable executable'],
-  [path.join(PORTABLE_DIR, 'resources', 'www', 'index.html'), 'the packaged application tree'],
-  [path.join(PORTABLE_DIR, 'resources', 'build-info.json'), 'build metadata'],
-  [ICON_SOURCE, 'the app icon'],
-]) {
-  if (!existsSync(p)) fail(`Missing ${what}: ${p}\nRun:  npm run package:windows`);
-}
-
-const buildInfo = JSON.parse(readFileSync(path.join(PORTABLE_DIR, 'resources', 'build-info.json'), 'utf8'));
-if (buildInfo.edition !== 'free' || buildInfo.profile === 'pro') {
-  fail(`The portable build is edition "${buildInfo.edition}", profile "${buildInfo.profile}". The pilot is Free only.`);
-}
-
-let identity, version;
-try {
-  identity = resolveIdentity(process.env);
-  version = storeVersion(buildInfo.appVersion);
-} catch (err) {
-  fail(err.message);
-}
+class BuildError extends Error {}
+const fail = (message) => { throw new BuildError(message); };
 
 function findMakeAppx() {
   if (process.env.SCIREPL_MAKEAPPX) {
@@ -85,60 +59,124 @@ function findMakeAppx() {
   }
   fail('MakeAppx.exe not found. Install the Windows SDK or set SCIREPL_MAKEAPPX.');
 }
-const makeappx = findMakeAppx();
 
-/* ------------------------------ staging ------------------------------ */
+function headCommit() {
+  try {
+    return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: REPO_ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch {
+    return null;
+  }
+}
 
-const stage = mkdtempSync(path.join(tmpdir(), 'scirepl-msix-'));
-const content = path.join(stage, 'content');
+/** The checks build-portable.mjs makes on its own output, repeated on what is about to be packed. */
+function checkPortableTree() {
+  for (const [p, what] of [
+    [path.join(PORTABLE_DIR, 'SciREPL.exe'), 'the executable'],
+    [path.join(RESOURCES, 'app.asar'), 'the packaged shell'],
+    [path.join(RESOURCES, 'www', 'index.html'), 'the application entry point'],
+    [path.join(RESOURCES, 'www', 'js', 'kernel_config.js'), 'the build profile'],
+    [path.join(RESOURCES, 'build-info.json'), 'build metadata'],
+    [ICON_SOURCE, 'the app icon'],
+  ]) {
+    if (!existsSync(p)) fail(`Missing ${what}: ${p}\nRun:  npm run package:windows -- --channel store`);
+  }
+  // Free-only boundary, checked in the files rather than trusted from metadata.
+  if (existsSync(path.join(RESOURCES, 'www', 'vendor', 'webr'))) fail('The tree contains the Pro offline R runtime (www/vendor/webr).');
+  if (existsSync(path.join(RESOURCES, 'www', 'pro'))) fail('The tree contains www/pro, which must not ship in Free.');
+  const profile = readFileSync(path.join(RESOURCES, 'www', 'js', 'kernel_config.js'), 'utf8')
+    .match(/["']?profile["']?\s*:\s*["']([^"']+)["']/)?.[1];
+  if (!profile || profile === 'pro') fail(`The packaged kernel_config.js has profile "${profile}". The pilot is Free only.`);
+
+  const buildInfo = JSON.parse(readFileSync(path.join(RESOURCES, 'build-info.json'), 'utf8'));
+  if (buildInfo.edition !== 'free' || buildInfo.profile !== profile) {
+    fail(`build-info.json (edition "${buildInfo.edition}", profile "${buildInfo.profile}") does not match a Free "${profile}" tree.`);
+  }
+  if (buildInfo.channel !== 'store') {
+    fail(`The tree was built for channel "${buildInfo.channel}". Rebuild with:  npm run package:windows -- --channel store`);
+  }
+  // A stale out/ directory must not be packed as if it were the current source.
+  const head = headCommit();
+  if (head && buildInfo.commit !== 'unknown' && buildInfo.commit !== head) {
+    fail(`The tree was built from ${buildInfo.commit}, but HEAD is ${head}. Rebuild and retest it.`);
+  }
+  if (!head || buildInfo.commit === 'unknown') {
+    console.warn('[build-msix] warning: cannot confirm the tree matches the source (no git commit recorded).');
+  }
+  return buildInfo;
+}
+
+function renderLogos(assetsDir) {
+  // Paths go through the environment, never into the script text, so no
+  // quoting in a path can break or alter the command.
+  const env = { ...process.env, SCIREPL_ICON_SOURCE: ICON_SOURCE, SCIREPL_ASSETS_DIR: assetsDir,
+    SCIREPL_LOGO_SPECS: LOGO_ASSETS.map(({ file, size }) => `${file}:${size}`).join(';') };
+  const script = `
+$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.Drawing
+$src = [System.Drawing.Image]::FromFile($env:SCIREPL_ICON_SOURCE)
 try {
-  cpSync(PORTABLE_DIR, content, { recursive: true });
-
-  // Record the distribution channel in the packaged copy only; the portable
-  // build and its tests are untouched.
-  const stagedInfo = { ...buildInfo, channel: 'msix-pilot', packageVersion: version, packageIdentity: identity.name,
-    note: identity.placeholder ? 'Local test MSIX with a placeholder identity. Not for submission.' : 'Store-pilot MSIX.' };
-  writeFileSync(path.join(content, 'resources', 'build-info.json'), JSON.stringify(stagedInfo, null, 2));
-
-  const assets = path.join(content, 'Assets');
-  mkdirSync(assets);
-  // High-quality resize with System.Drawing; no image dependency in the repo.
-  const ps = LOGO_ASSETS.map(({ file, size }) => `
-$dst = New-Object System.Drawing.Bitmap ${size}, ${size}
-$g = [System.Drawing.Graphics]::FromImage($dst)
-$g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
-$g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
-$g.DrawImage($src, 0, 0, ${size}, ${size})
-$dst.Save('${path.join(assets, file).replace(/'/g, "''")}', [System.Drawing.Imaging.ImageFormat]::Png)
-$g.Dispose(); $dst.Dispose()`).join('\n');
-  execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command',
-    `Add-Type -AssemblyName System.Drawing; $src = [System.Drawing.Image]::FromFile('${ICON_SOURCE.replace(/'/g, "''")}');${ps}
-$src.Dispose()`], { stdio: 'inherit' });
+  foreach ($spec in $env:SCIREPL_LOGO_SPECS.Split(';')) {
+    $name, $size = $spec.Split(':'); $size = [int]$size
+    $dst = New-Object System.Drawing.Bitmap $size, $size
+    $g = [System.Drawing.Graphics]::FromImage($dst)
+    try {
+      $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+      $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+      $g.DrawImage($src, 0, 0, $size, $size)
+      $dst.Save((Join-Path $env:SCIREPL_ASSETS_DIR $name), [System.Drawing.Imaging.ImageFormat]::Png)
+    } finally { $g.Dispose(); $dst.Dispose() }
+  }
+} finally { $src.Dispose() }
+`;
+  execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script], { env, stdio: 'inherit' });
   for (const { file } of LOGO_ASSETS) {
-    if (!existsSync(path.join(assets, file))) fail(`Logo was not rendered: ${file}`);
+    if (!existsSync(path.join(assetsDir, file))) fail(`Logo was not rendered: ${file}`);
   }
+}
 
-  writeFileSync(path.join(content, 'AppxManifest.xml'), buildManifest({ identity, version }));
+function main() {
+  if (process.platform !== 'win32') fail('MSIX packing needs Windows (MakeAppx.exe and PowerShell).');
+  const buildInfo = checkPortableTree();
+  const identity = resolveIdentity(process.env);
+  const version = storeVersion(buildInfo.appVersion);
+  const makeappx = findMakeAppx();
 
-  /* ------------------------------ pack ------------------------------ */
+  const stage = mkdtempSync(path.join(tmpdir(), 'scirepl-msix-'));
+  try {
+    const content = path.join(stage, 'content');
+    cpSync(PORTABLE_DIR, content, { recursive: true });
+    const assets = path.join(content, 'Assets');
+    mkdirSync(assets);
+    renderLogos(assets);
+    writeFileSync(path.join(content, 'AppxManifest.xml'), buildManifest({ identity, version }));
 
-  const suffix = identity.placeholder ? '-local-test' : '';
-  const msix = path.join(OUT_DIR, `SciREPL-${version}-x64${suffix}.msix`);
-  rmSync(msix, { force: true });
-  console.log('[build-msix] packing');
-  for (const [k, v] of Object.entries({ identity: identity.name, publisher: identity.publisher, version, makeappx })) {
-    console.log(`  ${k.padEnd(10)} ${v}`);
+    const suffix = identity.placeholder ? '-local-test' : '';
+    const msix = path.join(OUT_DIR, `SciREPL-${version}-x64${suffix}.msix`);
+    rmSync(msix, { force: true });
+    console.log('[build-msix] packing');
+    for (const [k, v] of Object.entries({ identity: identity.name, publisher: identity.publisher, version, commit: buildInfo.commit, makeappx })) {
+      console.log(`  ${k.padEnd(10)} ${v}`);
+    }
+    const packed = spawnSync(makeappx, ['pack', '/d', content, '/p', msix, '/o'], { encoding: 'utf8' });
+    if (packed.status !== 0 || !existsSync(msix)) {
+      fail(`MakeAppx failed (exit ${packed.status}).\n${(packed.stdout || '').slice(-4000)}${packed.stderr || ''}`);
+    }
+
+    console.log(`\n[build-msix] done`);
+    console.log(`  package  ${msix}`);
+    console.log(`  size     ${(statSync(msix).size / 1e6).toFixed(1)} MB`);
+    if (identity.placeholder) {
+      console.log('\n  Placeholder identity: install only with a local test signature. Do not submit.');
+    }
+    if (process.env.GITHUB_OUTPUT) writeFileSync(process.env.GITHUB_OUTPUT, `msix=${msix}\n`, { flag: 'a' });
+  } finally {
+    rmSync(stage, { recursive: true, force: true });
   }
-  execFileSync(makeappx, ['pack', '/d', content, '/p', msix, '/o'], { stdio: ['ignore', 'ignore', 'inherit'] });
-  if (!existsSync(msix)) fail('MakeAppx reported success but produced no package.');
+}
 
-  console.log(`\n[build-msix] done`);
-  console.log(`  package  ${msix}`);
-  console.log(`  size     ${(statSync(msix).size / 1e6).toFixed(1)} MB`);
-  if (identity.placeholder) {
-    console.log('\n  Placeholder identity: install only with a local test signature. Do not submit.');
-  }
-  if (process.env.GITHUB_OUTPUT) writeFileSync(process.env.GITHUB_OUTPUT, `msix=${msix}\n`, { flag: 'a' });
-} finally {
-  rmSync(stage, { recursive: true, force: true });
+try {
+  main();
+} catch (err) {
+  console.error(`\n[build-msix] ${err instanceof BuildError ? err.message : err?.message || err}\n`);
+  process.exitCode = 1;
 }

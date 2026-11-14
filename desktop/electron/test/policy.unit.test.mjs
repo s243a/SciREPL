@@ -121,6 +121,14 @@ export default async function run() {
   r.log('packaged: there is no repository root to fall back on',
     paths.resolveRepoRoot(packagedLayout) === null);
 
+  const APPDATA = path.resolve('/Users/u/AppData/Roaming');
+  r.log('profile: the portable build keeps its existing folder',
+    paths.resolveUserDataDir({ appData: APPDATA, windowsStore: false }) === path.join(APPDATA, 'SciREPL-Free-Electron'));
+  r.log('profile: the Store build never reuses the portable folder (MSIX reads existing AppData files in place)',
+    paths.resolveUserDataDir({ appData: APPDATA, windowsStore: true }) === path.join(APPDATA, 'SciREPL-Free-Store'));
+  r.log('profile: SCIREPL_USER_DATA still overrides both',
+    paths.resolveUserDataDir({ appData: APPDATA, windowsStore: true, env: { SCIREPL_USER_DATA: CUSTOM } }) === CUSTOM);
+
   // Every resolved path must be absolute on this platform — the property that
   // actually broke on Windows, asserted directly rather than inferred.
   for (const [label, layout] of [['development', devLayout], ['packaged', packagedLayout]]) {

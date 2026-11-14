@@ -98,8 +98,8 @@ export default async function run() {
     buildInfo && buildInfo.edition === 'free', JSON.stringify(buildInfo));
   r.log('build metadata reports a non-Pro profile',
     buildInfo && buildInfo.profile !== 'pro', buildInfo && buildInfo.profile);
-  r.log('build metadata marks this a preview, not a release',
-    buildInfo && buildInfo.channel === 'preview', buildInfo && buildInfo.channel);
+  r.log('build metadata marks this a preview or Store-pilot tree, not a release',
+    buildInfo && ['preview', 'store'].includes(buildInfo.channel), buildInfo && buildInfo.channel);
 
   // Build machinery must not reach a tester's machine.
   for (const leaked of ['test', 'packaging', 'node_modules']) {

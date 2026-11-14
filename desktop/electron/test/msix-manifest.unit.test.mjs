@@ -4,10 +4,11 @@
  * Pure Node: no Electron binary, no display, no Windows SDK.
  */
 
+import { pathToFileURL } from 'node:url';
 import { createReporter } from './reporter.mjs';
 import {
   storeVersion, resolveIdentity, buildManifest, xmlEscape,
-  PLACEHOLDER_IDENTITY, CAPABILITIES, LOGO_ASSETS,
+  PLACEHOLDER_IDENTITY, CAPABILITIES, LOGO_ASSETS, MIN_WINDOWS_VERSION,
 } from '../packaging/msix-manifest.mjs';
 
 function throws(fn) {
@@ -29,6 +30,8 @@ export default async function run() {
   r.log('two-part version is rejected', throws(() => storeVersion('1.6')));
   r.log('part above 65535 is rejected', throws(() => storeVersion('1.65536.0')));
   r.log('0.0.0 is rejected', throws(() => storeVersion('0.0.0')));
+  r.log('major version 0 is rejected (Store rule)', throws(() => storeVersion('0.1.0')));
+  r.log('65535 is the largest accepted part', storeVersion('1.65535.0') === '1.65535.0.0');
 
   const local = resolveIdentity({});
   r.log('no identity variables gives the marked placeholder', local.placeholder === true && local.name === PLACEHOLDER_IDENTITY.name);
@@ -37,6 +40,9 @@ export default async function run() {
   r.log('a partial identity is an error', throws(() => resolveIdentity({ SCIREPL_MSIX_IDENTITY_NAME: 'A.B' })));
   r.log('publisher must be a distinguished name', throws(() => resolveIdentity({ ...REAL_ENV, SCIREPL_MSIX_PUBLISHER: 'Example' })));
   r.log('invalid package name is rejected', throws(() => resolveIdentity({ ...REAL_ENV, SCIREPL_MSIX_IDENTITY_NAME: 'bad name!' })));
+  r.log('package name ending in a dot is rejected', throws(() => resolveIdentity({ ...REAL_ENV, SCIREPL_MSIX_IDENTITY_NAME: 'Example.SciREPL.' })));
+  r.log('pasted whitespace and CR are trimmed from identity values',
+    resolveIdentity({ ...REAL_ENV, SCIREPL_MSIX_PUBLISHER: ` ${REAL_ENV.SCIREPL_MSIX_PUBLISHER}\r\n` }).publisher === REAL_ENV.SCIREPL_MSIX_PUBLISHER);
   r.log('a placeholder value passed explicitly is still flagged',
     resolveIdentity({ ...REAL_ENV, SCIREPL_MSIX_PUBLISHER: PLACEHOLDER_IDENTITY.publisher }).placeholder === true);
 
@@ -49,8 +55,14 @@ export default async function run() {
     xml.includes('EntryPoint="Windows.FullTrustApplication"') && xml.includes('Executable="SciREPL.exe"') && xml.includes('Name="Windows.Desktop"'));
   const declared = [...xml.matchAll(/Capability Name="([^"]+)"/g)].map((m) => m[1]);
   r.log('only runFullTrust is declared', declared.length === 1 && declared[0] === 'runFullTrust' && CAPABILITIES.length === 1);
-  r.log('every referenced logo is a known asset',
-    [...xml.matchAll(/Assets\\([A-Za-z0-9x]+\.png)/g)].every((m) => LOGO_ASSETS.some((a) => a.file === m[1])));
+  const referenced = new Set([...xml.matchAll(/Assets\\([A-Za-z0-9x]+\.png)/g)].map((m) => m[1]));
+  r.log('the manifest references exactly the rendered logo files',
+    referenced.size === LOGO_ASSETS.length && LOGO_ASSETS.every((a) => referenced.has(a.file)), [...referenced].join(', '));
+  r.log('the minimum Windows version is 1903 (one AppData virtualization behaviour)',
+    MIN_WINDOWS_VERSION === '10.0.18362.0' && xml.includes(`MinVersion="${MIN_WINDOWS_VERSION}"`));
+  const odd = buildManifest({ identity: { ...real, name: 'A.B', publisher: 'CN="Q & R", O=<S>' }, version: '1.0.0.0' });
+  r.log('identity attributes are escaped',
+    odd.includes('Publisher="CN=&quot;Q &amp; R&quot;, O=&lt;S&gt;"') && !odd.includes('CN="Q'));
   r.log('publisher display name is escaped',
     buildManifest({ identity: { ...real, publisherDisplayName: 'A & B' }, version: '1.0.0.0' }).includes('A &amp; B'));
   r.log('a non-Store version is refused', throws(() => buildManifest({ identity: real, version: '1.5.0.3' })));
@@ -59,6 +71,6 @@ export default async function run() {
   return r.summary();
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   run().then((s) => process.exit(s.failed > 0 ? 1 : 0));
 }

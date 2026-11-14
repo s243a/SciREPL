@@ -22,7 +22,7 @@ preview** so the app can be evaluated on Windows without a toolchain.
 
 The preview is not a release. To run it, see
 [`docs/WINDOWS_PREVIEW.md`](../../docs/WINDOWS_PREVIEW.md). A Store-pilot MSIX
-can be packed from the same tested tree (`npm run package:windows:msix`, see
+can be packed from the same tested tree (`npm run package:windows -- --channel store`, then `npm run package:windows:msix`; see
 [`docs/WINDOWS_MSIX_PILOT.md`](../../docs/WINDOWS_MSIX_PILOT.md)); it is
 unsigned (the Store signs submissions) and has no entitlement logic or updater.
 

@@ -1,9 +1,9 @@
 # Free MSIX package for the Microsoft Store pilot
 
-Status, November 14, 2026: a Free x64 MSIX builds locally from the tested
-portable tree. No Partner Center account, reserved name, signing identity or
-submission exists. The broader sequence is in
-[WINDOWS_STORE_PILOT.md](WINDOWS_STORE_PILOT.md) (on PR #134).
+Status, November 14, 2026: a Free x64 MSIX builds from the tested Store-channel
+tree. It has **not** yet been installed, upgraded or run through WACK. No
+Partner Center account, reserved name, signing identity or submission exists.
+The broader sequence is in WINDOWS_STORE_PILOT.md (PR #134).
 
 ## Build
 
@@ -13,16 +13,26 @@ On Windows, from the repository root, with Node 22 and the Windows SDK
 
 ```bat
 npm install
+npm run configure
+npm run fetch:bundles
+npm run verify:bundles
 npm run windows:install
-npm run package:windows
+npm run package:windows -- --channel store
 node desktop\electron\test\run-all.mjs packaged
 npm run package:windows:msix
 ```
 
-`package:windows:msix` packs `desktop/electron/out/SciREPL-win32-x64` unchanged,
-plus `AppxManifest.xml` and three logos rendered from `www/icons/icon-512.png`.
-The packaged tests above therefore cover the same files the MSIX contains.
-Output: `desktop/electron/out/SciREPL-<version>.0-x64[-local-test].msix`
+`fetch:bundles` is required: the portable builder stops if the bundled Pyodide,
+SWI-Prolog or Scittle runtimes are missing.
+
+`--channel store` builds the same tree as the portable preview with Store
+metadata: `build-info.json` channel `store` and an executable description
+without "unsigned preview". The packaged tests run on that tree, and
+`package:windows:msix` copies it as built, adding only `AppxManifest.xml` and
+three logos rendered from `www/icons/icon-512.png`. Before packing it repeats
+the Free-boundary checks (no `www/pro`, no `vendor/webr`, non-Pro profile),
+requires channel `store`, and refuses a tree built from a different commit than
+`HEAD`. Output: `desktop/electron/out/SciREPL-<version>.0-x64[-local-test].msix`
 (about 200 MB for 1.5.0).
 
 ### Identity
@@ -36,97 +46,125 @@ Output: `desktop/electron/out/SciREPL-<version>.0-x64[-local-test].msix`
 Set all three or none. With none, the package uses the placeholder
 `SciREPL.FreePilot.LocalTest` / `CN=SciREPL Local Test` and the file name ends
 `-local-test`: it is for a test-signed install on a developer machine only.
+The manifest `DisplayName` is fixed as "SciREPL"; confirm it matches the name
+reserved in Partner Center.
 
 ### Manifest decisions
 
 - Version is `Major.Minor.Patch.0` from `package.json`. The Store reserves the
-  fourth part; pre-release suffixes are refused rather than dropped.
+  fourth part and rejects major version 0; pre-release suffixes are refused.
 - Full-trust desktop entry point (`Windows.FullTrustApplication`), one
-  capability: `runFullTrust`. Network access needs no capability for a
-  full-trust process.
-- `Windows.Desktop`, minimum 10.0.17763.0 (Windows 10 1809), x64 only.
+  capability: `runFullTrust`. It is a restricted capability: the submission
+  must explain why it is needed (a packaged Electron/Win32 app cannot start
+  without it). Network access needs no capability for a full-trust process.
+- `Windows.Desktop`, minimum **10.0.18362.0 (Windows 10 1903)**, x64 only.
+  1903 is where AppData virtualization took its current form (below);
+  requiring it leaves one behaviour to test.
 - Resource language `en-us` only for now. Manifest languages become the Store
-  listing languages; adding the UI's other languages is a listing decision,
-  each needing a reviewed Store description.
+  listing languages; each added one needs a reviewed Store description.
+- Logos are the documented minimum (StoreLogo 50, Square44x44, Square150x150
+  at 100% scale). Without `targetsize-*_altform-unplated` variants, which need
+  a `resources.pri` from MakePri, Windows shows the icon small on a backplate
+  in the taskbar and Start. Follow-up, along with a Windows `.ico` for the
+  executable (it still has the default Electron icon).
 - No auto-updater: the Store delivers updates.
 - Unit tests: `desktop/electron/test/msix-manifest.unit.test.mjs`
   (`npm run test:windows:unit`).
 
 ## Data location when packaged
 
-The shell stores everything under Electron `userData`, set to
-`%APPDATA%\SciREPL-Free-Electron` (`desktop/electron/main.js`). Under MSIX,
-writes to `%APPDATA%` are redirected to the package's private copy:
+On Windows 10 1903 and later, MSIX
+[file-system virtualization](https://learn.microsoft.com/en-us/windows/msix/desktop/flexible-virtualization)
+redirects **new** files and folders in `%APPDATA%` to the package's private
+location, but files that **already exist** in the real `%APPDATA%` are read and
+modified in place.
 
-```
-%LOCALAPPDATA%\Packages\<PackageFamilyName>\LocalCache\Roaming\SciREPL-Free-Electron
-```
+The portable preview keeps its profile in `%APPDATA%\SciREPL-Free-Electron`.
+If the Store build used the same name, it would open a preview user's existing
+profile, write new files to a separate private copy (a split profile), and
+uninstalling would leave the preview's notebooks behind. So the Store build
+(`process.windowsStore`) uses its own folder, `SciREPL-Free-Store`
+(`desktop/electron/paths.js`, `resolveUserDataDir`). That name never exists in
+the real `%APPDATA%`, so it is created new and is private to the package:
+notebooks, settings, IndexedDB/SharedVFS and the runtime cache all live there.
+The exact on-disk location (expected under
+`%LOCALAPPDATA%\Packages\<PackageFamilyName>\`) is to be confirmed on an
+installed package.
 
-Consequences to verify on the installed package and state in the listing:
+Consequences:
 
-- Notebooks, settings, IndexedDB/SharedVFS and the runtime cache live there.
-  The app is unaware of the redirection; it should need no code change.
-- A portable-preview profile in the real `%APPDATA%` is not visible to the
-  MSIX app. It is not imported silently; preview users export and re-import.
-- **Uninstalling removes that folder and the notebooks in it.** Users need
-  to export notebooks first. Updates keep it.
-- Free and Pro must keep separate userData names and package identities.
+- The Store build does not see a portable-preview profile. Preview users move
+  notebooks by export and import; nothing is imported silently.
+- **Uninstalling removes the Store build's data, including notebooks.** Users
+  need to export first. Updates keep it.
+- Pro needs the same isolation, with its own folder and package identity. A
+  private profile and the ACL-protected install folder make Pro harder to copy
+  casually, but Electron app files remain inspectable, so this is not DRM.
 
 ## Local install test (owner's machine; each step needs the owner's OK)
 
-These change the Windows machine's certificate store and installed apps, so
-they are run by the owner, not by an agent. Run PowerShell **as
-administrator** for steps 3 and 5.
+These change the machine's certificate store and installed apps, so the owner
+runs them. Run **all steps in one PowerShell window opened as administrator**,
+so `$cert` and the paths carry between steps.
 
-1. Create a test certificate whose subject equals the placeholder publisher:
+```powershell
+$msix = 'C:\scirepl-store-pilot\repo\desktop\electron\out\SciREPL-1.5.0.0-x64-local-test.msix'
+$sdk  = Get-ChildItem 'C:\Program Files (x86)\Windows Kits\10\bin\10.*\x64\signtool.exe' |
+        Sort-Object FullName -Descending | Select-Object -First 1
 
-   ```powershell
-   $cert = New-SelfSignedCertificate -Type Custom -Subject "CN=SciREPL Local Test" `
-     -KeyUsage DigitalSignature -FriendlyName "SciREPL MSIX local test" `
-     -CertStoreLocation Cert:\CurrentUser\My `
-     -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
-   ```
+# 1. Test certificate whose subject equals the placeholder publisher.
+$cert = New-SelfSignedCertificate -Type Custom -Subject "CN=SciREPL Local Test" `
+  -KeyUsage DigitalSignature -FriendlyName "SciREPL MSIX local test" `
+  -CertStoreLocation Cert:\CurrentUser\My `
+  -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
 
-2. Sign the package (signtool is next to makeappx in the Windows SDK):
+# 2. Sign the package.
+& $sdk.FullName sign /fd SHA256 /sha1 $cert.Thumbprint $msix
 
-   ```powershell
-   & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64\signtool.exe" sign `
-     /fd SHA256 /sha1 $cert.Thumbprint `
-     C:\scirepl-store-pilot\repo\desktop\electron\out\SciREPL-1.5.0.0-x64-local-test.msix
-   ```
+# 3. Trust the certificate for installs.
+Export-Certificate -Cert $cert -FilePath "$env:TEMP\scirepl-test.cer"
+Import-Certificate -FilePath "$env:TEMP\scirepl-test.cer" -CertStoreLocation Cert:\LocalMachine\TrustedPeople
 
-3. Trust it for installs (admin):
+# 4. Windows App Certification Kit, on the package before installing it.
+$appcert = 'C:\Program Files (x86)\Windows Kits\10\App Certification Kit\appcert.exe'
+& $appcert reset
+& $appcert test -appxpackagepath $msix -reportoutputpath C:\scirepl-store-pilot\wack-report.xml
 
-   ```powershell
-   Export-Certificate -Cert $cert -FilePath $env:TEMP\scirepl-test.cer
-   Import-Certificate -FilePath $env:TEMP\scirepl-test.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
-   ```
+# 5. Install.
+Add-AppxPackage $msix
+```
 
-4. Install: `Add-AppxPackage C:\scirepl-store-pilot\repo\desktop\electron\out\SciREPL-1.5.0.0-x64-local-test.msix`
+Cleanup when finished:
 
-5. Windows App Certification Kit (admin):
+```powershell
+Get-AppxPackage SciREPL.FreePilot.LocalTest | Remove-AppxPackage
+Get-ChildItem Cert:\CurrentUser\My, Cert:\LocalMachine\TrustedPeople |
+  Where-Object Subject -eq 'CN=SciREPL Local Test' | Remove-Item
+```
 
-   ```powershell
-   & "C:\Program Files (x86)\Windows Kits\10\App Certification Kit\appcert.exe" test `
-     -appxpackagepath C:\scirepl-store-pilot\repo\desktop\electron\out\SciREPL-1.5.0.0-x64-local-test.msix `
-     -reportoutputpath C:\scirepl-store-pilot\wack-report.xml
-   ```
+### Checks on the installed package
 
-6. Cleanup when finished: `Get-AppxPackage SciREPL.FreePilot.LocalTest | Remove-AppxPackage`,
-   then delete the certificate from `Cert:\CurrentUser\My` and
-   `Cert:\LocalMachine\TrustedPeople`.
-
-### Manual checks on the installed package
-
-- Start menu entry and icon; cold launch online and offline.
-- Python, Prolog, Bash and ClojureScript run offline (bundled).
+- **Profile isolation:** before installing, make a disposable portable-preview
+  profile containing a notebook (run the portable build once and save one).
+  After installing, confirm the Store build does **not** show that notebook,
+  and that the portable profile is unchanged afterwards.
+- Start menu entry and icon; taskbar grouping and pinning (the Store build
+  does not override its package-assigned AppUserModelID).
+- Cold launch online and offline. Python, Prolog, Bash and ClojureScript run
+  offline (bundled).
 - Lua or R: decline the runtime download, then allow it; confirm it works
   offline after the cache fills.
-- Network privacy consent, then one Python package install.
+- Network privacy consent, then one Python package install
+  (`%pip install matplotlib`, then a plot).
 - Notebook open, save and export; restart keeps notebooks.
-- Confirm the data folder is under `LocalCache\Roaming` as above.
-- Build 1.5.0.0 and a later version, install over it, and confirm notebooks
-  and settings survive; then uninstall and confirm the folder is removed.
+- **Open app data** (app menu) opens the folder that actually holds the data.
+  It passes the virtualized path to Explorer, which may not resolve; if it
+  doesn't, that's a fix before submission.
+- Find the data folder under `%LOCALAPPDATA%\Packages\` and record the path.
+- **Upgrade:** build a later version under the same identity, install it over
+  the first, and confirm notebooks and settings survive.
+- **Uninstall:** confirm the Store build's data folder is removed and the
+  portable profile is untouched.
 - Keyboard-only use, 150–200% display scaling.
 
 ## What the packaged Free app downloads
@@ -162,7 +200,8 @@ Custom kernel-source URLs are rejected in Electron (no allowlist exposed by
 
 - Partner Center account (individual registration is free), publisher display
   name, reserved product name, and the three identity values above.
+- A written justification for the `runFullTrust` restricted capability.
 - Private-audience tester list for the first certified submission.
 - Listing: screenshots, privacy and support URLs, descriptions, reviewer
-  notes. A draft of the download explanation is in the pilot plan; the
-  runtime-download inventory backs it.
+  notes (offline bundled kernels; optional downloads behind prompts; data
+  removed on uninstall).
