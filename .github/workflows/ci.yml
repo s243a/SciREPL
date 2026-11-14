@@ -24,7 +24,7 @@ concurrency:
 # in roughly the time of the slowest group rather than the sum of all of them.
 # Each job sets up its own runtimes and dev server; setup takes about 20 s.
 jobs:
-  # Static gates, Help, tutorials and localization.
+  # Static gates, Help, tutorials, localization and cold Matplotlib.
   test:
     # Keep the runner compatible with the Chromium builds in locked Playwright.
     runs-on: ubuntu-24.04
@@ -125,7 +125,12 @@ jobs:
       - name: Help examples — Copy and Insert
         run: node tests/test_help_examples.mjs
 
-  # Python, packages, runtimes, storage and the service worker.
+      # The full run covers both orientations and every scenario, including
+      # the portrait micropip/helper/%pip cases the --focused mode selects.
+      - name: Matplotlib cold first-show placement
+        run: npm run test:matplotlib-first-show
+
+  # Python packages, runtimes, catalogue and the service worker.
   test-runtimes:
     # Keep the runner compatible with the Chromium builds in locked Playwright.
     runs-on: ubuntu-24.04
@@ -183,20 +188,6 @@ jobs:
       - name: Service worker offline and upgrade coherence
         run: node tests/test_sw_offline.mjs
 
-      - name: Auto-save and crash recovery
-        run: node tests/test_autosave.mjs
-
-      - name: Cell operations
-        run: node tests/test_cell_ops.mjs
-
-      - name: JavaScript kernel
-        run: node tests/test_js_kernel.mjs
-
-      # The full run covers both orientations and every scenario, including
-      # the portrait micropip/helper/%pip cases the --focused mode selects.
-      - name: Matplotlib cold first-show placement
-        run: npm run test:matplotlib-first-show
-
       - name: Notebook VFS
         run: node tests/test_notebook_vfs.mjs
 
@@ -209,7 +200,7 @@ jobs:
       - name: Verified catalogue workbook import
         run: npm run test:catalog:import
 
-  # Layout, Android chrome, the tour and the header.
+  # Layout, Android chrome, the tour, the header, auto-save and cell operations.
   test-ui:
     # Keep the runner compatible with the Chromium builds in locked Playwright.
     runs-on: ubuntu-24.04
@@ -264,6 +255,15 @@ jobs:
 
       - name: Header controls follow scaled text
         run: npm run test:header-scaling
+
+      - name: Auto-save and crash recovery
+        run: node tests/test_autosave.mjs
+
+      - name: Cell operations
+        run: node tests/test_cell_ops.mjs
+
+      - name: JavaScript kernel
+        run: node tests/test_js_kernel.mjs
 
   # test_pwa_release starts its OWN server (on :8086) and drives a full install/
   # offline/reload cycle, so it runs in a dedicated job rather than sharing the

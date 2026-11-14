@@ -28,8 +28,27 @@ for (let index = 0; index < args.length; index++) {
 }
 const locales = args.includes('--all') ? LOCALES : selected.length ? selected : ['en'];
 const report = { schema: 1, kind: 'public-tutorial-locale-browser', completeAllLocales: locales.length === LOCALES.length, profiles: [], externalRequests: [], failures: [] };
+// Each profile has its own isolated browser context and shares no state, so a
+// few run at once. Most of each profile's time is waiting for the network to go
+// idle, not CPU work. Results keep their original order in the report.
+const jobs = [];
+for (const locale of locales) for (const route of ROUTES) for (const [name, width, height] of [['portrait', 320, 800], ['landscape', 844, 390]]) {
+  jobs.push({ index: jobs.length, locale, route, name, width, height });
+}
+const concurrency = Math.max(1, Number.parseInt(process.env.TUTORIAL_BROWSER_CONCURRENCY || '4', 10) || 1);
+const rows = new Array(jobs.length);
 try {
-  for (const locale of locales) for (const route of ROUTES) for (const [name, width, height] of [['portrait', 320, 800], ['landscape', 844, 390]]) {
+  let next = 0;
+  await Promise.all(Array.from({ length: Math.min(concurrency, jobs.length) }, async () => {
+    while (next < jobs.length) await runProfile(jobs[next++]);
+  }));
+} finally {
+  report.profiles = rows.filter(Boolean);
+  await browser.close(); await new Promise(resolve => server.close(resolve));
+  writeFileSync(process.env.TUTORIAL_LOCALE_REPORT || '/tmp/scirepl-tutorial-locale-browser.json', JSON.stringify(report, null, 2) + '\n');
+}
+
+async function runProfile({ index, locale, route, name, width, height }) {
     const context = await browser.newContext({ viewport: { width, height }, javaScriptEnabled: true });
     const page = await context.newPage();
     const pageErrors = [], missing = [];
@@ -80,11 +99,7 @@ try {
       for (const [check, value] of Object.entries(row.checks)) assert.ok(value, `${locale}/${route} ${name}: ${check}`);
       console.log(`PASS ${locale}/${route} ${name}`);
     } catch (error) { row.failure = error.message; report.failures.push(row.failure); console.error(`FAIL ${row.failure}`); }
-    report.profiles.push(row); await context.close();
-  }
-} finally {
-  await browser.close(); await new Promise(resolve => server.close(resolve));
-  writeFileSync(process.env.TUTORIAL_LOCALE_REPORT || '/tmp/scirepl-tutorial-locale-browser.json', JSON.stringify(report, null, 2) + '\n');
+    rows[index] = row; await context.close();
 }
 assert.equal(report.externalRequests.length, 0, 'Tutorials must not request third-party resources');
 assert.equal(report.failures.length, 0, 'Localized tutorial browser checks failed');
