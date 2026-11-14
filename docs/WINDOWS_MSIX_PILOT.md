@@ -32,7 +32,9 @@ without "unsigned preview". The packaged tests run on that tree, and
 three logos rendered from `www/icons/icon-512.png`. Before packing it repeats
 the Free-boundary checks (no `www/pro`, no `vendor/webr`, non-Pro profile),
 requires channel `store`, and refuses a tree built from a different commit than
-`HEAD`. Output: `desktop/electron/out/SciREPL-<version>.0-x64[-local-test].msix`
+`HEAD`. With the real Partner Center identity it also requires a git checkout
+with a recorded commit and no uncommitted changes to tracked files; a copy
+without `.git` is accepted only for a `-local-test` package, with a warning. Output: `desktop/electron/out/SciREPL-<version>.0-x64[-local-test].msix`
 (about 200 MB for 1.5.0).
 
 ### Identity
@@ -118,6 +120,9 @@ $cert = New-SelfSignedCertificate -Type Custom -Subject "CN=SciREPL Local Test" 
   -CertStoreLocation Cert:\CurrentUser\My `
   -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
 
+$thumb = $cert.Thumbprint   # note it down: cleanup removes only this certificate
+$thumb
+
 # 2. Sign the package.
 & $sdk.FullName sign /fd SHA256 /sha1 $cert.Thumbprint $msix
 
@@ -138,11 +143,16 @@ Cleanup when finished:
 
 ```powershell
 Get-AppxPackage SciREPL.FreePilot.LocalTest | Remove-AppxPackage
-Get-ChildItem Cert:\CurrentUser\My, Cert:\LocalMachine\TrustedPeople |
-  Where-Object Subject -eq 'CN=SciREPL Local Test' | Remove-Item
+# Only the certificate created above, by thumbprint (set $thumb again if this
+# is a new window).
+Remove-Item "Cert:\CurrentUser\My\$thumb", "Cert:\LocalMachine\TrustedPeople\$thumb"
+Remove-Item "$env:TEMP\scirepl-test.cer"
 ```
 
 ### Checks on the installed package
+
+These are gates for the pilot. Merging the packaging source does not establish
+any of them; record each result before inviting Store testers.
 
 - **Profile isolation:** before installing, make a disposable portable-preview
   profile containing a notebook (run the portable build once and save one).

@@ -60,16 +60,16 @@ function findMakeAppx() {
   fail('MakeAppx.exe not found. Install the Windows SDK or set SCIREPL_MAKEAPPX.');
 }
 
-function headCommit() {
+function git(args) {
   try {
-    return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: REPO_ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    return execFileSync('git', args, { cwd: REPO_ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
   } catch {
     return null;
   }
 }
 
 /** The checks build-portable.mjs makes on its own output, repeated on what is about to be packed. */
-function checkPortableTree() {
+function checkPortableTree({ requireProvenance }) {
   for (const [p, what] of [
     [path.join(PORTABLE_DIR, 'SciREPL.exe'), 'the executable'],
     [path.join(RESOURCES, 'app.asar'), 'the packaged shell'],
@@ -95,12 +95,22 @@ function checkPortableTree() {
     fail(`The tree was built for channel "${buildInfo.channel}". Rebuild with:  npm run package:windows -- --channel store`);
   }
   // A stale out/ directory must not be packed as if it were the current source.
-  const head = headCommit();
+  const head = git(['rev-parse', 'HEAD']);
   if (head && buildInfo.commit !== 'unknown' && buildInfo.commit !== head) {
     fail(`The tree was built from ${buildInfo.commit}, but HEAD is ${head}. Rebuild and retest it.`);
   }
-  if (!head || buildInfo.commit === 'unknown') {
-    console.warn('[build-msix] warning: cannot confirm the tree matches the source (no git commit recorded).');
+  if (requireProvenance) {
+    // A package with the real Partner Center identity must come from a known,
+    // clean commit: no unverifiable copies and no uncommitted changes.
+    if (!head || buildInfo.commit === 'unknown') {
+      fail('A package with the Partner Center identity needs a git checkout whose build recorded its commit. Build from a clean clone.');
+    }
+    const dirty = git(['status', '--porcelain', '--untracked-files=no']);
+    if (dirty === null || dirty !== '') {
+      fail(`The checkout has uncommitted changes to tracked files; build the Partner Center package from a clean, pinned commit.\n${dirty || ''}`);
+    }
+  } else if (!head || buildInfo.commit === 'unknown') {
+    console.warn('[build-msix] warning: cannot confirm the tree matches the source (no git commit recorded). Acceptable only for a local test package.');
   }
   return buildInfo;
 }
@@ -136,8 +146,8 @@ try {
 
 function main() {
   if (process.platform !== 'win32') fail('MSIX packing needs Windows (MakeAppx.exe and PowerShell).');
-  const buildInfo = checkPortableTree();
   const identity = resolveIdentity(process.env);
+  const buildInfo = checkPortableTree({ requireProvenance: !identity.placeholder });
   const version = storeVersion(buildInfo.appVersion);
   const makeappx = findMakeAppx();
 
