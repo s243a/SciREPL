@@ -6,6 +6,8 @@
  *   node desktop/electron/test/run-all.mjs packaged  # tests that tree
  *   npm run package:windows:msix                    # packs it
  *
+ * `npm run package:windows:msix-pilot` runs all three (build-msix-pilot.mjs).
+ *
  * The packaged tree is copied as built and tested; this script only adds
  * AppxManifest.xml and the logo files next to it. Windows only: it needs
  * MakeAppx.exe from the Windows SDK (found automatically, or set

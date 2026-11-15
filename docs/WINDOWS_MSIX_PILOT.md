@@ -11,10 +11,24 @@ On Windows, from the repository root, with Node 22 and the Windows SDK
 (MakeAppx.exe; found under `C:\Program Files (x86)\Windows Kits\10\bin`, or set
 `SCIREPL_MAKEAPPX`):
 
+Once per checkout (these change the checkout and download about 1 GB):
+
 ```bat
 npm install
 npm run configure
 npm run fetch:bundles
+```
+
+Then, for each build:
+
+```bat
+npm run package:windows:msix-pilot
+```
+
+`package:windows:msix-pilot` (`desktop/electron/packaging/build-msix-pilot.mjs`)
+runs these steps in order and stops at the first failure, naming the step:
+
+```bat
 npm run verify:bundles
 npm run windows:install
 npm run package:windows -- --channel store
@@ -22,8 +36,13 @@ node desktop\electron\test\run-all.mjs packaged
 npm run package:windows:msix
 ```
 
-`fetch:bundles` is required: the portable builder stops if the bundled Pyodide,
-SWI-Prolog or Scittle runtimes are missing.
+Add `-- --dry-run` to list the steps without running them. The steps can also
+be run one by one. Don't paste them into a `.bat` file as they are: `npm` is
+itself a batch file, so a `.bat` stops after the first `npm` line unless each
+one starts with `call`, and it carries on after a failure.
+
+`fetch:bundles` is required: `verify:bundles` and the portable builder stop if
+the bundled Pyodide, SWI-Prolog or Scittle runtimes are missing.
 
 `--channel store` builds the same tree as the portable preview with Store
 metadata: `build-info.json` channel `store` and an executable description
