@@ -109,6 +109,14 @@ check('Self-hosted guide follows actual scoped Ollama endpoint and key controls'
   ['Configure model for → AI Assistant', 'Backend → Ollama (local)', 'API Endpoint',
     'Or enter custom model ID', 'nonempty saved key', 'complete', '/v1/chat/completions',
     'does not append', 'Saving does not make a model request'].every(text => selfHostedText.includes(text)));
+check('Self-hosted guide distinguishes explicit keyless setup from older-key workarounds',
+  ['No authentication (my self-hosted server)', 'Older builds without that choice',
+    'Existing saved keys are retained', 'For an authenticated gateway', 'Cloud providers still require']
+    .every(text => selfHostedText.includes(text)));
+check('Self-hosted metadata check is optional, consented and not inference clearance',
+  ['Check connection and models', '/v1/models', 'No prompt, workbook or chat history is sent',
+    'Cancel stops the check', 'metadata reachability only', 'does not prove which one failed',
+    'does not guarantee local-only inference'].every(text => selfHostedText.includes(text)));
 check('Self-hosted guide separates phone localhost, HTTPS policy, TLS and CORS',
   ['Localhost means the device running SciREPL', 'HTTPS is required for a non-loopback host',
     'Plain LAN HTTP', 'do not disable certificate checks', 'CORS is not authentication',

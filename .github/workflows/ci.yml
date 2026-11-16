@@ -34,6 +34,9 @@ jobs:
       - name: Localized Free release notes for Pages
         run: node tests/test_public_release_notes.mjs
 
+      - name: Localized Pro release highlights for Pages
+        run: node tests/test_pro_public_release_notes.mjs
+
       - name: Install dependencies
         run: npm install
 
@@ -54,6 +57,9 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install chromium
+
+      - name: Localized Pro release highlights — browser layouts
+        run: node tests/test_pro_public_release_notes_browser.mjs
 
       # Static i18n gates — cheap, and each catches a class of bug no runtime
       # test does. Run before the server so a catalogue error fails fast.

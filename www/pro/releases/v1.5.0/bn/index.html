@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="bn" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="scirepl-translation-status" content="draft">
+  <title>SciREPL Pro 1.5.0 · সংস্করণের প্রধান পরিবর্তন</title>
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0/bn/">
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0.html">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0/ar/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0/bn/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0/de/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0/es/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0/fr/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0/hi/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0/id/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0/ja/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0/ko/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0/pt-BR/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0/ru/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0/zh/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/pro/releases/v1.5.0.html">
+  <style>
+  :root { color-scheme: light dark; --paper: #fff; --page: #f3f6fb; --ink: #182335; --link: #154483; --border: #bbc8da; }
+  @media (prefers-color-scheme: dark) {
+    :root { --paper: #182335; --page: #101927; --ink: #f1f5fc; --link: #add0ff; --border: #61718a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: clamp(1rem, 4vw, 3rem); background: var(--page); color: var(--ink); font: 1rem/1.6 system-ui, sans-serif; overflow-wrap: anywhere; }
+  main { max-inline-size: 48rem; margin-inline: auto; padding: clamp(1rem, 4vw, 2.5rem); border: 1px solid var(--border); border-radius: .75rem; background: var(--paper); }
+  h1 { margin-block: 0 1rem; line-height: 1.25; font-size: clamp(1.45rem, 5vw, 2.25rem); }
+  h1 span { display: block; margin-block-start: .35rem; font-size: .72em; }
+  h2 { margin-block: 0 .5rem; font-size: 1.15rem; }
+  .notes { padding-inline-start: 1.4rem; }
+  .notes li + li { margin-block-start: .6rem; }
+  nav { margin-block-start: 1.5rem; padding-block-start: 1rem; border-block-start: 1px solid var(--border); }
+  nav ul { display: flex; flex-wrap: wrap; gap: .35rem .75rem; padding: 0; margin: 0; list-style: none; }
+  nav a { display: inline-flex; align-items: center; justify-content: center; min-block-size: 2.75rem; min-inline-size: 2.75rem; padding-inline: .3rem; color: var(--link); text-underline-offset: .18em; }
+  nav a[aria-current="page"] { font-weight: 700; }
+  a:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+</style>
+</head>
+<body>
+  <main>
+    <h1><bdi dir="ltr">SciREPL Pro 1.5.0</bdi> <span>সংস্করণের প্রধান পরিবর্তন</span></h1>
+    <p role="note">এখানে শুধু প্রধান পরিবর্তনগুলি দেওয়া হয়েছে, সম্পূর্ণ সংস্করণ নোট নয়। সংস্করণের বর্তমান উপলব্ধতা, পরীক্ষার অবস্থা ও সীমাবদ্ধতার জন্য সম্পূর্ণ ইংরেজি নোট পড়ুন। অনুবাদগুলি খসড়া; মাতৃভাষী পর্যালোচকের অনুমোদন পায়নি।</p>
+    <ul class="notes">
+      <li>সহায়তার উদাহরণগুলি কপি করুন অথবা না চালিয়ে নোটবুকের শেষে নতুন সেল হিসেবে যোগ করুন।</li>
+      <li>সহায়তা ও নির্দেশিত ভ্রমণ নির্বাচিত প্রদর্শনভাষায় অনলাইন টিউটোরিয়াল খোলে। এই নির্দেশিকাগুলি অফলাইনে ব্যবহারের জন্য অ্যাপের সঙ্গে দেওয়া হয় না।</li>
+      <li>Bash ও Prolog-এর অফলাইন কোড পূরণ স্থানীয় সারণি ব্যবহার করে; কোনো মডেলকে অনুরোধ পাঠায় না বা ডিভাইসের বাইরে কোড পাঠায় না।</li>
+      <li>সেল চালানোর আগে নির্বাহের সম্মতি, চালনার মালিকানা ও অনুমতি পরীক্ষা করা হয়। থিমের বৈপরীত্য, স্ক্রলযোগ্য ডায়ালগ ও নির্দেশিত ভ্রমণের অবস্থান উন্নত হয়েছে।</li>
+    </ul>
+    <p><a href="../../v1.5.0.html">সম্পূর্ণ ইংরেজি নোট ও সংস্করণের অবস্থা</a></p>
+    <p><a href="../../../../help/bn/tutorials/">অনলাইন টিউটোরিয়াল</a></p>
+    <nav class="release-note-languages" aria-label="ভাষা" style="margin-block:2rem;padding:1rem;border:1px solid currentColor;border-radius:.5rem">
+      <h2>ভাষা</h2>
+      <ul style="display:flex;flex-wrap:wrap;gap:.5rem 1rem;list-style:none;padding:0">
+        <li><a href="../../v1.5.0.html" lang="en" dir="ltr" style="display:inline-flex;align-items:center;min-height:44px">English</a></li>
+        <li><a href="../ar/" lang="ar" dir="rtl" style="display:inline-flex;align-items:center;min-height:44px">العربية</a></li>
+        <li><a href="../bn/" lang="bn" dir="ltr" aria-current="page" style="display:inline-flex;align-items:center;min-height:44px">বাংলা</a></li>
+        <li><a href="../de/" lang="de" dir="ltr" style="display:inline-flex;align-items:center;min-height:44px">Deutsch</a></li>
+        <li><a href="../es/" lang="es" dir="ltr" style="display:inline-flex;align-items:center;min-height:44px">Español</a></li>
+        <li><a href="../fr/" lang="fr" dir="ltr" style="display:inline-flex;align-items:center;min-height:44px">Français</a></li>
+        <li><a href="../hi/" lang="hi" dir="ltr" style="display:inline-flex;align-items:center;min-height:44px">हिन्दी</a></li>
+        <li><a href="../id/" lang="id" dir="ltr" style="display:inline-flex;align-items:center;min-height:44px">Bahasa Indonesia</a></li>
+        <li><a href="../ja/" lang="ja" dir="ltr" style="display:inline-flex;align-items:center;min-height:44px">日本語</a></li>
+        <li><a href="../ko/" lang="ko" dir="ltr" style="display:inline-flex;align-items:center;min-height:44px">한국어</a></li>
+        <li><a href="../pt-BR/" lang="pt-BR" dir="ltr" style="display:inline-flex;align-items:center;min-height:44px">Português (Brasil)</a></li>
+        <li><a href="../ru/" lang="ru" dir="ltr" style="display:inline-flex;align-items:center;min-height:44px">Русский</a></li>
+        <li><a href="../zh/" lang="zh" dir="ltr" style="display:inline-flex;align-items:center;min-height:44px">简体中文</a></li>
+      </ul>
+    </nav>
+  </main>
+</body>
+</html>
