@@ -3,7 +3,8 @@
 Status, November 14, 2026: a Free x64 MSIX builds from the tested Store-channel
 tree. It has **not** yet been installed, upgraded or run through WACK. No
 Partner Center account, reserved name, signing identity or submission exists.
-The broader sequence is in WINDOWS_STORE_PILOT.md (PR #134).
+The broader proposal is in [WINDOWS_STORE_PROPOSAL.md](WINDOWS_STORE_PROPOSAL.md);
+the pilot sequence is planned in draft PR #134.
 
 ## Build
 
@@ -124,59 +125,291 @@ Consequences:
 
 ## Local install test (owner's machine; each step needs the owner's OK)
 
-These change the machine's certificate store and installed apps, so the owner
-runs them. Run **all steps in one PowerShell window opened as administrator**,
-so `$cert` and the paths carry between steps.
+This tests a clean install and an upgrade of a test-signed package. It
+changes the machine's certificate store and installed apps, so the owner runs
+it. It needs the Windows SDK with the App Certification Kit.
+
+**How to run the blocks.** Each PowerShell block below is one gated step.
+Paste a whole block at once: it runs as a single unit (`. { … }`) and stops
+at the first failure, including a native tool's non-zero exit code. Don't
+paste lines one at a time, or a failed line won't stop the next. Every block
+starts by setting `$pilot`. Use the same new folder for every block in one
+run, and a new folder for each run. That folder keeps everything the run
+produces: both packages, their build metadata and hashes, the certification
+report and the profile snapshot.
+
+**Use fresh packages only.** Never install an MSIX built before the commit
+under test, for example one left in another copy of the repository. The steps
+below collect both packages from builds that recorded the current commit.
+
+### 1. Package A: the current version
+
+In a clean clone of current `main`, do the one-time setup from **Build**,
+then run `npm run package:windows:msix-pilot`. Then, in a normal PowerShell
+window at the repository root:
 
 ```powershell
-$msix = 'C:\scirepl-store-pilot\repo\desktop\electron\out\SciREPL-1.5.0.0-x64-local-test.msix'
-$sdk  = Get-ChildItem 'C:\Program Files (x86)\Windows Kits\10\bin\10.*\x64\signtool.exe' |
-        Sort-Object FullName -Descending | Select-Object -First 1
-
-# 1. Test certificate whose subject equals the placeholder publisher.
-$cert = New-SelfSignedCertificate -Type Custom -Subject "CN=SciREPL Local Test" `
-  -KeyUsage DigitalSignature -FriendlyName "SciREPL MSIX local test" `
-  -CertStoreLocation Cert:\CurrentUser\My `
-  -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
-
-$thumb = $cert.Thumbprint   # note it down: cleanup removes only this certificate
-$thumb
-
-# 2. Sign the package.
-& $sdk.FullName sign /fd SHA256 /sha1 $cert.Thumbprint $msix
-
-# 3. Trust the certificate for installs.
-Export-Certificate -Cert $cert -FilePath "$env:TEMP\scirepl-test.cer"
-Import-Certificate -FilePath "$env:TEMP\scirepl-test.cer" -CertStoreLocation Cert:\LocalMachine\TrustedPeople
-
-# 4. Windows App Certification Kit, on the package before installing it.
-$appcert = 'C:\Program Files (x86)\Windows Kits\10\App Certification Kit\appcert.exe'
-& $appcert reset
-& $appcert test -appxpackagepath $msix -reportoutputpath C:\scirepl-store-pilot\wack-report.xml
-
-# 5. Install.
-Add-AppxPackage $msix
+. {
+  $ErrorActionPreference = 'Stop'
+  $pilot = 'C:\scirepl-store-pilot\run-1'
+  if (Test-Path $pilot) { throw "$pilot already exists: use a new folder for each run" }
+  $res  = 'desktop\electron\out\SciREPL-win32-x64\resources'
+  $info = Get-Content "$res\build-info.json" -Raw | ConvertFrom-Json
+  $head = git rev-parse HEAD
+  if ($LASTEXITCODE -ne 0) { throw 'git rev-parse failed: run this from the clone' }
+  if ($info.channel -ne 'store' -or $info.commit -ne $head) {
+    throw "The tree is channel '$($info.channel)', commit '$($info.commit)'; HEAD is $head. Rebuild."
+  }
+  if (-not (Test-Path "$res\www\vendor\docx\docx.iife.js")) { throw 'The tree has no bundled DOCX library.' }
+  $msix = Get-Item "desktop\electron\out\SciREPL-$($info.appVersion).0-x64-local-test.msix"
+  if ($msix.LastWriteTime -lt (Get-Item "$res\build-info.json").LastWriteTime) { throw "$msix is older than the tree." }
+  New-Item -ItemType Directory "$pilot\A" | Out-Null
+  Copy-Item $msix.FullName, "$res\build-info.json" "$pilot\A\"
+  "A: $($info.appVersion) from $head"
+}
 ```
 
-Cleanup when finished:
+### 2. Package B: the upgrade, from the same commit
+
+The upgrade package comes from a second clone, checked out at A's commit,
+with only the patch version raised. The raise stays uncommitted, so B records
+the same commit as A. The local-test identity allows that; a Partner Center
+build does not. Same window, same folder (the setup downloads about 1 GB
+again):
 
 ```powershell
-Get-AppxPackage SciREPL.FreePilot.LocalTest | Remove-AppxPackage
-# Only the certificate created above, by thumbprint (set $thumb again if this
-# is a new window).
-Remove-Item "Cert:\CurrentUser\My\$thumb", "Cert:\LocalMachine\TrustedPeople\$thumb"
-Remove-Item "$env:TEMP\scirepl-test.cer"
+. {
+  $ErrorActionPreference = 'Stop'
+  $pilot = 'C:\scirepl-store-pilot\run-1'
+  $infoA = Get-Content "$pilot\A\build-info.json" -Raw | ConvertFrom-Json
+  $src = "$pilot\upgrade-src"
+  git clone --quiet . $src
+  if ($LASTEXITCODE -ne 0) { throw 'git clone failed' }
+  git -C $src checkout --quiet --detach $infoA.commit
+  if ($LASTEXITCODE -ne 0) { throw "checkout of $($infoA.commit) failed" }
+  Push-Location $src
+  try {
+    foreach ($step in @('install'), @('run', 'configure'), @('run', 'fetch:bundles'),
+                      @('version', 'patch', '--no-git-tag-version'), @('run', 'package:windows:msix-pilot')) {
+      & npm @step
+      if ($LASTEXITCODE -ne 0) { throw "npm $($step -join ' ') failed (exit $LASTEXITCODE)" }
+    }
+  } finally { Pop-Location }
+  $res   = "$src\desktop\electron\out\SciREPL-win32-x64\resources"
+  $infoB = Get-Content "$res\build-info.json" -Raw | ConvertFrom-Json
+  if ($infoB.commit -ne $infoA.commit) { throw "B was built from '$($infoB.commit)', A from '$($infoA.commit)'." }
+  if ([version]$infoB.appVersion -le [version]$infoA.appVersion) { throw "B ($($infoB.appVersion)) is not newer than A ($($infoA.appVersion))." }
+  if ($infoB.channel -ne 'store') { throw "B is channel '$($infoB.channel)'." }
+  if (-not (Test-Path "$res\www\vendor\docx\docx.iife.js")) { throw 'B has no bundled DOCX library.' }
+  New-Item -ItemType Directory "$pilot\B" | Out-Null
+  Copy-Item "$src\desktop\electron\out\SciREPL-$($infoB.appVersion).0-x64-local-test.msix", "$res\build-info.json" "$pilot\B\"
+  "B: $($infoB.appVersion) from $($infoB.commit)"
+}
 ```
 
-### Checks on the installed package
+### 3. Test certificate, signing and signature check
 
-These are gates for the pilot. Merging the packaging source does not establish
-any of them; record each result before inviting Store testers.
+In a PowerShell window **opened as administrator**:
 
-- **Profile isolation:** before installing, make a disposable portable-preview
-  profile containing a notebook (run the portable build once and save one).
-  After installing, confirm the Store build does **not** show that notebook,
-  and that the portable profile is unchanged afterwards.
+```powershell
+. {
+  $ErrorActionPreference = 'Stop'
+  $pilot = 'C:\scirepl-store-pilot\run-1'
+  $signtool = Get-ChildItem 'C:\Program Files (x86)\Windows Kits\10\bin\10.*\x64\signtool.exe' -ErrorAction SilentlyContinue |
+              Sort-Object FullName -Descending | Select-Object -First 1
+  if (-not $signtool) { throw 'signtool.exe not found: install the Windows SDK.' }
+  if (Test-Path "$pilot\thumbprint.txt") { throw 'This run already has a test certificate.' }
+  $packages = @(Get-ChildItem "$pilot\A\*.msix") + @(Get-ChildItem "$pilot\B\*.msix")
+  if ($packages.Count -ne 2) { throw "Expected one package in A and one in B; found $($packages.Count)." }
+
+  # Subject must equal the placeholder publisher.
+  $cert = New-SelfSignedCertificate -Type Custom -Subject 'CN=SciREPL Local Test' `
+    -KeyUsage DigitalSignature -FriendlyName 'SciREPL MSIX local test' `
+    -CertStoreLocation Cert:\CurrentUser\My `
+    -TextExtension @('2.5.29.37={text}1.3.6.1.5.5.7.3.3', '2.5.29.19={text}')
+  $thumb = $cert.Thumbprint
+  Set-Content "$pilot\thumbprint.txt" $thumb   # cleanup removes only this certificate
+  Export-Certificate -Cert $cert -FilePath "$pilot\scirepl-test.cer" | Out-Null
+  Import-Certificate -FilePath "$pilot\scirepl-test.cer" -CertStoreLocation Cert:\LocalMachine\TrustedPeople | Out-Null
+
+  foreach ($m in $packages) {
+    & $signtool.FullName sign /fd SHA256 /sha1 $thumb $m.FullName
+    if ($LASTEXITCODE -ne 0) { throw "Signing $($m.Name) failed (exit $LASTEXITCODE)." }
+    & $signtool.FullName verify /pa $m.FullName
+    if ($LASTEXITCODE -ne 0) { throw "The signature on $($m.Name) did not verify under the test trust setup (exit $LASTEXITCODE)." }
+    $signer = (Get-AuthenticodeSignature $m.FullName).SignerCertificate
+    if (-not $signer -or $signer.Thumbprint -ne $thumb) { throw "$($m.Name) is signed by '$($signer.Thumbprint)', not the test certificate $thumb." }
+    Get-FileHash $m.FullName -Algorithm SHA256 | Select-Object Hash, Path |
+      Export-Csv "$pilot\signed-packages.csv" -Append -NoTypeInformation
+  }
+  "Both packages signed and verified with $thumb"
+}
+```
+
+If `signtool verify` stops with an untrusted-root error, stop the run and
+record it. Don't work around it by importing the test certificate into
+Trusted Root: Microsoft advises against trusting self-signed certificates
+there, and that is the owner's decision.
+
+### 4. Windows App Certification Kit on package A
+
+Same administrator window. Each run writes a new report and requires an
+overall result of `PASS`:
+
+```powershell
+. {
+  $ErrorActionPreference = 'Stop'
+  $pilot = 'C:\scirepl-store-pilot\run-1'
+  $appcert = 'C:\Program Files (x86)\Windows Kits\10\App Certification Kit\appcert.exe'
+  if (-not (Test-Path $appcert)) { throw 'appcert.exe not found: install the App Certification Kit.' }
+  $a = @(Get-ChildItem "$pilot\A\*.msix")
+  if ($a.Count -ne 1) { throw 'Expected one package in A.' }
+  $report = Join-Path $pilot ('wack-A-{0:yyyyMMdd-HHmmss}.xml' -f (Get-Date))
+  if (Test-Path $report) { throw "$report already exists." }
+  & $appcert reset
+  if ($LASTEXITCODE -ne 0) { throw "appcert reset failed (exit $LASTEXITCODE)." }
+  & $appcert test -appxpackagepath $a[0].FullName -reportoutputpath $report
+  if ($LASTEXITCODE -ne 0) { throw "appcert test failed (exit $LASTEXITCODE)." }
+  if (-not (Test-Path $report)) { throw 'WACK wrote no report.' }
+  $result = ([xml](Get-Content $report -Raw)).REPORT.OVERALL_RESULT
+  if ($result -ne 'PASS') { throw "WACK overall result is '$result', not PASS. Read $report." }
+  "WACK: PASS ($report)"
+}
+```
+
+`WARNING`, `FAIL` or an empty result stops the run. Keep the report: a
+warning may still be acceptable for submission, but that's decided from the
+report, not by carrying on. An empty result can also mean the report's layout
+differs from what this block reads; record that too. A non-zero exit code
+stops the run even if a report was written.
+
+### 5. Portable baseline and clean install of A
+
+Before this step, run a portable preview build once (for example the
+released portable zip, outside the repository), save a notebook named
+`portable-canary`, and close it. Don't run the portable app again until
+step 8. Then, in a normal PowerShell window:
+
+```powershell
+. {
+  $ErrorActionPreference = 'Stop'
+  $pilot = 'C:\scirepl-store-pilot\run-1'
+  foreach ($scope in 'Process', 'User', 'Machine') {
+    if ([Environment]::GetEnvironmentVariable('SCIREPL_USER_DATA', $scope)) { throw "SCIREPL_USER_DATA is set ($scope); it overrides both profiles." }
+  }
+  # Clean-install preconditions; WACK installs and removes the package itself.
+  if (Get-AppxPackage SciREPL.FreePilot.LocalTest) { throw 'The pilot package is already installed: uninstall it first.' }
+  if (Get-ChildItem "$env:LOCALAPPDATA\Packages" -Directory -Filter 'SciREPL.FreePilot.LocalTest_*' -ErrorAction SilentlyContinue) {
+    throw 'A data folder from an earlier install of the pilot package still exists.'
+  }
+  if (Test-Path "$env:APPDATA\SciREPL-Free-Store") { throw 'The real %APPDATA% already has a SciREPL-Free-Store folder.' }
+  $portable = "$env:APPDATA\SciREPL-Free-Electron"
+  if (-not (Test-Path $portable)) { throw 'No portable profile: run the portable build once and save a notebook first.' }
+  if (Test-Path "$pilot\portable-before.csv") { throw 'This run already has a portable snapshot.' }
+  Get-ChildItem $portable -Recurse -File | Get-FileHash | Select-Object Hash, Path |
+    Export-Csv "$pilot\portable-before.csv" -NoTypeInformation
+  Add-AppxPackage (Get-ChildItem "$pilot\A\*.msix").FullName
+  'Installed ' + (Get-AppxPackage SciREPL.FreePilot.LocalTest).Version
+}
+```
+
+A locked file in the snapshot means the portable app is still running: close
+it, delete `portable-before.csv` if it was written, and rerun the block.
+
+Then, by hand, with the network still on:
+
+1. Start SciREPL from the Start menu. The `portable-canary` notebook must
+   **not** appear.
+2. Create a notebook named `store-canary` with a Python cell that prints
+   something and a Markdown cell with a formula, for example `$e^{i\pi}+1=0$`.
+   Run it, change one setting you can recognise later (for example the
+   theme), save, and close the app.
+
+### 6. DOCX export offline in the installed app
+
+Turn Wi-Fi off, or airplane mode on, and unplug any network cable. Confirm
+there is no active connection:
+
+```powershell
+. {
+  $ErrorActionPreference = 'Stop'
+  $up = @(Get-NetAdapter -Physical | Where-Object Status -eq 'Up')
+  $internet = @(Get-NetConnectionProfile -ErrorAction SilentlyContinue |
+    Where-Object { $_.IPv4Connectivity -eq 'Internet' -or $_.IPv6Connectivity -eq 'Internet' })
+  if ($up.Count -or $internet.Count) {
+    throw "Still connected: adapters up [$($up.Name -join ', ')], internet profiles [$($internet.InterfaceAlias -join ', ')]."
+  }
+  'Offline: no physical adapter is up and no connection has internet access.'
+}
+```
+
+Then start SciREPL, open `store-canary`, and export it as DOCX. There must be
+no download or network prompt. Open the file and check that the printed output
+and the formula are in it. Close the app.
+
+### 7. Upgrade to B
+
+Stay offline:
+
+```powershell
+. {
+  $ErrorActionPreference = 'Stop'
+  $pilot = 'C:\scirepl-store-pilot\run-1'
+  $before = (Get-AppxPackage SciREPL.FreePilot.LocalTest).Version
+  if (-not $before) { throw 'Package A is not installed.' }
+  Add-AppxPackage (Get-ChildItem "$pilot\B\*.msix").FullName
+  $after = (Get-AppxPackage SciREPL.FreePilot.LocalTest).Version
+  if ([version]$after -le [version]$before) { throw "The installed version is $after; expected newer than $before." }
+  "Upgraded $before -> $after"
+}
+```
+
+Rerun the offline check block from step 6, then start SciREPL. `store-canary`
+must still be there with its output, and the setting from step 5 kept. Export
+it as DOCX again and check the file. Close the app.
+
+### 8. The portable profile is untouched
+
+```powershell
+. {
+  $ErrorActionPreference = 'Stop'
+  $pilot = 'C:\scirepl-store-pilot\run-1'
+  $before = Import-Csv "$pilot\portable-before.csv"
+  $after = Get-ChildItem "$env:APPDATA\SciREPL-Free-Electron" -Recurse -File | Get-FileHash | Select-Object Hash, Path
+  $diff = Compare-Object $before $after -Property Hash, Path
+  if ($diff) { $diff | Format-Table -AutoSize | Out-String | Write-Host; throw 'The portable profile changed.' }
+  if (Test-Path "$env:APPDATA\SciREPL-Free-Store") { throw 'Store data was written to the real %APPDATA%.' }
+  Get-ChildItem "$env:LOCALAPPDATA\Packages" -Directory -Filter 'SciREPL.FreePilot.LocalTest_*' |
+    Get-ChildItem -Recurse -Directory -Filter 'SciREPL-Free-Store' | Select-Object -ExpandProperty FullName
+  'Portable profile unchanged; the Store profile is in the package folder above.'
+}
+```
+
+Record the Store profile path it prints.
+
+### Cleanup
+
+Keep `$pilot` with the packages, hashes and report; `upgrade-src` inside it
+can be deleted. Turn the network back on. In an administrator window:
+
+```powershell
+. {
+  $ErrorActionPreference = 'Stop'
+  $pilot = 'C:\scirepl-store-pilot\run-1'
+  $thumb = (Get-Content "$pilot\thumbprint.txt").Trim()
+  Get-AppxPackage SciREPL.FreePilot.LocalTest | Remove-AppxPackage
+  # Only the certificate created for this run.
+  Remove-Item "Cert:\CurrentUser\My\$thumb", "Cert:\LocalMachine\TrustedPeople\$thumb"
+}
+```
+
+Uninstalling removes the Store profile, including `store-canary`. Check that
+its package folder under `%LOCALAPPDATA%\Packages` is gone.
+
+### Other checks before inviting testers
+
+Record each result. Merging the packaging source establishes none of them.
+
 - Start menu entry and icon; taskbar grouping and pinning (the Store build
   does not override its package-assigned AppUserModelID).
 - Cold launch online and offline. Python, Prolog, Bash and ClojureScript run
@@ -185,15 +418,9 @@ any of them; record each result before inviting Store testers.
   offline after the cache fills.
 - Network privacy consent, then one Python package install
   (`%pip install matplotlib`, then a plot).
-- Notebook open, save and export; restart keeps notebooks.
 - **Open app data** (app menu) opens the folder that actually holds the data.
   It passes the virtualized path to Explorer, which may not resolve; if it
   doesn't, that's a fix before submission.
-- Find the data folder under `%LOCALAPPDATA%\Packages\` and record the path.
-- **Upgrade:** build a later version under the same identity, install it over
-  the first, and confirm notebooks and settings survive.
-- **Uninstall:** confirm the Store build's data folder is removed and the
-  portable profile is untouched.
 - Keyboard-only use, 150–200% display scaling.
 
 ## What the packaged Free app downloads
