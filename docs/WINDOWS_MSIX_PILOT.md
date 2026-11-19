@@ -251,9 +251,39 @@ record it. Don't work around it by importing the test certificate into
 Trusted Root: Microsoft advises against trusting self-signed certificates
 there, and that is the owner's decision.
 
-### 4. Windows App Certification Kit on package A
+### 4. Portable baseline, before WACK
 
-Same administrator window. Each run writes a new report and requires an
+WACK installs and launches the package, so the portable profile and the
+profile override are checked before it runs. Run a portable preview build
+once (for example the released portable zip, outside the repository), save a
+notebook named `portable-canary`, and close it. Don't run the portable app
+again until step 9. Then, in a normal PowerShell window:
+
+```powershell
+. {
+  $ErrorActionPreference = 'Stop'
+  $pilot = 'C:\scirepl-store-pilot\run-1'
+  foreach ($scope in 'Process', 'User', 'Machine') {
+    if ([Environment]::GetEnvironmentVariable('SCIREPL_USER_DATA', $scope)) { throw "SCIREPL_USER_DATA is set ($scope); it overrides both profiles." }
+  }
+  if (Get-AppxPackage SciREPL.FreePilot.LocalTest) { throw 'The pilot package is already installed: uninstall it first.' }
+  if (Test-Path "$env:APPDATA\SciREPL-Free-Store") { throw 'The real %APPDATA% already has a SciREPL-Free-Store folder.' }
+  $portable = "$env:APPDATA\SciREPL-Free-Electron"
+  if (-not (Test-Path $portable)) { throw 'No portable profile: run the portable build once and save a notebook first.' }
+  if (Test-Path "$pilot\portable-before.csv") { throw 'This run already has a portable snapshot.' }
+  Get-ChildItem $portable -Recurse -File | Get-FileHash | Select-Object Hash, Path |
+    Export-Csv "$pilot\portable-before.csv" -NoTypeInformation
+  'Portable snapshot taken: ' + (Import-Csv "$pilot\portable-before.csv").Count + ' files.'
+}
+```
+
+A locked file means the portable app is still running: close it, delete
+`portable-before.csv` if it was written, and rerun the block.
+
+### 5. Windows App Certification Kit on package A
+
+In the administrator window from step 3. WACK installs and launches the
+package itself, which is why the baseline above comes first. Each run writes a new report and requires an
 overall result of `PASS`:
 
 ```powershell
@@ -283,12 +313,11 @@ report, not by carrying on. An empty result can also mean the report's layout
 differs from what this block reads; record that too. A non-zero exit code
 stops the run even if a report was written.
 
-### 5. Portable baseline and clean install of A
+### 6. Clean install of A
 
-Before this step, run a portable preview build once (for example the
-released portable zip, outside the repository), save a notebook named
-`portable-canary`, and close it. Don't run the portable app again until
-step 8. Then, in a normal PowerShell window:
+WACK has installed, launched and removed the package, so the clean-install
+conditions are checked again. Any error while scanning for leftover data
+stops the block. In a normal PowerShell window:
 
 ```powershell
 . {
@@ -297,24 +326,18 @@ step 8. Then, in a normal PowerShell window:
   foreach ($scope in 'Process', 'User', 'Machine') {
     if ([Environment]::GetEnvironmentVariable('SCIREPL_USER_DATA', $scope)) { throw "SCIREPL_USER_DATA is set ($scope); it overrides both profiles." }
   }
-  # Clean-install preconditions; WACK installs and removes the package itself.
-  if (Get-AppxPackage SciREPL.FreePilot.LocalTest) { throw 'The pilot package is already installed: uninstall it first.' }
-  if (Get-ChildItem "$env:LOCALAPPDATA\Packages" -Directory -Filter 'SciREPL.FreePilot.LocalTest_*' -ErrorAction SilentlyContinue) {
-    throw 'A data folder from an earlier install of the pilot package still exists.'
-  }
-  if (Test-Path "$env:APPDATA\SciREPL-Free-Store") { throw 'The real %APPDATA% already has a SciREPL-Free-Store folder.' }
-  $portable = "$env:APPDATA\SciREPL-Free-Electron"
-  if (-not (Test-Path $portable)) { throw 'No portable profile: run the portable build once and save a notebook first.' }
-  if (Test-Path "$pilot\portable-before.csv") { throw 'This run already has a portable snapshot.' }
-  Get-ChildItem $portable -Recurse -File | Get-FileHash | Select-Object Hash, Path |
-    Export-Csv "$pilot\portable-before.csv" -NoTypeInformation
+  if (Get-AppxPackage SciREPL.FreePilot.LocalTest) { throw 'The pilot package is still installed after WACK: uninstall it first.' }
+  $leftover = @(Get-ChildItem "$env:LOCALAPPDATA\Packages" -Directory -Filter 'SciREPL.FreePilot.LocalTest_*' -ErrorAction Stop)
+  if ($leftover.Count) { throw "Data from an earlier install is still present: $($leftover.FullName -join ', ')" }
+  if (Test-Path "$env:APPDATA\SciREPL-Free-Store") { throw 'A SciREPL-Free-Store folder appeared in the real %APPDATA%.' }
+  $before = Import-Csv "$pilot\portable-before.csv"
+  $now = Get-ChildItem "$env:APPDATA\SciREPL-Free-Electron" -Recurse -File | Get-FileHash | Select-Object Hash, Path
+  $diff = Compare-Object $before $now -Property Hash, Path
+  if ($diff) { $diff | Format-Table -AutoSize | Out-String | Write-Host; throw 'The portable profile changed before install (during WACK?).' }
   Add-AppxPackage (Get-ChildItem "$pilot\A\*.msix").FullName
   'Installed ' + (Get-AppxPackage SciREPL.FreePilot.LocalTest).Version
 }
 ```
-
-A locked file in the snapshot means the portable app is still running: close
-it, delete `portable-before.csv` if it was written, and rerun the block.
 
 Then, by hand, with the network still on:
 
@@ -325,12 +348,15 @@ Then, by hand, with the network still on:
    Run it, change one setting you can recognise later (for example the
    theme), save, and close the app.
 
-### 6. DOCX export offline in the installed app
+### 7. DOCX export offline in the installed app
 
-Turn Wi-Fi off, or airplane mode on, and unplug any network cable. Then
-confirm there is no active connection. The check covers every adapter,
-including virtual ones (VPN, Hyper-V or WSL switches, phone tethering). It
-stops if any query fails, so "Offline" is printed only when it is established:
+Disconnect any VPN client explicitly (in its own app, and in Settings →
+Network & internet → VPN). Then turn Wi-Fi off, or airplane mode on, and
+unplug any network cable. Confirm there is no active connection. The check
+covers every adapter, including virtual ones, and stops if any query fails,
+so "Offline" is printed only when it is established. Host-only switches (WSL,
+the Hyper-V Default Switch, VirtualBox host-only) may stay up; they pass if
+they have no default route.
 
 ```powershell
 . {
@@ -340,6 +366,10 @@ stops if any query fails, so "Offline" is printed only when it is established:
   $routes   = @(Get-NetRoute -ErrorAction Stop | Where-Object { $_.DestinationPrefix -in '0.0.0.0/0', '::/0' })
   $profiles = @(Get-CimInstance -Namespace root/StandardCimv2 -ClassName MSFT_NetConnectionProfile -ErrorAction Stop)
   $physical = @(Get-NetAdapter -Physical -ErrorAction Stop | Where-Object Status -eq 'Up')
+  $vpns     = @(@(Get-VpnConnection -ErrorAction Stop) + @(Get-VpnConnection -AllUserConnection -ErrorAction Stop) |
+                Where-Object ConnectionStatus -ne 'Disconnected')
+  $tunnels  = @(Get-NetAdapter -IncludeHidden -ErrorAction Stop | Where-Object {
+                $_.Status -eq 'Up' -and $_.InterfaceDescription -match 'VPN|TAP|TUN|WireGuard|Wintun|OpenVPN|Tunnel|PPP' })
   if (-not $ifaces.Count) { throw 'No IP interfaces were reported; offline status cannot be established.' }
 
   $problems = @()
@@ -355,21 +385,21 @@ stops if any query fails, so "Offline" is printed only when it is established:
     }
   }
   foreach ($a in $physical) { $problems += "physical adapter up: $($a.Name)" }
+  foreach ($v in $vpns)     { $problems += "Windows VPN not disconnected: $($v.Name) ($($v.ConnectionStatus))" }
+  foreach ($t in $tunnels)  { $problems += "VPN or tunnel adapter up: $($t.Name) ($($t.InterfaceDescription))" }
   if ($problems.Count) { throw "Not offline:`n  " + ($problems -join "`n  ") }
-  'Offline: no default route on a connected interface, no connection with internet access, no physical adapter up.'
+  'Offline: no VPN or tunnel up, no default route on a connected interface, no connection with internet access, no physical adapter up.'
 }
 ```
 
-A host-only virtual switch (for example WSL's) may stay up with local
-traffic; that passes only if it has no default route. Anything the block
-lists has to be disconnected, or recorded, before carrying on: don't skip
-the check.
+Anything the block lists has to be disconnected before carrying on. If it
+can't be, record what it lists and stop: don't skip the check.
 
 Then start SciREPL, open `store-canary`, and export it as DOCX. There must be
 no download or network prompt. Open the file and check that the printed output
 and the formula are in it. Close the app.
 
-### 7. Upgrade to B
+### 8. Upgrade to B
 
 Stay offline:
 
@@ -386,11 +416,11 @@ Stay offline:
 }
 ```
 
-Rerun the offline check block from step 6, then start SciREPL. `store-canary`
-must still be there with its output, and the setting from step 5 kept. Export
+Rerun the offline check block from step 7, then start SciREPL. `store-canary`
+must still be there with its output, and the setting from step 6 kept. Export
 it as DOCX again and check the file. Close the app.
 
-### 8. The portable profile is untouched; the Store profile is in the package
+### 9. The portable profile is untouched; the Store profile is in the package
 
 ```powershell
 . {
