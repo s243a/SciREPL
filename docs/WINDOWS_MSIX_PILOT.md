@@ -327,21 +327,43 @@ Then, by hand, with the network still on:
 
 ### 6. DOCX export offline in the installed app
 
-Turn Wi-Fi off, or airplane mode on, and unplug any network cable. Confirm
-there is no active connection:
+Turn Wi-Fi off, or airplane mode on, and unplug any network cable. Then
+confirm there is no active connection. The check covers every adapter,
+including virtual ones (VPN, Hyper-V or WSL switches, phone tethering). It
+stops if any query fails, so "Offline" is printed only when it is established:
 
 ```powershell
 . {
   $ErrorActionPreference = 'Stop'
-  $up = @(Get-NetAdapter -Physical | Where-Object Status -eq 'Up')
-  $internet = @(Get-NetConnectionProfile -ErrorAction SilentlyContinue |
-    Where-Object { $_.IPv4Connectivity -eq 'Internet' -or $_.IPv6Connectivity -eq 'Internet' })
-  if ($up.Count -or $internet.Count) {
-    throw "Still connected: adapters up [$($up.Name -join ', ')], internet profiles [$($internet.InterfaceAlias -join ', ')]."
+  # Any query error stops the block: offline status must be shown, not assumed.
+  $ifaces   = @(Get-NetIPInterface -ErrorAction Stop)
+  $routes   = @(Get-NetRoute -ErrorAction Stop | Where-Object { $_.DestinationPrefix -in '0.0.0.0/0', '::/0' })
+  $profiles = @(Get-CimInstance -Namespace root/StandardCimv2 -ClassName MSFT_NetConnectionProfile -ErrorAction Stop)
+  $physical = @(Get-NetAdapter -Physical -ErrorAction Stop | Where-Object Status -eq 'Up')
+  if (-not $ifaces.Count) { throw 'No IP interfaces were reported; offline status cannot be established.' }
+
+  $problems = @()
+  foreach ($r in $routes) {
+    $state = @($ifaces | Where-Object { $_.ifIndex -eq $r.ifIndex } | Select-Object -ExpandProperty ConnectionState -Unique)
+    if ($state.Count -ne 1 -or $state[0] -ne 'Disconnected') {
+      $problems += "default route $($r.DestinationPrefix) via $($r.InterfaceAlias) (state: $($state -join '/'))"
+    }
   }
-  'Offline: no physical adapter is up and no connection has internet access.'
+  foreach ($p in $profiles) {
+    if ($p.IPv4Connectivity -eq 4 -or $p.IPv6Connectivity -eq 4) {   # 4 = Internet
+      $problems += "connection profile on $($p.InterfaceAlias) (IPv4 $($p.IPv4Connectivity), IPv6 $($p.IPv6Connectivity))"
+    }
+  }
+  foreach ($a in $physical) { $problems += "physical adapter up: $($a.Name)" }
+  if ($problems.Count) { throw "Not offline:`n  " + ($problems -join "`n  ") }
+  'Offline: no default route on a connected interface, no connection with internet access, no physical adapter up.'
 }
 ```
+
+A host-only virtual switch (for example WSL's) may stay up with local
+traffic; that passes only if it has no default route. Anything the block
+lists has to be disconnected, or recorded, before carrying on: don't skip
+the check.
 
 Then start SciREPL, open `store-canary`, and export it as DOCX. There must be
 no download or network prompt. Open the file and check that the printed output
@@ -368,7 +390,7 @@ Rerun the offline check block from step 6, then start SciREPL. `store-canary`
 must still be there with its output, and the setting from step 5 kept. Export
 it as DOCX again and check the file. Close the app.
 
-### 8. The portable profile is untouched
+### 8. The portable profile is untouched; the Store profile is in the package
 
 ```powershell
 . {
@@ -379,13 +401,24 @@ it as DOCX again and check the file. Close the app.
   $diff = Compare-Object $before $after -Property Hash, Path
   if ($diff) { $diff | Format-Table -AutoSize | Out-String | Write-Host; throw 'The portable profile changed.' }
   if (Test-Path "$env:APPDATA\SciREPL-Free-Store") { throw 'Store data was written to the real %APPDATA%.' }
-  Get-ChildItem "$env:LOCALAPPDATA\Packages" -Directory -Filter 'SciREPL.FreePilot.LocalTest_*' |
-    Get-ChildItem -Recurse -Directory -Filter 'SciREPL-Free-Store' | Select-Object -ExpandProperty FullName
-  'Portable profile unchanged; the Store profile is in the package folder above.'
+
+  # The Store profile must be in the installed package's redirected AppData.
+  $pkg = @(Get-AppxPackage SciREPL.FreePilot.LocalTest)
+  if ($pkg.Count -ne 1) { throw "Expected one installed pilot package; found $($pkg.Count)." }
+  $pkgData = Join-Path $env:LOCALAPPDATA "Packages\$($pkg[0].PackageFamilyName)"
+  $expected = Join-Path $pkgData 'LocalCache\Roaming\SciREPL-Free-Store'
+  $found = @(Get-ChildItem $pkgData -Recurse -Directory -Filter 'SciREPL-Free-Store' | Select-Object -ExpandProperty FullName)
+  if ($found.Count -ne 1 -or $found[0] -ne $expected) {
+    throw "Expected exactly one Store profile at $expected; found [$($found -join ', ')]."
+  }
+  if (-not (Get-ChildItem $expected -Recurse -File | Select-Object -First 1)) { throw "$expected is empty." }
+  "Portable profile unchanged. Store profile: $expected"
 }
 ```
 
-Record the Store profile path it prints.
+Record the Store profile path it prints. If the profile is somewhere else in
+the package folder, the block stops and lists it: record that path, because
+the doc's data-location section then needs correcting.
 
 ### Cleanup
 
