@@ -267,23 +267,36 @@ again until step 9. Then, in a normal PowerShell window:
     if ([Environment]::GetEnvironmentVariable('SCIREPL_USER_DATA', $scope)) { throw "SCIREPL_USER_DATA is set ($scope); it overrides both profiles." }
   }
   if (Get-AppxPackage SciREPL.FreePilot.LocalTest) { throw 'The pilot package is already installed: uninstall it first.' }
+  $leftover = @(Get-ChildItem "$env:LOCALAPPDATA\Packages" -Directory -Filter 'SciREPL.FreePilot.LocalTest_*' -ErrorAction Stop)
+  if ($leftover.Count) { throw "Data from an earlier install is still present: $($leftover.FullName -join ', ')" }
   if (Test-Path "$env:APPDATA\SciREPL-Free-Store") { throw 'The real %APPDATA% already has a SciREPL-Free-Store folder.' }
   $portable = "$env:APPDATA\SciREPL-Free-Electron"
   if (-not (Test-Path $portable)) { throw 'No portable profile: run the portable build once and save a notebook first.' }
-  if (Test-Path "$pilot\portable-before.csv") { throw 'This run already has a portable snapshot.' }
+  if ((Test-Path "$pilot\portable-before.csv") -or (Test-Path "$pilot\baseline-account.json")) { throw 'This run already has a baseline.' }
+  # The account the baseline belongs to; the elevated WACK window must match it.
+  [pscustomobject]@{
+    Sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+    AppData = $env:APPDATA
+    LocalAppData = $env:LOCALAPPDATA
+  } | ConvertTo-Json | Set-Content "$pilot\baseline-account.json"
   Get-ChildItem $portable -Recurse -File | Get-FileHash | Select-Object Hash, Path |
     Export-Csv "$pilot\portable-before.csv" -NoTypeInformation
-  'Portable snapshot taken: ' + (Import-Csv "$pilot\portable-before.csv").Count + ' files.'
+  'Portable snapshot taken: ' + @(Import-Csv "$pilot\portable-before.csv").Count + ' files.'
 }
 ```
 
 A locked file means the portable app is still running: close it, delete
-`portable-before.csv` if it was written, and rerun the block.
+`portable-before.csv` and `baseline-account.json` if they were written, and
+rerun the block.
 
 ### 5. Windows App Certification Kit on package A
 
 In the administrator window from step 3. WACK installs and launches the
-package itself, which is why the baseline above comes first. Each run writes a new report and requires an
+package itself, so this block first checks, in this elevated session, that
+the baseline from step 4 exists and belongs to this same Windows account,
+and repeats the clean-state checks. `Get-AppxPackage` and `%APPDATA%` are
+per-user, so an administrator window opened as a different account would
+check the wrong profile. Each run writes a new report and requires an
 overall result of `PASS`:
 
 ```powershell
@@ -292,6 +305,26 @@ overall result of `PASS`:
   $pilot = 'C:\scirepl-store-pilot\run-1'
   $appcert = 'C:\Program Files (x86)\Windows Kits\10\App Certification Kit\appcert.exe'
   if (-not (Test-Path $appcert)) { throw 'appcert.exe not found: install the App Certification Kit.' }
+
+  # Preflight in this elevated session, immediately before WACK.
+  if (-not (Test-Path "$pilot\baseline-account.json") -or -not (Test-Path "$pilot\portable-before.csv")) { throw 'No baseline: run step 4 first.' }
+  $account = Get-Content "$pilot\baseline-account.json" -Raw | ConvertFrom-Json
+  $sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+  if ($account.Sid -ne $sid -or $account.AppData -ne $env:APPDATA -or $account.LocalAppData -ne $env:LOCALAPPDATA) {
+    throw "This window runs as $sid ($env:APPDATA); the baseline belongs to $($account.Sid) ($($account.AppData)). Open the administrator window from the same account."
+  }
+  $before = @(Import-Csv "$pilot\portable-before.csv")
+  if (-not $before.Count) { throw 'The portable snapshot is empty: redo step 4 in a new run folder.' }
+  foreach ($scope in 'Process', 'User', 'Machine') {
+    if ([Environment]::GetEnvironmentVariable('SCIREPL_USER_DATA', $scope)) { throw "SCIREPL_USER_DATA is set ($scope); it overrides both profiles." }
+  }
+  if (Get-AppxPackage SciREPL.FreePilot.LocalTest) { throw 'The pilot package is installed: uninstall it first.' }
+  $leftover = @(Get-ChildItem "$env:LOCALAPPDATA\Packages" -Directory -Filter 'SciREPL.FreePilot.LocalTest_*' -ErrorAction Stop)
+  if ($leftover.Count) { throw "Data from an earlier install is still present: $($leftover.FullName -join ', ')" }
+  if (Test-Path "$env:APPDATA\SciREPL-Free-Store") { throw 'The real %APPDATA% has a SciREPL-Free-Store folder.' }
+  $now = Get-ChildItem "$env:APPDATA\SciREPL-Free-Electron" -Recurse -File | Get-FileHash | Select-Object Hash, Path
+  if (Compare-Object $before $now -Property Hash, Path) { throw 'The portable profile changed since step 4.' }
+
   $a = @(Get-ChildItem "$pilot\A\*.msix")
   if ($a.Count -ne 1) { throw 'Expected one package in A.' }
   $report = Join-Path $pilot ('wack-A-{0:yyyyMMdd-HHmmss}.xml' -f (Get-Date))
@@ -350,17 +383,28 @@ Then, by hand, with the network still on:
 
 ### 7. DOCX export offline in the installed app
 
-Disconnect any VPN client explicitly (in its own app, and in Settings →
-Network & internet → VPN). Then turn Wi-Fi off, or airplane mode on, and
-unplug any network cable. Confirm there is no active connection. The check
-covers every adapter, including virtual ones, and stops if any query fails,
-so "Offline" is printed only when it is established. Host-only switches (WSL,
-the Hyper-V Default Switch, VirtualBox host-only) may stay up; they pass if
-they have no default route.
+Take the machine offline physically: unplug any network cable and turn Wi-Fi
+off, or airplane mode on. If the test runs in a VM, disconnect the VM's
+network adapter from the host side. Disconnect any VPN client explicitly too
+(in its own app, and in Settings → Network & internet → VPN).
+
+Then run the check below. It looks for the common active network paths:
+- an active Windows VPN, or a recognisable VPN or tunnel adapter that is up;
+- a default route through a connected interface;
+- a connection with internet access;
+- a physical adapter that is up.
+
+It is a preflight, not proof of isolation: it can't rule out every route over
+a virtual adapter. Any query error stops it. Host-only switches (WSL, the
+Hyper-V Default Switch, VirtualBox host-only) may stay up; they pass if they
+have no default route. A passing run is appended to `offline-check.txt` in the
+run folder. Count the DOCX result only after that passing record, made with
+the machine physically offline or the VM's network disconnected.
 
 ```powershell
 . {
   $ErrorActionPreference = 'Stop'
+  $pilot = 'C:\scirepl-store-pilot\run-1'
   # Any query error stops the block: offline status must be shown, not assumed.
   $ifaces   = @(Get-NetIPInterface -ErrorAction Stop)
   $routes   = @(Get-NetRoute -ErrorAction Stop | Where-Object { $_.DestinationPrefix -in '0.0.0.0/0', '::/0' })
@@ -388,12 +432,16 @@ they have no default route.
   foreach ($v in $vpns)     { $problems += "Windows VPN not disconnected: $($v.Name) ($($v.ConnectionStatus))" }
   foreach ($t in $tunnels)  { $problems += "VPN or tunnel adapter up: $($t.Name) ($($t.InterfaceDescription))" }
   if ($problems.Count) { throw "Not offline:`n  " + ($problems -join "`n  ") }
-  'Offline: no VPN or tunnel up, no default route on a connected interface, no connection with internet access, no physical adapter up.'
+  $line = "$(Get-Date -Format s) passed: no VPN or tunnel up, no default route on a connected interface, no connection with internet access, no physical adapter up."
+  Add-Content "$pilot\offline-check.txt" $line
+  $line
 }
 ```
 
 Anything the block lists has to be disconnected before carrying on. If it
-can't be, record what it lists and stop: don't skip the check.
+can't be, record what it lists and stop: don't skip the check. Note in the
+run record how the machine was taken offline (cable unplugged, Wi-Fi off,
+airplane mode, or VM adapter disconnected).
 
 Then start SciREPL, open `store-canary`, and export it as DOCX. There must be
 no download or network prompt. Open the file and check that the printed output
