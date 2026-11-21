@@ -197,15 +197,17 @@ again):
   if ($LASTEXITCODE -ne 0) { throw "checkout of $($infoA.commit) failed" }
   Push-Location $src
   try {
+    # npm.cmd, not npm: PowerShell 7 runs npm.ps1, which rebuilds its arguments
+    # from the typed line and so misreads '& npm @step' as the command 'pm'.
     foreach ($step in @('ci'), @('run', 'configure'), @('run', 'fetch:bundles')) {
-      & npm @step
+      & npm.cmd @step
       if ($LASTEXITCODE -ne 0) { throw "npm $($step -join ' ') failed (exit $LASTEXITCODE)" }
     }
     git diff --quiet -- package-lock.json desktop/electron/package-lock.json
     if ($LASTEXITCODE -ne 0) { throw 'The setup changed a lockfile.' }
     # The version raise rewrites package.json and package-lock.json on purpose.
     foreach ($step in @('version', 'patch', '--no-git-tag-version'), @('run', 'package:windows:msix-pilot')) {
-      & npm @step
+      & npm.cmd @step
       if ($LASTEXITCODE -ne 0) { throw "npm $($step -join ' ') failed (exit $LASTEXITCODE)" }
     }
     git diff --quiet -- desktop/electron/package-lock.json
