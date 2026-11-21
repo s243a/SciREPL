@@ -923,6 +923,25 @@
     "mathPalette.mdLimit": "极限",
     "mathPalette.mdMatrix": "矩阵",
     "mathPalette.mdNthRoot": "n 次方根",
-    "mathPalette.mdInfinity": "无穷大"
+    "mathPalette.mdInfinity": "无穷大",
+    "packageInstall.title": "安装 {name}",
+    "packageInstall.persistent": "在此设备上保持安装",
+    "packageInstall.session": "仅此会话",
+    "packageInstall.explanation": "两种模式都会保存笔记本。保留软件包还会在重启后离线恢复其支持文件；不会运行笔记本单元格。",
+    "packageInstall.manage": "已保存的软件包",
+    "packageInstall.managedHelp": "移除已保存副本会保留现有笔记本和本次会话的文件。重启后将不再恢复其支持文件。",
+    "packageInstall.empty": "没有已保存的软件包归档。",
+    "packageInstall.remove": "移除已保存副本",
+    "packageInstall.removeTitle": "移除已保存的软件包？",
+    "packageInstall.removeQuestion": "从已保存的软件包中移除 {name}？",
+    "packageInstall.limits": "最多32个软件包，每个归档32 MiB，总计96 MiB。",
+    "packageInstall.tooLarge": "此软件包太大，无法保存。归档大小上限为32 MiB。",
+    "packageInstall.full": "软件包存储空间已满。请移除已保存副本，或选择仅此会话。",
+    "packageInstall.corrupt": "软件包归档无效或已损坏。请从可信来源重新导入。",
+    "packageInstall.unavailable": "软件包存储不可用。未安装任何内容。可以重试，或明确选择仅此会话。",
+    "packageInstall.failed": "软件包操作失败。不会静默改为仅此会话安装。",
+    "packageInstall.unsupported": "此归档格式无法保持安装。请使用ZIP或tar.gz软件包。",
+    "packageInstall.restoreFailed": "部分已保存软件包无法恢复：{names}。",
+    "packageInstall.notice": "软件包安装"
   }
 }

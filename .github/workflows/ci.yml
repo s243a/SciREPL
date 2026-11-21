@@ -55,6 +55,9 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium
 
+      - name: Persistent package validation, local storage and real dialog controls
+        run: npm run test:package-persistence
+
       # Static i18n gates — cheap, and each catches a class of bug no runtime
       # test does. Run before the server so a catalogue error fails fast.
       - name: i18n — manifest is current

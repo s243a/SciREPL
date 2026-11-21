@@ -930,6 +930,25 @@
     "mathPalette.mdLimit": "Limite",
     "mathPalette.mdMatrix": "Matriz",
     "mathPalette.mdNthRoot": "Raiz enésima",
-    "mathPalette.mdInfinity": "Infinito"
+    "mathPalette.mdInfinity": "Infinito",
+    "packageInstall.title": "Instalar {name}",
+    "packageInstall.persistent": "Manter instalado neste dispositivo",
+    "packageInstall.session": "Somente esta sessão",
+    "packageInstall.explanation": "Os cadernos são salvos nos dois modos. Manter o pacote também restaura seus arquivos de apoio offline após reiniciar, sem executar as células.",
+    "packageInstall.manage": "Pacotes salvos",
+    "packageInstall.managedHelp": "Remover uma cópia salva mantém os cadernos existentes e os arquivos desta sessão. Os arquivos de apoio não serão mais restaurados após reiniciar.",
+    "packageInstall.empty": "Nenhum arquivo de pacote salvo.",
+    "packageInstall.remove": "Remover cópia salva",
+    "packageInstall.removeTitle": "Remover pacote salvo?",
+    "packageInstall.removeQuestion": "Remover {name} dos pacotes salvos?",
+    "packageInstall.limits": "Até 32 pacotes, 32 MiB por arquivo e 96 MiB no total.",
+    "packageInstall.tooLarge": "Este pacote é grande demais para salvar. O limite por arquivo é 32 MiB.",
+    "packageInstall.full": "O armazenamento de pacotes está cheio. Remova uma cópia salva ou escolha somente esta sessão.",
+    "packageInstall.corrupt": "O arquivo do pacote é inválido ou está danificado. Importe-o novamente de uma fonte confiável.",
+    "packageInstall.unavailable": "O armazenamento de pacotes está indisponível. Nada foi instalado. Tente novamente ou escolha explicitamente somente esta sessão.",
+    "packageInstall.failed": "A operação do pacote falhou. Nenhuma instalação foi alterada silenciosamente para apenas esta sessão.",
+    "packageInstall.unsupported": "Este formato não permite manter o pacote instalado. Use um pacote ZIP ou tar.gz.",
+    "packageInstall.restoreFailed": "Não foi possível restaurar alguns pacotes salvos: {names}.",
+    "packageInstall.notice": "Instalação de pacotes"
   }
 }

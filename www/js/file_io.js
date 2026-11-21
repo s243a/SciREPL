@@ -670,8 +670,18 @@ class FileIO {
         }
         if (window.packageLoader) {
             try {
+                if (window.Capacitor?.getPlatform?.() === 'android') {
+                    if (!window.packageInstalls) throw new Error('Android package installation is unavailable.');
+                    await window.packageInstalls.install(file);
+                    return;
+                }
                 await window.packageLoader.loadFromFile(file);
             } catch (err) {
+                if (err?.code === 'INSTALL_CANCELLED') return;
+                if (window.Capacitor?.getPlatform?.() === 'android' && window.PackageInstallUI) {
+                    await window.PackageInstallUI.notify(err);
+                    return;
+                }
                 alert(this._t('fileIo.packageImportFailed',
                     'Package import failed: {error}', { error: err.message }));
             }

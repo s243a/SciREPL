@@ -923,6 +923,25 @@
     "mathPalette.mdLimit": "सीमा",
     "mathPalette.mdMatrix": "आव्यूह",
     "mathPalette.mdNthRoot": "n-वाँ मूल",
-    "mathPalette.mdInfinity": "अनंत"
+    "mathPalette.mdInfinity": "अनंत",
+    "packageInstall.title": "{name} इंस्टॉल करें",
+    "packageInstall.persistent": "इस डिवाइस पर इंस्टॉल रखें",
+    "packageInstall.session": "केवल इस सत्र के लिए",
+    "packageInstall.explanation": "दोनों मोड में नोटबुक सहेजी जाती हैं। पैकेज सहेजने पर उसके सहायक फ़ाइलें भी पुनः शुरू करने के बाद ऑफ़लाइन बहाल होती हैं; नोटबुक की सेल नहीं चलतीं।",
+    "packageInstall.manage": "सहेजे गए पैकेज",
+    "packageInstall.managedHelp": "सहेजी गई प्रति हटाने पर मौजूदा नोटबुक और इस सत्र की फ़ाइलें बनी रहती हैं। पुनः शुरू करने के बाद सहायक फ़ाइलें बहाल नहीं होंगी।",
+    "packageInstall.empty": "कोई पैकेज आर्काइव सहेजा नहीं गया है।",
+    "packageInstall.remove": "सहेजी गई प्रति हटाएँ",
+    "packageInstall.removeTitle": "सहेजा गया पैकेज हटाएँ?",
+    "packageInstall.removeQuestion": "{name} को सहेजे गए पैकेजों से हटाएँ?",
+    "packageInstall.limits": "अधिकतम 32 पैकेज, प्रति आर्काइव 32 MiB और कुल 96 MiB।",
+    "packageInstall.tooLarge": "यह पैकेज सहेजने के लिए बहुत बड़ा है। आर्काइव की सीमा 32 MiB है।",
+    "packageInstall.full": "पैकेज का संग्रहण भर गया है। सहेजी गई प्रति हटाएँ या केवल इस सत्र के लिए चुनें।",
+    "packageInstall.corrupt": "पैकेज आर्काइव अमान्य या क्षतिग्रस्त है। किसी विश्वसनीय स्रोत से इसे फिर से इंपोर्ट करें।",
+    "packageInstall.unavailable": "पैकेज संग्रहण उपलब्ध नहीं है। कुछ भी इंस्टॉल नहीं हुआ। फिर कोशिश करें या स्पष्ट रूप से केवल इस सत्र के लिए चुनें।",
+    "packageInstall.failed": "पैकेज की कार्रवाई विफल हुई। इंस्टॉल को चुपचाप केवल सत्र तक सीमित नहीं किया गया।",
+    "packageInstall.unsupported": "इस आर्काइव प्रारूप को इंस्टॉल रखा नहीं जा सकता। ZIP या tar.gz पैकेज का उपयोग करें।",
+    "packageInstall.restoreFailed": "कुछ सहेजे गए पैकेज बहाल नहीं हो सके: {names}।",
+    "packageInstall.notice": "पैकेज इंस्टॉलेशन"
   }
 }

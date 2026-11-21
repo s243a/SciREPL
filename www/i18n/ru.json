@@ -923,6 +923,25 @@
     "mathPalette.mdLimit": "Предел",
     "mathPalette.mdMatrix": "Матрица",
     "mathPalette.mdNthRoot": "Корень n-й степени",
-    "mathPalette.mdInfinity": "Бесконечность"
+    "mathPalette.mdInfinity": "Бесконечность",
+    "packageInstall.title": "Установить {name}",
+    "packageInstall.persistent": "Сохранить установленным на этом устройстве",
+    "packageInstall.session": "Только на этот сеанс",
+    "packageInstall.explanation": "Блокноты сохраняются в обоих режимах. Сохранение пакета также восстанавливает его вспомогательные файлы офлайн после перезапуска; ячейки блокнотов не выполняются.",
+    "packageInstall.manage": "Сохранённые пакеты",
+    "packageInstall.managedHelp": "Удаление сохранённой копии не затрагивает блокноты и файлы текущего сеанса. Вспомогательные файлы больше не будут восстанавливаться после перезапуска.",
+    "packageInstall.empty": "Нет сохранённых архивов пакетов.",
+    "packageInstall.remove": "Удалить сохранённую копию",
+    "packageInstall.removeTitle": "Удалить сохранённый пакет?",
+    "packageInstall.removeQuestion": "Удалить {name} из сохранённых пакетов?",
+    "packageInstall.limits": "До 32 пакетов, 32 MiB на архив и 96 MiB всего.",
+    "packageInstall.tooLarge": "Этот пакет слишком велик для сохранения. Предел размера архива — 32 MiB.",
+    "packageInstall.full": "Хранилище пакетов заполнено. Удалите сохранённую копию или выберите только этот сеанс.",
+    "packageInstall.corrupt": "Архив пакета недействителен или повреждён. Импортируйте его заново из надёжного источника.",
+    "packageInstall.unavailable": "Хранилище пакетов недоступно. Ничего не установлено. Повторите попытку или явно выберите только этот сеанс.",
+    "packageInstall.failed": "Операция с пакетом не удалась. Установка не была незаметно заменена на сеансовую.",
+    "packageInstall.unsupported": "Этот формат нельзя сохранить установленным. Используйте пакет ZIP или tar.gz.",
+    "packageInstall.restoreFailed": "Не удалось восстановить некоторые сохранённые пакеты: {names}.",
+    "packageInstall.notice": "Установка пакетов"
   }
 }

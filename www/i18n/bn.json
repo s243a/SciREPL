@@ -923,6 +923,25 @@
     "mathPalette.mdLimit": "সীমা",
     "mathPalette.mdMatrix": "ম্যাট্রিক্স",
     "mathPalette.mdNthRoot": "n-তম মূল",
-    "mathPalette.mdInfinity": "অসীম"
+    "mathPalette.mdInfinity": "অসীম",
+    "packageInstall.title": "{name} ইনস্টল করুন",
+    "packageInstall.persistent": "এই ডিভাইসে ইনস্টল করা রাখুন",
+    "packageInstall.session": "শুধু এই সেশনের জন্য",
+    "packageInstall.explanation": "দুই মোডেই নোটবুক সংরক্ষিত হয়। প্যাকেজ রাখলে পুনরায় চালু করার পর সহায়ক ফাইলও অফলাইনে ফিরিয়ে আনা হয়; নোটবুকের সেল চালানো হয় না।",
+    "packageInstall.manage": "সংরক্ষিত প্যাকেজ",
+    "packageInstall.managedHelp": "সংরক্ষিত কপি সরালেও বর্তমান নোটবুক এবং এই সেশনের ফাইল থাকে। পুনরায় চালু করার পর সহায়ক ফাইল আর ফিরিয়ে আনা হবে না।",
+    "packageInstall.empty": "কোনো প্যাকেজ আর্কাইভ সংরক্ষিত নেই।",
+    "packageInstall.remove": "সংরক্ষিত কপি সরান",
+    "packageInstall.removeTitle": "সংরক্ষিত প্যাকেজ সরাবেন?",
+    "packageInstall.removeQuestion": "সংরক্ষিত প্যাকেজ থেকে {name} সরাবেন?",
+    "packageInstall.limits": "সর্বোচ্চ 32টি প্যাকেজ, প্রতি আর্কাইভে 32 MiB এবং মোট 96 MiB।",
+    "packageInstall.tooLarge": "প্যাকেজটি সংরক্ষণের জন্য খুব বড়। আর্কাইভের সীমা 32 MiB।",
+    "packageInstall.full": "প্যাকেজ সংরক্ষণাগার পূর্ণ। সংরক্ষিত কপি সরান অথবা শুধু এই সেশন বেছে নিন।",
+    "packageInstall.corrupt": "প্যাকেজ আর্কাইভটি অবৈধ বা ক্ষতিগ্রস্ত। বিশ্বস্ত উৎস থেকে আবার ইমপোর্ট করুন।",
+    "packageInstall.unavailable": "প্যাকেজ সংরক্ষণাগার ব্যবহার করা যাচ্ছে না। কিছুই ইনস্টল হয়নি। আবার চেষ্টা করুন অথবা স্পষ্টভাবে শুধু এই সেশন বেছে নিন।",
+    "packageInstall.failed": "প্যাকেজের কাজ ব্যর্থ হয়েছে। ইনস্টলেশন নীরবে শুধু এই সেশনের জন্য করা হয়নি।",
+    "packageInstall.unsupported": "এই আর্কাইভ ফরম্যাট ইনস্টল রাখা যায় না। ZIP বা tar.gz প্যাকেজ ব্যবহার করুন।",
+    "packageInstall.restoreFailed": "কিছু সংরক্ষিত প্যাকেজ ফিরিয়ে আনা যায়নি: {names}।",
+    "packageInstall.notice": "প্যাকেজ ইনস্টলেশন"
   }
 }

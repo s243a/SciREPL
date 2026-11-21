@@ -924,6 +924,25 @@
     "mathPalette.mdLimit": "極限",
     "mathPalette.mdMatrix": "行列",
     "mathPalette.mdNthRoot": "n乗根",
-    "mathPalette.mdInfinity": "無限大"
+    "mathPalette.mdInfinity": "無限大",
+    "packageInstall.title": "{name} をインストール",
+    "packageInstall.persistent": "この端末にインストールしたままにする",
+    "packageInstall.session": "このセッションのみ",
+    "packageInstall.explanation": "ノートブックはどちらのモードでも保存されます。パッケージを保存すると、再起動後に関連ファイルもオフラインで復元されます。ノートブックのセルは実行されません。",
+    "packageInstall.manage": "保存済みパッケージ",
+    "packageInstall.managedHelp": "保存済みコピーを削除しても、既存のノートブックと現在のセッションのファイルは残ります。関連ファイルは再起動後に復元されなくなります。",
+    "packageInstall.empty": "保存済みのパッケージアーカイブはありません。",
+    "packageInstall.remove": "保存済みコピーを削除",
+    "packageInstall.removeTitle": "保存済みパッケージを削除しますか？",
+    "packageInstall.removeQuestion": "保存済みパッケージから {name} を削除しますか？",
+    "packageInstall.limits": "最大32パッケージ、アーカイブごとに32 MiB、合計96 MiBまで。",
+    "packageInstall.tooLarge": "このパッケージは大きすぎて保存できません。アーカイブの上限は32 MiBです。",
+    "packageInstall.full": "パッケージの保存領域がいっぱいです。保存済みコピーを削除するか、このセッションのみを選択してください。",
+    "packageInstall.corrupt": "パッケージアーカイブが無効か破損しています。信頼できる入手先から再度インポートしてください。",
+    "packageInstall.unavailable": "パッケージの保存領域を利用できません。何もインストールされていません。再試行するか、このセッションのみを明示的に選択してください。",
+    "packageInstall.failed": "パッケージの操作に失敗しました。セッション限定のインストールに自動で切り替わることはありません。",
+    "packageInstall.unsupported": "この形式はインストール状態を保存できません。ZIPまたはtar.gzパッケージを使用してください。",
+    "packageInstall.restoreFailed": "一部の保存済みパッケージを復元できませんでした: {names}。",
+    "packageInstall.notice": "パッケージのインストール"
   }
 }

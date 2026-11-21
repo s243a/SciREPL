@@ -13,6 +13,7 @@ class PrologKernel {
         this._stdoutBuffer = [];
         this._stderrBuffer = [];
         this._packagesRestored = false;
+        this._packagesRestorePromise = null;
     }
 
     /**
@@ -22,14 +23,24 @@ class PrologKernel {
      */
     async _ensurePackagesRestored() {
         if (this._packagesRestored) return;
-        this._packagesRestored = true;
-        try {
+        if (this._packagesRestorePromise) return this._packagesRestorePromise;
+        this._packagesRestorePromise = (async () => {
             if (window.packageCatalog && window.packageCatalog.restoreInstalledToProlog) {
                 await window.packageCatalog.restoreInstalledToProlog();
             }
-        } catch (e) {
+            this._packagesRestored = true;
+        })().catch(e => {
+            this._packagesRestorePromise = null;
             console.warn('[PrologKernel] package restore failed:', e);
-        }
+            if (!this._packageRestoreWarningShown && window.PackageInstallUI) {
+                this._packageRestoreWarningShown = true;
+                void window.PackageInstallUI.notify(e);
+            }
+            // A failed archive restore is visible, but must not disable
+            // unrelated Prolog or an explicit session-only installation.
+            return false;
+        });
+        return this._packagesRestorePromise;
     }
 
     static runtimeConfig() {
@@ -1122,6 +1133,12 @@ class PrologKernel {
     }
 
     async destroy() {
+        if (this._packagesRestorePromise) await this._packagesRestorePromise.catch(() => {});
+        this._packagesRestored = false;
+        this._packagesRestorePromise = null;
+        this._packageRestoreWarningShown = false;
+        if (window.packageCatalog) window.packageCatalog._restorePromise = null;
+        if (window.packageInstalls) window.packageInstalls.restorePromise = null;
         this._vfs = null;
         this._swipl = null;
         this._ready = false;
