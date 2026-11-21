@@ -282,6 +282,8 @@ again until step 9. Then, in a normal PowerShell window:
 ```powershell
 . {
   $ErrorActionPreference = 'Stop'
+  # PowerShell 7 can't load the Appx module natively; use the Windows PowerShell one.
+  if ($PSVersionTable.PSEdition -eq 'Core') { Import-Module Appx -UseWindowsPowerShell -WarningAction SilentlyContinue }
   $pilot = 'C:\scirepl-store-pilot\run-1'
   foreach ($scope in 'Process', 'User', 'Machine') {
     if ([Environment]::GetEnvironmentVariable('SCIREPL_USER_DATA', $scope)) { throw "SCIREPL_USER_DATA is set ($scope); it overrides both profiles." }
@@ -322,6 +324,8 @@ overall result of `PASS`:
 ```powershell
 . {
   $ErrorActionPreference = 'Stop'
+  # PowerShell 7 can't load the Appx module natively; use the Windows PowerShell one.
+  if ($PSVersionTable.PSEdition -eq 'Core') { Import-Module Appx -UseWindowsPowerShell -WarningAction SilentlyContinue }
   $pilot = 'C:\scirepl-store-pilot\run-1'
   $appcert = 'C:\Program Files (x86)\Windows Kits\10\App Certification Kit\appcert.exe'
   if (-not (Test-Path $appcert)) { throw 'appcert.exe not found: install the App Certification Kit.' }
@@ -375,6 +379,8 @@ stops the block. In a normal PowerShell window:
 ```powershell
 . {
   $ErrorActionPreference = 'Stop'
+  # PowerShell 7 can't load the Appx module natively; use the Windows PowerShell one.
+  if ($PSVersionTable.PSEdition -eq 'Core') { Import-Module Appx -UseWindowsPowerShell -WarningAction SilentlyContinue }
   $pilot = 'C:\scirepl-store-pilot\run-1'
   foreach ($scope in 'Process', 'User', 'Machine') {
     if ([Environment]::GetEnvironmentVariable('SCIREPL_USER_DATA', $scope)) { throw "SCIREPL_USER_DATA is set ($scope); it overrides both profiles." }
@@ -474,6 +480,8 @@ Stay offline:
 ```powershell
 . {
   $ErrorActionPreference = 'Stop'
+  # PowerShell 7 can't load the Appx module natively; use the Windows PowerShell one.
+  if ($PSVersionTable.PSEdition -eq 'Core') { Import-Module Appx -UseWindowsPowerShell -WarningAction SilentlyContinue }
   $pilot = 'C:\scirepl-store-pilot\run-1'
   $before = (Get-AppxPackage SciREPL.FreePilot.LocalTest).Version
   if (-not $before) { throw 'Package A is not installed.' }
@@ -493,6 +501,8 @@ it as DOCX again and check the file. Close the app.
 ```powershell
 . {
   $ErrorActionPreference = 'Stop'
+  # PowerShell 7 can't load the Appx module natively; use the Windows PowerShell one.
+  if ($PSVersionTable.PSEdition -eq 'Core') { Import-Module Appx -UseWindowsPowerShell -WarningAction SilentlyContinue }
   $pilot = 'C:\scirepl-store-pilot\run-1'
   $before = Import-Csv "$pilot\portable-before.csv"
   $after = Get-ChildItem "$env:APPDATA\SciREPL-Free-Electron" -Recurse -File | Get-FileHash | Select-Object Hash, Path
@@ -526,9 +536,11 @@ can be deleted. Turn the network back on. In an administrator window:
 ```powershell
 . {
   $ErrorActionPreference = 'Stop'
+  # PowerShell 7 can't load the Appx module natively; use the Windows PowerShell one.
+  if ($PSVersionTable.PSEdition -eq 'Core') { Import-Module Appx -UseWindowsPowerShell -WarningAction SilentlyContinue }
   $pilot = 'C:\scirepl-store-pilot\run-1'
   $thumb = (Get-Content "$pilot\thumbprint.txt").Trim()
-  Get-AppxPackage SciREPL.FreePilot.LocalTest | Remove-AppxPackage
+  Get-AppxPackage SciREPL.FreePilot.LocalTest | ForEach-Object { Remove-AppxPackage -Package $_.PackageFullName }
   # Only the certificate created for this run.
   Remove-Item "Cert:\CurrentUser\My\$thumb", "Cert:\LocalMachine\TrustedPeople\$thumb"
 }
