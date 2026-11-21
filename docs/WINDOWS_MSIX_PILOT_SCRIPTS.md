@@ -114,16 +114,13 @@ version is installed. It then gives the run a random RunId and writes it to
 marker carries this run's RunId, so an old run's scripts can't upgrade or
 remove a later run's install, even one with the same version.
 
-If it says the install isn't marked because its data folder doesn't exist
-yet, do step 1 below, close SciREPL, then:
-
-```powershell
-& "$pilot\Step6-MarkInstall.ps1" -Run $run
-```
-
-It marks the install only if exactly this run's A is installed and no other
-run has marked it. Until it is marked, step 8 and cleanup refuse to touch
-it.
+If Windows creates that data folder only when the app first starts, step 6
+asks you to start SciREPL from the Start menu (step 1 below) and waits up to
+10 minutes, then marks the install in the same run of the script. Nothing is
+recorded until the marker is written, so an install is never left with a
+pending record another run could claim. If the folder doesn't appear, step 6
+fails with no record: step 8 and cleanup refuse that install, so remove it
+with the block guide's cleanup and start a new run folder.
 
 Then by hand, with the network on:
 
@@ -185,7 +182,7 @@ inviting testers** now: cleanup uninstalls the app.
 Removes the package (and with it `store-canary`) and this run's certificate,
 then checks that the package, its data folder and both certificate entries
 are gone. It removes the package only if its marker carries this run's
-RunId. A package from another run, or one this run never marked, is left
+RunId. A package from another run, or one no run marked, is left
 installed and the script fails after removing this run's certificate:
 cleanup of an old run can't uninstall a later pilot and its test notebook.
 If you have checked that the installed pilot is yours to remove, remove it
@@ -208,8 +205,8 @@ script and how it was fixed.
   `npm_config_local_prefix` variables, so it reads the clone's own
   `package.json`.
 - The build refuses a checkout with changes or untracked files.
-- Step 6 marks the install with a random RunId (`Step6-MarkInstall.ps1` if
-  the data folder appears only at first launch). Step 8 upgrades only this
+- Step 6 marks the install with a random RunId, waiting for first launch if
+  the data folder appears only then. Step 8 upgrades only this
   run's install, from exactly A's version.
 - Step 6 and step 8 check the installed version after `Add-AppxPackage`, and
   cleanup checks the package, its data and both certificates are gone. Run 1

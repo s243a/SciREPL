@@ -9,8 +9,8 @@
 
   Gives the run a random RunId, kept in install-record.json and in a marker
   in the package's data folder; step 8 and cleanup act only on an install
-  that carries it. If the data folder doesn't exist yet, run
-  Step6-MarkInstall.ps1 after starting SciREPL once.
+  that carries it. If Windows creates the data folder only at first launch,
+  the script asks you to start SciREPL and waits for it before marking.
 #>
 param([Parameter(Mandatory)][string]$Run)
 $ErrorActionPreference = 'Stop'
@@ -33,9 +33,7 @@ if ($installed.Count -ne 1 -or "$($installed[0].Version)" -ne $expected) {
   throw "Expected $expected installed; found [$(($installed | ForEach-Object { "$($_.Version)" }) -join ', ')]."
 }
 # Mark this install as the run's, so only this run's scripts upgrade or remove it.
-New-PilotInstallRecord $pilot $expected
-if (Set-PilotInstallMarker $pilot) {
-  "Installed $expected and marked it as this run's install."
-} else {
-  "Installed $expected. Its data folder doesn't exist yet, so it isn't marked: after starting SciREPL once, run Step6-MarkInstall.ps1. Until then step 8 and cleanup won't touch it."
+Complete-PilotInstall $pilot $expected -OnWaiting {
+  Write-Host "Windows hasn't created the package's data folder yet. Start SciREPL from the Start menu now (that is step 1 below); this waits up to 10 minutes."
 }
+"Installed $expected and marked it as this run's install."

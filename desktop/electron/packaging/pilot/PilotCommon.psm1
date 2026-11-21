@@ -125,7 +125,7 @@ function Get-InstallOwnershipProblem {
   if (-not $Record) { return 'this run has no install-record.json (Step6-InstallA.ps1 writes it)' }
   if (-not $Record.RunId) { return 'the install record has no RunId' }
   if ("$($Record.FamilyName)" -ne $FamilyName) { return "family $FamilyName, recorded $($Record.FamilyName)" }
-  if ($Record.Marked -ne $true) { return 'this run never marked its install (Step6-MarkInstall.ps1)' }
+  if ($Record.Marked -ne $true) { return 'the install record is not marked' }
   if (-not $Marker) { return 'its data folder has no pilot marker' }
   if ("$($Marker.RunId)" -ne "$($Record.RunId)") { return "it is marked by another run ($($Marker.Run), RunId $($Marker.RunId))" }
   $null
@@ -142,48 +142,42 @@ function Assert-PilotOwnsInstall {
   $installed[0]
 }
 
-# Step 6, straight after a clean install of A: a new RunId, recorded unmarked.
-function New-PilotInstallRecord {
-  param([Parameter(Mandatory)][string]$RunPath, [Parameter(Mandatory)][string]$Version)
+# Step 6, straight after a clean install of A, in the same run of the
+# script: wait for the package's data folder (Windows may create it only at
+# first launch), write a marker with a new RunId into it, and only then write
+# the run's record. No unmarked record is ever left on disk, so no later
+# script can bind a run to an install it didn't make. If the data folder
+# doesn't appear in time, nothing is recorded and the install stays unowned:
+# step 8 and cleanup refuse it.
+function Complete-PilotInstall {
+  param(
+    [Parameter(Mandatory)][string]$RunPath, [Parameter(Mandatory)][string]$Version,
+    [int]$WaitSeconds = 600, [scriptblock]$OnWaiting = {}
+  )
   $installed = @(Get-AppxPackage $script:PackageName)
-  if ($installed.Count -ne 1) { throw "Expected one installed pilot package; found $($installed.Count)." }
+  if ($installed.Count -ne 1 -or "$($installed[0].Version)" -ne $Version) {
+    throw "Expected exactly $Version installed; found [$(($installed | ForEach-Object { "$($_.Version)" }) -join ', ')]."
+  }
+  $family = $installed[0].PackageFamilyName
+  $markerPath = Get-PilotMarkerPath $family
+  if (-not $markerPath) {
+    & $OnWaiting
+    $deadline = (Get-Date).AddSeconds($WaitSeconds)
+    while (-not $markerPath -and (Get-Date) -lt $deadline) {
+      Start-Sleep -Seconds 2
+      $markerPath = Get-PilotMarkerPath $family
+    }
+  }
+  if (-not $markerPath) {
+    throw "The package's data folder didn't appear within $WaitSeconds s, so this install is not marked as this run's. Step 8 and cleanup will refuse it: remove it with the block guide's cleanup and start a new run."
+  }
+  $existing = Read-PilotJson $markerPath
+  if ($existing) { throw "The install is already marked by another run ($($existing.Run)); it is not this run's fresh install." }
+  $runId = [guid]::NewGuid().ToString()
+  [pscustomobject]@{ RunId = $runId; Run = $RunPath } | ConvertTo-Json | Set-Content -LiteralPath $markerPath
   [pscustomobject]@{
-    RunId = [guid]::NewGuid().ToString()
-    Run = $RunPath
-    FamilyName = $installed[0].PackageFamilyName
-    Version = $Version
-    Marked = $false
+    RunId = $runId; Run = $RunPath; FamilyName = $family; Version = $Version; Marked = $true
   } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $RunPath 'install-record.json')
-}
-
-# Pure: why an unmarked install can't be marked as this run's, or $null.
-function Get-MarkProblem {
-  param([object]$Record, [object[]]$Installed, [string]$MarkerPath, [object]$ExistingMarker)
-  if (-not $Record) { return 'this run has no install-record.json: run Step6-InstallA.ps1' }
-  if ($Record.Marked -eq $true) { return 'this run already marked its install' }
-  if (@($Installed).Count -ne 1) { return "expected one installed pilot package; found $(@($Installed).Count)" }
-  if ("$($Installed[0].PackageFamilyName)" -ne "$($Record.FamilyName)") { return "family $($Installed[0].PackageFamilyName), recorded $($Record.FamilyName)" }
-  if ("$($Installed[0].Version)" -ne "$($Record.Version)") { return "version $($Installed[0].Version) is installed; this run installed $($Record.Version)" }
-  if (-not $MarkerPath) { return 'its data folder does not exist yet' }
-  if ($ExistingMarker) { return "it is already marked by another run ($($ExistingMarker.Run))" }
-  $null
-}
-
-# Write the marker into the installed package's data folder and mark the
-# record. Returns $true when marked, $false when the data folder doesn't exist
-# yet (start the app once, then Step6-MarkInstall.ps1); throws otherwise.
-function Set-PilotInstallMarker {
-  param([Parameter(Mandatory)][string]$RunPath)
-  $record = Get-PilotInstallRecord $RunPath
-  $installed = @(Get-AppxPackage $script:PackageName)
-  $markerPath = if ($installed.Count -eq 1) { Get-PilotMarkerPath $installed[0].PackageFamilyName } else { $null }
-  $problem = Get-MarkProblem -Record $record -Installed $installed -MarkerPath $markerPath -ExistingMarker (Read-PilotJson $markerPath)
-  if ($problem -eq 'its data folder does not exist yet') { return $false }
-  if ($problem) { throw "Can't mark the install as this run's: $problem" }
-  [pscustomobject]@{ RunId = $record.RunId; Run = $RunPath } | ConvertTo-Json | Set-Content -LiteralPath $markerPath
-  $record.Marked = $true
-  $record | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $RunPath 'install-record.json')
-  $true
 }
 
 # Cleanup: remove the pilot package only if it is this run's install. Returns

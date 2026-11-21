@@ -89,7 +89,7 @@ export default async function run() {
   // The PowerShell scripts: static rules carried over from pilot run 1.
   const scripts = readdirSync(PILOT_DIR).filter((f) => f.endsWith('.ps1'));
   r.log('there is a script for steps 3 to 9 and cleanup',
-    ['Step3-Sign.ps1', 'Step4-Baseline.ps1', 'Step5-Wack.ps1', 'Step6-InstallA.ps1', 'Step6-MarkInstall.ps1', 'Step7-CheckOffline.ps1',
+    ['Step3-Sign.ps1', 'Step4-Baseline.ps1', 'Step5-Wack.ps1', 'Step6-InstallA.ps1', 'Step7-CheckOffline.ps1',
       'Step8-UpgradeB.ps1', 'Step9-VerifyProfiles.ps1', 'Cleanup.ps1'].every((f) => scripts.includes(f)), scripts.join(', '));
   for (const f of scripts) {
     const text = readFileSync(path.join(PILOT_DIR, f), 'utf8');
@@ -110,8 +110,10 @@ export default async function run() {
   const read = (f) => readFileSync(path.join(PILOT_DIR, f), 'utf8');
   r.log("cleanup removes the package only through the ownership check",
     /Remove-PilotRunPackage \$pilot/.test(read('Cleanup.ps1')) && !/Remove-AppxPackage/.test(read('Cleanup.ps1')));
+  r.log('no script other than step 6 marks an install',
+    scripts.filter((f) => /Complete-PilotInstall/.test(read(f))).join() === 'Step6-InstallA.ps1');
   r.log('step 6 records and marks the install; step 8 checks it and the exact A version before upgrading',
-    /New-PilotInstallRecord \$pilot \$expected/.test(read('Step6-InstallA.ps1')) && /Set-PilotInstallMarker \$pilot/.test(read('Step6-InstallA.ps1'))
+    /Complete-PilotInstall \$pilot \$expected/.test(read('Step6-InstallA.ps1'))
       && (read('Step8-UpgradeB.ps1').match(/Assert-PilotOwnsInstall \$pilot/g) || []).length === 2
       && /if \(\$before -ne \$a\)/.test(read('Step8-UpgradeB.ps1'))
       && read('Step8-UpgradeB.ps1').indexOf('$before -ne $a') < read('Step8-UpgradeB.ps1').indexOf('Add-AppxPackage'));
