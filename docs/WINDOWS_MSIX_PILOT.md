@@ -205,8 +205,10 @@ again):
     }
     git diff --quiet -- package-lock.json desktop/electron/package-lock.json
     if ($LASTEXITCODE -ne 0) { throw 'The setup changed a lockfile.' }
-    # The version raise rewrites package.json and package-lock.json on purpose.
-    foreach ($step in @('version', 'patch', '--no-git-tag-version'), @('run', 'package:windows:msix-pilot')) {
+    # The version raise rewrites package.json and package-lock.json on purpose,
+    # and the licence notices name the app version, so regenerate them.
+    foreach ($step in @('version', 'patch', '--no-git-tag-version'), @('run', 'licenses:generate'),
+                      @('run', 'package:windows:msix-pilot')) {
       & npm.cmd @step
       if ($LASTEXITCODE -ne 0) { throw "npm $($step -join ' ') failed (exit $LASTEXITCODE)" }
     }
