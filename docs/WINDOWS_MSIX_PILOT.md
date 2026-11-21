@@ -15,10 +15,15 @@ On Windows, from the repository root, with Node 22 and the Windows SDK
 Once per checkout (these change the checkout and download about 1 GB):
 
 ```bat
-npm install
+npm ci
 npm run configure
 npm run fetch:bundles
 ```
+
+Use `npm ci`, not `npm install`: it installs exactly what `package-lock.json`
+lists and never rewrites it. `npm install` reformats the committed lockfile
+(4-space indentation) to match `package.json` (2 spaces), which leaves the
+checkout modified.
 
 Then, for each build:
 
@@ -161,6 +166,8 @@ window at the repository root:
     throw "The tree is channel '$($info.channel)', commit '$($info.commit)'; HEAD is $head. Rebuild."
   }
   if (-not (Test-Path "$res\www\vendor\docx\docx.iife.js")) { throw 'The tree has no bundled DOCX library.' }
+  git diff --quiet -- package-lock.json desktop/electron/package-lock.json
+  if ($LASTEXITCODE -ne 0) { throw 'A lockfile differs from the commit: restore it, run npm ci, and rebuild.' }
   $msix = Get-Item "desktop\electron\out\SciREPL-$($info.appVersion).0-x64-local-test.msix"
   if ($msix.LastWriteTime -lt (Get-Item "$res\build-info.json").LastWriteTime) { throw "$msix is older than the tree." }
   New-Item -ItemType Directory "$pilot\A" | Out-Null
@@ -183,17 +190,26 @@ again):
   $pilot = 'C:\scirepl-store-pilot\run-1'
   $infoA = Get-Content "$pilot\A\build-info.json" -Raw | ConvertFrom-Json
   $src = "$pilot\upgrade-src"
-  git clone --quiet . $src
+  # LF checkout, like A's: Git for Windows defaults to core.autocrlf=true.
+  git clone --quiet -c core.autocrlf=false . $src
   if ($LASTEXITCODE -ne 0) { throw 'git clone failed' }
   git -C $src checkout --quiet --detach $infoA.commit
   if ($LASTEXITCODE -ne 0) { throw "checkout of $($infoA.commit) failed" }
   Push-Location $src
   try {
-    foreach ($step in @('install'), @('run', 'configure'), @('run', 'fetch:bundles'),
-                      @('version', 'patch', '--no-git-tag-version'), @('run', 'package:windows:msix-pilot')) {
+    foreach ($step in @('ci'), @('run', 'configure'), @('run', 'fetch:bundles')) {
       & npm @step
       if ($LASTEXITCODE -ne 0) { throw "npm $($step -join ' ') failed (exit $LASTEXITCODE)" }
     }
+    git diff --quiet -- package-lock.json desktop/electron/package-lock.json
+    if ($LASTEXITCODE -ne 0) { throw 'The setup changed a lockfile.' }
+    # The version raise rewrites package.json and package-lock.json on purpose.
+    foreach ($step in @('version', 'patch', '--no-git-tag-version'), @('run', 'package:windows:msix-pilot')) {
+      & npm @step
+      if ($LASTEXITCODE -ne 0) { throw "npm $($step -join ' ') failed (exit $LASTEXITCODE)" }
+    }
+    git diff --quiet -- desktop/electron/package-lock.json
+    if ($LASTEXITCODE -ne 0) { throw 'The build changed desktop/electron/package-lock.json.' }
   } finally { Pop-Location }
   $res   = "$src\desktop\electron\out\SciREPL-win32-x64\resources"
   $infoB = Get-Content "$res\build-info.json" -Raw | ConvertFrom-Json
