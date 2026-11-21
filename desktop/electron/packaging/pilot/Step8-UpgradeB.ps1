@@ -12,14 +12,11 @@ Import-Module (Join-Path $PSScriptRoot 'PilotCommon.psm1') -Force
 Initialize-PilotAppx
 $pilot = Resolve-PilotRun $Run
 
-$before = (Get-AppxPackage (Get-PilotPackageName)).Version
-if (-not $before) { throw 'Package A is not installed.' }
-Update-PilotInstallRecord $pilot   # the installed A is this run's
+$a = "$((Get-PilotBuildInfo $pilot A).appVersion).0"
 $expected = "$((Get-PilotBuildInfo $pilot B).appVersion).0"
+$before = "$((Assert-PilotOwnsInstall $pilot).Version)"
+if ($before -ne $a) { throw "Version $before is installed; the upgrade starts from this run's A ($a)." }
 Add-AppxPackage (Get-PilotPackage $pilot B).FullName
-$after = @(Get-AppxPackage (Get-PilotPackageName))
-if ($after.Count -ne 1) { throw "Expected one installed pilot package; found $($after.Count)." }
-Update-PilotInstallRecord $pilot   # the upgrade kept the same data folder
-if ([version]"$($after[0].Version)" -le [version]"$before") { throw "The installed version is $($after[0].Version); expected newer than $before." }
-if ("$($after[0].Version)" -ne $expected) { throw "The installed version is $($after[0].Version); expected $expected." }
-"Upgraded $before -> $($after[0].Version)"
+$after = Assert-PilotOwnsInstall $pilot   # same marker: the upgrade kept the data folder
+if ("$($after.Version)" -ne $expected) { throw "The installed version is $($after.Version); expected $expected." }
+"Upgraded $before -> $($after.Version)"

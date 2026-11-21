@@ -19,20 +19,7 @@ if ($thumb -notmatch '^[0-9A-F]{40}$') { throw "thumbprint.txt does not hold a c
 
 # Remove the package only if it is this run's install: cleanup of an older run
 # must not uninstall a later run's package and its store-canary.
-$installed = @(Get-AppxPackage (Get-PilotPackageName))
-$leftAlone = $null
-if ($installed.Count -gt 1) { throw "Found $($installed.Count) installed pilot packages; remove them by hand." }
-if ($installed.Count -eq 1) {
-  $recordFile = Join-Path $pilot 'install-record.json'
-  $record = if (Test-Path -LiteralPath $recordFile) { Get-Content -LiteralPath $recordFile -Raw | ConvertFrom-Json } else { $null }
-  $data = Get-PilotDataFolder $installed[0].PackageFamilyName
-  $problem = Get-InstallOwnershipProblem -Record $record -FamilyName $installed[0].PackageFamilyName -DataCreatedTicks $(if ($data) { $data.CreationTimeUtc.Ticks } else { $null })
-  if ($problem) {
-    $leftAlone = "Left $($installed[0].PackageFullName) installed: it isn't shown to be this run's install ($problem)."
-  } else {
-    Remove-AppxPackage -Package $installed[0].PackageFullName
-  }
-}
+$leftAlone = Remove-PilotRunPackage $pilot
 # Only the certificate created for this run.
 foreach ($store in 'Cert:\CurrentUser\My', 'Cert:\LocalMachine\TrustedPeople') {
   if (Test-Path "$store\$thumb") { Remove-Item "$store\$thumb" }

@@ -10,6 +10,7 @@
  * notices regenerated. Both raises stay uncommitted, so A and B record the same
  * commit. Each package is built with the same sequence:
  *
+ *   (the checkout must be clean: no changes, no untracked files)
  *   npm ci                         install exactly what package-lock.json lists
  *   npm run configure
  *   npm run fetch:bundles
@@ -66,6 +67,18 @@ export function buildSteps({ bump }) {
     { npm: ['run', 'package:windows:msix-pilot'] },
     { lockfiles: [LOCKFILES[1]], why: 'the build changed desktop/electron/package-lock.json' },
   ];
+}
+
+/**
+ * `git status --porcelain` output -> a problem, or null when the checkout is
+ * clean. Untracked files count: they could end up in a package that records
+ * only the commit. Ignored files (node_modules, build output) don't show.
+ */
+export function dirtyProblem(porcelain, { label, when }) {
+  const lines = String(porcelain).split(/\r?\n/).filter(Boolean);
+  if (!lines.length) return null;
+  const shown = lines.slice(0, 10).map((l) => `    ${l}`).join('\n');
+  return `${label} checkout ${when} has uncommitted changes, so the package would not match its recorded commit:\n${shown}${lines.length > 10 ? `\n    ... and ${lines.length - 10} more` : ''}\n  Use a clean clone.`;
 }
 
 /** Numeric x.y.z comparison; build-info versions are plain semver cores. */
@@ -140,6 +153,13 @@ function npm(args, cwd) {
   if (status !== 0) fail(`npm ${args.join(' ')} failed in ${cwd} (exit ${status})`);
 }
 
+function assertClean(cwd, label, when) {
+  const r = git(['status', '--porcelain', '--untracked-files=all'], cwd);
+  if (r.status !== 0) fail(`git status failed in ${cwd}`);
+  const problem = dirtyProblem(r.stdout, { label, when });
+  if (problem) fail(problem);
+}
+
 function buildPackage(cwd, { bump }) {
   for (const step of buildSteps({ bump })) {
     if (step.lockfiles) {
@@ -172,7 +192,7 @@ function collect(cwd, dest, { label, commit, olderThan }) {
 
 function printPlan(runDir) {
   const src = path.join(runDir, 'upgrade-src');
-  console.log(`Package A, in ${REPO_ROOT} at HEAD:`);
+  console.log(`Package A, in ${REPO_ROOT} at HEAD (must be clean before and after):`);
   for (const s of buildSteps({ bump: false })) console.log(s.npm ? `  npm ${s.npm.join(' ')}` : `  check unchanged: ${s.lockfiles.join(', ')}`);
   console.log(`  collect into ${path.join(runDir, 'A')}`);
   console.log(`Package B, in ${src} (git clone -c core.autocrlf=false, checkout --detach <A's commit>):`);
@@ -191,8 +211,11 @@ export function main(argv = process.argv.slice(2)) {
     const head = git(['rev-parse', 'HEAD'], REPO_ROOT);
     if (head.status !== 0) fail('git rev-parse HEAD failed: run this from a git clone');
     const commit = head.stdout.trim();
+    assertClean(REPO_ROOT, 'The build', 'before the build');
 
     buildPackage(REPO_ROOT, { bump: false });
+    // A's setup and build must not have changed tracked or unignored files.
+    assertClean(REPO_ROOT, "A's", 'after the build');
     mkdirSync(runDir, { recursive: true });
     const a = collect(REPO_ROOT, path.join(runDir, 'A'), { label: 'A', commit });
 

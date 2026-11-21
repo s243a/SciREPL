@@ -19,7 +19,9 @@ gate.
   `#Requires -Version 7` and refuse to run in Windows PowerShell 5.1.
 - **Node 22** and **Git for Windows** on `PATH` in PowerShell (`git --version`
   should show `.windows.`; Cygwin's Git can't read Windows paths).
-- **A clone on a Windows drive**, on current `main`, with no local changes.
+- **A fresh clone on a Windows drive**, used only for the pilot, with no
+  local changes or untracked files: the build refuses anything else, so that
+  A and B really come from the recorded commit.
   Not a `\\wsl.localhost\…` path: PowerShell treats those as remote and its
   default policy refuses unsigned scripts there. A clone made by Git is local,
   so `RemoteSigned`, PowerShell 7's default, runs the scripts unchanged.
@@ -48,7 +50,8 @@ This builds and collects both packages, about 1 GB of downloads and a few
 minutes:
 
 - **A** is this checkout at `HEAD`: `npm ci`, `configure`, `fetch:bundles`, then
-  `package:windows:msix-pilot`.
+  `package:windows:msix-pilot`. The checkout must be clean (`git status`
+  shows nothing) before the build and still clean after it.
 - **B** is a second clone in `$run\upgrade-src`, checked out at A's commit
   with Unix line endings, built the same way after `npm version patch` and
   `licenses:generate`. B records the same commit as A.
@@ -104,9 +107,25 @@ from strings inside Electron's own binaries. WACK may run static checks only
 ```
 
 Repeats the clean-install checks, installs A, and checks that exactly A's
-version is installed. It records the install in `$run\install-record.json`:
-the package family and when its data folder was created. Each run starts
-from a clean install, so that identifies this run's install. Then by hand, with the network on:
+version is installed. It then gives the run a random RunId and writes it to
+`$run\install-record.json` and to a marker,
+`LocalState\scirepl-pilot-run.json`, in the package's data folder under
+`%LOCALAPPDATA%\Packages`. Step 8 and cleanup act only on an install whose
+marker carries this run's RunId, so an old run's scripts can't upgrade or
+remove a later run's install, even one with the same version.
+
+If it says the install isn't marked because its data folder doesn't exist
+yet, do step 1 below, close SciREPL, then:
+
+```powershell
+& "$pilot\Step6-MarkInstall.ps1" -Run $run
+```
+
+It marks the install only if exactly this run's A is installed and no other
+run has marked it. Until it is marked, step 8 and cleanup refuse to touch
+it.
+
+Then by hand, with the network on:
 
 1. Start SciREPL from the Start menu. `portable-canary` must **not** appear.
 2. Create a notebook named `store-canary` with a Python cell that prints
@@ -138,9 +157,10 @@ check the output and the formula, and close the app.
 & "$pilot\Step7-CheckOffline.ps1" -Run $run
 ```
 
-The upgrade installs B from its file, so it needs no network, and must
-install exactly B's version. It checks the install record before and after:
-the installed A must be this run's, and the upgrade must keep its data folder. Then start SciREPL: `store-canary` must still be
+Before upgrading, the installed package must be this run's (its marker) and
+exactly this run's A version. The upgrade installs B from its file, so it
+needs no network, and must install exactly B's version with the same marker,
+so the upgrade kept the data folder. Then start SciREPL: `store-canary` must still be
 there with its output, and the setting kept. Export DOCX again and check it.
 
 ## 9. Profiles (normal window, network back on)
@@ -164,18 +184,12 @@ inviting testers** now: cleanup uninstalls the app.
 
 Removes the package (and with it `store-canary`) and this run's certificate,
 then checks that the package, its data folder and both certificate entries
-are gone. It removes the package only if it matches this run's install record.
-A package from another run, or one with no record, is left installed and the
-script fails after removing this run's certificate: cleanup of an old run
-can't uninstall a later pilot and its test notebook. If you have checked
-that the installed pilot is yours to remove, remove it by hand with the
-block guide's cleanup.
-
-The record relies on Windows creating the package's data folder under
-`%LOCALAPPDATA%\Packages` at install time. That is untested until a run uses
-these scripts: if step 6 stops with "No data folder", A is installed with no
-record, so remove it with the block guide's cleanup, report it, and don't
-loosen the check. Keep `$run` as the record; `$run\upgrade-src` can be deleted.
+are gone. It removes the package only if its marker carries this run's
+RunId. A package from another run, or one this run never marked, is left
+installed and the script fails after removing this run's certificate:
+cleanup of an old run can't uninstall a later pilot and its test notebook.
+If you have checked that the installed pilot is yours to remove, remove it
+by hand with the block guide's cleanup. Keep `$run` as the record; `$run\upgrade-src` can be deleted.
 
 ## Recording the run
 
@@ -193,6 +207,10 @@ script and how it was fixed.
   npm in B's clone runs without the parent's `npm_package_*` and
   `npm_config_local_prefix` variables, so it reads the clone's own
   `package.json`.
+- The build refuses a checkout with changes or untracked files.
+- Step 6 marks the install with a random RunId (`Step6-MarkInstall.ps1` if
+  the data folder appears only at first launch). Step 8 upgrades only this
+  run's install, from exactly A's version.
 - Step 6 and step 8 check the installed version after `Add-AppxPackage`, and
   cleanup checks the package, its data and both certificates are gone. Run 1
   confirmed those by hand; errors from the Appx commands pass through the

@@ -47,17 +47,74 @@ Out-Check 'WACK: failed optional tests are listed' (@($s.FailedOptional).Count -
 $s = Get-WackSummary ([xml]'<REPORT><REQUIREMENTS /></REPORT>')
 Out-Check 'WACK: a report without OVERALL_RESULT gives an empty result (the gate fails closed)' ($s.Overall -eq '') $s.Overall
 
-$ticks = [datetime]::new(2026, 11, 20, 23, 20, 0, [DateTimeKind]::Utc).Ticks
-$record = [pscustomobject]@{ FamilyName = 'SciREPL.FreePilot.LocalTest_2xd92v2yysscm'; DataCreatedTicks = $ticks; DataCreatedUtc = '2026-11-20T23:20:00Z' }
-$p = Get-InstallOwnershipProblem -Record $record -FamilyName $record.FamilyName -DataCreatedTicks $ticks
-Out-Check "cleanup: the run's own install (same data folder) may be removed" ($null -eq $p) "$p"
-$p = Get-InstallOwnershipProblem -Record $record -FamilyName $record.FamilyName -DataCreatedTicks ($ticks + [timespan]::TicksPerDay)
-Out-Check "cleanup: a later run's install of the same package is left alone" ($p -match 'a later install') "$p"
-$p = Get-InstallOwnershipProblem -Record $null -FamilyName $record.FamilyName -DataCreatedTicks $ticks
-Out-Check 'cleanup: without an install record the package is left alone' ($p -match 'install-record.json') "$p"
-$p = Get-InstallOwnershipProblem -Record $record -FamilyName 'SciREPL.FreePilot.LocalTest_other' -DataCreatedTicks $ticks
-Out-Check 'cleanup: a different package family is left alone' ($p -match 'family') "$p"
-$p = Get-InstallOwnershipProblem -Record $record -FamilyName $record.FamilyName -DataCreatedTicks $null
-Out-Check 'cleanup: a missing data folder is not taken as ownership' ($p -match 'missing') "$p"
-$p = Get-InstallOwnershipProblem -Record ('{"FamilyName":"F","DataCreatedTicks":' + $ticks + ',"DataCreatedUtc":"x"}' | ConvertFrom-Json) -FamilyName 'F' -DataCreatedTicks $ticks
-Out-Check 'cleanup: a record read back from JSON matches exactly' ($null -eq $p) "$p"
+
+# Install ownership. Get-AppxPackage and Remove-AppxPackage are stand-ins
+# defined here (the real ones exist only on Windows); %LOCALAPPDATA% points at
+# a temporary folder.
+$tmp = Join-Path ([IO.Path]::GetTempPath()) "pilot-test-$([guid]::NewGuid())"
+$savedLocal = $env:LOCALAPPDATA
+$env:LOCALAPPDATA = Join-Path $tmp 'local'
+$family = 'SciREPL.FreePilot.LocalTest_2xd92v2yysscm'
+$global:pilotInstalled = @()
+$global:pilotRemoved = @()
+function global:Get-AppxPackage { param([string]$Name) $global:pilotInstalled }
+function global:Remove-AppxPackage { param([string]$Package) $global:pilotRemoved += $Package; $global:pilotInstalled = @() }
+function Install-Fake([string]$Version, [switch]$NoDataFolder) {
+  $global:pilotInstalled = @([pscustomobject]@{ PackageFamilyName = $family; Version = $Version; PackageFullName = "SciREPL.FreePilot.LocalTest_$($Version)_x64__2xd92v2yysscm" })
+  $data = Join-Path $env:LOCALAPPDATA "Packages\$family"
+  if (Test-Path $data) { Remove-Item $data -Recurse -Force }
+  if (-not $NoDataFolder) { New-Item -ItemType Directory -Force (Join-Path $data 'LocalState') | Out-Null }
+}
+function New-Run([string]$Name) { $d = Join-Path $tmp $Name; New-Item -ItemType Directory -Force $d | Out-Null; $d }
+try {
+  $run1 = New-Run 'run-1'; $run2 = New-Run 'run-2'
+
+  Install-Fake '1.5.0.0'
+  New-PilotInstallRecord $run1 '1.5.0.0'
+  $marked = Set-PilotInstallMarker $run1
+  Out-Check 'ownership: step 6 marks its own fresh install' ($marked -eq $true -and (Get-PilotInstallRecord $run1).Marked -eq $true)
+  Out-Check "ownership: the run's own install passes the step 8 check" ("$((Assert-PilotOwnsInstall $run1).Version)" -eq '1.5.0.0')
+
+  # Run 1 is cleaned up, then run 2 installs the same package version.
+  $left = Remove-PilotRunPackage $run1
+  Out-Check "cleanup: a run's own install is removed" ($null -eq $left -and $global:pilotRemoved.Count -eq 1) "$left"
+  Install-Fake '1.5.0.0'
+  New-PilotInstallRecord $run2 '1.5.0.0'
+  [void](Set-PilotInstallMarker $run2)
+  $global:pilotRemoved = @()
+  $left = Remove-PilotRunPackage $run1
+  Out-Check "cleanup: rerunning an old run's cleanup leaves a newer install of the same version alone" ($global:pilotRemoved.Count -eq 0 -and $left -match 'marked by another run') "$left"
+  $threw = $false; try { Assert-PilotOwnsInstall $run1 | Out-Null } catch { $threw = $true }
+  Out-Check "upgrade: an old run's step 8 refuses a newer run's install" $threw
+  $threw = $false; try { [void](Set-PilotInstallMarker $run1) } catch { $threw = $true }
+  Out-Check "mark: an old run can't re-mark a newer run's install" $threw
+  $left = Remove-PilotRunPackage $run2
+  Out-Check "cleanup: the newer run's own cleanup removes it" ($null -eq $left -and $global:pilotRemoved.Count -eq 1) "$left"
+
+  # No data folder at install: unmarked until Step6-MarkInstall.
+  $run3 = New-Run 'run-3'
+  Install-Fake '1.5.0.0' -NoDataFolder
+  New-PilotInstallRecord $run3 '1.5.0.0'
+  $marked = Set-PilotInstallMarker $run3
+  $global:pilotRemoved = @()
+  $left = Remove-PilotRunPackage $run3
+  Out-Check 'cleanup: an install not yet marked is left alone' ($marked -eq $false -and $global:pilotRemoved.Count -eq 0 -and $left -match 'never marked') "$left"
+  New-Item -ItemType Directory -Force (Join-Path $env:LOCALAPPDATA "Packages\$family\LocalState") | Out-Null
+  Out-Check 'mark: Step6-MarkInstall marks it once the data folder exists' ((Set-PilotInstallMarker $run3) -eq $true)
+  $global:pilotInstalled[0].Version = '1.5.1.0'
+  $run4 = New-Run 'run-4'
+  New-PilotInstallRecord $run4 '1.5.0.0'
+  $p = Get-MarkProblem -Record (Get-PilotInstallRecord $run4) -Installed $global:pilotInstalled -MarkerPath 'x' -ExistingMarker $null
+  Out-Check 'mark: a different installed version is not marked' ($p -match 'version 1.5.1.0') "$p"
+  $rec = [pscustomobject]@{ RunId = 'old'; FamilyName = $family; Version = '1.5.0.0'; Marked = $false }
+  $one = @([pscustomobject]@{ PackageFamilyName = $family; Version = '1.5.0.0' })
+  $p = Get-MarkProblem -Record $rec -Installed $one -MarkerPath 'x' -ExistingMarker ([pscustomobject]@{ RunId = 'new'; Run = 'C:\pilot\run-5' })
+  Out-Check "mark: an old run's unmarked record can't take over a newer run's marked install" ($p -match 'already marked by another run') "$p"
+  $global:pilotInstalled = @()
+  Out-Check 'cleanup: nothing installed is not an error' ($null -eq (Remove-PilotRunPackage $run3))
+  $p = Get-InstallOwnershipProblem -Record $null -FamilyName $family -Marker $null
+  Out-Check 'cleanup: without an install record the package is left alone' ($p -match 'install-record.json') "$p"
+} finally {
+  $env:LOCALAPPDATA = $savedLocal
+  Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
+}

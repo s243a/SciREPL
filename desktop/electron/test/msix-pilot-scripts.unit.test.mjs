@@ -14,7 +14,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createReporter } from './reporter.mjs';
 import {
-  parseArgs, buildSteps, compareVersions, buildInfoProblems, childEnv, LOCKFILES,
+  parseArgs, buildSteps, compareVersions, buildInfoProblems, childEnv, dirtyProblem, LOCKFILES,
 } from '../packaging/pilot/build-pilot-packages.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -56,6 +56,11 @@ export default async function run() {
   r.log('the Electron lockfile is checked after the build',
     stepsB.at(-1).lockfiles?.join() === 'desktop/electron/package-lock.json');
 
+  r.log('a clean checkout has no problem', dirtyProblem('', { label: 'A', when: 'now' }) === null && dirtyProblem('\n', { label: 'A', when: 'now' }) === null);
+  r.log('a modified tracked file is a problem', /www\/js\/app\.js/.test(dirtyProblem(' M www/js/app.js\n', { label: 'A', when: 'now' }) || ''));
+  r.log('an untracked file is a problem', /\?\? www\/extra\.js/.test(dirtyProblem('?? www/extra.js\n', { label: 'A', when: 'now' }) || ''));
+  r.log('the build refuses a dirty checkout before and after building A',
+    (readFileSync(NODE_SCRIPT, 'utf8').match(/assertClean\(REPO_ROOT/g) || []).length === 2);
   r.log('versions compare numerically', compareVersions('1.5.10', '1.5.9') === 1 && compareVersions('1.5.0', '1.5.1') === -1 && compareVersions('2.0.0', '2.0.0') === 0);
   r.log('a non x.y.z version is an error', throws(() => compareVersions('1.5', '1.5.0')) && throws(() => compareVersions('1.5.0-rc.1', '1.5.0')));
 
@@ -84,7 +89,7 @@ export default async function run() {
   // The PowerShell scripts: static rules carried over from pilot run 1.
   const scripts = readdirSync(PILOT_DIR).filter((f) => f.endsWith('.ps1'));
   r.log('there is a script for steps 3 to 9 and cleanup',
-    ['Step3-Sign.ps1', 'Step4-Baseline.ps1', 'Step5-Wack.ps1', 'Step6-InstallA.ps1', 'Step7-CheckOffline.ps1',
+    ['Step3-Sign.ps1', 'Step4-Baseline.ps1', 'Step5-Wack.ps1', 'Step6-InstallA.ps1', 'Step6-MarkInstall.ps1', 'Step7-CheckOffline.ps1',
       'Step8-UpgradeB.ps1', 'Step9-VerifyProfiles.ps1', 'Cleanup.ps1'].every((f) => scripts.includes(f)), scripts.join(', '));
   for (const f of scripts) {
     const text = readFileSync(path.join(PILOT_DIR, f), 'utf8');
@@ -102,19 +107,14 @@ export default async function run() {
     r.log(`${f}: PowerShell 7, -Run, stop on error, exit codes checked`, problems.length === 0, problems.join('; '));
   }
 
-  const cleanup = readFileSync(path.join(PILOT_DIR, 'Cleanup.ps1'), 'utf8');
-  const ownership = cleanup.indexOf('Get-InstallOwnershipProblem');
-  r.log("cleanup removes the package only after checking it is this run's install",
-    ownership > 0 && ownership < cleanup.indexOf('Remove-AppxPackage') && !/\|\s*ForEach-Object\s*\{\s*Remove-AppxPackage/.test(cleanup));
-  r.log('step 6 records the install and step 8 checks it before and after the upgrade',
-    /Update-PilotInstallRecord \$pilot -New/.test(readFileSync(path.join(PILOT_DIR, 'Step6-InstallA.ps1'), 'utf8'))
-      && (readFileSync(path.join(PILOT_DIR, 'Step8-UpgradeB.ps1'), 'utf8').match(/^Update-PilotInstallRecord \$pilot\s/gm) || []).length === 2);
-
-  const common = readFileSync(path.join(PILOT_DIR, 'PilotCommon.psm1'), 'utf8');
-  const recordFn = common.slice(common.indexOf('function Update-PilotInstallRecord'), common.indexOf('function Get-InstallOwnershipProblem'));
-  r.log('only -New writes the install record; otherwise a missing record is an error',
-    /if \(-not \$New\) \{[\s\S]*Get-InstallOwnershipProblem[\s\S]*\} else \{[\s\S]*Set-Content/.test(recordFn)
-      && (recordFn.match(/Set-Content/g) || []).length === 1);
+  const read = (f) => readFileSync(path.join(PILOT_DIR, f), 'utf8');
+  r.log("cleanup removes the package only through the ownership check",
+    /Remove-PilotRunPackage \$pilot/.test(read('Cleanup.ps1')) && !/Remove-AppxPackage/.test(read('Cleanup.ps1')));
+  r.log('step 6 records and marks the install; step 8 checks it and the exact A version before upgrading',
+    /New-PilotInstallRecord \$pilot \$expected/.test(read('Step6-InstallA.ps1')) && /Set-PilotInstallMarker \$pilot/.test(read('Step6-InstallA.ps1'))
+      && (read('Step8-UpgradeB.ps1').match(/Assert-PilotOwnsInstall \$pilot/g) || []).length === 2
+      && /if \(\$before -ne \$a\)/.test(read('Step8-UpgradeB.ps1'))
+      && read('Step8-UpgradeB.ps1').indexOf('$before -ne $a') < read('Step8-UpgradeB.ps1').indexOf('Add-AppxPackage'));
 
   // PowerShell itself, when available.
   const pwsh = process.env.SCIREPL_PWSH || 'pwsh';

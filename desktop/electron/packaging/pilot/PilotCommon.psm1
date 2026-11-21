@@ -84,51 +84,119 @@ function Assert-BaselineAccount {
   }
 }
 
-# Which run an install belongs to. Each run starts from a clean install
-# (Assert-NoLeftoverData), so the creation time of the package's data folder
-# identifies the install; it survives the A -> B upgrade. The record is kept in
-# the run folder as install-record.json.
+# Which run an install belongs to. Step 6 gives each run a random RunId, kept
+# in the run folder (install-record.json) and, once the package's data folder
+# exists, in a marker file inside it. The marker survives the A -> B upgrade
+# and goes with the uninstall. Only an install whose marker carries this run's
+# RunId may be upgraded or removed by this run's scripts.
+$script:MarkerName = 'scirepl-pilot-run.json'
+
 function Get-PilotDataFolder {
   param([Parameter(Mandatory)][string]$FamilyName)
-  $dir = Join-Path "$env:LOCALAPPDATA\Packages" $FamilyName
-  if (Test-Path -LiteralPath $dir -PathType Container) { Get-Item -LiteralPath $dir } else { $null }
+  $dir = Join-Path (Join-Path $env:LOCALAPPDATA 'Packages') $FamilyName
+  if (Test-Path -LiteralPath $dir -PathType Container) { (Get-Item -LiteralPath $dir).FullName } else { $null }
 }
 
-# Record the installed package as this run's, or check that it already is.
-# Only -New (step 6, straight after a clean install) writes the record; without
-# it a missing record is an error, so no later step can adopt another install.
-function Update-PilotInstallRecord {
-  param([Parameter(Mandatory)][string]$RunPath, [switch]$New)
-  $installed = @(Get-AppxPackage $script:PackageName)
-  if ($installed.Count -ne 1) { throw "Expected one installed pilot package; found $($installed.Count)." }
-  $data = Get-PilotDataFolder $installed[0].PackageFamilyName
-  if (-not $data) { throw "No data folder for $($installed[0].PackageFamilyName) under %LOCALAPPDATA%\Packages." }
-  $file = Join-Path $RunPath 'install-record.json'
-  if (-not $New) {
-    $record = if (Test-Path -LiteralPath $file) { Get-Content -LiteralPath $file -Raw | ConvertFrom-Json } else { $null }
-    $problem = Get-InstallOwnershipProblem -Record $record -FamilyName $installed[0].PackageFamilyName -DataCreatedTicks $data.CreationTimeUtc.Ticks
-    if ($problem) { throw "The installed pilot package is not this run's: $problem" }
-  } else {
-    [pscustomobject]@{
-      FamilyName = $installed[0].PackageFamilyName
-      DataFolder = $data.FullName
-      DataCreatedTicks = $data.CreationTimeUtc.Ticks
-      DataCreatedUtc = $data.CreationTimeUtc.ToString('o')
-    } | ConvertTo-Json | Set-Content -LiteralPath $file
-  }
+# The marker's folder: LocalState, which Windows creates with the data folder.
+function Get-PilotMarkerPath {
+  param([Parameter(Mandatory)][string]$FamilyName)
+  $data = Get-PilotDataFolder $FamilyName
+  if (-not $data) { return $null }
+  $state = Join-Path $data 'LocalState'
+  if (-not (Test-Path -LiteralPath $state -PathType Container)) { return $null }
+  Join-Path $state $script:MarkerName
+}
+
+function Read-PilotJson {
+  param([string]$Path)
+  if ($Path -and (Test-Path -LiteralPath $Path -PathType Leaf)) { Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json } else { $null }
+}
+
+function Get-PilotInstallRecord {
+  param([Parameter(Mandatory)][string]$RunPath)
+  Read-PilotJson (Join-Path $RunPath 'install-record.json')
 }
 
 # Pure: why the installed package can't be shown to be this run's install, or
-# $null when it can. Inputs are the run's install-record.json and the
-# installed package's family name and data-folder creation time.
+# $null when it can. Inputs: the run's install record, the installed
+# package's family name, and the marker read from its data folder.
 function Get-InstallOwnershipProblem {
-  param([object]$Record, [string]$FamilyName, [Nullable[long]]$DataCreatedTicks)
+  param([object]$Record, [string]$FamilyName, [object]$Marker)
   if (-not $Record) { return 'this run has no install-record.json (Step6-InstallA.ps1 writes it)' }
+  if (-not $Record.RunId) { return 'the install record has no RunId' }
   if ("$($Record.FamilyName)" -ne $FamilyName) { return "family $FamilyName, recorded $($Record.FamilyName)" }
-  if ($null -eq $DataCreatedTicks) { return 'its data folder is missing' }
-  if ([long]$Record.DataCreatedTicks -ne $DataCreatedTicks) {
-    return "its data folder was created at $([datetime]::new($DataCreatedTicks, [DateTimeKind]::Utc).ToString('o')), recorded $($Record.DataCreatedUtc): a later install"
-  }
+  if ($Record.Marked -ne $true) { return 'this run never marked its install (Step6-MarkInstall.ps1)' }
+  if (-not $Marker) { return 'its data folder has no pilot marker' }
+  if ("$($Marker.RunId)" -ne "$($Record.RunId)") { return "it is marked by another run ($($Marker.Run), RunId $($Marker.RunId))" }
+  $null
+}
+
+# The one installed pilot package, checked to be this run's.
+function Assert-PilotOwnsInstall {
+  param([Parameter(Mandatory)][string]$RunPath)
+  $installed = @(Get-AppxPackage $script:PackageName)
+  if ($installed.Count -ne 1) { throw "Expected one installed pilot package; found $($installed.Count)." }
+  $marker = Read-PilotJson (Get-PilotMarkerPath $installed[0].PackageFamilyName)
+  $problem = Get-InstallOwnershipProblem -Record (Get-PilotInstallRecord $RunPath) -FamilyName $installed[0].PackageFamilyName -Marker $marker
+  if ($problem) { throw "The installed pilot package is not shown to be this run's: $problem" }
+  $installed[0]
+}
+
+# Step 6, straight after a clean install of A: a new RunId, recorded unmarked.
+function New-PilotInstallRecord {
+  param([Parameter(Mandatory)][string]$RunPath, [Parameter(Mandatory)][string]$Version)
+  $installed = @(Get-AppxPackage $script:PackageName)
+  if ($installed.Count -ne 1) { throw "Expected one installed pilot package; found $($installed.Count)." }
+  [pscustomobject]@{
+    RunId = [guid]::NewGuid().ToString()
+    Run = $RunPath
+    FamilyName = $installed[0].PackageFamilyName
+    Version = $Version
+    Marked = $false
+  } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $RunPath 'install-record.json')
+}
+
+# Pure: why an unmarked install can't be marked as this run's, or $null.
+function Get-MarkProblem {
+  param([object]$Record, [object[]]$Installed, [string]$MarkerPath, [object]$ExistingMarker)
+  if (-not $Record) { return 'this run has no install-record.json: run Step6-InstallA.ps1' }
+  if ($Record.Marked -eq $true) { return 'this run already marked its install' }
+  if (@($Installed).Count -ne 1) { return "expected one installed pilot package; found $(@($Installed).Count)" }
+  if ("$($Installed[0].PackageFamilyName)" -ne "$($Record.FamilyName)") { return "family $($Installed[0].PackageFamilyName), recorded $($Record.FamilyName)" }
+  if ("$($Installed[0].Version)" -ne "$($Record.Version)") { return "version $($Installed[0].Version) is installed; this run installed $($Record.Version)" }
+  if (-not $MarkerPath) { return 'its data folder does not exist yet' }
+  if ($ExistingMarker) { return "it is already marked by another run ($($ExistingMarker.Run))" }
+  $null
+}
+
+# Write the marker into the installed package's data folder and mark the
+# record. Returns $true when marked, $false when the data folder doesn't exist
+# yet (start the app once, then Step6-MarkInstall.ps1); throws otherwise.
+function Set-PilotInstallMarker {
+  param([Parameter(Mandatory)][string]$RunPath)
+  $record = Get-PilotInstallRecord $RunPath
+  $installed = @(Get-AppxPackage $script:PackageName)
+  $markerPath = if ($installed.Count -eq 1) { Get-PilotMarkerPath $installed[0].PackageFamilyName } else { $null }
+  $problem = Get-MarkProblem -Record $record -Installed $installed -MarkerPath $markerPath -ExistingMarker (Read-PilotJson $markerPath)
+  if ($problem -eq 'its data folder does not exist yet') { return $false }
+  if ($problem) { throw "Can't mark the install as this run's: $problem" }
+  [pscustomobject]@{ RunId = $record.RunId; Run = $RunPath } | ConvertTo-Json | Set-Content -LiteralPath $markerPath
+  $record.Marked = $true
+  $record | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $RunPath 'install-record.json')
+  $true
+}
+
+# Cleanup: remove the pilot package only if it is this run's install. Returns
+# $null when nothing is installed or it was removed, or why it was left alone.
+function Remove-PilotRunPackage {
+  param([Parameter(Mandatory)][string]$RunPath)
+  $installed = @(Get-AppxPackage $script:PackageName)
+  if ($installed.Count -eq 0) { return $null }
+  if ($installed.Count -gt 1) { return "found $($installed.Count) installed pilot packages" }
+  $marker = Read-PilotJson (Get-PilotMarkerPath $installed[0].PackageFamilyName)
+  $problem = Get-InstallOwnershipProblem -Record (Get-PilotInstallRecord $RunPath) -FamilyName $installed[0].PackageFamilyName -Marker $marker
+  if ($problem) { return "left $($installed[0].PackageFullName) installed: $problem" }
+  Remove-AppxPackage -Package $installed[0].PackageFullName
   $null
 }
 
