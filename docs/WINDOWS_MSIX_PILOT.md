@@ -1,10 +1,12 @@
 # Free MSIX package for the Microsoft Store pilot
 
 Status, November 21, 2026: a Free x64 MSIX builds from the tested Store-channel
-tree. The first local pilot run (see **Pilot run 1** below) signed it with a
-test certificate, passed WACK's static checks, installed it, exported DOCX
-offline and upgraded it with the notebook and settings kept. No Partner Center
-account, reserved name, signing identity or submission exists.
+tree. In the first local pilot run (see **Pilot run 1** below) it was signed
+with a test certificate and installed, then upgraded with the notebook and
+settings kept. WACK reported an overall `PASS` on package A in static-only
+mode (it did not deploy the app), with one optional test failing. Offline DOCX
+export was confirmed on B after the upgrade, but not separately on A. No
+Partner Center account, reserved name, signing identity or submission exists.
 The broader proposal is in [WINDOWS_STORE_PROPOSAL.md](WINDOWS_STORE_PROPOSAL.md);
 the pilot sequence is planned in draft PR #134.
 
