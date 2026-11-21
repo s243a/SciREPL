@@ -1,8 +1,10 @@
 # Free MSIX package for the Microsoft Store pilot
 
-Status, November 14, 2026: a Free x64 MSIX builds from the tested Store-channel
-tree. It has **not** yet been installed, upgraded or run through WACK. No
-Partner Center account, reserved name, signing identity or submission exists.
+Status, November 21, 2026: a Free x64 MSIX builds from the tested Store-channel
+tree. The first local pilot run (see **Pilot run 1** below) signed it with a
+test certificate, passed WACK's static checks, installed it, exported DOCX
+offline and upgraded it with the notebook and settings kept. No Partner Center
+account, reserved name, signing identity or submission exists.
 The broader proposal is in [WINDOWS_STORE_PROPOSAL.md](WINDOWS_STORE_PROPOSAL.md);
 the pilot sequence is planned in draft PR #134.
 
@@ -273,8 +275,9 @@ there, and that is the owner's decision.
 
 ### 4. Portable baseline, before WACK
 
-WACK installs and launches the package, so the portable profile and the
-profile override are checked before it runs. Run a portable preview build
+WACK may install and launch the package (in pilot run 1 it reported
+"Running tests without application deployment" and only ran static checks),
+so the portable profile and the profile override are checked before it runs. Run a portable preview build
 once (for example the released portable zip, outside the repository), save a
 notebook named `portable-canary`, and close it. Don't run the portable app
 again until step 9. Then, in a normal PowerShell window:
@@ -313,7 +316,7 @@ rerun the block.
 
 ### 5. Windows App Certification Kit on package A
 
-In the administrator window from step 3. WACK installs and launches the
+In the administrator window from step 3. WACK may install and launch the
 package itself, so this block first checks, in this elevated session, that
 the baseline from step 4 exists and belongs to this same Windows account,
 and repeats the clean-state checks. `Get-AppxPackage` and `%APPDATA%` are
@@ -370,10 +373,14 @@ report, not by carrying on. An empty result can also mean the report's layout
 differs from what this block reads; record that too. A non-zero exit code
 stops the run even if a report was written.
 
+The gate reads only the overall result. Optional tests can fail under an
+overall `PASS`; list them from the report (each `<TEST>` with
+`OPTIONAL="TRUE"` and a `FAIL` result) in the run record.
+
 ### 6. Clean install of A
 
-WACK has installed, launched and removed the package, so the clean-install
-conditions are checked again. Any error while scanning for leftover data
+WACK may have installed, launched and removed the package, so the
+clean-install conditions are checked again. Any error while scanning for leftover data
 stops the block. In a normal PowerShell window:
 
 ```powershell
@@ -548,6 +555,36 @@ can be deleted. Turn the network back on. In an administrator window:
 
 Uninstalling removes the Store profile, including `store-canary`. Check that
 its package folder under `%LOCALAPPDATA%\Packages` is gone.
+
+### Pilot run 1 (November 20–21, 2026)
+
+Owner's Windows 10 Pro (build 19045) machine, PowerShell 7.6.10, Node
+22.20.0, Git for Windows 2.47 for the blocks, Windows SDK 10.0.19041
+(MakeAppx, signtool, App Certification Kit). Run folder
+`C:\scirepl-store-pilot\run-1`, kept.
+
+| Step | Result |
+| --- | --- |
+| 1. Package A | 1.5.0, channel `store`, commit `e4a296b` (#139 merge); 5/5 pilot build steps, 60/60 packaged tests |
+| 2. Package B | 1.5.1 from the same commit, separate LF clone; 5/5 steps, 60/60 tests |
+| 3. Signing | Test certificate in `LocalMachine\TrustedPeople` only; `signtool verify /pa` passed for both; signer thumbprint matched |
+| 4. Baseline | 194 files in the portable profile, with a `portable-canary` notebook |
+| 5. WACK on A | Overall `PASS` (kit 10.0.19041.5609), static checks only: no deployment. One optional test failed: **Blocked executables**, on strings such as `cmd`, `reg` and `bash` inside Electron/Chromium binaries (`SciREPL.exe`, `d3dcompiler_47.dll`, `dxcompiler.dll`, `.pak` files) and a `CreateProcessW` reference |
+| 6. Install A | Installed 1.5.0.0; `portable-canary` absent; `store-canary` (Python print, KaTeX formula) ran; theme set to light |
+| 7. Offline | Airplane mode plus Ethernet unplugged; check passed at 23:31:04. DOCX export from A was not separately confirmed |
+| 8. Upgrade | 1.5.0.0 → 1.5.1.0 offline; check passed again at 23:39:26; `store-canary` and light theme kept; DOCX export from B had the output and formula, with no network prompt |
+| 9. Profiles | Portable profile unchanged; Store profile at `%LOCALAPPDATA%\Packages\SciREPL.FreePilot.LocalTest_2xd92v2yysscm\LocalCache\Roaming\SciREPL-Free-Store` |
+| Cleanup | Package and its data folder removed; test certificate removed by thumbprint |
+
+Signed package SHA-256: A `5D16F53A…FAE8F8`, B `D90B4E5E…D90B262C` (full
+values in the run folder's `signed-packages.csv`).
+
+Fixed in this guide during the run, without changing what any gate requires:
+`npm ci` instead of `npm install` (npm reindents the committed lockfile), an
+LF clone for B, `npm.cmd` instead of `npm` (PowerShell 7's `npm.ps1` misreads
+splatted arguments), regenerating the licence notices after the version
+raise, and loading the Appx module through Windows PowerShell under
+PowerShell 7. Results of the optional checks below were not recorded.
 
 ### Other checks before inviting testers
 
