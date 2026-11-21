@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shape of a WACK 10.0.19041 command-line report (pilot run 1), trimmed. -->
+<REPORT xml:lang="en-CA" OVERALL_RESULT="PASS" VERSION="10.0.19041.5609" APP_TYPE="Centennial" APP_NAME="SciREPL.FreePilot.LocalTest" APP_VERSION="1.5.0.0" PARTIAL_RUN="FALSE">
+  <REQUIREMENTS>
+    <REQUIREMENT NUMBER="3" TITLE="Digitally signed file test">
+      <TEST INDEX="2" NAME="Install signed driver and executable files" OPTIONAL="TRUE">
+        <MESSAGES />
+        <RESULT><![CDATA[PASS]]></RESULT>
+      </TEST>
+    </REQUIREMENT>
+    <REQUIREMENT NUMBER="25" TITLE="Platform appropriate files test">
+      <TEST INDEX="88" NAME="Blocked executables" OPTIONAL="TRUE">
+        <MESSAGES>
+          <MESSAGE TEXT="File SciREPL.exe contains a blocked executable reference to &quot;cmd&quot;." />
+        </MESSAGES>
+        <RESULT><![CDATA[FAIL]]></RESULT>
+      </TEST>
+      <TEST INDEX="90" NAME="App manifest" OPTIONAL="FALSE">
+        <MESSAGES />
+        <RESULT><![CDATA[PASS]]></RESULT>
+      </TEST>
+    </REQUIREMENT>
+  </REQUIREMENTS>
+</REPORT>

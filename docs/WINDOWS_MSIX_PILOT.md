@@ -138,6 +138,10 @@ This tests a clean install and an upgrade of a test-signed package. It
 changes the machine's certificate store and installed apps, so the owner runs
 it. It needs the Windows SDK with the App Certification Kit.
 
+The same steps also exist as scripts in the repository, described in
+[WINDOWS_MSIX_PILOT_SCRIPTS.md](WINDOWS_MSIX_PILOT_SCRIPTS.md). They haven't
+been used for a run yet; the blocks below are what pilot run 1 ran.
+
 **How to run the blocks.** Each PowerShell block below is one gated step.
 Paste a whole block at once: it runs as a single unit (`. { … }`) and stops
 at the first failure, including a native tool's non-zero exit code. Don't
