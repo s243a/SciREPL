@@ -18,6 +18,10 @@ import { launchShell, createReporter, waitForAppReady } from './harness.mjs';
 
 const MARKER = 'electron-spike-persistence-marker';
 
+async function waitForVfsStore(page, timeout = 30_000) {
+  await page.waitForFunction(() => !!(window.vfsStore && window.vfsStore.isReady()), null, { timeout });
+}
+
 export default async function run() {
   const r = createReporter('persistence');
   const userDataDir = mkdtempSync(path.join(tmpdir(), 'scirepl-persist-'));
@@ -29,6 +33,9 @@ export default async function run() {
     let wrote;
     try {
       await waitForAppReady(first.page);
+      // The app opens its IndexedDB store asynchronously; until it is ready,
+      // saveToIndexedDB() returns false and saves nothing.
+      await waitForVfsStore(first.page);
 
       const originFirst = await first.page.evaluate(() => window.location.origin);
 
@@ -38,7 +45,7 @@ export default async function run() {
         // 1. SharedVFS -> IndexedDB
         const vfs = window.sharedVFS;
         vfs.writeFile('/shared/persist.txt', marker, 'test');
-        await vfs.saveToIndexedDB();
+        out.vfsSaved = await vfs.saveToIndexedDB();
         out.vfsWritten = vfs.readFile('/shared/persist.txt') === marker;
 
         // 2. A notebook, through the app's own manager.
@@ -96,6 +103,7 @@ export default async function run() {
       r.log('first launch: storage is marked persistent (not evictable)',
         durability.persisted === true, JSON.stringify(durability));
       r.log('first launch: SharedVFS write succeeded', wrote.vfsWritten === true);
+      r.log('first launch: SharedVFS saved to IndexedDB', wrote.vfsSaved === true, String(wrote.vfsSaved));
       r.log('first launch: direct IndexedDB write succeeded', wrote.directIdb === true);
       r.log('first launch: localStorage write succeeded', wrote.localStorage === true);
     } finally {
@@ -111,6 +119,7 @@ export default async function run() {
     const second = await launchShell({ userDataDir });
     try {
       await waitForAppReady(second.page);
+      await waitForVfsStore(second.page);
 
       const originSecond = await second.page.evaluate(() => window.location.origin);
       r.log('second launch: origin is unchanged', originSecond === 'app://scirepl', originSecond);
@@ -135,10 +144,14 @@ export default async function run() {
           req.onerror = () => resolve(false);
         });
 
-        // SharedVFS restores itself from IndexedDB during startup.
+        // What IndexedDB holds, independent of when the app's own startup
+        // restore runs; then SharedVFS's restore, the call the app makes at
+        // startup, so the check doesn't race it.
         try {
+          const stored = await window.vfsStore.loadSharedFiles();
+          out.vfsStored = stored.some((f) => f.path === '/shared/persist.txt' && f.content === marker);
           const vfs = window.sharedVFS;
-          if (typeof vfs.loadFromIndexedDB === 'function') await vfs.loadFromIndexedDB();
+          await vfs.restoreFromIndexedDB();
           out.vfs = vfs.readFile('/shared/persist.txt') === marker;
         } catch (e) {
           out.vfs = false;
@@ -152,8 +165,8 @@ export default async function run() {
 
       r.log('IndexedDB survives a full application restart', read.directIdb === true,
         JSON.stringify(read.databases));
-      r.log('SharedVFS content survives a full application restart', read.vfs === true,
-        read.vfsError || '');
+      r.log('SharedVFS content survives a full application restart', read.vfs === true && read.vfsStored === true,
+        read.vfsError || `stored in IndexedDB: ${read.vfsStored}, restored: ${read.vfs}`);
       r.log('localStorage survives a full application restart', read.localStorage === true);
     } finally {
       await second.close();
