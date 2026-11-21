@@ -84,6 +84,54 @@ function Assert-BaselineAccount {
   }
 }
 
+# Which run an install belongs to. Each run starts from a clean install
+# (Assert-NoLeftoverData), so the creation time of the package's data folder
+# identifies the install; it survives the A -> B upgrade. The record is kept in
+# the run folder as install-record.json.
+function Get-PilotDataFolder {
+  param([Parameter(Mandatory)][string]$FamilyName)
+  $dir = Join-Path "$env:LOCALAPPDATA\Packages" $FamilyName
+  if (Test-Path -LiteralPath $dir -PathType Container) { Get-Item -LiteralPath $dir } else { $null }
+}
+
+# Record the installed package as this run's, or check that it already is.
+# Only -New (step 6, straight after a clean install) writes the record; without
+# it a missing record is an error, so no later step can adopt another install.
+function Update-PilotInstallRecord {
+  param([Parameter(Mandatory)][string]$RunPath, [switch]$New)
+  $installed = @(Get-AppxPackage $script:PackageName)
+  if ($installed.Count -ne 1) { throw "Expected one installed pilot package; found $($installed.Count)." }
+  $data = Get-PilotDataFolder $installed[0].PackageFamilyName
+  if (-not $data) { throw "No data folder for $($installed[0].PackageFamilyName) under %LOCALAPPDATA%\Packages." }
+  $file = Join-Path $RunPath 'install-record.json'
+  if (-not $New) {
+    $record = if (Test-Path -LiteralPath $file) { Get-Content -LiteralPath $file -Raw | ConvertFrom-Json } else { $null }
+    $problem = Get-InstallOwnershipProblem -Record $record -FamilyName $installed[0].PackageFamilyName -DataCreatedTicks $data.CreationTimeUtc.Ticks
+    if ($problem) { throw "The installed pilot package is not this run's: $problem" }
+  } else {
+    [pscustomobject]@{
+      FamilyName = $installed[0].PackageFamilyName
+      DataFolder = $data.FullName
+      DataCreatedTicks = $data.CreationTimeUtc.Ticks
+      DataCreatedUtc = $data.CreationTimeUtc.ToString('o')
+    } | ConvertTo-Json | Set-Content -LiteralPath $file
+  }
+}
+
+# Pure: why the installed package can't be shown to be this run's install, or
+# $null when it can. Inputs are the run's install-record.json and the
+# installed package's family name and data-folder creation time.
+function Get-InstallOwnershipProblem {
+  param([object]$Record, [string]$FamilyName, [Nullable[long]]$DataCreatedTicks)
+  if (-not $Record) { return 'this run has no install-record.json (Step6-InstallA.ps1 writes it)' }
+  if ("$($Record.FamilyName)" -ne $FamilyName) { return "family $FamilyName, recorded $($Record.FamilyName)" }
+  if ($null -eq $DataCreatedTicks) { return 'its data folder is missing' }
+  if ([long]$Record.DataCreatedTicks -ne $DataCreatedTicks) {
+    return "its data folder was created at $([datetime]::new($DataCreatedTicks, [DateTimeKind]::Utc).ToString('o')), recorded $($Record.DataCreatedUtc): a later install"
+  }
+  $null
+}
+
 # Pure: what in the given network state counts as "not offline". Each input is
 # the output of the matching query in Get-OfflineState.
 function Get-OfflineProblem {

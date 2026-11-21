@@ -102,6 +102,20 @@ export default async function run() {
     r.log(`${f}: PowerShell 7, -Run, stop on error, exit codes checked`, problems.length === 0, problems.join('; '));
   }
 
+  const cleanup = readFileSync(path.join(PILOT_DIR, 'Cleanup.ps1'), 'utf8');
+  const ownership = cleanup.indexOf('Get-InstallOwnershipProblem');
+  r.log("cleanup removes the package only after checking it is this run's install",
+    ownership > 0 && ownership < cleanup.indexOf('Remove-AppxPackage') && !/\|\s*ForEach-Object\s*\{\s*Remove-AppxPackage/.test(cleanup));
+  r.log('step 6 records the install and step 8 checks it before and after the upgrade',
+    /Update-PilotInstallRecord \$pilot -New/.test(readFileSync(path.join(PILOT_DIR, 'Step6-InstallA.ps1'), 'utf8'))
+      && (readFileSync(path.join(PILOT_DIR, 'Step8-UpgradeB.ps1'), 'utf8').match(/^Update-PilotInstallRecord \$pilot\s/gm) || []).length === 2);
+
+  const common = readFileSync(path.join(PILOT_DIR, 'PilotCommon.psm1'), 'utf8');
+  const recordFn = common.slice(common.indexOf('function Update-PilotInstallRecord'), common.indexOf('function Get-InstallOwnershipProblem'));
+  r.log('only -New writes the install record; otherwise a missing record is an error',
+    /if \(-not \$New\) \{[\s\S]*Get-InstallOwnershipProblem[\s\S]*\} else \{[\s\S]*Set-Content/.test(recordFn)
+      && (recordFn.match(/Set-Content/g) || []).length === 1);
+
   // PowerShell itself, when available.
   const pwsh = process.env.SCIREPL_PWSH || 'pwsh';
   const probe = spawnSync(pwsh, ['-NoLogo', '-NoProfile', '-Command', '$PSVersionTable.PSVersion.Major'], { encoding: 'utf8' });

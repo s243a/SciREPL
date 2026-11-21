@@ -21,6 +21,8 @@ Assert-PortableUnchanged $pilot 'The portable profile changed before install (du
 
 $expected = "$((Get-PilotBuildInfo $pilot A).appVersion).0"
 Add-AppxPackage (Get-PilotPackage $pilot A).FullName
+# Mark this install as the run's, so only this run's cleanup removes it.
+Update-PilotInstallRecord $pilot -New
 # Check the result rather than trusting error propagation through the
 # Windows PowerShell compatibility session.
 $installed = @(Get-AppxPackage (Get-PilotPackageName))

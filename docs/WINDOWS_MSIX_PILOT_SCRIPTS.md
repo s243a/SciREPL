@@ -104,7 +104,9 @@ from strings inside Electron's own binaries. WACK may run static checks only
 ```
 
 Repeats the clean-install checks, installs A, and checks that exactly A's
-version is installed. Then by hand, with the network on:
+version is installed. It records the install in `$run\install-record.json`:
+the package family and when its data folder was created. Each run starts
+from a clean install, so that identifies this run's install. Then by hand, with the network on:
 
 1. Start SciREPL from the Start menu. `portable-canary` must **not** appear.
 2. Create a notebook named `store-canary` with a Python cell that prints
@@ -137,7 +139,8 @@ check the output and the formula, and close the app.
 ```
 
 The upgrade installs B from its file, so it needs no network, and must
-install exactly B's version. Then start SciREPL: `store-canary` must still be
+install exactly B's version. It checks the install record before and after:
+the installed A must be this run's, and the upgrade must keep its data folder. Then start SciREPL: `store-canary` must still be
 there with its output, and the setting kept. Export DOCX again and check it.
 
 ## 9. Profiles (normal window, network back on)
@@ -161,7 +164,18 @@ inviting testers** now: cleanup uninstalls the app.
 
 Removes the package (and with it `store-canary`) and this run's certificate,
 then checks that the package, its data folder and both certificate entries
-are gone. Keep `$run` as the record; `$run\upgrade-src` can be deleted.
+are gone. It removes the package only if it matches this run's install record.
+A package from another run, or one with no record, is left installed and the
+script fails after removing this run's certificate: cleanup of an old run
+can't uninstall a later pilot and its test notebook. If you have checked
+that the installed pilot is yours to remove, remove it by hand with the
+block guide's cleanup.
+
+The record relies on Windows creating the package's data folder under
+`%LOCALAPPDATA%\Packages` at install time. That is untested until a run uses
+these scripts: if step 6 stops with "No data folder", A is installed with no
+record, so remove it with the block guide's cleanup, report it, and don't
+loosen the check. Keep `$run` as the record; `$run\upgrade-src` can be deleted.
 
 ## Recording the run
 
@@ -185,4 +199,6 @@ script and how it was fixed.
   Windows PowerShell compatibility session, so the scripts check the result.
 - Step 5 lists failed optional WACK tests. The gate is still the overall
   result.
+- Cleanup removes the package only when it is this run's install; the block
+  guide's cleanup removes any installed pilot package.
 - Cleanup skips a certificate entry that is already gone, so it can be rerun.

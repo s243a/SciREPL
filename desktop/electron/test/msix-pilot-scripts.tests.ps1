@@ -46,3 +46,18 @@ Out-Check 'WACK: the overall result is read from the REPORT attribute' ($s.Overa
 Out-Check 'WACK: failed optional tests are listed' (@($s.FailedOptional).Count -eq 1 -and $s.FailedOptional[0] -eq 'Blocked executables') (@($s.FailedOptional) -join ', ')
 $s = Get-WackSummary ([xml]'<REPORT><REQUIREMENTS /></REPORT>')
 Out-Check 'WACK: a report without OVERALL_RESULT gives an empty result (the gate fails closed)' ($s.Overall -eq '') $s.Overall
+
+$ticks = [datetime]::new(2026, 11, 20, 23, 20, 0, [DateTimeKind]::Utc).Ticks
+$record = [pscustomobject]@{ FamilyName = 'SciREPL.FreePilot.LocalTest_2xd92v2yysscm'; DataCreatedTicks = $ticks; DataCreatedUtc = '2026-11-20T23:20:00Z' }
+$p = Get-InstallOwnershipProblem -Record $record -FamilyName $record.FamilyName -DataCreatedTicks $ticks
+Out-Check "cleanup: the run's own install (same data folder) may be removed" ($null -eq $p) "$p"
+$p = Get-InstallOwnershipProblem -Record $record -FamilyName $record.FamilyName -DataCreatedTicks ($ticks + [timespan]::TicksPerDay)
+Out-Check "cleanup: a later run's install of the same package is left alone" ($p -match 'a later install') "$p"
+$p = Get-InstallOwnershipProblem -Record $null -FamilyName $record.FamilyName -DataCreatedTicks $ticks
+Out-Check 'cleanup: without an install record the package is left alone' ($p -match 'install-record.json') "$p"
+$p = Get-InstallOwnershipProblem -Record $record -FamilyName 'SciREPL.FreePilot.LocalTest_other' -DataCreatedTicks $ticks
+Out-Check 'cleanup: a different package family is left alone' ($p -match 'family') "$p"
+$p = Get-InstallOwnershipProblem -Record $record -FamilyName $record.FamilyName -DataCreatedTicks $null
+Out-Check 'cleanup: a missing data folder is not taken as ownership' ($p -match 'missing') "$p"
+$p = Get-InstallOwnershipProblem -Record ('{"FamilyName":"F","DataCreatedTicks":' + $ticks + ',"DataCreatedUtc":"x"}' | ConvertFrom-Json) -FamilyName 'F' -DataCreatedTicks $ticks
+Out-Check 'cleanup: a record read back from JSON matches exactly' ($null -eq $p) "$p"
