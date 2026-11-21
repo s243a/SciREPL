@@ -144,17 +144,13 @@ export default async function run() {
           req.onerror = () => resolve(false);
         });
 
-        // What IndexedDB holds, independent of when the app's own startup
-        // restore runs; then SharedVFS's restore, the call the app makes at
-        // startup, so the check doesn't race it.
+        // What IndexedDB holds. Whether the app restored it into SharedVFS
+        // by itself at startup is checked below, without calling the restore.
         try {
           const stored = await window.vfsStore.loadSharedFiles();
           out.vfsStored = stored.some((f) => f.path === '/shared/persist.txt' && f.content === marker);
-          const vfs = window.sharedVFS;
-          await vfs.restoreFromIndexedDB();
-          out.vfs = vfs.readFile('/shared/persist.txt') === marker;
         } catch (e) {
-          out.vfs = false;
+          out.vfsStored = false;
           out.vfsError = String(e && e.message);
         }
 
@@ -163,10 +159,22 @@ export default async function run() {
         return out;
       }, MARKER);
 
+      // The app restores SharedVFS from IndexedDB asynchronously during
+      // startup; wait for that restore rather than performing it.
+      let restored = false;
+      try {
+        await second.page.waitForFunction((marker) => {
+          try { return window.sharedVFS.readFile('/shared/persist.txt') === marker; } catch { return false; }
+        }, MARKER, { timeout: 30_000 });
+        restored = true;
+      } catch { /* reported below */ }
+
       r.log('IndexedDB survives a full application restart', read.directIdb === true,
         JSON.stringify(read.databases));
-      r.log('SharedVFS content survives a full application restart', read.vfs === true && read.vfsStored === true,
-        read.vfsError || `stored in IndexedDB: ${read.vfsStored}, restored: ${read.vfs}`);
+      r.log('SharedVFS content is still in IndexedDB after a full application restart', read.vfsStored === true,
+        read.vfsError || '');
+      r.log('the app restores SharedVFS content by itself at startup', restored,
+        restored ? '' : 'not in SharedVFS 30 s after the store opened');
       r.log('localStorage survives a full application restart', read.localStorage === true);
     } finally {
       await second.close();
