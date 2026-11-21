@@ -183,8 +183,9 @@ window at the repository root:
 ### 2. Package B: the upgrade, from the same commit
 
 The upgrade package comes from a second clone, checked out at A's commit,
-with only the patch version raised. The raise stays uncommitted, so B records
-the same commit as A. The local-test identity allows that; a Partner Center
+with only the patch version raised and the licence notices regenerated
+(they name the app version). These changes stay uncommitted, so B records the
+same commit as A. The local-test identity allows that; a Partner Center
 build does not. Same window, same folder (the setup downloads about 1 GB
 again):
 
