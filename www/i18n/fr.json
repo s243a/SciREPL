@@ -954,6 +954,8 @@
     "packageInstall.failed": "L’opération a échoué. Aucune installation n’a été convertie silencieusement en installation de session.",
     "packageInstall.unsupported": "Ce format ne permet pas de conserver le paquet installé. Utilisez une archive ZIP ou tar.gz.",
     "packageInstall.restoreFailed": "Certains paquets enregistrés n’ont pas pu être restaurés : {names}.",
+    "packageInstall.conflict": "Ce paquet remplacerait un fichier existant. Déplacez ou renommez le fichier en conflit, ou utilisez un autre dossier pour le paquet, puis réessayez.",
+    "packageInstall.edits": "Pour conserver les modifications des fichiers de support du paquet, enregistrez une copie à un autre emplacement.",
     "packageInstall.notice": "Installation de paquets"
   }
 }

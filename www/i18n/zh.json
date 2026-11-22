@@ -942,6 +942,8 @@
     "packageInstall.failed": "软件包操作失败。不会静默改为仅此会话安装。",
     "packageInstall.unsupported": "此归档格式无法保持安装。请使用ZIP或tar.gz软件包。",
     "packageInstall.restoreFailed": "部分已保存软件包无法恢复：{names}。",
+    "packageInstall.conflict": "此软件包将替换现有文件。请移动或重命名冲突的文件，或为软件包使用其他文件夹，然后重试。",
+    "packageInstall.edits": "若要保留对软件包支持文件的修改，请将副本保存到其他路径。",
     "packageInstall.notice": "软件包安装"
   }
 }

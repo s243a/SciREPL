@@ -943,6 +943,8 @@
     "packageInstall.failed": "パッケージの操作に失敗しました。セッション限定のインストールに自動で切り替わることはありません。",
     "packageInstall.unsupported": "この形式はインストール状態を保存できません。ZIPまたはtar.gzパッケージを使用してください。",
     "packageInstall.restoreFailed": "一部の保存済みパッケージを復元できませんでした: {names}。",
+    "packageInstall.conflict": "このパッケージは既存のファイルを置き換えようとしています。競合するファイルを移動するか名前を変更するか、別のパッケージフォルダーを使用してから、もう一度お試しください。",
+    "packageInstall.edits": "パッケージの補助ファイルへの変更を保持するには、別のパスにコピーを保存してください。",
     "packageInstall.notice": "パッケージのインストール"
   }
 }

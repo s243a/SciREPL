@@ -951,6 +951,8 @@
     "packageInstall.failed": "La operación del paquete falló. No se cambió silenciosamente a una instalación solo para esta sesión.",
     "packageInstall.unsupported": "Este formato de archivo no se puede conservar instalado. Usa un paquete ZIP o tar.gz.",
     "packageInstall.restoreFailed": "No se pudieron restaurar algunos paquetes guardados: {names}.",
+    "packageInstall.conflict": "Este paquete reemplazaría un archivo existente. Mueve o cambia el nombre del archivo en conflicto, o usa otra carpeta para el paquete y vuelve a intentarlo.",
+    "packageInstall.edits": "Para conservar los cambios en los archivos auxiliares del paquete, guarda una copia en otra ruta.",
     "packageInstall.notice": "Instalación de paquetes"
   }
 }

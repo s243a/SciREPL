@@ -1246,6 +1246,8 @@
     "packageInstall.failed": "The package operation failed. Nothing was silently changed to a session-only install.",
     "packageInstall.unsupported": "This archive format cannot be kept installed. Use a ZIP or tar.gz package.",
     "packageInstall.restoreFailed": "Some saved packages could not be restored: {names}.",
+    "packageInstall.conflict": "This package would replace an existing file. Move or rename the conflicting file, or use a different package folder, then try again.",
+    "packageInstall.edits": "To keep edits to package support files, save a copy under a different path.",
     "packageInstall.notice": "Package installation"
   }
 }

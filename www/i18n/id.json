@@ -950,6 +950,8 @@
     "packageInstall.failed": "Operasi paket gagal. Instalasi tidak diam-diam diubah menjadi khusus sesi.",
     "packageInstall.unsupported": "Format arsip ini tidak dapat dipertahankan terinstal. Gunakan paket ZIP atau tar.gz.",
     "packageInstall.restoreFailed": "Beberapa paket tersimpan tidak dapat dipulihkan: {names}.",
+    "packageInstall.conflict": "Paket ini akan mengganti berkas yang sudah ada. Pindahkan atau ganti nama berkas yang bentrok, atau gunakan folder paket lain, lalu coba lagi.",
+    "packageInstall.edits": "Untuk menyimpan perubahan pada berkas pendukung paket, simpan salinan di jalur yang berbeda.",
     "packageInstall.notice": "Instalasi paket"
   }
 }

@@ -658,6 +658,7 @@ class SharedVFS {
     snapshot() {
         const files = [];
         for (const [path, entry] of this._files) {
+            if (window.packageInstalls?.isSessionOnlyManagedPath?.(path)) continue;
             // Only snapshot string content (skip large binary)
             if (typeof entry.content === 'string') {
                 files.push({
@@ -718,6 +719,7 @@ class SharedVFS {
 
         const files = [];
         for (const [path, entry] of this._files) {
+            if (window.packageInstalls?.isSessionOnlyManagedPath?.(path)) continue;
             files.push({
                 path,
                 content: entry.content,

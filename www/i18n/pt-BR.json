@@ -949,6 +949,8 @@
     "packageInstall.failed": "A operação do pacote falhou. Nenhuma instalação foi alterada silenciosamente para apenas esta sessão.",
     "packageInstall.unsupported": "Este formato não permite manter o pacote instalado. Use um pacote ZIP ou tar.gz.",
     "packageInstall.restoreFailed": "Não foi possível restaurar alguns pacotes salvos: {names}.",
+    "packageInstall.conflict": "Este pacote substituiria um arquivo existente. Mova ou renomeie o arquivo em conflito, ou use outra pasta para o pacote e tente novamente.",
+    "packageInstall.edits": "Para manter alterações nos arquivos de suporte do pacote, salve uma cópia em outro caminho.",
     "packageInstall.notice": "Instalação de pacotes"
   }
 }

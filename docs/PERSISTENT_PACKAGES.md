@@ -66,6 +66,21 @@ later installed packages win conflicts among archive-restored files. Reusing
 an already saved archive records the user's latest explicit installation
 order without storing duplicate bytes.
 
+Package-managed Prolog files and exact search-path pairs are not copied into
+ordinary workspace snapshots: otherwise session-only files, or support from
+a removed archive, could silently survive through that second persistence
+mechanism. Persistent SharedVFS files retain normal startup restoration before
+Python or another kernel runs. Session-only shared files are excluded from
+SharedVFS snapshots. Removing a retained archive does not delete independent
+persistent SharedVFS copies.
+
+Edits to managed Prolog files and session-only shared files stay in the current
+app session; save a copy under a different path to keep those edits as ordinary
+user data. Persistent SharedVFS edits retain their existing storage behavior.
+Initial managed imports reject conflicting unowned destinations before any
+write, rather than delete or replace an existing user copy. Unknown legacy
+snapshot files are not automatically deleted or claimed as package-owned.
+
 ## Local and device verification
 
 Use Node 22 and `npm run test:package-persistence`. The suite covers real browser

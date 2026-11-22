@@ -12,7 +12,7 @@ function harness() {
     context.window = context;
     context.t = key => key;
     context.kernelManager = { async ensureReady() {}, getKernel: () => ({ getVFS: () => vfs, isReady: () => false }) };
-    context.sharedVFS = { mkdir() { calls.shared++; }, writeFile() { calls.shared++; } };
+    context.sharedVFS = { exists: path => path === '/shared/edited.txt', mkdir() { calls.shared++; }, writeFile() { calls.shared++; } };
     context.notebookManager = { loadFromManifest() { calls.notebooks++; }, createNotebook() { calls.notebooks++; } };
     vm.runInContext(read('www/js/package_loader.js'), context);
     const loader = context.packageLoader;
@@ -61,6 +61,51 @@ test('prepared shared-file installs fail explicitly when storage is missing or a
     await assert.rejects(loader.loadPrepared(prepared), /filesystem is unavailable/);
     context.sharedVFS = { mkdir() {}, writeFile() { return false; } };
     await assert.rejects(loader.loadPrepared(prepared), /not permitted/);
+});
+test('initial prepared import rejects an unowned collision before writing other package files', async () => {
+    const { context, loader, calls, files } = harness();
+    context.packageInstalls = { isManagedPath: () => false };
+    await assert.rejects(loader.loadPrepared({ manifest: { files: [
+        { src: 'shared.txt', dest: '/shared/new.txt', target: 'shared' },
+        { src: 'edited.pl', dest: '/user/edited.pl' },
+    ] }, filename: 'conflict.zip', fileMap: new Map([['shared.txt', 'new'], ['edited.pl', 'replacement']]) }), error => error.code === 'PACKAGE_FILE_CONFLICT');
+    assert.equal(calls.shared, 0);
+    assert.equal(files.get('/user/edited.pl'), 'user edit');
+});
+test('prepared imports track only written support paths with their explicit mode', async () => {
+    const { context, loader, files } = harness();
+    const managed = new Map();
+    context.packageInstalls = {
+        isManagedPath: path => managed.has(path), isSessionOnlyManagedPath: path => managed.get(path) === false,
+        trackSupportFiles(paths, { persistent }) { for (const path of paths) managed.set(path, persistent); },
+    };
+    const make = value => ({ filename: 'owned.zip', manifest: { files: [{ src: 'lib.pl', dest: '/user/lib.pl' }] }, fileMap: new Map([['lib.pl', value]]) });
+    await loader.loadPrepared(make('persistent'), { persistent: true });
+    assert.equal(managed.get('/user/lib.pl'), true);
+    await loader.loadPrepared(make('session'), { persistent: false });
+    assert.equal(managed.get('/user/lib.pl'), false);
+    assert.equal(files.get('/user/lib.pl'), 'session');
+});
+test('session-only Shared import cannot discard a previously retained Shared snapshot', async () => {
+    const { context, loader, calls } = harness();
+    context.sharedVFS.exists = () => true;
+    context.packageInstalls = { isManagedPath: () => true, isSessionOnlyManagedPath: () => false };
+    await assert.rejects(loader.loadPrepared({ filename: 'session.zip', manifest: { files: [{ src: 'lib.py', dest: '/shared/lib.py', target: 'shared' }] },
+        fileMap: new Map([['lib.py', 'replacement']]) }), error => error.code === 'PACKAGE_FILE_CONFLICT');
+    assert.equal(calls.shared, 0);
+});
+test('archive restore fills missing Shared support but preserves an existing user copy', async () => {
+    const { context, loader, calls } = harness();
+    const owned = [];
+    context.packageInstalls = { trackSupportFiles(paths, options) { owned.push({ paths, ...options }); } };
+    await loader.remountPrepared({ manifest: { files: [
+        { src: 'missing.py', dest: '/shared/missing.py', target: 'shared' },
+        { src: 'edited.txt', dest: '/shared/edited.txt', target: 'shared' },
+    ] }, fileMap: new Map([['missing.py', 'x = 1'], ['edited.txt', 'old copy']]) });
+    assert.equal(owned.length, 1);
+    assert.deepEqual(Array.from(owned[0].paths), ['/shared/missing.py']);
+    assert.equal(owned[0].persistent, true);
+    assert.ok(calls.shared > 0);
 });
 test('concurrent first Prolog cells await the same restoration; destroy resets it', async () => {
     const { context } = harness();

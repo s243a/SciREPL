@@ -942,6 +942,8 @@
     "packageInstall.failed": "패키지 작업에 실패했습니다. 세션 전용 설치로 자동 변경되지 않았습니다.",
     "packageInstall.unsupported": "이 아카이브 형식은 설치 상태를 유지할 수 없습니다. ZIP 또는 tar.gz 패키지를 사용하세요.",
     "packageInstall.restoreFailed": "일부 저장된 패키지를 복원할 수 없습니다: {names}.",
+    "packageInstall.conflict": "이 패키지는 기존 파일을 덮어쓰게 됩니다. 충돌하는 파일을 이동하거나 이름을 바꾸거나, 다른 패키지 폴더를 사용한 다음 다시 시도하세요.",
+    "packageInstall.edits": "패키지 지원 파일의 수정 내용을 유지하려면 다른 경로에 복사본을 저장하세요.",
     "packageInstall.notice": "패키지 설치"
   }
 }

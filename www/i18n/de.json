@@ -957,6 +957,8 @@
     "packageInstall.failed": "Der Paketvorgang ist fehlgeschlagen. Es wurde nicht stillschweigend zu einer reinen Sitzungsinstallation gewechselt.",
     "packageInstall.unsupported": "Dieses Archivformat lässt sich nicht dauerhaft installieren. Verwenden Sie ein ZIP- oder tar.gz-Paket.",
     "packageInstall.restoreFailed": "Einige gespeicherte Pakete konnten nicht wiederhergestellt werden: {names}.",
+    "packageInstall.conflict": "Dieses Paket würde eine vorhandene Datei ersetzen. Verschieben Sie die betroffene Datei oder benennen Sie sie um, oder verwenden Sie einen anderen Paketordner. Versuchen Sie es anschließend erneut.",
+    "packageInstall.edits": "Um Änderungen an den Unterstützungsdateien des Pakets zu behalten, speichern Sie eine Kopie unter einem anderen Pfad.",
     "packageInstall.notice": "Paketinstallation"
   }
 }

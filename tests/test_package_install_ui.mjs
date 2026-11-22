@@ -93,6 +93,18 @@ try {
             check(button && button.x >= 0 && button.y >= 0 && button.x + button.width <= viewport.width + 1 && button.y + button.height <= viewport.height + 1,
                 `${locale} install button stays within viewport`);
             await page.locator('#package-install-cancel').click(); await chosen(null);
+            await page.evaluate(() => {
+                window.conflictNoticeClosed = false;
+                PackageInstallUI.notify({ code: 'PACKAGE_FILE_CONFLICT' }).then(() => { window.conflictNoticeClosed = true; });
+            });
+            await page.locator('#package-install-notice-modal').waitFor();
+            check(await page.locator('#package-install-notice-modal p').innerText() === strings['packageInstall.conflict'],
+                `${locale} file-conflict notice is translated`);
+            check(await page.locator('#package-install-notice-modal [role="dialog"]').evaluate(element => element.scrollWidth <= element.clientWidth + 1),
+                `${locale} file-conflict notice has no horizontal overflow`);
+            await page.locator('#package-install-notice-close').click();
+            await page.waitForFunction(() => conflictNoticeClosed);
+            check(await page.locator('#package-install-notice-modal').count() === 0, `${locale} file-conflict notice closes with no queued dialog`);
         }
     }
     await page.setViewportSize({ width: 360, height: 800 });

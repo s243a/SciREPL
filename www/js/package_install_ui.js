@@ -6,6 +6,7 @@
         title: 'Install {name}',
         persistent: 'Keep installed on this device',
         session: 'This session only',
+        edits: 'To keep edits to package support files, save a copy under a different path.',
         explanation: 'Notebooks are saved in either mode. Keeping the package also restores its supporting files offline after restarting; it does not run notebook cells.',
         manage: 'Saved packages',
         managedHelp: 'Removing a saved copy keeps existing notebooks and this session\'s files. Its supporting files will no longer be restored after restarting.',
@@ -19,6 +20,7 @@
         corrupt: 'The package archive is invalid or damaged. Import it again from a trusted source.',
         unavailable: 'Saved package storage is unavailable. Nothing was installed. You can retry or explicitly choose this session only.',
         failed: 'The package operation failed. Nothing was silently changed to a session-only install.',
+        conflict: 'This package would replace an existing file. Move or rename the conflicting file, or use a different package folder, then try again.',
         unsupported: 'This archive format cannot be kept installed. Use a ZIP or tar.gz package.',
         restoreFailed: 'Some saved packages could not be restored: {names}.',
         notice: 'Package installation',
@@ -121,7 +123,7 @@
                         finish(chosen === 'persistent' || chosen === 'session' ? chosen : null);
                     }, true);
                     buttons.append(cancel, install);
-                    modal.panel.append(help, choices, node('p', text('limits')), buttons);
+                    modal.panel.append(help, choices, node('p', text('edits')), node('p', text('limits')), buttons);
                     choices.querySelector('input:checked').focus();
                 } catch (_) { finish(null); }
             });
@@ -132,6 +134,7 @@
                 ARCHIVE_TOO_LARGE: 'tooLarge', ARCHIVE_STORE_FULL: 'full',
                 ARCHIVE_CORRUPT: 'corrupt', ARCHIVE_INVALID: 'corrupt', INVALID_ARCHIVE: 'corrupt',
                 STORE_UNAVAILABLE: 'unavailable', ARCHIVE_UNSUPPORTED: 'unsupported',
+                PACKAGE_FILE_CONFLICT: 'conflict',
             }[error?.code] || 'failed';
             return text(key);
         }

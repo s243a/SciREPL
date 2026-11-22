@@ -12,8 +12,31 @@
             this.restoring = false;
             this.operationPromise = null;
             this.restorePromise = null;
+            // Prolog support is restored from archives, not generic kernel
+            // snapshots. SharedVFS may still retain persistent-mode files for
+            // Python-first startup; session mode must not leak through either
+            // persistence system. Exact paths/pairs avoid claiming user files.
+            this.managedSupportFiles = new Map();
+            this.managedSupportSearchPaths = new Set();
         }
         identity(pkg) { return JSON.stringify([pkg?.id || null, pkg?.name || null]); }
+        trackSupportFiles(paths, { persistent = false } = {}) {
+            for (const path of paths || []) {
+                if (typeof path === 'string') this.managedSupportFiles.set(path, persistent === true);
+            }
+        }
+        trackSupportSearchPaths(paths) {
+            for (const path of paths || []) {
+                if (path && typeof path.alias === 'string' && typeof path.dir === 'string') {
+                    this.managedSupportSearchPaths.add(JSON.stringify([path.alias, path.dir]));
+                }
+            }
+        }
+        isManagedPath(path) { return this.managedSupportFiles.has(path); }
+        isSessionOnlyManagedPath(path) { return this.managedSupportFiles.get(path) === false; }
+        isManagedSearchPath(alias, dir) {
+            return this.managedSupportSearchPaths.has(JSON.stringify([alias, dir]));
+        }
         async refresh() {
             const records = await this.store.list();
             this.savedIds = new Set(records.map(record => record.id));
@@ -41,7 +64,17 @@
                     record = await this.store.save({ name: prepared.name, filename: prepared.filename, bytes: prepared.bytes });
                     this.savedIds.add(record.id);
                 }
-                const result = await window.packageLoader.loadPrepared(prepared);
+                const result = await window.packageLoader.loadPrepared(prepared, { persistent: choice === 'persistent' });
+                // Await normal snapshots too. Package-owned Prolog paths must
+                // not leak into the generic workspace cache, and persistent
+                // SharedVFS support must be durable before Python-first startup.
+                await window.sessionManager?.savePrologState?.();
+                const sharedSaved = await window.sessionManager?.saveSharedState?.();
+                const hasSharedSupport = prepared.manifest?.files?.some(spec => spec.target === 'shared' || spec.target === 'all'
+                    || /^\/(?:shared|tmp|education)\//.test(spec.dest));
+                if (choice === 'persistent' && hasSharedSupport && sharedSaved === false) {
+                    throw Object.assign(new Error('Package snapshot could not be saved.'), { code: 'PACKAGE_SNAPSHOT_FAILED' });
+                }
                 if (pkg) {
                     if (record) pkg._localArchiveId = record.id;
                     else { delete pkg._localArchiveId; this.sessionIds.add(this.identity(pkg)); }
