@@ -1,11 +1,12 @@
 # Free MSIX package for the Microsoft Store pilot
 
-Status, November 21, 2026: a Free x64 MSIX builds from the tested Store-channel
-tree. In the first local pilot run (see **Pilot run 1** below) it was signed
-with a test certificate and installed, then upgraded with the notebook and
-settings kept. WACK reported an overall `PASS` on package A in static-only
-mode (it did not deploy the app), with one optional test failing. Offline DOCX
-export was confirmed on B after the upgrade, but not separately on A. No
+Status, November 23, 2026: a Free x64 MSIX builds from the tested Store-channel
+tree. Three local pilot runs (see **Pilot run 1** and **Pilot runs 2 and 3**
+below) signed it with a test certificate, installed it, and upgraded it with
+the notebook and settings kept. WACK reported an overall `PASS` on package A
+in static-only mode (it did not deploy the app), with one optional test
+failing. Offline DOCX export was confirmed on both A and B. Runs 2 and 3 used
+the repository scripts. No
 Partner Center account, reserved name, signing identity or submission exists.
 The broader proposal is in [WINDOWS_STORE_PROPOSAL.md](WINDOWS_STORE_PROPOSAL.md);
 the pilot sequence is planned in draft PR #134.
@@ -139,8 +140,8 @@ changes the machine's certificate store and installed apps, so the owner runs
 it. It needs the Windows SDK with the App Certification Kit.
 
 The same steps also exist as scripts in the repository, described in
-[WINDOWS_MSIX_PILOT_SCRIPTS.md](WINDOWS_MSIX_PILOT_SCRIPTS.md). They haven't
-been used for a run yet; the blocks below are what pilot run 1 ran.
+[WINDOWS_MSIX_PILOT_SCRIPTS.md](WINDOWS_MSIX_PILOT_SCRIPTS.md). Pilot run 1
+used the blocks below; pilot runs 2 and 3 used the scripts.
 
 **How to run the blocks.** Each PowerShell block below is one gated step.
 Paste a whole block at once: it runs as a single unit (`. { … }`) and stops
@@ -592,6 +593,42 @@ LF clone for B, `npm.cmd` instead of `npm` (PowerShell 7's `npm.ps1` misreads
 splatted arguments), regenerating the licence notices after the version
 raise, and loading the Appx module through Windows PowerShell under
 PowerShell 7. Results of the optional checks below were not recorded.
+
+### Pilot runs 2 and 3 (November 21–23, 2026), with the scripts
+
+Same machine and tools as run 1, using the scripts in
+[WINDOWS_MSIX_PILOT_SCRIPTS.md](WINDOWS_MSIX_PILOT_SCRIPTS.md) from the
+owner's Windows-drive clone at `90e5066` (#142 merge). Run folders
+`C:\scirepl-store-pilot\run-2` and `run-3`, kept.
+
+Run 2 skipped step 9 by mistake before cleanup, so run 3 rebuilt both
+packages and repeated steps 3, 4, 6, 8 and 9 and cleanup, online, without
+WACK or the offline checks, which run 2 had passed.
+
+| Step | Run 2 | Run 3 |
+| --- | --- | --- |
+| 1–2. Packages | A 1.5.0, B 1.5.1, both from `90e5066`; 60/60 packaged tests each | Same |
+| 3. Signing | Both verified; certificate `70AD95EE…F0E47594` | Both verified; certificate `A42BF199…02C65331` |
+| 4. Baseline | 194 portable files | 194 portable files |
+| 5. WACK on A | Overall `PASS` (kit 10.0.19041.5609), static checks only; optional **Blocked executables** failed, as in run 1 | Not run |
+| 6. Install A | Installed and marked 1.5.0.0; `portable-canary` absent; `store-canary` ran; a setting changed | Installed and marked 1.5.0.0; a notebook created and saved |
+| 7. Offline | Airplane mode plus Ethernet unplugged; check passed at 16:35:55. **DOCX export from A** had the output and formula, with no network prompt | Not run |
+| 8. Upgrade | 1.5.0.0 → 1.5.1.0 offline; check passed again at 16:40:42; `store-canary` and the setting kept; DOCX export from B correct | 1.5.0.0 → 1.5.1.0 online; the notebook kept |
+| 9. Profiles | Not run (see above) | Portable profile unchanged; Store profile at `%LOCALAPPDATA%\Packages\SciREPL.FreePilot.LocalTest_2xd92v2yysscm\LocalCache\Roaming\SciREPL-Free-Store` |
+| Cleanup | Package, data folder and certificate removed (marker matched) | Same |
+
+Signed package SHA-256: run 2 A `9C41C7DC…AF5E2577`, B `12002E8D…3D2B0B5D`;
+run 3 A `772B846D…4973453E`, B `52C2CE16…712EDE53` (full values in each run
+folder's `signed-packages.csv`).
+
+Findings:
+
+- Windows created the package's data folder at install, not at first launch,
+  so step 6 marked the install straight away without waiting.
+- No script needed a fix. The stops were operator slips, each caught before
+  any change: a `$pilot` left over from run 1, re-running step 3 on a run that
+  already had a certificate, and step 3 in a window that wasn't elevated.
+- Results of the optional checks below were still not recorded.
 
 ### Other checks before inviting testers
 

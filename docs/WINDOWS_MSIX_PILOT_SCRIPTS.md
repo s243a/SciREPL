@@ -4,12 +4,13 @@ This is the local MSIX pilot from [WINDOWS_MSIX_PILOT.md](WINDOWS_MSIX_PILOT.md)
 with each step as a script in the repository instead of a block pasted into
 PowerShell. The steps, the order, and the checks that stop a run are the same.
 
-**Status: not yet run end to end.** Pilot run 1 (November 20–21, 2026) used
-the pasted blocks, and that guide stays the tested reference. These scripts
-carry the same gates, plus checks that each install and the cleanup actually
-took effect. Until a run has used them, treat a surprise here as a script bug
-and compare with the block guide. If a script stops, fix the script, not the
-gate.
+**Status: run end to end.** Pilot runs 2 and 3 (November 21–23, 2026) used
+these scripts with no fixes needed; run 2 covered steps 1–8 and cleanup,
+offline DOCX on both A and B included, and run 3 repeated the install and
+upgrade through step 9 and cleanup. Results are in
+[WINDOWS_MSIX_PILOT.md](WINDOWS_MSIX_PILOT.md). Pilot run 1 used the pasted
+blocks, which stay as the reference. If a script stops, fix the script, not
+the gate.
 
 ## Before you start
 
