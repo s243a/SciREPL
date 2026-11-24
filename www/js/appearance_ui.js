@@ -151,6 +151,19 @@
                     this._refreshLandscapeStatusBar();
                 });
             }
+
+            const notebookWidth = $('appearance-notebook-width');
+            if (notebookWidth) {
+                notebookWidth.addEventListener('change', () => {
+                    window.appearance.setNotebookWidth(notebookWidth.value);
+                    this._refreshNotebookWidth();
+                });
+            }
+        }
+
+        _refreshNotebookWidth() {
+            const select = $('appearance-notebook-width');
+            if (select) select.value = window.appearance.getNotebookWidth();
         }
 
         /** What the header is actually using right now, in px. */
@@ -476,6 +489,7 @@
         refresh() {
             this._refreshTopMargin();
             this._refreshLandscapeStatusBar();
+            this._refreshNotebookWidth();
             this._refreshButtonScale();
             this._refreshTheme();
             this._refreshLanguage();

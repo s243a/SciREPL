@@ -42,6 +42,7 @@
         showFormulaShortcut: 'scirepl_appearance_show_formula_shortcut',
         shortcutPriority: 'scirepl_appearance_shortcut_priority',
         statusBarMode: 'scirepl_appearance_status_bar_mode', // never | landscape | always
+        notebookWidth: 'scirepl_appearance_notebook_width',  // standard | wide | full
         // CSS that was rolled back for hiding the way out of Appearance. Kept
         // rather than deleted: it is the user's work and may be one typo away
         // from what they wanted.
@@ -73,6 +74,17 @@
     ];
 
     const BUILTIN_THEMES = ['auto', 'dark', 'light'];
+
+    /**
+     * How wide the notebook column may grow on a large window (css/style.css,
+     * "Notebook width"). Below 1000px every choice is the historical 720px
+     * column, so this only changes desktop-sized windows. Standard is that
+     * 720px column everywhere; Wide (the default) caps it at 1200px; Full
+     * removes the cap. Wide is also what CSS does with no attribute at all,
+     * so the default needs nothing from this script to avoid a flash.
+     */
+    const NOTEBOOK_WIDTHS = ['standard', 'wide', 'full'];
+    const DEFAULT_NOTEBOOK_WIDTH = 'wide';
 
     /**
      * Dark is SciREPL's default, and it is a product decision rather than a
@@ -252,6 +264,12 @@
         getShowBrowseShortcut() { return this.getShortcutMode('browse') !== 'never'; }
         getShowFormulaShortcut() { return this.getShortcutMode('formula') !== 'never'; }
 
+        /** 'standard' | 'wide' | 'full'; anything else is the default. */
+        getNotebookWidth() {
+            const w = localStorage.getItem(KEYS.notebookWidth);
+            return NOTEBOOK_WIDTHS.includes(w) ? w : DEFAULT_NOTEBOOK_WIDTH;
+        }
+
         /* ---------------------------- writing ---------------------------- */
 
         /** @param {number|null} px null (or '') restores auto. */
@@ -271,6 +289,16 @@
         setTheme(theme) {
             localStorage.setItem(KEYS.theme, theme);
             this.apply();
+        }
+
+        setNotebookWidth(width) {
+            const next = NOTEBOOK_WIDTHS.includes(width) ? width : DEFAULT_NOTEBOOK_WIDTH;
+            localStorage.setItem(KEYS.notebookWidth, next);
+            this.apply();
+            // The column changed size without the window changing size. Plotly
+            // (responsive: true) and the other width-dependent fits listen for
+            // window resize, so tell them.
+            window.dispatchEvent(new Event('resize'));
         }
 
         setCustomCss(css) {
@@ -438,6 +466,11 @@
 
             // --- button scale ---
             root.style.setProperty('--ui-btn-scale', String(this.getButtonScale()));
+
+            // --- notebook column width (large windows only; see style.css) ---
+            const notebookWidth = this.getNotebookWidth();
+            if (notebookWidth === DEFAULT_NOTEBOOK_WIDTH) root.removeAttribute('data-notebook-width');
+            else root.setAttribute('data-notebook-width', notebookWidth);
 
             // --- optional header shortcuts ---
             this._fitHeaderShortcuts();
@@ -1592,6 +1625,7 @@
     appearance.SCALE = SCALE;
     appearance.THEMEABLE = THEMEABLE;
     appearance.BUILTIN_THEMES = BUILTIN_THEMES;
+    appearance.NOTEBOOK_WIDTHS = NOTEBOOK_WIDTHS;
     appearance.AUTO_TOP_MARGIN = AUTO_TOP_MARGIN;
 
     window.appearance = appearance;

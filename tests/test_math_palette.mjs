@@ -1213,8 +1213,11 @@ try {
             return { barW: Math.round(bar.width), inputW: Math.round(input.width),
                      barLeft: Math.round(bar.left), barRight: Math.round(innerWidth - bar.right) };
         });
-        check(`${width}px: footer takes full available width up to 720px cap`,
-            geo.barW === Math.min(width, 720), JSON.stringify(geo));
+        // 720px is the column cap below 1000px; from 1000px the default
+        // Notebook width (Wide) raises it to 1200px (test_notebook_width.mjs).
+        const cap = width >= 1000 ? 1200 : 720;
+        check(`${width}px: footer takes full available width up to ${cap}px cap`,
+            geo.barW === Math.min(width, cap), JSON.stringify(geo));
         check(`${width}px: editor is wide (not collapsed)`, geo.inputW >= geo.barW - 220, JSON.stringify(geo));
         check(`${width}px: footer is centered`, Math.abs(geo.barLeft - geo.barRight) <= 2, JSON.stringify(geo));
         await page.context().close();
