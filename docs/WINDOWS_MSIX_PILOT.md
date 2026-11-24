@@ -659,7 +659,7 @@ checked; it was previously fetched from jsdelivr/unpkg without consent).
 | --- | --- | --- | --- | --- |
 | Lua (fengari, jsdelivr/unpkg) | first Lua run | privacy consent + download confirm | none | yes |
 | R (webR, webr.r-wasm.org / jsdelivr) | first R run | privacy consent + download confirm | none | yes |
-| R packages (repo.r-wasm.org) | user `install.packages()` | only the R first-load consent | none | yes |
+| R packages (repo.r-wasm.org) | user `install.packages()` / `%install` / `library()` of a missing package; opt-in ggplot2/dplyr pre-install | current privacy-policy revision (same check as Python packages) | none | yes (user-chosen) |
 | Python packages (Pyodide CDN, PyPI) | user import / `%pip` | per-request network consent guard | lockfile hashes for Pyodide wheels | yes (user-chosen) |
 | CDN fallback for bundled kernels | bundled copy missing/failing, or a non-bundled version chosen | privacy consent + confirm | none | yes |
 | Latest-version metadata (data.jsdelivr.com) | Languages dialog | privacy consent | n/a | no (JSON) |
@@ -669,10 +669,33 @@ Custom kernel-source URLs are rejected in Electron (no allowlist exposed by
 `preload.js`). There is no update check; Help links open in the system browser.
 
 **Before submission:**
-- Decide whether R package installs need their own consent prompt or whether
-  the R first-load disclosure covers them, and say so in the reviewer notes.
-- Reviewer notes: list bundled kernels as the offline example; Lua/R and
-  Python packages as optional, user-initiated downloads behind a prompt.
+- Decided: R package installs need no prompt of their own. `install.packages()`
+  is an explicit user request, like `%pip install`, and R package downloads now
+  require the current privacy-policy revision, as Python package downloads do.
+  webR routes every package download (`install.packages()`, `%install`,
+  `library()`/`require()` of a missing package and the opt-in ggplot2/dplyr
+  pre-install) through `webr::install`, which SciREPL gates. A user who already
+  accepted the current revision sees nothing new. After a policy revision
+  change, `%install` and the pre-install show the policy and then continue; an
+  in-R install fails the cell, shows the policy, and installs when the cell is
+  run again after acceptance. Code that fetches URLs
+  itself (`download.file()`, `url()`, `webr::mount()` of a URL) is not gated,
+  the same as arbitrary network code in Python.
+
+**Reviewer notes (draft):**
+
+> SciREPL works offline. Python, SWI-Prolog, Bash and ClojureScript are
+> bundled in the package. The first time the user asks for anything that needs
+> the network, the app shows its privacy policy and waits for acceptance.
+> Optional runtimes (Lua, R) are downloaded only when the user first runs code
+> in those languages. The app shows the download size and asks before
+> downloading. Users can turn this confirmation off in Settings. Python and R
+> packages are downloaded only when the user requests them (`%pip install`,
+> `install.packages()`, or loading a package that is not installed yet). After
+> R loads, the app offers to pre-install two common R packages; they are
+> downloaded only if the user accepts, and then again each time R starts
+> (the user can turn this off in Settings). There is no update check and no
+> telemetry. Uninstalling removes all app data.
 
 ## Owner inputs still needed
 

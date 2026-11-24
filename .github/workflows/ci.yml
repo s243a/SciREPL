@@ -141,6 +141,9 @@ jobs:
       - name: Python package consent, native installer options and failure recovery
         run: npm run test:python-packages
 
+      - name: R package consent (stub webR; no runtime download)
+        run: npm run test:r-packages
+
       - name: Matplotlib first plot with bundled Python and real package installs
         run: npm run test:matplotlib-first-show -- --focused
 
