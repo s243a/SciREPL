@@ -98,8 +98,7 @@
                 // SharedVFS support must be durable before Python-first startup.
                 await window.sessionManager?.savePrologState?.();
                 const sharedSaved = await window.sessionManager?.saveSharedState?.();
-                const hasSharedSupport = prepared.manifest?.files?.some(spec => spec.target === 'shared' || spec.target === 'all'
-                    || /^\/(?:shared|tmp|education)\//.test(spec.dest));
+                const hasSharedSupport = window.packageLoader.hasSharedSupport(prepared);
                 if (choice === 'persistent' && hasSharedSupport && sharedSaved === false) {
                     throw Object.assign(new Error('Package snapshot could not be saved.'), { code: 'PACKAGE_SNAPSHOT_FAILED' });
                 }

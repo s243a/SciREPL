@@ -359,6 +359,20 @@ class PrologKernel {
                     if (name.startsWith('_cell_')) continue;
                     // Read from Emscripten FS and write to SharedVFS
                     const content = FS.readFile(fullPath);
+                    // An unchanged mirror is not a user edit. Preserve package
+                    // provenance and overwrite ownership across normal cells.
+                    const existing = window.sharedVFS._files.get(fullPath);
+                    if (existing) {
+                        const canonical = existing.content instanceof Uint8Array
+                            ? existing.content : new TextEncoder().encode(String(existing.content));
+                        if (canonical.length === content.length) {
+                            let same = true;
+                            for (let i = 0; i < content.length; i++) {
+                                if (canonical[i] !== content[i]) { same = false; break; }
+                            }
+                            if (same) continue;
+                        }
+                    }
                     window.sharedVFS.writeFile(fullPath, content, 'prolog');
                 }
             } catch (e) {

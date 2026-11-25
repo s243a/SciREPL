@@ -6,6 +6,7 @@ import vm from 'node:vm';
 import test from 'node:test';
 
 const source = readFileSync(new URL('../www/js/package_installs.js', import.meta.url), 'utf8');
+const loaderSource = readFileSync(new URL('../www/js/package_loader.js', import.meta.url), 'utf8');
 const plain = value => JSON.parse(JSON.stringify(value));
 const error = code => Object.assign(new Error(code), { code });
 const idFor = byte => byte.toString(16).padStart(2, '0').repeat(32);
@@ -58,7 +59,7 @@ function harness({ choice = 'persistent', initial = [] } = {}) {
         const bytes = new Uint8Array(await input.arrayBuffer());
         return { name: `Validated ${input.name}`, filename: input.name, bytes, manifest: null, fileMap: new Map() };
     } };
-    const loader = {
+    let loader = {
         async loadPrepared(prepared) { events.push({ op: 'load', prepared }); return { files: 1, notebooks: 0 }; },
         async remountPrepared(prepared, paths) { events.push({ op: 'remount', prepared, paths }); },
     };
@@ -66,6 +67,10 @@ function harness({ choice = 'persistent', initial = [] } = {}) {
         packageLoader: loader, packageCatalog: { _syncInstallButtons() { events.push({ op: 'sync' }); } } };
     const context = vm.createContext({ window, File, Uint8Array, Map, Set, console,
         fetch() { events.push({ op: 'network' }); throw new Error('No network authority'); } });
+    // Keep the controller's shared-support classification real; import effects
+    // alone are mocked here. Manifest and raw paths must use one policy.
+    vm.runInContext(loaderSource, context, { filename: 'package_loader.js' });
+    loader = Object.assign(window.packageLoader, loader);
     vm.runInContext(source, context, { filename: 'package_installs.js' });
     const controller = new window.PackageInstalls(store);
     return { controller, store, ui, validation, loader, events, records, payloads, metadata, window };
@@ -260,4 +265,31 @@ test('saved-copy management removes the requested archive, refreshes install sta
     assert.equal(h.records.size, 0);
     assert.equal(h.events.some(event => ['load', 'remount', 'network'].includes(event.op)), false);
     assert.equal(h.controller.busy, false);
+});
+
+test('every kernel-shared manifest root and raw education archive requires a committed Shared snapshot', async () => {
+    const variants = ['/shared', '/tmp', '/education', '/user/education'].map(root => ({
+        manifest: { files: [{ src: 'support.pl', dest: `${root}/support.pl`, target: 'prolog' }] },
+        fileMap: new Map([['support.pl', 'fixture(ok).']]),
+    }));
+    variants.push({ manifest: null, fileMap: new Map([['education/support.pl', 'fixture(ok).']]) });
+    for (const variant of variants) {
+        const h = harness();
+        const prepare = h.validation.prepare;
+        h.validation.prepare = async input => ({ ...await prepare(input), ...variant });
+        h.window.sessionManager = { async savePrologState() { return true; }, async saveSharedState() { return false; } };
+        await assert.rejects(h.controller.install(file()), failure => failure.code === 'PACKAGE_SNAPSHOT_FAILED');
+        assert.equal(h.records.size, 0, 'failed first persistent installation rolls back its new retained archive');
+        assert.equal(h.events.filter(event => event.op === 'remove').length, 1);
+    }
+});
+
+test('shared-support classification excludes unrelated roots and notebook-only raw archives', () => {
+    const { loader } = harness();
+    for (const path of ['/user/notes.pl', '/education-other/x.pl', '/user/education-other/x.pl', '/nb/1/x', '/local/x']) {
+        assert.equal(loader.isSharedSupportPath(path), false);
+        assert.equal(loader.hasSharedSupport({ manifest: { files: [{ dest: path, target: 'prolog' }] } }), false);
+    }
+    assert.equal(loader.hasSharedSupport({ manifest: null, fileMap: new Map([['education/notes.ipynb', '{}']]) }), false);
+    assert.equal(loader.hasSharedSupport({ manifest: { files: [{ dest: '/user/data.txt', target: 'shared' }] } }), true);
 });

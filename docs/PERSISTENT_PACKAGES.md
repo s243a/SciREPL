@@ -83,13 +83,20 @@ snapshot files are not automatically deleted or claimed as package-owned.
 
 Ownership is scoped to a filesystem (`shared` or `prolog`) and normalized path:
 an independent same-path file in one cannot change the other's bytes, snapshot
-policy or overwrite authority. Intentional shared-root bridging is unchanged.
+policy or overwrite authority. Prolog intentionally mirrors `/shared`, `/tmp`,
+`/education` and `/user/education`. Managed manifest and raw installs apply the
+Shared collision and persistence policy to every mirrored destination before
+native mounting; a later cell must not introduce an untracked durable copy.
 Persistent SharedVFS entries retain an inert archive identity through IndexedDB
 and fallback snapshots. Only the matching validated archive and unchanged bytes
 can restore ownership after restart, so an untouched copy can be reinstalled.
 Edits clear provenance and overwrite authority without promoting session-only
 data into persistence. Untagged copies (even identical ones), malformed tags and
 older snapshots without provenance remain protected rather than being claimed.
+Unchanged native mirror writes are skipped, preserving provenance and ownership;
+actual edits still release overwrite authority while keeping session exclusion.
+On cold restart a missing native mirror is seeded only from matching validated
+archive/provenance/Shared bytes, never over an existing native user file.
 
 ## Local and device verification
 
@@ -100,6 +107,13 @@ execution, offline support-only remounts, and actual HTML dialog controls in
 all 13 shipped Free locales in portrait/landscape. New translated UI text is
 draft translation, not native-speaker approval. Existing catalogue workbook
 SHA/size gates, CSV entry, browse shortcut and cached-source clearing remain.
+
+`npm run test:package-shared-roots` uses actual bundled SWI-Prolog execution and
+native sync, real IndexedDB and cold page/runtime reloads. It covers all four
+roots, raw education archives, existing Shared user files, native session-file
+edits, snapshot exclusion, and persistent cold-restart queries. Runtime assets
+load from loopback before offline archive replay; this is not offline PWA boot
+or a device result. The surrounding notebook/manager UI is a local fixture.
 
 Before release, still verify an exact device candidate:
 
