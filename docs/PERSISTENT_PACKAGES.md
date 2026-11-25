@@ -98,6 +98,15 @@ actual edits still release overwrite authority while keeping session exclusion.
 On cold restart a missing native mirror is seeded only from matching validated
 archive/provenance/Shared bytes, never over an existing native user file.
 
+For overlapping archives, prior native replay ownership cannot bypass matching
+Shared bytes/provenance. Saved or edited Shared copies remain authoritative;
+only untouched copies created during this restore pass may advance through
+retained archive order. A later Shared-only winner updates a native mirror
+created by the same pass, without text-decoding binary bytes. Private paths keep
+their prior replay policy. If Shared data is lost AND a failed deduplicated
+attempt advanced archive metadata, that metadata alone cannot reconstruct the
+last successful install; no new success ledger is added by this correction.
+
 ## Local and device verification
 
 Use Node 22 and `npm run test:package-persistence`. The suite covers real browser
@@ -114,6 +123,11 @@ roots, raw education archives, existing Shared user files, native session-file
 edits, snapshot exclusion, and persistent cold-restart queries. Runtime assets
 load from loopback before offline archive replay; this is not offline PWA boot
 or a device result. The surrounding notebook/manager UI is a local fixture.
+
+`npm run test:package-overlap` adds real-kernel overlap checks across two cold
+restarts: normal and deduplicated installation order, failed reinstall with a
+saved Shared copy, missing Shared snapshots, edited user copies, and mixed
+Shared-only/text/binary winners. Provider and phone access are not used.
 
 Before release, still verify an exact device candidate:
 

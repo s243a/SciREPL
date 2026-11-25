@@ -127,6 +127,7 @@
                 const results = [];
                 const failures = [];
                 const restoredPaths = new Set();
+                const restoredSharedFiles = new Map();
                 const records = await this.refresh();
                 for (const metadata of records) {
                     try {
@@ -134,7 +135,7 @@
                         if (!record) throw Object.assign(new Error('ARCHIVE_CORRUPT'), { code: 'ARCHIVE_CORRUPT' });
                         const file = new File([record.bytes], record.filename, { type: 'application/octet-stream' });
                         const prepared = await window.PackageArchiveValidation.prepare(file);
-                        await window.packageLoader.remountPrepared(prepared, restoredPaths, { archiveId: record.id });
+                        await window.packageLoader.remountPrepared(prepared, restoredPaths, { archiveId: record.id, restoredSharedFiles });
                         results.push({ id: record.id, restored: true });
                     } catch (error) {
                         this.savedIds.delete(metadata.id);

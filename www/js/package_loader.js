@@ -54,15 +54,15 @@ class PackageLoader {
             : this._loadWithoutManifest(fileMap, filename, { strict: true, managed: true, persistent, archiveId });
     }
 
-    async remountPrepared(prepared, restoredPaths = new Set(), { archiveId = null } = {}) {
+    async remountPrepared(prepared, restoredPaths = new Set(), { archiveId = null, restoredSharedFiles = new Map() } = {}) {
         const { manifest, fileMap } = prepared;
         if (manifest) {
             const baseDir = manifest._baseDir || '';
-            if (manifest.files?.length) await this._mountFiles(manifest.files, fileMap, baseDir, { restoring: true, restoredPaths, managed: true, persistent: true, archiveId });
+            if (manifest.files?.length) await this._mountFiles(manifest.files, fileMap, baseDir, { restoring: true, restoredPaths, restoredSharedFiles, managed: true, persistent: true, archiveId });
             if (manifest.search_paths?.length) this._addSearchPaths(manifest.search_paths, { managed: true });
         } else {
             const support = new Map([...fileMap].filter(([path]) => !/\.(?:ipynb|srwb)$/i.test(path)));
-            await this._mountRawFiles(support, { restoring: true, restoredPaths, managed: true, persistent: true, archiveId });
+            await this._mountRawFiles(support, { restoring: true, restoredPaths, restoredSharedFiles, managed: true, persistent: true, archiveId });
         }
         // Deliberately no notebook creation, Python sync, WASM instantiation,
         // JavaScript wrapper evaluation, consult(), or cell execution here.
@@ -384,7 +384,7 @@ class PackageLoader {
     }
 
     /** Mount support with collision/persistence policy before native sync. */
-    async _mountFiles(fileSpecs, fileMap, baseDir, { restoring = false, restoredPaths = new Set(), strict = false, managed = false, persistent = false, archiveId = null } = {}) {
+    async _mountFiles(fileSpecs, fileMap, baseDir, { restoring = false, restoredPaths = new Set(), restoredSharedFiles = new Map(), strict = false, managed = false, persistent = false, archiveId = null } = {}) {
         const km = window.kernelManager;
         if (!km) { if (strict || restoring) throw new Error('Package filesystem is unavailable.'); return; }
 
@@ -466,7 +466,13 @@ class PackageLoader {
             console.log(`[PackageLoader] Mounting ${sharedBatch.length} files to SharedVFS...`);
             const t0 = performance.now();
             for (const entry of sharedBatch) {
-                if (restoring && window.sharedVFS.exists(entry.path)) continue;
+                if (restoring && window.sharedVFS.exists(entry.path)) {
+                    // Saved/user Shared data stays authoritative. Only an
+                    // untouched copy created earlier in THIS restore pass may
+                    // advance to the next retained archive's install order.
+                    const prior = restoredSharedFiles.get(entry.path);
+                    if (!prior || !this._matchesSavedSharedFile(prior, prior.archiveId)) continue;
+                }
                 // Ensure parent directories exist
                 const parts = entry.path.split('/');
                 for (let i = 2; i < parts.length; i++) {
@@ -477,6 +483,17 @@ class PackageLoader {
                 const written = window.sharedVFS.writeFile(entry.path, entry.content, entry.origin, { packageOrigin });
                 if (strict && written === false) throw new Error('Package file write was not permitted.');
                 if (managed && written !== false) window.packageInstalls?.trackSupportFiles?.([entry.path], { filesystem: 'shared', persistent });
+                if (restoring && managed && persistent && written !== false && this._matchesSavedSharedFile(entry, archiveId)) {
+                    restoredSharedFiles.set(entry.path, { path: entry.path, archiveId,
+                        content: entry.content instanceof Uint8Array ? entry.content.slice() : entry.content });
+                    // A later Shared-only archive must not leave a stale native
+                    // mirror that this pass already seeded from an older one.
+                    if (this.isSharedSupportPath(entry.path) && restoredPaths.has(entry.path)
+                        && !prologBatch.some(file => file.path === entry.path)) {
+                        prologBatch.push({ path: entry.path, content: entry.content instanceof Uint8Array
+                            ? entry.content.slice() : entry.content });
+                    }
+                }
             }
             console.log(`[PackageLoader] SharedVFS mount done in ${(performance.now() - t0).toFixed(0)}ms`);
         }
@@ -498,8 +515,15 @@ class PackageLoader {
                     const verifiedSharedPaths = restoring && managed && persistent
                         ? new Set(sharedBatch.filter(entry => this._matchesSavedSharedFile(entry, archiveId)).map(entry => entry.path))
                         : new Set();
-                    const batch = restoring ? prologBatch.filter(entry => !vfs.exists(entry.path) || restoredPaths.has(entry.path)
-                        || (!this._prologFileExists(vfs, entry.path) && verifiedSharedPaths.has(entry.path))) : prologBatch;
+                    const batch = restoring ? prologBatch.filter(entry => {
+                        if (managed && persistent && this.isSharedSupportPath(entry.path)) {
+                            // Prior native replay ownership is NOT permission to
+                            // disagree with a saved or edited Shared copy.
+                            return verifiedSharedPaths.has(entry.path)
+                                && (!this._prologFileExists(vfs, entry.path) || restoredPaths.has(entry.path));
+                        }
+                        return !vfs.exists(entry.path) || restoredPaths.has(entry.path);
+                    }) : prologBatch;
                     vfs.bulkWrite(batch);
                     if (managed) window.packageInstalls?.trackSupportFiles?.(batch.map(entry => entry.path), { filesystem: 'prolog', persistent });
                     if (restoring) for (const entry of batch) restoredPaths.add(entry.path);
