@@ -49,6 +49,78 @@ class RKernel {
         return source.url;
     }
 
+    // R-side marker of a package download refused by the consent gate.
+    static PACKAGE_CONSENT_MESSAGE = 'SciREPL: downloading R packages requires the current privacy policy. '
+        + 'Accept it when prompted, then run the cell again.';
+
+    // webR downloads packages in its worker, out of reach of a main-thread
+    // fetch guard, and the worker cannot wait for the privacy dialog. So R
+    // checks an option that JavaScript sets before every evaluation, and
+    // JavaScript shows the dialog when R reports the refusal. webr::install is
+    // the single entry point: the install.packages() shim is a copy of it, and
+    // library()/require() auto-install and WebR.installPackages() call it.
+    static PACKAGE_CONSENT_GATE = `local({
+  original <- get("install", envir = asNamespace("webr"))
+  if (isTRUE(attr(original, "scirepl_consent_gate"))) return(invisible(NULL))
+  refusal <- ${JSON.stringify(RKernel.PACKAGE_CONSENT_MESSAGE)}
+  gated <- function(...) {
+    if (!isTRUE(getOption("scirepl.package_network_consent"))) {
+      stop(structure(class = c("scirepl_privacy_required", "error", "condition"),
+        list(message = refusal, call = NULL)))
+    }
+    original(...)
+  }
+  attr(gated, "scirepl_consent_gate") <- TRUE
+  utils::assignInNamespace("install", gated, ns = "webr")
+  if ("webr_shims" %in% search()) {
+    assign("install.packages", gated, envir = as.environment("webr_shims"))
+  }
+  invisible(NULL)
+})`;
+
+    /** Same check as Python package downloads: the current policy revision. */
+    static async requirePackageNetworkConsent() {
+        const manager = window.kernelManager;
+        if (typeof manager?.ensureNetworkConsent !== 'function'
+            || typeof manager?.hasCurrentPrivacyConsent !== 'function') {
+            throw new Error('Network disclosure is unavailable; R package installation was not started.');
+        }
+        await manager.ensureNetworkConsent();
+        if (!manager.hasCurrentPrivacyConsent()) throw new Error(window.t('kernelManager.privacyRequired'));
+    }
+
+    /** Tell R whether package downloads are currently allowed. */
+    async _syncPackageConsent() {
+        let allowed = false;
+        try { allowed = window.kernelManager?.hasCurrentPrivacyConsent?.() === true; } catch (_) {}
+        await this._webr.evalRVoid(`options(scirepl.package_network_consent = ${allowed ? 'TRUE' : 'FALSE'})`);
+    }
+
+    /**
+     * After R refused a package download, ask for the current policy. The cell
+     * already failed, so acceptance only lets the next run install.
+     */
+    // With captureConditions:false webR prints an R error to the captured
+    // stderr instead of rejecting, so a refusal shows up in the output.
+    async _packageRefusal(stdout) {
+        const lines = stdout.split('\n');
+        const kept = lines.filter(line => !line.includes(RKernel.PACKAGE_CONSENT_MESSAGE));
+        if (kept.length === lines.length) return { stdout, error: null };
+        return { stdout: kept.join('\n'),
+            error: await this._packageConsentError(new Error(RKernel.PACKAGE_CONSENT_MESSAGE)) };
+    }
+
+    async _packageConsentError(error) {
+        const message = error?.message || String(error);
+        if (!message.includes(RKernel.PACKAGE_CONSENT_MESSAGE)) return message;
+        try {
+            await RKernel.requirePackageNetworkConsent();
+        } catch (e) {
+            return e.message || String(e);
+        }
+        return message;
+    }
+
     async init() {
         if (this._ready) return;
         if (this._loading) {
@@ -103,6 +175,10 @@ class RKernel {
             // Enable install.packages() to work with webR's WASM repo
             await this._webr.evalRVoid('webr::shim_install()');
             console.log('[RKernel] install.packages() shimmed');
+            // Every webR package download (install.packages(), library()/
+            // require() auto-install, %install and pre-warm) goes through
+            // webr::install. Gate it on the current privacy-policy revision.
+            await this._webr.evalRVoid(RKernel.PACKAGE_CONSENT_GATE);
 
             // Define interactive() to return TRUE in notebook context
             // webR doesn't provide it, and generated R code uses if(!interactive()) guards
@@ -375,6 +451,11 @@ class RKernel {
     async installPackages(packageNames) {
         if (!this._ready) await this.init();
 
+        // Fail closed before the loop, so a dismissal stops every package
+        // instead of being reported (and re-asked) once per package.
+        await RKernel.requirePackageNetworkConsent();
+        await this._syncPackageConsent();
+
         const messages = [];
         for (const pkg of packageNames) {
             try {
@@ -414,6 +495,7 @@ class RKernel {
             await this._syncToWebR();
             // Sync NotebookVFS cell properties into webR FS
             await this._syncNbToWebR();
+            await this._syncPackageConsent();
 
             const shelter = await new this._webr.Shelter();
             // Prepend dark-theme par() so base R plots are legible on dark UI
@@ -481,17 +563,18 @@ class RKernel {
             // Sync webR → NotebookVFS (write-back)
             await this._syncNbFromWebR();
 
+            const refusal = await this._packageRefusal(stdout);
             return {
-                stdout: stdout.trimEnd(),
+                stdout: refusal.stdout.trimEnd(),
                 result,
-                error: null,
+                error: refusal.error,
                 images
             };
         } catch (e) {
             return {
                 stdout: '',
                 result: null,
-                error: e.message || String(e)
+                error: await this._packageConsentError(e)
             };
         }
     }
@@ -509,6 +592,7 @@ class RKernel {
         try {
             await this._syncToWebR();
             await this._syncNbToWebR();
+            await this._syncPackageConsent();
 
             const shelter = await new this._webr.Shelter();
             const capture = await shelter.captureR(trimmed, {
@@ -553,9 +637,10 @@ class RKernel {
             await this._syncFromWebR();
             await this._syncNbFromWebR();
 
-            return { stdout: stdout.trimEnd(), result: null, error: null, images };
+            const refusal = await this._packageRefusal(stdout);
+            return { stdout: refusal.stdout.trimEnd(), result: null, error: refusal.error, images };
         } catch (e) {
-            return { stdout: '', result: null, error: e.message || String(e) };
+            return { stdout: '', result: null, error: await this._packageConsentError(e) };
         }
     }
 

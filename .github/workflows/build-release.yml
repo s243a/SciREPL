@@ -39,7 +39,7 @@ jobs:
       - run: npm run test:catalog
       - run: npm run privacy:check
       - run: node scripts/check-sw-shell.mjs
-      - run: node tests/test_sw_shell_guard.mjs
+      - run: node tests/test_sw_shell_guard.mjs && npm run test:sw-history
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -62,6 +62,7 @@ jobs:
       - run: npm run test:math-palette
       - run: npm run test:pip-cell
       - run: npm run test:python-packages
+      - run: npm run test:r-packages
       - run: npm run test:matplotlib-first-show -- --focused
       - run: node tests/test_rtl_layout.mjs
       - run: node tests/test_i18n_dynamic.mjs

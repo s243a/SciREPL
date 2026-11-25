@@ -1,11 +1,12 @@
 # Free MSIX package for the Microsoft Store pilot
 
-Status, November 21, 2026: a Free x64 MSIX builds from the tested Store-channel
-tree. In the first local pilot run (see **Pilot run 1** below) it was signed
-with a test certificate and installed, then upgraded with the notebook and
-settings kept. WACK reported an overall `PASS` on package A in static-only
-mode (it did not deploy the app), with one optional test failing. Offline DOCX
-export was confirmed on B after the upgrade, but not separately on A. No
+Status, November 23, 2026: a Free x64 MSIX builds from the tested Store-channel
+tree. Three local pilot runs (see **Pilot run 1** and **Pilot runs 2 and 3**
+below) signed it with a test certificate, installed it, and upgraded it with
+the notebook and settings kept. WACK reported an overall `PASS` on package A
+in static-only mode (it did not deploy the app), with one optional test
+failing. Offline DOCX export was confirmed on both A and B. Runs 2 and 3 used
+the repository scripts. No
 Partner Center account, reserved name, signing identity or submission exists.
 The broader proposal is in [WINDOWS_STORE_PROPOSAL.md](WINDOWS_STORE_PROPOSAL.md);
 the pilot sequence is planned in draft PR #134.
@@ -137,6 +138,10 @@ Consequences:
 This tests a clean install and an upgrade of a test-signed package. It
 changes the machine's certificate store and installed apps, so the owner runs
 it. It needs the Windows SDK with the App Certification Kit.
+
+The same steps also exist as scripts in the repository, described in
+[WINDOWS_MSIX_PILOT_SCRIPTS.md](WINDOWS_MSIX_PILOT_SCRIPTS.md). Pilot run 1
+used the blocks below; pilot runs 2 and 3 used the scripts.
 
 **How to run the blocks.** Each PowerShell block below is one gated step.
 Paste a whole block at once: it runs as a single unit (`. { … }`) and stops
@@ -589,6 +594,42 @@ splatted arguments), regenerating the licence notices after the version
 raise, and loading the Appx module through Windows PowerShell under
 PowerShell 7. Results of the optional checks below were not recorded.
 
+### Pilot runs 2 and 3 (November 21–23, 2026), with the scripts
+
+Same machine and tools as run 1, using the scripts in
+[WINDOWS_MSIX_PILOT_SCRIPTS.md](WINDOWS_MSIX_PILOT_SCRIPTS.md) from the
+owner's Windows-drive clone at `90e5066` (#142 merge). Run folders
+`C:\scirepl-store-pilot\run-2` and `run-3`, kept.
+
+Run 2 skipped step 9 by mistake before cleanup, so run 3 rebuilt both
+packages and repeated steps 3, 4, 6, 8 and 9 and cleanup, online, without
+WACK or the offline checks, which run 2 had passed.
+
+| Step | Run 2 | Run 3 |
+| --- | --- | --- |
+| 1–2. Packages | A 1.5.0, B 1.5.1, both from `90e5066`; 60/60 packaged tests each | Same |
+| 3. Signing | Both verified; certificate `70AD95EE…F0E47594` | Both verified; certificate `A42BF199…02C65331` |
+| 4. Baseline | 194 portable files | 194 portable files |
+| 5. WACK on A | Overall `PASS` (kit 10.0.19041.5609), static checks only; optional **Blocked executables** failed, as in run 1 | Not run |
+| 6. Install A | Installed and marked 1.5.0.0; `portable-canary` absent; `store-canary` ran; a setting changed | Installed and marked 1.5.0.0; a notebook created and saved |
+| 7. Offline | Airplane mode plus Ethernet unplugged; check passed at 16:35:55. **DOCX export from A** had the output and formula, with no network prompt | Not run |
+| 8. Upgrade | 1.5.0.0 → 1.5.1.0 offline; check passed again at 16:40:42; `store-canary` and the setting kept; DOCX export from B correct | 1.5.0.0 → 1.5.1.0 online; the notebook kept |
+| 9. Profiles | Not run (see above) | Portable profile unchanged; Store profile at `%LOCALAPPDATA%\Packages\SciREPL.FreePilot.LocalTest_2xd92v2yysscm\LocalCache\Roaming\SciREPL-Free-Store` |
+| Cleanup | Package, data folder and certificate removed (marker matched) | Same |
+
+Signed package SHA-256: run 2 A `9C41C7DC…AF5E2577`, B `12002E8D…3D2B0B5D`;
+run 3 A `772B846D…4973453E`, B `52C2CE16…712EDE53` (full values in each run
+folder's `signed-packages.csv`).
+
+Findings:
+
+- Windows created the package's data folder at install, not at first launch,
+  so step 6 marked the install straight away without waiting.
+- No script needed a fix. The stops were operator slips, each caught before
+  any change: a `$pilot` left over from run 1, re-running step 3 on a run that
+  already had a certificate, and step 3 in a window that wasn't elevated.
+- Results of the optional checks below were still not recorded.
+
 ### Other checks before inviting testers
 
 Record each result. Merging the packaging source establishes none of them.
@@ -618,7 +659,7 @@ checked; it was previously fetched from jsdelivr/unpkg without consent).
 | --- | --- | --- | --- | --- |
 | Lua (fengari, jsdelivr/unpkg) | first Lua run | privacy consent + download confirm | none | yes |
 | R (webR, webr.r-wasm.org / jsdelivr) | first R run | privacy consent + download confirm | none | yes |
-| R packages (repo.r-wasm.org) | user `install.packages()` | only the R first-load consent | none | yes |
+| R packages (repo.r-wasm.org) | user `install.packages()` / `%install` / `library()` of a missing package; opt-in ggplot2/dplyr pre-install | current privacy-policy revision (same check as Python packages) | none | yes (user-chosen) |
 | Python packages (Pyodide CDN, PyPI) | user import / `%pip` | per-request network consent guard | lockfile hashes for Pyodide wheels | yes (user-chosen) |
 | CDN fallback for bundled kernels | bundled copy missing/failing, or a non-bundled version chosen | privacy consent + confirm | none | yes |
 | Latest-version metadata (data.jsdelivr.com) | Languages dialog | privacy consent | n/a | no (JSON) |
@@ -628,10 +669,33 @@ Custom kernel-source URLs are rejected in Electron (no allowlist exposed by
 `preload.js`). There is no update check; Help links open in the system browser.
 
 **Before submission:**
-- Decide whether R package installs need their own consent prompt or whether
-  the R first-load disclosure covers them, and say so in the reviewer notes.
-- Reviewer notes: list bundled kernels as the offline example; Lua/R and
-  Python packages as optional, user-initiated downloads behind a prompt.
+- Decided: R package installs need no prompt of their own. `install.packages()`
+  is an explicit user request, like `%pip install`, and R package downloads now
+  require the current privacy-policy revision, as Python package downloads do.
+  webR routes every package download (`install.packages()`, `%install`,
+  `library()`/`require()` of a missing package and the opt-in ggplot2/dplyr
+  pre-install) through `webr::install`, which SciREPL gates. A user who already
+  accepted the current revision sees nothing new. After a policy revision
+  change, `%install` and the pre-install show the policy and then continue; an
+  in-R install fails the cell, shows the policy, and installs when the cell is
+  run again after acceptance. Code that fetches URLs
+  itself (`download.file()`, `url()`, `webr::mount()` of a URL) is not gated,
+  the same as arbitrary network code in Python.
+
+**Reviewer notes (draft):**
+
+> SciREPL works offline. Python, SWI-Prolog, Bash and ClojureScript are
+> bundled in the package. The first time the user asks for anything that needs
+> the network, the app shows its privacy policy and waits for acceptance.
+> Optional runtimes (Lua, R) are downloaded only when the user first runs code
+> in those languages. The app shows the download size and asks before
+> downloading. Users can turn this confirmation off in Settings. Python and R
+> packages are downloaded only when the user requests them (`%pip install`,
+> `install.packages()`, or loading a package that is not installed yet). After
+> R loads, the app offers to pre-install two common R packages; they are
+> downloaded only if the user accepts, and then again each time R starts
+> (the user can turn this off in Settings). There is no update check and no
+> telemetry. Uninstalling removes all app data.
 
 ## Owner inputs still needed
 

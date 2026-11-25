@@ -82,7 +82,7 @@ jobs:
         run: node scripts/check-sw-shell.mjs
 
       - name: Service worker — shell-guard cannot be bypassed
-        run: node tests/test_sw_shell_guard.mjs
+        run: node tests/test_sw_shell_guard.mjs && npm run test:sw-history
 
       - name: Python packaging >=26 for the specifier differential
         uses: actions/setup-python@v5
@@ -144,6 +144,9 @@ jobs:
       - name: Python package consent, native installer options and failure recovery
         run: npm run test:python-packages
 
+      - name: R package consent (stub webR; no runtime download)
+        run: npm run test:r-packages
+
       - name: Matplotlib first plot with bundled Python and real package installs
         run: npm run test:matplotlib-first-show -- --focused
 
@@ -158,6 +161,9 @@ jobs:
 
       - name: Header controls follow scaled text
         run: npm run test:header-scaling
+
+      - name: Notebook width on large windows
+        run: npm run test:notebook-width
 
       - name: Generated and dynamic localization
         run: node tests/test_i18n_dynamic.mjs

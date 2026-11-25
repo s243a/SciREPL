@@ -6,6 +6,34 @@ file-boundary or protected-provider branches. It does not change browser or
 Electron package-import behavior, release identity, privacy acceptance text,
 or the separately prepared Turkish/Italian/Polish Free language branch.
 
+### Integration with current main
+
+The forward merge integrates canonical main
+`fc74cd224df5e99c8ec0cb254e7700404e95dc4e` with the reviewed persistence tip
+`5834f717c34df50f1ed42c9dc56a7c559090a6b5`. Both parents had independently
+recorded different shell hashes for `v246` and `v247`. Neither historical
+variant may be represented as the only variant that ever existed.
+
+The generated lock keeps main's canonical history and nonconflicting feature
+pins, and preserves the **complete original feature lock** under
+`archivedForks["5834f717c34df50f1ed42c9dc56a7c559090a6b5"]`. Its source-lock
+SHA-256 is
+`cdf13ace71f3910220c7773b5a2dbb3ed4fdc5037ffc29ab5d6c3217892bfaab`.
+The archive is integrity/provenance evidence, not cryptographic authentication
+against an editor who changes both the captured lock and its digest. Archived
+IDs also contribute to the monotonic version floor. Integrated shell bytes
+start at a fresh `v254`; future shell edits must append another fresh ID.
+
+`scripts/reconcile-sw-shell-history.mjs --canonical FULL_MAIN_SHA --feature
+FULL_FEATURE_SHA` previews reconciliation from exact Git objects. `--write`
+requires that exact two-parent merge in progress and refuses to overwrite
+additional working-lock data, including an appended integration pin. It can
+replace only a parent lock, its own exact generated result, or the pristine
+pinned Git conflict. Never hand-edit the lock or rerun reconciliation to erase
+a subsequently appended pin. `npm run sw:lock` handles ordinary future appends
+while preserving and validating the archive. `npm run test:sw-history` and the
+original guard tests cover these constraints in disposable repositories.
+
 ## User choices
 
 Manual package-archive imports and non-bundled catalogue packages on Android

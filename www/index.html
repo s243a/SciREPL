@@ -864,6 +864,17 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
                data-i18n="appearance.statusBarModeHelp">
                 Saves vertical space on Android. In landscape: the status bar returns in portrait. The navigation bar is never hidden.
             </p>
+            <div class="appearance-row">
+                <label for="appearance-notebook-width" data-i18n="appearance.notebookWidth">Notebook width</label>
+                <select id="appearance-notebook-width" class="settings-select" aria-describedby="appearance-notebook-width-help">
+                    <option value="standard" data-i18n="appearance.notebookWidthStandard">Standard</option>
+                    <option value="wide" data-i18n="appearance.notebookWidthWide">Wide</option>
+                    <option value="full" data-i18n="appearance.notebookWidthFull">Full window</option>
+                </select>
+            </div>
+            <p id="appearance-notebook-width-help" class="appearance-note" data-i18n="appearance.notebookWidthHelp">
+                How wide notebook cells may grow on a large window. Smaller windows, tablets and phones always use the standard width.
+            </p>
 
             <div class="settings-section" data-i18n="appearance.buttons">Buttons</div>
             <p class="appearance-note" data-i18n="appearance.buttonScaleHelp">
