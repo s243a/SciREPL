@@ -15,6 +15,7 @@
     "test:notebook-width": "node tests/test_notebook_width.mjs",
     "test:matplotlib-first-show": "node tests/test_matplotlib_first_show.mjs",
     "test:python-packages": "node tests/test_python_package_guards.mjs && node tests/test_python_package_consent.mjs",
+    "test:r-packages": "node tests/test_r_package_consent.mjs",
     "test:tutorial-links": "node tests/test_tutorial_links.mjs && node tests/test_tutorial_free_index.mjs",
     "test:help": "node tests/test_help_site.mjs && node scripts/build-named-cell-example.mjs --check && node scripts/build-landing-pages.mjs --check && node tests/test_workbook_graphics.mjs && node tests/test_named_cell_tutorial.mjs && npm run test:tutorial-locales",
     "tutorials:extract": "node scripts/tutorial_locale_extract.mjs",
