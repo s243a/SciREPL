@@ -561,7 +561,9 @@ html, body {
 
 @media (min-width: 768px) {
     #repl, .repl-container {
-        max-width: 720px;
+        /* --notebook-max-width is unset below 1000px, so tablets and small
+           windows keep the historical 720px column (see Notebook width). */
+        max-width: var(--notebook-max-width, 720px);
         margin: 0 auto;
         /* keep the measured footer-overlay reservation at desktop widths */
         padding: 20px 20px calc(20px + var(--footer-overlay-local, 0px));
@@ -573,8 +575,49 @@ html, body {
            width (~387px at tablet sizes) and the editor collapses */
         width: 100%;
         box-sizing: border-box;
-        max-width: 720px;
+        max-width: var(--notebook-max-width, 720px);
         margin: 0 auto;
+    }
+}
+
+/* Notebook width (Appearance → Layout). Only large windows are affected:
+   below 1000px the variable stays unset and every option is today's 720px
+   column. Wide is the attribute-less default, so a first launch needs no
+   script to get it; appearance.js sets data-notebook-width only for the
+   other two choices. Standard reproduces the 720px column exactly, including
+   its shrink-to-content behaviour; Wide and Full take the full available
+   width up to their cap, so the column does not jump as cells are added. */
+@media (min-width: 1000px) {
+    :root {
+        --notebook-max-width: 1200px;
+    }
+
+    :root[data-notebook-width="standard"] {
+        --notebook-max-width: 720px;
+    }
+
+    /* 100% rather than none: the column already has width: 100%, and a
+       length keeps the variable usable inside min() below. */
+    :root[data-notebook-width="full"] {
+        --notebook-max-width: 100%;
+    }
+
+    :root:not([data-notebook-width="standard"]) #repl,
+    :root:not([data-notebook-width="standard"]) .repl-container {
+        width: 100%;
+    }
+
+    /* With the notebook sidebar showing, the column is centred in the space
+       beside it, but the input bar is a body-level footer centred in the whole
+       window. At 720px the offset is small; at Wide or Full the bar would
+       overhang the column, so line it up with the column instead. Engines
+       without :has() simply keep the centred bar. */
+    :root:not([data-notebook-width="standard"]) body:has(#notebook-sidebar:not(.hidden)) #input-bar {
+        --notebook-region: calc(100% - 200px);   /* .notebook-sidebar width */
+        max-width: none;
+        width: min(var(--notebook-max-width), var(--notebook-region));
+        margin-inline-start: calc(200px + (var(--notebook-region) - min(var(--notebook-max-width), var(--notebook-region))) / 2);
+        margin-inline-end: 0;
     }
 }
 
