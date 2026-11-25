@@ -156,6 +156,9 @@ jobs:
       - name: Header controls follow scaled text
         run: npm run test:header-scaling
 
+      - name: Notebook width on large windows
+        run: npm run test:notebook-width
+
       - name: Generated and dynamic localization
         run: node tests/test_i18n_dynamic.mjs
 
