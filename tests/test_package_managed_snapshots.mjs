@@ -27,8 +27,8 @@ function harness({ indexed = false, failFiles = false, defer = null } = {}) {
         vm.runInContext(read(path), context, { filename: path });
     }
     context.packageInstalls = new context.PackageInstalls(null);
-    context.packageInstalls.trackSupportFiles([managedProlog[0], ownedShared[0], ownedShared[3]], { persistent: true });
-    context.packageInstalls.trackSupportFiles([managedProlog[1], ownedShared[1], ownedShared[2]], { persistent: false });
+    context.packageInstalls.trackSupportFiles([managedProlog[0]], { filesystem: 'prolog', persistent: true });
+    context.packageInstalls.trackSupportFiles([managedProlog[1]], { filesystem: 'prolog', persistent: false });
     context.packageInstalls.trackSupportSearchPaths(aliases);
     const files = new Map([
         ['/user/prelude.pl', 'prelude'],
@@ -63,6 +63,10 @@ function harness({ indexed = false, failFiles = false, defer = null } = {}) {
     shared.writeFile(ownedShared[1], new Uint8Array([1, 2, 3]), 'package');
     shared.writeFile(ownedShared[2], 'session python', 'package');
     shared.writeFile(ownedShared[3], new Uint8Array([7, 8, 9]), 'package');
+    // Like the loader, claim only successful writes. Ordinary SharedVFS writes
+    // clear earlier ownership, so claiming before writing would test stale state.
+    context.packageInstalls.trackSupportFiles([ownedShared[0], ownedShared[3]], { filesystem: 'shared', persistent: true });
+    context.packageInstalls.trackSupportFiles([ownedShared[1], ownedShared[2]], { filesystem: 'shared', persistent: false });
     shared.writeFile('/shared/data/user.txt', 'ordinary shared text', 'user');
     shared.writeFile('/shared/data/user.bin', new Uint8Array([4, 5, 6]), 'user');
     return { context, captured, saved, reads, files, searchPaths };
@@ -71,14 +75,15 @@ function harness({ indexed = false, failFiles = false, defer = null } = {}) {
 test('support ownership is exact, app-session scoped and preserves nearby user paths and aliases', () => {
     const { context } = harness();
     const registry = context.packageInstalls;
-    assert.equal(registry.isManagedPath(managedProlog[0]), true);
-    assert.equal(registry.isSessionOnlyManagedPath(managedProlog[0]), false);
-    assert.equal(registry.isSessionOnlyManagedPath(managedProlog[1]), true);
-    assert.equal(registry.isManagedPath(`${root}/session.pl.copy`), false);
-    assert.equal(registry.isManagedPath(root), false);
+    assert.equal(registry.isManagedPath(managedProlog[0], 'prolog'), true);
+    assert.equal(registry.isManagedPath(managedProlog[0], 'shared'), false);
+    assert.equal(registry.isSessionOnlyManagedPath(managedProlog[0], 'prolog'), false);
+    assert.equal(registry.isSessionOnlyManagedPath(managedProlog[1], 'prolog'), true);
+    assert.equal(registry.isManagedPath(`${root}/session.pl.copy`, 'prolog'), false);
+    assert.equal(registry.isManagedPath(root, 'prolog'), false);
     assert.equal(registry.isManagedSearchPath('fixture_session', `${root}/session`), true);
     assert.equal(registry.isManagedSearchPath('fixture_session', '/user/unrelated-directory'), false);
-    assert.equal(new context.PackageInstalls(null).isManagedPath(managedProlog[0]), false);
+    assert.equal(new context.PackageInstalls(null).isManagedPath(managedProlog[0], 'prolog'), false);
 });
 
 test('IndexedDB Prolog snapshots exclude both persistent and session package support and aliases', async () => {
@@ -132,12 +137,13 @@ test('SessionManager SharedVFS fallback is filtered too when IndexedDB is unavai
 test('registry records the explicit persistence mode without claiming neighboring user files', () => {
     const { context } = harness();
     const registry = context.packageInstalls;
-    registry.trackSupportFiles(['/shared/data/new_package.txt'], { persistent: true });
-    assert.equal(registry.isManagedPath('/shared/data/new_package.txt'), true);
-    assert.equal(registry.isSessionOnlyManagedPath('/shared/data/new_package.txt'), false);
-    registry.trackSupportFiles(['/shared/data/new_package.txt'], { persistent: false });
-    assert.equal(registry.isSessionOnlyManagedPath('/shared/data/new_package.txt'), true);
-    assert.equal(registry.isManagedPath('/shared/data/new_package.txt.copy'), false);
+    registry.trackSupportFiles(['/shared/data/new_package.txt'], { filesystem: 'shared', persistent: true });
+    assert.equal(registry.isManagedPath('/shared/data/new_package.txt', 'shared'), true);
+    assert.equal(registry.isManagedPath('/shared/data/new_package.txt', 'prolog'), false);
+    assert.equal(registry.isSessionOnlyManagedPath('/shared/data/new_package.txt', 'shared'), false);
+    registry.trackSupportFiles(['/shared/data/new_package.txt'], { filesystem: 'shared', persistent: false });
+    assert.equal(registry.isSessionOnlyManagedPath('/shared/data/new_package.txt', 'shared'), true);
+    assert.equal(registry.isManagedPath('/shared/data/new_package.txt.copy', 'shared'), false);
 });
 
 test('savePrologState waits for both writes and keeps fallback data if a write fails', async () => {

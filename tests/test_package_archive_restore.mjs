@@ -6,7 +6,8 @@ const read = path => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8'
 function harness() {
     const files = new Map([['/user/edited.pl', 'user edit']]);
     const calls = { notebooks: 0, executes: 0, wasm: 0, shared: 0, search: [] };
-    const vfs = { exists: path => files.has(path), bulkWrite(batch) { for (const item of batch) files.set(item.path, item.content); },
+    const vfs = { exists: path => files.has(path), stat: path => files.has(path) ? { isDir: false } : null,
+        bulkWrite(batch) { for (const item of batch) files.set(item.path, item.content); },
         addSearchPath(alias, dir) { calls.search.push({ alias, dir }); } };
     const context = vm.createContext({ console: { log() {}, warn() {} }, TextEncoder, TextDecoder, Uint8Array, performance, Map, Set });
     context.window = context;
@@ -64,7 +65,7 @@ test('prepared shared-file installs fail explicitly when storage is missing or a
 });
 test('initial prepared import rejects an unowned collision before writing other package files', async () => {
     const { context, loader, calls, files } = harness();
-    context.packageInstalls = { isManagedPath: () => false };
+    context.packageInstalls = { isManagedPath: (_path, filesystem) => { assert.equal(filesystem, 'prolog'); return false; } };
     await assert.rejects(loader.loadPrepared({ manifest: { files: [
         { src: 'shared.txt', dest: '/shared/new.txt', target: 'shared' },
         { src: 'edited.pl', dest: '/user/edited.pl' },
@@ -75,21 +76,30 @@ test('initial prepared import rejects an unowned collision before writing other 
 test('prepared imports track only written support paths with their explicit mode', async () => {
     const { context, loader, files } = harness();
     const managed = new Map();
+    const key = (path, filesystem) => JSON.stringify([filesystem, path]);
     context.packageInstalls = {
-        isManagedPath: path => managed.has(path), isSessionOnlyManagedPath: path => managed.get(path) === false,
-        trackSupportFiles(paths, { persistent }) { for (const path of paths) managed.set(path, persistent); },
+        isManagedPath: (path, filesystem) => managed.has(key(path, filesystem)),
+        isSessionOnlyManagedPath: (path, filesystem) => managed.get(key(path, filesystem)) === false,
+        trackSupportFiles(paths, { persistent, filesystem }) {
+            assert.ok(['shared', 'prolog'].includes(filesystem));
+            for (const path of paths) managed.set(key(path, filesystem), persistent);
+        },
     };
     const make = value => ({ filename: 'owned.zip', manifest: { files: [{ src: 'lib.pl', dest: '/user/lib.pl' }] }, fileMap: new Map([['lib.pl', value]]) });
     await loader.loadPrepared(make('persistent'), { persistent: true });
-    assert.equal(managed.get('/user/lib.pl'), true);
+    assert.equal(managed.get(key('/user/lib.pl', 'prolog')), true);
+    assert.equal(managed.has(key('/user/lib.pl', 'shared')), false);
     await loader.loadPrepared(make('session'), { persistent: false });
-    assert.equal(managed.get('/user/lib.pl'), false);
+    assert.equal(managed.get(key('/user/lib.pl', 'prolog')), false);
     assert.equal(files.get('/user/lib.pl'), 'session');
 });
 test('session-only Shared import cannot discard a previously retained Shared snapshot', async () => {
     const { context, loader, calls } = harness();
     context.sharedVFS.exists = () => true;
-    context.packageInstalls = { isManagedPath: () => true, isSessionOnlyManagedPath: () => false };
+    context.packageInstalls = {
+        isManagedPath: (_path, filesystem) => filesystem === 'shared',
+        isSessionOnlyManagedPath: (_path, filesystem) => { assert.equal(filesystem, 'shared'); return false; },
+    };
     await assert.rejects(loader.loadPrepared({ filename: 'session.zip', manifest: { files: [{ src: 'lib.py', dest: '/shared/lib.py', target: 'shared' }] },
         fileMap: new Map([['lib.py', 'replacement']]) }), error => error.code === 'PACKAGE_FILE_CONFLICT');
     assert.equal(calls.shared, 0);
@@ -104,8 +114,48 @@ test('archive restore fills missing Shared support but preserves an existing use
     ] }, fileMap: new Map([['missing.py', 'x = 1'], ['edited.txt', 'old copy']]) });
     assert.equal(owned.length, 1);
     assert.deepEqual(Array.from(owned[0].paths), ['/shared/missing.py']);
+    assert.equal(owned[0].filesystem, 'shared');
     assert.equal(owned[0].persistent, true);
     assert.ok(calls.shared > 0);
+});
+test('archive restore does not seed stale Prolog mirrors over edited Shared bridge files', async () => {
+    const { context, loader, files, calls } = harness();
+    const existingShared = new Map([
+        ['/shared/edited.txt', 'edited shared user copy'],
+        ['/user/education/edited.pl', 'edited educational user copy'],
+    ]);
+    const vfs = context.kernelManager.getKernel('prolog').getVFS();
+    const nativeWrites = [];
+    const claims = [];
+    vfs.bulkWrite = batch => {
+        for (const entry of batch) {
+            nativeWrites.push(entry.path);
+            files.set(entry.path, entry.content);
+        }
+    };
+    context.packageInstalls = {
+        trackSupportFiles(paths, { filesystem }) {
+            for (const path of paths) claims.push({ path, filesystem });
+        },
+    };
+    // The real PrologVFS sees Shared bridge files in exists(), even with no
+    // native copy. Cold IndexedDB restoration does not emit a write event, so
+    // mounting archive bytes here would allow a later kernel sync to replace
+    // the user's Shared edit with a stale native mirror.
+    vfs.exists = path => files.has(path) || existingShared.has(path);
+    context.sharedVFS.exists = path => existingShared.has(path);
+    await loader.remountPrepared({ manifest: { files: [
+        { src: 'shared.txt', dest: '/shared/edited.txt', target: 'all' },
+    ] }, fileMap: new Map([['shared.txt', 'stale archive shared value']]) });
+    await loader.remountPrepared({ manifest: null,
+        fileMap: new Map([['education/edited.pl', 'stale archive educational value']]) });
+    assert.equal(files.has('/shared/edited.txt'), false, 'manifest restore must not seed a stale native Shared mirror');
+    assert.equal(files.has('/user/education/edited.pl'), false, 'raw restore must preserve the same educational Shared bridge boundary');
+    assert.deepEqual(nativeWrites, [], 'neither restore may write a stale native mirror');
+    assert.deepEqual(claims, [], 'preserved Shared edits must not be claimed in either filesystem');
+    assert.equal(calls.shared, 0, 'existing Shared copies must not be rewritten');
+    assert.equal(existingShared.get('/shared/edited.txt'), 'edited shared user copy');
+    assert.equal(existingShared.get('/user/education/edited.pl'), 'edited educational user copy');
 });
 test('concurrent first Prolog cells await the same restoration; destroy resets it', async () => {
     const { context } = harness();

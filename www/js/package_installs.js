@@ -17,12 +17,37 @@
             // Python-first startup; session mode must not leak through either
             // persistence system. Exact paths/pairs avoid claiming user files.
             this.managedSupportFiles = new Map();
+            this.editedSupportFiles = new Set();
             this.managedSupportSearchPaths = new Set();
         }
         identity(pkg) { return JSON.stringify([pkg?.id || null, pkg?.name || null]); }
-        trackSupportFiles(paths, { persistent = false } = {}) {
+        supportKey(path, filesystem) {
+            // A Prolog path is not a SharedVFS path, even when spelled alike.
+            // Missing/unknown namespaces must never grant overwrite authority.
+            if (!['shared', 'prolog'].includes(filesystem) || typeof path !== 'string' || path.includes('\0')) return null;
+            const parts = [];
+            for (const part of path.split('/')) {
+                if (!part || part === '.') continue;
+                if (part === '..') parts.pop(); else parts.push(part);
+            }
+            return JSON.stringify([filesystem, '/' + parts.join('/')]);
+        }
+        trackSupportFiles(paths, { filesystem, persistent = false } = {}) {
             for (const path of paths || []) {
-                if (typeof path === 'string') this.managedSupportFiles.set(path, persistent === true);
+                const key = this.supportKey(path, filesystem);
+                if (key !== null) {
+                    this.managedSupportFiles.set(key, persistent === true);
+                    this.editedSupportFiles.delete(key);
+                }
+            }
+        }
+        releaseSupportFiles(paths, { filesystem } = {}) {
+            for (const path of paths || []) {
+                const key = this.supportKey(path, filesystem);
+                // Edits revoke overwrite authority, not the explicit session-only
+                // storage choice. Otherwise editing a session file would quietly
+                // promote its contents into the next workspace snapshot.
+                if (key !== null && this.managedSupportFiles.has(key)) this.editedSupportFiles.add(key);
             }
         }
         trackSupportSearchPaths(paths) {
@@ -32,8 +57,11 @@
                 }
             }
         }
-        isManagedPath(path) { return this.managedSupportFiles.has(path); }
-        isSessionOnlyManagedPath(path) { return this.managedSupportFiles.get(path) === false; }
+        isManagedPath(path, filesystem) {
+            const key = this.supportKey(path, filesystem);
+            return this.managedSupportFiles.has(key) && !this.editedSupportFiles.has(key);
+        }
+        isSessionOnlyManagedPath(path, filesystem) { return this.managedSupportFiles.get(this.supportKey(path, filesystem)) === false; }
         isManagedSearchPath(alias, dir) {
             return this.managedSupportSearchPaths.has(JSON.stringify([alias, dir]));
         }
@@ -64,7 +92,7 @@
                     record = await this.store.save({ name: prepared.name, filename: prepared.filename, bytes: prepared.bytes });
                     this.savedIds.add(record.id);
                 }
-                const result = await window.packageLoader.loadPrepared(prepared, { persistent: choice === 'persistent' });
+                const result = await window.packageLoader.loadPrepared(prepared, { persistent: choice === 'persistent', archiveId: record?.id });
                 // Await normal snapshots too. Package-owned Prolog paths must
                 // not leak into the generic workspace cache, and persistent
                 // SharedVFS support must be durable before Python-first startup.
@@ -107,7 +135,7 @@
                         if (!record) throw Object.assign(new Error('ARCHIVE_CORRUPT'), { code: 'ARCHIVE_CORRUPT' });
                         const file = new File([record.bytes], record.filename, { type: 'application/octet-stream' });
                         const prepared = await window.PackageArchiveValidation.prepare(file);
-                        await window.packageLoader.remountPrepared(prepared, restoredPaths);
+                        await window.packageLoader.remountPrepared(prepared, restoredPaths, { archiveId: record.id });
                         results.push({ id: record.id, restored: true });
                     } catch (error) {
                         this.savedIds.delete(metadata.id);

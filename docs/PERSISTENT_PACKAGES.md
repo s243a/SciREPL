@@ -81,6 +81,16 @@ Initial managed imports reject conflicting unowned destinations before any
 write, rather than delete or replace an existing user copy. Unknown legacy
 snapshot files are not automatically deleted or claimed as package-owned.
 
+Ownership is scoped to a filesystem (`shared` or `prolog`) and normalized path:
+an independent same-path file in one cannot change the other's bytes, snapshot
+policy or overwrite authority. Intentional shared-root bridging is unchanged.
+Persistent SharedVFS entries retain an inert archive identity through IndexedDB
+and fallback snapshots. Only the matching validated archive and unchanged bytes
+can restore ownership after restart, so an untouched copy can be reinstalled.
+Edits clear provenance and overwrite authority without promoting session-only
+data into persistence. Untagged copies (even identical ones), malformed tags and
+older snapshots without provenance remain protected rather than being claimed.
+
 ## Local and device verification
 
 Use Node 22 and `npm run test:package-persistence`. The suite covers real browser
@@ -104,3 +114,7 @@ Before release, still verify an exact device candidate:
    or silently falling back to a session install.
 5. Repeat relevant picker and Back behavior on both navigation modes. Local
    browser verification is not signed-device or Play release clearance.
+6. Reinstall the same persistent archive after a cold restart with SharedVFS
+   support restored. Then edit its support file and verify reinstall refuses to
+   replace the edit. The local ownership suite covers both filesystem directions,
+   binary and fallback snapshots, and unprovenanced/edited-copy controls.

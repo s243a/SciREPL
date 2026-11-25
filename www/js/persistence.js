@@ -177,7 +177,7 @@ class SessionManager {
         const files = vfs.getMountedFiles();
         const savedFiles = [];
         for (const f of files) {
-            if (f.path === '/user/prelude.pl' || managed?.isManagedPath?.(f.path)) continue;
+            if (f.path === '/user/prelude.pl' || managed?.isManagedPath?.(f.path, 'prolog')) continue;
             try {
                 const content = vfs.readFile(f.path);
                 savedFiles.push({ path: f.path, content: content });
