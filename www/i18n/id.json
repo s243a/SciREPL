@@ -936,6 +936,27 @@
     "mathPalette.mdLimit": "Limit",
     "mathPalette.mdMatrix": "Matriks",
     "mathPalette.mdNthRoot": "Akar pangkat n",
-    "mathPalette.mdInfinity": "Tak hingga"
+    "mathPalette.mdInfinity": "Tak hingga",
+    "packageInstall.title": "Instal {name}",
+    "packageInstall.persistent": "Tetap terinstal di perangkat ini",
+    "packageInstall.session": "Hanya sesi ini",
+    "packageInstall.explanation": "Buku catatan disimpan dalam kedua mode. Menyimpan paket juga memulihkan berkas pendukungnya secara offline setelah mulai ulang; sel buku catatan tidak dijalankan.",
+    "packageInstall.manage": "Paket tersimpan",
+    "packageInstall.managedHelp": "Menghapus salinan tersimpan tetap mempertahankan buku catatan yang ada dan berkas sesi ini. Berkas pendukungnya tidak akan dipulihkan lagi setelah mulai ulang.",
+    "packageInstall.empty": "Tidak ada arsip paket tersimpan.",
+    "packageInstall.remove": "Hapus salinan tersimpan",
+    "packageInstall.removeTitle": "Hapus paket tersimpan?",
+    "packageInstall.removeQuestion": "Hapus {name} dari paket tersimpan?",
+    "packageInstall.limits": "Hingga 32 paket, 32 MiB per arsip dan total 96 MiB.",
+    "packageInstall.tooLarge": "Paket ini terlalu besar untuk disimpan. Batas arsip adalah 32 MiB.",
+    "packageInstall.full": "Penyimpanan paket penuh. Hapus salinan tersimpan atau pilih hanya sesi ini.",
+    "packageInstall.corrupt": "Arsip paket tidak valid atau rusak. Impor ulang dari sumber tepercaya.",
+    "packageInstall.unavailable": "Penyimpanan paket tidak tersedia. Tidak ada yang diinstal. Coba lagi atau pilih hanya sesi ini secara eksplisit.",
+    "packageInstall.failed": "Operasi paket gagal. Instalasi tidak diam-diam diubah menjadi khusus sesi.",
+    "packageInstall.unsupported": "Format arsip ini tidak dapat dipertahankan terinstal. Gunakan paket ZIP atau tar.gz.",
+    "packageInstall.restoreFailed": "Beberapa paket tersimpan tidak dapat dipulihkan: {names}.",
+    "packageInstall.conflict": "Paket ini akan mengganti berkas yang sudah ada. Pindahkan atau ganti nama berkas yang bentrok, atau gunakan folder paket lain, lalu coba lagi.",
+    "packageInstall.edits": "Untuk menyimpan perubahan pada berkas pendukung paket, simpan salinan di jalur yang berbeda.",
+    "packageInstall.notice": "Instalasi paket"
   }
 }

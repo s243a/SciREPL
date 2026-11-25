@@ -1412,26 +1412,75 @@
         /**
          * Reveal a modal for measurement and restore it in the same synchronous
          * frame (no paint). Transitions are disabled so a just-un-hidden modal
-         * reports its settled opacity, not the transition's momentary 0.
+         * reports its settled opacity, not the transition's momentary 0. Other
+         * dialogs must not mask a covering pseudo-element during hit-testing.
          */
         _withProbeOpen(modal, measure) {
-            const wasHidden = modal.classList.contains('hidden');
-            const saved = modal.style.cssText;
-            const wasInert = modal.inert;
-            modal.classList.remove('hidden');
-            modal.style.transition = 'none';
-            // A hidden modal is left inert (see installModalInert), and an inert
-            // subtree is not hit-testable — the coverage check would then see
-            // straight through the open menu to whatever is behind it and call
-            // the Appearance entry "covered". Clear it for the measurement.
-            modal.inert = false;
-            let result;
-            try { result = measure(); } finally {
-                modal.style.cssText = saved;
-                modal.inert = wasInert;
-                if (wasHidden) modal.classList.add('hidden');
+            const saved = ['class', 'style', 'inert'].map((name) => [name, modal.getAttribute(name)]);
+            const isolated = [];
+            const settled = [];
+            const focused = document.activeElement;
+            try {
+                for (const other of document.querySelectorAll('.modal')) {
+                    if (other === modal || other.contains(modal) || modal.contains(other)) continue;
+                    isolated.push([other, other.getAttribute('inert')]);
+                    // Unlike display:none, inert removes a dialog from hit
+                    // testing without cancelling/restarting its animations.
+                    other.inert = true;
+                }
+                modal.classList.remove('hidden');
+                modal.style.transition = 'none';
+                // Hidden modals are inert (see installModalInert). The target,
+                // unlike the isolated dialogs, must accept the probe's hit test.
+                modal.inert = false;
+                for (const content of modal.querySelectorAll(':scope > .modal-content')) {
+                    if (typeof content.getAnimations !== 'function') continue;
+                    for (const anim of content.getAnimations({ subtree: false })) {
+                        if (!this._isBuiltinModalSlide(anim, content)) continue;
+                        settled.push([anim, anim.currentTime]);
+                        // The transient transform creates a containing block
+                        // for fixed ::after overlays. Measure its settled frame,
+                        // then rewind before paint without pausing/restarting it.
+                        anim.currentTime = anim.effect.getComputedTiming().endTime;
+                    }
+                }
+                return measure();
+            } finally {
+                for (const [anim, time] of settled) anim.currentTime = time;
+                for (const [name, value] of saved) {
+                    if (value === null) modal.removeAttribute(name);
+                    else modal.setAttribute(name, value);
+                }
+                for (const [other, value] of isolated) {
+                    if (value === null) other.removeAttribute('inert');
+                    else other.setAttribute('inert', value);
+                }
+                if (focused && focused.isConnected && document.activeElement !== focused) {
+                    focused.focus({ preventScroll: true });
+                }
             }
-            return result;
+        }
+
+        /** Match the app's transient slide, not a user-redefined namesake. */
+        _isBuiltinModalSlide(anim, content) {
+            const effect = anim.effect;
+            if (anim.animationName !== 'modalSlideIn' || !effect || effect.target !== content
+                || effect.pseudoElement || anim.timeline !== document.timeline
+                || effect.composite !== 'replace'
+                || (effect.iterationComposite !== undefined && effect.iterationComposite !== 'replace')) return false;
+            const t = effect.getTiming();
+            if (t.duration !== 300 || t.delay !== 0 || t.endDelay !== 0
+                || t.iterations !== 1 || t.iterationStart !== 0
+                || t.direction !== 'normal' || t.fill !== 'none' || t.easing !== 'linear'
+                || !Number.isFinite(effect.getComputedTiming().endTime)) return false;
+            const frames = effect.getKeyframes();
+            const allowed = ['offset', 'computedOffset', 'easing', 'composite', 'opacity', 'transform'];
+            return frames.length === 2 && frames.every((f) => f.easing === 'ease' && f.composite === 'auto'
+                && Object.keys(f).every((k) => allowed.includes(k)))
+                && frames[0].computedOffset === 0 && frames[0].opacity === '0'
+                && frames[0].transform === 'translateY(-20px)'
+                && frames[1].computedOffset === 1 && frames[1].opacity === '1'
+                && frames[1].transform === 'translateY(0px)';
         }
 
         /**

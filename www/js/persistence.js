@@ -161,21 +161,23 @@ class SessionManager {
      * Uses IndexedDB for large file storage (no size cap).
      * Called when cells are saved if Prolog kernel is active.
      */
-    savePrologState() {
+    async savePrologState() {
         const km = window.kernelManager;
-        if (!km) return;
+        if (!km) return false;
         const kernel = km.getKernel('prolog');
-        if (!kernel || !kernel.getVFS) return;
+        if (!kernel || !kernel.getVFS) return false;
         const vfs = kernel.getVFS();
-        if (!vfs) return;
+        if (!vfs) return false;
 
-        const searchPaths = vfs.getSearchPaths();
+        const managed = window.packageInstalls;
+        const searchPaths = vfs.getSearchPaths().filter(path =>
+            !managed?.isManagedSearchPath?.(path.alias, path.dir));
 
         // Collect all user files (skip prelude.pl)
         const files = vfs.getMountedFiles();
         const savedFiles = [];
         for (const f of files) {
-            if (f.path === '/user/prelude.pl') continue;
+            if (f.path === '/user/prelude.pl' || managed?.isManagedPath?.(f.path, 'prolog')) continue;
             try {
                 const content = vfs.readFile(f.path);
                 savedFiles.push({ path: f.path, content: content });
@@ -184,17 +186,26 @@ class SessionManager {
             }
         }
 
-        // Save to IndexedDB (fire-and-forget, async)
+        // Existing UI callers may ignore this Promise; tests and destructive
+        // workflows can await the actual persistence result.
         const store = window.vfsStore;
         if (store && store.isReady()) {
-            store.saveFiles(savedFiles).catch(e =>
-                console.warn('[SessionManager] IndexedDB saveFiles failed:', e));
-            store.saveSearchPaths(searchPaths).catch(e =>
-                console.warn('[SessionManager] IndexedDB saveSearchPaths failed:', e));
-            // Clear localStorage VFS data (migrated to IndexedDB)
+            const results = await Promise.all([
+                store.saveFiles(savedFiles).then(() => true, error => {
+                    console.warn('[SessionManager] IndexedDB saveFiles failed:', error);
+                    return false;
+                }),
+                store.saveSearchPaths(searchPaths).then(() => true, error => {
+                    console.warn('[SessionManager] IndexedDB saveSearchPaths failed:', error);
+                    return false;
+                }),
+            ]);
+            // Do not discard an existing fallback until both writes commit.
+            if (!results.every(Boolean)) return false;
             this.session.prologFiles = [];
             this.session.prologPaths = [];
             this.save();
+            return true;
         } else {
             // Fallback: save to localStorage with size cap
             const MAX_TOTAL = 5 * 1024 * 1024;
@@ -208,6 +219,7 @@ class SessionManager {
             this.session.prologPaths = searchPaths;
             this.session.prologFiles = capped;
             this.save();
+            return true;
         }
     }
 

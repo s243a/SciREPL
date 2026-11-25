@@ -13,6 +13,7 @@ class PrologKernel {
         this._stdoutBuffer = [];
         this._stderrBuffer = [];
         this._packagesRestored = false;
+        this._packagesRestorePromise = null;
     }
 
     /**
@@ -22,14 +23,24 @@ class PrologKernel {
      */
     async _ensurePackagesRestored() {
         if (this._packagesRestored) return;
-        this._packagesRestored = true;
-        try {
+        if (this._packagesRestorePromise) return this._packagesRestorePromise;
+        this._packagesRestorePromise = (async () => {
             if (window.packageCatalog && window.packageCatalog.restoreInstalledToProlog) {
                 await window.packageCatalog.restoreInstalledToProlog();
             }
-        } catch (e) {
+            this._packagesRestored = true;
+        })().catch(e => {
+            this._packagesRestorePromise = null;
             console.warn('[PrologKernel] package restore failed:', e);
-        }
+            if (!this._packageRestoreWarningShown && window.PackageInstallUI) {
+                this._packageRestoreWarningShown = true;
+                void window.PackageInstallUI.notify(e);
+            }
+            // A failed archive restore is visible, but must not disable
+            // unrelated Prolog or an explicit session-only installation.
+            return false;
+        });
+        return this._packagesRestorePromise;
     }
 
     static runtimeConfig() {
@@ -348,6 +359,20 @@ class PrologKernel {
                     if (name.startsWith('_cell_')) continue;
                     // Read from Emscripten FS and write to SharedVFS
                     const content = FS.readFile(fullPath);
+                    // An unchanged mirror is not a user edit. Preserve package
+                    // provenance and overwrite ownership across normal cells.
+                    const existing = window.sharedVFS._files.get(fullPath);
+                    if (existing) {
+                        const canonical = existing.content instanceof Uint8Array
+                            ? existing.content : new TextEncoder().encode(String(existing.content));
+                        if (canonical.length === content.length) {
+                            let same = true;
+                            for (let i = 0; i < content.length; i++) {
+                                if (canonical[i] !== content[i]) { same = false; break; }
+                            }
+                            if (same) continue;
+                        }
+                    }
                     window.sharedVFS.writeFile(fullPath, content, 'prolog');
                 }
             } catch (e) {
@@ -1122,6 +1147,12 @@ class PrologKernel {
     }
 
     async destroy() {
+        if (this._packagesRestorePromise) await this._packagesRestorePromise.catch(() => {});
+        this._packagesRestored = false;
+        this._packagesRestorePromise = null;
+        this._packageRestoreWarningShown = false;
+        if (window.packageCatalog) window.packageCatalog._restorePromise = null;
+        if (window.packageInstalls) window.packageInstalls.restorePromise = null;
         this._vfs = null;
         this._swipl = null;
         this._ready = false;

@@ -208,7 +208,10 @@ class VFSStore {
                     origin: f.origin || 'unknown',
                     size: f.size || 0,
                     created: f.created || 0,
-                    modified: f.modified || 0
+                    modified: f.modified || 0,
+                    ...(f.packageOrigin && Object.keys(f.packageOrigin).length === 1
+                        && typeof f.packageOrigin.archiveId === 'string' && /^[a-f0-9]{64}$/.test(f.packageOrigin.archiveId)
+                        ? { packageOrigin: { archiveId: f.packageOrigin.archiveId } } : {})
                 });
             }
 
@@ -276,7 +279,10 @@ class VFSStore {
                 origin: entry.origin || 'unknown',
                 size: entry.size || 0,
                 created: entry.created || Date.now(),
-                modified: entry.modified || Date.now()
+                modified: entry.modified || Date.now(),
+                ...(entry.packageOrigin && Object.keys(entry.packageOrigin).length === 1
+                    && typeof entry.packageOrigin.archiveId === 'string' && /^[a-f0-9]{64}$/.test(entry.packageOrigin.archiveId)
+                    ? { packageOrigin: { archiveId: entry.packageOrigin.archiveId } } : {})
             });
             tx.oncomplete = () => resolve();
             tx.onerror = (event) => reject(event.target.error);

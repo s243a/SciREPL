@@ -1232,6 +1232,27 @@
     "mathPalette.mdLimit": "Limit",
     "mathPalette.mdMatrix": "Matrix",
     "mathPalette.mdNthRoot": "Nth root",
-    "mathPalette.mdInfinity": "Infinity"
+    "mathPalette.mdInfinity": "Infinity",
+    "packageInstall.title": "Install {name}",
+    "packageInstall.persistent": "Keep installed on this device",
+    "packageInstall.session": "This session only",
+    "packageInstall.explanation": "Notebooks are saved in either mode. Keeping the package also restores its supporting files offline after restarting; it does not run notebook cells.",
+    "packageInstall.manage": "Saved packages",
+    "packageInstall.managedHelp": "Removing a saved copy keeps existing notebooks and this session's files. Its supporting files will no longer be restored after restarting.",
+    "packageInstall.empty": "No saved package archives.",
+    "packageInstall.remove": "Remove saved copy",
+    "packageInstall.removeTitle": "Remove saved package?",
+    "packageInstall.removeQuestion": "Remove {name} from saved packages?",
+    "packageInstall.limits": "Up to 32 packages, 32 MiB per archive and 96 MiB in total.",
+    "packageInstall.tooLarge": "This package is too large to save. The archive limit is 32 MiB.",
+    "packageInstall.full": "Saved package storage is full. Remove a saved copy or choose this session only.",
+    "packageInstall.corrupt": "The package archive is invalid or damaged. Import it again from a trusted source.",
+    "packageInstall.unavailable": "Saved package storage is unavailable. Nothing was installed. You can retry or explicitly choose this session only.",
+    "packageInstall.failed": "The package operation failed. Nothing was silently changed to a session-only install.",
+    "packageInstall.unsupported": "This archive format cannot be kept installed. Use a ZIP or tar.gz package.",
+    "packageInstall.restoreFailed": "Some saved packages could not be restored: {names}.",
+    "packageInstall.conflict": "This package would replace an existing file. Move or rename the conflicting file, or use a different package folder, then try again.",
+    "packageInstall.edits": "To keep edits to package support files, save a copy under a different path.",
+    "packageInstall.notice": "Package installation"
   }
 }

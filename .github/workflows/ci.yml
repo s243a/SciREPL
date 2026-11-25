@@ -55,6 +55,9 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium
 
+      - name: Persistent package validation, local storage and real dialog controls
+        run: npm run test:package-persistence
+
       # Static i18n gates — cheap, and each catches a class of bug no runtime
       # test does. Run before the server so a catalogue error fails fast.
       - name: i18n — manifest is current
@@ -79,7 +82,7 @@ jobs:
         run: node scripts/check-sw-shell.mjs
 
       - name: Service worker — shell-guard cannot be bypassed
-        run: node tests/test_sw_shell_guard.mjs
+        run: node tests/test_sw_shell_guard.mjs && npm run test:sw-history
 
       - name: Python packaging >=26 for the specifier differential
         uses: actions/setup-python@v5

@@ -941,6 +941,27 @@
     "mathPalette.mdLimit": "Limite",
     "mathPalette.mdMatrix": "Matrice",
     "mathPalette.mdNthRoot": "Racine n-ième",
-    "mathPalette.mdInfinity": "Infini"
+    "mathPalette.mdInfinity": "Infini",
+    "packageInstall.title": "Installer {name}",
+    "packageInstall.persistent": "Conserver sur cet appareil",
+    "packageInstall.session": "Cette session uniquement",
+    "packageInstall.explanation": "Les carnets sont enregistrés dans les deux modes. Conserver le paquet restaure aussi ses fichiers associés hors connexion après redémarrage, sans exécuter les cellules.",
+    "packageInstall.manage": "Paquets enregistrés",
+    "packageInstall.managedHelp": "Supprimer une copie conserve les carnets existants et les fichiers de cette session. Ses fichiers associés ne seront plus restaurés après redémarrage.",
+    "packageInstall.empty": "Aucune archive de paquet enregistrée.",
+    "packageInstall.remove": "Supprimer la copie enregistrée",
+    "packageInstall.removeTitle": "Supprimer le paquet enregistré ?",
+    "packageInstall.removeQuestion": "Supprimer {name} des paquets enregistrés ?",
+    "packageInstall.limits": "Jusqu’à 32 paquets, 32 MiB par archive et 96 MiB au total.",
+    "packageInstall.tooLarge": "Ce paquet est trop volumineux pour être enregistré. La limite est de 32 MiB par archive.",
+    "packageInstall.full": "Le stockage des paquets est plein. Supprimez une copie enregistrée ou choisissez cette session uniquement.",
+    "packageInstall.corrupt": "L’archive du paquet est invalide ou endommagée. Importez-la à nouveau depuis une source fiable.",
+    "packageInstall.unavailable": "Le stockage des paquets est indisponible. Rien n’a été installé. Réessayez ou choisissez explicitement cette session uniquement.",
+    "packageInstall.failed": "L’opération a échoué. Aucune installation n’a été convertie silencieusement en installation de session.",
+    "packageInstall.unsupported": "Ce format ne permet pas de conserver le paquet installé. Utilisez une archive ZIP ou tar.gz.",
+    "packageInstall.restoreFailed": "Certains paquets enregistrés n’ont pas pu être restaurés : {names}.",
+    "packageInstall.conflict": "Ce paquet remplacerait un fichier existant. Déplacez ou renommez le fichier en conflit, ou utilisez un autre dossier pour le paquet, puis réessayez.",
+    "packageInstall.edits": "Pour conserver les modifications des fichiers de support du paquet, enregistrez une copie à un autre emplacement.",
+    "packageInstall.notice": "Installation de paquets"
   }
 }

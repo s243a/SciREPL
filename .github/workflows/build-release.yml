@@ -39,7 +39,7 @@ jobs:
       - run: npm run test:catalog
       - run: npm run privacy:check
       - run: node scripts/check-sw-shell.mjs
-      - run: node tests/test_sw_shell_guard.mjs
+      - run: node tests/test_sw_shell_guard.mjs && npm run test:sw-history
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

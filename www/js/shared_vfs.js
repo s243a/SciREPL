@@ -105,7 +105,7 @@ class SharedVFS {
      * @param {string|Uint8Array} content
      * @param {string} origin - Kernel that wrote this file ('prolog', 'bash', 'python', 'user')
      */
-    writeFile(path, content, origin = 'unknown') {
+    writeFile(path, content, origin = 'unknown', { packageOrigin = null } = {}) {
         path = this._normalize(path);
 
         // Delegate /nb/ paths to NotebookVFS
@@ -133,8 +133,13 @@ class SharedVFS {
             origin,
             created: existing ? existing.created : now,
             modified: now,
-            size
+            size,
+            ...this._packageOriginFields(packageOrigin)
         });
+
+        // A normal edit is user data again, not a package-owned destination.
+        // The installer explicitly tracks only its successful writes afterwards.
+        window.packageInstalls?.releaseSupportFiles?.([path], { filesystem: 'shared' });
 
         this._emit('write', { path, origin, size });
     }
@@ -651,6 +656,18 @@ class SharedVFS {
 
     // ── Persistence ─────────────────────────────────────────────
 
+    _packageOriginFields(value) {
+        // Inert provenance only: ownership is re-established by the installer
+        // after validating the retained archive and comparing actual bytes.
+        if (!value || typeof value !== 'object' || Object.keys(value).length !== 1
+            || typeof value.archiveId !== 'string' || !/^[a-f0-9]{64}$/.test(value.archiveId)) return {};
+        return { packageOrigin: { archiveId: value.archiveId } };
+    }
+
+    getPackageOrigin(path) {
+        return this._packageOriginFields(this._files.get(this._normalize(path))?.packageOrigin).packageOrigin || null;
+    }
+
     /**
      * Snapshot the entire filesystem for persistence.
      * Returns a serializable object.
@@ -658,12 +675,14 @@ class SharedVFS {
     snapshot() {
         const files = [];
         for (const [path, entry] of this._files) {
+            if (window.packageInstalls?.isSessionOnlyManagedPath?.(path, 'shared')) continue;
             // Only snapshot string content (skip large binary)
             if (typeof entry.content === 'string') {
                 files.push({
                     path,
                     content: entry.content,
-                    origin: entry.origin
+                    origin: entry.origin,
+                    ...this._packageOriginFields(entry.packageOrigin)
                 });
             } else if (entry.content instanceof Uint8Array && entry.size < 512 * 1024) {
                 // Small binary: base64 encode
@@ -677,7 +696,8 @@ class SharedVFS {
                     path,
                     content: btoa(binary),
                     origin: entry.origin,
-                    binary: true
+                    binary: true,
+                    ...this._packageOriginFields(entry.packageOrigin)
                 });
             }
         }
@@ -701,7 +721,7 @@ class SharedVFS {
                     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
                     content = bytes;
                 }
-                this.writeFile(f.path, content, f.origin || 'restored');
+                this.writeFile(f.path, content, f.origin || 'restored', this._packageOriginFields(f.packageOrigin));
             }
         }
     }
@@ -718,13 +738,15 @@ class SharedVFS {
 
         const files = [];
         for (const [path, entry] of this._files) {
+            if (window.packageInstalls?.isSessionOnlyManagedPath?.(path, 'shared')) continue;
             files.push({
                 path,
                 content: entry.content,
                 origin: entry.origin,
                 size: entry.size,
                 created: entry.created,
-                modified: entry.modified
+                modified: entry.modified,
+                ...this._packageOriginFields(entry.packageOrigin)
             });
         }
         const dirs = Array.from(this._dirs);
@@ -757,7 +779,8 @@ class SharedVFS {
                 origin: f.origin || 'restored',
                 created: f.created || Date.now(),
                 modified: f.modified || Date.now(),
-                size: f.size || 0
+                size: f.size || 0,
+                ...this._packageOriginFields(f.packageOrigin)
             });
         }
         console.log(`[SharedVFS] Restored ${files.length} files, ${dirs.length} dirs from IndexedDB`);

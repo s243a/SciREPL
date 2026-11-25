@@ -944,6 +944,27 @@
     "mathPalette.mdLimit": "Grenzwert",
     "mathPalette.mdMatrix": "Matrix",
     "mathPalette.mdNthRoot": "n-te Wurzel",
-    "mathPalette.mdInfinity": "Unendlich"
+    "mathPalette.mdInfinity": "Unendlich",
+    "packageInstall.title": "{name} installieren",
+    "packageInstall.persistent": "Auf diesem Gerät installiert lassen",
+    "packageInstall.session": "Nur diese Sitzung",
+    "packageInstall.explanation": "Notebooks werden in beiden Modi gespeichert. Ein gespeichertes Paket stellt nach einem Neustart auch seine Begleitdateien offline wieder her; Notebook-Zellen werden dabei nicht ausgeführt.",
+    "packageInstall.manage": "Gespeicherte Pakete",
+    "packageInstall.managedHelp": "Das Entfernen einer gespeicherten Kopie behält vorhandene Notebooks und die Dateien dieser Sitzung bei. Die Begleitdateien werden nach einem Neustart nicht mehr wiederhergestellt.",
+    "packageInstall.empty": "Keine gespeicherten Paketarchive.",
+    "packageInstall.remove": "Gespeicherte Kopie entfernen",
+    "packageInstall.removeTitle": "Gespeichertes Paket entfernen?",
+    "packageInstall.removeQuestion": "{name} aus den gespeicherten Paketen entfernen?",
+    "packageInstall.limits": "Bis zu 32 Pakete, 32 MiB pro Archiv und insgesamt 96 MiB.",
+    "packageInstall.tooLarge": "Dieses Paket ist zum Speichern zu groß. Die Archivgrenze beträgt 32 MiB.",
+    "packageInstall.full": "Der Paketspeicher ist voll. Entfernen Sie eine gespeicherte Kopie oder wählen Sie nur diese Sitzung.",
+    "packageInstall.corrupt": "Das Paketarchiv ist ungültig oder beschädigt. Importieren Sie es erneut aus einer vertrauenswürdigen Quelle.",
+    "packageInstall.unavailable": "Der Paketspeicher ist nicht verfügbar. Es wurde nichts installiert. Versuchen Sie es erneut oder wählen Sie ausdrücklich nur diese Sitzung.",
+    "packageInstall.failed": "Der Paketvorgang ist fehlgeschlagen. Es wurde nicht stillschweigend zu einer reinen Sitzungsinstallation gewechselt.",
+    "packageInstall.unsupported": "Dieses Archivformat lässt sich nicht dauerhaft installieren. Verwenden Sie ein ZIP- oder tar.gz-Paket.",
+    "packageInstall.restoreFailed": "Einige gespeicherte Pakete konnten nicht wiederhergestellt werden: {names}.",
+    "packageInstall.conflict": "Dieses Paket würde eine vorhandene Datei ersetzen. Verschieben Sie die betroffene Datei oder benennen Sie sie um, oder verwenden Sie einen anderen Paketordner. Versuchen Sie es anschließend erneut.",
+    "packageInstall.edits": "Um Änderungen an den Unterstützungsdateien des Pakets zu behalten, speichern Sie eine Kopie unter einem anderen Pfad.",
+    "packageInstall.notice": "Paketinstallation"
   }
 }

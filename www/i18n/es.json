@@ -937,6 +937,27 @@
     "mathPalette.mdLimit": "Límite",
     "mathPalette.mdMatrix": "Matriz",
     "mathPalette.mdNthRoot": "Raíz enésima",
-    "mathPalette.mdInfinity": "Infinito"
+    "mathPalette.mdInfinity": "Infinito",
+    "packageInstall.title": "Instalar {name}",
+    "packageInstall.persistent": "Mantener instalado en este dispositivo",
+    "packageInstall.session": "Solo esta sesión",
+    "packageInstall.explanation": "Los cuadernos se guardan en ambos modos. Conservar el paquete también restaura sus archivos auxiliares sin conexión al reiniciar; no ejecuta las celdas del cuaderno.",
+    "packageInstall.manage": "Paquetes guardados",
+    "packageInstall.managedHelp": "Eliminar una copia guardada conserva los cuadernos existentes y los archivos de esta sesión. Sus archivos auxiliares ya no se restaurarán al reiniciar.",
+    "packageInstall.empty": "No hay archivos de paquetes guardados.",
+    "packageInstall.remove": "Eliminar copia guardada",
+    "packageInstall.removeTitle": "¿Eliminar el paquete guardado?",
+    "packageInstall.removeQuestion": "¿Eliminar {name} de los paquetes guardados?",
+    "packageInstall.limits": "Hasta 32 paquetes, 32 MiB por archivo y 96 MiB en total.",
+    "packageInstall.tooLarge": "Este paquete es demasiado grande para guardarlo. El límite del archivo es de 32 MiB.",
+    "packageInstall.full": "El almacenamiento de paquetes está lleno. Elimina una copia guardada o elige solo esta sesión.",
+    "packageInstall.corrupt": "El archivo del paquete no es válido o está dañado. Impórtalo de nuevo desde una fuente de confianza.",
+    "packageInstall.unavailable": "El almacenamiento de paquetes no está disponible. No se instaló nada. Puedes reintentar o elegir explícitamente solo esta sesión.",
+    "packageInstall.failed": "La operación del paquete falló. No se cambió silenciosamente a una instalación solo para esta sesión.",
+    "packageInstall.unsupported": "Este formato de archivo no se puede conservar instalado. Usa un paquete ZIP o tar.gz.",
+    "packageInstall.restoreFailed": "No se pudieron restaurar algunos paquetes guardados: {names}.",
+    "packageInstall.conflict": "Este paquete reemplazaría un archivo existente. Mueve o cambia el nombre del archivo en conflicto, o usa otra carpeta para el paquete y vuelve a intentarlo.",
+    "packageInstall.edits": "Para conservar los cambios en los archivos auxiliares del paquete, guarda una copia en otra ruta.",
+    "packageInstall.notice": "Instalación de paquetes"
   }
 }

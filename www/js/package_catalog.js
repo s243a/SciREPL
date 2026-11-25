@@ -1177,6 +1177,10 @@ class PackageCatalog {
         if (!pkg) return 'missing';
 
         if ((pkg.type || 'package') === 'package') {
+            if (window.Capacitor?.getPlatform?.() === 'android'
+                && !this.builtinPackages.some(entry => entry.type === 'package' && entry.id === pkg.id)) {
+                return window.packageInstalls?.isInstalled(pkg, this._installedPackages()) ? 'current' : 'missing';
+            }
             return this._installedPackages().some(saved =>
                 saved && (saved.id === pkg.id || saved.name === pkg.name)) ? 'current' : 'missing';
         }
@@ -1338,6 +1342,9 @@ class PackageCatalog {
                 this._syncInstallButtons();
             } catch (err) {
                 console.error('[PackageCatalog] Import failed:', err);
+                if (err?.code !== 'INSTALL_CANCELLED' && window.Capacitor?.getPlatform?.() === 'android' && window.PackageInstallUI) {
+                    await window.PackageInstallUI.notify(err);
+                }
                 this._setButtonLabel(job.btn, 'packageCatalog.failed', 'Failed');
                 job.btn.disabled = false;
                 setTimeout(() => this._syncInstallButtons(), 3000);
@@ -1361,10 +1368,21 @@ class PackageCatalog {
      */
     _rememberInstalled(pkg) {
         if (!pkg || (pkg.type || 'package') !== 'package') return;
+        const android = window.Capacitor?.getPlatform?.() === 'android';
+        const builtin = this.builtinPackages.some(entry => entry.type === 'package' && entry.id === pkg.id
+            && entry.pages_url === pkg.pages_url && entry.url === pkg.url);
+        if (android && !builtin && !pkg._localArchiveId) return;
         if (!pkg.pages_url && !pkg.url) return; // need a re-fetchable source
         try {
             const key = 'scirepl_installed_packages';
             const list = JSON.parse(localStorage.getItem(key) || '[]');
+            if (android && pkg._localArchiveId) {
+                const remaining = list.filter(p => !(p && (p.id === pkg.id || p.name === pkg.name)));
+                remaining.push({ id: pkg.id || null, name: pkg.name, pages_url: pkg.pages_url || null,
+                    url: pkg.url || null, archiveId: pkg._localArchiveId });
+                localStorage.setItem(key, JSON.stringify(remaining));
+                return;
+            }
             if (!list.some(p => p && (p.id === pkg.id || p.name === pkg.name))) {
                 list.push({ id: pkg.id || null, name: pkg.name, pages_url: pkg.pages_url || null, url: pkg.url || null });
                 localStorage.setItem(key, JSON.stringify(list));
@@ -1452,8 +1470,18 @@ class PackageCatalog {
      * without the user re-installing them. Notebooks are NOT recreated.
      */
     async restoreInstalledToProlog() {
-        if (this._restoredToProlog) return;
-        this._restoredToProlog = true;
+        if (this._restorePromise) return this._restorePromise;
+        this._restorePromise = this._restoreInstalledToProlog().catch(error => {
+            this._restorePromise = null;
+            throw error;
+        });
+        return this._restorePromise;
+    }
+
+    async _restoreInstalledToProlog() {
+        if (window.Capacitor?.getPlatform?.() === 'android' && window.packageInstalls) {
+            await window.packageInstalls.restore();
+        }
         let list;
         try { list = JSON.parse(localStorage.getItem('scirepl_installed_packages') || '[]'); }
         catch (_) { list = []; }
@@ -1462,6 +1490,7 @@ class PackageCatalog {
 
         for (const pkg of list) {
             try {
+                if (window.Capacitor?.getPlatform?.() === 'android' && pkg?.archiveId) continue;
                 const blob = await this._fetchForRestore(pkg);
                 if (!blob) { console.warn('[PackageCatalog] no source to restore', pkg.name); continue; }
                 const file = new File([blob], (pkg.name || 'package') + '.zip', { type: 'application/zip' });
@@ -1478,6 +1507,18 @@ class PackageCatalog {
      * bundled copy (pages_url — offline-capable), fall back to the release URL.
      */
     async _fetchForRestore(pkg) {
+        if (window.Capacitor?.getPlatform?.() === 'android') {
+            // Saved URLs are not authority for startup requests. Retained
+            // archives restore through PackageInstalls; only fixed app assets
+            // may supply a bundled package here, even while offline.
+            const builtin = this.builtinPackages.find(entry => entry.type === 'package'
+                && (pkg?.id ? entry.id === pkg.id : entry.name === pkg?.name));
+            if (!builtin?.pages_url) return null;
+            const target = new URL(builtin.pages_url, location.href);
+            if (target.origin !== location.origin) return null;
+            try { return await this._fetchPackage(target.href); }
+            catch (_) { return null; }
+        }
         const candidates = [];
         if (pkg.pages_url) candidates.push(pkg.pages_url);
         if (pkg.url) candidates.push(pkg.url);
@@ -1549,6 +1590,20 @@ class PackageCatalog {
                 : () => window.fileIO.importIpynb(text);
             await this._importWorkbook(pkg, importer);
         } else {
+            if (window.Capacitor?.getPlatform?.() === 'android') {
+                const builtin = this.builtinPackages.find(entry => entry.type === 'package'
+                    && (pkg.id ? entry.id === pkg.id : entry.name === pkg.name));
+                const bundled = builtin?.pages_url
+                    && new URL(builtin.pages_url, location.href).origin === location.origin
+                    && pkg.pages_url === builtin.pages_url && pkg.url === builtin.url;
+                if (!bundled) {
+                    if (!window.packageInstalls) throw new Error('Android package installation is unavailable.');
+                    const source = pkg.url || pkg.pages_url || 'package.zip';
+                    const filename = source.split('/').pop() || 'package.zip';
+                    const file = new File([blob], filename, { type: blob.type });
+                    return window.packageInstalls.install(file, { name: pkg.name, pkg });
+                }
+            }
             const sourceUrl = pkg.url || pkg.pages_url || 'package.zip';
             const urlParts = sourceUrl.split('/');
             const filename = urlParts[urlParts.length - 1] || 'package.zip';

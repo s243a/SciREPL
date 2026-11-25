@@ -887,6 +887,119 @@ try {
     }
     await page.evaluate(() => window.appearance.setCustomCss(''));
 
+    // Probe the menu both with and without a separate Appearance dialog above
+    // it. A fresh menu also starts modalSlideIn: neither that transient
+    // transform nor another app modal may mask a fixed covering pseudo-element.
+    for (const open of [false, true]) {
+        const result = await page.evaluate((appearanceOpen) => {
+            window.appearance.setCustomCss('');
+            window.appearance.clearQuarantinedCss();
+            if (appearanceOpen) window.appearanceUI.open();
+            else window.appearanceUI.close();
+            const menu = document.getElementById('menu-modal');
+            menu.classList.add('hidden');
+            const dialog = document.getElementById('appearance-modal');
+            const before = [menu, dialog].map((el) => ['class', 'style', 'inert']
+                .map((name) => el.getAttribute(name)));
+            window.appearance.setCustomCss('#menu-modal .modal-content::after '
+                + '{ content:""; position:fixed; inset:0; z-index:99999; }');
+            return {
+                rolledBack: !document.getElementById('appearance-custom-css'),
+                restored: JSON.stringify(before) === JSON.stringify([menu, dialog]
+                    .map((el) => ['class', 'style', 'inert'].map((name) => el.getAttribute(name)))),
+            };
+        }, open);
+        check(`menu pseudo-overlay is quarantined with Appearance ${open ? 'open' : 'closed'}`,
+            result.rolledBack && result.restored, JSON.stringify(result));
+    }
+
+    const probeState = await page.evaluate(() => {
+        window.appearance.setCustomCss('');
+        window.appearanceUI.open();
+        const menu = document.getElementById('menu-modal');
+        const dialog = document.getElementById('appearance-modal');
+        const details = dialog.querySelector('details');
+        const detailsOpen = details.open;
+        details.open = true;
+        const input = document.getElementById('appearance-custom-css-input');
+        input.focus({ preventScroll: true });
+        input.setSelectionRange(0, 0);
+        const attrs = () => [...document.querySelectorAll('.modal')].map((el) =>
+            ['class', 'style', 'inert', 'aria-hidden'].map((name) => el.getAttribute(name)));
+        const animationState = (a) => [a.currentTime, a.startTime, a.playState, a.pending, a.playbackRate];
+        const dialogAnimations = dialog.querySelector('.modal-content').getAnimations({ subtree: false });
+        const before = { attrs: attrs(), focus: document.activeElement,
+            scroll: dialog.querySelector('.modal-content').scrollTop,
+            animations: dialogAnimations.map(animationState) };
+        window.appearance.setCustomCss('#app-header { letter-spacing: .25px; }');
+        const benignAccepted = !!document.getElementById('appearance-custom-css');
+        let isolated = false;
+        let threw = false;
+        try {
+            window.appearance._withProbeOpen(menu, () => {
+                isolated = dialog.inert && !menu.inert;
+                throw new Error('probe restoration fixture');
+            });
+        } catch (err) { threw = err.message === 'probe restoration fixture'; }
+        const restored = JSON.stringify(attrs()) === JSON.stringify(before.attrs)
+            && document.activeElement === before.focus
+            && dialog.querySelector('.modal-content').scrollTop === before.scroll
+            && JSON.stringify(dialogAnimations.map(animationState)) === JSON.stringify(before.animations);
+        details.open = detailsOpen;
+        window.appearance.setCustomCss('');
+        return { benignAccepted, isolated, threw, restored };
+    });
+    check('benign CSS and a throwing probe preserve modal, focus, scroll and animation state',
+        Object.values(probeState).every(Boolean), JSON.stringify(probeState));
+
+    const animationControls = await page.evaluate(() => {
+        const menu = document.getElementById('menu-modal');
+        const content = menu.querySelector('.modal-content');
+        const saved = ['class', 'style', 'inert'].map((name) => [name, menu.getAttribute(name)]);
+        const fixture = document.createElement('style');
+        const state = (a) => [a.currentTime, a.startTime, a.playState, a.pending, a.playbackRate];
+        let builtinRestored = false;
+        const customUntouched = [];
+        try {
+            menu.classList.remove('hidden');
+            menu.inert = false;
+            const builtin = content.getAnimations({ subtree: false })
+                .find((a) => a.animationName === 'modalSlideIn');
+            const before = state(builtin);
+            let settled = false;
+            window.appearance._withProbeOpen(menu, () => {
+                settled = getComputedStyle(content).transform === 'none';
+            });
+            builtinRestored = settled && JSON.stringify(state(builtin)) === JSON.stringify(before);
+            document.head.appendChild(fixture);
+            for (const fill of ['none', 'forwards']) {
+                fixture.textContent = '@keyframes modalSlideIn { from { opacity:1; transform:translateY(0); } '
+                    + 'to { opacity:0; transform:translateY(-2500px); } } '
+                    + `#menu-modal > .modal-content { animation:modalSlideIn .3s ease ${fill}; }`;
+                const custom = content.getAnimations({ subtree: false })
+                    .find((a) => a.animationName === 'modalSlideIn');
+                const prior = state(custom);
+                let during;
+                window.appearance._withProbeOpen(menu, () => { during = state(custom); });
+                customUntouched.push(!window.appearance._isBuiltinModalSlide(custom, content)
+                    && JSON.stringify(during) === JSON.stringify(prior)
+                    && JSON.stringify(state(custom)) === JSON.stringify(prior));
+            }
+        } finally {
+            fixture.remove();
+            for (const [name, value] of saved) {
+                if (value === null) menu.removeAttribute(name);
+                else menu.setAttribute(name, value);
+            }
+        }
+        return { builtinRestored, customUntouched };
+    });
+    check('only the built-in slide is settled and its running state is restored',
+        animationControls.builtinRestored, JSON.stringify(animationControls));
+    check('user hiding animations, including a transient namesake, are not settled or changed',
+        animationControls.customUntouched.length === 2 && animationControls.customUntouched.every(Boolean),
+        JSON.stringify(animationControls));
+
     /* ----------------- legal text follows its own review ---------------- */
     console.log('\n4d. Privacy status controls the legal text');
 

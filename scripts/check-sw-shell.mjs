@@ -29,6 +29,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { canonicalJSON, parseShellHistory, usedShellVersions, versionNumber } from './lib/sw-shell-history.mjs';
 
 const ROOT = path.resolve(fileURLToPath(new URL('..', import.meta.url)));
 const WWW = path.join(ROOT, 'www');
@@ -75,13 +76,13 @@ if (missing.length) {
 }
 const digest = hash.digest('hex');
 
-let lock = { reserved: [], history: {} };
+let lock;
 try {
-    const parsed = JSON.parse(readFileSync(LOCK, 'utf8'));
-    if (parsed && parsed.history && typeof parsed.history === 'object') {
-        lock = { reserved: Array.isArray(parsed.reserved) ? parsed.reserved : [], history: parsed.history };
-    }
-} catch { /* missing or legacy; treated as empty */ }
+    lock = parseShellHistory(readFileSync(LOCK, 'utf8'), { requireCanonical: true });
+} catch (error) {
+    console.error(`[sw] ${error.message}`);
+    process.exit(1);
+}
 
 const recorded = lock.history[version];
 
@@ -90,11 +91,10 @@ const recorded = lock.history[version];
 // strictly greater than all of them. Rolling the worker back to an old ID (e.g.
 // v129) would otherwise let --write append it and pass CI, while browsers reuse
 // that cache name against changed content and wipe a good cache.
-const asNum = (v) => { const m = /^v(\d+)$/.exec(v); return m ? parseInt(m[1], 10) : NaN; };
-const usedVersions = [...Object.keys(lock.history), ...lock.reserved];
-const floor = usedVersions.reduce((mx, v) => Math.max(mx, asNum(v) || 0), 0);
-const curN = asNum(version);
-if (!Number.isFinite(curN)) {
+const usedVersions = usedShellVersions(lock);
+const floor = usedVersions.reduce((mx, v) => Math.max(mx, versionNumber(v)), 0);
+let curN;
+try { curN = versionNumber(version); } catch {
     console.error(`[sw] CACHE_VERSION '${version}' is not of the form vN; cannot order it.`);
     process.exit(2);
 }
@@ -123,7 +123,7 @@ if (process.argv.includes('--write')) {
         process.exit(1);
     }
     lock.history[version] = digest;
-    writeFileSync(LOCK, JSON.stringify({ reserved: lock.reserved, history: lock.history }, null, 2) + '\n');
+    writeFileSync(LOCK, canonicalJSON(lock));
     console.log(`[sw] appended ${version} to the shell history (${shell.length} assets + worker).`);
     process.exit(0);
 }

@@ -46,6 +46,28 @@ class PackageLoader {
         }
     }
 
+    // Only the bounded archive validator supplies this snapshot. Reuse the
+    // already-extracted bytes so saving and importing refer to the same archive.
+    async loadPrepared(prepared, { persistent = false, archiveId = null } = {}) {
+        const { fileMap, manifest, filename } = prepared;
+        return manifest ? this._loadWithManifest(manifest, fileMap, { strict: true, managed: true, persistent, archiveId })
+            : this._loadWithoutManifest(fileMap, filename, { strict: true, managed: true, persistent, archiveId });
+    }
+
+    async remountPrepared(prepared, restoredPaths = new Set(), { archiveId = null, restoredSharedFiles = new Map() } = {}) {
+        const { manifest, fileMap } = prepared;
+        if (manifest) {
+            const baseDir = manifest._baseDir || '';
+            if (manifest.files?.length) await this._mountFiles(manifest.files, fileMap, baseDir, { restoring: true, restoredPaths, restoredSharedFiles, managed: true, persistent: true, archiveId });
+            if (manifest.search_paths?.length) this._addSearchPaths(manifest.search_paths, { managed: true });
+        } else {
+            const support = new Map([...fileMap].filter(([path]) => !/\.(?:ipynb|srwb)$/i.test(path)));
+            await this._mountRawFiles(support, { restoring: true, restoredPaths, restoredSharedFiles, managed: true, persistent: true, archiveId });
+        }
+        // Deliberately no notebook creation, Python sync, WASM instantiation,
+        // JavaScript wrapper evaluation, consult(), or cell execution here.
+    }
+
     /**
      * Quietly re-mount a package's supporting files + search paths WITHOUT
      * creating or switching notebooks. Used to restore installed packages into
@@ -120,14 +142,14 @@ class PackageLoader {
     /**
      * Load package with a valid manifest.
      */
-    async _loadWithManifest(manifest, fileMap) {
+    async _loadWithManifest(manifest, fileMap, { strict = false, managed = false, persistent = false, archiveId = null } = {}) {
         const baseDir = manifest._baseDir || '';
         const nm = window.notebookManager;
         if (!nm) throw new Error(window.t('packageLoader.notebookManagerUnavailable'));
 
         // 1. Mount supporting files to VFS
         if (manifest.files && manifest.files.length > 0) {
-            await this._mountFiles(manifest.files, fileMap, baseDir);
+            await this._mountFiles(manifest.files, fileMap, baseDir, { strict, managed, persistent, archiveId });
         }
 
         // 1b. Sync Python modules if the Python kernel is already initialized
@@ -135,7 +157,7 @@ class PackageLoader {
 
         // 2. Add search paths
         if (manifest.search_paths && manifest.search_paths.length > 0) {
-            this._addSearchPaths(manifest.search_paths);
+            this._addSearchPaths(manifest.search_paths, { managed });
         }
 
         // 2b. Load WASM modules
@@ -184,7 +206,7 @@ class PackageLoader {
     /**
      * Load package without a manifest — each .ipynb becomes a notebook.
      */
-    async _loadWithoutManifest(fileMap, archiveName) {
+    async _loadWithoutManifest(fileMap, archiveName, { strict = false, managed = false, persistent = false, archiveId = null } = {}) {
         const nm = window.notebookManager;
         if (!nm) throw new Error(window.t('packageLoader.notebookManagerUnavailable'));
 
@@ -202,7 +224,7 @@ class PackageLoader {
 
         if (ipynbFiles.length === 0) {
             // No notebooks — mount all files to VFS as a plain archive
-            await this._mountRawFiles(fileMap);
+            await this._mountRawFiles(fileMap, { strict, managed, persistent, archiveId });
             return {
                 name: archiveName,
                 notebooks: 0,
@@ -212,7 +234,7 @@ class PackageLoader {
 
         // Mount non-notebook files to VFS
         if (otherFiles.length > 0) {
-            await this._mountRawFiles(new Map(otherFiles.map(f => [f.path, f.content])));
+            await this._mountRawFiles(new Map(otherFiles.map(f => [f.path, f.content])), { strict, managed, persistent, archiveId });
         }
 
         // Create a notebook for each .ipynb
@@ -326,13 +348,45 @@ class PackageLoader {
         return (typeof content === 'string') ? content : new TextDecoder().decode(content);
     }
 
-    /**
-     * Mount manifest-specified files to VFS with target routing.
-     * Supports targets: "shared", "prolog", "all" (default: "prolog").
-     */
-    async _mountFiles(fileSpecs, fileMap, baseDir) {
+    // Exact roots mirrored by PrologKernel._syncSharedPaths. Do not use the
+    // broader SharedVFS.isSharedPath, which includes delegated virtual mounts.
+    isSharedSupportPath(path) {
+        return typeof path === 'string' && /^\/(?:shared|tmp|education|user\/education)(?:\/|$)/.test(path);
+    }
+
+    _rawFileSpecs(fileMap) {
+        return [...fileMap.keys()].filter(path => !path.endsWith('/') && !path.startsWith('.') && !path.includes('/.'))
+            .map(src => ({ src, dest: '/user/' + src, target: 'prolog' }));
+    }
+
+    hasSharedSupport({ manifest, fileMap }) {
+        // Raw .ipynb files become notebooks, not support files. Other raw
+        // destinations must obey the same shared-root policy as manifests.
+        const specs = manifest ? manifest.files || []
+            : this._rawFileSpecs(new Map([...fileMap].filter(([path]) => !path.endsWith('.ipynb'))));
+        return specs.some(spec => spec.target === 'shared' || spec.target === 'all' || this.isSharedSupportPath(spec.dest));
+    }
+
+    _prologFileExists(vfs, path) {
+        // PrologVFS.exists() also sees SharedVFS fallback files. Collision and
+        // initial overwrite decisions concern the private Prolog FS only.
+        return typeof vfs.stat === 'function' ? vfs.stat(path) !== null : vfs.exists(path);
+    }
+
+    _matchesSavedSharedFile(entry, archiveId) {
+        if (typeof archiveId !== 'string' || !/^[a-f0-9]{64}$/.test(archiveId)
+            || window.sharedVFS?.getPackageOrigin?.(entry.path)?.archiveId !== archiveId) return false;
+        const actual = window.sharedVFS.readFile(entry.path);
+        const bytes = value => typeof value === 'string' ? new TextEncoder().encode(value) : value;
+        const left = bytes(actual), right = bytes(entry.content);
+        return left instanceof Uint8Array && right instanceof Uint8Array
+            && left.length === right.length && left.every((value, index) => value === right[index]);
+    }
+
+    /** Mount support with collision/persistence policy before native sync. */
+    async _mountFiles(fileSpecs, fileMap, baseDir, { restoring = false, restoredPaths = new Set(), restoredSharedFiles = new Map(), strict = false, managed = false, persistent = false, archiveId = null } = {}) {
         const km = window.kernelManager;
-        if (!km) return;
+        if (!km) { if (strict || restoring) throw new Error('Package filesystem is unavailable.'); return; }
 
         const sharedBatch = [];
         const prologBatch = [];
@@ -344,8 +398,10 @@ class PackageLoader {
 
             const addFile = (dest, content) => {
                 const resolved = this._resolveContent(content, dest, spec);
-                // Auto-route: paths under /shared/ or /tmp/ always go to SharedVFS
-                const isSharedPath = dest.startsWith('/shared/') || dest.startsWith('/tmp/');
+                // A managed Prolog install must apply Shared policy BEFORE a
+                // cell can mirror these roots. Retain unmanaged legacy routing.
+                const isSharedPath = managed ? this.isSharedSupportPath(dest)
+                    : dest.startsWith('/shared/') || dest.startsWith('/tmp/');
                 if (target === 'shared' || target === 'all' || isSharedPath) {
                     sharedBatch.push({ path: dest, content: resolved, origin: 'package' });
                 }
@@ -367,24 +423,77 @@ class PackageLoader {
                 }
             } else {
                 const content = fileMap.get(srcPath);
-                if (content) {
+                if (content !== undefined) {
                     addFile(destPath, content);
                 }
             }
         }
 
+        // A saved Shared copy is not enough by itself to grant ownership. Only
+        // a matching validated retained archive AND unchanged bytes can revive
+        // its provenance after a cold restart. Untagged/user-edited files stay
+        // protected, including identical user copies at a package destination.
+        if (managed && persistent) {
+            for (const entry of sharedBatch) {
+                if (this._matchesSavedSharedFile(entry, archiveId)) {
+                    window.packageInstalls?.trackSupportFiles?.([entry.path], { filesystem: 'shared', persistent: true });
+                }
+            }
+        }
+
+        // Preflight every destination before a prepared import changes any of
+        // them. Unknown existing data is user-owned; never silently overwrite
+        // and then remove its last durable snapshot as package-managed data.
+        if (strict && managed && !restoring) {
+            const ownership = window.packageInstalls;
+            const conflict = () => { throw Object.assign(new Error('Package file conflict.'), { code: 'PACKAGE_FILE_CONFLICT' }); };
+            for (const entry of sharedBatch) {
+                if (window.sharedVFS?.exists?.(entry.path)
+                    && (!ownership?.isManagedPath?.(entry.path, 'shared')
+                        || (!persistent && !ownership?.isSessionOnlyManagedPath?.(entry.path, 'shared')))) conflict();
+            }
+            if (prologBatch.length) {
+                await km.ensureReady('prolog');
+                const vfs = km.getKernel('prolog').getVFS();
+                if (!vfs) throw new Error('Package filesystem is unavailable.');
+                for (const entry of prologBatch) if (this._prologFileExists(vfs, entry.path) && !ownership?.isManagedPath?.(entry.path, 'prolog')) conflict();
+            }
+        }
+
         // Write to SharedVFS
+        if (strict && sharedBatch.length && !window.sharedVFS) throw new Error('Package filesystem is unavailable.');
         if (sharedBatch.length > 0 && window.sharedVFS) {
             console.log(`[PackageLoader] Mounting ${sharedBatch.length} files to SharedVFS...`);
             const t0 = performance.now();
             for (const entry of sharedBatch) {
+                if (restoring && window.sharedVFS.exists(entry.path)) {
+                    // Saved/user Shared data stays authoritative. Only an
+                    // untouched copy created earlier in THIS restore pass may
+                    // advance to the next retained archive's install order.
+                    const prior = restoredSharedFiles.get(entry.path);
+                    if (!prior || !this._matchesSavedSharedFile(prior, prior.archiveId)) continue;
+                }
                 // Ensure parent directories exist
                 const parts = entry.path.split('/');
                 for (let i = 2; i < parts.length; i++) {
                     const dir = parts.slice(0, i).join('/');
                     if (dir) window.sharedVFS.mkdir(dir);
                 }
-                window.sharedVFS.writeFile(entry.path, entry.content, entry.origin);
+                const packageOrigin = managed && persistent && /^[a-f0-9]{64}$/.test(archiveId || '') ? { archiveId } : null;
+                const written = window.sharedVFS.writeFile(entry.path, entry.content, entry.origin, { packageOrigin });
+                if (strict && written === false) throw new Error('Package file write was not permitted.');
+                if (managed && written !== false) window.packageInstalls?.trackSupportFiles?.([entry.path], { filesystem: 'shared', persistent });
+                if (restoring && managed && persistent && written !== false && this._matchesSavedSharedFile(entry, archiveId)) {
+                    restoredSharedFiles.set(entry.path, { path: entry.path, archiveId,
+                        content: entry.content instanceof Uint8Array ? entry.content.slice() : entry.content });
+                    // A later Shared-only archive must not leave a stale native
+                    // mirror that this pass already seeded from an older one.
+                    if (this.isSharedSupportPath(entry.path) && restoredPaths.has(entry.path)
+                        && !prologBatch.some(file => file.path === entry.path)) {
+                        prologBatch.push({ path: entry.path, content: entry.content instanceof Uint8Array
+                            ? entry.content.slice() : entry.content });
+                    }
+                }
             }
             console.log(`[PackageLoader] SharedVFS mount done in ${(performance.now() - t0).toFixed(0)}ms`);
         }
@@ -394,13 +503,34 @@ class PackageLoader {
             try {
                 await km.ensureReady('prolog');
                 const vfs = km.getKernel('prolog').getVFS();
+                if (!vfs && (restoring || strict)) throw new Error('Package filesystem is unavailable.');
                 if (vfs) {
                     console.log(`[PackageLoader] Mounting ${prologBatch.length} files to Prolog VFS...`);
                     const t0 = performance.now();
-                    vfs.bulkWrite(prologBatch);
+                    // SharedVFS persists independently. Do not replay its old
+                    // contents or replace an already-mounted edited Prolog file.
+                    // A missing native mirror can be seeded only from matching
+                    // validated Shared package bytes. Existing native or edited/
+                    // untagged Shared copies keep the original restore safeguard.
+                    const verifiedSharedPaths = restoring && managed && persistent
+                        ? new Set(sharedBatch.filter(entry => this._matchesSavedSharedFile(entry, archiveId)).map(entry => entry.path))
+                        : new Set();
+                    const batch = restoring ? prologBatch.filter(entry => {
+                        if (managed && persistent && this.isSharedSupportPath(entry.path)) {
+                            // Prior native replay ownership is NOT permission to
+                            // disagree with a saved or edited Shared copy.
+                            return verifiedSharedPaths.has(entry.path)
+                                && (!this._prologFileExists(vfs, entry.path) || restoredPaths.has(entry.path));
+                        }
+                        return !vfs.exists(entry.path) || restoredPaths.has(entry.path);
+                    }) : prologBatch;
+                    vfs.bulkWrite(batch);
+                    if (managed) window.packageInstalls?.trackSupportFiles?.(batch.map(entry => entry.path), { filesystem: 'prolog', persistent });
+                    if (restoring) for (const entry of batch) restoredPaths.add(entry.path);
                     console.log(`[PackageLoader] Prolog VFS mount done in ${(performance.now() - t0).toFixed(0)}ms`);
                 }
             } catch (e) {
+                if (restoring || strict) throw e;
                 console.warn('Could not mount to Prolog VFS:', e);
             }
         }
@@ -527,7 +657,7 @@ class PackageLoader {
     /**
      * Add search paths from manifest.
      */
-    _addSearchPaths(paths) {
+    _addSearchPaths(paths, { managed = false } = {}) {
         const km = window.kernelManager;
         if (!km) return;
         const kernel = km.getKernel('prolog');
@@ -537,7 +667,10 @@ class PackageLoader {
 
         for (const p of paths) {
             if (p.alias && p.dir) {
+                const exists = managed && vfs.getSearchPaths?.().some(entry => entry.alias === p.alias && entry.dir === p.dir);
+                if (exists) continue; // Keep pre-existing user alias ownership.
                 vfs.addSearchPath(p.alias, p.dir);
+                if (managed) window.packageInstalls?.trackSupportSearchPaths?.([{ alias: p.alias, dir: p.dir }]);
             }
         }
     }
@@ -545,35 +678,14 @@ class PackageLoader {
     /**
      * Mount raw files from archive to VFS (no manifest, uses bulk write).
      */
-    async _mountRawFiles(fileMap) {
-        const km = window.kernelManager;
-        if (!km) return;
-
-        try {
-            await km.ensureReady('prolog');
-        } catch (e) {
-            console.warn('Could not init Prolog for VFS:', e);
-            return;
-        }
-
-        const vfs = km.getKernel('prolog').getVFS();
-        if (!vfs) return;
-
-        const batch = [];
-        for (const [path, content] of fileMap) {
-            // Skip directories and hidden files
-            if (path.endsWith('/') || path.startsWith('.') || path.includes('/.')) continue;
-            const dest = '/user/' + path;
-            const textContent = typeof content === 'string'
-                ? content
-                : new TextDecoder().decode(content);
-            batch.push({ path: dest, content: textContent });
-        }
-
-        console.log(`[PackageLoader] Raw mounting ${batch.length} files to VFS...`);
-        const t0 = performance.now();
-        vfs.bulkWrite(batch);
-        console.log(`[PackageLoader] VFS mount done in ${(performance.now() - t0).toFixed(0)}ms`);
+    async _mountRawFiles(fileMap, options = {}) {
+        // Keep raw support's existing text conversion and hidden-file filtering,
+        // but share preflight, successful-write tracking and provenance handling.
+        // education/foo.pl maps to a kernel-mirrored /user/education path too.
+        const specs = this._rawFileSpecs(fileMap);
+        const textFiles = new Map(specs.map(spec => [spec.src, typeof fileMap.get(spec.src) === 'string'
+            ? fileMap.get(spec.src) : new TextDecoder().decode(fileMap.get(spec.src))]));
+        await this._mountFiles(specs, textFiles, '', options);
     }
 
     /**

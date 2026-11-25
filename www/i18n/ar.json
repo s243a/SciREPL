@@ -928,6 +928,27 @@
     "mathPalette.mdLimit": "نهاية",
     "mathPalette.mdMatrix": "مصفوفة",
     "mathPalette.mdNthRoot": "جذر نوني",
-    "mathPalette.mdInfinity": "ما لا نهاية"
+    "mathPalette.mdInfinity": "ما لا نهاية",
+    "packageInstall.title": "تثبيت {name}",
+    "packageInstall.persistent": "الاحتفاظ بالتثبيت على هذا الجهاز",
+    "packageInstall.session": "لهذه الجلسة فقط",
+    "packageInstall.explanation": "تُحفظ دفاتر الملاحظات في كلا الوضعين. يؤدي الاحتفاظ بالحزمة أيضًا إلى استعادة ملفاتها المساندة دون اتصال بعد إعادة التشغيل، ولا يشغّل خلايا الدفتر.",
+    "packageInstall.manage": "الحزم المحفوظة",
+    "packageInstall.managedHelp": "تؤدي إزالة النسخة المحفوظة إلى الإبقاء على دفاتر الملاحظات الحالية وملفات هذه الجلسة. لن تُستعاد الملفات المساندة بعد إعادة التشغيل.",
+    "packageInstall.empty": "لا توجد أرشيفات حزم محفوظة.",
+    "packageInstall.remove": "إزالة النسخة المحفوظة",
+    "packageInstall.removeTitle": "إزالة الحزمة المحفوظة؟",
+    "packageInstall.removeQuestion": "إزالة {name} من الحزم المحفوظة؟",
+    "packageInstall.limits": "حتى 32 حزمة، وبحد أقصى 32 MiB لكل أرشيف و96 MiB إجمالًا.",
+    "packageInstall.tooLarge": "هذه الحزمة أكبر من أن تُحفظ. الحد الأقصى للأرشيف هو 32 MiB.",
+    "packageInstall.full": "مساحة تخزين الحزم ممتلئة. أزل نسخة محفوظة أو اختر هذه الجلسة فقط.",
+    "packageInstall.corrupt": "أرشيف الحزمة غير صالح أو تالف. استورده مجددًا من مصدر موثوق.",
+    "packageInstall.unavailable": "تخزين الحزم غير متاح. لم يُثبّت شيء. أعد المحاولة أو اختر صراحةً هذه الجلسة فقط.",
+    "packageInstall.failed": "فشلت عملية الحزمة. لم يتغير التثبيت بصمت إلى تثبيت لهذه الجلسة فقط.",
+    "packageInstall.unsupported": "لا يمكن الاحتفاظ بتثبيت هذا النوع من الأرشيف. استخدم حزمة ZIP أو tar.gz.",
+    "packageInstall.restoreFailed": "تعذرت استعادة بعض الحزم المحفوظة: {names}.",
+    "packageInstall.conflict": "ستستبدل هذه الحزمة ملفًا موجودًا. انقل الملف المتعارض أو أعد تسميته، أو استخدم مجلدًا مختلفًا للحزمة، ثم حاول مرة أخرى.",
+    "packageInstall.edits": "للاحتفاظ بالتعديلات على ملفات الدعم الخاصة بالحزمة، احفظ نسخة في مسار مختلف.",
+    "packageInstall.notice": "تثبيت الحزم"
   }
 }
