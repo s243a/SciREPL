@@ -1,5 +1,11 @@
 # Proposal: SciREPL Free and Pro for the Microsoft Store
 
+The architectural proposal below predates the Electron previews. See the
+[current Store pilot plan](WINDOWS_STORE_PILOT.md) for scope, sequencing and
+current certification questions, and the [next Free release plan](NEXT_FREE_RELEASE_PLAN.md)
+for the separate Android/PWA work. The pilot does not require a Pro runtime
+license check to prove the Free packaging and update path.
+
 ## Recommendation
 
 Keep **Capacitor for Android** and the existing **Free PWA**, and add **Electron as a Windows-only shell** around the existing web application. Package the Windows desktop applications for the Microsoft Store, preferably as MSIX. The Pro application must never be published as a hosted PWA.
