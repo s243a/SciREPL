@@ -47,6 +47,10 @@ function fixture() {
 function branchFixture() {
     const f = fixture();
     f.git('init', '-q');
+    // The raw no-commit merge below also requires a committer identity. Keep it
+    // inside this disposable repository, never in the developer's global config.
+    f.git('config', '--local', 'user.name', 'SW fixture');
+    f.git('config', '--local', 'user.email', 'sw-fixture@example.invalid');
     f.writeLock(legacy());
     f.shell('v245', 'base');
     assert.equal(f.guard('--write').status, 0);
@@ -122,7 +126,7 @@ test('CLI is read-only by default, writes only in its pinned merge, and cannot e
         assert.equal(f.reconcile('--canonical', commit('0'), '--feature', f.feature).status, 1);
 
         const merging = result('git', ['-c', 'core.hooksPath=/dev/null', 'merge', '--no-commit', '--no-ff', f.canonical], f.dir);
-        assert.equal(merging.status, 1, 'the fixture must create real unmerged index stages');
+        assert.equal(merging.status, 1, 'the fixture must create real unmerged index stages: ' + merging.output);
         const pristineConflict = readFileSync(f.lock, 'utf8');
         assert.match(pristineConflict, /<<<<<<< /);
         const mergeHeadPath = path.resolve(f.dir, f.git('rev-parse', '--git-path', 'MERGE_HEAD'));
