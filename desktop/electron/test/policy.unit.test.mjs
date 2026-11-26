@@ -129,6 +129,39 @@ export default async function run() {
   r.log('profile: SCIREPL_USER_DATA still overrides both',
     paths.resolveUserDataDir({ appData: APPDATA, windowsStore: true, env: { SCIREPL_USER_DATA: CUSTOM } }) === CUSTOM);
 
+  // Open application data folder: Explorer runs outside the MSIX package, so
+  // the Store build must hand it the real, redirected folder (pilot run 4).
+  const W_APPDATA = 'C:\\Users\\u\\AppData\\Roaming';
+  const W_LOCAL = 'C:\\Users\\u\\AppData\\Local';
+  const W_EXEC = 'C:\\Program Files\\WindowsApps\\SciREPL.FreePilot.LocalTest_1.5.0.0_x64__8wekyb3d8bbwe\\app\\SciREPL.exe';
+  const W_STORE = W_APPDATA + '\\SciREPL-Free-Store';
+  r.log('package family name comes from the WindowsApps install folder',
+    paths.packageFamilyFromExecPath(W_EXEC) === 'SciREPL.FreePilot.LocalTest_8wekyb3d8bbwe',
+    paths.packageFamilyFromExecPath(W_EXEC));
+  r.log('no package family outside WindowsApps or for a malformed folder name',
+    paths.packageFamilyFromExecPath('C:\\SciREPL\\SciREPL.exe') === null
+      && paths.packageFamilyFromExecPath('C:\\Program Files\\WindowsApps\\SciREPL_1.5.0.0_x64\\SciREPL.exe') === null
+      && paths.packageFamilyFromExecPath('C:\\Program Files\\WindowsApps') === null
+      && paths.packageFamilyFromExecPath(undefined) === null);
+  const storeOpen = paths.resolveExplorerDataDir({
+    userData: W_STORE, appData: W_APPDATA, localAppData: W_LOCAL, windowsStore: true, execPath: W_EXEC,
+  });
+  r.log('Store build: Explorer gets the redirected folder under Packages\\<family>\\LocalCache\\Roaming',
+    storeOpen === W_LOCAL + '\\Packages\\SciREPL.FreePilot.LocalTest_8wekyb3d8bbwe\\LocalCache\\Roaming\\SciREPL-Free-Store',
+    storeOpen);
+  r.log('portable build: Explorer gets userData unchanged',
+    paths.resolveExplorerDataDir({
+      userData: W_APPDATA + '\\SciREPL-Free-Electron', appData: W_APPDATA, localAppData: W_LOCAL, windowsStore: false, execPath: W_EXEC,
+    }) === W_APPDATA + '\\SciREPL-Free-Electron');
+  r.log('Store build with a profile outside %APPDATA% (override): opened as is',
+    paths.resolveExplorerDataDir({
+      userData: 'D:\\profiles\\scirepl', appData: W_APPDATA, localAppData: W_LOCAL, windowsStore: true, execPath: W_EXEC,
+    }) === 'D:\\profiles\\scirepl');
+  r.log('Store build without a recognisable package folder: opened as is',
+    paths.resolveExplorerDataDir({
+      userData: W_STORE, appData: W_APPDATA, localAppData: W_LOCAL, windowsStore: true, execPath: 'C:\\dev\\electron.exe',
+    }) === W_STORE);
+
   // Every resolved path must be absolute on this platform — the property that
   // actually broke on Windows, asserted directly rather than inferred.
   for (const [label, layout] of [['development', devLayout], ['packaged', packagedLayout]]) {
