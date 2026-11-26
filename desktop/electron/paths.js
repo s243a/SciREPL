@@ -110,9 +110,15 @@ function packageFamilyFromExecPath(execPath) {
  * redirected to %LOCALAPPDATA%\Packages\<family>\LocalCache\Roaming. The app
  * sees the redirected folder at its usual %APPDATA% path, but Explorer runs
  * outside the package and does not: handing it `userData` fails with
- * "Location is not available" (pilot run 4). So for a Store build whose
- * profile is under %APPDATA%, return the real location. Anything else, such
- * as the portable build or a SCIREPL_USER_DATA override, opens as is.
+ * "Location is not available" (pilot run 4).
+ *
+ * The rule is to open the folder where the files actually are. MSIX redirects
+ * only folders that did not already exist in the real %APPDATA%: a folder
+ * that did, such as a SCIREPL_USER_DATA override pointing at an existing
+ * Roaming folder, is used in place. So for a Store build with a profile under
+ * %APPDATA%, return the redirected folder when it exists, and otherwise the
+ * profile path as given. The portable build, and a profile outside %APPDATA%,
+ * always open as given.
  *
  * Windows-only paths, so path.win32 throughout: the unit tests run on Linux.
  *
@@ -122,15 +128,17 @@ function packageFamilyFromExecPath(execPath) {
  * @param {string}  o.localAppData  %LOCALAPPDATA%
  * @param {boolean} o.windowsStore  `process.windowsStore`
  * @param {string}  o.execPath      `process.execPath`
+ * @param {(p: string) => boolean} o.exists  whether a folder exists
  * @returns {string}
  */
-function resolveExplorerDataDir({ userData, appData, localAppData, windowsStore, execPath }) {
+function resolveExplorerDataDir({ userData, appData, localAppData, windowsStore, execPath, exists }) {
   if (!windowsStore || !localAppData || !appData) return userData;
   const family = packageFamilyFromExecPath(execPath);
   if (!family) return userData;
   const rel = path.win32.relative(appData, userData);
   if (!rel || rel.startsWith('..') || path.win32.isAbsolute(rel)) return userData;
-  return path.win32.join(localAppData, 'Packages', family, 'LocalCache', 'Roaming', rel);
+  const redirected = path.win32.join(localAppData, 'Packages', family, 'LocalCache', 'Roaming', rel);
+  return exists(redirected) ? redirected : userData;
 }
 
 module.exports = {

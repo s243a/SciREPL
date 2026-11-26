@@ -153,6 +153,7 @@ export default async function run() {
       dialog: fakeDialog,
       shell: { async openPath(p) { opened.push(p); return 'Location is not available'; }, openExternal() {} },
       app: { getPath: (k) => (k === 'appData' ? 'C:\\Users\\u\\AppData\\Roaming' : 'C:\\Users\\u\\AppData\\Roaming\\SciREPL-Free-Store') },
+      folderExists: () => true,
       process: {
         windowsStore: true,
         execPath: 'C:\\Program Files\\WindowsApps\\SciREPL.FreePilot.LocalTest_1.5.0.0_x64__8wekyb3d8bbwe\\SciREPL.exe',

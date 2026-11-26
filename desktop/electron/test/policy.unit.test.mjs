@@ -143,24 +143,29 @@ export default async function run() {
       && paths.packageFamilyFromExecPath('C:\\Program Files\\WindowsApps\\SciREPL_1.5.0.0_x64\\SciREPL.exe') === null
       && paths.packageFamilyFromExecPath('C:\\Program Files\\WindowsApps') === null
       && paths.packageFamilyFromExecPath(undefined) === null);
-  const storeOpen = paths.resolveExplorerDataDir({
-    userData: W_STORE, appData: W_APPDATA, localAppData: W_LOCAL, windowsStore: true, execPath: W_EXEC,
+  const W_REDIRECTED = W_LOCAL + '\\Packages\\SciREPL.FreePilot.LocalTest_8wekyb3d8bbwe\\LocalCache\\Roaming';
+  const store = (userData, existing, execPath = W_EXEC) => paths.resolveExplorerDataDir({
+    userData, appData: W_APPDATA, localAppData: W_LOCAL, windowsStore: true, execPath,
+    exists: (p) => existing.includes(p),
   });
+  const storeOpen = store(W_STORE, [W_REDIRECTED + '\\SciREPL-Free-Store']);
   r.log('Store build: Explorer gets the redirected folder under Packages\\<family>\\LocalCache\\Roaming',
-    storeOpen === W_LOCAL + '\\Packages\\SciREPL.FreePilot.LocalTest_8wekyb3d8bbwe\\LocalCache\\Roaming\\SciREPL-Free-Store',
-    storeOpen);
+    storeOpen === W_REDIRECTED + '\\SciREPL-Free-Store', storeOpen);
   r.log('portable build: Explorer gets userData unchanged',
     paths.resolveExplorerDataDir({
       userData: W_APPDATA + '\\SciREPL-Free-Electron', appData: W_APPDATA, localAppData: W_LOCAL, windowsStore: false, execPath: W_EXEC,
+      exists: () => true,
     }) === W_APPDATA + '\\SciREPL-Free-Electron');
-  r.log('Store build with a profile outside %APPDATA% (override): opened as is',
-    paths.resolveExplorerDataDir({
-      userData: 'D:\\profiles\\scirepl', appData: W_APPDATA, localAppData: W_LOCAL, windowsStore: true, execPath: W_EXEC,
-    }) === 'D:\\profiles\\scirepl');
-  r.log('Store build without a recognisable package folder: opened as is',
-    paths.resolveExplorerDataDir({
-      userData: W_STORE, appData: W_APPDATA, localAppData: W_LOCAL, windowsStore: true, execPath: 'C:\\dev\\electron.exe',
-    }) === W_STORE);
+  r.log('Store build, override outside %APPDATA%: opened as given',
+    store('D:\\profiles\\scirepl', [W_REDIRECTED + '\\scirepl']) === 'D:\\profiles\\scirepl');
+  r.log('Store build, override to a Roaming folder that already existed (MSIX uses it in place): opened as given',
+    store(W_APPDATA + '\\my-scirepl', []) === W_APPDATA + '\\my-scirepl');
+  r.log('Store build, override to a new Roaming folder (MSIX redirected it): the redirected copy opens',
+    store(W_APPDATA + '\\my-scirepl', [W_REDIRECTED + '\\my-scirepl']) === W_REDIRECTED + '\\my-scirepl');
+  r.log('Store build, default profile not yet created on the redirected side: opened as given',
+    store(W_STORE, []) === W_STORE);
+  r.log('Store build without a recognisable package folder: opened as given',
+    store(W_STORE, [W_REDIRECTED + '\\SciREPL-Free-Store'], 'C:\\dev\\electron.exe') === W_STORE);
 
   // Every resolved path must be absolute on this platform — the property that
   // actually broke on Windows, asserted directly rather than inferred.

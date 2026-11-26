@@ -31,6 +31,7 @@
  * actions.
  */
 
+const fs = require('fs');
 const { Menu, dialog, shell, app } = require('electron');
 const { ENGLISH, interpolate } = require('./native-i18n');
 const { resolveExplorerDataDir } = require('./paths');
@@ -76,6 +77,9 @@ function createMenuTemplate(deps) {
   const hostShell = deps.shell || shell;
   const hostApp = deps.app || app;
   const hostProcess = deps.process || process;
+  const folderExists = deps.folderExists || ((p) => {
+    try { return fs.statSync(p).isDirectory(); } catch { return false; }
+  });
 
   async function openAppData() {
     // A fixed, application-owned path. No renderer input reaches this.
@@ -85,6 +89,7 @@ function createMenuTemplate(deps) {
       localAppData: (hostProcess.env || {}).LOCALAPPDATA,
       windowsStore: hostProcess.windowsStore === true,
       execPath: hostProcess.execPath,
+      exists: folderExists,
     });
     const error = await hostShell.openPath(folder);
     if (!error) return;
