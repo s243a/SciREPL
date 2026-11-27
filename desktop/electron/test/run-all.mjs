@@ -23,6 +23,7 @@ const SUITES = [
   { name: 'msix-manifest', file: './msix-manifest.unit.test.mjs', unit: true },
   { name: 'msix-pilot-scripts', file: './msix-pilot-scripts.unit.test.mjs', unit: true },
   { name: 'shell-launch', file: './shell-launch.test.mjs', unit: false },
+  { name: 'zoom', file: './zoom.test.mjs', unit: false },
   { name: 'security', file: './security.test.mjs', unit: false },
   { name: 'artifact-boundary', file: './artifact-boundary.test.mjs', unit: false },
   { name: 'download', file: './download.test.mjs', unit: false },

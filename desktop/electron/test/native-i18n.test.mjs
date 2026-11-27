@@ -139,6 +139,15 @@ export default async function run() {
     await template[3].submenu[0].click(); // cache info
     await template[3].submenu[1].click(); // clear confirmation + result
     await template[4].submenu[0].click(); // about
+    const view = template[2].submenu;
+    const extraZoom = view.find((item) => item.accelerator === 'CommandOrControl+=');
+    r.log('View menu: Ctrl+= is a hidden second Zoom In that still fires',
+      !!extraZoom && extraZoom.role === 'zoomIn' && extraZoom.visible === false
+        && extraZoom.acceleratorWorksWhenHidden === true,
+      JSON.stringify(extraZoom || null));
+    r.log('View menu: exactly one visible Zoom In',
+      view.filter((item) => item.role === 'zoomIn' && item.visible !== false).length === 1);
+
     // Open application data folder: Store build opens the redirected folder,
     // and a failed open shows the path in a localized dialog.
     const opened = [];

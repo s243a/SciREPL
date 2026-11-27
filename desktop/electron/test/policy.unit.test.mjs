@@ -384,6 +384,27 @@ export default async function run() {
     csp.includes("'wasm-unsafe-eval'"));
 
   Module._resolveFilename = originalResolve;
+  // Zoom: Ctrl+= and Ctrl+wheel (pilot run 4).
+  const zoom = require(path.join(ELECTRON_DIR, 'zoom.js'));
+  r.log('zoom: one step in and out matches the menu roles (0.5)',
+    zoom.nextZoomLevel(0, 'in') === 0.5 && zoom.nextZoomLevel(0, 'out') === -0.5);
+  r.log('zoom: clamped to the limits',
+    zoom.nextZoomLevel(zoom.MAX_ZOOM_LEVEL, 'in') === zoom.MAX_ZOOM_LEVEL
+      && zoom.nextZoomLevel(zoom.MIN_ZOOM_LEVEL, 'out') === zoom.MIN_ZOOM_LEVEL);
+  r.log('zoom: an unknown direction or level changes nothing harmful',
+    zoom.nextZoomLevel(1, 'sideways') === 1 && zoom.nextZoomLevel(NaN, 'in') === 0.5);
+  {
+    let level = 0; let handler = null;
+    const fake = {
+      on(ev, fn) { if (ev === 'zoom-changed') handler = fn; },
+      getZoomLevel: () => level,
+      setZoomLevel: (v) => { level = v; },
+    };
+    zoom.installWheelZoom(fake);
+    handler && handler({}, 'in'); handler && handler({}, 'in'); handler && handler({}, 'out');
+    r.log('zoom: Ctrl+wheel (zoom-changed) steps the page zoom', handler !== null && level === 0.5, String(level));
+  }
+
   return r.summary();
 }
 
