@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ja" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Windows デスクトップアプリが SciREPL Free の外観設定に加えるもの：ノートブックの幅、ズーム、Windows の表示スケール、新規セルパネルの非表示、ウィンドウの「ランタイム」メニュー。">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ja/interface/appearance-windows/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <title>Windows での外観：異なる点 · SciREPL ヘルプ</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/appearance-windows/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/appearance-windows/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/appearance-windows/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/appearance-windows/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/appearance-windows/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/appearance-windows/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/appearance-windows/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/appearance-windows/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/appearance-windows/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/appearance-windows/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/appearance-windows/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/appearance-windows/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/appearance-windows/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/en/interface/appearance-windows/">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free" data-platforms="windows-preview">
+  <a class="skip-link" href="#main">コンテンツへスキップ</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (英語のリファレンスページ)</span></a>
+    <nav aria-label="メインナビゲーション">
+      <a href="../../../interface/">インターフェースリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a>
+      <a href="../../tutorials/">すべてのチュートリアル</a>
+      <a href="../../../">すべてのヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a>
+      <a href="../../../../">Free PWAを開く</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="チュートリアルの言語"><details class="tutorial-language-menu"><summary>チュートリアルの言語: <bdi>日本語</bdi></summary><nav aria-label="チュートリアルの言語"><a href="../../../en/interface/appearance-windows/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/appearance-windows/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/appearance-windows/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/appearance-windows/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/appearance-windows/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/appearance-windows/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/appearance-windows/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/appearance-windows/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="./" lang="ja" hreflang="ja" aria-current="page">日本語</a>
+      <a href="../../../ko/interface/appearance-windows/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/appearance-windows/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/appearance-windows/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/appearance-windows/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">このページは機械翻訳です。ネイティブによるレビューは保留中です。キーボードショートカットと技術的な値は変更されていません。</p></aside>
+    <p class="breadcrumbs"><a href="../../../">ヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a> / <a href="../../../interface/">インターフェース<span class="english-reference"> (英語のリファレンスページ)</span></a> / <a href="../appearance/">外観のウォークスルー</a> / Windows</p>
+    <article>
+      <p class="eyebrow">Windows デスクトップアプリ</p>
+      <h1>Windows での外観：異なる点</h1>
+      <p class="lede">Windows アプリ（Microsoft Store 版を含む）には、Android と同じ <strong>☰ メニュー → 🎨 外観</strong> があります。テーマ、表示言語、ボタンのサイズ、📦 Browse ショートカットは<a href="../appearance/">外観のウォークスルー</a>のとおりに動作します。このページでは、デスクトップのウィンドウで加わる点だけを説明します。</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free</li>
+        <li class="chip">Windows デスクトップアプリ</li>
+        <li class="chip">約 2 分</li>
+      </ul>
+
+      <section id="notebook-width">
+        <h2>ノートブックの幅</h2>
+        <p>幅が 1000 ピクセル以上のウィンドウでは、ノートブックのセルは最大 1200 ピクセルまで広がります。この <strong>ワイド</strong> が既定の設定です。変更するには <strong>☰ メニュー → 🎨 外観</strong> を開き、<strong>レイアウト</strong> の <strong>ノートブックの幅</strong> を選びます。</p>
+        <ul>
+          <li><strong>標準</strong>：従来の 720 ピクセルの列。</li>
+          <li><strong>ワイド</strong>：最大 1200 ピクセル（既定）。</li>
+          <li><strong>ウィンドウ全体</strong>：セルがウィンドウの幅全体を使います。</li>
+        </ul>
+        <p>それより狭いウィンドウでは、どれを選んでも常に標準の列になります。</p>
+      </section>
+
+      <section id="zoom">
+        <h2>ズーム</h2>
+        <p>ズームでウィンドウ内のページを拡大・縮小できます。</p>
+        <ul>
+          <li>拡大：<kbd dir="ltr">Ctrl+=</kbd> または <kbd dir="ltr">Ctrl+Shift+=</kbd>（Ctrl とプラスキー）。</li>
+          <li>縮小：<kbd dir="ltr">Ctrl+-</kbd>。100% に戻す：<kbd dir="ltr">Ctrl+0</kbd>。</li>
+          <li><kbd dir="ltr">Ctrl</kbd> を押しながらマウスホイールを回すか、タッチパッドでピンチ操作をします。</li>
+          <li>ウィンドウのメニューバーから：<strong>表示 → 拡大</strong>、<strong>縮小</strong>、<strong>実際のサイズ</strong>。</li>
+        </ul>
+      </section>
+
+      <section id="display-scaling">
+        <h2>Windows の表示スケールか、アプリのズームか</h2>
+        <p>Windows のディスプレイ設定（設定 → システム → ディスプレイ）の拡大縮小は、SciREPL のタイトルバー、メニューバー、ダイアログを含め、画面上のすべてを拡大します。アプリのズームは、ウィンドウ内のページだけを拡大します。Windows には 1 つのアプリだけを拡大縮小する設定がないので、SciREPL だけを大きく（または小さく）したいときはズームを使ってください。</p>
+        <p>どちらも、ページから見たウィンドウの大きさを変えます。たとえば 150% のスケールでは、幅 1920 ピクセルの画面は SciREPL にとって幅 1280 ピクセルです。上記の幅 1000 ピクセルと下記の高さ 500 ピクセルは、スケールとズームを適用した後の値です。</p>
+      </section>
+
+      <section id="new-cell-panel">
+        <h2>新規セルパネルを隠す</h2>
+        <p>ウィンドウが縦より横に長く、ページの高さが 500 ピクセル以下のときは、下部の新規セルパネルに <strong>⌄</strong> ボタン（<strong>新規セルパネルを隠す</strong>）が表示されます。150–200% のスケールでは普通のノートパソコンのウィンドウでもこの高さになることがあり、ズームで拡大しても同じです。<strong>⌄</strong> をクリックすると、ノートブックが高さ全体を使えます。</p>
+        <p>パネルを隠している間は、左上の <bdi>Sci REPL</bdi> というタイトルの代わりに小さな <strong>⌃</strong> ボタン（<strong>新規セルパネルを表示</strong>）が表示されます。これをクリックするとパネルが戻ります。最大化するなどしてウィンドウを高くしても、パネルは戻ります。</p>
+      </section>
+
+      <section id="menu-bar">
+        <h2>ウィンドウのメニューバー</h2>
+        <p>Windows のウィンドウには、アプリの上に独自のメニューバーがあります：<strong>ファイル</strong>、<strong>編集</strong>、<strong>表示</strong>、<strong>ランタイム</strong>、<strong>ヘルプ</strong>（表示言語で表示されます）。キーボードからは <kbd dir="ltr">Alt</kbd> を押して移動できます。<strong>ランタイム</strong> には次の項目があります。</p>
+        <ul>
+          <li><strong>ダウンロード済みランタイム…</strong>：ダウンロードした Lua と R のランタイムが使っている容量と、保存場所を表示します。</li>
+          <li><strong>ダウンロード済みランタイムを消去…</strong>：確認のうえで削除します。ノートブックやファイルには影響しません。すでに読み込まれたランタイムは再起動するまで使えます。その後、R と Lua はダウンロードの前に再び確認を求めます。ダウンロードにはインターネット接続が必要です。</li>
+          <li><strong>アプリケーション データ フォルダを開く</strong>：SciREPL のデータフォルダをエクスプローラーで開きます。</li>
+        </ul>
+        <p class="callout"><strong>Android にはウィンドウのメニューバーはありません。</strong>Android では <strong>☰ メニュー → 📊 メモリとストレージ</strong> でストレージを確認・消去します。Windows ではこのパネルからダウンロード済みランタイムが見えないため、ランタイムには <strong>ランタイム</strong> メニューを使ってください。</p>
+        <p>そのほかはすべて Android と共通です。<a href="../appearance/">外観のウォークスルー</a>に戻る。</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL ヘルプ</span><nav aria-label="フッターナビゲーション"><a href="../../../interface/">インターフェースリファレンス<span class="english-reference"> (英語のリファレンスページ)</span></a><a href="../../../">すべてのヘルプ<span class="english-reference"> (英語のリファレンスページ)</span></a></nav></footer>
+</body>
+</html>

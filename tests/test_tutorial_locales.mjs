@@ -26,6 +26,27 @@ verify('English-first self-hosted guide remains outside the frozen accepted tuto
   assert.equal(manifest.pages.some(page => page.route === 'pro/ai/self-hosted'), false);
   assert.equal(ROUTES.includes('pro/ai/self-hosted'), false);
 });
+// The hand-authored Windows Appearance supplement is outside ROUTES; its
+// control names must still be this locale's actual app and Electron menu labels.
+const WINDOWS_APPEARANCE_LABELS = ['menu.title', 'menu.appearance', 'menu.memoryAmpStorage',
+  'appearance.layout', 'appearance.notebookWidth', 'appearance.notebookWidthStandard',
+  'appearance.notebookWidthWide', 'appearance.notebookWidthFull', 'composer.collapse', 'composer.expand',
+  'electron.menu.file', 'electron.menu.edit', 'electron.menu.view', 'electron.menu.help',
+  'electron.menu.zoomIn', 'electron.menu.zoomOut', 'electron.menu.resetZoom', 'electron.menu.runtimes',
+  'electron.menu.downloadedRuntimes', 'electron.menu.clearDownloadedRuntimes', 'electron.menu.openAppData'];
+verify('Windows Appearance supplement stays outside the frozen inventory and uses actual control labels', () => {
+  assert.equal(ROUTES.includes('interface/appearance-windows'), false);
+  for (const locale of LOCALES) {
+    const html = readFileSync(path.join(ROOT, 'www', 'help', locale, 'interface', 'appearance-windows', 'index.html'), 'utf8');
+    const strings = JSON.parse(readFileSync(path.join(ROOT, 'www', 'i18n', `${locale}.json`), 'utf8')).strings;
+    const emphasised = [...html.matchAll(/<strong>([^<]*)<\/strong>/g)].map(match => match[1]);
+    for (const key of WINDOWS_APPEARANCE_LABELS) {
+      assert.equal(typeof strings[key], 'string', `${locale}: ${key}`);
+      const label = strings[key].replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+      assert.ok(emphasised.some(text => text.includes(label)), `${locale}: appearance-windows lacks ${key} (${strings[key]})`);
+    }
+  }
+});
 verify('incomplete locale inventories fail closed before rendering', () => {
   const status = inspectLocaleRecord(manifest, 'fr', { locale: 'fr', manifestHash: manifest.manifestHash, translations: {}, receipts: [] });
   assert.equal(status.complete, false); assert.equal(status.translated, 0); assert.equal(status.missing.length, status.fields);

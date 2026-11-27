@@ -54,6 +54,7 @@ const expected = [
   'help/pro/ai/index.html',
   'help/pro/ai/tutorial/index.html',
   'help/en/pro/ai/self-hosted/index.html',
+  'help/en/interface/appearance-windows/index.html',
   'help/pro/remote/index.html',
   'pro/help/index.html',
 ];
@@ -152,6 +153,32 @@ for (const [reference, href] of [
   ['help/pro/ai/index.html', '../../en/pro/ai/self-hosted/'],
 ]) check(`${reference} discovers the English-only self-hosted supplement`,
   readFileSync(path.join(WWW, reference), 'utf8').includes(`href="${href}">self-hosted AI setup guide (English)</a>`));
+
+// The Windows Appearance supplement is hand-authored in every tutorial
+// locale, outside the frozen tutorial inventory. Its control labels are
+// checked against the app catalogues in test_tutorial_locales.mjs: Pages
+// overlays this suite onto an older app checkout whose catalogues may differ.
+const WINDOWS_APPEARANCE_LOCALES = ['en', 'ar', 'bn', 'de', 'es', 'fr', 'hi', 'id', 'ja', 'ko', 'pt-BR', 'ru', 'zh'];
+for (const locale of WINDOWS_APPEARANCE_LOCALES) {
+  const rel = `help/${locale}/interface/appearance-windows/index.html`;
+  const file = path.join(WWW, rel);
+  if (!existsSync(file)) { check(`${rel} exists`, false); continue; }
+  const page = readFileSync(file, 'utf8');
+  check(`${rel} declares its language and direction`,
+    page.includes(`<html lang="${locale}" dir="${locale === 'ar' ? 'rtl' : 'ltr'}">`));
+  check(`${rel} is a Free Windows page with all locale alternates`,
+    /<body data-editions="free" data-platforms="windows-preview">/.test(page)
+      && WINDOWS_APPEARANCE_LOCALES.every(other => page.includes(`hreflang="${other}" href="https://s243a.github.io/SciREPL/help/${other}/interface/appearance-windows/"`)));
+  check(`${rel} links back to the shared Appearance walkthrough`, page.includes('href="../appearance/"'));
+  check(`${rel} keeps the zoom shortcuts`, ['Ctrl+=', 'Ctrl+Shift+=', 'Ctrl+-', 'Ctrl+0']
+    .every(keys => page.includes(`<kbd dir="ltr">${keys}</kbd>`)));
+  const appearance = readFileSync(path.join(WWW, `help/${locale}/interface/appearance/index.html`), 'utf8');
+  check(`help/${locale}/interface/appearance/ links to its Windows supplement`,
+    (appearance.match(/<a href="\.\.\/appearance-windows\/">/g) || []).length === 1);
+}
+check('Interface reference discovers the Windows Appearance supplement',
+  readFileSync(path.join(WWW, 'help/interface/index.html'), 'utf8')
+    .includes('<a href="../en/interface/appearance-windows/">Appearance on Windows: what\'s different</a>'));
 
 const tutorialIndexPath = 'help/tutorials/index.html';
 const tutorialIndex = readFileSync(path.join(WWW, tutorialIndexPath), 'utf8');

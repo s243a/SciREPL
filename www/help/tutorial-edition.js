@@ -4,7 +4,7 @@
   if (new URL(window.location.href).searchParams.get('edition') !== 'free') return;
   const helpBase = new URL('.', document.currentScript.src);
   const locales = new Set(['en', 'ar', 'bn', 'de', 'es', 'fr', 'hi', 'id', 'ja', 'ko', 'pt-BR', 'ru', 'zh']);
-  const sharedRoutes = new Set(['tutorials', 'interface/tutorial', 'interface/appearance', 'files-export/tutorial', 'workbooks/tutorial', 'workbooks/import', 'workbooks/graphics', 'workbooks/named-cells']);
+  const sharedRoutes = new Set(['tutorials', 'interface/tutorial', 'interface/appearance', 'interface/appearance-windows', 'files-export/tutorial', 'workbooks/tutorial', 'workbooks/import', 'workbooks/graphics', 'workbooks/named-cells']);
 
   // This script runs in the head, before Pro-only content can be painted.
   document.documentElement.setAttribute('data-tutorial-edition', 'free');

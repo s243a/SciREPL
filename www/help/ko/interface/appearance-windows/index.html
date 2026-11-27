@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Windows 데스크톱 앱이 SciREPL Free의 모양 설정에 더하는 것: 노트북 너비, 확대/축소, Windows 디스플레이 배율, 숨길 수 있는 새 셀 패널, 창의 런타임 메뉴.">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/ko/interface/appearance-windows/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <title>Windows의 모양: 달라지는 점 · SciREPL 도움말</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/appearance-windows/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/appearance-windows/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/appearance-windows/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/appearance-windows/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/appearance-windows/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/appearance-windows/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/appearance-windows/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/appearance-windows/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/appearance-windows/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/appearance-windows/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/appearance-windows/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/appearance-windows/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/appearance-windows/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/en/interface/appearance-windows/">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free" data-platforms="windows-preview">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (영어 참조 페이지)</span></a>
+    <nav aria-label="기본 탐색">
+      <a href="../../../interface/">인터페이스 참조<span class="english-reference"> (영어 참조 페이지)</span></a>
+      <a href="../../tutorials/">모든 튜토리얼</a>
+      <a href="../../../">모든 도움말<span class="english-reference"> (영어 참조 페이지)</span></a>
+      <a href="../../../../">Free PWA 열기</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="튜토리얼 언어"><details class="tutorial-language-menu"><summary>튜토리얼 언어: <bdi>한국어</bdi></summary><nav aria-label="튜토리얼 언어"><a href="../../../en/interface/appearance-windows/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/appearance-windows/" lang="ar" hreflang="ar">العربية</a>
+      <a href="../../../bn/interface/appearance-windows/" lang="bn" hreflang="bn">বাংলা</a>
+      <a href="../../../de/interface/appearance-windows/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/appearance-windows/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/appearance-windows/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/appearance-windows/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/appearance-windows/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/appearance-windows/" lang="ja" hreflang="ja">日本語</a>
+      <a href="./" lang="ko" hreflang="ko" aria-current="page">한국어</a>
+      <a href="../../../pt-BR/interface/appearance-windows/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/appearance-windows/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/appearance-windows/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">기계 번역된 페이지이며, 원어민 검토는 아직 진행되지 않았습니다. 키보드 단축키와 기술적인 값은 바뀌지 않았습니다.</p></aside>
+    <p class="breadcrumbs"><a href="../../../">도움말<span class="english-reference"> (영어 참조 페이지)</span></a> / <a href="../../../interface/">인터페이스<span class="english-reference"> (영어 참조 페이지)</span></a> / <a href="../appearance/">모양 둘러보기</a> / Windows</p>
+    <article>
+      <p class="eyebrow">Windows 데스크톱 앱</p>
+      <h1>Windows의 모양: 달라지는 점</h1>
+      <p class="lede">Microsoft Store 버전을 포함한 Windows 앱에도 Android와 같은 <strong>☰ 메뉴 → 🎨 모양 및 화면</strong>이 있습니다. 테마, 표시 언어, 버튼 크기, 📦 Browse 바로 가기는 <a href="../appearance/">모양 둘러보기</a>에서 설명한 대로 작동합니다. 이 페이지에서는 데스크톱 창에서 더해지는 점만 다룹니다.</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free</li>
+        <li class="chip">Windows 데스크톱 앱</li>
+        <li class="chip">약 2분</li>
+      </ul>
+
+      <section id="notebook-width">
+        <h2>노트북 너비</h2>
+        <p>너비가 1000픽셀 이상인 창에서는 노트북 셀이 최대 1200픽셀까지 넓어집니다. 이 <strong>넓게</strong> 설정이 기본값입니다. 바꾸려면 <strong>☰ 메뉴 → 🎨 모양 및 화면</strong>을 열고 <strong>레이아웃</strong>에서 <strong>노트북 너비</strong>를 고르세요.</p>
+        <ul>
+          <li><strong>표준</strong>: 예전의 720픽셀 열.</li>
+          <li><strong>넓게</strong>: 최대 1200픽셀(기본값).</li>
+          <li><strong>창 전체</strong>: 셀이 창의 전체 너비를 사용합니다.</li>
+        </ul>
+        <p>그보다 좁은 창에서는 무엇을 선택하든 항상 표준 열을 사용합니다.</p>
+      </section>
+
+      <section id="zoom">
+        <h2>확대/축소</h2>
+        <p>확대/축소는 창 안의 페이지를 크게 또는 작게 만듭니다.</p>
+        <ul>
+          <li>확대: <kbd dir="ltr">Ctrl+=</kbd> 또는 <kbd dir="ltr">Ctrl+Shift+=</kbd>(Ctrl과 더하기 키).</li>
+          <li>축소: <kbd dir="ltr">Ctrl+-</kbd>. 100%로 되돌리기: <kbd dir="ltr">Ctrl+0</kbd>.</li>
+          <li><kbd dir="ltr">Ctrl</kbd>을 누른 채 마우스 휠을 돌리거나 터치패드에서 손가락을 오므리거나 벌립니다.</li>
+          <li>창의 메뉴 표시줄에서: <strong>보기 → 확대</strong>, <strong>축소</strong>, <strong>실제 크기</strong>.</li>
+        </ul>
+      </section>
+
+      <section id="display-scaling">
+        <h2>Windows 디스플레이 배율인가요, 앱 확대/축소인가요?</h2>
+        <p>Windows 디스플레이 설정(설정 → 시스템 → 디스플레이)의 배율은 SciREPL의 제목 표시줄, 메뉴 표시줄, 대화 상자를 포함해 화면의 모든 것을 크게 합니다. 앱 확대/축소는 창 안의 페이지만 크게 합니다. Windows에는 앱 하나만 배율을 바꾸는 설정이 없으므로, SciREPL만 크게 또는 작게 하려면 확대/축소를 사용하세요.</p>
+        <p>두 가지 모두 페이지가 보는 창의 크기도 바꿉니다. 예를 들어 배율이 150%이면 너비 1920픽셀 화면이 SciREPL에는 1280픽셀 너비로 보입니다. 위의 1000픽셀 너비와 아래의 500픽셀 높이는 배율과 확대/축소를 적용한 뒤의 값입니다.</p>
+      </section>
+
+      <section id="new-cell-panel">
+        <h2>새 셀 패널 숨기기</h2>
+        <p>창이 세로보다 가로로 길고 페이지 높이가 500픽셀 이하이면, 아래쪽 새 셀 패널에 <strong>⌄</strong> 버튼(<strong>새 셀 패널 숨기기</strong>)이 나타납니다. 배율이 150–200%이면 평범한 노트북 컴퓨터의 창도 이만큼 낮을 수 있고, 확대해도 같은 효과가 납니다. <strong>⌄</strong>를 클릭하면 노트북이 전체 높이를 사용합니다.</p>
+        <p>패널이 숨겨져 있는 동안에는 왼쪽 위의 <bdi>Sci REPL</bdi> 제목 대신 작은 <strong>⌃</strong> 버튼(<strong>새 셀 패널 표시</strong>)이 표시됩니다. 이 버튼을 클릭하면 패널이 다시 나타납니다. 창을 최대화하는 등 창을 더 높게 만들어도 패널이 돌아옵니다.</p>
+      </section>
+
+      <section id="menu-bar">
+        <h2>창의 메뉴 표시줄</h2>
+        <p>Windows 창에는 앱 위에 자체 메뉴 표시줄이 있습니다: <strong>파일</strong>, <strong>편집</strong>, <strong>보기</strong>, <strong>런타임</strong>, <strong>도움말</strong>(표시 언어로 표시됨). 키보드로는 <kbd dir="ltr">Alt</kbd>를 눌러 이동합니다. <strong>런타임</strong>에는 다음 항목이 있습니다.</p>
+        <ul>
+          <li><strong>다운로드된 런타임…</strong>: 다운로드한 Lua와 R 런타임이 차지하는 공간과 저장 위치를 보여 줍니다.</li>
+          <li><strong>다운로드된 런타임 삭제…</strong>: 확인을 받은 뒤 삭제합니다. 노트북과 파일에는 영향이 없습니다. 이미 불러온 런타임은 다시 시작할 때까지 계속 작동합니다. 그 뒤 R과 Lua는 다운로드하기 전에 다시 묻고, 다운로드에는 인터넷 연결이 필요합니다.</li>
+          <li><strong>애플리케이션 데이터 폴더 열기</strong>: 파일 탐색기에서 SciREPL 데이터 폴더를 엽니다.</li>
+        </ul>
+        <p class="callout"><strong>Android에는 창 메뉴 표시줄이 없습니다.</strong> Android에서는 <strong>☰ 메뉴 → 📊 메모리 및 스토리지</strong>에서 저장 공간을 확인하고 비웁니다. Windows에서는 이 패널이 다운로드한 런타임을 볼 수 없으므로, 런타임은 <strong>런타임</strong> 메뉴에서 관리하세요.</p>
+        <p>나머지는 모두 Android와 같습니다. <a href="../appearance/">모양 둘러보기</a>로 돌아가세요.</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL 도움말</span><nav aria-label="바닥글 탐색"><a href="../../../interface/">인터페이스 참조<span class="english-reference"> (영어 참조 페이지)</span></a><a href="../../../">모든 도움말<span class="english-reference"> (영어 참조 페이지)</span></a></nav></footer>
+</body>
+</html>
