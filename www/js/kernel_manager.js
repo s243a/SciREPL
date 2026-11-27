@@ -559,11 +559,17 @@ class KernelManager {
      * The Electron desktop shell caches CDN runtimes in its own data directory
      * (desktop/electron/runtime-cache.js), not in the Cache API, which is
      * always empty under the app:// origin. The shell reports, as a static
-     * build/launch fact in getDistributionInfo(), whether that cache is active
-     * and which hosts it stores. Resolves to `{ hosts: Set }` when it is, or
-     * null everywhere else (PWA, Android, Electron with SCIREPL_RUNTIME_CACHE=0
-     * or a cache that failed to install), in which case the Cache API path
-     * below is used unchanged.
+     * build/launch fact in getDistributionInfo(), whether that cache is active,
+     * which hosts it stores, and a snapshot of its files taken at startup:
+     * URLs with an intact entry (`present`) and URLs it stored once whose entry
+     * has since gone (`missing`). Resolves to `{ hosts, present, missing }`
+     * (Sets) when the cache is active, or null everywhere else (PWA, Android,
+     * Electron with SCIREPL_RUNTIME_CACHE=0 or a cache that failed to install),
+     * in which case the Cache API path below is used unchanged.
+     *
+     * Read once and memoised. The snapshot is not refreshed during a session,
+     * and does not need to be: the prompt check only matters for a runtime
+     * that has not been loaded yet this session, i.e. at the next start.
      */
     _electronRuntimeCache() {
         if (!this._electronRuntimeCachePromise) {
@@ -574,7 +580,12 @@ class KernelManager {
                     const info = await host.getDistributionInfo();
                     if (info?.container !== 'electron' || info.runtimeCache !== true
                         || !Array.isArray(info.runtimeCacheHosts)) return null;
-                    return { hosts: new Set(info.runtimeCacheHosts.map((h) => String(h).toLowerCase())) };
+                    const urls = (list) => new Set(Array.isArray(list) ? list.map(String) : []);
+                    return {
+                        hosts: new Set(info.runtimeCacheHosts.map((h) => String(h).toLowerCase())),
+                        present: urls(info.runtimeCachePresent),
+                        missing: urls(info.runtimeCacheMissing),
+                    };
                 } catch (_) {
                     return null;
                 }
@@ -598,13 +609,15 @@ class KernelManager {
      * qualify: a runtime fetched from any other host (e.g. Prolog's
      * github.io CDN) is not on disk, so it keeps prompting.
      *
-     * Trade-off, accepted deliberately: the receipt is not re-validated
-     * against the files on disk (the renderer cannot see them and the IPC
-     * surface stays as it is). If someone deletes userData/runtime-cache by
-     * hand, the stale receipt means an online launch re-downloads the runtime
-     * without asking first, and an offline launch fails to load it exactly as
-     * it would without a receipt. Runtimes → Clear downloaded runtimes… removes
-     * the receipts together with the files, so the normal path stays honest.
+     * The receipt alone never skips the prompt: _hasElectronRuntimeReceipt
+     * also requires the shell's startup snapshot to show the loader URL intact
+     * and no file of this runtime/version missing, so files deleted by hand,
+     * a wiped cache directory or a write that never finished bring the prompt
+     * back. What it cannot see is a file the runtime fetches lazily and the
+     * cache has never stored (e.g. an optional webR VFS file first touched in
+     * a later session): that one is fetched without a prompt, as it always
+     * was after the initial download. Runtimes → Clear downloaded runtimes…
+     * removes the receipts together with the files.
      */
     _writeElectronRuntimeReceipt(language, version, source, electronCache) {
         if (!this._electronCacheStoresSource(electronCache, source)) return false;
@@ -632,7 +645,11 @@ class KernelManager {
                 && receipt.language === language && receipt.version === version
                 && typeof receipt.source === 'string'
                 && this._runtimeCacheUrlMatches(language, version, receipt.source)
-                && this._electronCacheStoresSource(electronCache, receipt.source);
+                && this._electronCacheStoresSource(electronCache, receipt.source)
+                // The files must still be on disk, not just the receipt.
+                && electronCache.present.has(receipt.source)
+                && ![...electronCache.missing]
+                    .some((url) => this._runtimeCacheUrlMatches(language, version, url));
         } catch (_) {
             return false;
         }

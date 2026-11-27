@@ -14,6 +14,8 @@
 import { createRequire } from 'node:module';
 import Module from 'node:module';
 import path from 'node:path';
+import { mkdtempSync, rmSync, unlinkSync, existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createReporter, ELECTRON_DIR } from './reporter.mjs';
 
@@ -264,6 +266,55 @@ export default async function run() {
   for (const url of unpinned) {
     r.log(`404 must NOT be remembered (mutable): ${url.replace('https://', '').slice(0, 58)}`,
       rc.isVersionPinned(u(url)) === false);
+  }
+
+  /* ---------------- runtime cache: startup snapshot of its own files ---------------- */
+  //
+  // The renderer skips the download prompt for a runtime only while its files
+  // are intact on disk, and learns that from this snapshot (ipc.js reports it).
+  {
+    const dir = mkdtempSync(path.join(tmpdir(), 'scirepl-rc-snapshot-'));
+    try {
+      const cache = new rc.RuntimeCache(dir);
+      const hdrs = new Headers({ 'content-type': 'text/javascript' });
+      const A = 'https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js';
+      const B = 'https://webr.r-wasm.org/v0.5.4/webr.mjs';
+      const C = 'https://webr.r-wasm.org/v0.5.4/webr-worker.js';
+      const D = 'https://webr.r-wasm.org/v0.5.4/R.wasm';
+      const P = 'https://webr.r-wasm.org/v0.5.4/vfs/optional';
+      for (const url of [A, B, C]) {
+        await cache.journal(url);
+        await cache.write(url, Buffer.from(`body of ${url}`), hdrs);
+      }
+      await cache.journal(P, 'HEAD');
+      await cache.write(P, Buffer.alloc(0), hdrs, { method: 'HEAD', status: 404 });
+      await cache.journal(D);   // download/write cut short: journaled, never stored
+
+      let snap = cache.snapshotSync();
+      r.log('snapshot: intact GET entries are present (HEAD probes are not listed)',
+        JSON.stringify(snap.present) === JSON.stringify([A, B, C].sort()), JSON.stringify(snap.present));
+      r.log('snapshot: a journaled entry whose write never finished is missing',
+        JSON.stringify(snap.missing) === JSON.stringify([D]), JSON.stringify(snap.missing));
+
+      unlinkSync(cache._paths(B).body);          // body deleted by hand
+      unlinkSync(cache._paths(C).meta);          // metadata deleted by hand
+      unlinkSync(cache._paths(P, 'HEAD').meta);  // probe deleted by hand
+      snap = cache.snapshotSync();
+      r.log('snapshot: deleted body or metadata makes an entry missing, not present',
+        JSON.stringify(snap.present) === JSON.stringify([A])
+          && JSON.stringify(snap.missing) === JSON.stringify([B, C, D, P].sort()),
+        JSON.stringify(snap));
+
+      const { entries } = await cache.size();
+      r.log('size() does not count the journal as an entry', entries === 2, `${entries} entries`);
+      await cache.clear();
+      snap = cache.snapshotSync();
+      r.log('clear() removes entries and journal: nothing present, nothing missing',
+        snap.present.length === 0 && snap.missing.length === 0
+          && !existsSync(path.join(dir, rc.JOURNAL_NAME)), JSON.stringify(snap));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   }
 
   /* ---------------- external URL classification ---------------- */
