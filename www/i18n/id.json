@@ -616,6 +616,7 @@
     "rPackages.install": "Instal",
     "rPackages.skip": "Lewati",
     "rPackages.neverAsk": "Jangan tanya lagi",
+    "rPackages.downloading": "Mengunduh paket webR: {package}",
     "runtime.prologDownloading": "Mengunduh runtime Prolog…",
     "runtime.prologInitializing": "Menginisialisasi Prolog…",
     "kernel.prologNotInitialized": "Kernel Prolog belum diinisialisasi",

@@ -609,6 +609,7 @@
     "rPackages.install": "インストール",
     "rPackages.skip": "スキップ",
     "rPackages.neverAsk": "今後確認しない",
+    "rPackages.downloading": "webR パッケージをダウンロード中: {package}",
     "runtime.prologDownloading": "Prolog ランタイムをダウンロード中…",
     "runtime.prologInitializing": "Prolog を初期化中…",
     "kernel.prologNotInitialized": "Prolog カーネルが初期化されていません",

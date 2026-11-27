@@ -621,6 +621,7 @@
     "rPackages.install": "Installer",
     "rPackages.skip": "Ignorer",
     "rPackages.neverAsk": "Ne plus demander",
+    "rPackages.downloading": "Téléchargement du paquet webR : {package}",
     "runtime.prologDownloading": "Téléchargement de l’environnement d’exécution Prolog…",
     "runtime.prologInitializing": "Initialisation de Prolog...",
     "kernel.prologNotInitialized": "Noyau Prolog non initialisé",

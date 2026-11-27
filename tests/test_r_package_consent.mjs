@@ -9,7 +9,10 @@
 // `--real-webr <dir>` (or SCIREPL_WEBR_DIR) serves a local webR 0.5.4 copy
 // (the folder holding webr.mjs, R.wasm and vfs/) instead, and blocks the webR
 // package repository. It proves the R-side gate on install.packages() and
-// library() auto-install by counting real repository requests.
+// library() auto-install by counting real repository requests, and that the
+// gated install re-words webr's "Downloading webR package:" line in the UI
+// language (a one-entry fake repository index lets install() reach that line
+// with nothing downloaded).
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { extname, join, resolve } from 'node:path';
@@ -36,7 +39,7 @@ const check = (message, condition, detail) => {
 // Mimics webR 0.5.4 plus the R gate SciREPL installs: R reads
 // options(scirepl.package_network_consent) and refuses with RKernel's message.
 const STUB = `
-const state = window.__webrStub = { flag: null, gate: 0, installs: [] };
+const state = window.__webrStub = { flag: null, template: undefined, gate: 0, installs: [] };
 const refusal = () => new Error('Error in unknown source: ' + RKernel.PACKAGE_CONSENT_MESSAGE);
 const install = names => {
     if (state.flag !== true) throw refusal();
@@ -63,6 +66,8 @@ export class WebR {
         if (code.includes('scirepl_consent_gate')) state.gate++;
         const option = code.match(/scirepl\\.package_network_consent = (TRUE|FALSE)/);
         if (option) state.flag = option[1] === 'TRUE';
+        const template = code.match(/scirepl\\.i18n\\.webr_downloading = (NULL|"(?:[^"\\\\]|\\\\.)*")/);
+        if (template) state.template = template[1];
     }
     async evalRString() { return ''; }
     async installPackages(names) { install(names); }
@@ -75,6 +80,9 @@ const MIME = { '.mjs': 'text/javascript', '.js': 'text/javascript', '.wasm': 'ap
 const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({ serviceWorkers: 'block' });
 const repoRequests = [];
+// While set, the repository answers PACKAGES with this fake index (and 404s
+// PACKAGES.rds/.gz) so webr::install() gets as far as its download line.
+let fakeIndex = null;
 await context.addInitScript(version => {
     localStorage.setItem('scirepl_onboarding_seen', '1');
     localStorage.setItem('scirepl_whats_new_seen_version', version);
@@ -92,6 +100,13 @@ await context.route('**/*', async route => {
     const url = new URL(route.request().url());
     if (isRepo(url)) {
         repoRequests.push(url.href);
+        const cors = { 'Access-Control-Allow-Origin': '*' };
+        if (fakeIndex && /\/PACKAGES$/.test(url.pathname)) {
+            return route.fulfill({ body: fakeIndex, contentType: 'text/plain', headers: cors });
+        }
+        if (fakeIndex && /\/PACKAGES\.(rds|gz)$/.test(url.pathname)) {
+            return route.fulfill({ status: 404, body: '', headers: cors });
+        }
         return route.abort('internetdisconnected');
     }
     if (!isWebrRuntime(url)) return route.continue();
@@ -224,6 +239,53 @@ try {
     check('installPackages() proceeds with no dialog', !await modalVisible() && await installs() > repeatStart);
     const plain = await runCell('cat("PLAIN_R_OK\\n")');
     check('ordinary R code still runs', !plain.error && /PLAIN_R_OK|STUB_CELL_DONE/.test(plain.text), plain.text);
+
+    console.log('5. The webR download line follows the UI language');
+    const ENGLISH_LINE = 'Downloading webR package: glue';
+    const ENGLISH_DEP_LINE = 'Downloading webR package: cli';
+    // R string literal -> text, for the stub's recorded option value.
+    const fromR = literal => literal === 'NULL' ? null : literal.slice(1, -1)
+        .replace(/\\U\{([0-9a-f]+)\}/g, (_m, hex) => String.fromCodePoint(parseInt(hex, 16)))
+        .replace(/\\(["\\])/g, '$1');
+    const languages = [['fr', 'Téléchargement du paquet webR : glue'],
+        ['ja', 'webR パッケージをダウンロード中: glue'], ['ar', 'جارٍ تنزيل حزمة webR: glue']];
+    // pillar imports cli, so install() re-enters the gated install for cli.
+    if (REAL) fakeIndex = 'Package: glue\nVersion: 1.0.0\n\n'
+        + 'Package: pillar\nVersion: 1.0.0\nImports: cli\n\nPackage: cli\nVersion: 1.0.0\n\n';
+    try {
+        for (const [code, localizedLine] of [['en', ENGLISH_LINE], ...languages]) {
+            await page.evaluate(code => window.i18n.activate(code), code);
+            if (!REAL) {
+                await runCell('cat("SYNC\\n")');
+                const sent = await page.evaluate(() => window.__webrStub.template);
+                check(`${code}: download-line template sent to R`, code === 'en'
+                    ? sent === 'NULL' : fromR(sent) === localizedLine.replace('glue', '{package}'), sent);
+                continue;
+            }
+            const result = await runCell('install.packages("glue")');
+            const lines = result.text.split('\n').map(line => line.trim());
+            check(`${code}: install.packages() prints the download line once, in the UI language`,
+                lines.filter(line => line === localizedLine).length === 1, result.text);
+            if (code !== 'en') {
+                check(`${code}: the English download line is replaced, not duplicated`,
+                    !result.text.includes(ENGLISH_LINE), result.text);
+            }
+            // The fake index has no files, so webr's later conditions follow.
+            check(`${code}: webr's other conditions after the line are unchanged`,
+                result.text.includes('Falling back to traditional `.tgz` extraction.')
+                && /download from '[^']*glue_1\.0\.0\.tgz' failed/.test(result.text), result.text);
+            // A dependency install nests a second gated call (two handlers).
+            const depLine = localizedLine.replace('glue', 'cli');
+            const dep = await runCell('install.packages("pillar")');
+            const depLines = dep.text.split('\n').map(line => line.trim());
+            check(`${code}: a dependency's download line prints once, in the UI language`,
+                depLines.filter(line => line === depLine).length === 1
+                && (code === 'en' || !dep.text.includes(ENGLISH_DEP_LINE)), dep.text);
+        }
+    } finally {
+        fakeIndex = null;
+        await page.evaluate(() => window.i18n.activate('en'));
+    }
     console.log(`R package consent: ${checks} checks passed.`);
 } finally {
     await browser.close();

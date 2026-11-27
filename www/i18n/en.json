@@ -216,6 +216,7 @@
     ]
   },
   "__context": {
+    "rPackages.downloading": "R output line webR prints when it starts downloading an R package (install.packages(), %install, library() auto-install). Keep webR and {package} exactly as written; {package} is the R package name.",
     "whatsNew.highlightLocalizedTutorials": "Free 1.5.0 release highlight. Help and Files & Storage are existing app areas. Display language means the app UI locale, not a programming language. Tutorials require a network connection; the Free index omits guides for Pro-only features.",
     "whatsNew.highlightSourceOnlyCells": "Free 1.5.0 release highlight. Preserve the exact marker #!source. These cells store source text rather than executing it; previous output is removed when a formerly executable cell becomes source-only.",
     "whatsNew.highlightPrologBindings": "Free 1.5.0 release highlight. Preserve Prolog and [object Object] exactly. Unbound variables and opaque handles are internal Prolog values, not useful displayed answers; normal bound answers still display.",
@@ -912,6 +913,7 @@
     "rPackages.install": "Install",
     "rPackages.skip": "Skip",
     "rPackages.neverAsk": "Don't ask again",
+    "rPackages.downloading": "Downloading webR package: {package}",
     "runtime.prologDownloading": "Downloading Prolog runtime...",
     "runtime.prologInitializing": "Initializing Prolog...",
     "kernel.prologNotInitialized": "Prolog kernel not initialized",

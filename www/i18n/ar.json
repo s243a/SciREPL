@@ -608,6 +608,7 @@
     "rPackages.install": "تثبيت",
     "rPackages.skip": "تخطي",
     "rPackages.neverAsk": "عدم السؤال مرة أخرى",
+    "rPackages.downloading": "جارٍ تنزيل حزمة webR: {package}",
     "runtime.prologDownloading": "جارٍ تنزيل بيئة تشغيل Prolog…",
     "runtime.prologInitializing": "جارٍ تهيئة Prolog…",
     "kernel.prologNotInitialized": "لم تتم تهيئة نواة Prolog",

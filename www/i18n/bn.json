@@ -608,6 +608,7 @@
     "rPackages.install": "ইনস্টল করুন",
     "rPackages.skip": "এড়িয়ে যান",
     "rPackages.neverAsk": "আর জিজ্ঞাসা করবেন না",
+    "rPackages.downloading": "webR প্যাকেজ ডাউনলোড হচ্ছে: {package}",
     "runtime.prologDownloading": "Prolog রানটাইম ডাউনলোড হচ্ছে…",
     "runtime.prologInitializing": "Prolog শুরু হচ্ছে…",
     "kernel.prologNotInitialized": "Prolog কার্নেল শুরু হয়নি",

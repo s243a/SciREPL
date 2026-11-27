@@ -608,6 +608,7 @@
     "rPackages.install": "Установить",
     "rPackages.skip": "Пропустить",
     "rPackages.neverAsk": "Больше не спрашивать",
+    "rPackages.downloading": "Загрузка пакета webR: {package}",
     "runtime.prologDownloading": "Загрузка среды выполнения Prolog…",
     "runtime.prologInitializing": "Инициализация Prolog…",
     "kernel.prologNotInitialized": "Ядро Prolog не инициализировано",
