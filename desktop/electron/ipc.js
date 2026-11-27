@@ -44,6 +44,8 @@ function assertLocaleArgument(channel, args, supportedLocales) {
  * @param {(locale:string) => string} options.setLocale host-side locale adapter
  * @param {boolean} [options.runtimeCache] the on-disk runtime cache is installed
  * @param {Iterable<string>} [options.runtimeCacheHosts] hosts that cache stores
+ * @param {{present:string[], missing:string[]}} [options.runtimeCacheFiles]
+ *   startup snapshot of that cache (RuntimeCache.snapshotSync)
  */
 function registerIpcHandlers(options = {}) {
   const appVersion = options.appVersion || '0.0.0';
@@ -58,6 +60,11 @@ function registerIpcHandlers(options = {}) {
   const runtimeCacheHosts = runtimeCache
     ? Object.freeze([...(options.runtimeCacheHosts || [])].map(String).sort())
     : Object.freeze([]);
+  // Startup snapshot of the cache's own files (RuntimeCache.snapshotSync):
+  // URLs with an intact entry, and journaled URLs whose entry is gone.
+  const files = (runtimeCache && options.runtimeCacheFiles) || {};
+  const runtimeCachePresent = Object.freeze([...(files.present || [])].map(String));
+  const runtimeCacheMissing = Object.freeze([...(files.missing || [])].map(String));
 
   ipcMain.handle(CHANNELS.APP_INFO, (_event, ...args) => {
     assertNullary(CHANNELS.APP_INFO, args);
@@ -99,6 +106,11 @@ function registerIpcHandlers(options = {}) {
       // _electronRuntimeCache). It grants nothing: no path, no cache contents.
       runtimeCache,
       runtimeCacheHosts: [...runtimeCacheHosts],
+      // Taken once at startup, before the window loaded; not updated as the
+      // session downloads more. That is all the renderer needs: it asks only
+      // for runtimes it has not loaded yet in this session.
+      runtimeCachePresent: [...runtimeCachePresent],
+      runtimeCacheMissing: [...runtimeCacheMissing],
     };
   });
 

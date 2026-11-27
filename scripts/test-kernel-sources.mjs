@@ -625,13 +625,22 @@ await test('custom runtime URLs cannot create a tested-version completion receip
 
 // ── Electron desktop shell: receipts in localStorage, not the Cache API ──
 const ELECTRON_RECEIPT_PREFIX = 'scirepl_electron_runtime_receipt:';
-function electronPlatform({ runtimeCache = true, hosts = ['webr.r-wasm.org', 'cdn.jsdelivr.net', 'unpkg.com'] } = {}) {
+const R_SOURCE = 'https://webr.r-wasm.org/v0.5.4/webr.mjs';
+const R_WORKER = 'https://webr.r-wasm.org/v0.5.4/webr-worker.js';
+function electronPlatform({
+  runtimeCache = true,
+  hosts = ['webr.r-wasm.org', 'cdn.jsdelivr.net', 'unpkg.com'],
+  present = [R_SOURCE, R_WORKER],
+  missing = [],
+} = {}) {
   return Object.freeze({
     getDistributionInfo: async () => ({
       edition: 'free',
       container: 'electron',
       runtimeCache,
       runtimeCacheHosts: runtimeCache ? hosts : [],
+      runtimeCachePresent: runtimeCache ? present : [],
+      runtimeCacheMissing: runtimeCache ? missing : [],
     }),
   });
 }
@@ -662,6 +671,29 @@ await test('Electron with the shell runtime cache: receipt in localStorage suppr
   store.delete(`${ELECTRON_RECEIPT_PREFIX}r:0.5.4`);
   eq(await restarted._hasCompleteCachedRuntime('r'), false,
     'removing the receipt (menu clear) brings the prompt back without a reload');
+});
+
+await test('Electron receipt skips the prompt only while the runtime files are on disk', async () => {
+  const store = new Map();
+  const first = makeManager({ config: PRO_R, store, platformApi: electronPlatform({ present: [], missing: [] }) });
+  first._recordRuntimeSource('r', R_SOURCE);
+  first.recordRuntimeLoadedVersion('r', '0.5.4');
+  eq(await first.markRuntimeCacheComplete('r'), true, 'receipt written after the first download');
+
+  const restart = (files) => makeManager({ config: PRO_R, store, platformApi: electronPlatform(files) });
+  eq(await restart({ present: [R_SOURCE, R_WORKER], missing: [] })._hasCompleteCachedRuntime('r'), true,
+    'files intact at startup: no prompt');
+  eq(await restart({ present: [R_WORKER], missing: [R_SOURCE] })._hasCompleteCachedRuntime('r'), false,
+    'loader file missing: prompt');
+  eq(await restart({ present: [], missing: [] })._hasCompleteCachedRuntime('r'), false,
+    'cache directory wiped (journal gone too): prompt');
+  eq(await restart({ present: [R_SOURCE], missing: [R_WORKER] })._hasCompleteCachedRuntime('r'), false,
+    'any other file of this runtime/version missing: prompt');
+  eq(await restart({ present: [R_SOURCE],
+    missing: ['https://webr.r-wasm.org/v0.6.0/webr-worker.js',
+      'https://repo.r-wasm.org/bin/emscripten/contrib/4.4/ggplot2_3.5.1.tgz'] })
+    ._hasCompleteCachedRuntime('r'), true,
+  'missing files of another version or of a package do not affect this runtime');
 });
 
 await test('Electron receipt validation rejects tampered or mismatched records', async () => {

@@ -29,12 +29,13 @@
  *   - Only `GET` is cached, only `200`, and never a range request — a partial
  *     body written as if whole is a corrupt cache entry, which is worse than no
  *     cache.
- *   - Nothing is exposed to the renderer beyond two static facts in the
- *     existing getDistributionInfo() result (ipc.js): whether this cache is
- *     active and its host allowlist. The renderer uses them only to remember
- *     which runtimes it has loaded, so the download prompt is not repeated.
- *     No new IPC channel, no paths, no contents, so it does not widen the
- *     boundary described in security.js.
+ *   - Nothing is exposed to the renderer beyond static facts in the existing
+ *     getDistributionInfo() result (ipc.js), taken once at startup: whether
+ *     this cache is active, its host allowlist, and which cached URLs are
+ *     intact or missing (snapshotSync). The renderer uses them only to decide
+ *     whether a runtime it loaded before may skip the download prompt. No new
+ *     IPC channel, no paths, no contents, so it does not widen the boundary
+ *     described in security.js.
  */
 
 const { net } = require('electron');
@@ -114,6 +115,21 @@ function isNeverCacheable(url) {
 const META_SUFFIX = '.meta.json';
 
 /**
+ * Append-only list of every entry the cache set out to store ("METHOD url" per
+ * line), written before the body is read or written. Comparing it with the
+ * entries actually present (snapshotSync) shows what has gone missing since:
+ * a body or metadata deleted by hand, or a write that never finished. Removing
+ * the whole directory removes the journal too, which is why the renderer also
+ * requires its runtime's loader URL to be present, not merely not missing.
+ */
+const JOURNAL_NAME = 'journal.log';
+
+/** Files in the cache directory that are not cache entries. */
+function isBookkeeping(name) {
+  return name === JOURNAL_NAME || name.endsWith(META_SUFFIX) || name.endsWith('.partial');
+}
+
+/**
  * Cache key. The method is part of it because webR probes its virtual
  * filesystem with HEAD before fetching with GET, and the two have different
  * bodies (a HEAD has none) but the same URL.
@@ -155,6 +171,55 @@ class RuntimeCache {
     }
   }
 
+  /** Record that this entry is about to be stored (see JOURNAL_NAME). */
+  async journal(url, method = 'GET') {
+    await fsp.appendFile(path.join(this.dir, JOURNAL_NAME), `${method} ${url}\n`);
+  }
+
+  /**
+   * Which stored entries are intact right now, and which journaled ones are
+   * not. Synchronous and read once at startup, before the window loads: the
+   * result is reported to the renderer as a static fact (ipc.js), and that is
+   * enough, because the renderer only needs it to decide whether to skip the
+   * download prompt for a runtime it has not loaded yet this session.
+   *
+   * @returns {{ present: string[], missing: string[] }} `present` lists URLs
+   *   with an intact GET entry (metadata plus a body of the recorded size);
+   *   `missing` lists URLs with a journaled GET or HEAD entry that is not intact.
+   */
+  snapshotSync() {
+    const intact = new Set();   // "METHOD url"
+    let names = [];
+    try { names = fs.readdirSync(this.dir); } catch { /* no directory: nothing cached */ }
+    for (const name of names) {
+      if (!name.endsWith(META_SUFFIX)) continue;
+      try {
+        const meta = JSON.parse(fs.readFileSync(path.join(this.dir, name), 'utf8'));
+        if (typeof meta.url !== 'string' || typeof meta.method !== 'string') continue;
+        const { body, meta: metaPath } = this._paths(meta.url, meta.method);
+        if (metaPath !== path.join(this.dir, name)) continue; // not where read() would look
+        if (meta.hasBody) {
+          const st = fs.statSync(body, { throwIfNoEntry: false });
+          if (!st || st.size !== meta.bytes) continue;
+        }
+        intact.add(`${meta.method} ${meta.url}`);
+      } catch { /* unreadable metadata is not an intact entry */ }
+    }
+    const missing = new Set();
+    let journal = '';
+    try { journal = fs.readFileSync(path.join(this.dir, JOURNAL_NAME), 'utf8'); } catch { /* none */ }
+    for (const line of journal.split('\n')) {
+      const space = line.indexOf(' ');
+      if (space <= 0) continue;
+      if (!intact.has(line)) missing.add(line.slice(space + 1));
+    }
+    const present = [];
+    for (const key of intact) {
+      if (key.startsWith('GET ')) present.push(key.slice(4));
+    }
+    return { present: present.sort(), missing: [...missing].sort() };
+  }
+
   async write(url, bytes, headers, { method = 'GET', status = 200 } = {}) {
     const { body, meta } = this._paths(url, method);
     const kept = {};
@@ -183,7 +248,7 @@ class RuntimeCache {
     let total = 0;
     let entries = 0;
     for (const name of await fsp.readdir(this.dir).catch(() => [])) {
-      if (name.endsWith(META_SUFFIX) || name.endsWith('.partial')) continue;
+      if (isBookkeeping(name)) continue;
       const st = await fsp.stat(path.join(this.dir, name)).catch(() => null);
       if (st) { total += st.size; entries++; }
     }
@@ -273,6 +338,15 @@ function installRuntimeCache(session, options = {}) {
     if (response.status === 404 && !isVersionPinned(url)) return response;
     if (response.status !== 200 && response.status !== 404) return response;
 
+    // Journal before the body is read: if the download or the write is cut
+    // short, the entry shows up as missing at the next start rather than
+    // silently never having existed.
+    try {
+      await cache.journal(request.url, method);
+    } catch (e) {
+      log('runtime-cache journal write failed', String(e && e.message));
+    }
+
     // A HEAD has no body to read or store.
     const buf = method === 'HEAD'
       ? Buffer.alloc(0)
@@ -296,6 +370,6 @@ function installRuntimeCache(session, options = {}) {
 }
 
 module.exports = {
-  installRuntimeCache, RuntimeCache, CACHEABLE_HOSTS, keyFor,
+  installRuntimeCache, RuntimeCache, CACHEABLE_HOSTS, keyFor, JOURNAL_NAME,
   isVersionPinned, isNeverCacheable, NEVER_CACHE,
 };

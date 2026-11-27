@@ -182,7 +182,7 @@ browser, matching the other external documentation links.
 | `offline.test.mjs` | yes | bundled kernels with the network cut; CDN kernels fail cleanly |
 | `packaged.test.mjs` | yes, **and a built package** | the packaged app: own `www/`, security boundary, kernels, restart persistence, no Pro material |
 | `runtime-cache.test.mjs` | yes, **and network** | Lua and R still run offline after a restart; a cold profile still fails |
-| `runtime-receipt.test.mjs` | yes, **and network** | a runtime downloaded once (Lua) loads after a restart, offline, without the download prompt; the menu clear brings the prompt back; `SCIREPL_RUNTIME_CACHE=0` writes no receipt |
+| `runtime-receipt.test.mjs` | yes, **and network** | a runtime downloaded once (Lua) loads after a restart, offline, without the download prompt; a cached file deleted by hand, or the menu clear, brings the prompt back; `SCIREPL_RUNTIME_CACHE=0` writes no receipt |
 
 `packaged.test.mjs` is opt-in — it needs an artifact most runs do not have:
 

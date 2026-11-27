@@ -156,6 +156,17 @@ let mainWindow = null;
 let runtimeCache = null;
 const nativeI18n = createNativeI18n({ catalogDir: path.join(WWW_ROOT, 'i18n') });
 
+/** Never let a damaged cache directory stop the shell from starting. */
+function runtimeCacheSnapshot() {
+  if (!runtimeCache) return { present: [], missing: [] };
+  try {
+    return runtimeCache.snapshotSync();
+  } catch (e) {
+    console.error('[scirepl] runtime cache snapshot failed:', e && e.message);
+    return { present: [], missing: [] };
+  }
+}
+
 function nativeMenuDeps() {
   return {
     getCache: () => runtimeCache,
@@ -326,6 +337,9 @@ app.whenReady().then(() => {
     // it has loaded through this cache (see menu.js clearCache for the reset).
     runtimeCache: !!runtimeCache,
     runtimeCacheHosts: runtimeCache ? [...CACHEABLE_HOSTS] : [],
+    // Read before the window exists, so it describes what the previous
+    // sessions left on disk (see RuntimeCache.snapshotSync).
+    runtimeCacheFiles: runtimeCacheSnapshot(),
   });
 
   createWindow();

@@ -14,6 +14,8 @@
 import { createRequire } from 'node:module';
 import Module from 'node:module';
 import path from 'node:path';
+import { mkdtempSync, rmSync, unlinkSync, existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createReporter, ELECTRON_DIR } from './reporter.mjs';
 
@@ -129,6 +131,44 @@ export default async function run() {
   r.log('profile: SCIREPL_USER_DATA still overrides both',
     paths.resolveUserDataDir({ appData: APPDATA, windowsStore: true, env: { SCIREPL_USER_DATA: CUSTOM } }) === CUSTOM);
 
+  // Open application data folder: Explorer runs outside the MSIX package, so
+  // the Store build must hand it the real, redirected folder (pilot run 4).
+  const W_APPDATA = 'C:\\Users\\u\\AppData\\Roaming';
+  const W_LOCAL = 'C:\\Users\\u\\AppData\\Local';
+  const W_EXEC = 'C:\\Program Files\\WindowsApps\\SciREPL.FreePilot.LocalTest_1.5.0.0_x64__8wekyb3d8bbwe\\app\\SciREPL.exe';
+  const W_STORE = W_APPDATA + '\\SciREPL-Free-Store';
+  r.log('package family name comes from the WindowsApps install folder',
+    paths.packageFamilyFromExecPath(W_EXEC) === 'SciREPL.FreePilot.LocalTest_8wekyb3d8bbwe',
+    paths.packageFamilyFromExecPath(W_EXEC));
+  r.log('no package family outside WindowsApps or for a malformed folder name',
+    paths.packageFamilyFromExecPath('C:\\SciREPL\\SciREPL.exe') === null
+      && paths.packageFamilyFromExecPath('C:\\Program Files\\WindowsApps\\SciREPL_1.5.0.0_x64\\SciREPL.exe') === null
+      && paths.packageFamilyFromExecPath('C:\\Program Files\\WindowsApps') === null
+      && paths.packageFamilyFromExecPath(undefined) === null);
+  const W_REDIRECTED = W_LOCAL + '\\Packages\\SciREPL.FreePilot.LocalTest_8wekyb3d8bbwe\\LocalCache\\Roaming';
+  const store = (userData, existing, execPath = W_EXEC) => paths.resolveExplorerDataDir({
+    userData, appData: W_APPDATA, localAppData: W_LOCAL, windowsStore: true, execPath,
+    exists: (p) => existing.includes(p),
+  });
+  const storeOpen = store(W_STORE, [W_REDIRECTED + '\\SciREPL-Free-Store']);
+  r.log('Store build: Explorer gets the redirected folder under Packages\\<family>\\LocalCache\\Roaming',
+    storeOpen === W_REDIRECTED + '\\SciREPL-Free-Store', storeOpen);
+  r.log('portable build: Explorer gets userData unchanged',
+    paths.resolveExplorerDataDir({
+      userData: W_APPDATA + '\\SciREPL-Free-Electron', appData: W_APPDATA, localAppData: W_LOCAL, windowsStore: false, execPath: W_EXEC,
+      exists: () => true,
+    }) === W_APPDATA + '\\SciREPL-Free-Electron');
+  r.log('Store build, override outside %APPDATA%: opened as given',
+    store('D:\\profiles\\scirepl', [W_REDIRECTED + '\\scirepl']) === 'D:\\profiles\\scirepl');
+  r.log('Store build, override to a Roaming folder that already existed (MSIX uses it in place): opened as given',
+    store(W_APPDATA + '\\my-scirepl', []) === W_APPDATA + '\\my-scirepl');
+  r.log('Store build, override to a new Roaming folder (MSIX redirected it): the redirected copy opens',
+    store(W_APPDATA + '\\my-scirepl', [W_REDIRECTED + '\\my-scirepl']) === W_REDIRECTED + '\\my-scirepl');
+  r.log('Store build, default profile not yet created on the redirected side: opened as given',
+    store(W_STORE, []) === W_STORE);
+  r.log('Store build without a recognisable package folder: opened as given',
+    store(W_STORE, [W_REDIRECTED + '\\SciREPL-Free-Store'], 'C:\\dev\\electron.exe') === W_STORE);
+
   // Every resolved path must be absolute on this platform — the property that
   // actually broke on Windows, asserted directly rather than inferred.
   for (const [label, layout] of [['development', devLayout], ['packaged', packagedLayout]]) {
@@ -226,6 +266,55 @@ export default async function run() {
   for (const url of unpinned) {
     r.log(`404 must NOT be remembered (mutable): ${url.replace('https://', '').slice(0, 58)}`,
       rc.isVersionPinned(u(url)) === false);
+  }
+
+  /* ---------------- runtime cache: startup snapshot of its own files ---------------- */
+  //
+  // The renderer skips the download prompt for a runtime only while its files
+  // are intact on disk, and learns that from this snapshot (ipc.js reports it).
+  {
+    const dir = mkdtempSync(path.join(tmpdir(), 'scirepl-rc-snapshot-'));
+    try {
+      const cache = new rc.RuntimeCache(dir);
+      const hdrs = new Headers({ 'content-type': 'text/javascript' });
+      const A = 'https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js';
+      const B = 'https://webr.r-wasm.org/v0.5.4/webr.mjs';
+      const C = 'https://webr.r-wasm.org/v0.5.4/webr-worker.js';
+      const D = 'https://webr.r-wasm.org/v0.5.4/R.wasm';
+      const P = 'https://webr.r-wasm.org/v0.5.4/vfs/optional';
+      for (const url of [A, B, C]) {
+        await cache.journal(url);
+        await cache.write(url, Buffer.from(`body of ${url}`), hdrs);
+      }
+      await cache.journal(P, 'HEAD');
+      await cache.write(P, Buffer.alloc(0), hdrs, { method: 'HEAD', status: 404 });
+      await cache.journal(D);   // download/write cut short: journaled, never stored
+
+      let snap = cache.snapshotSync();
+      r.log('snapshot: intact GET entries are present (HEAD probes are not listed)',
+        JSON.stringify(snap.present) === JSON.stringify([A, B, C].sort()), JSON.stringify(snap.present));
+      r.log('snapshot: a journaled entry whose write never finished is missing',
+        JSON.stringify(snap.missing) === JSON.stringify([D]), JSON.stringify(snap.missing));
+
+      unlinkSync(cache._paths(B).body);          // body deleted by hand
+      unlinkSync(cache._paths(C).meta);          // metadata deleted by hand
+      unlinkSync(cache._paths(P, 'HEAD').meta);  // probe deleted by hand
+      snap = cache.snapshotSync();
+      r.log('snapshot: deleted body or metadata makes an entry missing, not present',
+        JSON.stringify(snap.present) === JSON.stringify([A])
+          && JSON.stringify(snap.missing) === JSON.stringify([B, C, D, P].sort()),
+        JSON.stringify(snap));
+
+      const { entries } = await cache.size();
+      r.log('size() does not count the journal as an entry', entries === 2, `${entries} entries`);
+      await cache.clear();
+      snap = cache.snapshotSync();
+      r.log('clear() removes entries and journal: nothing present, nothing missing',
+        snap.present.length === 0 && snap.missing.length === 0
+          && !existsSync(path.join(dir, rc.JOURNAL_NAME)), JSON.stringify(snap));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   }
 
   /* ---------------- external URL classification ---------------- */

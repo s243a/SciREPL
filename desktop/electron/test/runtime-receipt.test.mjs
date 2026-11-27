@@ -14,16 +14,19 @@
  *
  *   1. online: Lua downloads and runs, and a receipt is written;
  *   2. restart, offline, auto-download off: no prompt, Lua loads from disk;
- *   3. Runtimes → Clear downloaded runtimes… removes the receipts, and after a
+ *   3. a runtime file deleted from userData/runtime-cache by hand brings the
+ *      prompt back at the next start (the receipt alone is not enough), and
+ *      after downloading again the prompt stays away;
+ *   4. Runtimes → Clear downloaded runtimes… removes the receipts, and after a
  *      restart the prompt is back;
- *   4. with SCIREPL_RUNTIME_CACHE=0 no receipt is written.
+ *   5. with SCIREPL_RUNTIME_CACHE=0 no receipt is written.
  *
  * Needs network for the online half, so it is opt-in:
  *
  *   node desktop/electron/test/run-all.mjs runtime-receipt
  */
 
-import { mkdtempSync, rmSync, readdirSync, existsSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, rmSync, readdirSync, existsSync, mkdirSync, readFileSync, unlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { launchShell, createReporter, waitForAppReady } from './harness.mjs';
@@ -80,7 +83,28 @@ const promptVisible = (page) => page.evaluate(() => {
 function cacheEntries(userDataDir) {
   const dir = path.join(userDataDir, 'runtime-cache');
   if (!existsSync(dir)) return 0;
-  return readdirSync(dir).filter((f) => !f.endsWith('.meta.json') && !f.endsWith('.partial')).length;
+  return readdirSync(dir).filter((f) => !f.endsWith('.meta.json') && !f.endsWith('.partial')
+    && f !== 'journal.log').length;
+}
+
+/** Delete a cached body by hand, as a user poking at userData would. */
+function deleteCachedBody(userDataDir, pattern) {
+  const dir = path.join(userDataDir, 'runtime-cache');
+  for (const f of readdirSync(dir)) {
+    if (!f.endsWith('.meta.json')) continue;
+    const meta = JSON.parse(readFileSync(path.join(dir, f), 'utf8'));
+    if (meta.method === 'GET' && pattern.test(meta.url)) {
+      unlinkSync(path.join(dir, f.slice(0, -'.meta.json'.length)));
+      return meta.url;
+    }
+  }
+  return null;
+}
+
+/** Start the kernel without awaiting it and report whether the prompt shows. */
+async function promptShownFor(page, lang, timeoutMs = 15_000) {
+  page.evaluate((l) => window.kernelManager.ensureReady(l).catch(() => {}), lang).catch(() => {});
+  return (await waitFor(() => promptVisible(page), timeoutMs)) === true;
 }
 
 /** Drive the real native menu item, auto-confirming its dialogs. */
@@ -168,8 +192,42 @@ export default async function run() {
       const offline = await runKernel(shell.page, LUA, 30_000);
       r.log('Lua runs offline from the on-disk cache', offline.ok && /42/.test(offline.out || ''),
         offline.error || offline.out);
+    } finally {
+      await shell.close();
+    }
 
-      // 3. clear through the real menu
+    // 3. a file deleted by hand: the receipt alone must not skip the prompt
+    const deleted = deleteCachedBody(userDataDir, /fengari-web/);
+    r.log('deleted the cached Lua body by hand', !!deleted, deleted || 'not found');
+    shell = await launchShell({ userDataDir });
+    try {
+      await waitForAppReady(shell.page);
+      await disableAutoDownload(shell.page);
+      const dist = await shell.page.evaluate(() => window.sciREPLPlatform.getDistributionInfo());
+      r.log('startup snapshot reports the deleted file missing and not present',
+        dist.runtimeCacheMissing.includes(deleted) && !dist.runtimeCachePresent.includes(deleted),
+        JSON.stringify({ missing: dist.runtimeCacheMissing, present: dist.runtimeCachePresent.length }));
+      r.log('receipt still there, but _hasCompleteCachedRuntime(lua) is false',
+        (await receiptKeys(shell.page)).length === 1 && (await cachedCheck(shell.page, 'lua')) === false);
+      r.log('a missing runtime file brings the download confirmation back',
+        await promptShownFor(shell.page, 'lua'));
+      await shell.page.click('#runtime-download-btn');
+      const again = await runKernel(shell.page, LUA);
+      r.log('choosing Download fetches it again and runs', again.ok && /42/.test(again.out || ''),
+        again.error || again.out);
+    } finally {
+      await shell.close();
+    }
+
+    shell = await launchShell({ userDataDir });
+    try {
+      await waitForAppReady(shell.page);
+      await goOffline(shell);
+      await disableAutoDownload(shell.page);
+      r.log('after downloading again, the next offline start skips the prompt',
+        (await cachedCheck(shell.page, 'lua')) === true);
+
+      // 4. clear through the real menu
       const clicked = await clickClearDownloadedRuntimes(shell);
       r.log('Runtimes → Clear downloaded runtimes… menu item found and clicked', clicked === true);
       const gone = await waitFor(async () => (await receiptKeys(shell.page)).length === 0, 15_000);
@@ -187,9 +245,7 @@ export default async function run() {
       await disableAutoDownload(shell.page);
       r.log('after clearing and restarting, Lua is not reported cached',
         (await cachedCheck(shell.page, 'lua')) === false);
-      shell.page.evaluate(() => window.kernelManager.ensureReady('lua').catch(() => {})).catch(() => {});
-      const shown = await waitFor(() => promptVisible(shell.page), 15_000);
-      r.log('the download confirmation returns after clearing', shown === true);
+      r.log('the download confirmation returns after clearing', await promptShownFor(shell.page, 'lua'));
     } finally {
       await shell.close();
     }
@@ -205,7 +261,8 @@ export default async function run() {
       await waitForAppReady(shell.page);
       const dist = await shell.page.evaluate(() => window.sciREPLPlatform.getDistributionInfo());
       r.log('SCIREPL_RUNTIME_CACHE=0: getDistributionInfo reports the cache off',
-        dist.runtimeCache === false && dist.runtimeCacheHosts.length === 0,
+        dist.runtimeCache === false && dist.runtimeCacheHosts.length === 0
+          && dist.runtimeCachePresent.length === 0 && dist.runtimeCacheMissing.length === 0,
         JSON.stringify({ runtimeCache: dist.runtimeCache, hosts: dist.runtimeCacheHosts }));
       const online = await runKernel(shell.page, LUA);
       r.log('SCIREPL_RUNTIME_CACHE=0: Lua still runs online', online.ok && /42/.test(online.out || ''),
