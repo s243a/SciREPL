@@ -1,12 +1,14 @@
 # Free MSIX package for the Microsoft Store pilot
 
-Status, November 23, 2026: a Free x64 MSIX builds from the tested Store-channel
-tree. Three local pilot runs (see **Pilot run 1** and **Pilot runs 2 and 3**
-below) signed it with a test certificate, installed it, and upgraded it with
-the notebook and settings kept. WACK reported an overall `PASS` on package A
+Status, November 26, 2026: a Free x64 MSIX builds from the tested Store-channel
+tree. Four local pilot runs (see **Pilot run 1**, **Pilot runs 2 and 3** and
+**Pilot run 4** below) signed it with a test certificate, installed it, and
+upgraded it with the notebook and settings kept. WACK reported an overall `PASS` on package A
 in static-only mode (it did not deploy the app), with one optional test
-failing. Offline DOCX export was confirmed on both A and B. Runs 2 and 3 used
-the repository scripts. No
+failing. Offline DOCX export was confirmed on both A and B. Runs 2–4 used
+the repository scripts. Run 4 recorded the checks in the installed app and
+found three fixes needed before submission (#148, #149, #150) and two items
+deferred past release. No
 Partner Center account, reserved name, signing identity or submission exists.
 The broader proposal is in [WINDOWS_STORE_PROPOSAL.md](WINDOWS_STORE_PROPOSAL.md);
 the pilot sequence is planned in draft PR #134.
@@ -630,9 +632,48 @@ Findings:
   already had a certificate, and step 3 in a window that wasn't elevated.
 - Results of the optional checks below were still not recorded.
 
+### Pilot run 4 (November 25–26, 2026), checks in the installed app
+
+Same machine, scripts and Windows-drive clone, at `47cad08` (#147 merge; it
+includes the R package consent gate #145 and the notebook width setting
+#146). Run folder `C:\scirepl-store-pilot\run-4`, kept. Steps 1–4 and 6 as in
+runs 2 and 3, then the **Other checks** below by hand on package A, then
+cleanup. No WACK, no upgrade, no step 9.
+
+| Step | Result |
+| --- | --- |
+| 1–2. Packages | A 1.5.0, B 1.5.1, both from `47cad08`; 60/60 packaged tests each |
+| 3. Signing | Both verified; certificate `9F5FB1F2…8D4212C5` |
+| 4. Baseline | 194 portable files |
+| 6. Install A | Installed and marked 1.5.0.0 |
+| Cleanup | Package and certificate removed |
+
+Signed package SHA-256: A `6A38D5A1…BE38359F`, B `F04DB102…8B85B047` (full
+values in `signed-packages.csv`).
+
+| Check | Result |
+| --- | --- |
+| Start menu, taskbar | **Pass.** Pinned icon stays after closing, launches the app, and the running window groups under it (older SciREPL pins were removed first). |
+| Notebook width (#146) | **Pass.** Wide by default; Standard and Full work. |
+| Open app data | **Fail**, as predicted: Explorer reported "Location is not available" for `%APPDATA%\SciREPL-Free-Store`, which exists only inside the package. The real folder `%LOCALAPPDATA%\Packages\SciREPL.FreePilot.LocalTest_2xd92v2yysscm\LocalCache\Roaming\SciREPL-Free-Store` was confirmed with `Test-Path`, and the real `%APPDATA%` has no `SciREPL-Free-Store`. Fix: **#148**. |
+| R: decline, then allow | **Pass.** Cancel gave a clear "Failed to load R" message; Download loaded R. The download dialog and the recommended-packages banner were shown in German after switching language. Runtimes → Clear downloaded runtimes brought the prompt back. |
+| R `install.packages("jsonlite")` (#145) | **Pass.** No prompt with current privacy consent; installed and ran. webR's own "Downloading webR package" line stays English. |
+| `%pip install matplotlib` and a plot | **Pass**, also with `%pip install tabulate` and the code in one cell. |
+| Offline cold launch | Python, Prolog, Bash and ClojureScript **pass**. R **asked to download again**: the pre-prompt check reads the Cache API, which is always empty under `app://`, though the shell's own runtime cache had R on disk (reproduced on Linux Electron; Download offline loads it from disk). Fix: **#149**. |
+| Cell-language dropdown | With R active, the open list showed only the selected item: the semi-transparent per-language background made option text unreadable in Windows' native popup. Python was fine. Fix: **#149**. |
+| Keyboard only | **Fail, deferred past release.** Tab in the composer inserts an indent, so focus can't leave it, and the header (☰, Settings) can't be reached by keyboard. Alt reaches only the window menu bar (normal Windows behaviour). Needs a keyboard plan: an escape such as Escape-then-Tab or a Ctrl+M "Tab moves focus" toggle first, customizable bindings later. |
+| Zoom | Ctrl+- worked; Ctrl+= didn't (Ctrl+Shift+= did); Ctrl+mouse wheel did nothing. Fix: **#150**. |
+| Display scaling (175%) | Readable. The short-window **hide new-cell panel** control appeared; while hidden, its restore is a small ⌃ in place of the title, easy to miss on a large screen; maximising also restores the panel. Kept as is and documented (Windows appearance help page). |
+
+Retest on the next install (best with the real Store identity): Open app
+data opens Explorer at the data folder (#148); R downloaded online starts
+offline with no prompt, and the cell-language list is readable with R
+active (#149); Ctrl+= and Ctrl+wheel zoom (#150).
+
 ### Other checks before inviting testers
 
 Record each result. Merging the packaging source establishes none of them.
+Run 4 recorded all of them; see above for results and fixes.
 
 - Start menu entry and icon; taskbar grouping and pinning (the Store build
   does not override its package-assigned AppUserModelID).
