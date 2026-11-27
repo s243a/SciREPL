@@ -62,6 +62,55 @@
     "help.exampleRemoved": [
       "Cell-Notebook"
     ],
+    "help.exampleComment.crossKernelFileSharing": [
+      "Kernel-Interpreter"
+    ],
+    "help.exampleComment.readOtherCellOutput": [
+      "Cell-Notebook",
+      "Notebook-Document"
+    ],
+    "help.exampleComment.writeNamedCellResultsFirst": [
+      "Cell-Notebook"
+    ],
+    "help.exampleComment.overwriteFirstCellWarning": [
+      "Cell-Notebook"
+    ],
+    "help.exampleComment.relativePreviousOutput": [
+      "Cell-Notebook"
+    ],
+    "help.exampleComment.writeToCell": [
+      "Cell-Notebook"
+    ],
+    "help.exampleComment.listAllCells": [
+      "Cell-Notebook"
+    ],
+    "help.exampleComment.relativePreviousCellParen": [
+      "Cell-Notebook"
+    ],
+    "help.exampleComment.writeGeneratedCode": [
+      "Cell-Notebook"
+    ],
+    "help.exampleComment.writeNamedCell": [
+      "Cell-Notebook"
+    ],
+    "help.exampleComment.listCells": [
+      "Cell-Notebook"
+    ],
+    "help.exampleComment.relativePreviousCell": [
+      "Cell-Notebook"
+    ],
+    "help.exampleComment.listAllCellsJson": [
+      "Cell-Notebook"
+    ],
+    "help.exampleComment.writeCompilerOutput": [
+      "Cell-Notebook"
+    ],
+    "help.exampleComment.fetchAndLoadFromUrl": [
+      "Cell-Notebook"
+    ],
+    "help.exampleLabel.cellSaid": [
+      "Cell-Notebook"
+    ],
     "whatsNew.highlightHelpExamples": [
       "Cell-Notebook",
       "Notebook-Document",
@@ -236,6 +285,55 @@
     "help.exampleUndo": "Link after Insert: removes the cell that was just added.",
     "help.exampleRemoved": "Screen-reader announcement after Undo removed the inserted example cell.",
     "help.exampleCopyFailed": "The clipboard was unavailable; the code is now selected on screen so the user can copy it with the system menu.",
+    "help.exampleComment.basicMath": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.plotlyChartInteractive": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.matplotlibInstallOnce": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.sympyLatexRendering": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.suppressOutput": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written. Keep the ASCII semicolon ; — it is the Python syntax being explained.",
+    "help.exampleComment.thenUseIt": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.standardRSyntax": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.installShortcut": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written. %install is a command the user types; do not translate it.",
+    "help.exampleComment.vectorsAndStats": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.staticPlotPng": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.interactivePlotlyChart": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.multiTraceChart": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.crossKernelFileSharing": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.assertFacts": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written. Prolog assert/1: adding facts to the database.",
+    "help.exampleComment.query": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written. A Prolog query against the facts asserted above.",
+    "help.exampleComment.rules": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.writeCsvSharedFolder": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.readItBack": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.consultSharedKnowledgeBase": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.luaTables": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.closures": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.coroutines": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.patternMatching": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.readOtherCellOutput": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.writeNamedCellResultsFirst": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written. \"results\" is the cell name the next line of code uses; keep it in English.",
+    "help.exampleComment.overwriteFirstCellWarning": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.byName": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.byIndex": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.relativePreviousOutput": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.selfReference": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.writeToCell": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.listAllCells": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.relativePreviousCellParen": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.writeGeneratedCode": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.writeNamedCell": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.listCells": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.relativePreviousCell": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.listAllCellsJson": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.writeCompilerOutput": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.write": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written. A verb heading for the next code line, which writes to a cell.",
+    "help.exampleComment.afterUploading": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written. myfile.pl is a file name; keep it.",
+    "help.exampleComment.afterAddingSearchPath": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written. mylib and /user/mylib are a Prolog alias and a path; keep them.",
+    "help.exampleComment.fetchAndLoadFromUrl": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written.",
+    "help.exampleComment.orUseLoadUrl": "A comment inside a Help code example; the comment marker (#, --, %, //) stays outside the string. Copy and Insert put it into runnable code: keep it on one line, and leave code, identifiers, paths and commands in it exactly as written. load_url and consult are Prolog predicate names; keep them.",
+    "help.exampleLabel.quadratic": "Display text inside a double-quoted string literal in a Help code example (a plot title or printed label). Copy and Insert put it into runnable code: one line, no double quotes (\"), no backslashes.",
+    "help.exampleLabel.sineWave": "Display text inside a double-quoted string literal in a Help code example (a plot title or printed label). Copy and Insert put it into runnable code: one line, no double quotes (\"), no backslashes.",
+    "help.exampleLabel.powerFunctions": "Display text inside a double-quoted string literal in a Help code example (a plot title or printed label). Copy and Insert put it into runnable code: one line, no double quotes (\"), no backslashes.",
+    "help.exampleLabel.cellSaid": "Display text inside a double-quoted string literal in a Help code example (a plot title or printed label). Copy and Insert put it into runnable code: one line, no double quotes (\"), no backslashes. Followed by the output of cell 1.",
+    "help.exampleLabel.empty": "Display text inside a double-quoted string literal in a Help code example (a plot title or printed label). Copy and Insert put it into runnable code: one line, no double quotes (\"), no backslashes. Shown when cell 1 has no output.",
     "appearance.themeAuto": "Follow the operating system's light/dark setting.",
     "appearance.themeCustom": "A user-defined colour scheme.",
     "appearance.customise": "Opens an editor. Trailing ellipsis means 'this opens a dialog' — keep it.",
@@ -760,6 +858,55 @@
     "help.exampleUndoUnavailable": "Not removed: the inserted cell is in another notebook or was already deleted.",
     "help.exampleShowUnavailable": "The inserted cell is no longer available; it may have been deleted or its notebook closed.",
     "help.exampleCopyFailed": "Could not copy. The code is selected so you can copy it manually.",
+    "help.exampleComment.basicMath": "Basic math",
+    "help.exampleComment.plotlyChartInteractive": "Plotly chart (interactive)",
+    "help.exampleComment.matplotlibInstallOnce": "Matplotlib (install once, then use)",
+    "help.exampleComment.sympyLatexRendering": "SymPy (LaTeX rendering)",
+    "help.exampleComment.suppressOutput": "Suppress output with ;",
+    "help.exampleComment.thenUseIt": "Then use it",
+    "help.exampleComment.standardRSyntax": "Standard R syntax (works out of the box)",
+    "help.exampleComment.installShortcut": "Or use the %install shortcut",
+    "help.exampleComment.vectorsAndStats": "Vectors and stats",
+    "help.exampleComment.staticPlotPng": "Static plot (PNG)",
+    "help.exampleComment.interactivePlotlyChart": "Interactive Plotly chart",
+    "help.exampleComment.multiTraceChart": "Multi-trace interactive chart",
+    "help.exampleComment.crossKernelFileSharing": "Cross-kernel file sharing",
+    "help.exampleComment.assertFacts": "Assert facts",
+    "help.exampleComment.query": "Query",
+    "help.exampleComment.rules": "Rules",
+    "help.exampleComment.writeCsvSharedFolder": "write a CSV to the shared folder",
+    "help.exampleComment.readItBack": "read it back",
+    "help.exampleComment.consultSharedKnowledgeBase": "consult a shared knowledge base",
+    "help.exampleComment.luaTables": "Tables (arrays and dictionaries)",
+    "help.exampleComment.closures": "Closures",
+    "help.exampleComment.coroutines": "Coroutines",
+    "help.exampleComment.patternMatching": "Pattern matching (built-in, no regex needed)",
+    "help.exampleComment.readOtherCellOutput": "Read another cell's output via Notebook VFS",
+    "help.exampleComment.writeNamedCellResultsFirst": "Write to a named cell (name a cell \"results\" first)",
+    "help.exampleComment.overwriteFirstCellWarning": "WARNING: overwrites the first cell's code!",
+    "help.exampleComment.byName": "By name",
+    "help.exampleComment.byIndex": "By index",
+    "help.exampleComment.relativePreviousOutput": "Relative: previous cell's output",
+    "help.exampleComment.selfReference": "Self-reference",
+    "help.exampleComment.writeToCell": "Write to a cell",
+    "help.exampleComment.listAllCells": "List all cells",
+    "help.exampleComment.relativePreviousCellParen": "Relative (previous cell)",
+    "help.exampleComment.writeGeneratedCode": "Write generated code to a named cell",
+    "help.exampleComment.writeNamedCell": "Write to a named cell",
+    "help.exampleComment.listCells": "List cells",
+    "help.exampleComment.relativePreviousCell": "Relative: previous cell",
+    "help.exampleComment.listAllCellsJson": "List all cells (returns JSON)",
+    "help.exampleComment.writeCompilerOutput": "Write compiler output to another cell",
+    "help.exampleComment.write": "Write",
+    "help.exampleComment.afterUploading": "After uploading myfile.pl:",
+    "help.exampleComment.afterAddingSearchPath": "After adding search path mylib → /user/mylib:",
+    "help.exampleComment.fetchAndLoadFromUrl": "Fetch and load from URL in a cell:",
+    "help.exampleComment.orUseLoadUrl": "Or use load_url (fetch + consult):",
+    "help.exampleLabel.quadratic": "Quadratic",
+    "help.exampleLabel.sineWave": "Sine Wave",
+    "help.exampleLabel.powerFunctions": "Power Functions",
+    "help.exampleLabel.cellSaid": "Cell 1 said:",
+    "help.exampleLabel.empty": "(empty)",
     "appearance.showDrafts": "Include translations under review",
     "appearance.showDraftsHelp": "Most translations have not yet been checked by a speaker of the language. They are offered anyway, and labelled, because an interface you can read beats one you cannot. Turn this off to see only reviewed translations.",
     "appearance.languageDraft": "{language} — under review ({percent}%)",

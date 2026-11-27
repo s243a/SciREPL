@@ -22,6 +22,12 @@
  * so nothing here goes through innerHTML. Labels carry their i18n key on the
  * element (setI18nText / setI18nAttr), so a locale switch re-translates an
  * already-decorated Help dialog.
+ *
+ * The examples' comments (and a few display-only string literals) are static
+ * `<span data-i18n="help.exampleComment.*" data-i18n-dir="ltr">` nodes inside
+ * the <code>, so i18n.applyToDom() translates them and Copy / Insert hand over
+ * the reader's language. data-i18n-dir="ltr" stops the RTL pass inserting
+ * bidi isolates into what becomes code; CSS handles their display direction.
  */
 (function () {
     'use strict';

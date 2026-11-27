@@ -941,6 +941,14 @@ html, body {
     margin-top: 0;
 }
 
+/* A translated comment inside an example takes its direction from its own
+   first letter, so an Arabic comment with a Latin token in the middle (CSV,
+   %install) reads in order, while the code line around it stays LTR. This is
+   layout only: no bidi control characters enter the copied code. */
+pre[data-example-lang] [data-i18n] {
+    unicode-bidi: plaintext;
+}
+
 .help-example-bar {
     display: flex;
     align-items: center;
