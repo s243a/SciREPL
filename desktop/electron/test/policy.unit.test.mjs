@@ -355,6 +355,56 @@ export default async function run() {
     }
   }
 
+  /* ---------------- runtime cache: journal line before the response ---------------- */
+  //
+  // The renderer writes its receipt after the runtime has loaded, i.e. after
+  // the responses it needed. So a hit on an inherited (un-journaled) entry
+  // must not be served until its journal line is written, or a receipt could
+  // exist for a load the journal does not know about. appendFile is slowed
+  // down here so the order is deterministic, not a race the test usually wins.
+  {
+    const dir = mkdtempSync(path.join(tmpdir(), 'scirepl-rc-order-'));
+    const fspMod = require('fs/promises');
+    const realAppend = fspMod.appendFile;
+    try {
+      const U = 'https://webr.r-wasm.org/v0.5.4/R.bin.wasm';
+      const V = 'https://webr.r-wasm.org/v0.5.4/R.bin.data';
+      const hdrs = new Headers({ 'content-type': 'application/wasm' });
+      const old = new rc.RuntimeCache(dir);
+      await old.write(U, Buffer.from('wasm'), hdrs);   // pre-journal layout
+      await old.write(V, Buffer.from('data'), hdrs);
+
+      let handler = null;
+      const fakeSession = { protocol: { handle: (scheme, fn) => { if (scheme === 'https') handler = fn; } } };
+      rc.installRuntimeCache(fakeSession, { cacheDir: dir });
+      const journalHas = (url) => {
+        try { return readFileSync(path.join(dir, rc.JOURNAL_NAME), 'utf8').includes(`GET ${url}\n`); }
+        catch { return false; }
+      };
+
+      fspMod.appendFile = (...args) => new Promise((res, rej) => {
+        setTimeout(() => realAppend(...args).then(res, rej), 80);
+      });
+      const res = await handler(new Request(U));
+      const servedAfterJournal = journalHas(U);
+      r.log('a hit on an inherited entry is served only after its journal line is written',
+        res.status === 200 && servedAfterJournal === true, `status=${res.status} journaled=${servedAfterJournal}`);
+
+      // Two concurrent requests for the same inherited entry: the second must
+      // wait for the first one's append too, not return as soon as the line
+      // is in the in-memory set.
+      const both = await Promise.all([handler(new Request(V)), handler(new Request(V))]
+        .map((p) => p.then((resp) => ({ status: resp.status, journaled: journalHas(V) }))));
+      r.log('concurrent hits on the same inherited entry both wait for the journal line',
+        both.every((b) => b.status === 200 && b.journaled), JSON.stringify(both));
+      const lines = readFileSync(path.join(dir, rc.JOURNAL_NAME), 'utf8').trim().split('\n');
+      r.log('each inherited entry is journaled once', lines.length === 2, JSON.stringify(lines));
+    } finally {
+      fspMod.appendFile = realAppend;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
   /* ---------------- external URL classification ---------------- */
 
   const allowedExternal = [

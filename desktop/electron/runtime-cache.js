@@ -151,6 +151,8 @@ class RuntimeCache {
     fs.mkdirSync(this.dir, { recursive: true });
     /** "METHOD url" lines already in the journal; loaded on first use. */
     this._journaled = null;
+    /** Appends still in flight, so a concurrent caller can wait for the same line. */
+    this._pendingJournal = new Map();
   }
 
   _journalPath() {
@@ -190,7 +192,13 @@ class RuntimeCache {
   async journal(url, method = 'GET') {
     const line = `${method} ${url}`;
     (this._journaled || this._loadJournalSync()).add(line);
-    await fsp.appendFile(this._journalPath(), `${line}\n`);
+    const pending = fsp.appendFile(this._journalPath(), `${line}\n`);
+    this._pendingJournal.set(line, pending);
+    try {
+      await pending;
+    } finally {
+      if (this._pendingJournal.get(line) === pending) this._pendingJournal.delete(line);
+    }
   }
 
   /**
@@ -200,10 +208,23 @@ class RuntimeCache {
    * missing. Its presence never depended on this: snapshotSync() reports an
    * intact entry as present whether or not it is journaled, so an upgraded
    * cache is recognised from the first start.
+   *
+   * The hit path awaits this before it serves the response. The renderer
+   * writes its receipt only after the runtime has loaded, i.e. after every
+   * response it needed, so no receipt can exist for a load whose journal
+   * lines are not yet written. After the first hit this is a Set lookup; the
+   * one-time append per inherited entry is a small local write.
    */
   async noteHit(url, method = 'GET') {
+    const line = `${method} ${url}`;
     const journaled = this._journaled || this._loadJournalSync();
-    if (journaled.has(`${method} ${url}`)) return false;
+    if (journaled.has(line)) {
+      // Another request for the same entry may have started the append; its
+      // response must not go out before the line is written either.
+      const pending = this._pendingJournal.get(line);
+      if (pending) await pending.catch(() => {});
+      return false;
+    }
     await this.journal(url, method);
     return true;
   }
@@ -339,9 +360,13 @@ function installRuntimeCache(session, options = {}) {
     const hit = await cache.read(request.url, method);
     if (hit) {
       cache.stats.hits++;
-      cache.noteHit(request.url, method).catch((e) => {
+      // Awaited, not fire-and-forget: the journal line must be written before
+      // the response can contribute to a load the renderer then records.
+      try {
+        await cache.noteHit(request.url, method);
+      } catch (e) {
         log('runtime-cache journal write failed', String(e && e.message));
-      });
+      }
       return new Response(hit.meta.hasBody ? hit.bytes : null, {
         status: hit.meta.status || 200,
         headers: hit.meta.headers || {},
