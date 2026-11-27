@@ -14,7 +14,7 @@
 import { createRequire } from 'node:module';
 import Module from 'node:module';
 import path from 'node:path';
-import { mkdtempSync, rmSync, unlinkSync, existsSync } from 'node:fs';
+import { mkdtempSync, rmSync, unlinkSync, existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createReporter, ELECTRON_DIR } from './reporter.mjs';
@@ -317,6 +317,143 @@ export default async function run() {
     }
   }
 
+  /* ---------------- runtime cache: upgrading a cache with no journal ---------------- */
+  //
+  // Caches written before the journal existed (pilot run 4 builds) have entries
+  // but no journal.log. Intact entries must count as present from the first
+  // start, and a hit must journal them so later damage is detected.
+  {
+    const dir = mkdtempSync(path.join(tmpdir(), 'scirepl-rc-upgrade-'));
+    try {
+      const hdrs = new Headers({ 'content-type': 'text/javascript' });
+      const L = 'https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js';
+      const W = 'https://webr.r-wasm.org/v0.5.4/webr.mjs';
+      const old = new rc.RuntimeCache(dir);
+      // write() without journal() is exactly what the older build left behind.
+      await old.write(L, Buffer.from('lua'), hdrs);
+      await old.write(W, Buffer.from('webr'), hdrs);
+
+      const cache = new rc.RuntimeCache(dir);   // the new build starting up
+      let snap = cache.snapshotSync();
+      r.log('upgrade: intact pre-journal entries are present, nothing is missing',
+        JSON.stringify(snap.present) === JSON.stringify([L, W].sort()) && snap.missing.length === 0,
+        JSON.stringify(snap));
+      r.log('upgrade: a hit on a pre-journal entry journals it', (await cache.noteHit(L)) === true);
+      r.log('upgrade: a second hit does not journal it again', (await cache.noteHit(L)) === false);
+      const lines = readFileSync(path.join(dir, rc.JOURNAL_NAME), 'utf8').trim().split('\n');
+      r.log('upgrade: the journal holds exactly the entry that was used',
+        JSON.stringify(lines) === JSON.stringify([`GET ${L}`]), JSON.stringify(lines));
+
+      unlinkSync(cache._paths(L).body);
+      unlinkSync(cache._paths(W).body);
+      snap = new rc.RuntimeCache(dir).snapshotSync();
+      r.log('upgrade: after a journaled entry is damaged it is missing; a never-used pre-journal one is just absent',
+        JSON.stringify(snap.missing) === JSON.stringify([L]) && snap.present.length === 0,
+        JSON.stringify(snap));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  /* ---------------- runtime cache: journal line before the response ---------------- */
+  //
+  // The renderer writes its receipt after the runtime has loaded, i.e. after
+  // the responses it needed. So a hit on an inherited (un-journaled) entry
+  // must not be served until its journal line is written, or a receipt could
+  // exist for a load the journal does not know about. appendFile is slowed
+  // down here so the order is deterministic, not a race the test usually wins.
+  {
+    const dir = mkdtempSync(path.join(tmpdir(), 'scirepl-rc-order-'));
+    const fspMod = require('fs/promises');
+    const realAppend = fspMod.appendFile;
+    try {
+      const U = 'https://webr.r-wasm.org/v0.5.4/R.bin.wasm';
+      const V = 'https://webr.r-wasm.org/v0.5.4/R.bin.data';
+      const hdrs = new Headers({ 'content-type': 'application/wasm' });
+      const old = new rc.RuntimeCache(dir);
+      await old.write(U, Buffer.from('wasm'), hdrs);   // pre-journal layout
+      await old.write(V, Buffer.from('data'), hdrs);
+
+      let handler = null;
+      const fakeSession = { protocol: { handle: (scheme, fn) => { if (scheme === 'https') handler = fn; } } };
+      rc.installRuntimeCache(fakeSession, { cacheDir: dir });
+      const journalHas = (url) => {
+        try { return readFileSync(path.join(dir, rc.JOURNAL_NAME), 'utf8').includes(`GET ${url}\n`); }
+        catch { return false; }
+      };
+
+      fspMod.appendFile = (...args) => new Promise((res, rej) => {
+        setTimeout(() => realAppend(...args).then(res, rej), 80);
+      });
+      const res = await handler(new Request(U));
+      const servedAfterJournal = journalHas(U);
+      r.log('a hit on an inherited entry is served only after its journal line is written',
+        res.status === 200 && servedAfterJournal === true, `status=${res.status} journaled=${servedAfterJournal}`);
+
+      // Two concurrent requests for the same inherited entry: the second must
+      // wait for the first one's append too, not return as soon as the line
+      // is in the in-memory set.
+      const both = await Promise.all([handler(new Request(V)), handler(new Request(V))]
+        .map((p) => p.then((resp) => ({ status: resp.status, journaled: journalHas(V) }))));
+      r.log('concurrent hits on the same inherited entry both wait for the journal line',
+        both.every((b) => b.status === 200 && b.journaled), JSON.stringify(both));
+      const lines = readFileSync(path.join(dir, rc.JOURNAL_NAME), 'utf8').trim().split('\n');
+      r.log('each inherited entry is journaled once', lines.length === 2, JSON.stringify(lines));
+    } finally {
+      fspMod.appendFile = realAppend;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  /* ---------------- runtime cache: a journal append that fails ---------------- */
+  //
+  // A failed append must not leave the line marked journaled, must reach every
+  // concurrent caller waiting on it, and must set journalFailed (which stops
+  // the renderer's receipt); the intact bytes are still served.
+  {
+    const dir = mkdtempSync(path.join(tmpdir(), 'scirepl-rc-jfail-'));
+    const fspMod = require('fs/promises');
+    const realAppend = fspMod.appendFile;
+    try {
+      const U = 'https://webr.r-wasm.org/v0.5.4/R.bin.wasm';
+      const hdrs = new Headers({ 'content-type': 'application/wasm' });
+      const old = new rc.RuntimeCache(dir);
+      await old.write(U, Buffer.from('wasm'), hdrs);   // pre-journal layout
+
+      let handler = null;
+      const fakeSession = { protocol: { handle: (scheme, fn) => { if (scheme === 'https') handler = fn; } } };
+      const cache = rc.installRuntimeCache(fakeSession, { cacheDir: dir });
+      r.log('journalFailed starts false', cache.journalFailed === false);
+
+      let appends = 0;
+      fspMod.appendFile = () => new Promise((_, rej) => {
+        appends++;
+        setTimeout(() => rej(Object.assign(new Error('ENOSPC: no space left on device'), { code: 'ENOSPC' })), 50);
+      });
+      const outcomes = await Promise.allSettled([cache.noteHit(U), cache.noteHit(U)]);
+      r.log('concurrent callers share one failed append and both see the failure',
+        appends === 1 && outcomes.every((o) => o.status === 'rejected' && /ENOSPC/.test(o.reason.message)),
+        JSON.stringify({ appends, outcomes: outcomes.map((o) => o.status) }));
+      r.log('a failed append does not mark the line journaled',
+        !cache._journaled.has(`GET ${U}`) && cache._pendingJournal.size === 0);
+      r.log('a failed append sets journalFailed', cache.journalFailed === true);
+
+      const res = await handler(new Request(U));
+      const body = Buffer.from(await res.arrayBuffer()).toString();
+      r.log('the intact entry is still served when its journal append fails',
+        res.status === 200 && body === 'wasm', `status=${res.status} body=${body}`);
+      r.log('the hit retried the append rather than trusting the earlier attempt', appends === 2, `${appends} appends`);
+
+      fspMod.appendFile = realAppend;
+      r.log('once appends work again, the next hit journals the entry', (await cache.noteHit(U)) === true
+        && readFileSync(path.join(dir, rc.JOURNAL_NAME), 'utf8') === `GET ${U}\n`);
+      r.log('journalFailed stays set for the rest of the process', cache.journalFailed === true);
+    } finally {
+      fspMod.appendFile = realAppend;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
   /* ---------------- external URL classification ---------------- */
 
   const allowedExternal = [
@@ -435,6 +572,27 @@ export default async function run() {
     csp.includes("'wasm-unsafe-eval'"));
 
   Module._resolveFilename = originalResolve;
+  // Zoom: Ctrl+= and Ctrl+wheel (pilot run 4).
+  const zoom = require(path.join(ELECTRON_DIR, 'zoom.js'));
+  r.log('zoom: one step in and out matches the menu roles (0.5)',
+    zoom.nextZoomLevel(0, 'in') === 0.5 && zoom.nextZoomLevel(0, 'out') === -0.5);
+  r.log('zoom: clamped to the limits',
+    zoom.nextZoomLevel(zoom.MAX_ZOOM_LEVEL, 'in') === zoom.MAX_ZOOM_LEVEL
+      && zoom.nextZoomLevel(zoom.MIN_ZOOM_LEVEL, 'out') === zoom.MIN_ZOOM_LEVEL);
+  r.log('zoom: an unknown direction or level changes nothing harmful',
+    zoom.nextZoomLevel(1, 'sideways') === 1 && zoom.nextZoomLevel(NaN, 'in') === 0.5);
+  {
+    let level = 0; let handler = null;
+    const fake = {
+      on(ev, fn) { if (ev === 'zoom-changed') handler = fn; },
+      getZoomLevel: () => level,
+      setZoomLevel: (v) => { level = v; },
+    };
+    zoom.installWheelZoom(fake);
+    handler && handler({}, 'in'); handler && handler({}, 'in'); handler && handler({}, 'out');
+    r.log('zoom: Ctrl+wheel (zoom-changed) steps the page zoom', handler !== null && level === 0.5, String(level));
+  }
+
   return r.summary();
 }
 

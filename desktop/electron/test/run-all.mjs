@@ -23,6 +23,7 @@ const SUITES = [
   { name: 'msix-manifest', file: './msix-manifest.unit.test.mjs', unit: true },
   { name: 'msix-pilot-scripts', file: './msix-pilot-scripts.unit.test.mjs', unit: true },
   { name: 'shell-launch', file: './shell-launch.test.mjs', unit: false },
+  { name: 'zoom', file: './zoom.test.mjs', unit: false },
   { name: 'security', file: './security.test.mjs', unit: false },
   { name: 'artifact-boundary', file: './artifact-boundary.test.mjs', unit: false },
   { name: 'download', file: './download.test.mjs', unit: false },
@@ -36,6 +37,8 @@ const SUITES = [
   { name: 'runtime-cache', file: './runtime-cache.test.mjs', unit: false, optIn: true },
   // Also needs live network: download once, then no prompt after a restart.
   { name: 'runtime-receipt', file: './runtime-receipt.test.mjs', unit: false, optIn: true },
+  // The same for R from a pre-journal (pilot run 4) cache: ~50 MB download.
+  { name: 'runtime-receipt-r', file: './runtime-receipt-r.test.mjs', unit: false, optIn: true },
 ];
 
 const argv = process.argv.slice(2);

@@ -19,7 +19,12 @@
  *      after downloading again the prompt stays away;
  *   4. Runtimes → Clear downloaded runtimes… removes the receipts, and after a
  *      restart the prompt is back;
- *   5. with SCIREPL_RUNTIME_CACHE=0 no receipt is written.
+ *   5. upgrading from a cache written before journal.log existed: one prompt,
+ *      Download served offline from disk, then no prompt; a damaged old cache
+ *      still prompts;
+ *   6. a journal that cannot be written: Lua still downloads and runs, but no
+ *      receipt is written, so the next start prompts again;
+ *   7. with SCIREPL_RUNTIME_CACHE=0 no receipt is written.
  *
  * Needs network for the online half, so it is opt-in:
  *
@@ -251,6 +256,127 @@ export default async function run() {
     }
   } finally {
     try { rmSync(userDataDir, { recursive: true, force: true }); } catch { /* ignore */ }
+  }
+
+  /* ---------------- upgrade: a cache written before journal.log existed ---------------- */
+  //
+  // Pilot run 4 builds populated runtime-cache/ with no journal and wrote no
+  // receipt. Expected on the new build: the prompt shows once (no receipt);
+  // Download is served from disk, offline; that writes the receipt and
+  // journals the hit, so the next start skips the prompt. If the old cache is
+  // damaged (the loader body gone), the prompt keeps coming back.
+  const upDir = makeProfile('upgrade');
+  try {
+    let shell = await launchShell({ userDataDir: upDir });
+    try {
+      await waitForAppReady(shell.page);
+      const online = await runKernel(shell.page, LUA);
+      r.log('upgrade: populate the cache online', online.ok, online.error || online.out);
+      await shell.page.evaluate((prefix) => Object.keys(localStorage)
+        .filter((k) => k.startsWith(prefix)).forEach((k) => localStorage.removeItem(k)), PREFIX);
+    } finally {
+      await shell.close();
+    }
+    const journalPath = path.join(upDir, 'runtime-cache', 'journal.log');
+    rmSync(journalPath, { force: true });
+    r.log('upgrade: old layout built (entries, no journal.log, no receipt)',
+      cacheEntries(upDir) > 0 && !existsSync(journalPath));
+
+    shell = await launchShell({ userDataDir: upDir });
+    try {
+      await waitForAppReady(shell.page);
+      await goOffline(shell);
+      await disableAutoDownload(shell.page);
+      const dist = await shell.page.evaluate(() => window.sciREPLPlatform.getDistributionInfo());
+      r.log('upgrade: the un-journaled intact entry counts as present, nothing missing',
+        dist.runtimeCachePresent.some((u) => /fengari-web/.test(u)) && dist.runtimeCacheMissing.length === 0,
+        JSON.stringify({ present: dist.runtimeCachePresent, missing: dist.runtimeCacheMissing }));
+      r.log('upgrade: no receipt yet, so the prompt shows once', await promptShownFor(shell.page, 'lua'));
+      await shell.page.click('#runtime-download-btn');
+      const fromDisk = await runKernel(shell.page, LUA, 30_000);
+      r.log('upgrade: Download works offline, served from the old cache',
+        fromDisk.ok && /42/.test(fromDisk.out || ''), fromDisk.error || fromDisk.out);
+      r.log('upgrade: the receipt is written', (await receiptKeys(shell.page)).length === 1);
+    } finally {
+      await shell.close();
+    }
+    const journal = existsSync(journalPath) ? readFileSync(journalPath, 'utf8') : '';
+    r.log('upgrade: the cache hit journaled the old entry', /^GET .*fengari-web/m.test(journal),
+      JSON.stringify(journal.trim()));
+
+    shell = await launchShell({ userDataDir: upDir });
+    try {
+      await waitForAppReady(shell.page);
+      await goOffline(shell);
+      await disableAutoDownload(shell.page);
+      r.log('upgrade: next offline start reports Lua cached', (await cachedCheck(shell.page, 'lua')) === true);
+      const outcome = await Promise.race([
+        shell.page.evaluate(() => window.kernelManager.ensureReady('lua').then(() => 'ready', (e) => `rejected: ${e && e.message}`)),
+        waitFor(() => promptVisible(shell.page), 30_000).then((shown) => (shown ? 'prompted' : 'timeout')),
+      ]);
+      r.log('upgrade: no prompt, Lua becomes ready', outcome === 'ready', outcome);
+      const run2 = await runKernel(shell.page, LUA, 30_000);
+      r.log('upgrade: runs offline', run2.ok && /42/.test(run2.out || ''), run2.error || run2.out);
+    } finally {
+      await shell.close();
+    }
+
+    // A damaged old cache: no journal, loader body gone, stale receipt kept.
+    rmSync(journalPath, { force: true });
+    const gone = deleteCachedBody(upDir, /fengari-web/);
+    shell = await launchShell({ userDataDir: upDir });
+    try {
+      await waitForAppReady(shell.page);
+      await disableAutoDownload(shell.page);
+      r.log('upgrade, damaged old cache: the prompt comes back despite the receipt',
+        !!gone && (await receiptKeys(shell.page)).length === 1
+          && (await cachedCheck(shell.page, 'lua')) === false
+          && await promptShownFor(shell.page, 'lua'));
+    } finally {
+      await shell.close();
+    }
+  } finally {
+    try { rmSync(upDir, { recursive: true, force: true }); } catch { /* ignore */ }
+  }
+
+  /* ---------------- journal write fails: usable, but no receipt ---------------- */
+  //
+  // journal.log is made a directory, so every append fails (EISDIR). Entries
+  // are still stored and served, but the next start's inventory could not
+  // report one of them missing, so no receipt may be written for this load.
+  const jfDir = makeProfile('journal-fail');
+  try {
+    mkdirSync(path.join(jfDir, 'runtime-cache', 'journal.log'), { recursive: true });
+    let shell = await launchShell({ userDataDir: jfDir });
+    try {
+      await waitForAppReady(shell.page);
+      const before = await shell.page.evaluate(() => window.sciREPLPlatform.getDistributionInfo());
+      r.log('journal failure: the flag starts false', before.runtimeCacheJournalFailed === false,
+        String(before.runtimeCacheJournalFailed));
+      const online = await runKernel(shell.page, LUA);
+      r.log('journal failure: Lua still downloads and runs', online.ok && /42/.test(online.out || ''),
+        online.error || online.out);
+      const after = await shell.page.evaluate(() => window.sciREPLPlatform.getDistributionInfo());
+      r.log('journal failure: getDistributionInfo reports it', after.runtimeCacheJournalFailed === true,
+        String(after.runtimeCacheJournalFailed));
+      r.log('journal failure: no receipt is written', (await receiptKeys(shell.page)).length === 0,
+        JSON.stringify(await receiptKeys(shell.page)));
+      r.log('journal failure: the bytes were still cached', cacheEntries(jfDir) > 0,
+        `${cacheEntries(jfDir)} entries`);
+    } finally {
+      await shell.close();
+    }
+    shell = await launchShell({ userDataDir: jfDir });
+    try {
+      await waitForAppReady(shell.page);
+      await disableAutoDownload(shell.page);
+      r.log('journal failure: the next start is not trusted to skip the prompt',
+        (await cachedCheck(shell.page, 'lua')) === false && await promptShownFor(shell.page, 'lua'));
+    } finally {
+      await shell.close();
+    }
+  } finally {
+    try { rmSync(jfDir, { recursive: true, force: true }); } catch { /* ignore */ }
   }
 
   /* ---------------- cache off: no receipt ---------------- */

@@ -116,7 +116,9 @@ const META_SUFFIX = '.meta.json';
 
 /**
  * Append-only list of every entry the cache set out to store ("METHOD url" per
- * line), written before the body is read or written. Comparing it with the
+ * line), written before the body is read or written, plus any entry first
+ * served from a cache written by an older build that had no journal
+ * (noteHit). Comparing it with the
  * entries actually present (snapshotSync) shows what has gone missing since:
  * a body or metadata deleted by hand, or a write that never finished. Removing
  * the whole directory removes the journal too, which is why the renderer also
@@ -147,6 +149,23 @@ class RuntimeCache {
     this.log = log;
     this.stats = { hits: 0, misses: 0, stored: 0, bypassed: 0, errors: 0 };
     fs.mkdirSync(this.dir, { recursive: true });
+    /** "METHOD url" lines already in the journal; loaded on first use. */
+    this._journaled = null;
+    /** Appends still in flight, so a concurrent caller shares the same outcome. */
+    this._pendingJournal = new Map();
+    /** Set for the rest of the process once any journal append has failed. */
+    this.journalFailed = false;
+  }
+
+  _journalPath() {
+    return path.join(this.dir, JOURNAL_NAME);
+  }
+
+  _loadJournalSync() {
+    let text = '';
+    try { text = fs.readFileSync(this._journalPath(), 'utf8'); } catch { /* none yet */ }
+    this._journaled = new Set(text.split('\n').filter((line) => line.indexOf(' ') > 0));
+    return this._journaled;
   }
 
   _paths(url, method = 'GET') {
@@ -171,9 +190,62 @@ class RuntimeCache {
     }
   }
 
-  /** Record that this entry is about to be stored (see JOURNAL_NAME). */
-  async journal(url, method = 'GET') {
-    await fsp.appendFile(path.join(this.dir, JOURNAL_NAME), `${method} ${url}\n`);
+  /**
+   * Make sure this entry has a line in the journal (see JOURNAL_NAME).
+   *
+   * The line counts as journaled only once the append has succeeded. Callers
+   * that arrive while an append for the same line is in flight wait for that
+   * append and see its outcome, failure included, so none of them can go on as
+   * if the line were on disk when it is not. A failed append leaves the line
+   * un-journaled (the next request retries it) and sets journalFailed for the
+   * rest of this process, which tells the renderer not to record a receipt
+   * (ipc.js runtimeCacheJournalFailed): the startup inventory that receipt
+   * would later be checked against cannot be trusted to list this entry.
+   *
+   * @returns {Promise<boolean>} true when this call (or the in-flight one it
+   *   joined) wrote the line, false when it was already journaled.
+   */
+  journal(url, method = 'GET') {
+    const line = `${method} ${url}`;
+    const journaled = this._journaled || this._loadJournalSync();
+    if (journaled.has(line)) return Promise.resolve(false);
+    const inFlight = this._pendingJournal.get(line);
+    if (inFlight) return inFlight;
+    const pending = (async () => {
+      try {
+        await fsp.appendFile(this._journalPath(), `${line}\n`);
+        journaled.add(line);
+        return true;
+      } catch (e) {
+        this.journalFailed = true;
+        throw e;
+      } finally {
+        if (this._pendingJournal.get(line) === pending) this._pendingJournal.delete(line);
+      }
+    })();
+    this._pendingJournal.set(line, pending);
+    return pending;
+  }
+
+  /**
+   * A hit on an entry the journal does not know yet: one stored before the
+   * journal existed (a cache written by an older build) has no line in it.
+   * Journal it on first use, so that from then on deleting it shows up as
+   * missing. Its presence never depended on this: snapshotSync() reports an
+   * intact entry as present whether or not it is journaled, so an upgraded
+   * cache is recognised from the first start.
+   *
+   * The hit path awaits this before it serves the response. The renderer
+   * writes its receipt only after the runtime has loaded, i.e. after every
+   * response it needed, so no receipt can exist for a load whose journal
+   * lines are not yet written. If the append fails, the response is still
+   * served (the bytes on disk are intact), but journalFailed is already set,
+   * so the renderer will not write that receipt. After the first hit this is
+   * a Set lookup; the one-time append per inherited entry is a small local
+   * write.
+   */
+  noteHit(url, method = 'GET') {
+    return this.journal(url, method);
   }
 
   /**
@@ -206,12 +278,8 @@ class RuntimeCache {
       } catch { /* unreadable metadata is not an intact entry */ }
     }
     const missing = new Set();
-    let journal = '';
-    try { journal = fs.readFileSync(path.join(this.dir, JOURNAL_NAME), 'utf8'); } catch { /* none */ }
-    for (const line of journal.split('\n')) {
-      const space = line.indexOf(' ');
-      if (space <= 0) continue;
-      if (!intact.has(line)) missing.add(line.slice(space + 1));
+    for (const line of this._loadJournalSync()) {
+      if (!intact.has(line)) missing.add(line.slice(line.indexOf(' ') + 1));
     }
     const present = [];
     for (const key of intact) {
@@ -258,6 +326,7 @@ class RuntimeCache {
   async clear() {
     await fsp.rm(this.dir, { recursive: true, force: true });
     fs.mkdirSync(this.dir, { recursive: true });
+    this._journaled = new Set();
   }
 }
 
@@ -310,6 +379,15 @@ function installRuntimeCache(session, options = {}) {
     const hit = await cache.read(request.url, method);
     if (hit) {
       cache.stats.hits++;
+      // Awaited, not fire-and-forget: the journal line must be written before
+      // the response can contribute to a load the renderer then records. If
+      // the append fails the intact bytes are still served, and journalFailed
+      // (already set when this await settles) stops the renderer's receipt.
+      try {
+        await cache.noteHit(request.url, method);
+      } catch (e) {
+        log('runtime-cache journal write failed', String(e && e.message));
+      }
       return new Response(hit.meta.hasBody ? hit.bytes : null, {
         status: hit.meta.status || 200,
         headers: hit.meta.headers || {},
