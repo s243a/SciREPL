@@ -195,6 +195,16 @@ function createMenuTemplate(deps) {
         { type: 'separator' },
         { role: 'togglefullscreen', label: t('electron.menu.toggleFullscreen') },
         { role: 'toggleDevTools', label: t('electron.menu.toggleDevTools') },
+        // Ctrl+= as a second Zoom In shortcut: the role's own Ctrl+Plus needs
+        // Shift on a US keyboard (see zoom.js). Hidden, so the menu shows one
+        // Zoom In; the accelerator still works.
+        {
+          role: 'zoomIn',
+          label: t('electron.menu.zoomIn'),
+          accelerator: 'CommandOrControl+=',
+          visible: false,
+          acceleratorWorksWhenHidden: true,
+        },
       ],
     },
     {
