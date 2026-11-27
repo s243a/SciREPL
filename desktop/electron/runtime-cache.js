@@ -116,7 +116,9 @@ const META_SUFFIX = '.meta.json';
 
 /**
  * Append-only list of every entry the cache set out to store ("METHOD url" per
- * line), written before the body is read or written. Comparing it with the
+ * line), written before the body is read or written, plus any entry first
+ * served from a cache written by an older build that had no journal
+ * (noteHit). Comparing it with the
  * entries actually present (snapshotSync) shows what has gone missing since:
  * a body or metadata deleted by hand, or a write that never finished. Removing
  * the whole directory removes the journal too, which is why the renderer also
@@ -147,6 +149,19 @@ class RuntimeCache {
     this.log = log;
     this.stats = { hits: 0, misses: 0, stored: 0, bypassed: 0, errors: 0 };
     fs.mkdirSync(this.dir, { recursive: true });
+    /** "METHOD url" lines already in the journal; loaded on first use. */
+    this._journaled = null;
+  }
+
+  _journalPath() {
+    return path.join(this.dir, JOURNAL_NAME);
+  }
+
+  _loadJournalSync() {
+    let text = '';
+    try { text = fs.readFileSync(this._journalPath(), 'utf8'); } catch { /* none yet */ }
+    this._journaled = new Set(text.split('\n').filter((line) => line.indexOf(' ') > 0));
+    return this._journaled;
   }
 
   _paths(url, method = 'GET') {
@@ -173,7 +188,24 @@ class RuntimeCache {
 
   /** Record that this entry is about to be stored (see JOURNAL_NAME). */
   async journal(url, method = 'GET') {
-    await fsp.appendFile(path.join(this.dir, JOURNAL_NAME), `${method} ${url}\n`);
+    const line = `${method} ${url}`;
+    (this._journaled || this._loadJournalSync()).add(line);
+    await fsp.appendFile(this._journalPath(), `${line}\n`);
+  }
+
+  /**
+   * A hit on an entry the journal does not know yet: one stored before the
+   * journal existed (a cache written by an older build) has no line in it.
+   * Journal it on first use, so that from then on deleting it shows up as
+   * missing. Its presence never depended on this: snapshotSync() reports an
+   * intact entry as present whether or not it is journaled, so an upgraded
+   * cache is recognised from the first start.
+   */
+  async noteHit(url, method = 'GET') {
+    const journaled = this._journaled || this._loadJournalSync();
+    if (journaled.has(`${method} ${url}`)) return false;
+    await this.journal(url, method);
+    return true;
   }
 
   /**
@@ -206,12 +238,8 @@ class RuntimeCache {
       } catch { /* unreadable metadata is not an intact entry */ }
     }
     const missing = new Set();
-    let journal = '';
-    try { journal = fs.readFileSync(path.join(this.dir, JOURNAL_NAME), 'utf8'); } catch { /* none */ }
-    for (const line of journal.split('\n')) {
-      const space = line.indexOf(' ');
-      if (space <= 0) continue;
-      if (!intact.has(line)) missing.add(line.slice(space + 1));
+    for (const line of this._loadJournalSync()) {
+      if (!intact.has(line)) missing.add(line.slice(line.indexOf(' ') + 1));
     }
     const present = [];
     for (const key of intact) {
@@ -258,6 +286,7 @@ class RuntimeCache {
   async clear() {
     await fsp.rm(this.dir, { recursive: true, force: true });
     fs.mkdirSync(this.dir, { recursive: true });
+    this._journaled = new Set();
   }
 }
 
@@ -310,6 +339,9 @@ function installRuntimeCache(session, options = {}) {
     const hit = await cache.read(request.url, method);
     if (hit) {
       cache.stats.hits++;
+      cache.noteHit(request.url, method).catch((e) => {
+        log('runtime-cache journal write failed', String(e && e.message));
+      });
       return new Response(hit.meta.hasBody ? hit.bytes : null, {
         status: hit.meta.status || 200,
         headers: hit.meta.headers || {},

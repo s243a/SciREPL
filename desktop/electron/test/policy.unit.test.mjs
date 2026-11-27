@@ -14,7 +14,7 @@
 import { createRequire } from 'node:module';
 import Module from 'node:module';
 import path from 'node:path';
-import { mkdtempSync, rmSync, unlinkSync, existsSync } from 'node:fs';
+import { mkdtempSync, rmSync, unlinkSync, existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createReporter, ELECTRON_DIR } from './reporter.mjs';
@@ -312,6 +312,44 @@ export default async function run() {
       r.log('clear() removes entries and journal: nothing present, nothing missing',
         snap.present.length === 0 && snap.missing.length === 0
           && !existsSync(path.join(dir, rc.JOURNAL_NAME)), JSON.stringify(snap));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  /* ---------------- runtime cache: upgrading a cache with no journal ---------------- */
+  //
+  // Caches written before the journal existed (pilot run 4 builds) have entries
+  // but no journal.log. Intact entries must count as present from the first
+  // start, and a hit must journal them so later damage is detected.
+  {
+    const dir = mkdtempSync(path.join(tmpdir(), 'scirepl-rc-upgrade-'));
+    try {
+      const hdrs = new Headers({ 'content-type': 'text/javascript' });
+      const L = 'https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js';
+      const W = 'https://webr.r-wasm.org/v0.5.4/webr.mjs';
+      const old = new rc.RuntimeCache(dir);
+      // write() without journal() is exactly what the older build left behind.
+      await old.write(L, Buffer.from('lua'), hdrs);
+      await old.write(W, Buffer.from('webr'), hdrs);
+
+      const cache = new rc.RuntimeCache(dir);   // the new build starting up
+      let snap = cache.snapshotSync();
+      r.log('upgrade: intact pre-journal entries are present, nothing is missing',
+        JSON.stringify(snap.present) === JSON.stringify([L, W].sort()) && snap.missing.length === 0,
+        JSON.stringify(snap));
+      r.log('upgrade: a hit on a pre-journal entry journals it', (await cache.noteHit(L)) === true);
+      r.log('upgrade: a second hit does not journal it again', (await cache.noteHit(L)) === false);
+      const lines = readFileSync(path.join(dir, rc.JOURNAL_NAME), 'utf8').trim().split('\n');
+      r.log('upgrade: the journal holds exactly the entry that was used',
+        JSON.stringify(lines) === JSON.stringify([`GET ${L}`]), JSON.stringify(lines));
+
+      unlinkSync(cache._paths(L).body);
+      unlinkSync(cache._paths(W).body);
+      snap = new rc.RuntimeCache(dir).snapshotSync();
+      r.log('upgrade: after a journaled entry is damaged it is missing; a never-used pre-journal one is just absent',
+        JSON.stringify(snap.missing) === JSON.stringify([L]) && snap.present.length === 0,
+        JSON.stringify(snap));
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
