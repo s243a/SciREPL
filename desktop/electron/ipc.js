@@ -46,6 +46,8 @@ function assertLocaleArgument(channel, args, supportedLocales) {
  * @param {Iterable<string>} [options.runtimeCacheHosts] hosts that cache stores
  * @param {{present:string[], missing:string[]}} [options.runtimeCacheFiles]
  *   startup snapshot of that cache (RuntimeCache.snapshotSync)
+ * @param {() => boolean} [options.runtimeCacheJournalFailed] whether a journal
+ *   append has failed in this process (RuntimeCache.journalFailed)
  */
 function registerIpcHandlers(options = {}) {
   const appVersion = options.appVersion || '0.0.0';
@@ -65,6 +67,8 @@ function registerIpcHandlers(options = {}) {
   const files = (runtimeCache && options.runtimeCacheFiles) || {};
   const runtimeCachePresent = Object.freeze([...(files.present || [])].map(String));
   const runtimeCacheMissing = Object.freeze([...(files.missing || [])].map(String));
+  const journalFailed = typeof options.runtimeCacheJournalFailed === 'function'
+    ? options.runtimeCacheJournalFailed : () => false;
 
   ipcMain.handle(CHANNELS.APP_INFO, (_event, ...args) => {
     assertNullary(CHANNELS.APP_INFO, args);
@@ -111,6 +115,12 @@ function registerIpcHandlers(options = {}) {
       // for runtimes it has not loaded yet in this session.
       runtimeCachePresent: [...runtimeCachePresent],
       runtimeCacheMissing: [...runtimeCacheMissing],
+      // The one live value here: true once a journal append has failed in
+      // this process. The startup snapshot above is then no longer a complete
+      // inventory of what this session served, so the renderer reads this
+      // just before it would record a receipt, and records none. One boolean;
+      // no path, no contents.
+      runtimeCacheJournalFailed: runtimeCache && journalFailed() === true,
     };
   });
 

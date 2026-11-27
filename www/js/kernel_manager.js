@@ -511,6 +511,9 @@ class KernelManager {
         // receipt lives in localStorage instead (see _electronRuntimeCache).
         const electronCache = await this._electronRuntimeCache();
         if (electronCache) {
+            // The runtime stays usable either way; only the receipt depends
+            // on the shell having journaled every entry this load used.
+            if (!(await this._electronRuntimeJournalIntact())) return false;
             return this._writeElectronRuntimeReceipt(language, expected, source, electronCache);
         }
 
@@ -592,6 +595,25 @@ class KernelManager {
             })();
         }
         return this._electronRuntimeCachePromise;
+    }
+
+    /**
+     * Asked fresh (not memoised) right before a receipt is written: false once
+     * the shell has failed to journal a cache entry in this process. Without
+     * that line, a later deletion of the entry would not show up as missing
+     * in the next start's snapshot, so a receipt written now could skip the
+     * prompt for a runtime that is no longer complete on disk. Any doubt
+     * (no answer, an error) also means no receipt.
+     */
+    async _electronRuntimeJournalIntact() {
+        const host = (typeof window !== 'undefined') ? window.sciREPLPlatform : null;
+        if (!host || typeof host.getDistributionInfo !== 'function') return false;
+        try {
+            const info = await host.getDistributionInfo();
+            return info?.runtimeCacheJournalFailed === false;
+        } catch (_) {
+            return false;
+        }
     }
 
     _electronRuntimeReceiptKey(language, version) {

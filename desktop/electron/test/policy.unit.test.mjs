@@ -405,6 +405,55 @@ export default async function run() {
     }
   }
 
+  /* ---------------- runtime cache: a journal append that fails ---------------- */
+  //
+  // A failed append must not leave the line marked journaled, must reach every
+  // concurrent caller waiting on it, and must set journalFailed (which stops
+  // the renderer's receipt); the intact bytes are still served.
+  {
+    const dir = mkdtempSync(path.join(tmpdir(), 'scirepl-rc-jfail-'));
+    const fspMod = require('fs/promises');
+    const realAppend = fspMod.appendFile;
+    try {
+      const U = 'https://webr.r-wasm.org/v0.5.4/R.bin.wasm';
+      const hdrs = new Headers({ 'content-type': 'application/wasm' });
+      const old = new rc.RuntimeCache(dir);
+      await old.write(U, Buffer.from('wasm'), hdrs);   // pre-journal layout
+
+      let handler = null;
+      const fakeSession = { protocol: { handle: (scheme, fn) => { if (scheme === 'https') handler = fn; } } };
+      const cache = rc.installRuntimeCache(fakeSession, { cacheDir: dir });
+      r.log('journalFailed starts false', cache.journalFailed === false);
+
+      let appends = 0;
+      fspMod.appendFile = () => new Promise((_, rej) => {
+        appends++;
+        setTimeout(() => rej(Object.assign(new Error('ENOSPC: no space left on device'), { code: 'ENOSPC' })), 50);
+      });
+      const outcomes = await Promise.allSettled([cache.noteHit(U), cache.noteHit(U)]);
+      r.log('concurrent callers share one failed append and both see the failure',
+        appends === 1 && outcomes.every((o) => o.status === 'rejected' && /ENOSPC/.test(o.reason.message)),
+        JSON.stringify({ appends, outcomes: outcomes.map((o) => o.status) }));
+      r.log('a failed append does not mark the line journaled',
+        !cache._journaled.has(`GET ${U}`) && cache._pendingJournal.size === 0);
+      r.log('a failed append sets journalFailed', cache.journalFailed === true);
+
+      const res = await handler(new Request(U));
+      const body = Buffer.from(await res.arrayBuffer()).toString();
+      r.log('the intact entry is still served when its journal append fails',
+        res.status === 200 && body === 'wasm', `status=${res.status} body=${body}`);
+      r.log('the hit retried the append rather than trusting the earlier attempt', appends === 2, `${appends} appends`);
+
+      fspMod.appendFile = realAppend;
+      r.log('once appends work again, the next hit journals the entry', (await cache.noteHit(U)) === true
+        && readFileSync(path.join(dir, rc.JOURNAL_NAME), 'utf8') === `GET ${U}\n`);
+      r.log('journalFailed stays set for the rest of the process', cache.journalFailed === true);
+    } finally {
+      fspMod.appendFile = realAppend;
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
   /* ---------------- external URL classification ---------------- */
 
   const allowedExternal = [

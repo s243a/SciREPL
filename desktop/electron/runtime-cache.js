@@ -151,8 +151,10 @@ class RuntimeCache {
     fs.mkdirSync(this.dir, { recursive: true });
     /** "METHOD url" lines already in the journal; loaded on first use. */
     this._journaled = null;
-    /** Appends still in flight, so a concurrent caller can wait for the same line. */
+    /** Appends still in flight, so a concurrent caller shares the same outcome. */
     this._pendingJournal = new Map();
+    /** Set for the rest of the process once any journal append has failed. */
+    this.journalFailed = false;
   }
 
   _journalPath() {
@@ -188,17 +190,41 @@ class RuntimeCache {
     }
   }
 
-  /** Record that this entry is about to be stored (see JOURNAL_NAME). */
-  async journal(url, method = 'GET') {
+  /**
+   * Make sure this entry has a line in the journal (see JOURNAL_NAME).
+   *
+   * The line counts as journaled only once the append has succeeded. Callers
+   * that arrive while an append for the same line is in flight wait for that
+   * append and see its outcome, failure included, so none of them can go on as
+   * if the line were on disk when it is not. A failed append leaves the line
+   * un-journaled (the next request retries it) and sets journalFailed for the
+   * rest of this process, which tells the renderer not to record a receipt
+   * (ipc.js runtimeCacheJournalFailed): the startup inventory that receipt
+   * would later be checked against cannot be trusted to list this entry.
+   *
+   * @returns {Promise<boolean>} true when this call (or the in-flight one it
+   *   joined) wrote the line, false when it was already journaled.
+   */
+  journal(url, method = 'GET') {
     const line = `${method} ${url}`;
-    (this._journaled || this._loadJournalSync()).add(line);
-    const pending = fsp.appendFile(this._journalPath(), `${line}\n`);
+    const journaled = this._journaled || this._loadJournalSync();
+    if (journaled.has(line)) return Promise.resolve(false);
+    const inFlight = this._pendingJournal.get(line);
+    if (inFlight) return inFlight;
+    const pending = (async () => {
+      try {
+        await fsp.appendFile(this._journalPath(), `${line}\n`);
+        journaled.add(line);
+        return true;
+      } catch (e) {
+        this.journalFailed = true;
+        throw e;
+      } finally {
+        if (this._pendingJournal.get(line) === pending) this._pendingJournal.delete(line);
+      }
+    })();
     this._pendingJournal.set(line, pending);
-    try {
-      await pending;
-    } finally {
-      if (this._pendingJournal.get(line) === pending) this._pendingJournal.delete(line);
-    }
+    return pending;
   }
 
   /**
@@ -212,21 +238,14 @@ class RuntimeCache {
    * The hit path awaits this before it serves the response. The renderer
    * writes its receipt only after the runtime has loaded, i.e. after every
    * response it needed, so no receipt can exist for a load whose journal
-   * lines are not yet written. After the first hit this is a Set lookup; the
-   * one-time append per inherited entry is a small local write.
+   * lines are not yet written. If the append fails, the response is still
+   * served (the bytes on disk are intact), but journalFailed is already set,
+   * so the renderer will not write that receipt. After the first hit this is
+   * a Set lookup; the one-time append per inherited entry is a small local
+   * write.
    */
-  async noteHit(url, method = 'GET') {
-    const line = `${method} ${url}`;
-    const journaled = this._journaled || this._loadJournalSync();
-    if (journaled.has(line)) {
-      // Another request for the same entry may have started the append; its
-      // response must not go out before the line is written either.
-      const pending = this._pendingJournal.get(line);
-      if (pending) await pending.catch(() => {});
-      return false;
-    }
-    await this.journal(url, method);
-    return true;
+  noteHit(url, method = 'GET') {
+    return this.journal(url, method);
   }
 
   /**
@@ -361,7 +380,9 @@ function installRuntimeCache(session, options = {}) {
     if (hit) {
       cache.stats.hits++;
       // Awaited, not fire-and-forget: the journal line must be written before
-      // the response can contribute to a load the renderer then records.
+      // the response can contribute to a load the renderer then records. If
+      // the append fails the intact bytes are still served, and journalFailed
+      // (already set when this await settles) stops the renderer's receipt.
       try {
         await cache.noteHit(request.url, method);
       } catch (e) {

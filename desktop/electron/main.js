@@ -342,6 +342,7 @@ app.whenReady().then(() => {
     // Read before the window exists, so it describes what the previous
     // sessions left on disk (see RuntimeCache.snapshotSync).
     runtimeCacheFiles: runtimeCacheSnapshot(),
+    runtimeCacheJournalFailed: () => !!(runtimeCache && runtimeCache.journalFailed),
   });
 
   createWindow();

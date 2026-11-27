@@ -22,7 +22,9 @@
  *   5. upgrading from a cache written before journal.log existed: one prompt,
  *      Download served offline from disk, then no prompt; a damaged old cache
  *      still prompts;
- *   6. with SCIREPL_RUNTIME_CACHE=0 no receipt is written.
+ *   6. a journal that cannot be written: Lua still downloads and runs, but no
+ *      receipt is written, so the next start prompts again;
+ *   7. with SCIREPL_RUNTIME_CACHE=0 no receipt is written.
  *
  * Needs network for the online half, so it is opt-in:
  *
@@ -335,6 +337,46 @@ export default async function run() {
     }
   } finally {
     try { rmSync(upDir, { recursive: true, force: true }); } catch { /* ignore */ }
+  }
+
+  /* ---------------- journal write fails: usable, but no receipt ---------------- */
+  //
+  // journal.log is made a directory, so every append fails (EISDIR). Entries
+  // are still stored and served, but the next start's inventory could not
+  // report one of them missing, so no receipt may be written for this load.
+  const jfDir = makeProfile('journal-fail');
+  try {
+    mkdirSync(path.join(jfDir, 'runtime-cache', 'journal.log'), { recursive: true });
+    let shell = await launchShell({ userDataDir: jfDir });
+    try {
+      await waitForAppReady(shell.page);
+      const before = await shell.page.evaluate(() => window.sciREPLPlatform.getDistributionInfo());
+      r.log('journal failure: the flag starts false', before.runtimeCacheJournalFailed === false,
+        String(before.runtimeCacheJournalFailed));
+      const online = await runKernel(shell.page, LUA);
+      r.log('journal failure: Lua still downloads and runs', online.ok && /42/.test(online.out || ''),
+        online.error || online.out);
+      const after = await shell.page.evaluate(() => window.sciREPLPlatform.getDistributionInfo());
+      r.log('journal failure: getDistributionInfo reports it', after.runtimeCacheJournalFailed === true,
+        String(after.runtimeCacheJournalFailed));
+      r.log('journal failure: no receipt is written', (await receiptKeys(shell.page)).length === 0,
+        JSON.stringify(await receiptKeys(shell.page)));
+      r.log('journal failure: the bytes were still cached', cacheEntries(jfDir) > 0,
+        `${cacheEntries(jfDir)} entries`);
+    } finally {
+      await shell.close();
+    }
+    shell = await launchShell({ userDataDir: jfDir });
+    try {
+      await waitForAppReady(shell.page);
+      await disableAutoDownload(shell.page);
+      r.log('journal failure: the next start is not trusted to skip the prompt',
+        (await cachedCheck(shell.page, 'lua')) === false && await promptShownFor(shell.page, 'lua'));
+    } finally {
+      await shell.close();
+    }
+  } finally {
+    try { rmSync(jfDir, { recursive: true, force: true }); } catch { /* ignore */ }
   }
 
   /* ---------------- cache off: no receipt ---------------- */

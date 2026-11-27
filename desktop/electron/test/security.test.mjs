@@ -46,6 +46,8 @@ export default async function run() {
       dist && dist.runtimeCache === true && Array.isArray(dist.runtimeCacheHosts)
         && dist.runtimeCacheHosts.includes('cdn.jsdelivr.net'),
       JSON.stringify({ runtimeCache: dist && dist.runtimeCache, hosts: dist && dist.runtimeCacheHosts }));
+    r.log('getDistributionInfo reports no journal failure at startup',
+      dist && dist.runtimeCacheJournalFailed === false, String(dist && dist.runtimeCacheJournalFailed));
 
     /* ------- in-app navigation must still be PERMITTED (regression) ------- */
     //
