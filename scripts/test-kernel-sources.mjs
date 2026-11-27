@@ -31,8 +31,9 @@ function loadGeneratedConfig() {
 }
 
 // ── Build a fresh KernelManager in a sandbox with the given config/override ──
-function makeManager({ config, overrides = {}, platformApi = null, cacheStorage = null } = {}) {
-  const store = new Map(Object.entries(overrides));
+function makeManager({ config, overrides = {}, platformApi = null, cacheStorage = null, store: sharedStore = null } = {}) {
+  const store = sharedStore || new Map();
+  for (const [k, v] of Object.entries(overrides)) store.set(k, v);
   const sandbox = {
     console,
     setTimeout,
@@ -620,6 +621,135 @@ await test('custom runtime URLs cannot create a tested-version completion receip
     'custom executable source remains a fresh explicit trust choice');
   eq(await km._hasCompleteCachedRuntime('r'), false,
     'custom source never suppresses the prompt via tested provenance');
+});
+
+// ── Electron desktop shell: receipts in localStorage, not the Cache API ──
+const ELECTRON_RECEIPT_PREFIX = 'scirepl_electron_runtime_receipt:';
+const R_SOURCE = 'https://webr.r-wasm.org/v0.5.4/webr.mjs';
+const R_WORKER = 'https://webr.r-wasm.org/v0.5.4/webr-worker.js';
+function electronPlatform({
+  runtimeCache = true,
+  hosts = ['webr.r-wasm.org', 'cdn.jsdelivr.net', 'unpkg.com'],
+  present = [R_SOURCE, R_WORKER],
+  missing = [],
+} = {}) {
+  return Object.freeze({
+    getDistributionInfo: async () => ({
+      edition: 'free',
+      container: 'electron',
+      runtimeCache,
+      runtimeCacheHosts: runtimeCache ? hosts : [],
+      runtimeCachePresent: runtimeCache ? present : [],
+      runtimeCacheMissing: runtimeCache ? missing : [],
+    }),
+  });
+}
+const electronReceiptKeys = (store) => [...store.keys()].filter((k) => k.startsWith(ELECTRON_RECEIPT_PREFIX));
+
+await test('Electron with the shell runtime cache: receipt in localStorage suppresses the prompt', async () => {
+  const store = new Map();
+  // Real Electron has a Cache API that is always empty under app://.
+  const cacheStorage = makeFakeCacheStorage();
+  const km = makeManager({ config: PRO_R, cacheStorage, store, platformApi: electronPlatform() });
+  eq(await km._hasCompleteCachedRuntime('r'), false, 'no receipt yet: prompt');
+  km._recordRuntimeSource('r', 'https://webr.r-wasm.org/v0.5.4/webr.mjs');
+  km.recordRuntimeLoadedVersion('r', '0.5.4');
+  eq(await km.markRuntimeCacheComplete('r'), true, 'successful CDN load writes a receipt');
+  eq(JSON.stringify(electronReceiptKeys(store)), JSON.stringify([`${ELECTRON_RECEIPT_PREFIX}r:0.5.4`]),
+    'one receipt keyed by language and expected version');
+  eq((await cacheStorage.urls('scirepl-cdn-v3')).length, 0, 'nothing written to the Cache API');
+  eq(await km._hasCompleteCachedRuntime('r'), true, 'receipt suppresses the prompt');
+
+  // A restart is a new KernelManager over the same localStorage.
+  const restarted = makeManager({ config: PRO_R, store, platformApi: electronPlatform() });
+  eq(await restarted._hasCompleteCachedRuntime('r'), true, 'receipt survives a restart');
+  const newer = makeManager({ config: PRO_R, store, platformApi: electronPlatform(),
+    overrides: { scirepl_webr_version: 'v0.6.0' } });
+  eq(await newer._hasCompleteCachedRuntime('r'), false, '0.5.4 receipt does not cover 0.6.0');
+  eq(await restarted._hasCompleteCachedRuntime('lua'), false, 'R receipt does not cover Lua');
+
+  store.delete(`${ELECTRON_RECEIPT_PREFIX}r:0.5.4`);
+  eq(await restarted._hasCompleteCachedRuntime('r'), false,
+    'removing the receipt (menu clear) brings the prompt back without a reload');
+});
+
+await test('Electron receipt skips the prompt only while the runtime files are on disk', async () => {
+  const store = new Map();
+  const first = makeManager({ config: PRO_R, store, platformApi: electronPlatform({ present: [], missing: [] }) });
+  first._recordRuntimeSource('r', R_SOURCE);
+  first.recordRuntimeLoadedVersion('r', '0.5.4');
+  eq(await first.markRuntimeCacheComplete('r'), true, 'receipt written after the first download');
+
+  const restart = (files) => makeManager({ config: PRO_R, store, platformApi: electronPlatform(files) });
+  eq(await restart({ present: [R_SOURCE, R_WORKER], missing: [] })._hasCompleteCachedRuntime('r'), true,
+    'files intact at startup: no prompt');
+  eq(await restart({ present: [R_WORKER], missing: [R_SOURCE] })._hasCompleteCachedRuntime('r'), false,
+    'loader file missing: prompt');
+  eq(await restart({ present: [], missing: [] })._hasCompleteCachedRuntime('r'), false,
+    'cache directory wiped (journal gone too): prompt');
+  eq(await restart({ present: [R_SOURCE], missing: [R_WORKER] })._hasCompleteCachedRuntime('r'), false,
+    'any other file of this runtime/version missing: prompt');
+  eq(await restart({ present: [R_SOURCE],
+    missing: ['https://webr.r-wasm.org/v0.6.0/webr-worker.js',
+      'https://repo.r-wasm.org/bin/emscripten/contrib/4.4/ggplot2_3.5.1.tgz'] })
+    ._hasCompleteCachedRuntime('r'), true,
+  'missing files of another version or of a package do not affect this runtime');
+});
+
+await test('Electron receipt validation rejects tampered or mismatched records', async () => {
+  const store = new Map();
+  const km = makeManager({ config: PRO_R, store, platformApi: electronPlatform() });
+  const key = `${ELECTRON_RECEIPT_PREFIX}r:0.5.4`;
+  store.set(key, 'not json');
+  eq(await km._hasCompleteCachedRuntime('r'), false, 'corrupt JSON');
+  store.set(key, JSON.stringify({ schemaVersion: 1, complete: true, language: 'r', version: '0.6.0',
+    source: 'https://webr.r-wasm.org/v0.5.4/webr.mjs' }));
+  eq(await km._hasCompleteCachedRuntime('r'), false, 'version mismatch inside the record');
+  store.set(key, JSON.stringify({ schemaVersion: 1, complete: true, language: 'r', version: '0.5.4',
+    source: 'https://evil.example/v0.5.4/webr.mjs' }));
+  eq(await km._hasCompleteCachedRuntime('r'), false, 'source on a host the shell does not cache');
+});
+
+await test('Electron with SCIREPL_RUNTIME_CACHE=0 writes no receipt and keeps prompting', async () => {
+  const store = new Map();
+  const km = makeManager({ config: PRO_R, store, cacheStorage: makeFakeCacheStorage(),
+    platformApi: electronPlatform({ runtimeCache: false }) });
+  km._recordRuntimeSource('r', 'https://webr.r-wasm.org/v0.5.4/webr.mjs');
+  km.recordRuntimeLoadedVersion('r', '0.5.4');
+  eq(await km.markRuntimeCacheComplete('r'), false, 'empty app:// Cache API: no receipt anywhere');
+  eq(electronReceiptKeys(store).length, 0, 'no localStorage receipt');
+  eq(await km._hasCompleteCachedRuntime('r'), false, 'prompt as before');
+});
+
+await test('Electron writes no receipt for a source the shell does not cache, or a local one', async () => {
+  const store = new Map();
+  const km = makeManager({ config: FULL_PROLOG, store, platformApi: electronPlatform() });
+  km._recordRuntimeSource('prolog', 'https://SWI-Prolog.github.io/npm-swipl-wasm/3/8/2/dynamic-import.js');
+  km.recordRuntimeLoadedVersion('prolog', '3.8.2');
+  eq(await km.markRuntimeCacheComplete('prolog'), false, 'github.io is not in the shell cache');
+  const local = FULL_PROLOG.languages.python.sources.find((item) => item.type === 'local').url;
+  km._recordRuntimeSource('python', local);
+  km.recordRuntimeLoadedVersion('python', FULL_PROLOG.languages.python.version);
+  eq(await km.markRuntimeCacheComplete('python'), false, 'bundled runtime needs no receipt');
+  eq(electronReceiptKeys(store).length, 0, 'no receipts written');
+});
+
+await test('non-Electron hosts keep the Cache API receipt path unchanged', async () => {
+  for (const [label, platformApi] of [
+    ['PWA (no platform API)', null],
+    ['platform stub without getDistributionInfo', Object.freeze({ platform: 'electron' })],
+  ]) {
+    const store = new Map();
+    const cacheStorage = makeFakeCacheStorage();
+    const km = makeManager({ config: PRO_R, store, cacheStorage, platformApi });
+    const source = 'https://webr.r-wasm.org/v0.5.4/webr.mjs';
+    await cacheStorage.seed('scirepl-cdn-v3', source);
+    km._recordRuntimeSource('r', source);
+    km.recordRuntimeLoadedVersion('r', '0.5.4');
+    eq(await km.markRuntimeCacheComplete('r'), true, `${label}: Cache API receipt written`);
+    eq(electronReceiptKeys(store).length, 0, `${label}: no localStorage receipt`);
+    eq(await km._hasCompleteCachedRuntime('r'), true, `${label}: Cache API receipt honoured`);
+  }
 });
 
 await test('malformed percent escapes cannot break exact-version cache classification', async () => {

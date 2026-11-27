@@ -1122,9 +1122,15 @@ html, body {
     color: transparent !important;
 }
 
+/* The open list needs its own opaque background. Windows (Chromium/Electron)
+   paints the native popup's options with the SELECT's background, and the
+   per-language -active rules below make that a 10% tint, so with R or Lua
+   active the list became near-white text on a near-white popup. Options do
+   not inherit background-color, so this does not change the closed control. */
 .language-selector-shell > select option {
     color: var(--text-primary) !important;
     -webkit-text-fill-color: var(--text-primary);
+    background-color: var(--bg-card);
 }
 
 .language-selector-abbrev {

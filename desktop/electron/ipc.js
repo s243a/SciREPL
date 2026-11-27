@@ -42,6 +42,12 @@ function assertLocaleArgument(channel, args, supportedLocales) {
  * @param {string} options.profile     build profile the www/ tree was configured with
  * @param {Iterable<string>} options.supportedLocales fixed bundled locale ids
  * @param {(locale:string) => string} options.setLocale host-side locale adapter
+ * @param {boolean} [options.runtimeCache] the on-disk runtime cache is installed
+ * @param {Iterable<string>} [options.runtimeCacheHosts] hosts that cache stores
+ * @param {{present:string[], missing:string[]}} [options.runtimeCacheFiles]
+ *   startup snapshot of that cache (RuntimeCache.snapshotSync)
+ * @param {() => boolean} [options.runtimeCacheJournalFailed] whether a journal
+ *   append has failed in this process (RuntimeCache.journalFailed)
  */
 function registerIpcHandlers(options = {}) {
   const appVersion = options.appVersion || '0.0.0';
@@ -49,6 +55,20 @@ function registerIpcHandlers(options = {}) {
   const buildInfo = options.buildInfo || null;
   const supportedLocales = new Set(options.supportedLocales || []);
   const setLocale = typeof options.setLocale === 'function' ? options.setLocale : null;
+  // Whether the main process installed its on-disk runtime cache at startup
+  // (runtime-cache.js), and which hosts it stores. Fixed for the life of the
+  // process; copied here so the handler returns a constant.
+  const runtimeCache = options.runtimeCache === true;
+  const runtimeCacheHosts = runtimeCache
+    ? Object.freeze([...(options.runtimeCacheHosts || [])].map(String).sort())
+    : Object.freeze([]);
+  // Startup snapshot of the cache's own files (RuntimeCache.snapshotSync):
+  // URLs with an intact entry, and journaled URLs whose entry is gone.
+  const files = (runtimeCache && options.runtimeCacheFiles) || {};
+  const runtimeCachePresent = Object.freeze([...(files.present || [])].map(String));
+  const runtimeCacheMissing = Object.freeze([...(files.missing || [])].map(String));
+  const journalFailed = typeof options.runtimeCacheJournalFailed === 'function'
+    ? options.runtimeCacheJournalFailed : () => false;
 
   ipcMain.handle(CHANNELS.APP_INFO, (_event, ...args) => {
     assertNullary(CHANNELS.APP_INFO, args);
@@ -79,10 +99,28 @@ function registerIpcHandlers(options = {}) {
       store: null,
       // Build provenance for a packaged preview, so a tester can say exactly
       // which build they are looking at. Null in development. These are inert
-      // facts — no behaviour keys off them.
+      // facts — no behaviour keys off them (unlike runtimeCache below).
       commit: (buildInfo && buildInfo.commit) || null,
       builtAt: (buildInfo && buildInfo.builtAt) || null,
       channel: (buildInfo && buildInfo.channel) || 'development',
+      // Launch fact: is the shell's on-disk runtime cache active (it is unless
+      // SCIREPL_RUNTIME_CACHE=0 or it failed to install), and for which hosts.
+      // The renderer uses it only to decide whether a successfully loaded CDN
+      // runtime may skip the download prompt next time (kernel_manager.js
+      // _electronRuntimeCache). It grants nothing: no path, no cache contents.
+      runtimeCache,
+      runtimeCacheHosts: [...runtimeCacheHosts],
+      // Taken once at startup, before the window loaded; not updated as the
+      // session downloads more. That is all the renderer needs: it asks only
+      // for runtimes it has not loaded yet in this session.
+      runtimeCachePresent: [...runtimeCachePresent],
+      runtimeCacheMissing: [...runtimeCacheMissing],
+      // The one live value here: true once a journal append has failed in
+      // this process. The startup snapshot above is then no longer a complete
+      // inventory of what this session served, so the renderer reads this
+      // just before it would record a receipt, and records none. One boolean;
+      // no path, no contents.
+      runtimeCacheJournalFailed: runtimeCache && journalFailed() === true,
     };
   });
 

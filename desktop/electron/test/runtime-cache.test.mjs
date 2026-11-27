@@ -52,7 +52,7 @@ function cacheSize(userDataDir) {
   let bytes = 0;
   let entries = 0;
   for (const f of readdirSync(dir)) {
-    if (f.endsWith('.meta.json') || f.endsWith('.partial')) continue;
+    if (f.endsWith('.meta.json') || f.endsWith('.partial') || f === 'journal.log') continue;
     bytes += statSync(path.join(dir, f)).size;
     entries++;
   }

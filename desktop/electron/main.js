@@ -22,7 +22,7 @@ const {
 } = require('./protocol');
 const { applyWebContentsPolicy } = require('./security');
 const { registerIpcHandlers } = require('./ipc');
-const { installRuntimeCache } = require('./runtime-cache');
+const { installRuntimeCache, CACHEABLE_HOSTS } = require('./runtime-cache');
 const { installApplicationMenu } = require('./menu');
 const { installWheelZoom } = require('./zoom');
 const { createNativeI18n, SUPPORTED_LOCALES } = require('./native-i18n');
@@ -156,6 +156,17 @@ if (!gotLock) {
 let mainWindow = null;
 let runtimeCache = null;
 const nativeI18n = createNativeI18n({ catalogDir: path.join(WWW_ROOT, 'i18n') });
+
+/** Never let a damaged cache directory stop the shell from starting. */
+function runtimeCacheSnapshot() {
+  if (!runtimeCache) return { present: [], missing: [] };
+  try {
+    return runtimeCache.snapshotSync();
+  } catch (e) {
+    console.error('[scirepl] runtime cache snapshot failed:', e && e.message);
+    return { present: [], missing: [] };
+  }
+}
 
 function nativeMenuDeps() {
   return {
@@ -324,6 +335,14 @@ app.whenReady().then(() => {
     buildInfo: readBuildInfo(),
     supportedLocales: SUPPORTED_LOCALES,
     setLocale: setNativeLocale,
+    // Static for this process: lets the renderer remember which CDN runtimes
+    // it has loaded through this cache (see menu.js clearCache for the reset).
+    runtimeCache: !!runtimeCache,
+    runtimeCacheHosts: runtimeCache ? [...CACHEABLE_HOSTS] : [],
+    // Read before the window exists, so it describes what the previous
+    // sessions left on disk (see RuntimeCache.snapshotSync).
+    runtimeCacheFiles: runtimeCacheSnapshot(),
+    runtimeCacheJournalFailed: () => !!(runtimeCache && runtimeCache.journalFailed),
   });
 
   createWindow();

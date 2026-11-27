@@ -29,8 +29,13 @@
  *   - Only `GET` is cached, only `200`, and never a range request — a partial
  *     body written as if whole is a corrupt cache entry, which is worse than no
  *     cache.
- *   - Nothing is exposed to the renderer. This is main-process only and adds no
- *     IPC surface, so it does not widen the boundary described in security.js.
+ *   - Nothing is exposed to the renderer beyond static facts in the existing
+ *     getDistributionInfo() result (ipc.js), taken once at startup: whether
+ *     this cache is active, its host allowlist, and which cached URLs are
+ *     intact or missing (snapshotSync). The renderer uses them only to decide
+ *     whether a runtime it loaded before may skip the download prompt. No new
+ *     IPC channel, no paths, no contents, so it does not widen the boundary
+ *     described in security.js.
  */
 
 const { net } = require('electron');
@@ -110,6 +115,23 @@ function isNeverCacheable(url) {
 const META_SUFFIX = '.meta.json';
 
 /**
+ * Append-only list of every entry the cache set out to store ("METHOD url" per
+ * line), written before the body is read or written, plus any entry first
+ * served from a cache written by an older build that had no journal
+ * (noteHit). Comparing it with the
+ * entries actually present (snapshotSync) shows what has gone missing since:
+ * a body or metadata deleted by hand, or a write that never finished. Removing
+ * the whole directory removes the journal too, which is why the renderer also
+ * requires its runtime's loader URL to be present, not merely not missing.
+ */
+const JOURNAL_NAME = 'journal.log';
+
+/** Files in the cache directory that are not cache entries. */
+function isBookkeeping(name) {
+  return name === JOURNAL_NAME || name.endsWith(META_SUFFIX) || name.endsWith('.partial');
+}
+
+/**
  * Cache key. The method is part of it because webR probes its virtual
  * filesystem with HEAD before fetching with GET, and the two have different
  * bodies (a HEAD has none) but the same URL.
@@ -127,6 +149,23 @@ class RuntimeCache {
     this.log = log;
     this.stats = { hits: 0, misses: 0, stored: 0, bypassed: 0, errors: 0 };
     fs.mkdirSync(this.dir, { recursive: true });
+    /** "METHOD url" lines already in the journal; loaded on first use. */
+    this._journaled = null;
+    /** Appends still in flight, so a concurrent caller shares the same outcome. */
+    this._pendingJournal = new Map();
+    /** Set for the rest of the process once any journal append has failed. */
+    this.journalFailed = false;
+  }
+
+  _journalPath() {
+    return path.join(this.dir, JOURNAL_NAME);
+  }
+
+  _loadJournalSync() {
+    let text = '';
+    try { text = fs.readFileSync(this._journalPath(), 'utf8'); } catch { /* none yet */ }
+    this._journaled = new Set(text.split('\n').filter((line) => line.indexOf(' ') > 0));
+    return this._journaled;
   }
 
   _paths(url, method = 'GET') {
@@ -149,6 +188,104 @@ class RuntimeCache {
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Make sure this entry has a line in the journal (see JOURNAL_NAME).
+   *
+   * The line counts as journaled only once the append has succeeded. Callers
+   * that arrive while an append for the same line is in flight wait for that
+   * append and see its outcome, failure included, so none of them can go on as
+   * if the line were on disk when it is not. A failed append leaves the line
+   * un-journaled (the next request retries it) and sets journalFailed for the
+   * rest of this process, which tells the renderer not to record a receipt
+   * (ipc.js runtimeCacheJournalFailed): the startup inventory that receipt
+   * would later be checked against cannot be trusted to list this entry.
+   *
+   * @returns {Promise<boolean>} true when this call (or the in-flight one it
+   *   joined) wrote the line, false when it was already journaled.
+   */
+  journal(url, method = 'GET') {
+    const line = `${method} ${url}`;
+    const journaled = this._journaled || this._loadJournalSync();
+    if (journaled.has(line)) return Promise.resolve(false);
+    const inFlight = this._pendingJournal.get(line);
+    if (inFlight) return inFlight;
+    const pending = (async () => {
+      try {
+        await fsp.appendFile(this._journalPath(), `${line}\n`);
+        journaled.add(line);
+        return true;
+      } catch (e) {
+        this.journalFailed = true;
+        throw e;
+      } finally {
+        if (this._pendingJournal.get(line) === pending) this._pendingJournal.delete(line);
+      }
+    })();
+    this._pendingJournal.set(line, pending);
+    return pending;
+  }
+
+  /**
+   * A hit on an entry the journal does not know yet: one stored before the
+   * journal existed (a cache written by an older build) has no line in it.
+   * Journal it on first use, so that from then on deleting it shows up as
+   * missing. Its presence never depended on this: snapshotSync() reports an
+   * intact entry as present whether or not it is journaled, so an upgraded
+   * cache is recognised from the first start.
+   *
+   * The hit path awaits this before it serves the response. The renderer
+   * writes its receipt only after the runtime has loaded, i.e. after every
+   * response it needed, so no receipt can exist for a load whose journal
+   * lines are not yet written. If the append fails, the response is still
+   * served (the bytes on disk are intact), but journalFailed is already set,
+   * so the renderer will not write that receipt. After the first hit this is
+   * a Set lookup; the one-time append per inherited entry is a small local
+   * write.
+   */
+  noteHit(url, method = 'GET') {
+    return this.journal(url, method);
+  }
+
+  /**
+   * Which stored entries are intact right now, and which journaled ones are
+   * not. Synchronous and read once at startup, before the window loads: the
+   * result is reported to the renderer as a static fact (ipc.js), and that is
+   * enough, because the renderer only needs it to decide whether to skip the
+   * download prompt for a runtime it has not loaded yet this session.
+   *
+   * @returns {{ present: string[], missing: string[] }} `present` lists URLs
+   *   with an intact GET entry (metadata plus a body of the recorded size);
+   *   `missing` lists URLs with a journaled GET or HEAD entry that is not intact.
+   */
+  snapshotSync() {
+    const intact = new Set();   // "METHOD url"
+    let names = [];
+    try { names = fs.readdirSync(this.dir); } catch { /* no directory: nothing cached */ }
+    for (const name of names) {
+      if (!name.endsWith(META_SUFFIX)) continue;
+      try {
+        const meta = JSON.parse(fs.readFileSync(path.join(this.dir, name), 'utf8'));
+        if (typeof meta.url !== 'string' || typeof meta.method !== 'string') continue;
+        const { body, meta: metaPath } = this._paths(meta.url, meta.method);
+        if (metaPath !== path.join(this.dir, name)) continue; // not where read() would look
+        if (meta.hasBody) {
+          const st = fs.statSync(body, { throwIfNoEntry: false });
+          if (!st || st.size !== meta.bytes) continue;
+        }
+        intact.add(`${meta.method} ${meta.url}`);
+      } catch { /* unreadable metadata is not an intact entry */ }
+    }
+    const missing = new Set();
+    for (const line of this._loadJournalSync()) {
+      if (!intact.has(line)) missing.add(line.slice(line.indexOf(' ') + 1));
+    }
+    const present = [];
+    for (const key of intact) {
+      if (key.startsWith('GET ')) present.push(key.slice(4));
+    }
+    return { present: present.sort(), missing: [...missing].sort() };
   }
 
   async write(url, bytes, headers, { method = 'GET', status = 200 } = {}) {
@@ -179,7 +316,7 @@ class RuntimeCache {
     let total = 0;
     let entries = 0;
     for (const name of await fsp.readdir(this.dir).catch(() => [])) {
-      if (name.endsWith(META_SUFFIX) || name.endsWith('.partial')) continue;
+      if (isBookkeeping(name)) continue;
       const st = await fsp.stat(path.join(this.dir, name)).catch(() => null);
       if (st) { total += st.size; entries++; }
     }
@@ -189,6 +326,7 @@ class RuntimeCache {
   async clear() {
     await fsp.rm(this.dir, { recursive: true, force: true });
     fs.mkdirSync(this.dir, { recursive: true });
+    this._journaled = new Set();
   }
 }
 
@@ -241,6 +379,15 @@ function installRuntimeCache(session, options = {}) {
     const hit = await cache.read(request.url, method);
     if (hit) {
       cache.stats.hits++;
+      // Awaited, not fire-and-forget: the journal line must be written before
+      // the response can contribute to a load the renderer then records. If
+      // the append fails the intact bytes are still served, and journalFailed
+      // (already set when this await settles) stops the renderer's receipt.
+      try {
+        await cache.noteHit(request.url, method);
+      } catch (e) {
+        log('runtime-cache journal write failed', String(e && e.message));
+      }
       return new Response(hit.meta.hasBody ? hit.bytes : null, {
         status: hit.meta.status || 200,
         headers: hit.meta.headers || {},
@@ -269,6 +416,15 @@ function installRuntimeCache(session, options = {}) {
     if (response.status === 404 && !isVersionPinned(url)) return response;
     if (response.status !== 200 && response.status !== 404) return response;
 
+    // Journal before the body is read: if the download or the write is cut
+    // short, the entry shows up as missing at the next start rather than
+    // silently never having existed.
+    try {
+      await cache.journal(request.url, method);
+    } catch (e) {
+      log('runtime-cache journal write failed', String(e && e.message));
+    }
+
     // A HEAD has no body to read or store.
     const buf = method === 'HEAD'
       ? Buffer.alloc(0)
@@ -292,6 +448,6 @@ function installRuntimeCache(session, options = {}) {
 }
 
 module.exports = {
-  installRuntimeCache, RuntimeCache, CACHEABLE_HOSTS, keyFor,
+  installRuntimeCache, RuntimeCache, CACHEABLE_HOSTS, keyFor, JOURNAL_NAME,
   isVersionPinned, isNeverCacheable, NEVER_CACHE,
 };
