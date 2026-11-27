@@ -624,6 +624,7 @@
     "rPackages.install": "Installieren",
     "rPackages.skip": "Überspringen",
     "rPackages.neverAsk": "Nicht erneut fragen",
+    "rPackages.downloading": "webR-Paket wird heruntergeladen: {package}",
     "runtime.prologDownloading": "Prolog-Laufzeitumgebung wird heruntergeladen…",
     "runtime.prologInitializing": "Prolog wird initialisiert...",
     "kernel.prologNotInitialized": "Prolog-Kernel nicht initialisiert",

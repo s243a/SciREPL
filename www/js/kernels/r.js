@@ -53,6 +53,14 @@ class RKernel {
     static PACKAGE_CONSENT_MESSAGE = 'SciREPL: downloading R packages requires the current privacy policy. '
         + 'Accept it when prompted, then run the cell again.';
 
+    // webr::install (0.5.4) announces every download with
+    // message(paste("Downloading webR package:", pkg)) -- an R message on
+    // stderr, not a webR JavaScript log line. The gated wrapper below re-emits
+    // it from this template, which JavaScript keeps in sync with the UI
+    // language. {package} is the R package name and is never translated.
+    static WEBR_DOWNLOAD_PREFIX = 'Downloading webR package: ';
+    static WEBR_DOWNLOAD_TEMPLATE_OPTION = 'scirepl.i18n.webr_downloading';
+
     // webR downloads packages in its worker, out of reach of a main-thread
     // fetch guard, and the worker cannot wait for the privacy dialog. So R
     // checks an option that JavaScript sets before every evaluation, and
@@ -63,12 +71,33 @@ class RKernel {
   original <- get("install", envir = asNamespace("webr"))
   if (isTRUE(attr(original, "scirepl_consent_gate"))) return(invisible(NULL))
   refusal <- ${JSON.stringify(RKernel.PACKAGE_CONSENT_MESSAGE)}
+  download_pattern <- ${JSON.stringify('^' + RKernel.WEBR_DOWNLOAD_PREFIX + '([^\n]+)\n$')}
+  # Re-emit webr's English download line from the UI-language template.
+  # Every other message, and this one whenever no usable template is set
+  # (English, or a locale without the key), passes through untouched.
+  localize_download <- function(cnd) {
+    template <- getOption(${JSON.stringify(RKernel.WEBR_DOWNLOAD_TEMPLATE_OPTION)})
+    if (!is.character(template) || length(template) != 1L || is.na(template)
+        || !grepl("{package}", template, fixed = TRUE)) return(invisible(NULL))
+    text <- conditionMessage(cnd)
+    if (!is.character(text) || length(text) != 1L
+        || !grepl(download_pattern, text, perl = TRUE)) return(invisible(NULL))
+    pkg <- sub(download_pattern, "\\\\1", text, perl = TRUE)
+    at <- regexpr("{package}", template, fixed = TRUE)
+    localized <- paste0(substr(template, 1L, at - 1L), pkg,
+      substr(template, at + nchar("{package}"), nchar(template)), "\\n")
+    # A template that renders the English text is left alone, so English
+    # output is byte-identical.
+    if (identical(localized, text)) return(invisible(NULL))
+    message(localized, appendLF = FALSE)
+    invokeRestart("muffleMessage")
+  }
   gated <- function(...) {
     if (!isTRUE(getOption("scirepl.package_network_consent"))) {
       stop(structure(class = c("scirepl_privacy_required", "error", "condition"),
         list(message = refusal, call = NULL)))
     }
-    original(...)
+    invisible(withCallingHandlers(original(...), message = localize_download))
   }
   attr(gated, "scirepl_consent_gate") <- TRUE
   utils::assignInNamespace("install", gated, ns = "webr")
@@ -89,11 +118,38 @@ class RKernel {
         if (!manager.hasCurrentPrivacyConsent()) throw new Error(window.t('kernelManager.privacyRequired'));
     }
 
-    /** Tell R whether package downloads are currently allowed. */
+    /**
+     * R code for the download-line template option: an R string literal, or
+     * NULL (webr's own English line) for English, a missing key, or anything
+     * that is not a single-line template with a {package} placeholder.
+     * Non-ASCII is written as \U{...} escapes so the literal is plain ASCII.
+     */
+    static downloadTemplateOption(template) {
+        if (typeof template !== 'string' || !template.includes('{package}')
+            || /[\r\n\0]/.test(template)
+            || template === RKernel.WEBR_DOWNLOAD_PREFIX + '{package}') return 'NULL';
+        let literal = '"';
+        for (const char of template) {
+            const code = char.codePointAt(0);
+            if (char === '"' || char === '\\') literal += '\\' + char;
+            else if (code >= 0x20 && code < 0x7f) literal += char;
+            else literal += `\\U{${code.toString(16)}}`;
+        }
+        return literal + '"';
+    }
+
+    /**
+     * Tell R whether package downloads are currently allowed, and how to word
+     * webr's download line in the current UI language. Runs before every
+     * evaluation, so a language change applies from the next cell.
+     */
     async _syncPackageConsent() {
         let allowed = false;
         try { allowed = window.kernelManager?.hasCurrentPrivacyConsent?.() === true; } catch (_) {}
-        await this._webr.evalRVoid(`options(scirepl.package_network_consent = ${allowed ? 'TRUE' : 'FALSE'})`);
+        let template = null;
+        try { template = window.t?.('rPackages.downloading'); } catch (_) {}
+        await this._webr.evalRVoid(`options(scirepl.package_network_consent = ${allowed ? 'TRUE' : 'FALSE'}, `
+            + `${RKernel.WEBR_DOWNLOAD_TEMPLATE_OPTION} = ${RKernel.downloadTemplateOption(template)})`);
     }
 
     /**

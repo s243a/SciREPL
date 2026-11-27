@@ -608,6 +608,7 @@
     "rPackages.install": "설치",
     "rPackages.skip": "건너뛰기",
     "rPackages.neverAsk": "다시 묻지 않음",
+    "rPackages.downloading": "webR 패키지 다운로드 중: {package}",
     "runtime.prologDownloading": "Prolog 런타임 다운로드 중…",
     "runtime.prologInitializing": "Prolog 초기화 중…",
     "kernel.prologNotInitialized": "Prolog 커널이 초기화되지 않음",

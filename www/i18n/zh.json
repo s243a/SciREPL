@@ -608,6 +608,7 @@
     "rPackages.install": "安装",
     "rPackages.skip": "跳过",
     "rPackages.neverAsk": "不再询问",
+    "rPackages.downloading": "正在下载 webR 包：{package}",
     "runtime.prologDownloading": "正在下载 Prolog 运行环境…",
     "runtime.prologInitializing": "正在初始化 Prolog…",
     "kernel.prologNotInitialized": "Prolog 内核未初始化",
