@@ -29,8 +29,12 @@
  *   - Only `GET` is cached, only `200`, and never a range request — a partial
  *     body written as if whole is a corrupt cache entry, which is worse than no
  *     cache.
- *   - Nothing is exposed to the renderer. This is main-process only and adds no
- *     IPC surface, so it does not widen the boundary described in security.js.
+ *   - Nothing is exposed to the renderer beyond two static facts in the
+ *     existing getDistributionInfo() result (ipc.js): whether this cache is
+ *     active and its host allowlist. The renderer uses them only to remember
+ *     which runtimes it has loaded, so the download prompt is not repeated.
+ *     No new IPC channel, no paths, no contents, so it does not widen the
+ *     boundary described in security.js.
  */
 
 const { net } = require('electron');

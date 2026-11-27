@@ -36,6 +36,42 @@ const { ENGLISH, interpolate } = require('./native-i18n');
 
 const REPO_URL = 'https://github.com/s243a/SciREPL';
 
+/**
+ * localStorage prefix of the renderer's "this runtime loaded through the
+ * shell cache" receipts (www/js/kernel_manager.js,
+ * KernelManager.ELECTRON_RUNTIME_RECEIPT_PREFIX). Clearing the cache must clear
+ * them too, or the download prompt would be skipped for runtimes no longer on
+ * disk.
+ */
+const RUNTIME_RECEIPT_PREFIX = 'scirepl_electron_runtime_receipt:';
+
+/**
+ * A fixed script, no renderer- or user-supplied text: remove every receipt key
+ * from the app window's localStorage and report how many went.
+ */
+const CLEAR_RECEIPTS_SCRIPT = `(() => {
+  const prefix = ${JSON.stringify(RUNTIME_RECEIPT_PREFIX)};
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith(prefix)) keys.push(key);
+  }
+  keys.forEach((key) => localStorage.removeItem(key));
+  return keys.length;
+})()`;
+
+/** Best effort: a missing or crashed window has no receipts to keep. */
+async function clearRuntimeReceipts(win) {
+  if (!win || (typeof win.isDestroyed === 'function' && win.isDestroyed())) return 0;
+  const wc = win.webContents;
+  if (!wc || (typeof wc.isDestroyed === 'function' && wc.isDestroyed())) return 0;
+  try {
+    return await wc.executeJavaScript(CLEAR_RECEIPTS_SCRIPT, false);
+  } catch (_) {
+    return 0;
+  }
+}
+
 function formatBytes(bytes, locale = 'en') {
   const units = ['B', 'kB', 'MB', 'GB'];
   if (!Number.isFinite(bytes) || bytes <= 0) {
@@ -108,6 +144,9 @@ function createMenuTemplate(deps) {
 
     const { bytes, entries } = await cache.size();
     if (entries === 0) {
+      // Files already gone (e.g. deleted by hand): drop any stale receipts so
+      // the prompt comes back.
+      await clearRuntimeReceipts(win);
       await hostDialog.showMessageBox(win, {
         type: 'info',
         title: t('electron.cache.clearTitle'),
@@ -130,6 +169,7 @@ function createMenuTemplate(deps) {
     if (response !== 1) return;
 
     await cache.clear();
+    await clearRuntimeReceipts(win);
     await hostDialog.showMessageBox(win, {
       type: 'info',
       title: t('electron.cache.clearTitle'),
@@ -246,4 +286,6 @@ module.exports = {
   formatBytes,
   mnemonic,
   REPO_URL,
+  RUNTIME_RECEIPT_PREFIX,
+  CLEAR_RECEIPTS_SCRIPT,
 };

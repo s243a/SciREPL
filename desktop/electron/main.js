@@ -22,7 +22,7 @@ const {
 } = require('./protocol');
 const { applyWebContentsPolicy } = require('./security');
 const { registerIpcHandlers } = require('./ipc');
-const { installRuntimeCache } = require('./runtime-cache');
+const { installRuntimeCache, CACHEABLE_HOSTS } = require('./runtime-cache');
 const { installApplicationMenu } = require('./menu');
 const { createNativeI18n, SUPPORTED_LOCALES } = require('./native-i18n');
 
@@ -322,6 +322,10 @@ app.whenReady().then(() => {
     buildInfo: readBuildInfo(),
     supportedLocales: SUPPORTED_LOCALES,
     setLocale: setNativeLocale,
+    // Static for this process: lets the renderer remember which CDN runtimes
+    // it has loaded through this cache (see menu.js clearCache for the reset).
+    runtimeCache: !!runtimeCache,
+    runtimeCacheHosts: runtimeCache ? [...CACHEABLE_HOSTS] : [],
   });
 
   createWindow();

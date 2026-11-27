@@ -34,6 +34,8 @@ const SUITES = [
   { name: 'packaged', file: './packaged.test.mjs', unit: false, optIn: true },
   // Needs live network for its online half, so it is opt-in too.
   { name: 'runtime-cache', file: './runtime-cache.test.mjs', unit: false, optIn: true },
+  // Also needs live network: download once, then no prompt after a restart.
+  { name: 'runtime-receipt', file: './runtime-receipt.test.mjs', unit: false, optIn: true },
 ];
 
 const argv = process.argv.slice(2);

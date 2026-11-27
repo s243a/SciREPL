@@ -494,7 +494,6 @@ class KernelManager {
      * mistaken for a complete cached runtime on the next launch.
      */
     async markRuntimeCacheComplete(language) {
-        if (typeof caches === 'undefined' || typeof Response === 'undefined') return false;
         const entry = this._pendingRuntimeSources[language]
             || this._runtimeSessionSources[language];
         const expected = this._expectedRuntimeCacheVersion(language);
@@ -507,6 +506,15 @@ class KernelManager {
             source = new URL(entry.source, base).href;
         } catch (_) { return false; }
         if (!this._runtimeCacheUrlMatches(language, expected, source)) return false;
+
+        // Desktop shell: the Cache API is always empty under app://, so the
+        // receipt lives in localStorage instead (see _electronRuntimeCache).
+        const electronCache = await this._electronRuntimeCache();
+        if (electronCache) {
+            return this._writeElectronRuntimeReceipt(language, expected, source, electronCache);
+        }
+
+        if (typeof caches === 'undefined' || typeof Response === 'undefined') return false;
 
         try {
             const cache = await caches.open(KernelManager.CDN_CACHE);
@@ -547,10 +555,95 @@ class KernelManager {
         }
     }
 
+    /**
+     * The Electron desktop shell caches CDN runtimes in its own data directory
+     * (desktop/electron/runtime-cache.js), not in the Cache API, which is
+     * always empty under the app:// origin. The shell reports, as a static
+     * build/launch fact in getDistributionInfo(), whether that cache is active
+     * and which hosts it stores. Resolves to `{ hosts: Set }` when it is, or
+     * null everywhere else (PWA, Android, Electron with SCIREPL_RUNTIME_CACHE=0
+     * or a cache that failed to install), in which case the Cache API path
+     * below is used unchanged.
+     */
+    _electronRuntimeCache() {
+        if (!this._electronRuntimeCachePromise) {
+            const host = (typeof window !== 'undefined') ? window.sciREPLPlatform : null;
+            this._electronRuntimeCachePromise = (async () => {
+                if (!host || typeof host.getDistributionInfo !== 'function') return null;
+                try {
+                    const info = await host.getDistributionInfo();
+                    if (info?.container !== 'electron' || info.runtimeCache !== true
+                        || !Array.isArray(info.runtimeCacheHosts)) return null;
+                    return { hosts: new Set(info.runtimeCacheHosts.map((h) => String(h).toLowerCase())) };
+                } catch (_) {
+                    return null;
+                }
+            })();
+        }
+        return this._electronRuntimeCachePromise;
+    }
+
+    _electronRuntimeReceiptKey(language, version) {
+        return `${KernelManager.ELECTRON_RUNTIME_RECEIPT_PREFIX}${language}:${version}`;
+    }
+
+    _electronCacheStoresSource(electronCache, source) {
+        try { return electronCache.hosts.has(new URL(source).hostname.toLowerCase()); }
+        catch (_) { return false; }
+    }
+
+    /**
+     * Record that this exact runtime/version loaded successfully through the
+     * shell's on-disk cache. Only sources on a host the shell actually caches
+     * qualify: a runtime fetched from any other host (e.g. Prolog's
+     * github.io CDN) is not on disk, so it keeps prompting.
+     *
+     * Trade-off, accepted deliberately: the receipt is not re-validated
+     * against the files on disk (the renderer cannot see them and the IPC
+     * surface stays as it is). If someone deletes userData/runtime-cache by
+     * hand, the stale receipt means an online launch re-downloads the runtime
+     * without asking first, and an offline launch fails to load it exactly as
+     * it would without a receipt. Runtimes → Clear downloaded runtimes… removes
+     * the receipts together with the files, so the normal path stays honest.
+     */
+    _writeElectronRuntimeReceipt(language, version, source, electronCache) {
+        if (!this._electronCacheStoresSource(electronCache, source)) return false;
+        try {
+            localStorage.setItem(this._electronRuntimeReceiptKey(language, version), JSON.stringify({
+                schemaVersion: 1,
+                complete: true,
+                language,
+                version,
+                source,
+                completedAt: new Date().toISOString(),
+            }));
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    _hasElectronRuntimeReceipt(language, version, electronCache) {
+        try {
+            const raw = localStorage.getItem(this._electronRuntimeReceiptKey(language, version));
+            if (!raw) return false;
+            const receipt = JSON.parse(raw);
+            return receipt?.schemaVersion === 1 && receipt.complete === true
+                && receipt.language === language && receipt.version === version
+                && typeof receipt.source === 'string'
+                && this._runtimeCacheUrlMatches(language, version, receipt.source)
+                && this._electronCacheStoresSource(electronCache, receipt.source);
+        } catch (_) {
+            return false;
+        }
+    }
+
     async _hasCompleteCachedRuntime(language) {
-        if (typeof caches === 'undefined') return false;
         const version = this._expectedRuntimeCacheVersion(language);
         if (!version) return false;
+        const electronCache = await this._electronRuntimeCache();
+        if (electronCache) return this._hasElectronRuntimeReceipt(language, version, electronCache);
+        if (typeof caches === 'undefined') return false;
         try {
             const cache = await caches.open(KernelManager.CDN_CACHE);
             const response = await cache.match(this._runtimeCacheMarkerUrl(language, version));
@@ -1029,6 +1122,10 @@ class KernelManager {
 // Kernels that require CDN downloads
 KernelManager.CDN_KERNELS = new Set(['python', 'prolog', 'r', 'lua', 'clojurescript']);
 KernelManager.CDN_CACHE = 'scirepl-cdn-v3';
+// localStorage key prefix for desktop (Electron) runtime receipts. The shell's
+// Runtimes → Clear downloaded runtimes… menu removes keys with this prefix
+// (desktop/electron/menu.js), so keep the two in sync.
+KernelManager.ELECTRON_RUNTIME_RECEIPT_PREFIX = 'scirepl_electron_runtime_receipt:';
 KernelManager.PRIVACY_POLICY_REVISION_KEY = 'scirepl_privacy_accepted_revision';
 KernelManager.PRIVACY_POLICY_REVISION = '2026-08-catalog-sources-v1';
 

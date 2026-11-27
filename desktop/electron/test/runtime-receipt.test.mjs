@@ -1,0 +1,231 @@
+/**
+ * runtime-receipt.test.mjs — a runtime downloaded once must not prompt again.
+ *
+ * MSIX pilot run 4: R (and Lua) were downloaded online, the app restarted, and
+ * the download confirmation came back, even offline, although the runtime was
+ * on disk in userData/runtime-cache/ and loaded from there in about a second
+ * once Download was clicked. The pre-prompt check (`_hasCompleteCachedRuntime`)
+ * looked for a receipt in the Cache API, which is always empty under app://.
+ *
+ * The renderer now keeps an Electron-only receipt in localStorage, written
+ * only when the shell reports its runtime cache active (getDistributionInfo
+ * `runtimeCache`). This suite checks the whole loop with Lua (~200 kB, rather
+ * than R's ~50 MB; the receipt logic is language-independent):
+ *
+ *   1. online: Lua downloads and runs, and a receipt is written;
+ *   2. restart, offline, auto-download off: no prompt, Lua loads from disk;
+ *   3. Runtimes → Clear downloaded runtimes… removes the receipts, and after a
+ *      restart the prompt is back;
+ *   4. with SCIREPL_RUNTIME_CACHE=0 no receipt is written.
+ *
+ * Needs network for the online half, so it is opt-in:
+ *
+ *   node desktop/electron/test/run-all.mjs runtime-receipt
+ */
+
+import { mkdtempSync, rmSync, readdirSync, existsSync, mkdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { launchShell, createReporter, waitForAppReady } from './harness.mjs';
+
+const PREFIX = 'scirepl_electron_runtime_receipt:';
+const LUA = { lang: 'lua', code: 'print(6*7)' };
+
+/** Profiles go under SCIREPL_TEST_TMP when set (the default tmpdir otherwise). */
+function makeProfile(tag) {
+  const base = process.env.SCIREPL_TEST_TMP || tmpdir();
+  mkdirSync(base, { recursive: true });
+  return mkdtempSync(path.join(base, `scirepl-receipt-${tag}-`));
+}
+
+/** Cut the network at the session level, leaving app:// untouched. */
+async function goOffline(shell) {
+  await shell.electronApp.evaluate(async ({ session }) => {
+    await session.defaultSession.setProxy({ proxyRules: 'http=127.0.0.1:1;https=127.0.0.1:1' });
+    await session.defaultSession.closeAllConnections();
+  });
+}
+
+async function runKernel(page, { lang, code }, timeoutMs = 90_000) {
+  return page.evaluate(async ({ lang, code, timeoutMs }) => {
+    try {
+      await Promise.race([
+        window.kernelManager.ensureReady(lang),
+        new Promise((_, rj) => setTimeout(() => rj(new Error(`timed out after ${timeoutMs}ms`)), timeoutMs)),
+      ]);
+      const r = await window.kernelManager.execute(code, lang);
+      return { ok: !r.error, out: ((r.stdout || '') + (r.result?.content || '')).trim(), error: r.error || null };
+    } catch (e) {
+      return { ok: false, error: String(e && e.message).slice(0, 160) };
+    }
+  }, { lang, code, timeoutMs });
+}
+
+const receiptKeys = (page) => page.evaluate((prefix) => Object.keys(localStorage)
+  .filter((k) => k.startsWith(prefix)), PREFIX);
+
+const cachedCheck = (page, lang) => page.evaluate((l) => window.kernelManager._hasCompleteCachedRuntime(l), lang);
+
+/** Turn the prompt back on: the harness primes auto-download for kernel suites. */
+const disableAutoDownload = (page) => page.evaluate(() => localStorage.removeItem('scirepl_auto_download'));
+
+/** Whether the confirmation (with its Download/Cancel actions) is on screen. */
+const promptVisible = (page) => page.evaluate(() => {
+  const modal = document.getElementById('runtime-download-modal');
+  const actions = document.getElementById('runtime-download-actions');
+  return !!modal && !modal.classList.contains('hidden')
+    && !!actions && !actions.classList.contains('hidden');
+});
+
+function cacheEntries(userDataDir) {
+  const dir = path.join(userDataDir, 'runtime-cache');
+  if (!existsSync(dir)) return 0;
+  return readdirSync(dir).filter((f) => !f.endsWith('.meta.json') && !f.endsWith('.partial')).length;
+}
+
+/** Drive the real native menu item, auto-confirming its dialogs. */
+async function clickClearDownloadedRuntimes(shell) {
+  return shell.electronApp.evaluate(async ({ Menu, dialog }) => {
+    dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false });
+    const find = (menu) => {
+      for (const item of (menu && menu.items) || []) {
+        if (/Clear downloaded runtimes/.test(item.label || '')) return item;
+        const sub = find(item.submenu);
+        if (sub) return sub;
+      }
+      return null;
+    };
+    const item = find(Menu.getApplicationMenu());
+    if (!item) return false;
+    item.click();
+    return true;
+  });
+}
+
+async function waitFor(fn, timeoutMs, stepMs = 250) {
+  const end = Date.now() + timeoutMs;
+  let last;
+  while (Date.now() < end) {
+    last = await fn();
+    if (last) return last;
+    await new Promise((res) => setTimeout(res, stepMs));
+  }
+  return last;
+}
+
+export default async function run() {
+  const r = createReporter('runtime-receipt');
+
+  /* ---------------- cache on: download, restart offline, clear ---------------- */
+  const userDataDir = makeProfile('on');
+  try {
+    // 1. online
+    let shell = await launchShell({ userDataDir });
+    try {
+      await waitForAppReady(shell.page);
+      const dist = await shell.page.evaluate(() => window.sciREPLPlatform.getDistributionInfo());
+      r.log('getDistributionInfo reports the runtime cache active',
+        dist.runtimeCache === true && dist.runtimeCacheHosts.includes('cdn.jsdelivr.net'),
+        JSON.stringify({ runtimeCache: dist.runtimeCache, hosts: dist.runtimeCacheHosts }));
+      r.log('fresh profile: Lua is not reported cached', (await cachedCheck(shell.page, 'lua')) === false);
+      const online = await runKernel(shell.page, LUA);
+      r.log('Lua downloads and runs online', online.ok && /42/.test(online.out || ''),
+        online.error || online.out);
+      const keys = await receiptKeys(shell.page);
+      r.log('a receipt for Lua at its expected version is written',
+        keys.length === 1 && keys[0].startsWith(`${PREFIX}lua:`), JSON.stringify(keys));
+    } finally {
+      await shell.close();
+    }
+    r.log('Lua bytes are in userData/runtime-cache', cacheEntries(userDataDir) > 0,
+      `${cacheEntries(userDataDir)} entries`);
+
+    // 2. restart, offline, prompt enabled
+    shell = await launchShell({ userDataDir });
+    try {
+      await waitForAppReady(shell.page);
+      await goOffline(shell);
+      await disableAutoDownload(shell.page);
+      r.log('after restart offline, _hasCompleteCachedRuntime(lua) is true',
+        (await cachedCheck(shell.page, 'lua')) === true);
+
+      const started = shell.page.evaluate(() => window.kernelManager.ensureReady('lua')
+        .then(() => 'ready', (e) => `rejected: ${e && e.message}`));
+      let promptSeen = false;
+      const outcome = await Promise.race([
+        started,
+        (async () => {
+          const end = Date.now() + 30_000;
+          while (Date.now() < end) {
+            if (await promptVisible(shell.page)) { promptSeen = true; return 'prompted'; }
+            await new Promise((res) => setTimeout(res, 200));
+          }
+          return 'timeout';
+        })(),
+      ]);
+      r.log('no download confirmation is shown; Lua becomes ready without a click',
+        outcome === 'ready' && !promptSeen, outcome);
+      const offline = await runKernel(shell.page, LUA, 30_000);
+      r.log('Lua runs offline from the on-disk cache', offline.ok && /42/.test(offline.out || ''),
+        offline.error || offline.out);
+
+      // 3. clear through the real menu
+      const clicked = await clickClearDownloadedRuntimes(shell);
+      r.log('Runtimes → Clear downloaded runtimes… menu item found and clicked', clicked === true);
+      const gone = await waitFor(async () => (await receiptKeys(shell.page)).length === 0, 15_000);
+      r.log('clearing removes the renderer receipts', gone === true,
+        JSON.stringify(await receiptKeys(shell.page)));
+    } finally {
+      await shell.close();
+    }
+    r.log('clearing removes the on-disk runtime files', cacheEntries(userDataDir) === 0,
+      `${cacheEntries(userDataDir)} entries`);
+
+    shell = await launchShell({ userDataDir });
+    try {
+      await waitForAppReady(shell.page);
+      await disableAutoDownload(shell.page);
+      r.log('after clearing and restarting, Lua is not reported cached',
+        (await cachedCheck(shell.page, 'lua')) === false);
+      shell.page.evaluate(() => window.kernelManager.ensureReady('lua').catch(() => {})).catch(() => {});
+      const shown = await waitFor(() => promptVisible(shell.page), 15_000);
+      r.log('the download confirmation returns after clearing', shown === true);
+    } finally {
+      await shell.close();
+    }
+  } finally {
+    try { rmSync(userDataDir, { recursive: true, force: true }); } catch { /* ignore */ }
+  }
+
+  /* ---------------- cache off: no receipt ---------------- */
+  const offDir = makeProfile('off');
+  try {
+    const shell = await launchShell({ userDataDir: offDir, env: { SCIREPL_RUNTIME_CACHE: '0' } });
+    try {
+      await waitForAppReady(shell.page);
+      const dist = await shell.page.evaluate(() => window.sciREPLPlatform.getDistributionInfo());
+      r.log('SCIREPL_RUNTIME_CACHE=0: getDistributionInfo reports the cache off',
+        dist.runtimeCache === false && dist.runtimeCacheHosts.length === 0,
+        JSON.stringify({ runtimeCache: dist.runtimeCache, hosts: dist.runtimeCacheHosts }));
+      const online = await runKernel(shell.page, LUA);
+      r.log('SCIREPL_RUNTIME_CACHE=0: Lua still runs online', online.ok && /42/.test(online.out || ''),
+        online.error || online.out);
+      r.log('SCIREPL_RUNTIME_CACHE=0: no receipt is written',
+        (await receiptKeys(shell.page)).length === 0);
+      r.log('SCIREPL_RUNTIME_CACHE=0: Lua is not reported cached (prompt as before)',
+        (await cachedCheck(shell.page, 'lua')) === false);
+    } finally {
+      await shell.close();
+    }
+    r.log('SCIREPL_RUNTIME_CACHE=0: nothing written to userData/runtime-cache',
+      cacheEntries(offDir) === 0);
+  } finally {
+    try { rmSync(offDir, { recursive: true, force: true }); } catch { /* ignore */ }
+  }
+
+  return r.summary();
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  run().then((s) => process.exit(s.failed > 0 ? 1 : 0));
+}
