@@ -35,6 +35,10 @@ const SUITES = [
   { name: 'packaged', file: './packaged.test.mjs', unit: false, optIn: true },
   // Needs live network for its online half, so it is opt-in too.
   { name: 'runtime-cache', file: './runtime-cache.test.mjs', unit: false, optIn: true },
+  // Also needs live network: download once, then no prompt after a restart.
+  { name: 'runtime-receipt', file: './runtime-receipt.test.mjs', unit: false, optIn: true },
+  // The same for R from a pre-journal (pilot run 4) cache: ~50 MB download.
+  { name: 'runtime-receipt-r', file: './runtime-receipt-r.test.mjs', unit: false, optIn: true },
 ];
 
 const argv = process.argv.slice(2);

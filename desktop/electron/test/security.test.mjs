@@ -42,6 +42,12 @@ export default async function run() {
       dist && dist.edition === 'free' && dist.container === 'electron', JSON.stringify(dist));
     r.log('an unpackaged run reports itself as unpackaged',
       dist && dist.packaged === false, String(dist && dist.packaged));
+    r.log('getDistributionInfo reports the shell runtime cache as active, with its hosts',
+      dist && dist.runtimeCache === true && Array.isArray(dist.runtimeCacheHosts)
+        && dist.runtimeCacheHosts.includes('cdn.jsdelivr.net'),
+      JSON.stringify({ runtimeCache: dist && dist.runtimeCache, hosts: dist && dist.runtimeCacheHosts }));
+    r.log('getDistributionInfo reports no journal failure at startup',
+      dist && dist.runtimeCacheJournalFailed === false, String(dist && dist.runtimeCacheJournalFailed));
 
     /* ------- in-app navigation must still be PERMITTED (regression) ------- */
     //

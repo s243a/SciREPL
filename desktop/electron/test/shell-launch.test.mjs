@@ -106,6 +106,46 @@ export default async function run() {
       cspApplied.includes("frame-ancestors 'none'") && cspApplied.includes("object-src 'none'"),
       cspApplied.slice(0, 120));
 
+    // --- cell-language dropdown stays readable when a language is active ---
+    //
+    // Windows paints the native popup's options with the SELECT's background.
+    // The -active rules make that a 10% tint, so the options need their own
+    // opaque background or the open list is near-white on near-white (MSIX
+    // pilot run 4, R active). Checked in both built-in themes.
+    const optionBackgrounds = await page.evaluate(() => {
+      const sel = document.getElementById('lang-selector');
+      if (!sel || !sel.options.length) return null;
+      const root = document.documentElement;
+      const savedTheme = root.getAttribute('data-theme');
+      const savedClass = sel.className;
+      const alpha = (c) => {
+        const m = String(c).match(/rgba?\(([^)]+)\)/);
+        if (!m) return null;
+        const parts = m[1].split(/[ ,/]+/).filter(Boolean);
+        return parts.length >= 4 ? Number(parts[3]) : 1;
+      };
+      const out = [];
+      try {
+        for (const theme of ['dark', 'light']) {
+          root.setAttribute('data-theme', theme);
+          for (const active of ['r-active', 'lua-active']) {
+            sel.className = active;
+            const bg = getComputedStyle(sel.options[0]).backgroundColor;
+            out.push({ theme, active, bg, alpha: alpha(bg) });
+          }
+        }
+      } finally {
+        sel.className = savedClass;
+        if (savedTheme === null) root.removeAttribute('data-theme');
+        else root.setAttribute('data-theme', savedTheme);
+      }
+      return out;
+    });
+    r.log('language dropdown options have an opaque background with a language active (dark + light)',
+      Array.isArray(optionBackgrounds) && optionBackgrounds.length === 4
+        && optionBackgrounds.every((o) => o.alpha === 1),
+      JSON.stringify(optionBackgrounds));
+
     // --- reload ---
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 120_000 });
     await waitForAppReady(page);

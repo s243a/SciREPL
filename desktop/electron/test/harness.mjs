@@ -122,7 +122,7 @@ export async function launchShell(opts = {}) {
     executablePath: electronExecutable(),
     appArgs: [ELECTRON_DIR],
     // Development runs are pointed at the repository's prepared tree.
-    env: { SCIREPL_WWW: opts.www || WWW_ROOT },
+    env: { ...opts.env, SCIREPL_WWW: opts.www || WWW_ROOT },
     userDataPrefix: 'scirepl-electron-',
   });
 }
