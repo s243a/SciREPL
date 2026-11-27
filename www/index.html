@@ -181,89 +181,89 @@
             <p><a class="vfs-btn" href="open-source-licenses.html" data-i18n="help.openSourceLicenses">Open-source licences</a></p>
 
             <h3 data-i18n="help.quickStartPython">Quick Start — Python</h3>
-            <pre dir="ltr" data-example-lang="python"><code># Basic math
+            <pre dir="ltr" data-example-lang="python"><code># <span data-i18n="help.exampleComment.basicMath" data-i18n-dir="ltr">Basic math</span>
 2 + 2
 
 # NumPy
 import numpy as np
 np.linspace(0, 10, 5)
 
-# Plotly chart (interactive)
+# <span data-i18n="help.exampleComment.plotlyChartInteractive" data-i18n-dir="ltr">Plotly chart (interactive)</span>
 x = np.linspace(0, 2*np.pi, 50)
 plot(x, np.sin(x))
 
-# Matplotlib (install once, then use)
+# <span data-i18n="help.exampleComment.matplotlibInstallOnce" data-i18n-dir="ltr">Matplotlib (install once, then use)</span>
 %pip install matplotlib
 import matplotlib.pyplot as plt
 plt.plot([1, 4, 2, 3])
 plt.title("Matplotlib")
 plt.show()
 
-# SymPy (LaTeX rendering)
+# <span data-i18n="help.exampleComment.sympyLatexRendering" data-i18n-dir="ltr">SymPy (LaTeX rendering)</span>
 from sympy import symbols, sqrt, solve
 a, b, c, x = symbols('a b c x')
 solve(a*x**2 + b*x + c, x)
 
-# Suppress output with ;
+# <span data-i18n="help.exampleComment.suppressOutput" data-i18n-dir="ltr">Suppress output with ;</span>
 big_array = np.arange(1000);</code></pre>
 
             <h3 data-i18n="help.installingPackages">Installing Packages</h3>
             <p data-i18n-html="help.installPurePythonPackagesFrom">Install pure-Python packages from PyPI with <code>%pip install</code>:</p>
             <pre dir="ltr" data-example-lang="python"><code>%pip install requests
 
-# Then use it
+# <span data-i18n="help.exampleComment.thenUseIt" data-i18n-dir="ltr">Then use it</span>
 import requests
 r = requests.get('https://api.github.com')
 print(r.status_code)</code></pre>
             <p data-i18n-html="help.noteOnlyPurePythonPackages"><em>Note: Only pure-Python packages are supported. Packages with C extensions (e.g. psutil) require pre-compiled WASM wheels.</em></p>
 
             <p data-i18n-html="help.installRPackagesInstallPackages">Install R packages with <code>install.packages()</code> or <code>%install</code>:</p>
-            <pre dir="ltr" data-example-lang="r"><code># Standard R syntax (works out of the box)
+            <pre dir="ltr" data-example-lang="r"><code># <span data-i18n="help.exampleComment.standardRSyntax" data-i18n-dir="ltr">Standard R syntax (works out of the box)</span>
 install.packages("jsonlite")
 library(jsonlite)
 
-# Or use the %install shortcut
+# <span data-i18n="help.exampleComment.installShortcut" data-i18n-dir="ltr">Or use the %install shortcut</span>
 %install dplyr</code></pre>
             <p data-i18n-html="help.noteOnlyRPackagesCompiled"><em>Note: Only R packages compiled to WebAssembly are available. See <a href="https://repo.r-wasm.org/" target="_blank" rel="noopener">repo.r-wasm.org</a> for the package list.</em></p>
 
             <h3 data-i18n="help.quickStartR">Quick Start — R</h3>
             <p data-i18n="help.switchRUsingLanguageSelector">Switch to R using the language selector. The webR runtime (~50 MB) downloads on first use and is cached.</p>
-            <pre dir="ltr" data-example-lang="r"><code># Basic math
+            <pre dir="ltr" data-example-lang="r"><code># <span data-i18n="help.exampleComment.basicMath" data-i18n-dir="ltr">Basic math</span>
 mean(c(10, 20, 30))
 
-# Vectors and stats
+# <span data-i18n="help.exampleComment.vectorsAndStats" data-i18n-dir="ltr">Vectors and stats</span>
 x <- rnorm(100)
 summary(x)
 
-# Static plot (PNG)
-plot(1:10, (1:10)^2, main = "Quadratic")
+# <span data-i18n="help.exampleComment.staticPlotPng" data-i18n-dir="ltr">Static plot (PNG)</span>
+plot(1:10, (1:10)^2, main = "<span data-i18n="help.exampleLabel.quadratic" data-i18n-dir="ltr">Quadratic</span>")
 
-# Interactive Plotly chart
-plotly(1:50, sin(1:50 / 5), title = "Sine Wave")
+# <span data-i18n="help.exampleComment.interactivePlotlyChart" data-i18n-dir="ltr">Interactive Plotly chart</span>
+plotly(1:50, sin(1:50 / 5), title = "<span data-i18n="help.exampleLabel.sineWave" data-i18n-dir="ltr">Sine Wave</span>")
 
-# Multi-trace interactive chart
+# <span data-i18n="help.exampleComment.multiTraceChart" data-i18n-dir="ltr">Multi-trace interactive chart</span>
 mplotly(
   traces = list(
     list(x = 1:10, y = (1:10)^2, name = "x²"),
     list(x = 1:10, y = (1:10)^3, name = "x³")
   ),
-  title = "Power Functions"
+  title = "<span data-i18n="help.exampleLabel.powerFunctions" data-i18n-dir="ltr">Power Functions</span>"
 )
 
-# Cross-kernel file sharing
+# <span data-i18n="help.exampleComment.crossKernelFileSharing" data-i18n-dir="ltr">Cross-kernel file sharing</span>
 sharedfs_write("/shared/data/from_r.txt", "Hello from R!")
 sharedfs_list("/shared/data")</code></pre>
 
             <h3 data-i18n="help.quickStartProlog">Quick Start — Prolog</h3>
             <p data-i18n="help.switchPrologUsingLanguageSelector">Switch to Prolog using the language selector (Py → PL).</p>
-            <pre dir="ltr" data-example-lang="prolog"><code>% Assert facts
+            <pre dir="ltr" data-example-lang="prolog"><code>% <span data-i18n="help.exampleComment.assertFacts" data-i18n-dir="ltr">Assert facts</span>
 assert(parent(tom, bob)).
 assert(parent(bob, ann)).
 
-% Query
+% <span data-i18n="help.exampleComment.query" data-i18n-dir="ltr">Query</span>
 parent(tom, X).
 
-% Rules
+% <span data-i18n="help.exampleComment.rules" data-i18n-dir="ltr">Rules</span>
 assert((grandparent(X,Z) :-
     parent(X,Y), parent(Y,Z))).
 grandparent(tom, Z).</code></pre>
@@ -289,12 +289,12 @@ grandparent(tom, Z).</code></pre>
                 <li data-i18n-html="help.bashBrushWasmShellHas"><strong>Bash</strong> — The brush-wasm shell has a built-in bridge to SharedVFS.</li>
             </ul>
 
-            <pre dir="ltr" data-example-lang="python"><code># Python — write a CSV to the shared folder
+            <pre dir="ltr" data-example-lang="python"><code># Python — <span data-i18n="help.exampleComment.writeCsvSharedFolder" data-i18n-dir="ltr">write a CSV to the shared folder</span>
 with open("/shared/data/results.csv", "w") as f:
     f.write("x,y\n1,2\n3,4\n")</code></pre>
-            <pre dir="ltr" data-example-lang="r"><code># R — read it back
+            <pre dir="ltr" data-example-lang="r"><code># R — <span data-i18n="help.exampleComment.readItBack" data-i18n-dir="ltr">read it back</span>
 sharedfs_read("/shared/data/results.csv")</code></pre>
-            <pre dir="ltr" data-example-lang="prolog"><code>% Prolog — consult a shared knowledge base
+            <pre dir="ltr" data-example-lang="prolog"><code>% Prolog — <span data-i18n="help.exampleComment.consultSharedKnowledgeBase" data-i18n-dir="ltr">consult a shared knowledge base</span>
 :- consult('/shared/lib/prolog/kb.pl').</code></pre>
 
             <p data-i18n-html="help.packagesBundlesAmpWorkbooksWhen"><strong>Packages, bundles &amp; workbooks:</strong> When you install an item from Browse Packages, Bundles &amp; Workbooks, bundle dependencies are installed first and files with <code>/shared/</code> destination paths are written to SharedVFS automatically. Package files targeting a specific kernel (e.g., Prolog modules at <code>/user/</code>) go to that kernel's own filesystem.</p>
@@ -323,11 +323,11 @@ sharedfs_read("/shared/data/results.csv")</code></pre>
 
             <h3 data-i18n="help.quickStartLua">Quick Start — Lua</h3>
             <p data-i18n="help.switchLuaUsingLanguageSelector">Switch to Lua using the language selector. The Fengari runtime (~200 KB) downloads on first use from CDN.</p>
-            <pre dir="ltr" data-example-lang="lua"><code>-- Tables (arrays and dictionaries)
+            <pre dir="ltr" data-example-lang="lua"><code>-- <span data-i18n="help.exampleComment.luaTables" data-i18n-dir="ltr">Tables (arrays and dictionaries)</span>
 t = {10, 20, 30}
 print(#t, t[1])
 
--- Closures
+-- <span data-i18n="help.exampleComment.closures" data-i18n-dir="ltr">Closures</span>
 function counter(start)
     local n = start
     return function() n = n + 1; return n end
@@ -335,7 +335,7 @@ end
 c = counter(0)
 print(c(), c(), c())
 
--- Coroutines
+-- <span data-i18n="help.exampleComment.coroutines" data-i18n-dir="ltr">Coroutines</span>
 co = coroutine.create(function()
     for i = 1, 3 do
         coroutine.yield(i * i)
@@ -344,18 +344,18 @@ end)
 print(coroutine.resume(co))
 print(coroutine.resume(co))
 
--- Pattern matching (built-in, no regex needed)
+-- <span data-i18n="help.exampleComment.patternMatching" data-i18n-dir="ltr">Pattern matching (built-in, no regex needed)</span>
 s = "Hello World 123"
 print(s:match("(%a+)%s+(%a+)"))
 
--- Read another cell's output via Notebook VFS
+-- <span data-i18n="help.exampleComment.readOtherCellOutput" data-i18n-dir="ltr">Read another cell's output via Notebook VFS</span>
 prev = nb.read("In[1]", ".output")
-print("Cell 1 said: " .. (prev or "(empty)"))
+print("<span data-i18n="help.exampleLabel.cellSaid" data-i18n-dir="ltr">Cell 1 said:</span> " .. (prev or "<span data-i18n="help.exampleLabel.empty" data-i18n-dir="ltr">(empty)</span>"))
 
--- Write to a named cell (name a cell "results" first)
+-- <span data-i18n="help.exampleComment.writeNamedCellResultsFirst" data-i18n-dir="ltr">Write to a named cell (name a cell "results" first)</span>
 nb.write("results", ".code", "print('updated by Lua!')")
 
--- WARNING: overwrites the first cell's code!
+-- <span data-i18n="help.exampleComment.overwriteFirstCellWarning" data-i18n-dir="ltr">WARNING: overwrites the first cell's code!</span>
 nb.write("In[1]", ".code", "print('overwritten by Lua')")</code></pre>
 
             <h3 data-i18n="help.crossCellCommunicationNotebookVfs">Cross-Cell Communication (Notebook VFS)</h3>
@@ -368,87 +368,87 @@ nb.write("In[1]", ".code", "print('overwritten by Lua')")</code></pre>
             <p data-i18n-html="help.propertiesCodeOutputLanguageType"><strong>Properties:</strong> <code>.code</code>, <code>.output</code>, <code>.language</code>, <code>.type</code>, <code>.name</code></p>
 
             <p data-i18n-html="help.bashUsesFilesystemPathsDirectly"><strong>Bash</strong> — uses filesystem paths directly:</p>
-            <pre dir="ltr" data-example-lang="bash"><code># By name
+            <pre dir="ltr" data-example-lang="bash"><code># <span data-i18n="help.exampleComment.byName" data-i18n-dir="ltr">By name</span>
 cat /nb/my_cell/.code
 
-# By index
+# <span data-i18n="help.exampleComment.byIndex" data-i18n-dir="ltr">By index</span>
 cat /nb/In[1]/.output
 
-# Relative: previous cell's output
+# <span data-i18n="help.exampleComment.relativePreviousOutput" data-i18n-dir="ltr">Relative: previous cell's output</span>
 cat /nb/-1/.output
 
-# Self-reference
+# <span data-i18n="help.exampleComment.selfReference" data-i18n-dir="ltr">Self-reference</span>
 cat /nb/./.code
 
-# Write to a cell
+# <span data-i18n="help.exampleComment.writeToCell" data-i18n-dir="ltr">Write to a cell</span>
 echo "print('hello')" > /nb/In[3]/.code
 
-# List all cells
+# <span data-i18n="help.exampleComment.listAllCells" data-i18n-dir="ltr">List all cells</span>
 ls /nb/</code></pre>
 
             <p data-i18n-html="help.pythonNbReadNbWrite"><strong>Python</strong> — <code>nb_read()</code> / <code>nb_write()</code>:</p>
-            <pre dir="ltr" data-example-lang="python"><code># By name
+            <pre dir="ltr" data-example-lang="python"><code># <span data-i18n="help.exampleComment.byName" data-i18n-dir="ltr">By name</span>
 code = nb_read("my_cell", ".code")
 
-# By index
+# <span data-i18n="help.exampleComment.byIndex" data-i18n-dir="ltr">By index</span>
 output = nb_read("In[2]", ".output")
 
-# Relative (previous cell)
+# <span data-i18n="help.exampleComment.relativePreviousCellParen" data-i18n-dir="ltr">Relative (previous cell)</span>
 prev = nb_read("-1", ".output")
 
-# Write generated code to a named cell
+# <span data-i18n="help.exampleComment.writeGeneratedCode" data-i18n-dir="ltr">Write generated code to a named cell</span>
 nb_write("results", ".code", "print('generated!')")
 
-# List all cells
+# <span data-i18n="help.exampleComment.listAllCells" data-i18n-dir="ltr">List all cells</span>
 cells = nb_list()</code></pre>
 
             <p data-i18n-html="help.rNbReadNbWrite"><strong>R</strong> — <code>nb_read()</code> / <code>nb_write()</code>:</p>
-            <pre dir="ltr" data-example-lang="r"><code># By name
+            <pre dir="ltr" data-example-lang="r"><code># <span data-i18n="help.exampleComment.byName" data-i18n-dir="ltr">By name</span>
 code <- nb_read("my_cell", ".code")
 
-# By index
+# <span data-i18n="help.exampleComment.byIndex" data-i18n-dir="ltr">By index</span>
 output <- nb_read("In[2]", ".output")
 
-# Write to a named cell
+# <span data-i18n="help.exampleComment.writeNamedCell" data-i18n-dir="ltr">Write to a named cell</span>
 nb_write("plot_cell", ".code", "plot(1:10)")
 
-# List cells
+# <span data-i18n="help.exampleComment.listCells" data-i18n-dir="ltr">List cells</span>
 cells <- nb_list()</code></pre>
 
             <p data-i18n-html="help.luaNbReadNbWrite"><strong>Lua</strong> — <code>nb.read()</code> / <code>nb.write()</code>:</p>
-            <pre dir="ltr" data-example-lang="lua"><code>-- By name
+            <pre dir="ltr" data-example-lang="lua"><code>-- <span data-i18n="help.exampleComment.byName" data-i18n-dir="ltr">By name</span>
 code = nb.read("my_cell", ".code")
 
--- By index
+-- <span data-i18n="help.exampleComment.byIndex" data-i18n-dir="ltr">By index</span>
 output = nb.read("In[2]", ".output")
 
--- Relative: previous cell
+-- <span data-i18n="help.exampleComment.relativePreviousCell" data-i18n-dir="ltr">Relative: previous cell</span>
 prev = nb.read("-1", ".output")
 
--- Write to a named cell
+-- <span data-i18n="help.exampleComment.writeNamedCell" data-i18n-dir="ltr">Write to a named cell</span>
 nb.write("results", ".code", "print('from Lua')")
 
--- List all cells (returns JSON)
+-- <span data-i18n="help.exampleComment.listAllCellsJson" data-i18n-dir="ltr">List all cells (returns JSON)</span>
 cells = nb.list()</code></pre>
 
             <p data-i18n-html="help.prologNbRead3Nb"><strong>Prolog</strong> — <code>nb_read/3</code> / <code>nb_write/3</code>:</p>
-            <pre dir="ltr" data-example-lang="prolog"><code>%% By name
+            <pre dir="ltr" data-example-lang="prolog"><code>%% <span data-i18n="help.exampleComment.byName" data-i18n-dir="ltr">By name</span>
 nb_read('my_cell', '.code', Code).
 
-%% By index
+%% <span data-i18n="help.exampleComment.byIndex" data-i18n-dir="ltr">By index</span>
 nb_read('In[2]', '.output', Output).
 
-%% Write compiler output to another cell
+%% <span data-i18n="help.exampleComment.writeCompilerOutput" data-i18n-dir="ltr">Write compiler output to another cell</span>
 nb_write('r_factorial', '.code', GeneratedCode).</code></pre>
 
             <p data-i18n-html="help.javascriptDirectWindowNotebookvfsApi"><strong>JavaScript</strong> — direct <code>window.notebookVFS</code> API:</p>
-            <pre dir="ltr" data-example-lang="javascript"><code>// By name
+            <pre dir="ltr" data-example-lang="javascript"><code>// <span data-i18n="help.exampleComment.byName" data-i18n-dir="ltr">By name</span>
 const code = window.notebookVFS.readFile("/nb/my_cell/.code");
 
-// By index
+// <span data-i18n="help.exampleComment.byIndex" data-i18n-dir="ltr">By index</span>
 const out = window.notebookVFS.readFile("/nb/In[1]/.output");
 
-// Write
+// <span data-i18n="help.exampleComment.write" data-i18n-dir="ltr">Write</span>
 window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pre>
 
             <p data-i18n-html="help.tipGiveCellsNameClick"><em>Tip: Give cells a name (click the cell label) so other cells can address them by name instead of fragile index numbers.</em></p>
@@ -1192,17 +1192,17 @@ window.notebookVFS.writeFile("/nb/In[3]/.code", "console.log('hi')");</code></pr
 
             <div class="prolog-settings-help">
                 <h3 data-i18n="fetchStatus.usage">Usage</h3>
-                <pre dir="ltr" data-example-lang="prolog"><code>% After uploading myfile.pl:
+                <pre dir="ltr" data-example-lang="prolog"><code>% <span data-i18n="help.exampleComment.afterUploading" data-i18n-dir="ltr">After uploading myfile.pl:</span>
 :- consult('/user/myfile.pl').
 
-% After adding search path mylib → /user/mylib:
+% <span data-i18n="help.exampleComment.afterAddingSearchPath" data-i18n-dir="ltr">After adding search path mylib → /user/mylib:</span>
 :- use_module(mylib(module_name)).
 
-% Fetch and load from URL in a cell:
+% <span data-i18n="help.exampleComment.fetchAndLoadFromUrl" data-i18n-dir="ltr">Fetch and load from URL in a cell:</span>
 fetch_file('https://example.com/kb.pl', '/user/kb.pl').
 :- consult('/user/kb.pl').
 
-% Or use load_url (fetch + consult):
+% <span data-i18n="help.exampleComment.orUseLoadUrl" data-i18n-dir="ltr">Or use load_url (fetch + consult):</span>
 load_url('https://example.com/kb.pl', '/user/kb.pl').</code></pre>
             </div>
         </div>

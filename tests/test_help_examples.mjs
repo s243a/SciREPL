@@ -6,11 +6,20 @@
 // No kernel is needed: Insert appends a cell WITHOUT running it, and that is
 // exactly what this suite asserts.
 import { chromium } from 'playwright';
+import { createHash } from 'node:crypto';
 
 const PORT = process.env.PORT || 8085;
 const BASE = (process.env.SCIREPL_TEST_BASE || `http://localhost:${PORT}/`).replace(/\/?$/, '/');
 const URL = `${BASE}index.html`;
 const TIMEOUT = 60_000;
+// sha256 (first 16 hex) of each example's English code, in document order, as it
+// was before the comments were wired for translation. English must not drift.
+const EN_EXAMPLE_HASHES = [
+    'ab55a6e23f43e601', '391609d81fa3b149', '4d877d0beccf8702', 'b1c8e704e4f4c5ff',
+    '137aec263b758eb8', '3340169ad943f56c', 'd38d1ca8b4b0c6bd', 'ee097774f50d4283',
+    '16f971c6880477fb', 'a4c3262173f36222', '6c246a28d1d838d6', '3eb0a48918b21ae8',
+    '414d30f212bdd596', 'ae7f7a140d6f9fd3', '4040314427768f2c', 'e8b59bdb33f80ccf',
+];
 const KNOWN = ['python', 'r', 'prolog', 'bash', 'javascript', 'lua', 'typr', 'clojurescript', 'markdown'];
 
 let failures = 0;
@@ -560,6 +569,147 @@ try {
     check('the fallback leaves no hidden textarea behind', state.leftovers === 0);
     check('no uncaught page errors in the fallback path', errors2.length === 0, errors2.join(' | '));
     await legacy.close();
+
+    /* ------------------------ translated comments ----------------------- */
+    console.log('\n8. Example comments follow the UI language; the code does not');
+    const loc = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await loc.addInitScript(initScript);
+    await loc.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: new globalThis.URL(BASE).origin });
+    const page3 = await loc.newPage();
+    const errors3 = [];
+    page3.on('pageerror', (e) => errors3.push(e.message));
+    page3.on('dialog', (d) => d.dismiss().catch(() => {}));
+    await ready(page3);
+    await openHelp(page3);
+
+    // `template` replaces each translated span with its key, so everything
+    // outside the spans (code, comment markers, literals' quotes) can be
+    // compared byte-for-byte across locales.
+    const snapshot = () => page3.evaluate(() => [...document.querySelectorAll('pre[data-example-lang]')].map((pre) => {
+        const code = pre.querySelector('code');
+        const clone = code.cloneNode(true);
+        for (const el of clone.querySelectorAll('[data-i18n]')) {
+            el.replaceWith(document.createTextNode(`\u0000${el.getAttribute('data-i18n')}\u0000`));
+        }
+        return {
+            lang: pre.dataset.exampleLang,
+            text: window.helpExamples.exampleCode(pre),
+            raw: code.textContent.replace(/\s+$/, ''),
+            template: clone.textContent,
+            spans: [...code.querySelectorAll('[data-i18n]')].map((el) => [el.getAttribute('data-i18n'), el.textContent]),
+            nested: code.querySelectorAll('[data-i18n] *, [data-i18n-html]').length,
+            undirected: [...code.querySelectorAll('[data-i18n]')].filter((el) => el.getAttribute('data-i18n-dir') !== 'ltr').length,
+        };
+    }));
+    const BIDI = /[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/;
+    const hashes = (shot) => shot.map((e) => createHash('sha256').update(e.raw).digest('hex').slice(0, 16));
+    const english = await snapshot();
+    const englishHashes = hashes(english);
+    check('English example text is byte-identical to the pre-i18n examples',
+        JSON.stringify(englishHashes) === JSON.stringify(EN_EXAMPLE_HASHES),
+        JSON.stringify(english.filter((e, i) => englishHashes[i] !== EN_EXAMPLE_HASHES[i]).map((e) => e.raw.slice(0, 40))));
+    const keys = [...new Set(english.flatMap((e) => e.spans.map(([k]) => k)))];
+    check('comments are wired with plain-text spans that are kept left-to-right',
+        keys.length >= 40 && english.every((e) => e.nested === 0 && e.undirected === 0),
+        JSON.stringify({ keys: keys.length, bad: english.filter((e) => e.nested || e.undirected).map((e) => e.lang) }));
+    check('only example keys are used inside code',
+        keys.every((k) => /^help\.example(Comment|Label)\./.test(k)),
+        JSON.stringify(keys.filter((k) => !/^help\.example(Comment|Label)\./.test(k))));
+
+    const catalogues = await page3.evaluate(async () => {
+        const manifest = await (await fetch('i18n/manifest.json', { cache: 'no-store' })).json();
+        const out = {};
+        for (const { code } of manifest.locales) {
+            out[code] = await (await fetch(`i18n/${code}.json`, { cache: 'no-store' })).json();
+        }
+        return out;
+    });
+    const enStrings = catalogues.en.strings;
+    const sharedLiteral = catalogues.en.__literal || [];
+    const locales = Object.keys(catalogues).filter((c) => c !== 'en');
+    // Tokens that are code, not prose: each must survive translation verbatim.
+    const TOKENS = {
+        'help.exampleComment.suppressOutput': [';'],
+        'help.exampleComment.installShortcut': ['%install'],
+        'help.exampleComment.writeNamedCellResultsFirst': ['"results"'],
+        'help.exampleComment.afterUploading': ['myfile.pl'],
+        'help.exampleComment.afterAddingSearchPath': ['mylib', '/user/mylib'],
+        'help.exampleComment.orUseLoadUrl': ['load_url', 'consult'],
+    };
+    const catalogueProblems = [];
+    for (const k of keys) if (typeof enStrings[k] !== 'string') catalogueProblems.push(`en: missing ${k}`);
+    for (const code of locales) {
+        const strings = catalogues[code].strings || {};
+        const literal = new Set([...sharedLiteral, ...(strings.__literal || [])]);
+        for (const k of keys) {
+            const v = strings[k];
+            if (typeof v !== 'string' || !v.trim()) { catalogueProblems.push(`${code}: missing ${k}`); continue; }
+            if (v !== v.trim() || /[\r\n]/.test(v) || BIDI.test(v)) {
+                catalogueProblems.push(`${code}: ${k} has edge whitespace, a line break or a bidi control`);
+            }
+            if (k.startsWith('help.exampleLabel.') && /["\\]/.test(v)) catalogueProblems.push(`${code}: ${k} would break its string literal`);
+            if (v === enStrings[k] && !literal.has(k)) catalogueProblems.push(`${code}: ${k} is untranslated and not in __literal`);
+            for (const token of TOKENS[k] || []) if (!v.includes(token)) catalogueProblems.push(`${code}: ${k} lost ${token}`);
+        }
+    }
+    check(`every locale (${locales.length}) has every example key, translated safely`,
+        locales.length >= 12 && catalogueProblems.length === 0, catalogueProblems.slice(0, 8).join(' | '));
+
+    // Switch language with Help open and every example already decorated.
+    const localeProblems = [];
+    const copyInsertProblems = [];
+    let copyInsertChecked = 0;
+    for (const code of locales) {
+        await page3.evaluate(async (c) => { await window.i18n.activate(c); }, code);
+        const shot = await snapshot();
+        const strings = catalogues[code].strings;
+        const literal = new Set([...sharedLiteral, ...(strings.__literal || [])]);
+        shot.forEach((ex, i) => {
+            const en = english[i];
+            if (ex.template !== en.template) localeProblems.push(`${code}/${ex.lang}#${i}: code outside comments changed`);
+            if (ex.text.split('\n').length !== en.text.split('\n').length) localeProblems.push(`${code}/${ex.lang}#${i}: line count changed`);
+            if (BIDI.test(ex.raw)) localeProblems.push(`${code}/${ex.lang}#${i}: bidi controls in the code`);
+            for (const [k, v] of ex.spans) {
+                if (v !== strings[k]) localeProblems.push(`${code}: ${k} rendered ${JSON.stringify(v)}`);
+                if (v === enStrings[k] && !literal.has(k)) localeProblems.push(`${code}: ${k} still English`);
+            }
+        });
+        if (code === 'ja' || code === 'ar') {
+            // Copy and Insert hand over exactly what the reader sees.
+            const luaWrap = '#help-modal .help-example:has(> pre[data-example-lang="lua"])';
+            const rendered = await page3.evaluate(() => document.querySelector('#help-modal pre[data-example-lang="lua"]')
+                .querySelector('code').textContent.replace(/\s+$/, ''));
+            await page3.locator(`${luaWrap} .help-example-copy`).first().click();
+            await page3.waitForTimeout(150);
+            const clip = await page3.evaluate(() => navigator.clipboard.readText());
+            if (clip !== rendered) copyInsertProblems.push(`${code}: Copy differs from the rendered Lua example`);
+            if (!clip.includes(strings['help.exampleComment.luaTables'])) copyInsertProblems.push(`${code}: Copy lost the translated comment`);
+            const n = await page3.evaluate(() => window._cells.length);
+            await page3.locator(`${luaWrap} .help-example-insert`).first().click();
+            await page3.waitForFunction((m) => window._cells.length === m + 1, n, { timeout: TIMEOUT });
+            const cell = await page3.evaluate(() => {
+                const c = window._cells[window._cells.length - 1];
+                return { code: c.code, language: c.language };
+            });
+            if (cell.code !== rendered || cell.language !== 'lua') copyInsertProblems.push(`${code}: Insert differs from the rendered Lua example`);
+            copyInsertChecked++;
+        }
+    }
+    check('in every locale only the comments change, and they show the catalogue text',
+        localeProblems.length === 0, localeProblems.slice(0, 8).join(' | '));
+    check('Copy and Insert give the translated example exactly as rendered (ja, ar)',
+        copyInsertChecked === 2 && copyInsertProblems.length === 0, copyInsertProblems.join(' | '));
+
+    await page3.evaluate(async () => { await window.i18n.activate('en-x-rtl'); });
+    const rtlPreview = await snapshot();
+    check('the RTL preview leaves the English examples untouched (no bidi controls)',
+        rtlPreview.every((e, i) => e.raw === english[i].raw),
+        JSON.stringify(rtlPreview.find((e, i) => e.raw !== english[i].raw)?.raw.slice(0, 60)));
+    await page3.evaluate(async () => { await window.i18n.activate('en'); });
+    check('switching back to English restores the original examples exactly',
+        JSON.stringify(hashes(await snapshot())) === JSON.stringify(EN_EXAMPLE_HASHES));
+    check('no uncaught page errors while switching languages', errors3.length === 0, errors3.join(' | '));
+    await loc.close();
 } catch (err) {
     failures++;
     console.log(`\n  [FAIL] test crashed: ${err && err.stack || err}`);
