@@ -139,6 +139,38 @@ export default async function run() {
     await template[3].submenu[0].click(); // cache info
     await template[3].submenu[1].click(); // clear confirmation + result
     await template[4].submenu[0].click(); // about
+    // Open application data folder: Store build opens the redirected folder,
+    // and a failed open shows the path in a localized dialog.
+    const opened = [];
+    const storeTemplate = menu.createMenuTemplate({
+      getCache: () => fakeCache,
+      getBuildInfo: () => null,
+      getWindow: () => ({ id: 'window' }),
+      appVersion: '1.2.3',
+      t: (key, values) => i18n.t(key, values),
+      getLocale: () => i18n.locale,
+      literal: (value) => i18n.literal(value),
+      dialog: fakeDialog,
+      shell: { async openPath(p) { opened.push(p); return 'Location is not available'; }, openExternal() {} },
+      app: { getPath: (k) => (k === 'appData' ? 'C:\\Users\\u\\AppData\\Roaming' : 'C:\\Users\\u\\AppData\\Roaming\\SciREPL-Free-Store') },
+      folderExists: () => true,
+      process: {
+        windowsStore: true,
+        execPath: 'C:\\Program Files\\WindowsApps\\SciREPL.FreePilot.LocalTest_1.5.0.0_x64__8wekyb3d8bbwe\\SciREPL.exe',
+        env: { LOCALAPPDATA: 'C:\\Users\\u\\AppData\\Local' },
+      },
+    });
+    const before = dialogs.length;
+    await storeTemplate[3].submenu[3].click();
+    r.log('Store build: Open application data opens the package\'s real folder',
+      opened.length === 1 && opened[0].includes('\\Packages\\SciREPL.FreePilot.LocalTest_8wekyb3d8bbwe\\LocalCache\\Roaming\\SciREPL-Free-Store'),
+      opened.join(' | '));
+    const shown = dialogs.slice(before);
+    r.log('a failed open shows the folder path in a localized dialog',
+      shown.length === 1 && shown[0].title.startsWith('fr:') && String(shown[0].message).includes('SciREPL-Free-Store'),
+      JSON.stringify(shown.map((d) => ({ title: d.title, message: d.message }))));
+    dialogs.length = before;
+
     r.log('cache and About dialogs use the active locale',
       dialogs.length === 4
         && dialogs.every((d) => d.title.startsWith('fr:')),
