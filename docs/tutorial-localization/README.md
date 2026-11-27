@@ -24,6 +24,19 @@ mirrors yet. Keep the existing 13,632 accepted fields, translation receipts and
 alternates or silently redirect other-language routes to English. Future
 translation requires a separately scoped source/inventory update.
 
+### Hand-authored Windows Appearance supplement
+
+`www/help/<locale>/interface/appearance-windows/` ("Appearance on Windows:
+what's different") is hand-authored in all thirteen locales and is not one of
+`ROUTES`. Its prose is a machine translation by the authoring agent, without the
+chunked draft/review receipts, and says so in its notice. Its control names are
+the app's own catalogue labels (`www/i18n/<locale>.json`, including the
+`electron.menu.*` window-menu labels); `tests/test_tutorial_locales.mjs` checks
+them. The renderer adds one controller-authored link paragraph to each generated
+`interface/appearance` page (`WINDOWS_APPEARANCE_LINK` in
+`tutorial_locale_render.mjs`); the frozen source, hashes and locale records are
+unchanged, so the legacy un-prefixed English page has no such link.
+
 ### Existing frozen tutorial workflow
 
 1. Extract source-offset fields using `tutorial_locale_extract.mjs`. Pass

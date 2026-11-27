@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="bn" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Windows ডেস্কটপ অ্যাপ SciREPL Free-এর চেহারা ও রূপ সেটিংসে যা যোগ করে: নোটবুকের প্রস্থ, জুম, Windows ডিসপ্লে স্কেলিং, লুকানো যায় এমন নতুন সেলের প্যানেল এবং উইন্ডোর রানটাইম মেনু।">
+  <link rel="canonical" href="https://s243a.github.io/SciREPL/help/bn/interface/appearance-windows/">
+  <link rel="stylesheet" href="../../../styles.css">
+  <link rel="stylesheet" href="../../../interface/tutorial/tutorial.css">
+  <link rel="stylesheet" href="../../../tutorial-locales.css">
+  <title>Windows-এ চেহারা ও রূপ: কী আলাদা · SciREPL সহায়তা</title>
+  <link rel="alternate" hreflang="en" href="https://s243a.github.io/SciREPL/help/en/interface/appearance-windows/">
+  <link rel="alternate" hreflang="ar" href="https://s243a.github.io/SciREPL/help/ar/interface/appearance-windows/">
+  <link rel="alternate" hreflang="bn" href="https://s243a.github.io/SciREPL/help/bn/interface/appearance-windows/">
+  <link rel="alternate" hreflang="de" href="https://s243a.github.io/SciREPL/help/de/interface/appearance-windows/">
+  <link rel="alternate" hreflang="es" href="https://s243a.github.io/SciREPL/help/es/interface/appearance-windows/">
+  <link rel="alternate" hreflang="fr" href="https://s243a.github.io/SciREPL/help/fr/interface/appearance-windows/">
+  <link rel="alternate" hreflang="hi" href="https://s243a.github.io/SciREPL/help/hi/interface/appearance-windows/">
+  <link rel="alternate" hreflang="id" href="https://s243a.github.io/SciREPL/help/id/interface/appearance-windows/">
+  <link rel="alternate" hreflang="ja" href="https://s243a.github.io/SciREPL/help/ja/interface/appearance-windows/">
+  <link rel="alternate" hreflang="ko" href="https://s243a.github.io/SciREPL/help/ko/interface/appearance-windows/">
+  <link rel="alternate" hreflang="pt-BR" href="https://s243a.github.io/SciREPL/help/pt-BR/interface/appearance-windows/">
+  <link rel="alternate" hreflang="ru" href="https://s243a.github.io/SciREPL/help/ru/interface/appearance-windows/">
+  <link rel="alternate" hreflang="zh" href="https://s243a.github.io/SciREPL/help/zh/interface/appearance-windows/">
+  <link rel="alternate" hreflang="x-default" href="https://s243a.github.io/SciREPL/help/en/interface/appearance-windows/">
+  <script src="../../../tutorial-edition.js"></script>
+</head>
+<body data-editions="free" data-platforms="windows-preview">
+  <a class="skip-link" href="#main">সরাসরি মূল বিষয়ে যান</a>
+  <header class="site-header">
+    <a class="brand" href="../../../">sci<span>REPL</span> Help<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+    <nav aria-label="প্রধান নেভিগেশন">
+      <a href="../../../interface/">ইন্টারফেস রেফারেন্স<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+      <a href="../../tutorials/">সকল টিউটোরিয়াল</a>
+      <a href="../../../">সকল সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a>
+      <a href="../../../../">Free PWA খুলুন</a>
+    </nav>
+  </header>
+  <main class="page-shell" id="main">
+    <aside class="tutorial-locale-tools" aria-label="টিউটোরিয়ালের ভাষা"><details class="tutorial-language-menu"><summary>টিউটোরিয়ালের ভাষা: <bdi>বাংলা</bdi></summary><nav aria-label="টিউটোরিয়ালের ভাষা"><a href="../../../en/interface/appearance-windows/" lang="en" hreflang="en">English</a>
+      <a href="../../../ar/interface/appearance-windows/" lang="ar" hreflang="ar">العربية</a>
+      <a href="./" lang="bn" hreflang="bn" aria-current="page">বাংলা</a>
+      <a href="../../../de/interface/appearance-windows/" lang="de" hreflang="de">Deutsch</a>
+      <a href="../../../es/interface/appearance-windows/" lang="es" hreflang="es">Español</a>
+      <a href="../../../fr/interface/appearance-windows/" lang="fr" hreflang="fr">Français</a>
+      <a href="../../../hi/interface/appearance-windows/" lang="hi" hreflang="hi">हिन्दी</a>
+      <a href="../../../id/interface/appearance-windows/" lang="id" hreflang="id">Bahasa Indonesia</a>
+      <a href="../../../ja/interface/appearance-windows/" lang="ja" hreflang="ja">日本語</a>
+      <a href="../../../ko/interface/appearance-windows/" lang="ko" hreflang="ko">한국어</a>
+      <a href="../../../pt-BR/interface/appearance-windows/" lang="pt-BR" hreflang="pt-BR">Português (Brasil)</a>
+      <a href="../../../ru/interface/appearance-windows/" lang="ru" hreflang="ru">Русский</a>
+      <a href="../../../zh/interface/appearance-windows/" lang="zh" hreflang="zh">简体中文</a></nav></details><p class="tutorial-translation-notice" role="note">এই পৃষ্ঠাটি যন্ত্রের মাধ্যমে অনূদিত; মাতৃভাষী পর্যালোচনা এখনও বাকি। কিবোর্ড শর্টকাট ও প্রযুক্তিগত মান অপরিবর্তিত।</p></aside>
+    <p class="breadcrumbs"><a href="../../../">সাহায্য<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / <a href="../../../interface/">ইন্টারফেস<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a> / <a href="../appearance/">অ্যাপিয়ারেন্স ওয়াকথ্রু</a> / Windows</p>
+    <article>
+      <p class="eyebrow">Windows ডেস্কটপ অ্যাপ</p>
+      <h1>Windows-এ চেহারা ও রূপ: কী আলাদা</h1>
+      <p class="lede">Microsoft Store সংস্করণসহ Windows অ্যাপে Android-এর মতোই <strong>☰ মেনু → 🎨 চেহারা ও রূপ</strong> আছে। থিম, ইন্টারফেসের ভাষা, বোতামের আকার এবং 📦 Browse শর্টকাট <a href="../appearance/">অ্যাপিয়ারেন্স ওয়াকথ্রু</a>-তে যেভাবে বলা আছে সেভাবেই কাজ করে। এই পৃষ্ঠায় শুধু ডেস্কটপ উইন্ডো যা যোগ করে সেটুকুই আছে।</p>
+      <ul class="meta">
+        <li class="chip chip-free">Free</li>
+        <li class="chip">Windows ডেস্কটপ অ্যাপ</li>
+        <li class="chip">প্রায় 2 মিনিট</li>
+      </ul>
+
+      <section id="notebook-width">
+        <h2>নোটবুকের প্রস্থ</h2>
+        <p>অন্তত 1000 পিক্সেল চওড়া উইন্ডোতে নোটবুকের সেল 1200 পিক্সেল পর্যন্ত চওড়া হতে পারে। এই <strong>প্রশস্ত</strong> সেটিংটিই ডিফল্ট। এটি বদলাতে <strong>☰ মেনু → 🎨 চেহারা ও রূপ</strong> খুলুন এবং <strong>লেআউট</strong>-এর নিচে <strong>নোটবুকের প্রস্থ</strong> বেছে নিন:</p>
+        <ul>
+          <li><strong>সাধারণ</strong>: আগের 720 পিক্সেলের কলাম।</li>
+          <li><strong>প্রশস্ত</strong>: 1200 পিক্সেল পর্যন্ত (ডিফল্ট)।</li>
+          <li><strong>পুরো উইন্ডো</strong>: সেলগুলো উইন্ডোর পুরো প্রস্থ ব্যবহার করে।</li>
+        </ul>
+        <p>এর চেয়ে সরু উইন্ডোতে আপনি যা-ই বেছে নিন, সবসময় সাধারণ কলামই ব্যবহার হয়।</p>
+      </section>
+
+      <section id="zoom">
+        <h2>জুম</h2>
+        <p>জুম উইন্ডোর ভেতরের পৃষ্ঠাটি বড় বা ছোট করে:</p>
+        <ul>
+          <li>বড় করুন: <kbd dir="ltr">Ctrl+=</kbd> অথবা <kbd dir="ltr">Ctrl+Shift+=</kbd> (Ctrl এবং প্লাস কী)।</li>
+          <li>ছোট করুন: <kbd dir="ltr">Ctrl+-</kbd>। আবার 100%-এ: <kbd dir="ltr">Ctrl+0</kbd>।</li>
+          <li><kbd dir="ltr">Ctrl</kbd> চেপে ধরে মাউসের হুইল ঘোরান, অথবা টাচপ্যাডে পিঞ্চ করুন।</li>
+          <li>উইন্ডোর মেনু বারে: <strong>ভিউ → বড় করুন</strong>, <strong>ছোট করুন</strong> অথবা <strong>প্রকৃত আকার</strong>।</li>
+        </ul>
+      </section>
+
+      <section id="display-scaling">
+        <h2>Windows ডিসপ্লে স্কেলিং নাকি অ্যাপের জুম?</h2>
+        <p>Windows-এর ডিসপ্লে সেটিংসের (Settings → System → Display) স্কেল স্ক্রিনের সবকিছু বড় করে, SciREPL-এর টাইটেল বার, মেনু বার ও ডায়ালগ বক্সসহ। অ্যাপের জুম শুধু উইন্ডোর ভেতরের পৃষ্ঠাটি বড় করে। Windows-এ কেবল একটি অ্যাপের জন্য আলাদা স্কেল সেটিং নেই, তাই শুধু SciREPL বড় বা ছোট করতে চাইলে জুম ব্যবহার করুন।</p>
+        <p>দুটিই পৃষ্ঠার কাছে উইন্ডোর আকারও বদলে দেয়। যেমন, 150% স্কেলিংয়ে 1920 পিক্সেল চওড়া স্ক্রিন SciREPL-এর কাছে 1280 পিক্সেল চওড়া। ওপরের 1000 পিক্সেল প্রস্থ ও নিচের 500 পিক্সেল উচ্চতা স্কেলিং ও জুমের পরে মাপা হয়।</p>
+      </section>
+
+      <section id="new-cell-panel">
+        <h2>নতুন সেলের প্যানেল লুকানো</h2>
+        <p>উইন্ডো যখন উচ্চতার চেয়ে চওড়া এবং পৃষ্ঠার উচ্চতা সর্বোচ্চ 500 পিক্সেল, তখন নিচের নতুন সেলের প্যানেলে একটি <strong>⌄</strong> বোতাম (<strong>নতুন সেলের প্যানেল লুকান</strong>) দেখা যায়। 150–200% স্কেলিংয়ে সাধারণ ল্যাপটপের উইন্ডোও এতটা নিচু হতে পারে, আর জুম বাড়ালেও একই হয়। নোটবুককে পুরো উচ্চতা দিতে <strong>⌄</strong>-এ ক্লিক করুন।</p>
+        <p>প্যানেল লুকানো থাকার সময় ওপরে বাঁদিকের <bdi>Sci REPL</bdi> শিরোনামের জায়গায় একটি ছোট <strong>⌃</strong> বোতাম (<strong>নতুন সেলের প্যানেল দেখান</strong>) থাকে। প্যানেল ফিরিয়ে আনতে সেটিতে ক্লিক করুন। উইন্ডো উঁচু করলেও, যেমন ম্যাক্সিমাইজ করলে, প্যানেল ফিরে আসে।</p>
+      </section>
+
+      <section id="menu-bar">
+        <h2>উইন্ডোর মেনু বার</h2>
+        <p>Windows উইন্ডোতে অ্যাপের ওপরে নিজস্ব মেনু বার আছে: <strong>ফাইল</strong>, <strong>সম্পাদনা</strong>, <strong>ভিউ</strong>, <strong>রানটাইম</strong> এবং <strong>সহায়তা</strong>, আপনার ইন্টারফেসের ভাষায়। কিবোর্ড দিয়ে সেখানে যেতে <kbd dir="ltr">Alt</kbd> চাপুন। <strong>রানটাইম</strong>-এ আছে:</p>
+        <ul>
+          <li><strong>ডাউনলোড করা রানটাইম…</strong> দেখায় ডাউনলোড করা Lua ও R রানটাইম কতটা জায়গা নেয় এবং কোথায় রাখা আছে।</li>
+          <li><strong>ডাউনলোড করা রানটাইম মুছুন…</strong> আপনি নিশ্চিত করার পর সেগুলো মুছে দেয়; আপনার নোটবুক ও ফাইলে কোনো প্রভাব পড়ে না। আগে থেকে লোড হওয়া রানটাইম অ্যাপ আবার চালু না করা পর্যন্ত কাজ করে। তারপর R ও Lua আবার ডাউনলোডের আগে জিজ্ঞেস করে, আর ডাউনলোডের জন্য ইন্টারনেট সংযোগ লাগে।</li>
+          <li><strong>অ্যাপ্লিকেশন ডেটা ফোল্ডার খুলুন</strong> File Explorer-এ SciREPL-এর ডেটা ফোল্ডার খোলে।</li>
+        </ul>
+        <p class="callout"><strong>Android-এ উইন্ডোর মেনু বার নেই।</strong> সেখানে স্টোরেজ দেখতে ও খালি করতে <strong>☰ মেনু → 📊 মেমরি ও স্টোরেজ</strong> ব্যবহার করুন। Windows-এ ওই প্যানেল ডাউনলোড করা রানটাইম দেখতে পায় না, তাই সেগুলোর জন্য <strong>রানটাইম</strong> মেনু ব্যবহার করুন।</p>
+        <p>বাকি সবকিছু Android-এর মতোই: <a href="../appearance/">অ্যাপিয়ারেন্স ওয়াকথ্রু</a>-তে ফিরে যান।</p>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer"><span>SciREPL সহায়তা</span><nav aria-label="ফুটার নেভিগেশন"><a href="../../../interface/">ইন্টারফেস সহায়িকা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a><a href="../../../">সকল সহায়তা<span class="english-reference"> (ইংরেজি রেফারেন্স পৃষ্ঠা)</span></a></nav></footer>
+</body>
+</html>

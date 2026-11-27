@@ -4,6 +4,24 @@ import { ROOT, DATA, LOCALES, CHROME, readManifest, readLocale, sha, escapeText,
 import { inspectLocaleRecord } from './tutorial_locale_status.mjs';
 import { verifyEditorialInventory, restoreOperationalNames, renderEditorialField, editorialReceipt } from './tutorial_locale_editorial.mjs';
 
+// Link text for the Windows supplement, matching each locale's
+// help/<locale>/interface/appearance-windows/ page.
+const WINDOWS_APPEARANCE_LINK = {
+  en: ['On Windows?', "See what's different"],
+  ar: ['هل تستخدم Windows؟', 'اطّلع على ما يختلف'],
+  bn: ['Windows ব্যবহার করছেন?', 'কী আলাদা দেখুন'],
+  de: ['Unter Windows?', 'Sehen Sie, was dort anders ist'],
+  es: ['¿Usa Windows?', 'Vea qué cambia'],
+  fr: ['Sous Windows ?', 'Voyez ce qui change'],
+  hi: ['Windows इस्तेमाल करते हैं?', 'देखें क्या अलग है'],
+  id: ['Memakai Windows?', 'Lihat apa yang berbeda'],
+  ja: ['Windows をお使いですか？', '異なる点を見る'],
+  ko: ['Windows를 사용하시나요?', '달라지는 점 보기'],
+  'pt-BR': ['Usa Windows?', 'Veja o que muda'],
+  ru: ['Пользуетесь Windows?', 'Узнайте, что там отличается'],
+  zh: ['使用 Windows？', '查看有何不同'],
+};
+
 const requested = process.argv.filter(value => LOCALES.includes(value));
 const locales = requested.length ? requested : LOCALES;
 const check = process.argv.includes('--check');
@@ -48,6 +66,18 @@ for (const locale of locales) {
       if (!rendered.includes(proSection) || !rendered.includes(proChip)) throw new Error(`${locale}: tutorial edition markers no longer match the index`);
       rendered = rendered.replace(proSection, '<section aria-labelledby="ai-tutorials" data-tutorial-editions="pro">')
         .replace(proChip, '<li class="chip chip-pro" data-tutorial-editions="pro">');
+    }
+    if (page.route === 'interface/appearance') {
+      // Navigation to the hand-authored Windows supplement
+      // (help/<locale>/interface/appearance-windows/), which sits outside the
+      // frozen ROUTES inventory. Like the edition markers above, this is
+      // controller-authored output, not reviewed tutorial fields: the accepted
+      // source, its hashes and the locale records stay unchanged. The legacy
+      // un-prefixed English page is that frozen source, so it has no link.
+      const [question, linkText] = WINDOWS_APPEARANCE_LINK[locale] || [];
+      const lessonNav = '\n      <nav class="lesson-nav"';
+      if (!question || rendered.split(lessonNav).length !== 2) throw new Error(`${locale}: Windows Appearance link has no label or no unique insertion point`);
+      rendered = rendered.replace(lessonNav, `\n      <p class="callout" id="windows-differences"><strong>${escapeText(question)}</strong> <a href="../appearance-windows/">${escapeText(linkText)}</a></p>${lessonNav}`);
     }
     if (page.route !== 'pro/ai/tutorial') {
       const editionScript = path.posix.relative(`help/${locale}/${page.route}`, 'help/tutorial-edition.js');
