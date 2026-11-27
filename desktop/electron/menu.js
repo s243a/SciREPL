@@ -31,8 +31,10 @@
  * actions.
  */
 
+const fs = require('fs');
 const { Menu, dialog, shell, app } = require('electron');
 const { ENGLISH, interpolate } = require('./native-i18n');
+const { resolveExplorerDataDir } = require('./paths');
 
 const REPO_URL = 'https://github.com/s243a/SciREPL';
 
@@ -74,6 +76,30 @@ function createMenuTemplate(deps) {
   const hostDialog = deps.dialog || dialog;
   const hostShell = deps.shell || shell;
   const hostApp = deps.app || app;
+  const hostProcess = deps.process || process;
+  const folderExists = deps.folderExists || ((p) => {
+    try { return fs.statSync(p).isDirectory(); } catch { return false; }
+  });
+
+  async function openAppData() {
+    // A fixed, application-owned path. No renderer input reaches this.
+    const folder = resolveExplorerDataDir({
+      userData: hostApp.getPath('userData'),
+      appData: hostApp.getPath('appData'),
+      localAppData: (hostProcess.env || {}).LOCALAPPDATA,
+      windowsStore: hostProcess.windowsStore === true,
+      execPath: hostProcess.execPath,
+      exists: folderExists,
+    });
+    const error = await hostShell.openPath(folder);
+    if (!error) return;
+    // Explorer could not open it: show where it is rather than nothing.
+    await hostDialog.showMessageBox(getWindow(), {
+      type: 'info',
+      title: t('electron.menu.openAppData'),
+      message: literal(folder),
+    });
+  }
 
   async function showCacheInfo() {
     const cache = getCache();
@@ -205,10 +231,7 @@ function createMenuTemplate(deps) {
         { type: 'separator' },
         {
           label: t('electron.menu.openAppData'),
-          click: () => {
-            // A fixed, application-owned path. No renderer input reaches this.
-            hostShell.openPath(hostApp.getPath('userData'));
-          },
+          click: openAppData,
         },
       ],
     },
