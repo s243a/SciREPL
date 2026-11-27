@@ -24,6 +24,7 @@ const { applyWebContentsPolicy } = require('./security');
 const { registerIpcHandlers } = require('./ipc');
 const { installRuntimeCache, CACHEABLE_HOSTS } = require('./runtime-cache');
 const { installApplicationMenu } = require('./menu');
+const { installWheelZoom } = require('./zoom');
 const { createNativeI18n, SUPPORTED_LOCALES } = require('./native-i18n');
 
 const { resolveWwwRoot, resolveBuildInfoPath, resolveRepoRoot, resolveUserDataDir } = require('./paths');
@@ -214,6 +215,7 @@ function createWindow() {
   });
 
   applyWebContentsPolicy(mainWindow.webContents);
+  installWheelZoom(mainWindow.webContents);
 
   // The window is created hidden and shown on `ready-to-show` to avoid a white
   // flash. The risk is that `ready-to-show` never fires — a stalled load, a
